@@ -1,0 +1,2660 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	<screen name="CommonOrderCatalogDecorator">
+        <section>
+            <actions>
+                <set field="headerItem" value="orderentry"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetShoppingCart.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <container style="screenlet">
+                                    <platform-specific>
+                                        <html><html-template location="component://delys/webapp/delys/sales/order/OrderEntryCatalogTabBar.ftl"/></html>
+                                    </platform-specific>
+                                    <container style="screenlet-body">
+                                        <decorator-section-include name="body"/>
+                                    </container>
+                                </container>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="CommonOrderCheckoutDecorator">
+        <section>
+            <actions>
+                <set field="headerItem" value="orderentry"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetShoppingCart.groovy"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/SetCheckoutTabBar.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <platform-specific>
+                                    <html><html-template location="component://delys/webapp/delys/sales/order/OrderEntryCheckoutTabBar.ftl"/></html>
+                                </platform-specific>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+	<screen name="CheckInits">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="order" />
+				<set field="selectedSubMenuItem" value="newOrder" />
+				<set field="titleProperty" value="PageTitleOrderInits"/>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/CheckInits.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<platform-specific>
+							<html>
+								<html-template location="component://delys/webapp/delys/sales/order/checkInits.ftl"/>
+							</html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+    <screen name="ShowCart">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="order" />
+				<set field="selectedSubMenuItem" value="newOrder" />
+			    <set field="titleProperty" value="PageTitleOrderShowCart"/>
+                <set field="productsummaryScreen" value="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml#productsummary"/>
+                <property-to-field resource="order" property="orderPreference.giftEnable" field="giftEnable" default="Y"/>
+                <set field="promoUseDetailsInlineScreen" value="component://order/widget/ordermgr/OrderEntryCartScreens.xml#promoUseDetailsInline"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/ShowCart.groovy"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/ShowPromoText.groovy"/>
+                <entity-condition entity-name="ProductStorePromoAndAppl" list="allProductPromos" filter-by-date="true">
+                    <condition-list combine="and">
+                        <condition-expr field-name="manualOnly" value="Y"/>
+                        <condition-expr field-name="productStoreId" from-field="productStoreId"/>
+                    </condition-list>
+                    <order-by field-name="productPromoId"/>
+                </entity-condition>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetShoppingCart.groovy"/>
+            </actions>
+            <widgets>
+            	<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/OrderEntryTabBar.ftl"/></html></platform-specific>
+						<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/showCart.ftl"/></html></platform-specific>
+						
+						<platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/javascript.ftl"/></html></platform-specific>
+<!-- 	                    <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/addItemsToShoppingList.ftl"/></html></platform-specific> -->
+	                    <platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/showCartItems.ftl"/></html></platform-specific>
+<!-- 	                    <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/manualPromotions.ftl"/></html></platform-specific> -->
+<!-- 	                    <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/promoText.ftl"/></html></platform-specific> -->
+<!-- 	                    <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/associatedProducts.ftl"/></html></platform-specific> -->
+	                    <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/promotionsApplied.ftl"/></html></platform-specific>
+					</decorator-section>
+				</decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="LookupBulkAddProductsAndCatalog">
+     	<section>
+            <actions>
+            	<set field="selectedMenuItem" value="order" />
+				<set field="selectedSubMenuItem" value="newOrder" />
+                <set field="titleProperty" value="PageTitleLookupBulkAddProduct"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="10"/> <!-- 10 rows seems more appropriate given screen size, etc. -->
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/LookupBulkAddProductsAndCatalog.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrderCatalogDecorator">
+                    <decorator-section name="body">
+                        <include-form name="LookupBulkAddProductsAndCatalog" location="component://delys/widget/sales/OrderForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="QuickFinalizeOrder">
+        <section>
+        	<actions>
+        		<set field="selectedMenuItem" value="order" />
+				<set field="selectedSubMenuItem" value="newOrder" />
+        		<set field="shoppingCartSession" value="${groovy:session.getAttribute(&quot;shoppingCart&quot;)}" />
+        	</actions>
+        	<widgets>
+        		<section>
+        			<condition>
+        				<not>
+        					<if-empty field="shoppingCartSession"/>
+        				</not>
+        			</condition>
+        			<actions>
+		                <set field="headerItem" value="orderentry"/>
+		                <set field="titleProperty" value="PageTitleCheckoutOptions"/>
+		                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/CheckoutPayment.groovy"/>
+		                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/CheckoutOptions.groovy"/>
+		                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/StorePaymentOptions.groovy"/>
+		                <property-to-field resource="order" property="orderPreference.giftEnable" field="giftEnable" default="Y"/>
+		            </actions>
+		            <widgets>
+		                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+		                    <decorator-section name="body">
+		                        <platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/checkOutOptions.ftl"/></html></platform-specific>
+		                    </decorator-section>
+		                </decorator-screen>
+		            </widgets>
+		            <fail-widgets>
+		            	<include-screen name="CheckInits"/>
+		            </fail-widgets>
+        		</section>
+        	</widgets>
+        </section>
+    </screen>
+    <screen name="ConfirmOrder">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="order" />
+				<set field="selectedSubMenuItem" value="newOrder" />
+                <set field="stepTitleId" value="OrderOrderConfirmation"/>
+                <set field="stepLabelId" value="OrderReviewOrder"/>
+                <property-to-field resource="order" property="orderPreference.giftEnable" field="giftEnable" default="Y"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetShoppingCart.groovy"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/CheckoutReview.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrderCheckoutDecorator">
+                    <decorator-section name="body">
+                    	<platform-specific>
+                            <html><html-template location="component://delys/webapp/delys/sales/order/reviewOrder.ftl"/></html>
+                        </platform-specific>
+                        <!-- 
+                        <horizontal-separator />
+                        <platform-specific>
+                            <html><html-template location="component://order/webapp/ordermgr/entry/order/orderheaderinfo.ftl"/></html>
+                        </platform-specific>
+                        <platform-specific>
+                            <html><html-template location="component://order/webapp/ordermgr/entry/order/orderpaymentinfo.ftl"/></html>
+                        </platform-specific>
+                        <platform-specific>
+                            <html><html-template location="component://order/webapp/ordermgr/entry/order/shipGroupConfirmSummary.ftl"/></html>
+                        </platform-specific>
+                        <platform-specific>
+                            <html><html-template location="component://order/webapp/ordermgr/entry/order/orderitems.ftl"/></html>
+                        </platform-specific>
+                         -->
+                    </decorator-section>
+                  </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="CheckoutShippingAddress">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="order" />
+				<set field="selectedSubMenuItem" value="newOrder" />
+                <set field="rightbarScreenName" value="rightbar"/>
+                <set field="MainColumnStyle" value="rightonly"/>
+                <set field="titleProperty" value="PageTitleCheckoutOptions"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/CheckoutShippingAddress.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/checkoutshippingaddress.ftl"/></html></platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <!-- 
+    <screen name="OrderListAccJQ">
+		<section>
+			<actions>
+				<set field="requestNameScreen" default-value="requestNameScreen" value=""/>
+			</actions>
+			<widgets>
+			<fail-widgets>
+				<section>
+					<actions>
+						<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/nav_orderList.groovy"/>
+						<set field="selectedMenuItem" value="orderSub"/>
+						<set field="selectedSubMenuItem" value="SalesOrders"/>
+						<set field="navMenuName" value="SearchDelysSubTabBar" />
+						<set field="navMenuLocation" value="component://delys/widget/DelysMenus.xml" />
+						<set field="titleProperty" value="PageTitleListOrderItems" />
+						<set field="tabButtonItem" value="OrderMangement"/>
+						<set field="filterDate" type="Timestamp" from-field="parameters.filterDate"/>
+						<script location="component://delys/webapp/delys/WEB-INF/actions/delys/EmplFilter.groovy"/>
+						<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/OrderList.groovy" />
+						<script location="component://delys/webapp/delys/WEB-INF/actions/order/filterOrder.groovy" />
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<decorator-screen name="FilterScreenDecorator" location="component://delys/widget/sales/CommonScreens.xml">
+									<decorator-section name="search-options">
+										<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderSearchOption.ftl"/></html></platform-specific>
+									</decorator-section>
+									<decorator-section name="search-results">
+										<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderList.ftl"/></html></platform-specific>
+									</decorator-section>
+								</decorator-screen>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</fail-widgets>
+     -->
+    <screen name="OrderListAccJQ">
+		<section>
+			<actions>
+				<set field="requestNameScreen" default-value="requestNameScreen" value=""/>
+				<!-- <script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/nav_orderList.groovy"/> -->
+				<set field="selectedMenuItem" value="orders"/>
+				<set field="selectedSubMenuItem" value="SalesOrders"/>
+				<!-- <set field="navMenuName" value="SearchDelysSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/DelysMenus.xml" /> -->
+				<set field="titleProperty" value="accOrderListSales"/>
+				<set field="tabButtonItem" value="OrderMangement"/>
+				<set field="filterDate" type="Timestamp" from-field="parameters.filterDate"/>
+				<!-- <script location="component://delys/webapp/delys/WEB-INF/actions/delys/EmplFilter.groovy"/>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/OrderList.groovy" />
+				<script location="component://delys/webapp/delys/WEB-INF/actions/order/filterOrder.groovy" /> -->
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<platform-specific>
+							<html><html-template location="component://delys/webapp/delys/accounting/listSaleOrdersJQ.ftl"/></html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    <!-- <screen name="OrderListAcc">
+		<section>
+			<actions>
+				<set field="requestNameScreen" default-value="requestNameScreen" value=""/>
+			</actions>
+			<fail-widgets>
+				<section>
+					<actions>
+						<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/nav_orderList.groovy"/>
+						<set field="navMenuName" value="SearchDelysSubTabBar" />
+						<set field="navMenuLocation" value="component://delys/widget/DelysMenus.xml" />
+						<set field="titleProperty" value="PageTitleListOrderItems" />
+						<set field="tabButtonItem" value="OrderMangement"/>
+						<set field="filterDate" type="Timestamp" from-field="parameters.filterDate"/>
+						<script location="component://delys/webapp/delys/WEB-INF/actions/delys/EmplFilter.groovy"/>
+						<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/OrderList.groovy" />
+						<script location="component://delys/webapp/delys/WEB-INF/actions/order/filterOrder.groovy" />
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<decorator-screen name="FilterScreenDecorator" location="component://delys/widget/sales/CommonScreens.xml">
+									<decorator-section name="search-options">
+										<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderSearchOption.ftl"/></html></platform-specific>
+									</decorator-section>
+									<decorator-section name="search-results">
+										<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderList.ftl"/></html></platform-specific>
+									</decorator-section>
+								</decorator-screen>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</fail-widgets>
+	 -->
+    <screen name="OrderListAcc">
+		<section>
+			<actions>
+				<set field="requestNameScreen" default-value="requestNameScreen" value=""/>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/nav_orderList.groovy"/>
+				<!-- <set field="navMenuName" value="SearchDelysSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/DelysMenus.xml" /> -->
+				<set field="titleProperty" value="accOrderListSales" />
+				<set field="tabButtonItem" value="OrderMangement"/>
+				<set field="filterDate" type="Timestamp" from-field="parameters.filterDate"/>
+				<!-- <script location="component://delys/webapp/delys/WEB-INF/actions/delys/EmplFilter.groovy"/>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/OrderList.groovy" />
+				<script location="component://delys/webapp/delys/WEB-INF/actions/order/filterOrder.groovy" /> -->
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<decorator-screen name="FilterScreenDecorator" location="component://delys/widget/sales/CommonScreens.xml">
+							<!-- <decorator-section name="search-options">
+								<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderSearchOption.ftl"/></html></platform-specific>
+							</decorator-section> -->
+							<decorator-section name="search-results">
+								<!-- <platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderList.ftl"/></html></platform-specific> -->
+								<platform-specific>
+									<html>
+										<html-template location="component://delys/webapp/delys/accounting/listSaleOrdersJQ.ftl"/>
+									</html>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    <screen name="OrderListSale"><!-- screen for accounting: find orders of company -->
+		<section>
+			<actions>
+				<set field="requestNameScreen" default-value="requestNameScreen" value=""/>
+				<!-- <script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/nav_orderList.groovy"/> -->
+				<set field="selectedMenuItem" value="accApprovement"/>
+				<set field="selectedSubMenuItem" value="accSaleOrderList"/>
+				<!-- <set field="navMenuName" value="SearchDelysSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/DelysMenus.xml" /> -->
+				<set field="titleProperty" value="accOrderListSales" />
+				<set field="gridHeader" value="PageTitleListOrderItems" />
+				<set field="tabButtonItem" value="OrderMangement"/>
+				<set field="filterDate" type="Timestamp" from-field="parameters.filterDate"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<!-- <decorator-screen name="FilterScreenDecorator" location="component://delys/widget/sales/CommonScreens.xml">
+							<decorator-section name="search-results"> -->
+<!-- 								<platform-specific> -->
+<!-- 									<html> -->
+<!-- 										<html-template location="component://delys/webapp/delys/accounting/listSaleOrdersJQ.ftl"/> -->
+<!-- 									</html> -->
+<!-- 								</platform-specific> -->
+								<platform-specific>
+									<html>
+										<!-- <html-template location="component://delys/webapp/delys/accounting/listOrders.ftl"/> -->
+										<html-template location="component://delys/webapp/delys/sales/order/orderListJQ.ftl"/>
+									</html>
+								</platform-specific>
+							<!-- </decorator-section>
+						</decorator-screen> -->
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    <screen name="OrderListPurchase"><!-- screen for accounting: find orders not equal company -->
+		<section>
+			<actions>
+				<set field="requestNameScreen" default-value="requestNameScreen" value=""/>
+				<!-- <script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/nav_orderList.groovy"/> -->
+				<set field="selectedMenuItem" value="accApprovement"/>
+				<set field="selectedSubMenuItem" value="accPurchaseOrderList"/>
+				<!-- <set field="navMenuName" value="SearchDelysSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/DelysMenus.xml" /> -->
+				<set field="titleProperty" value="accOrderListPurchase" />
+				<set field="tabButtonItem" value="OrderMangement"/>
+				<set field="filterDate" type="Timestamp" from-field="parameters.filterDate"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<decorator-screen name="FilterScreenDecorator" location="component://delys/widget/sales/CommonScreens.xml">
+							<decorator-section name="search-results">
+								<platform-specific>
+									<html>
+										<html-template location="component://delys/webapp/delys/accounting/listPurchaseOrdersJQ.ftl"/>
+									</html>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    <!-- screen find list order by userLogin (sales admin, sup, accoutant, ...) -->
+    <screen name="OrderList">
+		<section>
+			<actions>
+				<set field="requestNameScreen" from-field="requestNameScreen" default-value="" global="true"/>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/nav_orderList.groovy"/>
+				<!-- <set field="navMenuName" value="SearchDelysSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/DelysMenus.xml" /> -->
+				<set field="titleProperty" value="PageTitleListOrderItems" global="true"/>
+				<set field="tabButtonItem" value="OrderMangement"/>
+				<set field="filterDate" type="Timestamp" from-field="parameters.filterDate"/>
+				<!-- <script location="component://delys/webapp/delys/WEB-INF/actions/delys/EmplFilter.groovy"/>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/OrderList.groovy" />
+				<script location="component://delys/webapp/delys/WEB-INF/actions/order/filterOrder.groovy" /> -->
+				<!-- <set field="selectedMenuItem" value="order"/>
+                <set field="selectedSubMenuItem" value="orderList"/> -->
+                <set field="isDistributor" value="${groovy: return com.olbius.util.SalesPartyUtil.isDistributor(userLogin, delegator);}"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/order/checkDistributor.groovy" />
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="DELYS_ORDER" action="_VIEW"/>
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html>
+										<!-- <html-template location="component://delys/webapp/delys/accounting/listOrders.ftl"/> -->
+										<html-template location="component://delys/webapp/delys/sales/order/orderListJQ.ftl"/>
+									</html>
+								</platform-specific>
+								<!-- <decorator-screen name="FilterScreenDecorator" location="component://delys/widget/sales/CommonScreens.xml">
+									<decorator-section name="search-options">
+										<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderSearchOption.ftl"/></html></platform-specific>
+									</decorator-section>
+									<decorator-section name="search-results">
+										<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderList.ftl"/></html></platform-specific>
+										<platform-specific>
+											<html>
+												<html-template location="component://delys/webapp/delys/accounting/listOrders.ftl"/>
+												<html-template location="component://delys/webapp/delys/sales/order/orderListJQ.ftl"/>
+											</html>
+										</platform-specific>
+									</decorator-section>
+								</decorator-screen>-->
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.DAYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    <screen name="importFacilityTitle">
+    	<section>
+    		<actions>
+				<set field="orderId" from-field="parameters.orderId"/>
+				<set field="deliveryId" from-field="parameters.deliveryId"/>
+				<set field="orderName" type="String" from-field="parameters.orderName"/>
+			</actions>
+    		<widgets>
+    			<label style="ibefore-icon-angle-right">${uiLabelMap.LogProductListInOrder}   ${orderName}[${orderId}]</label>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="ProductListInOrder">
+    	<section>
+			<actions>
+				<set field="selectedMenuItem" value="purchaseOrderDis"/>
+				<set field="selectedSubMenuItem" value="distributorListPO"/>
+				<set field="requestNameScreen" from-field="requestNameScreen" default-value="" global="true"/>
+				<set field="titleProperty" value="LogProductInOrder" global="true"/>
+				<set field="tabButtonItem" value="OrderMangement"/>
+				<set field="orderId" type="String" from-field="parameters.orderId"/>
+				<set field="orderName" type="String" from-field="parameters.orderName"/>
+				<set field="deliveryId" type="String" from-field="parameters.deliveryId"/>
+				<set field="titleHeaderValue" value="importFacilityTitle" global="true" />
+				<set field="titleHeaderLocation" value="component://delys/widget/sales/OrderScreens.xml" global="true" />
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="DELYS_ORDER" action="_VIEW"/>
+							</condition>
+							<actions>
+								<set field="isDistributor" value="${groovy: return com.olbius.util.SalesPartyUtil.isDistributor(userLogin, delegator);}"/>
+							</actions>
+							<widgets>
+								<include-screen name="listProductByInventoryItem"/>
+<!-- 								<include-screen name="listProductInDelivery"/> -->
+								<platform-specific>
+									<html>
+										<html-template location="component://delys/webapp/delys/sales/order/ProductDeataillnOrder.ftl"/>
+									</html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.DAYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>	
+    </screen>
+    
+    <screen name="listProductInDelivery">
+    	<section>
+    		<actions>
+    			<set field="titleProperty" value="LogProductUnderBill"/>
+    		</actions>
+    		<widgets>
+   				<platform-specific>
+					<html>
+						<html-template location="component://delys/webapp/delys/sales/order/ProductUnderBillFetchDelivery.ftl"/>
+					</html>
+				</platform-specific>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="listProductByInventoryItem">
+    	<section>
+    		<actions>
+    			<set field="titleProperty" value="LogProductByInvenrotyItem"/>
+    			<set field="updateProductByInventoryItem" value="component://delys/widget/sales/OrderMenus.xml" global="true" />
+    		</actions>
+    		<widgets>
+   				<platform-specific>
+					<html>
+						<html-template location="component://delys/webapp/delys/sales/order/listDeliveryItemToDistributor.ftl"/>
+					</html>
+				</platform-specific>
+    		</widgets>
+    	</section>
+    </screen>
+    
+    <screen name="OrderListOrigin">
+		<section>
+			<widgets>
+				<section>
+					<actions>
+						<!-- <set field="selectedMenuItem" value="otherSales" />
+						<set field="selectedSubMenuItem" value="orderList" /> -->
+						<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/nav_orderListOrigin.groovy"/>
+						<set field="navMenuName" value="SearchDelysSubTabBar" />
+						<set field="navMenuLocation" value="component://delys/widget/DelysMenus.xml" />
+						<set field="titleProperty" value="PageTitleListOrderItems" />
+						<set field="tabButtonItem" value="OrderMangement"/>
+						<set field="filterDate" type="Timestamp" from-field="parameters.filterDate"/>
+						<set field="parameters.roleTypeId" value="SALES_ADMIN"/>
+						<service service-name="getListStoreByRoleTypeAndUserLogin" auto-field-map="true" result-map="parameters.resultService"></service>
+						<script location="component://delys/webapp/delys/WEB-INF/actions/delys/EmplFilter.groovy"/>
+						<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/OrderListOrigin.groovy" />
+						<script location="component://delys/webapp/delys/WEB-INF/actions/order/filterOrder.groovy" />
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<decorator-screen name="FilterScreenDecorator" location="component://delys/widget/sales/CommonScreens.xml">
+									<decorator-section name="search-options">
+										<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderSearchOption.ftl"/></html></platform-specific>
+									</decorator-section>
+									<decorator-section name="search-results">
+										<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderList.ftl"/></html></platform-specific>
+									</decorator-section>
+								</decorator-screen>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</widgets>
+		</section>
+    </screen>
+    <screen name="OrderListSm">
+		<section>
+			<widgets>
+				<section>
+					<actions>
+						<set field="targetOrderSearch" value="orderListSm"/>
+						<set field="selectedMenuItem" value="otherSales"/> 
+						<set field="selectedSubMenuItem" value="orderListSm"/>
+						<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/nav_orderListSm.groovy"/>
+						<!-- <set field="navMenuName" value="SearchDelysSubTabBar" />
+						<set field="navMenuLocation" value="component://delys/widget/DelysMenus.xml" /> -->
+						<set field="titleProperty" value="PageTitleListOrderItems" />
+						<set field="tabButtonItem" value="OrderMangement"/>
+						<set field="filterDate" type="Timestamp" from-field="parameters.filterDate"/>
+						<set field="parameters.roleTypeId" value="SALES_ADMIN"/>
+						<!-- <service service-name="getListStoreByRoleTypeAndUserLogin" auto-field-map="true" result-map="parameters.resultService"></service> -->
+						<!-- <script location="component://delys/webapp/delys/WEB-INF/actions/delys/EmplFilter.groovy"/>
+						<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/OrderListSm.groovy" />
+						<script location="component://delys/webapp/delys/WEB-INF/actions/order/filterOrder.groovy" /> -->
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<decorator-screen name="FilterScreenDecorator" location="component://delys/widget/sales/CommonScreens.xml">
+									<!-- <decorator-section name="search-options">
+										<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderSearchOption.ftl"/></html></platform-specific>
+									</decorator-section> -->
+									<decorator-section name="search-results">
+										<platform-specific>
+											<html>
+												<!-- <html-template location="component://delys/webapp/delys/sales/order/orderListSm.ftl"/> -->
+												<html-template location="component://delys/webapp/delys/sales/order/orderListSmJQ.ftl"/>
+											</html>
+										</platform-specific>
+									</decorator-section>
+								</decorator-screen>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</widgets>
+		</section>
+    </screen>
+    <screen name="OrderListSmOrigin">
+		<section>
+			<widgets>
+				<section>
+					<actions>
+						<set field="targetOrderSearch" value="orderListSm"/>
+						<set field="selectedMenuItem" value="otherSales" />
+						<set field="selectedSubMenuItem" value="orderListSm" />
+						<!-- <script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/nav_orderList.groovy"/> -->
+						<set field="navMenuName" value="SearchDelysSubTabBar" />
+						<set field="navMenuLocation" value="component://delys/widget/DelysMenus.xml" />
+						<set field="titleProperty" value="PageTitleListOrderItems" />
+						<set field="tabButtonItem" value="OrderMangement"/>
+						<set field="filterDate" type="Timestamp" from-field="parameters.filterDate"/>
+						<set field="parameters.roleTypeId" value="SALES_ADMIN"/>
+						<!-- <service service-name="getListStoreByRoleTypeAndUserLogin" auto-field-map="true" result-map="parameters.resultService"></service> -->
+						<script location="component://delys/webapp/delys/WEB-INF/actions/delys/EmplFilter.groovy"/>
+						<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/OrderListSm.groovy" />
+						<script location="component://delys/webapp/delys/WEB-INF/actions/order/filterOrder.groovy" />
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<decorator-screen name="FilterScreenDecorator" location="component://delys/widget/sales/CommonScreens.xml">
+									<decorator-section name="search-options">
+										<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderSearchOption.ftl"/></html></platform-specific>
+									</decorator-section>
+									<decorator-section name="search-results">
+										<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderListSm.ftl"/></html></platform-specific>
+									</decorator-section>
+								</decorator-screen>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</widgets>
+		</section>
+    </screen>
+    <!-- <screen name="OrderListPurchaseDis">
+		<section>
+			<widgets>
+				<section>
+					<actions>
+						<set field="targetOrderSearch" value="orderListPurchaseDis"/>
+						<set field="selectedMenuItem" value="purchaseOrderDis" />
+						<set field="selectedSubMenuItem" value="distributorListPO" />
+						<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/nav_orderList.groovy"/>
+						<set field="navMenuName" value="SearchDelysSubTabBar" />
+						<set field="navMenuLocation" value="component://delys/widget/DelysMenus.xml" />
+						<set field="titleProperty" value="PageTitleListOrderItems" />
+						<set field="tabButtonItem" value="OrderMangement"/>
+						<set field="filterDate" type="Timestamp" from-field="parameters.filterDate"/>
+						<set field="parameters.roleTypeId" value="CUSTOMER"/>
+						<service service-name="getListStoreByRoleTypeAndUserLogin" auto-field-map="true" result-map="parameters.resultService"></service>
+						<script location="component://delys/webapp/delys/WEB-INF/actions/delys/EmplFilter.groovy"/>
+						<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/OrderListPurchaseDis.groovy" />
+						<script location="component://delys/webapp/delys/WEB-INF/actions/order/filterOrder.groovy" />
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<decorator-screen name="FilterScreenDecorator" location="component://delys/widget/sales/CommonScreens.xml">
+									<decorator-section name="search-options">
+										<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderSearchOption.ftl"/></html></platform-specific>
+									</decorator-section>
+									<decorator-section name="search-results">
+										<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderListSm.ftl"/></html></platform-specific>
+									</decorator-section>
+								</decorator-screen>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</widgets>
+		</section>
+    </screen> -->
+    <screen name="FindOrders">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="order" />
+				<set field="selectedSubMenuItem" value="searchOrder" />
+				<set field="navMenuName" value="SearchOrderSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/DelysMenus.xml" />
+				<set field="titleProperty" value="DAFindOrders" />
+				<set field="headerItem" value="findorders" />
+				<script location="component://order/webapp/ordermgr/WEB-INF/actions/order/FindOrders.groovy" />
+				<script location="component://content/webapp/content/WEB-INF/actions/print/FindPrinters.groovy" />
+
+				<!-- asmslect parameters, must be prefixed by asm_ for setMultipleSelectJs.ftl -->
+				<set field="asm_multipleSelectForm" value="lookuporder" />
+				<set field="asm_multipleSelect" value="roleTypeId" />
+				<set field="asm_formSize" value="700" />
+				<set field="asm_asmListItemPercentOfForm" value="95" />
+				<set field="asm_sortable" value="false" />
+				<property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true" />
+				<set field="asm_title" value="${uiLabelMap.OrderPartySelectRoleForParty}" />
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<decorator-screen name="FindOptionsScreenDecorator" location="component://delys/widget/sales/CommonScreens.xml">
+					 		<decorator-section name="search-options">
+                            	<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/searchFindOrders.ftl" /></html></platform-specific>
+                          		<platform-specific><html><html-template location="component://common/webcommon/includes/setMultipleSelectJs.ftl" /></html></platform-specific>
+                            </decorator-section>
+                            <decorator-section name="search-results">
+                            	<container style="margin-top10" >
+                                 	<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/findOrders.ftl" /></html></platform-specific>
+                                </container>
+                            </decorator-section>
+						</decorator-screen>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="orderTitle">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://delys/webapp/delys/sales/title/orderTitle.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<!-- 
+	<screen name="OrderViewDetail">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="order"/>
+				<set field="selectedSubMenuItem" value=""/>
+				<entity-one value-field="orderHeaderTemp" entity-name="OrderHeader">
+					<field-map field-name="orderId" from-field="parameters.orderId"/>
+				</entity-one>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not><if-empty field="orderHeaderTemp"/></not>
+					</condition>
+					<widgets>
+						<section>
+							<condition>
+								<if-empty field="requestNameScreen"/>
+							</condition>
+							<actions>
+								<set field="requestNameScreen" value=""/>
+							</actions>
+							<widgets>
+								<section>
+									<actions>
+										<set field="selectedMenuItem" value="order"/>
+										<set field="selectedSubMenuItem" value=""/>
+										<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/nav_orderList.groovy"/>
+										<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/checkRolePermissionPerson.groovy"/>
+										<set field="titleProperty" value="OrderViewOrder" />
+										<set field="layoutSettings.javaScripts[]" value="/delys/images/js/orderDelys.js" global="true" />
+										<set field="layoutSettings.javaScripts[]" value="/delys/images/js/OrderShippingInfoDelys.js" global="true" />
+										<set field="layoutSettings.javaScripts[]" value="/delys/images/js/geoAutoCompleterDelys.js" global="true" />
+										<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/OrderView.groovy" />
+										<script location="component://delys/webapp/delys/WEB-INF/actions/delys/OrderViewWebSecureDelys.groovy" />
+										<set field="titleHeaderValue" value="orderTitle" global="true" />
+										<set field="titleHeaderLocation" value="component://delys/widget/sales/OrderScreens.xml" global="true" />
+										<script location="component://delys/webapp/delys/WEB-INF/actions/delys/orderPermissionDelys.groovy" />
+									</actions>
+									<widgets>
+										<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+											<decorator-section name="body">
+												<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/openOrderViewDetail.ftl" /></html></platform-specific>
+												<include-screen name="OrderViewDetailHeader" />
+												<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderItemsTab.ftl" /></html></platform-specific>
+												<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderOrderNotes.ftl" /></html></platform-specific>
+												<platform-specific><html><html-template location="component://delys/webapp/delys/order/orderVDHTransitions.ftl" /></html></platform-specific>
+												<platform-specific><html><html-template location="component://delys/webapp/delys/order/closeOrderViewDetailHeader.ftl" /></html></platform-specific>
+											</decorator-section>
+										</decorator-screen>
+									</widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<section>
+									<actions>
+										<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/nav_orderList.groovy"/>
+										<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/checkRolePermissionPerson.groovy"/>
+										<set field="titleProperty" value="OrderViewOrder" />
+										<set field="layoutSettings.javaScripts[]" value="/delys/images/js/orderDelys.js" global="true" />
+										<set field="layoutSettings.javaScripts[]" value="/delys/images/js/OrderShippingInfoDelys.js" global="true" />
+										<set field="layoutSettings.javaScripts[]" value="/delys/images/js/geoAutoCompleterDelys.js" global="true" />
+										<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/OrderView.groovy" />
+										<script location="component://delys/webapp/delys/WEB-INF/actions/delys/OrderViewWebSecureDelys.groovy" />
+										<script location="component://delys/webapp/delys/WEB-INF/actions/delys/orderPermissionDelys.groovy" />
+									</actions>
+									<widgets>
+										<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+											<decorator-section name="body">
+												<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/openOrderViewDetail.ftl" /></html></platform-specific>
+												<include-screen name="OrderViewDetailHeader" />
+												//<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderItemsTab.ftl" /></html></platform-specific>
+												//<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderOrderNotes.ftl" /></html></platform-specific>
+												<platform-specific><html><html-template location="component://delys/webapp/delys/order/orderVDHTransitions.ftl" /></html></platform-specific>
+												<platform-specific><html><html-template location="component://delys/webapp/delys/order/closeOrderViewDetailHeader.ftl" /></html></platform-specific>
+											</decorator-section>
+										</decorator-screen>
+									</widgets>
+								</section>
+							</fail-widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.OrderNoOrderFound}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	 -->
+    <screen name="OrderViewDetail">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="orders"/>
+				<set field="selectedSubMenuItem" value="SalesOrders"/>
+				<entity-one value-field="orderHeaderTemp" entity-name="OrderHeader">
+					<field-map field-name="orderId" from-field="parameters.orderId"/>
+				</entity-one>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not><if-empty field="orderHeaderTemp"/></not>
+					</condition>
+					<actions>
+						<set field="companyId" value="${groovy: return com.olbius.util.SalesPartyUtil.getCompanyInProperties(delegator)}"/>
+						<entity-one value-field="orderRoleVendor" entity-name="OrderRole">
+							<field-map field-name="orderId" from-field="orderHeaderTemp.orderId"/>
+							<field-map field-name="partyId" from-field="companyId"/>
+							<field-map field-name="roleTypeId" value="BILL_FROM_VENDOR"/>
+						</entity-one>
+					</actions>
+					<widgets>
+						<section>
+							<condition>
+								<not><if-empty field="orderRoleVendor"/></not>
+							</condition>
+							<widgets>
+								<section>
+									<actions>
+										<set field="requestNameScreen" default-value="requestNameScreen" value=""/>
+										<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/nav_orderList.groovy"/>
+										<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/checkRolePermissionPerson.groovy"/>
+										<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/checkRolePermissionOrder.groovy"/>
+										<set field="titleProperty" value="OrderViewOrder" />
+										<!-- <set field="layoutSettings.javaScripts[]" value="/delys/images/js/orderDelys.js" global="true" />
+										<set field="layoutSettings.javaScripts[]" value="/delys/images/js/OrderShippingInfoDelys.js" global="true" />
+										<set field="layoutSettings.javaScripts[]" value="/delys/images/js/geoAutoCompleterDelys.js" global="true" /> -->
+										<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/OrderViewSimple.groovy" />
+										<script location="component://delys/webapp/delys/WEB-INF/actions/delys/OrderViewWebSecureDelys.groovy" />
+										<!-- <set field="urlViewOrder" value="orderView"/> -->
+										<set field="titleHeaderValue" value="orderTitle" global="true" />
+										<set field="titleHeaderLocation" value="component://delys/widget/sales/OrderScreens.xml" global="true" />
+										<script location="component://delys/webapp/delys/WEB-INF/actions/delys/orderPermissionDelys.groovy" />
+										<script location="component://delys/webapp/delys/WEB-INF/actions/delys/GetPartyListByOrder.groovy" />
+									</actions>
+									<widgets>
+										<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+											<decorator-section name="body">
+												<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/openOrderViewDetail.ftl" /></html></platform-specific>
+												<include-screen name="OrderViewDetailHeader" />
+												<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderItemsTabJQ.ftl" /></html></platform-specific>
+												<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderOrderNotes.ftl" /></html></platform-specific>
+												<platform-specific><html><html-template location="component://delys/webapp/delys/order/orderVDHTransitions.ftl" /></html></platform-specific>
+												<platform-specific><html><html-template location="component://delys/webapp/delys/order/closeOrderViewDetailHeader.ftl" /></html></platform-specific>
+											</decorator-section>
+										</decorator-screen>
+									</widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<include-screen name="OrderViewDetailDis"/>
+							</fail-widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.OrderNoOrderFound}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="OrderViewDetailHeader">
+		<section>
+			<condition>
+				<not><if-empty field="orderHeader" /></not>
+			</condition>
+			<actions>
+				<!-- <script location="component://delys/webapp/delys/WEB-INF/actions/delys/orderPermissionDelys.groovy" /> -->
+				<set field="postalAddressTemplateSuffix" value=".ftl"/>
+                <set field="addressTemplatePath" value="${sys:getProperty('ofbiz.home')}/applications/party/webapp/partymgr/party/contactmechtemplates/"/>
+                <script location="component://party/webapp/partymgr/WEB-INF/actions/party/GetPostalAddressTemplate.groovy"/>
+                <set field="parameters.sortField" from-field="parameters.sortField" default-value="-invoiceDate"/>
+				<set field="toPartyId" value="company"/>	
+				<set field="partyIdFrom" from-field="parameters.partyIdFrom"/>
+				<set field="partyIdTemp" from-field="parameters.partyIdFrom"/>
+				<set field="parameters.parentTypeId" value="PURCHASE_INVOICE"/>																															
+				<set field="parameters.statusId" value="INVOICE_IN_PROCESS"/>
+				<service service-name="performFind" result-map="result">
+         			<field-map field-name="inputFields" from-field="parameters"/>
+					<field-map field-name="entityName" value="InvoiceAndTypeAndRole"/>
+         		</service>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/accounting/sumupResultListIt.groovy"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/distributor/OrderViewApproveNPP.groovy" />
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/OrderViewGeneral.groovy" />
+			</actions>
+			<widgets>
+				<!-- <include-screen name="orderVDHOrderViewApproveNPP" location="component://delys/widget/DistributorScreens.xml" /> -->
+				<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderViewGeneral.ftl" /></html></platform-specific>
+				<include-screen name="orderVDHInfo" />
+				<include-screen name="orderVDHTerms" />
+				<include-screen name="orderVDHPaymentInfo" />
+				<include-screen name="orderVDHProjectAssoOrder" />
+				<!-- <include-screen name="orderVDHOrderContactInfo" /> -->
+				<include-screen name="orderVDHOrderActions" />
+				<include-screen name="orderVDHOrderShippingInfo" />
+				<include-screen name="orderVDHOrderSalesReps" />
+				<section>
+					<condition>
+						<or>
+							<and>
+								<not><if-empty field="isLog"/></not>
+								<if-compare operator="equals" value="true" field="isLog" type="Boolean"/>
+							</and>
+							<and>
+								<not><if-empty field="isLog"/></not>
+								<if-compare operator="equals" value="true" field="isChiefAccountant" type="Boolean"/>
+							</and>
+						</or>
+					</condition>
+					<widgets>
+						<include-screen name="orderVDHDelivery" />
+					</widgets>
+				</section>
+				<!-- <include-screen name="viewBalanceDetail" location="component://delys/widget/DistributorScreens.xml" /> -->
+			</widgets>
+			<fail-widgets>
+				<label style="h2" text="${uiLabelMap.OrderNoOrderFound}: [${orderId}]"></label>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="OrderHistory">
+		<section>
+			<actions>
+				<set field="headerItem" value="findorders" />
+				<script
+					location="component://order/webapp/ordermgr/WEB-INF/actions/order/OrderHistory.groovy" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonOrderViewDecorator">
+					<decorator-section name="body">
+						<screenlet title="${uiLabelMap.OrderOrderHistory} #${orderId}" navigation-menu-name="BackToOrder">
+						<include-menu location="component://order/widget/ordermgr/OrderMenus.xml" name="BackToOrder"/>
+<!-- 							<container> -->
+<!-- 								<link target="orderview?orderId=${orderId}" text="${uiLabelMap.OrderBackToOrder}" -->
+<!-- 									style="btn btn-primary btn-mini" /> -->
+<!-- 							</container> -->
+							<include-screen name="OrderShipmentMethodHistory" />
+							<include-screen name="OrderUnitPriceHistory" />
+							<include-screen name="OrderQuantityHistory" />
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="orderVDHInfo">
+		<section>
+			<widgets>
+				<!-- <platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderInfo.ftl" /></html></platform-specific> -->
+				<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderInfoSales.ftl" /></html></platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="orderVDHTerms">
+		<section>
+			<widgets>
+				<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderTerms.ftl" /></html></platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="orderVDHPaymentInfo">
+		<section>
+			<widgets>
+				<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderPaymentInfo.ftl" /></html></platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="orderVDHDelivery">
+		<section>
+			<actions>
+				<entity-condition entity-name="OrderShipment" list="listOrders">
+					<condition-expr field-name="shipmentId" from-field="shipmentId"/>
+				</entity-condition>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/logistics/getOrderToCreateDelivery.groovy"/>
+				<entity-and entity-name="OrderRoleAndPartyNameView" list="listPartyTo">
+					<field-map field-name="orderId" from-field="parameters.orderId"></field-map>
+					<field-map field-name="roleTypeId" value="BILL_TO_CUSTOMER"></field-map>
+				</entity-and>
+				<entity-and entity-name="OrderRoleAndPartyNameView" list="listPartyFrom">
+					<field-map field-name="orderId" from-field="parameters.orderId"></field-map>
+					<field-map field-name="roleTypeId" value="BILL_FROM_VENDOR"></field-map>
+				</entity-and>
+				<entity-and entity-name="ProductStore" list="listProStore">
+					<field-map field-name="productStoreId" value="${orderHeader.productStoreId}"/>
+				</entity-and>
+				<!-- <script location="component://delys/webapp/delys/WEB-INF/actions/logistics/CaculateTotalOrderAmount.groovy"/> -->
+				<set field="listOrderItemTypes" value="${listOrderItemTypes}" type="List"/>
+				<set field="titleProperty" value="DeliveryList" />
+				<entity-and list="destContacts" entity-name="OrderContacMechPostalAddress">
+					<field-map field-name="orderId" from-field="parameters.orderId"></field-map>
+					<field-map field-name="contactMechPurposeTypeId" value="SHIPPING_LOCATION"></field-map>
+				</entity-and>
+				<entity-and list="originContacts" entity-name="OrderContacMechPostalAddress">
+					<field-map field-name="orderId" from-field="parameters.orderId"></field-map>
+					<field-map field-name="contactMechPurposeTypeId" value="SHIP_ORIG_LOCATION"></field-map>
+				</entity-and>
+			</actions>
+			<widgets>
+				<platform-specific><html><html-template location="component://delys/webapp/delys/accounting/appr/orderDelivery.ftl" /></html></platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="DeliveryPDF">
+        <section>
+        	<actions>
+        		<property-map map-name="uiLabelMap" resource="DelysUiLabels" global="true"/>
+        		<entity-one entity-name="Delivery" value-field="delivery">
+                    <field-map field-name="deliveryId" from-field="parameters.deliveryId"/>
+                </entity-one>
+                <entity-one entity-name="Facility" value-field="originFacility">
+                	<field-map field-name="facilityId" from-field="delivery.originFacilityId"></field-map>
+                </entity-one>
+                <entity-one entity-name="Facility" value-field="destFacility">
+                	<field-map field-name="facilityId" from-field="delivery.destFacilityId"></field-map>
+                </entity-one>
+        	</actions>
+        	<widgets>
+        		<section>
+        			<condition>
+        				<if-compare operator="equals" value="DELIVERY_SALES" field="delivery.deliveryTypeId"/>
+        			</condition>
+        			<actions>
+        				<entity-one entity-name="PartyNameView" value-field="partyFrom">
+		                	<field-map field-name="partyId" from-field="delivery.partyIdFrom"></field-map>
+		                </entity-one>
+		                <entity-one entity-name="PartyNameView" value-field="partyTo">
+		                	<field-map field-name="partyId" from-field="delivery.partyIdTo"></field-map>
+		                </entity-one>
+		                <entity-one entity-name="PostalAddress" value-field="addressFrom">
+		                	<field-map field-name="contactMechId" from-field="delivery.originContactMechId"></field-map>
+		                </entity-one>
+		                <entity-one entity-name="DeliveryType" value-field="deliveryType">
+		                	<field-map field-name="deliveryTypeId" from-field="delivery.deliveryTypeId"></field-map>
+		                </entity-one>
+        				<script location="component://delys/webapp/delys/WEB-INF/actions/accounting/appr/AccApprDelivery.groovy"></script>
+        			</actions>
+        			<widgets>
+						<decorator-screen name="FoReportDecorator" location="component://common/widget/CommonScreens.xml">
+		                   <decorator-section name="body">
+		                       <platform-specific>
+		                          	<xsl-fo><html-template location="component://delys/webapp/delys/accounting/fo/deliveryNote.fo.ftl"/></xsl-fo>
+		                       </platform-specific>
+		                   </decorator-section>
+		                </decorator-screen>        			
+        			</widgets>
+        			<fail-widgets>
+        				<section>
+        					<condition>
+		        				<if-compare operator="equals" value="DELIVERY_TRANSFER" field="delivery.deliveryTypeId"/>
+		        			</condition>
+		        			<actions>
+		        				<entity-condition list="listItems" entity-name="TransferDeliveryItemView">
+		        					<condition-expr field-name="deliveryId" from-field="delivery.deliveryId"/>
+		        				</entity-condition>
+		        			</actions>
+		        			<widgets>
+		        				<decorator-screen name="FoReportDecorator" location="component://common/widget/CommonScreens.xml">
+				                   <decorator-section name="body">
+				                       <platform-specific>
+				                          	<xsl-fo><html-template location="component://delys/webapp/delys/logistics/transfer/transferNote.fo.ftl"/></xsl-fo>
+				                       </platform-specific>
+				                   </decorator-section>
+				                </decorator-screen>
+		        			</widgets>
+        				</section>
+        			</fail-widgets>
+        		</section>
+            </widgets>
+       	</section>
+    </screen>
+	
+	<screen name="orderVDHProjectAssoOrder">
+		<section>
+			<condition>
+				<if-has-permission permission="PROJECTMGR" action="_VIEW" />
+			</condition>
+			<actions>
+				<set field="orderId" from-field="parameters.orderId" />
+				<entity-and entity-name="OrderHeaderAndWorkEffort" list="listProjectAssoOrder">
+					<field-map field-name="orderId" from-field="orderId" />
+					<field-map field-name="workEffortTypeId" value="PROJECT" />
+				</entity-and>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not><if-empty field="listProjectAssoOrder" /></not>
+					</condition>
+					<widgets>
+						<container id="projectAssoOrder-tab" style="tab-pane">
+							<screenlet title="${uiLabelMap.PageTitleProjectInformation}">
+								<include-form name="projectAssoOrderDelys" location="component://delys/widget/DelysForms.xml" />
+							</screenlet>
+						</container>
+					</widgets>
+					<fail-widgets></fail-widgets>
+				</section>
+			</widgets>
+			<fail-widgets></fail-widgets>
+		</section>
+	</screen>
+	<screen name="orderVDHOrderContactInfo">
+		<section>
+			<widgets>
+				<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderContactInfo.ftl" /></html></platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="orderVDHOrderActions">
+		<section>
+			<widgets>
+				<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderActions.ftl" /></html></platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="orderVDHOrderShippingInfo">
+		<section>
+			<actions>
+				<set field="dependentForm" value="addShippingAddress" />
+				
+				<set field="paramKey" value="countryGeoId" />
+				<set field="paramKey_district" value="provinceGeoId"/>
+				<set field="paramKey_ward" value="districtGeoId"/>
+				
+				<set field="mainId" value="countryGeoId"/>
+				<set field="stateProvinceGeoId" value="stateProvinceGeoId"/>
+				<set field="distGeoId" value="districtGeoId"/>
+				<set field="wardGeoId" value="wardGeoId"/>
+				
+				<set field="requestName" value="getAssociatedStateList" />
+				<set field="requestName_district" value="getAssociatedDistList"/>
+				<set field="requestName_ward" value="getAssociatedWardList"/>
+				
+				<set field="responseName" value="stateList" />
+				<set field="responseName_district" value="districtList" />
+				<set field="responseName_ward" value="wardList" />
+				
+				<set field="dependentKeyName" value="geoId" />
+				<set field="descName" value="geoName" />
+				<set field="selectedDependentOption" from-field="mechMap.postalAddress.stateProvinceGeoId" default-value="_none_" />
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/AddressAjaxDis.groovy"/>
+				
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://delys/webapp/delys/sales/includes/setDependentDropdownValuesJs.ftl"/>
+						<html-template location="component://delys/webapp/delys/sales/order/orderShippingInfo.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="orderVDHOrderSalesReps">
+		<section>
+			<widgets>
+				<platform-specific><html><html-template location="component://delys/webapp/delys/order/OrderSalesRepsDelys.ftl" /></html></platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="OrderViewPaymentOrder">
+		<section>
+			<condition>
+				<not><if-empty field="parameters.orderId"/></not>
+			</condition>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="DelysAdminUiLabels" global="true"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/distributor/OrderViewApproveNPP.groovy" />
+                <script location="component://delys/webapp/delys/WEB-INF/actions/distributor/OrderViewSimple.groovy"/>
+			</actions>
+			<widgets>
+				<platform-specific><html><html-template location="component://common/webcommon/includes/messages.ftl"/></html></platform-specific>
+				<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderViewPaymentOrder.ftl" /></html></platform-specific>
+			</widgets>
+			<fail-widgets>
+				<section>
+					<actions>
+						<property-map map-name="uiLabelMap" resource="OrderUiLabels" global="true"/>
+					</actions>
+					<widgets>
+						<platform-specific><html><html-template location="component://common/webcommon/includes/messages.ftl"/></html></platform-specific>
+						<label style="h2" text="${uiLabelMap.OrderNoOrderFound}"></label>
+					</widgets>
+				</section>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="OrderItemEdit">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="order"/>
+				<set field="selectedSubMenuItem" value="searchOrder"/>
+				<set field="titleProperty" value="OrderEditItems" />
+				<set field="headerItem" value="orderlist" />
+				<script location="component://order/webapp/ordermgr/WEB-INF/actions/order/OrderView.groovy" />
+				<script location="component://order/webapp/ordermgr/WEB-INF/actions/order/OrderViewWebSecure.groovy" />
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/checkRolePermissionPerson.groovy"/>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/checkRolePermissionOrder.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonOrderViewDecorator">
+					<decorator-section name="body">
+						<platform-specific>
+							<html><html-template location="component://delys/webapp/delys/sales/order/editOrderItems.ftl" /></html>
+						</platform-specific>
+						<platform-specific>
+							<html><html-template location="component://delys/webapp/delys/sales/order/appendOrderItem.ftl" /></html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="NewDeliveryProposal">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="deliveryProposal" />
+				<set field="selectedSubMenuItem" value="newDeliveryProposal" />
+				<set field="titleProperty" value="DACreateNewDeliveryProposal"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<screenlet title="${uiLabelMap.DAStepOne}: ${uiLabelMap.DAEnterGeneralInfo}">
+							<platform-specific>
+								<html><html-template location="component://delys/webapp/delys/sales/order/newDeliveryProposal.ftl"/></html>
+							</platform-specific>
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ShowDeliveryProposal">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="deliveryProposal" />
+				<set field="selectedSubMenuItem" value="newDeliveryProposal" />
+				<set field="titleProperty" value="DACreateNewDeliveryProposal"/>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/ShowDeliveryCart.groovy"/>
+				<property-map map-name="uiLabelMap" resource="DelysUiLabels"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<!-- <platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/DeliveryReqTabBar.ftl"/></html></platform-specific> -->
+						<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/showDeliveryProposal.ftl"/></html></platform-specific>
+						<!-- <platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/javascriptDeliveryCart.ftl"/></html></platform-specific> -->
+						<!-- <platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/showDeliveryProposalItems.ftl"/></html></platform-specific>
+						<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/showDeliveryProposalItemsByFacility.ftl"/></html></platform-specific> -->
+						<!-- <platform-specific>
+							<html><html-template location="component://delys/webapp/delys/sales/order/showDeliveryProposal.ftl"/></html>
+						</platform-specific> -->
+						<!-- <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/javascript.ftl"/></html></platform-specific>
+	                    <platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/showCartItems.ftl"/></html></platform-specific>
+	                    <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/promotionsApplied.ftl"/></html></platform-specific> -->
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ConfirmDeliveryProposal">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="deliveryProposal" />
+				<set field="selectedSubMenuItem" value="newDeliveryProposal" />
+				<set field="titleProperty" value="DACreateNewDeliveryProposal"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<platform-specific>
+							<html><html-template location="component://delys/webapp/delys/sales/order/newDeliveryProposal.ftl"/></html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewDeliveryProposal">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="deliveryProposal" />
+				<set field="selectedSubMenuItem" value="" />
+				<set field="titleProperty" value="DAViewDeliveryProposal"/>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/DeliveryReqView.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/deliveryReqHeader.ftl"/></html></platform-specific>
+						<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/showDeliveryProposalItems.ftl"/></html></platform-specific>
+						<!-- <platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/showDeliveryProposalItemsByFacility.ftl"/></html></platform-specific> -->
+						<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/deliveryReqFooter.ftl"/></html></platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EditDeliveryProposal">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="deliveryProposal" />
+				<set field="selectedSubMenuItem" value="newDeliveryProposal" />
+				<set field="titleProperty" value="DACreateNewDeliveryProposal"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<platform-specific>
+							<html><html-template location="component://delys/webapp/delys/sales/order/newDeliveryProposal.ftl"/></html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="DeliveryProposalList">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="deliveryProposal" />
+				<set field="selectedSubMenuItem" value="deliveryProposalList" />
+<!-- 				<set field="navMenuName" value="SearchDelysSubTabBar" /> -->
+<!-- 				<set field="navMenuLocation" value="component://delys/widget/DelysMenus.xml" /> -->
+				<set field="titleProperty" value="DAPageTitleListDeliveryProposalItems" />
+<!-- 				<set field="tabButtonItem" value="OrderMangement"/> -->
+<!-- 				<set field="filterDate" type="Timestamp" from-field="parameters.filterDate"/> -->
+				<entity-condition list="deliveryReqList" entity-name="Requirement">
+					<condition-expr field-name="requirementTypeId" value="DELIVERY_SALES_REQ"/>
+					<order-by field-name="-requiredByDate"/>
+					<order-by field-name="-requirementStartDate"/>
+				</entity-condition>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<screenlet title="${uiLabelMap[titleProperty]}" navigation-menu-name="NewCreateProposal">
+							<include-menu location="component://delys/widget/sales/SalesMenus.xml" name="NewCreateProposal"/>
+							<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/deliveryReqList.ftl"/></html></platform-specific>
+						</screenlet>
+						<!-- <decorator-screen name="FilterScreenDecorator" location="component://delys/widget/sales/CommonScreens.xml">
+							<decorator-section name="search-options"> -->
+<!-- 								<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderSearchOption.ftl"/></html></platform-specific> -->
+							<!-- </decorator-section>
+							<decorator-section name="search-results">
+								<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/deliveryReqList.ftl"/></html></platform-specific>
+							</decorator-section>
+						</decorator-screen> -->
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="CommonOrderViewDecorator">
+		<section>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<widgets>
+								<decorator-section-include name="body" />
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="OrderReceivePayment">
+		<section>
+			<actions>
+				<set field="titleProperty" value="OrderReceiveOfflinePayments" />
+				<set field="headerItem" value="findorders" />
+				<script
+					location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/ReceivePaymentDelys.groovy" />
+				
+				<script
+					location="component://delys/webapp/delys/WEB-INF/actions/accounting/GetListPaymentMethods.groovy" />
+										
+				<entity-and entity-name="OrderRole" list="orderRoles">
+					<field-map field-name="orderId" value="${parameters.orderId}" />
+					<field-map field-name="roleTypeId" value="BILL_FROM_VENDOR" />
+				</entity-and>
+<!-- 				<entity-and entity-name="PaymentMethod" list="paymentMethods"> -->
+<!-- 					<field-map field-name="partyId" from-field="orderRoles[0].partyId" /> -->
+<!-- 				</entity-and>				 -->
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonOrderViewDecorator">								
+					<decorator-section name="body">						
+						<platform-specific>
+							<html><html-template location="component://delys/webapp/delys/sales/order/receivePayment.ftl" /></html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="OrderDeliveryScheduleInfo">
+		<section>
+			<actions>
+				<set field="titleProperty" value="OrderViewEditDeliveryScheduleInfo" />
+				<set field="headerItem" value="findorders" />
+				<property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true" />
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/OrderDeliveryScheduleInfo.groovy" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonOrderViewDecorator">
+					<decorator-section name="body">
+						<platform-specific>
+							<html><html-template location="component://delys/webapp/delys/sales/order/orderDeliveryScheduleInfo.ftl" /></html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="OrderReturnHeader">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="deliveryProposal" />
+				<set field="selectedSubMenuItem" value="deliveryProposalList" />
+                <set field="titleProperty" value="PageTitleReturnHeader"/>
+                <set field="headerItem" value="return"/>
+                <set field="tabButtonItem" value="OrderReturnHeader"/>
+                <set field="layoutSettings.javaScripts[+0]" value="/ordermgr/images/js/return.js" global="true"/>
+                <property-to-field field="defaultCurrencyUomId" resource="general" property="currency.uom.id.default" default="USD"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/return/ReturnHeader.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+	                            <container style="row-fluid">
+		                            <container style="span12">
+		                           		<platform-specific>
+		                                    <html><html-template location="component://order/webapp/ordermgr/return/returnLinks.ftl"/></html>
+		                         	 	</platform-specific>
+										<section>
+											<widgets>
+												<screenlet title="${uiLabelMap.PageTitleReturnHeader}">
+											       <include-form name="EditReturn" location="component://order/widget/ordermgr/ReturnForms.xml"/>
+												</screenlet>
+											</widgets>
+										</section>		
+									</container>    
+								</container>                           
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="OrderHistory">
+		<section>
+			<actions>
+				<set field="headerItem" value="findorders"/>
+				<script location="component://order/webapp/ordermgr/WEB-INF/actions/order/OrderHistory.groovy" />
+				
+				<set field="companyId" value="${groovy: return com.olbius.util.SalesPartyUtil.getCompanyInProperties(delegator)}"/>
+				<entity-one value-field="orderRoleVendor" entity-name="OrderRole">
+					<field-map field-name="orderId" from-field="parameters.orderId"/>
+					<field-map field-name="partyId" from-field="companyId"/>
+					<field-map field-name="roleTypeId" value="BILL_FROM_VENDOR"/>
+				</entity-one>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not><if-empty field="orderRoleVendor"/></not>
+					</condition>
+					<actions>
+						<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/nav_orderList.groovy"/>
+					</actions>
+					<widgets>
+					</widgets>
+					<fail-widgets>
+						<section>
+							<actions><script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/nav_orderListSm.groovy"/></actions>
+							<widgets></widgets>
+						</section>
+					</fail-widgets>
+				</section>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<screenlet title="${uiLabelMap.OrderOrderHistory} #${orderId}" navigation-menu-name="BackToOrder">
+							<include-menu location="component://delys/widget/sales/OrderMenus.xml" name="BackToOrder"/>
+							<include-screen name="OrderShipmentMethodHistory" />
+							<include-screen name="OrderUnitPriceHistory" />
+							<include-screen name="OrderQuantityHistory" />
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="OrderShipmentMethodHistory">
+		<section>
+			<condition>
+				<not>
+					<if-empty field="orderShipmentHistories" />
+				</not>
+			</condition>
+			<widgets>
+				<screenlet title="${uiLabelMap.OrderShipmentMethodHistory}">
+					<include-form location="component://order/widget/ordermgr/OrderForms.xml" name="OrderShipmentMethodHistory"/>
+				</screenlet>
+			</widgets>
+			<fail-widgets>
+				<screenlet title="${uiLabelMap.OrderShipmentMethodHistory}">
+					<container style="alert alert-info">
+						<label text="${uiLabelMap.OrderHistoryNotAvailable}" />
+					</container>
+				</screenlet>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="OrderUnitPriceHistory">
+		<section>
+			<condition>
+				<not>
+					<if-empty field="orderUnitPriceHistories" />
+				</not>
+			</condition>
+			<widgets>
+				<screenlet title="${uiLabelMap.OrderUnitPriceHistory}">
+					<include-form location="component://order/widget/ordermgr/OrderForms.xml" name="OrderUnitPriceHistory" />
+				</screenlet>
+			</widgets>
+			<fail-widgets>
+				<screenlet title="${uiLabelMap.OrderUnitPriceHistory}">
+					<container style="alert alert-info">
+						<label text="${uiLabelMap.OrderHistoryNotAvailable}" />
+					</container>
+				</screenlet>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="OrderQuantityHistory">
+		<section>
+			<condition>
+				<not>
+					<if-empty field="orderQuantityHistories" />
+				</not>
+			</condition>
+			<widgets>
+				<screenlet title="${uiLabelMap.OrderQuantityHistory}">
+					<include-form location="component://order/widget/ordermgr/OrderForms.xml" name="OrderQuantityHistory" />
+				</screenlet>
+			</widgets>
+			<fail-widgets>
+				<screenlet title="${uiLabelMap.OrderQuantityHistory}">
+				<container style="alert alert-info">
+					<label text="${uiLabelMap.OrderHistoryNotAvailable}" />
+					</container>
+				</screenlet>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="OrderNewNote">
+		<section>
+			<condition>
+				<if-has-permission permission="ORDERMGR" action="_VIEW" />
+			</condition>
+			<actions>
+				<set field="requestNameScreen" from-field="requestNameScreen" default-value="" global="true"/>
+				<set field="titleProperty" value="OrderAddNote" />
+				<set field="headerItem" value="findorders" />
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/nav_orderList.groovy"/>
+				<script location="component://order/webapp/ordermgr/WEB-INF/actions/order/NewNote.groovy" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonOrderViewDecorator">
+					<decorator-section name="body">
+						<screenlet title="${uiLabelMap.OrderAddNote} #${orderId}" navigation-menu-name="BackToOrder">
+							<include-menu location="component://delys/widget/sales/OrderMenus.xml" name="BackToOrder"/>
+							<include-form name="OrderNewNote" location="component://delys/widget/sales/OrderForms.xml" />
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<container style="alert alert-info">
+					<label>${uiLabelMap.OrderViewPermissionError}</label>
+				</container>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="OrderNewNoteAjax">
+		<section>
+			<condition>
+				<if-has-permission permission="ORDERMGR" action="_VIEW" />
+			</condition>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="DelysAdminUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="OrderUiLabels" global="true"/>
+				<set field="requestNameScreen" from-field="requestNameScreen" default-value="" global="true"/>
+				<set field="titleProperty" value="OrderAddNote" />
+				<set field="headerItem" value="findorders" />
+				<!-- <script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/nav_orderList.groovy"/> -->
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/checkRolePermissionPerson.groovy"/>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/NewNote.groovy"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html><html-template location="component://delys/webapp/delys/sales/order/newOrderNote.ftl"/></html>
+				</platform-specific>
+			</widgets>
+			<fail-widgets>
+				<container style="alert alert-info">
+					<label>${uiLabelMap.OrderViewPermissionError}</label>
+				</container>
+			</fail-widgets>
+		</section>
+	</screen>
+	
+	<!-- Create sales order of Distributor (is purchase order of store customer) - No relation with accounting -->
+	<screen name="CreateSalesOrderDis">
+		<section>
+			<condition>
+				<if-has-permission permission="ORDERPUR" action="_DIS_CREATE"/>
+			</condition>
+			<actions>
+				<set field="selectedMenuItem" value="salesOrderDis"/>
+				<set field="selectedSubMenuItem" value="newSalesOrderDis"/>
+				<set field="titleProperty" value="PageTitleOrderInits"/>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/CheckInitsDis.groovy"/>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/CheckoutAjaxDis.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<platform-specific>
+							<html><html-template location="component://delys/webapp/delys/distributor/order/totalCreateSalesOrderDis.ftl"/></html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<section>
+					<actions>
+						<set field="selectedMenuItem" value="newSalesOrderDis"/>
+						<set field="selectedSubMenuItem" value=""/>
+						<set field="titleProperty" value="PageTitleOrderInits"/>
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-danger">
+									<label text="${uiLabelMap.DACreatePermissionError}"/>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="CheckInitsDis">
+		<section>
+			<condition>
+				<if-has-permission permission="ORDERMGR" action="CREATE"/>
+			</condition>
+			<actions>
+				<set field="selectedMenuItem" value="newSalesOrderDis"/>
+				<set field="selectedSubMenuItem" value=""/>
+				<set field="titleProperty" value="PageTitleOrderInits"/>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/CheckInitsDis.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<!--<screenlet title="${uiLabelMap.DACreateNewSalesOrder}">-->
+							<platform-specific>
+								<html><html-template location="component://delys/webapp/delys/distributor/order/totalCreateSalesOrderDis.ftl"/></html>
+							</platform-specific>
+							<!-- <platform-specific>
+								<html><html-template location="component://delys/webapp/delys/sales/order/checkInitsDis.ftl"/></html>
+							</platform-specific> -->
+						<!-- </screenlet> -->
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<section>
+					<actions>
+						<set field="selectedMenuItem" value="newSalesOrderDis"/>
+						<set field="selectedSubMenuItem" value=""/>
+						<set field="titleProperty" value="PageTitleOrderInits"/>
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-danger">
+									<label text="${uiLabelMap.DACreatePermissionError}"/>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="CheckInitsDisAjax">
+		<section>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="DelysAdminUiLabels" global="true"/>
+            	<property-map map-name="uiLabelMap" resource="CommonUiLabels" global="true"/>
+            	<property-map map-name="uiLabelMap" resource="WidgetUiLabels" global="true"/>
+				<set field="titleProperty" value="PageTitleOrderInits"/>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/CheckInitsDis.groovy"/>
+			</actions>
+			<widgets>
+				<!--<screenlet title="${uiLabelMap.DACreateNewSalesOrder}">-->
+					<!-- <platform-specific>
+						<html><html-template location="component://delys/webapp/delys/distributor/order/totalCreateSalesOrderDis.ftl"/></html>
+					</platform-specific> -->
+					<platform-specific>
+						<html><html-template location="component://delys/webapp/delys/sales/order/checkInitsDis.ftl"/></html>
+					</platform-specific>
+				<!-- </screenlet> -->
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ShowCartDis">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="order" />
+				<set field="selectedSubMenuItem" value="newOrder" />
+			    <set field="titleProperty" value="PageTitleOrderShowCart"/>
+                <set field="productsummaryScreen" value="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml#productsummary"/>
+                <property-to-field resource="order" property="orderPreference.giftEnable" field="giftEnable" default="Y"/>
+                <set field="promoUseDetailsInlineScreen" value="component://order/widget/ordermgr/OrderEntryCartScreens.xml#promoUseDetailsInline"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/ShowCart.groovy"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/ShowPromoText.groovy"/>
+                <entity-condition entity-name="ProductStorePromoAndAppl" list="allProductPromos" filter-by-date="true">
+                    <condition-list combine="and">
+                        <condition-expr field-name="manualOnly" value="Y"/>
+                        <condition-expr field-name="productStoreId" from-field="productStoreId"/>
+                    </condition-list>
+                    <order-by field-name="productPromoId"/>
+                </entity-condition>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetShoppingCart.groovy"/>
+            </actions>
+            <widgets>
+            	<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/OrderEntryTabBar.ftl"/></html></platform-specific>
+						<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/showCart.ftl"/></html></platform-specific>
+						<platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/javascript.ftl"/></html></platform-specific>
+	                    <!-- <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/addItemsToShoppingList.ftl"/></html></platform-specific> -->
+	                    <platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/showCartItems.ftl"/></html></platform-specific>
+	                    <!-- <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/manualPromotions.ftl"/></html></platform-specific>
+	                    <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/promoText.ftl"/></html></platform-specific>
+	                    <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/associatedProducts.ftl"/></html></platform-specific> -->
+	                    <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/promotionsApplied.ftl"/></html></platform-specific>
+					</decorator-section>
+				</decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+	<screen name="ConfirmOrderDis">
+		<section>
+			<widgets>
+           		<!-- <link target="emptyCart" text="Xoa rong"></link>
+				<include-screen name="ConfirmOrder" location="component://order/widget/ordermgr/OrderEntryOrderScreens.xml"/> -->
+				<include-screen name="CreateSalesOrderDis"/>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ConfirmOrderAjaxDis">
+		<section>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="CommonUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="OrderUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="DelysAdminUiLabels" global="true"/>
+                <set field="stepTitleId" value="OrderOrderConfirmation"/>
+                <set field="stepLabelId" value="OrderReviewOrder"/>
+                <set field="headerItem" value="orderentry"/>
+                <property-to-field resource="order" property="orderPreference.giftEnable" field="giftEnable" default="Y"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetShoppingCart.groovy"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/CheckoutReviewDis.groovy"/>
+                <!-- <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetShoppingCart.groovy"/> -->
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetCheckOutTabBar.groovy"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/ConfirmOrderDis.groovy"/>
+            </actions>
+            <widgets>
+                <!-- 
+                <platform-specific>
+                    <html><html-template location="component://order/webapp/ordermgr/entry/OrderEntryCheckOutTabBar.ftl"/></html>
+                </platform-specific>
+                <platform-specific>
+                    <html><html-template location="component://order/webapp/ordermgr/entry/order/orderheaderinfo.ftl"/></html>
+                </platform-specific>
+                <platform-specific>
+                    <html><html-template location="component://order/webapp/ordermgr/entry/order/orderpaymentinfo.ftl"/></html>
+                </platform-specific>
+                <platform-specific>
+                    <html><html-template location="component://order/webapp/ordermgr/entry/order/shipGroupConfirmSummary.ftl"/></html>
+                </platform-specific>
+                <platform-specific>
+                    <html><html-template location="component://order/webapp/ordermgr/entry/order/orderitems.ftl"/></html>
+                </platform-specific>
+                -->
+                <platform-specific>
+            		<html><html-template location="component://delys/webapp/delys/distributor/order/confirmOrderDis.ftl"/></html>
+            	</platform-specific>
+            </widgets>
+		</section>
+	</screen>
+	<screen name="QuickCheckoutAjaxDis">
+        <section>
+            <actions>
+            	<property-map map-name="uiLabelMap" resource="DelysAdminUiLabels" global="true"/>
+            	<property-map map-name="uiLabelMap" resource="CommonUiLabels" global="true"/>
+            	<property-map map-name="uiLabelMap" resource="PartyUiLabels" global="true"/>
+                <set field="headerItem" value="orderentry"/>
+                <set field="titleProperty" value="PageTitleCheckoutOptions"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/CheckoutAjaxDis.groovy"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/AddressAjaxDis.groovy"/>
+                <set field="dependentForm" value="editcontactmechform"/>
+                <set field="paramKey" value="countryGeoId"/>
+                <set field="mainId" value="countryGeoId"/>
+                <set field="dependentId" value="stateProvinceGeoId"/>
+                <set field="requestName" value="getAssociatedStateList"/>
+                <set field="responseName" value="stateList"/>
+                <set field="dependentKeyName" value="geoId"/>
+                <set field="descName" value="geoName"/>
+                <set field="selectedDependentOption" from-field="mechMap.postalAddress.stateProvinceGeoId" default-value="_none_"/>
+                <!-- <script location="component://party/webapp/partymgr/WEB-INF/actions/HasPartyPermissions.groovy"/>
+                <script location="component://party/webapp/partymgr/WEB-INF/actions/party/EditContactMech.groovy"/> -->
+                <!-- <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/CheckoutPayment.groovy"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/CheckoutOptions.groovy"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/StorePaymentOptions.groovy"/>
+                <property-to-field resource="order" property="orderPreference.giftEnable" field="giftEnable" default="Y"/> -->
+            </actions>
+            <widgets>
+            	<platform-specific>
+            		<html><html-template location="component://delys/webapp/delys/distributor/order/checkoutAjaxDis.ftl"/></html>
+            	</platform-specific>
+            	<!-- <container id="custom-header"><label style="h3" text="OrderQuickFinalizeOrder"/></container>
+            	<platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/checkoutoptions.ftl"/></html></platform-specific> -->
+            </widgets>
+        </section>
+    </screen>
+    <screen name="QuickCheckoutAjaxSales">
+        <section>
+            <actions>
+            	<property-map map-name="uiLabelMap" resource="DelysAdminErrorUiLabels" global="true"/>
+            	<property-map map-name="uiLabelMap" resource="DelysAdminUiLabels" global="true"/>
+            	<property-map map-name="uiLabelMap" resource="CommonUiLabels" global="true"/>
+                <set field="headerItem" value="orderentry"/>
+                <set field="titleProperty" value="PageTitleCheckoutOptions"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/CheckoutAjaxDis.groovy"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/AddressAjaxDis.groovy"/>
+                <!-- <set field="dependentForm" value="editcontactmechform"/>
+                <set field="paramKey" value="countryGeoId"/>
+                <set field="mainId" value="countryGeoId"/>
+                <set field="dependentId" value="stateProvinceGeoId"/>
+                <set field="requestName" value="getAssociatedStateList"/>
+                <set field="responseName" value="stateList"/>
+                <set field="dependentKeyName" value="geoId"/>
+                <set field="descName" value="geoName"/>
+                <set field="selectedDependentOption" from-field="mechMap.postalAddress.stateProvinceGeoId" default-value="_none_"/> -->
+                <!-- <script location="component://party/webapp/partymgr/WEB-INF/actions/HasPartyPermissions.groovy"/>
+                <script location="component://party/webapp/partymgr/WEB-INF/actions/party/EditContactMech.groovy"/> -->
+                <!-- <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/CheckoutPayment.groovy"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/CheckoutOptions.groovy"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/StorePaymentOptions.groovy"/>
+                <property-to-field resource="order" property="orderPreference.giftEnable" field="giftEnable" default="Y"/> -->
+                
+                <!-- <script location="component://party/webapp/partymgr/WEB-INF/actions/party/EditContactMech.groovy" /> -->
+				<set field="dependentForm" value="editcontactmechform" />
+				
+				<set field="paramKey" value="countryGeoId" />
+				<set field="paramKey_district" value="provinceGeoId"/>
+				<set field="paramKey_ward" value="districtGeoId"/>
+				
+				<set field="mainId" value="countryGeoId"/>
+				<set field="stateProvinceGeoId" value="stateProvinceGeoId"/>
+				<set field="distGeoId" value="districtGeoId"/>
+				<set field="wardGeoId" value="wardGeoId"/>
+				
+				<set field="requestName" value="getAssociatedStateList" />
+				<set field="requestName_district" value="getAssociatedDistList"/>
+				<set field="requestName_ward" value="getAssociatedWardList"/>
+				
+				<set field="responseName" value="stateList" />
+				<set field="responseName_district" value="districtList" />
+				<set field="responseName_ward" value="wardList" />
+				
+				<set field="dependentKeyName" value="geoId" />
+				<set field="descName" value="geoName" />
+				<set field="selectedDependentOption" from-field="mechMap.postalAddress.stateProvinceGeoId" default-value="_none_" />
+				<!-- <set field="internalOrgId" from-field="parameters.internalOrgId"></set>					
+				<set field="interOrgName" value="${groovy: internalOrgId != null? org.ofbiz.party.party.PartyHelper.getPartyName(delegator, internalOrgId, false): &quot;&quot;}"/>
+				<set field="additionalTitle" value="${groovy: import org.ofbiz.base.util.UtilProperties; 
+										internalOrgId !=null? UtilProperties.getMessage(&quot;CommonUiLabels&quot; , &quot;CommonTo&quot;, locale) + &quot; &quot; + interOrgName: &quot;&quot;}"/>
+				<entity-condition list="nationality" entity-name="Nationality"></entity-condition> -->
+            </actions>
+            <widgets>
+            	<platform-specific>
+            		<html>
+            			<html-template location="component://delys/webapp/delys/sales/includes/setDependentDropdownValuesJs.ftl"/>
+            			<html-template location="component://delys/webapp/delys/sales/order/checkoutAjaxSales.ftl"/>
+            		</html>
+            	</platform-specific>
+            	<!-- <container id="custom-header"><label style="h3" text="OrderQuickFinalizeOrder"/></container>
+            	<platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/checkoutoptions.ftl"/></html></platform-specific> -->
+            </widgets>
+        </section>
+    </screen>
+    
+	<screen name="OrderViewDetailDis">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="salesOrderDis"/>
+				<set field="selectedSubMenuItem" value="distributorListSO"/>
+				<entity-one value-field="orderHeaderTemp" entity-name="OrderHeader">
+					<field-map field-name="orderId" from-field="parameters.orderId"/>
+				</entity-one>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not><if-empty field="orderHeaderTemp"/></not>
+					</condition>
+					<actions>
+						<set field="companyId" value="${groovy: return com.olbius.util.SalesPartyUtil.getCompanyInProperties(delegator)}"/>
+						<entity-one value-field="orderRoleVendor" entity-name="OrderRole">
+							<field-map field-name="orderId" from-field="orderHeaderTemp.orderId"/>
+							<field-map field-name="partyId" from-field="companyId"/>
+							<field-map field-name="roleTypeId" value="BILL_FROM_VENDOR"/>
+						</entity-one>
+					</actions>
+					<widgets>
+						<section>
+							<condition>
+								<if-empty field="orderRoleVendor"/>
+							</condition>
+							<widgets>
+								<section>
+									<actions>
+										<set field="requestNameScreen" default-value="requestNameScreen" value=""/>
+										<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/nav_orderListSm.groovy"/>
+										<set field="titleProperty" value="OrderViewOrder" />
+										<set field="layoutSettings.javaScripts[]" value="/delys/images/js/orderDelys.js" global="true" />
+										<set field="layoutSettings.javaScripts[]" value="/delys/images/js/OrderShippingInfoDelys.js" global="true" />
+										<set field="layoutSettings.javaScripts[]" value="/delys/images/js/geoAutoCompleterDelys.js" global="true" />
+										<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/OrderView.groovy" />
+										<script location="component://delys/webapp/delys/WEB-INF/actions/delys/OrderViewWebSecureDelys.groovy" />
+										<set field="urlViewOrder" value="orderViewDis"/>
+										<set field="titleHeaderValue" value="orderTitle" global="true" />
+										<set field="titleHeaderLocation" value="component://delys/widget/sales/OrderScreens.xml" global="true" />
+									</actions>
+									<widgets>
+										<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+											<decorator-section name="body">
+												<platform-specific><html><html-template location="component://delys/webapp/delys/distributor/order/disOpenOrderViewDetail.ftl" /></html></platform-specific>
+												<include-screen name="OrderViewDetailHeaderDis" />
+												<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderItemsTabJQ.ftl" /></html></platform-specific>
+												<!-- <platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/disOrderItemsTab.ftl" /></html></platform-specific> -->
+												<!-- <platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderOrderNotes.ftl" /></html></platform-specific> -->
+												<platform-specific><html><html-template location="component://delys/webapp/delys/order/orderVDHTransitions.ftl" /></html></platform-specific>
+												<platform-specific><html><html-template location="component://delys/webapp/delys/order/closeOrderViewDetailHeader.ftl" /></html></platform-specific>
+											</decorator-section>
+										</decorator-screen>
+									</widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<!-- render to view order company -->
+								<include-screen name="OrderViewDetail"/>
+							</fail-widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.OrderNoOrderFound}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="OrderViewDetailHeaderDis">
+		<section>
+			<condition>
+				<not><if-empty field="orderHeader" /></not>
+			</condition>
+			<actions>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/orderPermissionDelys.groovy" />
+				<set field="postalAddressTemplateSuffix" value=".ftl"/>
+                <set field="addressTemplatePath" value="${sys:getProperty('ofbiz.home')}/applications/party/webapp/partymgr/party/contactmechtemplates/"/>
+                <script location="component://party/webapp/partymgr/WEB-INF/actions/party/GetPostalAddressTemplate.groovy"/>
+                <set field="parameters.sortField" from-field="parameters.sortField" default-value="-invoiceDate"/>
+				<set field="toPartyId" value="company"/>	
+				<set field="partyIdFrom" from-field="parameters.partyIdFrom"/>
+				<set field="partyIdTemp" from-field="parameters.partyIdFrom"/>
+				<set field="parameters.parentTypeId" value="PURCHASE_INVOICE"/>																															
+				<set field="parameters.statusId" value="INVOICE_IN_PROCESS"/>
+				<service service-name="performFind" result-map="result">
+         			<field-map field-name="inputFields" from-field="parameters"/>
+					<field-map field-name="entityName" value="InvoiceAndTypeAndRole"/>
+         		</service>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/accounting/sumupResultListIt.groovy"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/distributor/OrderViewApproveNPP.groovy" />
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/OrderViewGeneral.groovy" />
+			</actions>
+			<widgets>
+				<!-- <include-screen name="orderVDHOrderViewApproveNPP" location="component://delys/widget/DistributorScreens.xml" /> -->
+				<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/disOrderViewGeneral.ftl" /></html></platform-specific>
+				<include-screen name="orderVDHInfoDis" />
+				<include-screen name="orderVDHTermsDis" />
+				<include-screen name="orderVDHProjectAssoOrderDis" />
+				<include-screen name="orderVDHOrderShippingInfoDis" />
+				<include-screen name="orderVDHOrderSalesRepsDis" />
+				<!-- <include-screen name="viewBalanceDetail" location="component://delys/widget/DistributorScreens.xml" /> -->
+			</widgets>
+			<fail-widgets>
+				<label style="h2" text="${uiLabelMap.OrderNoOrderFound}: [${orderId}]"></label>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="orderVDHInfoDis">
+		<section>
+			<widgets>
+				<platform-specific><html><html-template location="component://delys/webapp/delys/distributor/order/disOrderInfo.ftl" /></html></platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="orderVDHTermsDis">
+		<section>
+			<widgets>
+				<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/orderTerms.ftl" /></html></platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="orderVDHProjectAssoOrderDis">
+		<section>
+			<condition>
+				<if-has-permission permission="PROJECTMGR" action="_VIEW" />
+			</condition>
+			<actions>
+				<set field="orderId" from-field="parameters.orderId" />
+				<entity-and entity-name="OrderHeaderAndWorkEffort" list="listProjectAssoOrder">
+					<field-map field-name="orderId" from-field="orderId" />
+					<field-map field-name="workEffortTypeId" value="PROJECT" />
+				</entity-and>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not><if-empty field="listProjectAssoOrder" /></not>
+					</condition>
+					<widgets>
+						<container id="projectAssoOrder-tab" style="tab-pane">
+							<screenlet title="${uiLabelMap.PageTitleProjectInformation}">
+								<include-form name="projectAssoOrderDelys" location="component://delys/widget/DelysForms.xml" />
+							</screenlet>
+						</container>
+					</widgets>
+					<fail-widgets></fail-widgets>
+				</section>
+			</widgets>
+			<fail-widgets></fail-widgets>
+		</section>
+	</screen>
+	<screen name="orderVDHOrderShippingInfoDis">
+		<section>
+			<widgets>
+				<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/disOrderShippingInfo.ftl" /></html></platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="orderVDHOrderSalesRepsDis">
+		<section>
+			<widgets>
+				<platform-specific><html><html-template location="component://delys/webapp/delys/order/OrderSalesRepsDelys.ftl" /></html></platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<!-- 
+	redirect to orderListSm
+	<screen name="OrderListSalesDis">
+		<section>
+			<widgets>
+				<section>
+					<actions>
+						<set field="selectedMenuItem" value="otherSales" />
+						<set field="selectedSubMenuItem" value="orderList" />
+						<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/nav_orderListOrigin.groovy"/>
+						<set field="navMenuName" value="SearchDelysSubTabBar" />
+						<set field="navMenuLocation" value="component://delys/widget/DelysMenus.xml" />
+						<set field="titleProperty" value="PageTitleListOrderItems" />
+						<set field="tabButtonItem" value="OrderMangement"/>
+						<set field="filterDate" type="Timestamp" from-field="parameters.filterDate"/>
+						<set field="parameters.roleTypeId" value="SALES_ADMIN"/>
+						<service service-name="getListStoreByRoleTypeAndUserLogin" auto-field-map="true" result-map="parameters.resultService"></service>
+						<script location="component://delys/webapp/delys/WEB-INF/actions/delys/EmplFilter.groovy"/>
+						<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/OrderListOrigin.groovy" />
+						<script location="component://delys/webapp/delys/WEB-INF/actions/order/filterOrder.groovy" />
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<decorator-screen name="FilterScreenDecorator" location="component://delys/widget/sales/CommonScreens.xml">
+									<decorator-section name="search-options">
+										<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/disOrderSearchOption.ftl"/></html></platform-specific>
+									</decorator-section>
+									<decorator-section name="search-results">
+										<platform-specific><html><html-template location="component://delys/webapp/delys/sales/order/disOrderList.ftl"/></html></platform-specific>
+									</decorator-section>
+								</decorator-screen>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</widgets>
+		</section>
+    </screen> -->
+    
+    <!-- Create sales order of Sales (is sales order of distributor) -->
+	<screen name="CreateOrderSales">
+		<section>
+			<condition>
+				<if-has-permission permission="ORDERMGR" action="_CREATE"/>
+			</condition>
+			<actions>
+				<set field="selectedMenuItem" value="order"/>
+				<set field="selectedSubMenuItem" value="newOrderSales"/>
+				<set field="titleProperty" value="DACreateNewOrder"/>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/CheckInitsDis.groovy"/>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/CheckoutAjaxDis.groovy"/>
+				<!-- <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/CheckInits.groovy"/>
+				<html-template location="component://order/webapp/ordermgr/entry/checkinits.ftl"/> -->
+				<entity-condition list="listPackingUom" entity-name="Uom">
+					<condition-expr field-name="uomTypeId" value="PRODUCT_PACKING"/>
+				</entity-condition>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<platform-specific>
+							<html><html-template location="component://delys/webapp/delys/sales/order/totalCreateOrderSales.ftl"/></html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<section>
+					<actions>
+						<set field="selectedMenuItem" value="order"/>
+						<set field="selectedSubMenuItem" value="newOrderSales"/>
+						<set field="titleProperty" value="DACreateNewOrder"/>
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-danger">
+									<label text="${uiLabelMap.DACreatePermissionError}"/>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="ConfirmOrderAjaxSales">
+		<section>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="CommonUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="OrderUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="DelysAdminUiLabels" global="true"/>
+                <set field="stepTitleId" value="OrderOrderConfirmation"/>
+                <set field="stepLabelId" value="OrderReviewOrder"/>
+                <set field="headerItem" value="orderentry"/>
+                <property-to-field resource="order" property="orderPreference.giftEnable" field="giftEnable" default="Y"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetShoppingCart.groovy"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/CheckoutReviewDis.groovy"/>
+                <!-- <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetShoppingCart.groovy"/> -->
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetCheckOutTabBar.groovy"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/ConfirmOrder.groovy"/>
+            </actions>
+            <widgets>
+                <platform-specific>
+            		<html><html-template location="component://delys/webapp/delys/sales/order/confirmOrderSales.ftl"/></html>
+            	</platform-specific>
+            </widgets>
+		</section>
+	</screen>
+	
+	<!-- Create sales order of Sales (create by distributor) -->
+	<screen name="CreatePurchaseOrderDis">
+		<section>
+			<condition>
+				<if-has-permission permission="ORDERPUR" action="_DIS_CREATE"/>
+			</condition>
+			<actions>
+				<set field="selectedMenuItem" value="purchaseOrderDis"/>
+				<set field="selectedSubMenuItem" value="newPurchaseOrderDis"/>
+				<set field="titleProperty" value="DACreateNewOrder"/>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/distributor/CheckInitsDis.groovy"/>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/distributor/CheckoutAjaxDis.groovy"/>
+				<!-- <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/CheckInits.groovy"/>
+				<html-template location="component://order/webapp/ordermgr/entry/checkinits.ftl"/> -->
+				<entity-condition list="listPackingUom" entity-name="Uom">
+					<condition-expr field-name="uomTypeId" value="PRODUCT_PACKING"/>
+				</entity-condition>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<platform-specific>
+							<html><html-template location="component://delys/webapp/delys/distributor/order/totalCreateOrderSales.ftl"/></html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<section>
+					<actions>
+						<set field="selectedMenuItem" value="order"/>
+						<set field="selectedSubMenuItem" value="newOrderSales"/>
+						<set field="titleProperty" value="DACreateNewOrder"/>
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-danger">
+									<label text="${uiLabelMap.DACreatePermissionError}"/>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="ConfirmOrderAjaxSalesDis">
+		<section>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="CommonUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="OrderUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="DelysAdminUiLabels" global="true"/>
+                <set field="stepTitleId" value="OrderOrderConfirmation"/>
+                <set field="stepLabelId" value="OrderReviewOrder"/>
+                <property-to-field resource="order" property="orderPreference.giftEnable" field="giftEnable" default="Y"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetShoppingCart.groovy"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/CheckoutReviewDis.groovy"/>
+                <set field="headerItem" value="orderentry"/>
+                <!-- <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetShoppingCart.groovy"/> -->
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetCheckOutTabBar.groovy"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/ConfirmOrder.groovy"/>
+            </actions>
+            <widgets>
+                <platform-specific>
+            		<html><html-template location="component://delys/webapp/delys/distributor/order/confirmOrderSales.ftl"/></html>
+            	</platform-specific>
+            </widgets>
+		</section>
+	</screen>
+	<!-- <screen name="OrderItemEditSales">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="order"/>
+				<set field="selectedSubMenuItem" value="searchOrder"/>
+				<set field="titleProperty" value="OrderEditItems" />
+				<set field="headerItem" value="orderlist" />
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/OrderView.groovy" />
+				<script location="component://order/webapp/ordermgr/WEB-INF/actions/order/OrderViewWebSecure.groovy" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonOrderViewDecorator">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<not><if-empty field="orderHeader"/></not>
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html><html-template location="component://delys/webapp/delys/sales/order/editOrderItemsJQ.ftl" /></html>
+								</platform-specific>
+								<platform-specific>
+									<html><html-template location="component://delys/webapp/delys/sales/order/appendOrderItem.ftl" /></html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.DAThisOrderNotAvaiable}"/>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen> -->
+	<screen name="OrderItemEditSales">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="order"/>
+				<set field="selectedSubMenuItem" value="orderList"/>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/nav_orderList.groovy"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-has-permission permission="DELYS_ORDER_UPDATE"/>
+					</condition>
+					<actions>
+						<entity-condition list="orderHeader" entity-name="OrderHeader">
+							<condition-expr field-name="orderId" from-field="parameters.orderId"/>
+						</entity-condition>
+					</actions>
+					<widgets>
+						<section>
+							<condition>
+								<not><if-empty field="orderHeader"/></not>
+							</condition>
+							<actions>
+								<set field="titleProperty" value="OrderEditItems" />
+								<set field="headerItem" value="orderlist" />
+								<set field="urlViewOrder" value="orderView"/>
+								<set field="titleHeaderValue" value="orderTitle" global="true" />
+								<set field="titleHeaderLocation" value="component://delys/widget/sales/OrderScreens.xml" global="true" />
+								<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/OrderView.groovy" />
+								<script location="component://order/webapp/ordermgr/WEB-INF/actions/order/OrderViewWebSecure.groovy" />
+								<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/checkRolePermissionPerson.groovy"/>
+								<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/checkRolePermissionOrder.groovy"/>
+							</actions>
+							<widgets>
+								<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+									<decorator-section name="body">
+										<screenlet title="${uiLabelMap.DAEditOrderItems}" navigation-menu-name="OrderItemEditSubTabBar">
+											<include-menu location="component://delys/widget/sales/SalesMenus.xml" name="OrderItemEditSubTabBar"/>
+											<platform-specific>
+												<html><html-template location="component://delys/webapp/delys/sales/order/editOrderItemsJQ.ftl" /></html>
+											</platform-specific>
+										</screenlet>
+									</decorator-section>
+								</decorator-screen>
+							</widgets>
+							<fail-widgets>
+								<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+									<decorator-section name="body">
+										<container style="alert alert-info">
+											<label text="${uiLabelMap.OrderNoOrderFound}"></label><!-- <label text="${uiLabelMap.DAThisOrderNotAvaiable}"/> -->
+										</container>
+									</decorator-section>
+								</decorator-screen>
+							</fail-widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.DAYouHavenotViewPermission}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="OrderItemEditSalesUpdateOnlyPromo">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="order"/>
+				<set field="selectedSubMenuItem" value="orderList"/>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/nav_orderList.groovy"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-has-permission permission="DELYS_ORDER_UPDATE"/>
+					</condition>
+					<actions>
+						<entity-condition list="orderHeader" entity-name="OrderHeader">
+							<condition-expr field-name="orderId" from-field="parameters.orderId"/>
+						</entity-condition>
+					</actions>
+					<widgets>
+						<section>
+							<condition>
+								<not><if-empty field="orderHeader"/></not>
+							</condition>
+							<actions>
+								<set field="titleProperty" value="OrderEditItems" />
+								<set field="headerItem" value="orderlist" />
+								<set field="urlViewOrder" value="orderView"/>
+								<set field="titleHeaderValue" value="orderTitle" global="true" />
+								<set field="titleHeaderLocation" value="component://delys/widget/sales/OrderScreens.xml" global="true" />
+								<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/OrderView.groovy" />
+								<script location="component://order/webapp/ordermgr/WEB-INF/actions/order/OrderViewWebSecure.groovy" />
+								<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/checkRolePermissionPerson.groovy"/>
+								<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/checkRolePermissionOrder.groovy"/>
+							</actions>
+							<widgets>
+								<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+									<decorator-section name="body">
+										<screenlet title="${uiLabelMap.DAUpdateProducPromo}" navigation-menu-name="OrderItemEditOnlyProductPromoSubTabBar">
+											<include-menu location="component://delys/widget/sales/SalesMenus.xml" name="OrderItemEditOnlyProductPromoSubTabBar"/>
+											<platform-specific>
+												<html><html-template location="component://delys/webapp/delys/sales/order/editOrderItemsUpdateOnlyPromoJQ.ftl" /></html>
+											</platform-specific>
+										</screenlet>
+									</decorator-section>
+								</decorator-screen>
+							</widgets>
+							<fail-widgets>
+								<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+									<decorator-section name="body">
+										<container style="alert alert-info">
+											<label text="${uiLabelMap.OrderNoOrderFound}"></label><!-- <label text="${uiLabelMap.DAThisOrderNotAvaiable}"/> -->
+										</container>
+									</decorator-section>
+								</decorator-screen>
+							</fail-widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.DAYouHavenotViewPermission}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ConfirmPurchaseOrderAjaxDis">
+		<section>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="CommonUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="OrderUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="DelysAdminUiLabels" global="true"/>
+                <set field="stepTitleId" value="OrderOrderConfirmation"/>
+                <set field="stepLabelId" value="OrderReviewOrder"/>
+                <property-to-field resource="order" property="orderPreference.giftEnable" field="giftEnable" default="Y"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetShoppingCart.groovy"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/CheckoutReviewDis.groovy"/>
+                <set field="headerItem" value="orderentry"/>
+                <!-- <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetShoppingCart.groovy"/> -->
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetCheckOutTabBar.groovy"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/ConfirmOrder.groovy"/>
+            </actions>
+            <widgets>
+                <platform-specific>
+            		<html><html-template location="component://delys/webapp/delys/distributor/order/confirmOrderSales.ftl"/></html>
+            	</platform-specific>
+            </widgets>
+		</section>
+	</screen>
+	<screen name="OrderPrintHtml">
+        <section>
+        	<condition>
+        		<if-has-permission permission="DELYS_ORDER" action="_VIEW"/>
+        	</condition>
+            <actions>
+                <set field="titleProperty" value="OrderOrder"/>
+                <!-- <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/> -->
+                <property-map resource="DelysAdminUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="DelysAdminErrorUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="DelysPrintUiLabels" map-name="uiLabelMap" global="true"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/fo/GetOrderPrint.groovy"/>
+            </actions>
+            <widgets>
+            	<platform-specific>
+            		<html><html-template location="component://delys/webapp/delys/sales/order/orderPrintHtml.ftl"/></html>
+            	</platform-specific>
+            </widgets>
+            <fail-widgets>
+				<container style="alert alert-info">
+					<label text="${uiLabelMap.DAYouHavenotViewPermission}"></label>
+				</container>
+			</fail-widgets>
+        </section>
+    </screen>
+    <screen name="ViewOrderContactMechAjax">
+    	<section>
+    		<condition>
+    			<not>
+    				<if-empty field="parameters.contactMechId"/>
+    			</not>
+    		</condition>
+    		<actions>
+    			<entity-one value-field="postalAddress" entity-name="PostalAddress">
+    				<field-map field-name="contactMechId" from-field="parameters.contactMechId"/>
+    			</entity-one>
+    		</actions>
+    		<widgets>
+    			<include-screen name="postalAddressHtmlFormatter" location="component://party/widget/partymgr/PartyScreens.xml"/>
+    		</widgets>
+    	</section>
+   	</screen>
+	<screen name="OrderListJson">
+		<section>
+			<actions>
+				<set field="orderId" from-field="parameters.orderId"/>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/ListOrderNotify.groovy"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html><html-template location="component://delys/webapp/delys/sales/order/listOrderSubTotalJson.ftl"/></html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewDetailInformationOrderItemAjax">
+		<section>
+			<condition>
+				<not>
+					<or>
+						<if-empty field="parameters.orderId"/>
+						<if-empty field="parameters.orderItemSeqId"/>
+					</or>
+				</not>
+			</condition>
+			<actions>
+				<set field="orderId" from-field="parameters.orderId"/>
+				<set field="orderItemSeqId" from-field="parameters.orderItemSeqId"/>
+				<property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+				<property-map resource="OrderErrorUiLabels" map-name="uiLabelMap" global="true"/>
+				<property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+				<property-map resource="DelysAdminUiLabels" map-name="uiLabelMap" global="true"/>
+				<property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+				<entity-one value-field="orderHeader" entity-name="OrderHeader"></entity-one>
+				<entity-one value-field="orderItem" entity-name="OrderItem"></entity-one>
+				<set field="orderReadHelper" value="${groovy: return new com.olbius.order.OrderReadHelper(orderHeader)}"/>
+				<set field="isViewAtpQoh" value="false" type="Boolean"/>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/checkRolePermissionPerson.groovy"/>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/checkRolePermissionOrder.groovy"/>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/OrderViewItemProductDetail.groovy"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html><html-template location="component://delys/webapp/delys/sales/order/orderItemsTabDetailInline.ftl"/></html>
+				</platform-specific>
+			</widgets>
+			<fail-widgets>
+				<container style="">
+					<label text="${uiLabelMap.checkhelper_sales_order_lines_lookup_failed}"></label>
+				</container>
+			</fail-widgets>
+		</section>
+	</screen>
+</screens>

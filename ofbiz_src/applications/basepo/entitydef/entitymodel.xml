@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+	<!-- ========================================================= -->
+	<!-- ======================== Defaults ======================= -->
+	<!-- ========================================================= -->
+	<title>Entity of BasePO Component</title>
+	<description>None</description>
+	<copyright></copyright>
+	<version></version>
+
+	<view-entity entity-name="SupplierProductAndQuota"
+      package-name="org.ofbiz.product.supplier">
+      <member-entity entity-alias="SP" entity-name="SupplierProduct"/>
+      <member-entity entity-alias="PR" entity-name="Product"/>
+      <alias-all entity-alias="SP"/>
+      <alias-all entity-alias="PR">
+        <exclude field="productId"/>
+        <exclude field="comments"/>
+        <exclude field="quantityUomId"/>
+      </alias-all>
+      <view-link entity-alias="SP" rel-entity-alias="PR">
+        <key-map field-name="productId"/>
+      </view-link>
+    </view-entity>
+    
+    <view-entity entity-name="SupplierProductAndQuotaAndTax"
+      package-name="org.ofbiz.product.supplier">
+      <member-entity entity-alias="SP" entity-name="SupplierProductAndQuota"/>
+      <member-entity entity-alias="PTD" entity-name="ProductTempData"/>
+      <alias-all entity-alias="SP"/>
+      <alias entity-alias="PTD" field="taxPercentage" name="taxPercentage"></alias>
+      <view-link entity-alias="SP" rel-entity-alias="PTD">
+        <key-map field-name="productId"/>
+      </view-link>
+    </view-entity>
+	
+	<view-entity entity-name="ProductCategoryAndTax" package-name="org.ofbiz.product.facility">
+		<member-entity entity-alias="PC" entity-name="ProductCategory"></member-entity>
+		<member-entity entity-alias="PCM" entity-name="ProductCategoryMember"></member-entity>
+		<member-entity entity-alias="TAX" entity-name="TaxAuthorityRateProduct"></member-entity>
+		<alias-all entity-alias="PC"></alias-all>
+		<alias-all entity-alias="PCM"></alias-all>
+		<alias entity-alias="TAX" field="taxPercentage" name="taxPercentage"></alias>
+		<alias entity-alias="PCM" field="fromDate" name="fromDate"></alias>
+		<alias entity-alias="PCM" field="thruDate" name="thruDate"></alias>
+		<alias entity-alias="TAX" field="description" name="description"></alias>
+		<view-link rel-entity-alias="PCM" entity-alias="PC">
+			<key-map field-name="productCategoryId" />
+		</view-link>
+		<view-link rel-entity-alias="TAX" entity-alias="PC">
+			<key-map field-name="productCategoryId" />
+		</view-link>
+		<entity-condition>
+			<condition-list combine="or">
+				<condition-expr field-name="productCategoryTypeId" entity-alias="PC" value="TAX_IMP_CATEGORY"/>
+				<condition-expr field-name="productCategoryTypeId" entity-alias="PC" value="TAX_EXCISE_CATEGORY"/>
+			</condition-list>
+		</entity-condition>
+	</view-entity>
+
+	<entity entity-name="ProductPlanType" package-name="org.ofbiz.product.plan" default-resource-name="DelysEntityLabels">
+		<description>Managed product plan type</description>
+		<field name="productPlanTypeId" type="id-ne"></field>
+		<field name="description" type="description"></field>
+		<prim-key field="productPlanTypeId" />
+	</entity>
+
+	<view-entity entity-name="ProductPlanAndCustomTime" package-name="org.ofbiz.product.facility">
+		<member-entity entity-alias="PLAN" entity-name="ProductPlanHeader"></member-entity>
+		<member-entity entity-alias="CUS" entity-name="CustomTimePeriod"></member-entity>
+		<member-entity entity-alias="SUP" entity-name="PartyFullNameDetail"></member-entity>
+		<alias-all entity-alias="PLAN"></alias-all>
+		<alias-all entity-alias="CUS"></alias-all>
+		<alias entity-alias="SUP" field="partyCode" name="supplierPartyCode"></alias>
+		<alias entity-alias="SUP" field="fullName" name="supplierPartyName"></alias>
+		<view-link rel-entity-alias="CUS" entity-alias="PLAN">
+			<key-map field-name="customTimePeriodId" />
+		</view-link>
+		<view-link rel-entity-alias="SUP" entity-alias="PLAN">
+			<key-map field-name="supplierPartyId" rel-field-name="partyId"/>
+		</view-link>
+	</view-entity>
+
+	<entity entity-name="ConfigMoq" package-name="org.ofbiz.order.order">
+		<field name="configMoqId" type="id-ne"></field>
+		<field name="productId" type="id-ne"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<field name="quantity" type="fixed-point"></field>
+		<prim-key field="configMoqId" />
+		<relation rel-entity-name="Product" type="one" fk-name="FK_MOQ_PRODUCT">
+			<key-map field-name="productId" />
+		</relation>
+	</entity>
+
+	<entity entity-name="ProductPlanHeader" package-name="org.ofbiz.product.plan">
+		<description>Managed Product Plan</description>
+		<field name="productPlanId" type="id-ne"></field>
+		<field name="productPlanCode" type="id-ne"></field>
+		<field name="parentProductPlanId" type="id-ne"></field>
+		<field name="productPlanTypeId" type="id-ne"></field>
+		<field name="customTimePeriodId" type="id-ne"></field>
+		<field name="customTimePeriodIdOfSales" type="id-ne"></field>
+		<field name="createByUserLoginId" type="id-ne"></field>
+		<field name="modifiedByUserLoginId" type="id-ne"></field>
+		<field name="productPlanName" type="description"></field>
+		<field name="organizationPartyId" type="id-ne"></field>
+		<field name="internalPartyId" type="id-ne"></field>
+		<field name="salesForecastId" type="id-ne"></field>
+		<field name="supplierPartyId" type="id-ne"></field>
+		<field name="currencyUomId" type="id-ne"></field>
+		<field name="statusId" type="id-ne"></field>
+		<field name="description" type="description"></field>
+		<prim-key field="productPlanId" />
+		<relation rel-entity-name="ProductPlanType" type="one" fk-name="FK_PLAN_TYPE">
+			<key-map field-name="productPlanTypeId" rel-field-name="productPlanTypeId" />
+		</relation>
+		<relation rel-entity-name="Party" title="organizationParty" type="one" fk-name="FK_PLAN_PARTY_ORG">
+			<key-map field-name="organizationPartyId" rel-field-name="partyId" />
+		</relation>
+		<relation rel-entity-name="Party" title="internalParty" type="one" fk-name="FK_PLAN_PARTY_INT">
+			<key-map field-name="internalPartyId" rel-field-name="partyId" />
+		</relation>
+		<relation rel-entity-name="Party" title="supplier" type="one" fk-name="FK_PLAN_PARTY_SUP">
+			<key-map field-name="supplierPartyId" rel-field-name="partyId" />
+		</relation>
+		<relation rel-entity-name="Uom" title="currency" type="one" fk-name="FK_PLAN_CURRENCY">
+			<key-map field-name="currencyUomId" rel-field-name="uomId" />
+		</relation>
+		<relation rel-entity-name="ProductPlanHeader" type="one" fk-name="FK_PLAN_PLAN">
+			<key-map field-name="parentProductPlanId" rel-field-name="productPlanId" />
+		</relation>
+		<relation rel-entity-name="StatusItem" type="one" fk-name="FK_PLAN_STATUS">
+			<key-map field-name="statusId" rel-field-name="statusId" />
+		</relation>
+		<relation rel-entity-name="CustomTimePeriod" type="one" fk-name="FK_PLAN_TIME_PERIOD">
+			<key-map field-name="customTimePeriodId" rel-field-name="customTimePeriodId" />
+		</relation>
+		<relation rel-entity-name="UserLogin" type="one" fk-name="FK_USER_CREATE">
+			<key-map field-name="createByUserLoginId" rel-field-name="userLoginId" />
+		</relation>
+		<relation rel-entity-name="SalesForecast" type="one" fk-name="FK_SALES_FORECAST_PLAN">
+			<key-map field-name="salesForecastId" rel-field-name="salesForecastId" />
+		</relation>
+	</entity>
+
+	<entity entity-name="ProductPlanItem" package-name="org.ofbiz.product.plan" default-resource-name="DelysEntityLabels">
+		<description>Managed detail of product plan</description>
+		<field name="productPlanId" type="id-ne"></field>
+		<field name="customTimePeriodId" type="id-ne"></field>
+		<field name="productId" type="id-ne"></field>
+		<field name="productCategoryId" type="id-ne"></field>
+		<field name="recentPlanQuantity" type="fixed-point"></field>
+		<field name="planQuantity" type="fixed-point"></field>
+		<field name="orderedQuantity" type="fixed-point"></field>
+		<field name="inventoryForecast" type="fixed-point"></field>
+		<field name="quantityUomId" type="id-ne"></field>
+		<field name="statusId" type="id-ne"></field>
+		<prim-key field="productPlanId" />
+		<prim-key field="customTimePeriodId" />
+		<prim-key field="productId" />
+		<relation rel-entity-name="ProductPlanHeader" type="one" fk-name="FK_PLAN_HEADER">
+			<key-map field-name="productPlanId" rel-field-name="productPlanId" />
+		</relation>
+		<relation rel-entity-name="Product" type="one" fk-name="FK_PRODUCT_PLAN_PRODUCT">
+			<key-map field-name="productId" rel-field-name="productId" />
+		</relation>
+		<relation rel-entity-name="ProductCategory" type="one" fk-name="FK_PRODUCT_PLAN_CATEGORY">
+			<key-map field-name="productCategoryId" rel-field-name="productCategoryId" />
+		</relation>
+		<relation rel-entity-name="Uom" type="one" fk-name="FK_PRODUCT_PLAN_QUANTITY_UOM">
+			<key-map field-name="quantityUomId" rel-field-name="uomId" />
+		</relation>
+		<relation rel-entity-name="StatusItem" type="one" fk-name="FK_PRODUCT_PLAN_ITEM_STATUS">
+			<key-map field-name="statusId" rel-field-name="statusId" />
+		</relation>
+	</entity>
+
+	<entity entity-name="ProductPlanAndOrder" package-name="org.ofbiz.product.plan" default-resource-name="DelysEntityLabels">
+		<description>Managed relation product plan and order</description>
+		<field name="productPlanId" type="id-ne"></field>
+		<field name="orderId" type="id-ne"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<prim-key field="productPlanId" />
+		<prim-key field="orderId" />
+		<relation rel-entity-name="ProductPlanHeader" type="one" fk-name="FK_PRODUCT_PLAN_ID_NEW1">
+			<key-map field-name="productPlanId" rel-field-name="productPlanId" />
+		</relation>
+		<relation rel-entity-name="OrderHeader" type="one" fk-name="FK_PRODUCT_PLAN_ORDER">
+			<key-map field-name="orderId" rel-field-name="orderId" />
+		</relation>
+	</entity>
+
+	<entity entity-name="OrderPathFile" package-name="org.ofbiz.order.order">
+		<field name="orderPathFileId" type="id-ne"></field>
+		<field name="orderId" type="id-ne"></field>
+		<field name="createByDate" type="date-time"></field>
+		<field name="path" type="description"></field>
+		<prim-key field="orderPathFileId" />
+	</entity>
+
+	<view-entity entity-name="AgreementAndPartyNameView" package-name="com.olbius.accounting.payment">
+		<member-entity entity-alias="APA" entity-name="Agreement"></member-entity>
+		<member-entity entity-alias="PNWF" entity-name="PartyNameView"></member-entity>
+		<member-entity entity-alias="PNWT" entity-name="PartyNameView"></member-entity>
+		<alias-all entity-alias="APA"></alias-all>
+		<alias name="groupNameF" entity-alias="PNWF" field="groupName"></alias>
+		<alias name="groupNameT" entity-alias="PNWT" field="groupName"></alias>
+		<alias name="fullNameF">
+			<complex-alias operator="||' '||">
+				<complex-alias-field entity-alias="PNWF" field="firstName" default-value="''" />
+				<complex-alias-field entity-alias="PNWF" field="middleName" default-value="''" />
+				<complex-alias-field entity-alias="PNWF" field="lastName" default-value="''" />
+			</complex-alias>
+		</alias>
+		<alias name="fullNameT">
+			<complex-alias operator="||' '||">
+				<complex-alias-field entity-alias="PNWT" field="firstName" default-value="''" />
+				<complex-alias-field entity-alias="PNWT" field="middleName" default-value="''" />
+				<complex-alias-field entity-alias="PNWT" field="lastName" default-value="''" />
+			</complex-alias>
+		</alias>
+		<view-link rel-entity-alias="PNWF" entity-alias="APA">
+			<key-map field-name="partyIdFrom" rel-field-name="partyId" />
+		</view-link>
+		<view-link rel-entity-alias="PNWT" entity-alias="APA">
+			<key-map field-name="partyIdTo" rel-field-name="partyId" />
+		</view-link>
+	</view-entity>
+
+	<entity entity-name="PackingListHeader" package-name="com.olbius.logistics.delivery" default-resource-name="DelysEntityLabels">
+		<description>Packing list header</description>
+		<field name="packingListId" type="id-ne"></field>
+		<field name="packingListNumber" type="id"></field>
+		<field name="packingListDate" type="date"></field>
+		<field name="consignor" type="id"></field>
+		<field name="consignee" type="id"></field>
+		<field name="externalInvoiceNumber" type="id"></field>
+		<field name="externalInvoiceDate" type="date"></field>
+		<field name="externalOrderNumber" type="id"></field>
+		<field name="externalOrderTypeId" type="id-ne"></field>
+		<field name="sealNumber" type="id-long"></field>
+		<field name="containerId" type="id-ne"></field>
+		<field name="agreementId" type="id-ne"></field>
+		<field name="purchaseOrderId" type="id-ne"></field>
+		<field name="netWeightTotal" type="fixed-point"></field>
+		<field name="grossWeightTotal" type="fixed-point"></field>
+		<field name="description" type="description"></field>
+		<field name="originFacilityId" type="id"></field>
+		<field name="destFacilityId" type="id"></field>
+		
+		<prim-key field="packingListId" />
+		<relation rel-entity-name="Container" type="one" fk-name="FK_CONT_PL">
+			<key-map field-name="containerId" rel-field-name="containerId" />
+		</relation>
+		<relation rel-entity-name="ExternalOrderType" type="one" fk-name="FK_EXORDERTYPE_PL">
+			<key-map field-name="externalOrderTypeId" rel-field-name="externalOrderTypeId" />
+		</relation>
+		<relation rel-entity-name="OrderHeader" type="one" fk-name="FK_ORDER_PL">
+			<key-map field-name="purchaseOrderId" rel-field-name="orderId" />
+		</relation>
+		
+		<relation type="one" fk-name="PKL_ORG_FACILITY" rel-entity-name="Facility">
+			<key-map field-name="originFacilityId" rel-field-name="facilityId" />
+		</relation>
+		<relation type="one" fk-name="PKL_DEST_FACILITY" rel-entity-name="Facility">
+			<key-map field-name="destFacilityId" rel-field-name="facilityId" />
+		</relation>
+	</entity>
+
+	<entity entity-name="PackingListDetail" package-name="com.olbius.logistics.delivery" default-resource-name="DelysEntityLabels">
+		<description>Packing list detail</description>
+		<field name="packingListId" type="id-ne"></field>
+		<field name="packingListSeqId" type="id-ne"></field>
+		<field name="orderId" type="id-ne"></field>
+		<field name="orderItemSeqId" type="id-ne"></field>
+		<field name="productId" type="id-ne"></field>
+		<field name="datetimeManufactured" type="date-time"></field>
+		<field name="expireDate" type="date-time"></field>
+		<field name="batchNumber" type="id"></field>
+		<field name="globalTradeItemNumber" type="id"></field>
+		<field name="packingUnit" type="numeric"></field>
+		<field name="packingUomId" type="id-ne"></field>
+		<field name="orderUnit" type="numeric"></field>
+		<field name="orderUomId" type="id-ne"></field>
+		<field name="originOrderUnit" type="fixed-point"></field>
+		<prim-key field="packingListId" />
+		<prim-key field="packingListSeqId" />
+		<relation rel-entity-name="PackingListHeader" type="one" fk-name="FK_PLDETAIL_PL">
+			<key-map field-name="packingListId" rel-field-name="packingListId" />
+		</relation>
+		<relation rel-entity-name="Product" type="one" fk-name="FK_PLDETAIL_PRO">
+			<key-map field-name="productId" rel-field-name="productId" />
+		</relation>
+		<relation rel-entity-name="Uom" type="one" fk-name="FK_PLDETAIL_UOMP" title="packingUom">
+			<key-map field-name="packingUomId" rel-field-name="uomId" />
+		</relation>
+		<relation rel-entity-name="Uom" type="one" fk-name="FK_PLDETAIL_UOMO" title="orderUom">
+			<key-map field-name="orderUomId" rel-field-name="uomId" />
+		</relation>
+		<relation rel-entity-name="OrderItem" type="one" fk-name="FK_PLDETAIL_OITEM"> 
+			<key-map field-name="orderId" rel-field-name="orderId"/>
+			<key-map field-name="orderItemSeqId" rel-field-name="orderItemSeqId"/>
+		</relation>
+	</entity>
+
+	<entity entity-name="ExternalOrderType" package-name="com.olbius.logistics.delivery" default-resource-name="DelysEntityLabels">
+		<description>External order type</description>
+		<field name="externalOrderTypeId" type="id-ne"></field>
+		<field name="externalOrderTypeName" type="id"></field>
+		<field name="description" type="name"></field>
+		<prim-key field="externalOrderTypeId" />
+	</entity>
+
+	<entity entity-name="DocumentCustoms" package-name="com.olbius.logistics.delivery" default-resource-name="DelysEntityLabels">
+		<description>Documents of customs formalities</description>
+		<field name="documentCustomsId" type="id-ne"></field>
+		<field name="documentCustomsTypeId" type="id-ne"></field>
+		<field name="registerNumber" type="id"></field>
+		<field name="registerDate" type="date"></field>
+		<field name="sampleSendDate" type="date"></field>
+		<field name="resultNumber" type="id"></field>
+		<field name="resultDate" type="date"></field>
+		<field name="dateSendToOtherParty" type="date"></field>
+		<field name="clearanceDate" type="date"></field>
+		<field name="contentId" type="id-ne"></field>
+		<field name="containerId" type="id-ne"></field>
+		<field name="accountantReceiveDate" type="date"></field>
+		<prim-key field="documentCustomsId" />
+		<relation rel-entity-name="DocumentCustomsType" type="one" fk-name="FK_DOCCUS_DOCTYPE">
+			<key-map field-name="documentCustomsTypeId" rel-field-name="documentCustomsTypeId" />
+		</relation>
+		<relation rel-entity-name="Content" type="one" fk-name="FK_DOCCUS_CONTENT">
+			<key-map field-name="contentId" rel-field-name="contentId" />
+		</relation>
+		<relation rel-entity-name="Container" type="one" fk-name="FK_DOCCUS_CONTAINER">
+			<key-map field-name="containerId" rel-field-name="containerId" />
+		</relation>
+	</entity>
+
+	<entity entity-name="DocumentCustomsType" package-name="com.olbius.logistics.delivery" default-resource-name="DelysEntityLabels">
+		<description>Type of document customs formalities</description>
+		<field name="documentCustomsTypeId" type="id-ne"></field>
+		<field name="documentCustomsTypeName" type="id"></field>
+		<field name="description" type="name"></field>
+		<prim-key field="documentCustomsTypeId" />
+	</entity>
+
+	<view-entity entity-name="PackingListDetailSum" package-name="com.olbius.logistics.delivery">
+		<member-entity entity-name="PackingListDetail" entity-alias="PLD"></member-entity>
+		<alias name="packingListId" entity-alias="PLD" field="packingListId" group-by="true"></alias>
+		<alias name="packingUnit" entity-alias="PLD" field="packingUnit" function="sum"></alias>
+	</view-entity>
+
+	<entity entity-name="SupplierPromoAppl" package-name="org.ofbiz.product.store" title="Supplier Promotion Applicability Entity">
+		<field name="partyId" type="id-ne"></field>
+		<field name="productPromoId" type="id-ne"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<field name="sequenceNum" type="numeric"></field>
+		<field name="manualOnly" type="indicator">
+			<description>
+            	If set to Y then the promotion is not automatically evaluated, but only if it
+              	is manually added to the cart.
+          	</description>
+		</field>
+		<prim-key field="partyId" />
+		<prim-key field="productPromoId" />
+		<prim-key field="fromDate" />
+		<relation type="one" fk-name="SUPPRMO_SUP" rel-entity-name="PartyGroup">
+			<key-map field-name="partyId" />
+		</relation>
+		<relation type="one" fk-name="SUPPRMOA_PRMO" rel-entity-name="ProductPromo">
+			<key-map field-name="productPromoId" />
+		</relation>
+	</entity>
+
+	<entity entity-name="SupplierTarget" package-name="org.ofbiz.product.supplier" title="Supplier Product Target Entity">
+		<field name="productId" type="id-ne"></field>
+		<field name="partyId" type="id-ne"></field>
+		<field name="quantityUomId" type="id"></field>
+		<field name="quantity" type="fixed-point"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<prim-key field="productId" />
+		<prim-key field="partyId" />
+		<prim-key field="quantityUomId" />
+		<prim-key field="fromDate" />
+		<relation type="one" fk-name="SUP_PRO_PRO" rel-entity-name="Product">
+			<key-map field-name="productId" />
+		</relation>
+		<relation type="one" fk-name="SUP_PRO_PAR" rel-entity-name="Party">
+			<key-map field-name="partyId" />
+		</relation>
+		<relation type="one" fk-name="SUP_PRO_UOM" title="Quantity" rel-entity-name="Uom">
+			<key-map field-name="quantityUomId" rel-field-name="uomId" />
+		</relation>
+	</entity>
+
+	<entity entity-name="GoodIdentificationMeasure"
+            package-name="com.olbius.product"
+            title="Good Identification Measure Entity">
+      	<field name="goodIdentificationTypeId" type="id-ne"/>
+      	<field name="productId" type="id-ne"/>
+      	<field name="measureUomId" type="id-ne"/>
+      	<field name="measureValue" type="fixed-point"/>
+      	<field name="idValue" type="id-long"/>
+      	<prim-key field="goodIdentificationTypeId"/>
+      	<prim-key field="productId"/>
+      	<prim-key field="measureUomId"/>
+      	<prim-key field="measureValue"/>
+      	<relation type="one" fk-name="GOOD_ID_MEASURE_TYPE" rel-entity-name="GoodIdentificationType">
+        	<key-map field-name="goodIdentificationTypeId"/>
+      	</relation>
+      	<relation type="one" fk-name="GOOD_ID_MEASURE_PRODICT" rel-entity-name="Product">
+        	<key-map field-name="productId"/>
+      	</relation>
+      	<relation type="one" fk-name="GOOD_ID_MEASURE_UOM" rel-entity-name="Uom">
+      		<key-map field-name="measureUomId" rel-field-name="uomId"/>
+      	</relation>
+      	<index name="GOOD_ID_MEASURE_VALIDX" unique="false">
+          	<index-field name="idValue"/>
+      	</index>
+    </entity>
+
+    <entity entity-name="OrderSchedule" package-name="com.olbius.basepo">
+        <field name="productStoreId" type="id-ne" />
+        <field name="dayOfWeekEnumId" type="id-ne" />
+        <field name="status" type="indicator" />
+        <field name="fromDate" type="date-time" />
+        <field name="thruDate" type="date-time" />
+        <prim-key field="productStoreId" />
+        <prim-key field="dayOfWeekEnumId" />
+        <relation type="one" fk-name="OS_REL_PRODSTORE" rel-entity-name="ProductStore">
+            <key-map field-name="productStoreId" />
+        </relation>
+        <relation type="one" fk-name="OS_REL_ENUM" rel-entity-name="Enumeration">
+            <key-map field-name="dayOfWeekEnumId" rel-field-name="enumId"/>
+        </relation>
+    </entity>
+    
+	<extend-entity entity-name="Product">
+		<field name="purchaseDiscontinuationDate" type="date-time"></field>
+		<field name="useOnlyManualPrice" type="indicator"><description>Use for Aggregated Product (configuration product), price of this product is only price of this product, don't get auto sum price of children product</description></field>
+	</extend-entity>
+	
+	<extend-entity entity-name="OrderItem"><!-- create by thangnv -->
+    	<field name="weightUomId" type="id"></field>
+    	<relation type="one" fk-name="ORDER_ITEM_WEIGHT_UOM" title="WeightUom" rel-entity-name="Uom">
+          	<key-map field-name="weightUomId" rel-field-name="uomId"/>
+      	</relation>
+    </extend-entity>
+    <extend-entity entity-name="ProductConfigProduct">
+    	<field name="amount" type="fixed-point"></field>
+    </extend-entity>
+    <extend-entity entity-name="GoodIdentification">
+    	<field name="iupprm" type="numeric"></field>
+    </extend-entity>
+    
+   	<extend-entity entity-name="SupplierProduct">
+		<field name="isMainSupplier" type="indicator"></field>
+	</extend-entity>
+	
+	<extend-entity entity-name="Party">
+		<field name="oneOfMainSupplier" type="indicator"></field>
+	</extend-entity>
+	
+	<entity entity-name="PartyCurrency" package-name="com.olbius.basepo">
+        <field name="partyId" type="id-ne" />
+        <field name="currencyUomId" type="id-ne" />
+        <field name="fromDate" type="date-time" />
+        <field name="thruDate" type="date-time" />
+        <prim-key field="partyId" />
+        <prim-key field="currencyUomId" />
+        <prim-key field="fromDate" />
+        <relation type="one" fk-name="PC_UOM_PREF" rel-entity-name="Uom">
+            <key-map field-name="currencyUomId"  rel-field-name="uomId"/>
+        </relation>
+        <relation type="one" fk-name="PC_PARTY_PREF" rel-entity-name="Party">
+            <key-map field-name="partyId" rel-field-name="partyId"/>
+        </relation>
+    </entity>
+</entitymodel>

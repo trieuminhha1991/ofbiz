@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/site-conf.xsd">
+    <!-- The controller elements that are common to all OFBiz components
+         can be found in the following xml file. A component can override the
+         elements found in the common-controller.xml file. -->
+    <!-- <include location="component://common/webcommon/WEB-INF/common-controller.xml"/> -->
+
+    <description>MobileCustomer Component Site Configuration File</description>
+
+	<handler name="java" type="request" class="org.ofbiz.webapp.event.JavaEventHandler" />
+	<handler name="bsf" type="request" class="org.ofbiz.webapp.event.BsfEventHandler" />
+	<handler name="soap" type="request" class="org.ofbiz.webapp.event.SOAPEventHandler" />
+	<handler name="service" type="request" class="org.ofbiz.webapp.event.ServiceEventHandler" />
+	<handler name="service-multi" type="request" class="org.ofbiz.webapp.event.ServiceMultiEventHandler" />
+	<handler name="simple" type="request" class="org.ofbiz.webapp.event.SimpleEventHandler" />
+	<handler name="rome" type="request" class="org.ofbiz.webapp.event.RomeEventHandler" />
+
+	<handler name="jsp" type="view" class="org.ofbiz.webapp.view.JspViewHandler" />
+	<handler name="http" type="view" class="org.ofbiz.webapp.view.HttpViewHandler" />
+	<handler name="screen" type="view" class="org.ofbiz.widget.screen.MacroScreenViewHandler" />
+	<handler name="simplecontent" type="view" class="org.ofbiz.content.view.SimpleContentViewHandler" />
+	<handler name="screenfop" type="view" class="org.ofbiz.widget.screen.ScreenFopViewHandler" />
+
+	<!-- Events run from here for the first hit in a visit -->
+	<firstvisit>
+		<event name="autoLoginCheck" type="java" path="org.ofbiz.webapp.control.LoginWorker" invoke="autoLoginCheck" />
+		<event name="checkTrackingCodeCookies" type="java" path="org.ofbiz.marketing.tracking.TrackingCodeEvents" invoke="checkTrackingCodeCookies" />
+		<event name="setDefaultStoreSettings" type="java" path="org.ofbiz.product.product.MobileMcsProductEvents" invoke="setDefaultStoreSettings" />
+		<!-- 
+		<event name="createGuestShoppingListCookies" type="java" path="org.ofbiz.order.shoppinglist.ShoppingListEvents" invoke="createGuestShoppingListCookies"/> 
+		<event name="restoreAutoSaveList" type="java" path="org.ofbiz.order.shoppinglist.ShoppingListEvents" invoke="restoreAutoSaveList"/>
+		-->
+	</firstvisit>
+
+	<!-- Events to run on every request before security (chains exempt) -->
+	<preprocessor>
+		<!-- This event allows affilate/distributor entry on any page -->
+		<event name="check509CertLogin" type="java" path="org.ofbiz.webapp.control.LoginWorker" invoke="check509CertLogin" />
+		<event name="checkRequestHeaderLogin" type="java" path="org.ofbiz.webapp.control.LoginWorker" invoke="checkRequestHeaderLogin" />
+		<event name="checkServletRequestRemoteUserLogin" type="java" path="org.ofbiz.webapp.control.LoginWorker" invoke="checkServletRequestRemoteUserLogin" />
+		<event name="checkExternalLoginKey" type="java" path="org.ofbiz.webapp.control.LoginWorker" invoke="checkExternalLoginKey" />
+		<event name="checkProtectedView" type="java" path="org.ofbiz.webapp.control.ProtectViewWorker" invoke="checkProtectedView" />
+		<event name="extensionConnectLogin" type="java" path="org.ofbiz.webapp.control.LoginWorker" invoke="extensionConnectLogin" />
+	</preprocessor>
+
+	<!-- Events to run on every request after all other processing (chains exempt) -->
+	<!-- <postprocessor> <event name="test" type="java" path="org.ofbiz.webapp.event.TestEvent" 
+		invoke="test"/> </postprocessor> -->
+	<!-- default request; call into MobileSGO -->
+	<default-request request-uri="mobilesgo" />
+
+	<!-- Common json reponse events, chain these after events to send json reponses -->
+	<!-- Standard json response, uses all compatible request attributes -->
+	
+	<request-map uri="json">
+		<security direct-request="true" />
+		<event type="java" path="org.ofbiz.common.CommonEvents" invoke="jsonResponseFromRequestAttributes" />
+		<response name="success" type="none" />
+		<response name="error" type="none" />
+	</request-map>
+
+    <!-- Request Mappings -->
+	<request-map uri="checkLogin" edit="false">
+		<description>Verify a user is logged in.</description>
+		<security https="true" auth="false" />
+		<event type="java" path="org.ofbiz.webapp.control.LoginWorker" invoke="extensionCheckLogin" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="dologin" edit="false">
+		<security https="true" auth="false" />
+		<event type="java" path="org.ofbiz.mobileservices.LoginMobileServices" invoke="dologin" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="mobilelogin" edit="false">
+		<security https="true" auth="false"/>
+        <event type="java" path="org.ofbiz.mobilecustomer.LoginEvent" invoke="loginMobile"/>
+        <response name="success" type="request" value="json" />
+        <response name="requirePasswordChange" type="request" value="json"/>
+		<response name="error" type="request" value="json" />
+	</request-map>
+    <request-map uri="logout">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.webapp.control.LoginWorker" invoke="logout" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="mUpdatePassWordMobilemcs">
+		<security https="true" auth="true"/>
+		<event type="service" invoke="mUpdatePassWordMobilemcs"/>
+		<response name="success" type="request" value="json"/>
+		<response name="error" type="request" value="json"/>
+	</request-map>
+	<!-- Order -->
+	<request-map uri="getProductStore">
+		<security https="true" auth="true" />
+		<event type="service" invoke="getProductStore" />
+		<response name="success" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="getPriceTax">
+	    <security https="true" auth="true" />
+		<event type="service" invoke="getPriceTax" />
+		<response name="success" type="request" value="json"/>
+		<response name="error" type="request" value="json"/>
+	</request-map>
+	<!-- end Order -->
+	<request-map uri="mGetProductByInfoSearch">
+        <security https="true" auth="true" />
+        <event type="service" invoke="mGetProductByInfoSearch" />
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+	<request-map uri="mGetProductInfoDetail">
+		<security https="true" auth="true"/>
+		<event type="service" invoke="mGetProductInfoDetail"/>
+		<response name="success" type="request" value="json"/>
+		<response name="error" type="request" value="json"/>
+	</request-map>
+	<request-map uri="getOrderPromotion">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="getOrderPromotion"></event>
+	    <response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="getOrderPromotions">
+	    <security https="true" auth="true"/>
+	    <event type="service" invoke="getOrderPromotions"/>
+	    <response name="success" type="request" value="json"/>
+	    <response name="error" type="request" value="json"/>
+	</request-map>
+	<request-map uri="mGetListPriceChange">
+		<security https="true" auth="true"/>
+		<event type="service" invoke="mGetListPriceChange"/>
+		<response name="success" type="request" value="json"/>
+		<response name="error" type="request" value="json"/>
+	</request-map>
+	<request-map uri="createCart">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.mobileservices.OrderEvents" invoke="createCart" global-transaction="true"/>
+		<response name="success" type="request" value="getCartInfo"/>
+		<response name="error" type="request" value="emptycart"/>
+		<!-- <response name="success" type="request" value="addProductsToOrder" />
+		<response name="modifycart" type="request" value="modifyCart" />
+		<response name="error" type="request" value="emptycart" /> -->
+	</request-map>
+	<request-map uri="getCartInfo">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.mobileservices.OrderEvents"
+			invoke="getCartInfo" global-transaction="true"/>
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="modifyCart">
+		<security https="true" auth="true" />
+		<!-- <event type="java" path="org.ofbiz.mobileservices.OrderEvents" invoke="modifyCart"/> -->
+		<event type="java" path="com.olbius.basesales.shoppingcart.ShoppingCartEvents" invoke="modifyCart"/>
+		<response name="success" type="request" value="calcShipping" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="calcShipping">
+		<security direct-request="false" />
+		<event type="java"
+			path="org.ofbiz.order.shoppingcart.shipping.ShippingEvents" invoke="getShipEstimate" />
+		<response name="success" type="request" value="calcTax" />
+		<response name="error" type="request" value="getCartInfo" />
+	</request-map>
+	 <request-map uri="calcTax">
+		<security direct-request="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.CheckOutEvents"
+			invoke="calcTax" />
+		<response name="success" type="request" value="getCartInfo" />
+		<response name="error" type="request" value="getCartInfo" />
+	</request-map>
+	<request-map uri="submitOrder">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.mobileservices.OrderEvents" invoke="submitOrder" global-transaction="true"/>
+		<response name="success" type="request" value="emptycart" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="emptycart">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.ShoppingCartEvents" invoke="destroyCart" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="mGetSalesOrders">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="mGetSalesOrders"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+     <request-map uri="mGetSalesOrderDetails">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="mGetSalesOrderDetails"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    <request-map uri="submitFbCustomer">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="submitFbCustomer"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="mRegisterCustomerAccount">
+		<security auth="false" https="true"/>
+		<event type="service" invoke="mRegisterCustomerAccount"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="mGetAssociatedStateOtherListGeo">
+		<security auth="false" https="true"/>
+		<event type="service" invoke="mGetAssociatedStateOtherListGeo"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="main"><security https="true" auth="true"/><response name="success" type="view" value="main"/></request-map>
+    
+    <!-- View Mappings -->
+    <view-map name="main" type="screen" page="component://mobilecustomer/widget/MobileCustomerScreens.xml#main"/>
+</site-conf>

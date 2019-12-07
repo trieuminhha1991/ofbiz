@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-screen.xsd">
+
+	<screen name="Callcenter">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="Callcenter" />
+				<set field="titleProperty" value="CallCenter" />
+				<set field="layoutSettings.styleSheets[+0]" value="/crmresources/css/callcenter/searchCustomer.css" global="true" />
+				<script location="component://basecrm/webapp/basecrm/WEB-INF/actions/callcenter/CallInOut.groovy" />
+				<entity-and entity-name="EnumerationType" list="reasonEnums">
+					<field-map field-name="parentTypeId" value="COMM_REASON" />
+				</entity-and>
+				<entity-and list="reasonContacted" entity-name="EnumerationType">
+					<field-map field-name="parentTypeId" value="CONTACTED" />
+				</entity-and>
+				<entity-and list="reasonUnContacted" entity-name="EnumerationType">
+					<field-map field-name="parentTypeId" value="UNCONTACTED" />
+				</entity-and>
+				<entity-and entity-name="EnumTypeChildAndEnum" list="listRCType">
+					<field-map field-name="parentEnumTypeId" value="COMM_REASON" />
+				</entity-and>
+				<entity-and entity-name="Enumeration" list="subjects">
+					<field-map field-name="enumTypeId" value="COMM_SUBJECT" />
+				</entity-and>
+				<entity-condition list="listPaymentType" entity-name="PaymentType">
+					<condition-expr field-name="parentTypeId" operator="equals" value="DISBURSEMENT" />
+				</entity-condition>
+				<entity-condition list="listStatusItem" entity-name="StatusItem">
+					<condition-expr field-name="statusTypeId" operator="equals" value="PMNT_STATUS" />
+				</entity-condition>
+				<entity-condition list="listPartyAcctgPrefAndGroup" entity-name="PartyAcctgPrefAndGroup"></entity-condition>
+				<entity-condition list="listPaymentTypeImport" entity-name="PaymentType">
+					<condition-expr field-name="parentTypeId" value="DISBURSEMENT" />
+				</entity-condition>
+				<entity-condition list="listPaymentTypeExport" entity-name="PaymentType">
+					<condition-list combine="or">
+						<condition-expr field-name="parentTypeId" operator="equals" value="DISBURSEMENT" />
+						<condition-expr field-name="parentTypeId" operator="equals" value="TAX_PAYMENT" />
+					</condition-list>
+				</entity-condition>
+				<entity-condition list="listFinAccount" entity-name="FinAccount">
+					<condition-list combine="and">
+						<condition-expr field-name="finAccountTypeId" operator="equals" value="BANK_ACCOUNT" />
+						<condition-expr field-name="statusId" operator="not-equals" value="FNACT_MANFROZEN" />
+						<condition-expr field-name="statusId" operator="not-equals" value="FNACT_CANCELLED" />
+					</condition-list>
+				</entity-condition>
+				<entity-condition list="listPaymentMethod" entity-name="PaymentMethod">
+					<condition-expr field-name="partyId" value="${defaultOrganizationPartyId}" />
+				</entity-condition>
+				<entity-condition list="listRoleType" entity-name="RoleType">
+					<condition-list combine="or">
+						<condition-expr field-name="parentTypeId" operator="equals" value="FAMILY_MEMBER" />
+						<condition-expr field-name="parentTypeId" operator="equals" value="PARENT" />
+					</condition-list>
+					<order-by field-name="+roleTypeId" />
+				</entity-condition>
+				<entity-one value-field="roleType" entity-name="RoleType">
+					<field-map field-name="roleTypeId" value="REPRESENTATIVE" />
+				</entity-one>
+				<entity-condition list="brands" entity-name="PartyRoleAndPartyDetail">
+					<condition-list>
+						<condition-expr field-name="partyTypeId" operator="equals" value="PARTY_GROUP" />
+						<condition-expr field-name="roleTypeId" operator="equals" value="COM_SUPPLIER" />
+					</condition-list>
+				</entity-condition>
+				<entity-condition list="communicationEventTypes" entity-name="CommunicationEventType" />
+			</actions>
+			<widgets>
+				<decorator-screen name="BaseCRMCommonDecorator" location="component://basecrm/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission />
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://basecrm/webapp/basecrm/callcenter/callcenter.ftl" />
+									</html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}" />
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="SearchEngine">
+		<section>
+			<actions>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://basecrm/webapp/basecrm/callcenter/searchEngine.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="CustomerInformation">
+		<section>
+			<actions>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://basecrm/webapp/basecrm/callcenter/customerInformation.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="MemberFamily">
+		<section>
+			<actions>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://basecrm/webapp/basecrm/callcenter/memberFamily.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="Order">
+		<section>
+			<actions>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://basecrm/webapp/basecrm/callcenter/order.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="Agreement">
+		<section>
+			<actions>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://basecrm/webapp/basecrm/callcenter/agreement.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="Payment">
+		<section>
+			<actions>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://basecrm/webapp/basecrm/callcenter/payment.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="Invoice">
+		<section>
+			<actions>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://basecrm/webapp/basecrm/callcenter/invoice.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="CallScheduleTask">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="Task" />
+				<set field="titleProperty" value="CallScheduleTask" />
+			</actions>
+			<widgets>
+				<decorator-screen name="BaseCRMCommonDecorator" location="component://basecrm/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission />
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://basecrm/webapp/basecrm/callcenter/communication/listCommunicationSchedule.ftl" />
+									</html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}" />
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="CallHistory">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="CallHistory" />
+				<set field="titleProperty" value="CommunicationHistory" />
+			</actions>
+			<widgets>
+				<decorator-screen name="BaseCRMCommonDecorator" location="component://basecrm/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission />
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://basecrm/webapp/basecrm/callcenter/communication/CallHistory.ftl" />
+									</html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}" />
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+</screens>

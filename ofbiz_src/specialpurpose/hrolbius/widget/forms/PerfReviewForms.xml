@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Licensed to the Apache Software Foundation (ASF) under one or more contributor 
+	license agreements. See the NOTICE file distributed with this work for additional 
+	information regarding copyright ownership. The ASF licenses this file to 
+	you under the Apache License, Version 2.0 (the "License"); you may not use 
+	this file except in compliance with the License. You may obtain a copy of 
+	the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required 
+	by applicable law or agreed to in writing, software distributed under the 
+	License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS 
+	OF ANY KIND, either express or implied. See the License for the specific 
+	language governing permissions and limitations under the License. -->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
+	
+	<form name="AddKPI" type="single" target="createKPI">
+		<field name="description" title=""><text/></field>
+		<field name="emplPositionTypeId" title="${uiLabelMap.HROlbiusEmplPositionId}" title-style="asterisk" required-field="true">
+			<drop-down allow-empty="false">
+                <entity-options entity-name="EmplPositionType" description="${description}" key-field-name="emplPositionTypeId"/>
+            </drop-down>
+		</field>
+		<field name="fromDate" title-style="asterisk" required-field="true"><date-time/></field>
+        <field name="thruDate" title-style="asterisk" required-field="true"><date-time/></field>
+        <field name="jobStatus" title="${uiLabelMap.jobStatus}"><hidden /></field>
+		<field name="submitButton" title="${uiLabelMap.CommonCreate}" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-ok"/></field>
+	</form>
+	
+	<form name="ListKPI" type="list" default-table-style="table table-hover table-striped table-bordered dataTable" paginate-target="ListKPI">
+		<actions>
+			<entity-condition entity-name="PerfReviewKPI">
+			</entity-condition>
+		</actions>
+		<field name="Id" title="${uiLabelMap.KPIId}">
+			<hyperlink target="StandardRating" description="${KPIId}">
+				<parameter param-name="emplPositionTypeId"/>
+			</hyperlink>
+		</field>
+		<field name="description"><display type="text"/> </field>
+		<field name="emplPositionTypeId" >
+			<display-entity entity-name="EmplPositionType" key-field-name="emplPositionTypeId" description="${description}">
+			</display-entity> 
+		</field>
+		<field name="fromDate" ><display type="date" /></field>
+		<field name="thruDate" ><display type="date" /></field>
+		<field name="jobStatus" title="${uiLabelMap.jobStatus}" >
+			<display-entity entity-name="StatusItem" key-field-name="statusId" description="${description}">
+			</display-entity>
+		</field>
+		<field name="deleteLink" title="${uiLabelMap.CommonDelete}" widget-style="btn btn-mini btn-position btn-danger icon-trash open-sans">
+            <hyperlink also-hidden="false" description=" " target="deleteKPI"> 
+                <parameter param-name="KPIId"/> 
+                <parameter param-name="emplPositionTypeId" value="${emplPositionTypeId}"/> 
+            </hyperlink>
+        </field>
+	</form>
+	
+	<form name="StandardRating" type="list" list-name="standardRatingList" default-table-style="table table-hover table-striped table-bordered dataTable" paginate-target="StandardRating">
+		<field name="standardRatingId" title="${uiLabelMap.StandardRatingId}">
+			<hyperlink target="ListJobRating" description="${standardRatingId}">
+				<parameter param-name="emplPositionTypeId"/>
+				<parameter param-name="standardRatingId"/>
+			</hyperlink>
+		</field>
+		<field name="standardName" title="${uiLabelMap.StandardName}"><display type="text"/></field>
+		<field name="weight" title="${uiLabelMap.jobWeight}" ><display type="text"/></field>
+		<field name="deleteLink" title="${uiLabelMap.CommonDelete}" widget-style="btn btn-mini btn-position btn-danger icon-trash open-sans" use-when="emplPositionTypeId != null">
+            <hyperlink also-hidden="false" description=" ${uiLabelMap.CommonDelete}" target="deleteStandardRating"> 
+                <parameter param-name="standardRatingId"/>
+                <parameter param-name="emplPositionTypeId" value="${emplPositionTypeId}"/>
+            </hyperlink>
+        </field>
+	</form>
+	
+	<form name="AddStandardRating" type="single" target="createStandardRating" >
+		<field name="standardRatingId"><hidden/></field>
+		<field name="emplPositionTypeId"><hidden value="${emplPositionTypeId}"/></field>
+		<field name="standardName" title="${uiLabelMap.StandardName}"><text /></field>
+		<field name="weight" title="${uiLabelMap.jobWeight}" tooltip="${uiLabelMap.jobUnitWeight} (%)"><text mask="99"/></field>
+		<field name="submitButton" title="${uiLabelMap.CommonCreate}" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-ok"/></field>
+	</form>
+	
+	<form name="GeneralStandardRating" type="list" default-table-style="table table-hover table-striped table-bordered dataTable" paginate-target="GeneralStandardRating">
+		<actions>
+			<entity-condition entity-name="StandardRating">
+				<condition-list>
+					<condition-expr field-name="standardType" value="General"/>
+				</condition-list>
+			</entity-condition>
+		</actions>
+		<field name="standardRatingId" title="${uiLabelMap.StandardRatingId}">
+			<hyperlink target="ListGeneralJobRating" description="${standardRatingId}">
+				<parameter param-name="standardRatingId"/>
+			</hyperlink>
+		</field>
+		<field name="standardName" title="${uiLabelMap.StandardName}"><display type="text"/></field>
+		<field name="weight" title="${uiLabelMap.jobWeight}"><display type="text"/></field>
+		<field name="deleteLink" title="${uiLabelMap.CommonDelete}" widget-style="btn btn-mini btn-position btn-danger icon-trash open-sans">
+            <hyperlink also-hidden="false" description=" ${uiLabelMap.CommonDelete}" target="deleteGeneralStandardRating"> 
+                <parameter param-name="standardRatingId"/> 
+            </hyperlink>
+        </field>
+	</form>
+	
+	<form name="AddGeneralStandardRating" type="single" target="createGeneralStandardRating" extends="AddStandardRating" extends-resource="component://hrolbius/widget/forms/PerfReviewForms.xml">
+	</form>
+	
+	<form name="ListJobRating" type="list" list-name="jobRatingList" default-table-style="table table-hover table-striped table-bordered dataTable" paginate-target="ListJobRating">
+		<field name="emplPositionTypeId"><hidden value="${emplPositionTypeId}"/></field>
+		<field name="jobRatingId" title="${uiLabelMap.JobRatingId}" ><display></display>
+		</field>
+		<field name="jobRequirement" title="${uiLabelMap.jobRequirement}" ><display type="text"/></field>
+		<field name="jobIntent" title="${uiLabelMap.jobIntent}" ><display type="text"/></field>
+		<field name="jobTime" title="${uiLabelMap.jobTime}">
+			<display-entity entity-name="TimeJobRating" key-field-name="timeJobRatingId" description="${description}">
+			</display-entity>
+		</field>
+		<field name="deleteLink" title="${uiLabelMap.CommonDelete}" widget-style="btn btn-mini btn-position btn-danger icon-trash open-sans">
+            <hyperlink also-hidden="false" description=" ${uiLabelMap.CommonDelete}" target="deleteJobRating"> 
+                <parameter param-name="jobRatingId"/> 
+                <parameter param-name="emplPositionTypeId"/>
+                <parameter param-name="standardRatingId"/>
+            </hyperlink>
+        </field>
+	</form>
+	
+	<form name="AddJobRating" type="single" target="createJobRating">
+		<field name="emplPositionTypeId"><hidden value="${emplPositionTypeId}"/></field>
+		<field name="standardRatingId"><hidden value="${standardRatingId}"/></field>
+		<field name="jobRequirement" title="${uiLabelMap.jobRequirement}"><textarea/></field>
+		<field name="jobIntent" title="${uiLabelMap.jobIntent}"><textarea/></field>
+		<field name="jobTime" title="${uiLabelMap.jobTime}">
+			<drop-down allow-empty="false">
+                <entity-options entity-name="TimeJobRating" description="${description}" key-field-name="timeJobRatingId">
+                	<entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonCreate}" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-ok"/></field>
+	</form>
+	
+	<form name="ListGeneralJobRating" list-name="jobRatingList" type="list" default-table-style="table table-hover table-striped table-bordered dataTable" paginate-target="ListGeneralJobRating">
+		<field name="jobRatingId" title="${uiLabelMap.JobRatingId}"><display></display>
+		</field>
+		<field name="jobRequirement" title="${uiLabelMap.jobRequirement}" ><display type="text"/></field>
+		<field name="jobIntent" title="${uiLabelMap.jobIntent}" ><display type="text"/></field>
+		<field name="jobTime" title="${uiLabelMap.jobTime}" >
+			<display-entity entity-name="TimeJobRating" key-field-name="timeJobRatingId" description="${description}">
+			</display-entity>
+		</field>
+		<field name="deleteLink" title="${uiLabelMap.CommonDelete}" widget-style="btn btn-mini btn-position btn-danger icon-trash open-sans">
+            <hyperlink also-hidden="false" description=" ${uiLabelMap.CommonDelete}" target="deleteGeneralJobRating"> 
+                <parameter param-name="jobRatingId"/> 
+                <parameter param-name="standardRatingId"/>
+            </hyperlink>
+        </field>
+	</form>
+	
+	<form name="AddGeneralJobRating" type="single" target="createGeneralJobRating" extends="AddJobRating" extends-resource="component://hrolbius/widget/forms/PerfReviewForms.xml">
+	</form>
+	
+	<form name="RatingEmpl" type="single" target="createRatingEmpl">
+		<field name="employeePartyId" title-style="asterisk" title="${uiLabelMap.EmployeePartyId}">
+			<lookup target-form-name="LookupEmployeeNew">
+			</lookup>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonCreate}" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-ok"/></field>
+	</form>
+	
+<!-- 	<form name="FindKPI" type="single" target="FindKPI"> -->
+<!-- 		<field name="emplPositionTypeId" title="${uiLabelMap.HROlbiusEmplPositionId}"> -->
+<!-- 			<drop-down allow-empty="true"> -->
+<!--                 <entity-options entity-name="EmplPositionType" description="${description}" key-field-name="emplPositionTypeId"/> -->
+<!--             </drop-down> -->
+<!-- 		</field> -->
+<!-- 		<field name="submitButton" title="${uiLabelMap.CommonSearch}" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-search"/></field> -->
+<!-- 	</form> -->
+	
+	<form name="ProposeKPI" type="multi" list-name="listIt" target="proposeAllKPI" default-table-style="table table-hover table-striped table-bordered dataTable" paginate-target="ProposeKPI">
+		<actions>
+			<set field="entityName" value="PerfReviewKPI"/>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="requestParameters"/>
+                <field-map field-name="entityName" from-field="entityName"/>
+                <field-map field-name="orderBy" from-field="parameters.sortField"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+            <entity-condition entity-name="PerfReviewKPI">
+				<condition-expr field-name="jobStatus" operator="equals" value="IWT_INIT"/>
+			</entity-condition>
+		</actions>
+		<field name="KPIId" title="${uiLabelMap.KPIId}">
+			<hyperlink target="StandardRating" description="${KPIId}">
+				<parameter param-name="emplPositionTypeId"/>
+			</hyperlink>
+		</field>
+		<field name="emplPositionTypeId">
+			<display-entity entity-name="EmplPositionType" key-field-name="emplPositionTypeId" description="${description}">
+			</display-entity>
+		</field>
+		<field name="description"><display></display> </field>
+		<field name="fromDate"><display type="date" /></field>
+		<field name="thruDate"><display type="date" /></field>
+		<field name="jobStatus" title="${uiLabelMap.jobStatus}">
+			<display-entity entity-name="StatusItem" key-field-name="statusId" description="${description}">
+			</display-entity>
+		</field>
+		<field name="proposeKPI" use-when="statusId==IWT_INIT" title="${uiLabelMap.PageTitleProposeKPI}" widget-style="btn btn-mini btn-position btn-primary open-sans icon-sign-in">
+			<hyperlink also-hidden="false" description=" " target="proposeKPI">
+				<parameter param-name="emplPositionTypeId"/>
+			</hyperlink>
+		</field>
+		<field name="_rowSubmit" title="${uiLabelMap.CommonSelect}">
+			<hidden value="Y" />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.ProposeAllKPI}" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-sign-in"/></field>
+	</form>
+	
+	<form name="CheckKPI" type="list" target="checkKPI" default-table-style="table table-hover table-striped table-bordered dataTable" paginate-target="CheckKPI">
+		<actions>
+			<entity-condition entity-name="PerfReviewKPI">
+				<condition-list combine="and">
+					<condition-expr field-name="emplPositionTypeId" from-field="parameters.emplPositionTypeId"/>
+					<condition-expr field-name="jobStatus" operator="equals" value="IWT_INIT"/>
+				</condition-list>
+			</entity-condition>
+		</actions>
+		<field name="ntfId"><hidden value="${ntfId}" /></field>
+		<field name="KPIId" title="${uiLabelMap.KPIId}">
+			<hyperlink target="ListStandardOfKPI" description="${KPIId}">
+				<parameter param-name="emplPositionTypeId"/>
+			</hyperlink>
+		</field>
+		<field name="emplPositionTypeId" title="${uiLabelMap.HROlbiusEmplPositionId}">
+			<display-entity entity-name="EmplPositionType" description="${description}" key-field-name="emplPositionTypeId"></display-entity>
+		</field>
+		<field name="description"><display type="text"/> </field>
+		<field name="fromDate"><display type="date" /></field>
+		<field name="thruDate"><display type="date" /></field>
+		<field name="jobStatus" title="${uiLabelMap.jobStatus}" >
+			<drop-down allow-empty="false" current="selected">
+				<entity-options description="${description}" entity-name="StatusItem" key-field-name="statusId">
+					<entity-constraint name="statusTypeId" operator="equals" value="APPR_WT_STATUS"/>
+					<entity-order-by field-name="sequenceId"/>
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.PageTitleCheckKPI}" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-ok"/></field>
+	</form>
+</forms>

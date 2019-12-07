@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+	<simple-method method-name="testaccount" short-description="Create a Party Qualification">
+		<set field="entityName" from-field="parameters.entityName" set-if-null="true"/>
+		<set field="viewIndex" from-field="parameters.viewIndex" set-if-null="true"/>
+		<set field="viewSize" from-field="parameters.viewSize" set-if-null="true"/>
+		<set field="sortorder" from-field="parameters.sortorder"/>
+		<set field="sortdatafield" from-field="parameters.sortdatafield"/>
+		<if-not-empty field="sortorder">
+			<if-not-empty field="sortdatafield">
+				<if>
+					<condition>
+						<if-compare operator="equals" value="asc" field="sortorder"></if-compare>
+					</condition>
+					<then>
+						<set field="sortdatafield" value="${sortdatafield}"/>
+					</then>
+					<else>
+						<set field="sortdatafield" value="-${sortdatafield}"/>
+					</else>
+				</if>
+			<else>
+				<set field="sortdatafield" value="glAccountId"/>
+			</else>
+			</if-not-empty>
+		<else>
+			<set field="sortdatafield" value="glAccountId"/>
+		</else>
+		</if-not-empty>
+		<if-not-empty field="viewIndex">
+			<if-not-empty field="viewSize">
+				<entity-condition list="test" entity-name="${entityName}">
+					<order-by field-name="${sortdatafield}"/>
+		        	<limit-view view-size="${viewSize}" view-index="${viewIndex}" />
+		       	</entity-condition>
+	       	<else>
+	       		<entity-condition list="test" entity-name="${entityName}">
+	       			<order-by field-name="${sortdatafield}"/>
+	       			<limit-view view-size="10" view-index="${viewIndex}" />
+		       	</entity-condition>
+	       	</else>
+	       	</if-not-empty>
+		<else>
+			<if-not-empty field="viewSize">
+				<entity-condition list="test" entity-name="${entityName}">
+					<order-by field-name="${sortdatafield}"/>
+		        	<limit-view view-size="${viewSize}" view-index="0" />
+		       	</entity-condition>
+	       	<else>
+	       		<entity-condition list="test" entity-name="${entityName}">
+	       			<order-by field-name="${sortdatafield}"/>
+		       	</entity-condition>
+	       	</else>
+	       	</if-not-empty>
+		</else>
+		</if-not-empty>
+        <field-to-result field="test" result-name="results"/>
+        <return response-code="success"/>	
+    </simple-method>  
+    <simple-method method-name="updateAccReportTarget"  short-description="update AccReportTarget">
+    	
+    	<entity-one value-field="accReportTarget" entity-name="AccReportTarget"></entity-one>
+    	<check-errors/>
+    	<entity-one value-field="accReport" entity-name="AccReport" >
+    		<field-map field-name="reportId" from-field="accReportTarget.reportId"/>
+    	</entity-one>
+    	<set field="isDefault" from-field="accReport.isDefault"/>
+    	<if-compare operator="not-equals" value="Y" field="isDefault">
+	        <set-nonpk-fields map="parameters" value-field="accReportTarget" />
+	        <store-value value-field="accReportTarget"/>
+	        
+	        <check-errors/>
+        </if-compare>
+    </simple-method>
+    <simple-method method-name="createAccReportTarget" short-description="Create an Acc Report Target">
+        <!-- create new entity and create all the fields -->
+       
+        <make-value value-field="newEntity" entity-name="AccReportTarget"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+
+        <!-- create a non existing ID -->
+		<sequenced-id sequence-name="AccReportTarget" field="targetId"/>
+        <set from-field="targetId" field="newEntity.targetId"/>
+     	<set from-field="parameters.reportId" field="newEntity.reportId"/>
+        <field-to-result field="targetId" result-name="targetId"/>
+		<field-to-result field="parameters.reportId" result-name="reportId"/>
+      
+        <create-value value-field="newEntity"/>
+        <check-errors/>
+    </simple-method>
+    <!-- delete an existing AccTargetReport -->
+    <simple-method method-name="deleteAccReportTarget" short-description="Delete an existing AccReportTarget">
+        <entity-one entity-name="AccReportTarget" value-field="accReportTarget" auto-field-map="true"/>
+        <set field="reportId" from-field="accReportTarget.reportId"/>
+        <set field="targetId" from-field="accReportTarget.targetId"/>
+        <check-errors/>
+        <remove-value value-field="accReportTarget"/>
+        <check-errors/>
+        <field-to-result field="reportId" result-name="reportId"/>
+        <field-to-result field="targetId" result-name="targetId"/>
+    </simple-method>
+    <simple-method method-name="deleteAccReport" short-description="Delete an existing AccReport">
+        <entity-one entity-name="AccReport" value-field="accReport" auto-field-map="true"/>
+        <set field="reportId" from-field="accReport.reportId"/>
+       
+        <check-errors/>
+        <remove-value value-field="accReport"/>
+        <check-errors/>
+        <field-to-result field="reportId" result-name="reportId"/>
+       
+    </simple-method>
+     <simple-method method-name="createAccReport" short-description="Create an AccReport">
+        <!-- create new entity and create all the fields -->
+        <log message="olbius@123 ${parameters}" level="info"/>
+        <make-value value-field="newEntity" entity-name="AccReport"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <!-- create a non existing ID -->
+        <sequenced-id sequence-name="AccReportTarget" field="reportId"/>
+        <set from-field="reportId" field="newEntity.reportId"/>
+        <if-not-empty field="parameters.partyId">
+        	<set field="newEntity.partyId" from-field="parameters.partyId"/>
+        </if-not-empty>
+        <set field="newEntity.isDefault" value="N"/>
+		<field-to-result field="reportId" result-name="reportId"/>
+        <create-value value-field="newEntity"/>
+        <check-errors/>
+    </simple-method>
+    <simple-method method-name="SetToDefaultAccTarget" short-description="Reset about default AccReportTarget  according to reportTypeId">
+    	<set field="reportTypeId" from-field="parameters.reportTypeId"/>
+    	
+    	<if-not-empty field="reportTypeId">
+    		<entity-condition list="accReports" entity-name="AccReport">
+    			<condition-list>
+    				<condition-expr field-name="reportTypeId" operator="equals" from-field="reportTypeId"/>
+    				<condition-expr field-name="isDefault" operator="not-equals" value="Y"/>
+    			</condition-list>
+    		</entity-condition>
+    		<if-not-empty field="accReports">
+    			<iterate entry="accReport" list="accReports">
+    				<set field="reportId" from-field="accReport.reportId"/>
+    				<entity-condition list="accReportTargets" entity-name="AccReportTarget">
+    					<condition-expr field-name="reportId" operator="equals" from-field="reportId"/>
+    				</entity-condition>
+    				<if-not-empty field="accReportTargets">
+    					<iterate entry="accReportTarget" list="accReportTargets">
+    						<set field="RemoveAccReportTarget.targetId" from-field="accReportTarget.targetId"/>
+    						<set field="RemoveAccReportTarget.reportId" from-field="accReportTarget.reportId"/>
+    						<call-service service-name="removeAccReportTarget" in-map-name="RemoveAccReportTarget"></call-service>
+    					</iterate>
+    				</if-not-empty>
+    			</iterate>
+    		</if-not-empty>
+    	</if-not-empty>
+    	
+    </simple-method>
+    <simple-method method-name="getPaymentMethodType" short-description="get payment method type">
+    	<entity-one value-field="paymentMethodType" entity-name="PaymentMethodType"></entity-one>
+    	<if-not-empty field="paymentMethodType">
+    		
+    		<field-to-result field="paymentMethodType.defaultGlAccountId" result-name="defaultGlAccountId"/>
+    		<field-to-result field="paymentMethodType.description" result-name="description"/>	
+    	</if-not-empty>
+    </simple-method>
+    
+    <simple-method method-name="getProductName" short-description="get product name">   
+    	<entity-one value-field="product" entity-name="Product"></entity-one>
+    	<if-not-empty field="product">    		
+    		<field-to-result field="product.productName" result-name="productName"/>	
+    	</if-not-empty>
+    </simple-method>
+</simple-methods>

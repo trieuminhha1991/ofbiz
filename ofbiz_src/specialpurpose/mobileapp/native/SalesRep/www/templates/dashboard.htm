@@ -1,0 +1,91 @@
+<ion-view view-title="{{getLabel('Home')}}">
+    <ion-content padding="true" on-pull-refresh="initData(true)" scope="self">
+		<!-- <ion-refresher pulling-text="{{getLabel('PullToRefresh')}}" on-refresh="initData(true)"></ion-refresher> -->
+        <ion-list>
+            <ion-item class='item-icon-left item-space-top'>
+                <i class='icon fa fa-calendar assertive'></i> {{getLabel('Kpi')}}
+                <p class='report-value' ng-if="kpi">
+                    {{formatNumberDecimal(kpi.target)}}<sup>{{getLabel(kpi.uomId)}}</sup>/{{getLabel(kpi.periodTypeId)}}
+                </p>
+            </ion-item>
+            <ion-item class='item-icon-left item-space-top'>
+                <i class='icon fa fa-money balanced'></i> {{getLabel('ThisMonthTurnover')}}
+                <p class='report-value'>
+                    <b>{{getLabel('AmountValue')}}:</b> {{formatNumberDecimal(currentTotalProfit)}}<sup>{{getLabel(kpi.uomId)}}</sup>
+                </p>
+                <p class='report-value'>
+                    <b>{{getLabel('Rate')}}:</b> {{formatNumberDecimal(currentTotalProfitPercent)}}%
+                </p>
+            </ion-item>
+            <ion-item class='item-input item-select item-space-top'>
+                <a>
+                    <!-- <i class='icon fa fa-users'></i> -->
+                    <div class="input-label">
+                        {{getLabel('SalesTurnover')}}
+                    </div>
+                </a>
+                <select ng-model="reports.orderTotal.time">
+                    <option value="WEEK">{{getLabel('Week')}}</option>
+                    <option value="MONTH">{{getLabel('Month')}}</option>
+                    <option value="YEAR">{{getLabel('Year')}}</option>
+                </select>
+            </ion-item>
+            <ion-item class='item-body item-chart'>
+				<highchart config="self.reports.orderTotal.config"></highchart>
+            </ion-item>
+            <ion-item class='item-input item-select item-space-top'>
+                <a>
+                    <!-- <i class='icon fa fa-users'></i> -->
+                    <div class="input-label">
+                        {{getLabel('TopSalesman')}}
+                    </div>
+                </a>
+                <select ng-model="reports.salesmanTop.time">
+                    <option value="WEEK">{{getLabel('Thisweek')}}</option>
+                    <option value="MONTH">{{getLabel('Thismonth')}}</option>
+                    <option value="YEAR">{{getLabel('Thisyear')}}</option>
+                </select>
+            </ion-item>
+            <ion-item class='item-body'>
+				<highchart config="self.reports.salesmanTop.config"></highchart>
+            </ion-item>
+            <ion-item class='item-input item-select item-space-top'>
+                <a>
+                    <!-- <i class='icon fa fa-users'></i> -->
+                    <div class="input-label">
+                        {{getLabel('TopCustomers')}}
+                    </div>
+                </a>
+                <select ng-model="reports.customerReport.time">
+                    <option value="TODAY">{{getLabel('Today')}}</option>
+                    <option value="WEEK">{{getLabel('Thisweek')}}</option>
+                    <option value="MONTH">{{getLabel('Thismonth')}}</option>
+                    <option value="YEAR">{{getLabel('Thisyear')}}</option>
+                    <!-- <option value="RANGE">{{getLabel('Range')}}</option> -->
+                </select>
+            </ion-item>
+            <!-- <ion-item class='no-padding-vertical' ng-if="reports.customerReport.time == 'RANGE'">
+                <div class='row no-padding-vertical'>
+                    <div class="col col-50">
+                        <input type="date" ng-model="reports.customerReport.fromDate" class='no-padding-vertical' />
+                    </div>
+                    <div class="col col-50">
+                        <input type="date" ng-model="reports.customerReport.thruDate" class='no-padding-vertical' />
+                    </div>
+                </div>
+            </ion-item> -->
+            <ion-item class='item-body' ng-if="reports.customerReport.value">
+                <ion-list>
+                    <ion-item ng-repeat="obj in reports.customerReport.value track by $index">
+                        {{obj.cusName}}
+                        <span class='item-info'>{{formatNumberDecimal(obj.orderValue)}}<sup>đ</sup></span>
+                    </ion-item>
+                    <ion-item class='item-input item-select'>
+                        &nbsp;
+                        <select ng-options="obj for obj in reports.customerReport.quantityRange" ng-model="reports.customerReport.limit"></select>
+                    </ion-item>
+                </ion-list>
+            </ion-item>
+        </ion-list>
+    </ion-content>
+</ion-view>

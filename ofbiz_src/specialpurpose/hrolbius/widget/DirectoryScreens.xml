@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	    
+	<screen name="NotificationListDir">
+		<section>
+			<actions>
+				<set field="titleProperty" value="NotificationList" />
+				<set field="headerItem" value="profile" />
+				<set field="tabButtonItem" value="NotificationList" />
+				<property-map resource="NotificationUiLabels" map-name="uiLabelMap"
+					global="true" />
+			</actions>
+			<widgets>
+				<section>
+					<actions>
+						<set field="tabBarName" value="EmployeeProfileDirTabBar" global="true" />
+						<set field="tabBarLocation"
+							value="component://hrolbius/widget/menus/DirectoryMenus.xml"
+							global="true" />
+					</actions>
+					<widgets>
+						<section>
+							<actions>
+								<set field="printTabBar" value="true" />
+							</actions>
+							<widgets>
+							</widgets>
+						</section>
+					</widgets>
+				</section>
+				<decorator-screen name="main-decorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<screenlet title="${uiLabelMap.NotificationList}">
+							<!-- <include-menu location="component://hrolbius/widget/menus/hrolbiusMenus.xml" 
+								name="EmployeeProfileTabBar"/> -->
+							<include-form
+								location="component://hrolbius/widget/forms/NotificationForms.xml"
+								name="ListNotification" />
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>   
+	
+	<screen name="PayrollHistoryDir">
+		<section>
+			<actions>
+				<set field="titleProperty" value="HumanResPayRollHistory" />
+				<set field="tabButtonItem" value="PayrollHistory" />
+				<set field="partyId" from-field="parameters.partyId" />
+				<set field="parameters.sortField" from-field="parameters.sortField"
+					default-value="invoiceDate DESC" />
+				<entity-condition list="payroll" entity-name="InvoiceAndType">
+					<condition-list combine="and">
+						<condition-expr field-name="partyIdFrom" operator="equals"
+							from-field="partyId" />
+						<condition-expr field-name="invoiceTypeId"
+							operator="equals" value="PAYROL_INVOICE" />
+					</condition-list>
+					<order-by field-name="${parameters.sortField}" />
+				</entity-condition>
+			</actions>
+			<widgets>
+				<decorator-screen name="profileDirDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<screenlet 
+							title="${uiLabelMap.HumanResPayRollHistory}">
+							<include-form name="PayrollHistoryList"
+								location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EmplLeaveHistoryDir">
+		<section>        	
+            <actions>
+            	<set field="navMenuName" value="EmplLeaveSubTabBar" />
+				<set field="navMenuLocation" value="component://hrolbius/widget/menus/hrolbiusMenus.xml" />
+                <set field="titleProperty" value="HREmplLeaveHistory"/>
+				<set field="tabButtonItem" value="EmplLeaveHistory" />
+				<!-- <set field="tabSubButtonItem" value="EmplLeaveHistory" /> -->
+                <set field="leaveTypeId" from-field="parameters.leaveTypeId"/>
+                <set field="fromDate" from-field="parameters.fromDate"/>
+                <set field="partyId" from-field="parameters.partyId"/>
+                <set field="emplLeaveCtx" from-field="parameters"/>                                                
+            </actions>
+            <widgets>
+                <decorator-screen name="profileDirDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="HROLBIUS" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                                <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">                                    
+                                    <decorator-section name="search-options">
+                                        <include-form name="FindEmplLeaves" location="component://hrolbius/widget/forms/EmplLeaveForms.xml"/>
+                                    </decorator-section>
+                                    <decorator-section name="search-results">
+                                        <include-form name="listEmplListHistory" location="component://hrolbius/widget/forms/EmplLeaveForms.xml"/>
+                                    </decorator-section>
+                                </decorator-screen>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+	</screen>
+	
+	<screen name="CreateMgrForOrg">
+		<section>
+			<condition>
+				<if-has-permission permission="HR_DIRECTORY" action="_VIEW"/>
+			</condition>
+			<actions>
+				
+				<property-map resource="hrolbiusUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="DirectoryUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map map-name="uiLabelMap" resource="HrCommonUiLabels.xml" global="true"/>	
+				<property-map resource="GlobalHRSettingUiLabels"
+					map-name="uiLabelMap" global="true" />
+				<property-map resource="LookupUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="CommonUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<set field="layoutSettings.companyName" from-field="uiLabelMap.hrolbiusCompanyName"
+					global="true" />
+				<set field="layoutSettings.companySubtitle" from-field="uiLabelMap.hrolbiusCompanySubtitle"
+					global="true" />
+				<set field="layoutSettings.javaScripts[]" value="/partymgr/static/partymgr.js"
+					global="true" />
+				<set field="activeApp" value="hrolbius" global="true" />
+				<set field="applicationMenuName" value="MainAppBar" global="true" />
+				<set field="applicationMenuLocation" value="component://hrolbius/widget/menus/hrolbiusMenus.xml"
+					global="true" />
+				<set field="applicationTitle" value="${uiLabelMap.hrolbiusApplication}"
+					global="true" />
+				<set field="layoutSettings.styleSheets[]" value="/images/humanres/humanres.css"
+					global="true" />
+				<set field="layoutSettings.styleSheets[]" value="/partymgr/static/partymgr.css"
+					global="true" />
+				<set field="layoutSettings.javaScripts[+0]"
+					value="/images/jquery/ui/development-bundle/external/jquery.cookie.js"
+					global="true" />
+				<set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/jsTree/jquery.jstree.js"
+					global="true" />
+			</actions>
+		
+			<widgets>
+				<screenlet title="${uiLabelMap.CreateMgrForOrg}">
+					<!-- <platform-specific>
+						<html>							
+							<html-template
+								location="component://hrolbius/webapp/hrolbius/ftl/CreateMgrForOrg.ftl" />
+						</html>
+					</platform-specific> -->
+					<include-form location="component://hrolbius/widget/forms/OrganizationForms.xml" 
+						name="CreateMgrForOrg"/>
+				</screenlet>
+			</widgets>
+			<fail-widgets>
+				<label style="h3">${uiLabelMap.HROlbiusViewPermissionError}</label>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="EmplListPDF">
+		<section>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="HrCommonUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="EmployeeUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="hrolbiusUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="CommonUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="PartyUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="DirectoryUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="EmplPositionUiLabels" global="true"/>
+				<set field="internalOrgId" from-field="parameters.internalOrgId"/>
+				
+				<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/directory/getEmplListInOrg.groovy"/>
+				
+			</actions>
+			<widgets>
+				<platform-specific>
+					<xsl-fo>
+						<html-template location="component://hrolbius/webapp/hrolbius/ftl/pdf/EmplListPDF.fo.ftl"/>
+					</xsl-fo>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="JobPosition">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="directory" />
+				<set field="selectedSubMenuItem" value="JobPosition"/>
+				<set field="titleProperty" value="JobPositionCurrent"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonDirectoryDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<actions></actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/generalMgr/jobPosition.ftl"/>
+									</html>
+								</platform-specific>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	<screen name="OrganizationUnit">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="directory" />
+				<set field="selectedSubMenuItem" value="OrganizationUnit"/>
+				<set field="titleProperty" value="OrganizationUnit"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonDirectoryDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/Training/getPartyGroupTree.groovy"/>
+								<property-to-field resource="general" property="country.geo.id.default" field="countryGeoIdDefault"/>
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/generalMgr/OrganizationUnit.ftl"/>
+									</html>
+								</platform-specific>							
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EmployeeList">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="directory" />
+				<set field="selectedSubMenuItem" value="employeeList"/>
+				<set field="titleProperty" value="HREmplList"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonDirectoryDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/Training/getPartyGroupTree.groovy"/>
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/employee/emplList.ftl"/>
+									</html>
+								</platform-specific>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EmplTerminationList">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="directory" />
+				<set field="selectedSubMenuItem" value="employeeTerminationList"/>
+				<set field="titleProperty" value="HREmplResignList"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonDirectoryDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<entity-condition list="statusList" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="TER_PPSL_STATUS"/>
+								</entity-condition>
+								<entity-condition list="terminationReasonList" entity-name="TerminationReason">
+								</entity-condition>
+								<entity-condition list="statusTransferAssetList" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="PRTYASGN_STATUS"/>
+								</entity-condition>
+								<entity-condition list="listInvoiceType" entity-name="InvoiceType">
+				                	<condition-expr field-name="parentTypeId" operator="equals" value="SALES_INVOICE"/>
+				                </entity-condition>
+				                <entity-condition list="listStatusItem" entity-name="StatusItem">
+				                	<condition-expr field-name="statusTypeId" operator="equals" value="INVOICE_STATUS"/>
+				                </entity-condition>
+				                
+				                <entity-condition list="listPaymentType" entity-name="PaymentType">
+				                	<condition-expr field-name="parentTypeId" operator="equals" value="RECEIPT"/>
+				                </entity-condition>
+				                <entity-condition list="listStatusItemPayment" entity-name="StatusItem">
+				                	<condition-expr field-name="statusTypeId" operator="equals" value="PMNT_STATUS"/>
+				                </entity-condition>
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/employee/employeeTerminationList.ftl"/>
+									</html>
+								</platform-specific>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+</screens>        

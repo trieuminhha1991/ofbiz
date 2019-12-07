@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
+       
+    
+    <form name="EditRequirementInHR" type="single" target="updateRequirementInHR" title="" default-map-name="requirement"
+        header-row-style="header-row" default-table-style="basic-table">
+        <actions>
+        	<set field="requirementType" from-field="requirementTypeId"/>
+        	<entity-one entity-name="RequirementFacility" value-field="requirementFacility">
+        		<field-map field-name="requirementId" from-field="requirementId"/>
+        	</entity-one>
+        	<entity-condition entity-name="Facility" list="listFacilities">
+        	</entity-condition>
+        	<entity-condition entity-name="ProductStore" list="listProductStores"></entity-condition>
+        	<entity-one entity-name="PartyNameView" value-field="requestor">
+        		<field-map field-name="partyId" value="${listRequestor[0].partyId}"/>
+        	</entity-one>
+        	<set field="originContactMechId" from-field="RequirementFacility.originContactMechId"/>
+        </actions>
+        <!-- <alt-target use-when="requirement==null" target="createRequirement"/> -->
+        <!-- <auto-fields-service service-name="updateRequirement" default-field-type="edit"/> -->
+        <field name="contactMechId"><hidden/></field>
+        <field name="originContactMechId" use-when="!requirementType.equals(&quot;TRANSFER_REQ&quot;) &amp;&amp; requirement == null">
+        	<drop-down no-current-selected-key="${requirement.contactMechId}">
+        		<list-options key-name="contactMechId" list-name="listFacilityContactMechs" description="${address1}"/>
+        	</drop-down>
+        </field>
+        <field name="originContactMechId" use-when="!requirementType.equals(&quot;TRANSFER_REQ&quot;) &amp;&amp; requirement == null">
+        	<drop-down>
+        		<list-options key-name="contactMechId" list-name="listFacilityContactMechs" description="${address1}"/>
+        	</drop-down>
+        </field>
+        <field name="facilityIdFrom"><hidden value="${requirementFacility.facilityIdFrom}"/></field>
+        <field name="facilityIdTo"><hidden value="${requirementFacility.facilityIdTo}"/></field>
+        <field name="requirementId" title="${uiLabelMap.requirementId}" use-when="requirement != null"><display/></field>
+        <field name="requirementId" title="${uiLabelMap.requirementId}" use-when="requirement == null"><hidden/></field>
+        <field name="requirementTypeId" title="${uiLabelMap.RequirementType}">
+            <hidden/>
+        </field>
+        <field name="statusId" title="${uiLabelMap.Status}" use-when="requirement != null">
+            <drop-down allow-empty="false" no-current-selected-key="${requirement.statusId}">
+                <entity-options entity-name="StatusItem" description="${description}">
+                    <entity-constraint name="statusTypeId" value="REQUIREMENT_STATUS"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="statusId" title="${uiLabelMap.Status}" use-when="requirement == null"><hidden value="REQ_CREATED"/></field>
+        <field name="estimatedBudget"><text/></field>
+        <field name="reason"><text/></field>
+        <field name="description"><textarea/></field>
+        <field name="productStoreId" title="${uiLabelMap.productStore}" use-when="!requirementType.equals(&quot;TRANSFER_REQ&quot;) &amp;&amp; requirement != null">
+            <drop-down allow-empty="false" no-current-selected-key="${requirement.productStoreId}">
+                <list-options key-name="productStoreId" list-name="listProductStores" description="${storeName}"/>
+            </drop-down>
+        </field>
+        <field name="productStoreId" title="${uiLabelMap.productStore}" use-when="!requirementType.equals(&quot;TRANSFER_REQ&quot;) &amp;&amp; requirement == null">
+            <drop-down allow-empty="false">
+                <list-options key-name="productStoreId" list-name="listProductStores" description="${storeName}"/>
+            </drop-down>
+        </field>
+        <field name="productStoreId" title="${uiLabelMap.ProductStoreFrom}" use-when="requirementType.equals(&quot;TRANSFER_REQ&quot;) &amp;&amp; requirement != null">
+            <drop-down allow-empty="false" no-current-selected-key="${requirementFacility.productStoreIdFrom}">
+                <list-options key-name="productStoreId" list-name="listProductStores" description="${storeName}"/>
+            </drop-down>
+        </field>
+        <field name="productStoreId" title="${uiLabelMap.ProductStoreFrom}" use-when="requirementType.equals(&quot;TRANSFER_REQ&quot;) &amp;&amp; requirement == null">
+            <drop-down allow-empty="false">
+                <list-options key-name="productStoreId" list-name="listProductStores" description="${storeName}"/>
+            </drop-down>
+        </field>
+        <field name="facilityId" title="${uiLabelMap.facility}" use-when="!requirementType.equals(&quot;TRANSFER_REQ&quot;) &amp;&amp; requirement == null">
+            <drop-down allow-empty="false" no-current-selected-key="${requirement.facilityId}">
+                <list-options key-name="facilityId" list-name="listFacilities" description="${facilityName}"/>
+            </drop-down>
+        </field>
+        <field name="facilityId" title="${uiLabelMap.facility}" use-when="!requirementType.equals(&quot;TRANSFER_REQ&quot;) &amp;&amp; requirement != null">
+            <drop-down allow-empty="false" no-current-selected-key="${requirement.facilityId}">
+                <list-options key-name="facilityId" list-name="listFacilities" description="${facilityName}"/>
+            </drop-down>
+        </field>
+        <field name="facilityId" title="${uiLabelMap.FacilityFrom}" use-when="requirementType.equals(&quot;TRANSFER_REQ&quot;) &amp;&amp; requirement == null &amp;&amp; requirementFacility == null">
+            <drop-down allow-empty="false">
+                <list-options key-name="facilityId" list-name="listFacilities" description="${facilityName}"/>
+            </drop-down>
+        </field>
+        <field name="facilityId" title="${uiLabelMap.FacilityFrom}" use-when="requirementType.equals(&quot;TRANSFER_REQ&quot;) &amp;&amp; requirement != null &amp;&amp; requirementFacility == null">
+            <drop-down allow-empty="true">
+                <list-options key-name="facilityId" list-name="listFacilities" description="${facilityName}"/>
+            </drop-down>
+        </field>
+        <field name="facilityId" title="${uiLabelMap.FacilityFrom}" use-when="requirementType.equals(&quot;TRANSFER_REQ&quot;) &amp;&amp; requirementFacility != null">
+            <drop-down allow-empty="false" no-current-selected-key="${requirementFacility.facilityIdFrom}">
+                <list-options key-name="facilityId" list-name="listFacilities" description="${facilityName}"/>
+            </drop-down>
+        </field>
+        <field name="originContactMechId" title="${uiLabelMap.OriginContactMech}" use-when="requirementType.equals(&quot;TRANSFER_REQ&quot;) &amp;&amp; requirementFacility != null">
+        	<drop-down no-current-selected-key="${requirementFacility.originContactMechId}">
+        		<list-options key-name="contactMechId" list-name="listFacilityContactMechs" description="${address1}"/>
+        	</drop-down>
+        </field>
+        <field name="originContactMechId" title="${uiLabelMap.OriginContactMech}" use-when="requirementType.equals(&quot;TRANSFER_REQ&quot;) &amp;&amp; requirementFacility == null">
+        	<drop-down>
+        		<list-options key-name="contactMechId" list-name="listFacilityContactMechs" description="${address1}"/>
+        	</drop-down>
+        </field>
+        <field name="originContactMechId" title="${uiLabelMap.OriginContactMech}" use-when="!requirementType.equals(&quot;TRANSFER_REQ&quot;) &amp;&amp; requirement != null">
+        	<drop-down no-current-selected-key="${requirement.ontactMechId}">
+        		<list-options key-name="contactMechId" list-name="listFacilityContactMechs" description="${address1}"/>
+        	</drop-down>
+        </field>
+        <field name="originContactMechId" title="${uiLabelMap.OriginContactMech}" use-when="!requirementType.equals(&quot;TRANSFER_REQ&quot;) &amp;&amp; requirement == null">
+        	<drop-down>
+        		<list-options key-name="contactMechId" list-name="listFacilityContactMechs" description="${address1}"/>
+        	</drop-down>
+        </field>
+        <field name="productStoreIdTo" title="${uiLabelMap.ProductStoreTo}" use-when="requirementType.equals(&quot;TRANSFER_REQ&quot;) &amp;&amp; requirementFacility != null">
+            <drop-down allow-empty="false" no-current-selected-key="${requirementFacility.productStoreIdTo}">
+                <list-options key-name="productStoreId" list-name="listProductStores" description="${storeName}"/>
+            </drop-down>
+        </field>
+        <field name="productStoreIdTo" title="${uiLabelMap.ProductStoreTo}" use-when="requirementType.equals(&quot;TRANSFER_REQ&quot;) &amp;&amp; requirement == null &amp;&amp; requirementFacility == null">
+            <drop-down allow-empty="false">
+                <list-options key-name="productStoreId" list-name="listProductStores" description="${storeName}"/>
+            </drop-down>
+        </field>
+        <field name="productStoreIdTo" title="${uiLabelMap.ProductStoreTo}" use-when="requirementType.equals(&quot;TRANSFER_REQ&quot;) &amp;&amp; requirement != null &amp;&amp; requirementFacility == null">
+            <drop-down allow-empty="true">
+                <list-options key-name="productStoreId" list-name="listProductStores" description="${storeName}"/>
+            </drop-down>
+        </field>
+        <field name="facilityTo" title="${uiLabelMap.FacilityTo}" use-when="requirementType.equals(&quot;TRANSFER_REQ&quot;) &amp;&amp; requirementFacility != null" required-field="true">
+        	<drop-down no-current-selected-key="${requirementFacility.facilityIdTo}">
+        		<list-options key-name="facilityId" list-name="listFacilities" description="${facilityName}"/>
+        	</drop-down>
+        </field>
+        <field name="facilityTo" title="${uiLabelMap.FacilityTo}" use-when="requirementType.equals(&quot;TRANSFER_REQ&quot;) &amp;&amp; requirement == null &amp;&amp; requirementFacility == null" required-field="true">
+        	<drop-down>
+        		<list-options key-name="facilityId" list-name="listFacilities" description="${facilityName}"/>
+        	</drop-down>
+        </field>
+        <field name="facilityTo" title="${uiLabelMap.FacilityTo}" use-when="requirementType.equals(&quot;TRANSFER_REQ&quot;) &amp;&amp; requirement != null &amp;&amp; requirementFacility == null" required-field="true">
+        	<drop-down allow-empty="true">
+        		<list-options key-name="facilityId" list-name="listFacilities" description="${facilityName}"/>
+        	</drop-down>
+        </field>
+        <field name="facilityTo" use-when="!&quot;TRANSFER_REQ&quot;.equals(requirementType)"><hidden/></field>
+        <field name="destContactMechId" title="${uiLabelMap.DestinationContactMech}" use-when="requirementType.equals(&quot;TRANSFER_REQ&quot;)">
+        	<drop-down no-current-selected-key="${requirementFacility.destContactMechId}">
+        		<list-options key-name="contactMechId" list-name="listFacilityContactMechs" description="${address1}"/>
+        	</drop-down>
+        </field>
+        <field name="fixedAssetId" title="${uiLabelMap.fixedAsset}" use-when="requirementType.equals(&quot;MARKETING_REQ&quot;)"><lookup target-form-name="LookupFixedAsset"/></field>
+        <field name="fixedAssetId" title="${uiLabelMap.fixedAsset}" use-when="!requirementType.equals(&quot;MARKETING_REQ&quot;)"><hidden/></field>
+        <field name="custRequestId" map-name="parameters"><hidden/></field>
+        <field name="custRequestItemSeqId" map-name="parameters"><hidden/></field>
+        <field name="submitButton" title="${uiLabelMap.ProductAddProduct}" widget-style="btn btn-small btn-primary center" use-when="requirement == null">
+            <submit button-type="button" image-location="icon-arrow-right icon-on-right"/>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="btn btn-small btn-primary center" use-when="requirement != null">
+            <submit button-type="button" image-location="icon-ok"/>
+        </field>
+        <field name="requirementStartDate" title="${uiLabelMap.RequirementStartDate}"><date-time/></field>
+        <field name="requiredByDate" title="${uiLabelMap.RequiredByDate}"><date-time/></field>
+        <field name="useCase"><hidden/></field>
+        <field name="deliverableId"><hidden/></field>
+        <field name="requestor" title="${uiLabelMap.Requestor}" use-when="requirement == null" required-field="true" >
+        	<!-- <lookup target-form-name="lookupPartyInfo"></lookup> -->
+        	<hidden value="salesman1" />
+        </field>
+        <field name="requestor" use-when="requirement != null"><hidden value="${listRequestor[0].partyId}"/></field>
+        <field name="requestorDisplay" title="${uiLabelMap.Requestor}" use-when="requirement != null">
+        	<display default-value="${requestor.firstName} ${requestor.middleName} ${requestor.lastName} ${requestor.groupName} [${listRequestor[0].partyId}]"/>
+        </field>
+        <field name="requestorDisplay" title="${uiLabelMap.Requestor}" use-when="requirement == null">
+        	<hidden/>
+        </field>
+        <field name="receiverParty" title="${uiLabelMap.Receiver}" use-when="requirementType.equals(&quot;GIFT_REQ&quot;) &amp;&amp; requirement == null">
+        	<lookup target-form-name="lookupPartyInfo" default-value="${listReceivers[0].partyId}"></lookup>
+        </field>
+        <field name="receiverParty" title="${uiLabelMap.Receiver}" use-when="requirementType.equals(&quot;GIFT_REQ&quot;) &amp;&amp; requirement != null">
+        	<display default-value="${listReceivers[0].partyId}"/>
+        </field>
+        <field name="customerParty" title="${uiLabelMap.Customer}" use-when="requirementType.equals(&quot;CHANGE_DATE_REQ&quot;) || requirementType.equals(&quot;SALES_REQ&quot;)" required-field="true">
+        	<lookup target-form-name="lookupPartyInfo" default-value="${listCustomer[0].partyId}"></lookup>
+        </field>
+        <field name="customerParty" title="${uiLabelMap.Customer}" use-when="!requirementType.equals(&quot;CHANGE_DATE_REQ&quot;) &amp;&amp; !requirementType.equals(&quot;SALES_REQ&quot;)" required-field="true">
+        	<hidden/>
+        </field>
+		<field name="quantity"><hidden/></field>
+		<field name="uomId"><hidden/></field>
+		<field name="currencyUomId"><hidden/></field>
+		<field name="productId"><hidden/></field>
+        <sort-order>
+        	<field-group style="no-left-margin no-widget-header span6 begin-group-group">
+        		<sort-field name="requestor"/>
+        		<sort-field name="requirementId"/>
+        		<sort-field name="requirementTypeId"/>
+        		<sort-field name="requestorDisplay"/>
+        		<sort-field name="receiverParty"/>
+        		<sort-field name="productStoreId"/>
+        		<sort-field name="facilityId"/>
+        		<sort-field name="originContactMechId"/>
+        		<sort-field name="productStoreIdTo"/>
+        		<sort-field name="facilityTo"/>
+        		<sort-field name="destContactMechId"/>
+        		<sort-field name="customerParty"/>
+        		<sort-field name="fixedAssetId"/>
+        	</field-group>
+        	<field-group style="span6 no-widget-header end-group-group">
+        		<sort-field name="requiredByDate"/>
+        		<sort-field name="requirementStartDate"/>
+        		<sort-field name="estimatedBudget"/>
+        		<sort-field name="reason"/>
+        		<sort-field name="statusId"/>
+        		<sort-field name="description"/>
+        	</field-group>
+        	<field-group style="no-left-margin no-widget-header span6 begin-group-group">
+        		<sort-field name="submitButtonUpdate" position="1"/>
+        	</field-group>
+        </sort-order>
+    </form>
+    
+    <form name="ListRequirementItems" target="deleteRequirementItems" type="multi" list-name="listRequirementItems" use-row-submit="true" default-table-style="table table-striped table-bordered table-hover dataTable" odd-row-style="alternate-row">
+    	<field name="productId" title="${uiLabelMap.ProductProduct}"><display-entity entity-name="Product" description="${productName}" key-field-name="productId"></display-entity></field>
+    	<field name="prodCatalogId" title="${uiLabelMap.ProductCatalog}"><display-entity entity-name="ProdCatalog" description="${catalogName}" key-field-name="prodCatalogId"></display-entity></field>
+    	<field name="prodCategoryId" title="${uiLabelMap.ProductCategory}"><display-entity entity-name="ProductCategory" description="${categoryName}" key-field-name="productCategoryId"></display-entity></field>
+    	<field name="reqItemSeqId" title="${uiLabelMap.reqItemSeqId}"><display/></field>
+    	<field name="quantity" title="${uiLabelMap.Quantity}"><display/></field>
+    	<field name="quantityUomId" title="${uiLabelMap.QuantityUomId}"><display-entity entity-name="Uom" description="${description}" key-field-name="uomId"></display-entity></field>
+		<field name="expireDate" title="${uiLabelMap.ExpirationDate}"><display/></field>
+    	<field name="createDate" title="${uiLabelMap.createDate}"><display/></field>
+    	<field name="shipBeforeDate"><display/></field>
+    	<field name="shipAfterDate"><display/></field>
+    	<field name="statusId" title="${uiLabelMap.Status}"><display-entity entity-name="StatusItem" description="${description}" key-field-name="statusId"></display-entity></field>
+    	<field name="requirementId"><hidden value="${requirementId}"/></field>
+    	<field name="_rowSubmit" title="${uiLabelMap.CommonSelect}"><check all-checked="true"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonDelete}" widget-style="btn btn-small btn-danger" use-when="!listRequirementItems.isEmpty()">
+            <submit button-type="button" image-location="icon-trash"/>
+        </field>
+    </form> 
+    
+</forms>
+<!-- HUNGNC END EDIT -->

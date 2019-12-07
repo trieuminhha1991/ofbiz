@@ -1,0 +1,1311 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+    <simple-method method-name="createShipmentReceipt" short-description="Create a ShipmentReceipt">
+        <make-value value-field="newEntity" entity-name="ShipmentReceipt"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <sequenced-id sequence-name="ShipmentReceipt" field="receiptId"/>
+        <to-string field="receiptId"/>
+        <set field="newEntity.receiptId" from-field="receiptId"/>
+        <field-to-result field="receiptId" result-name="receiptId"/>
+
+        <if-empty field="newEntity.datetimeReceived">
+            <now-timestamp field="nowTimestamp"/>
+            <set field="newEntity.datetimeReceived" from-field="nowTimestamp"/>
+        </if-empty>
+
+        <set field="newEntity.receivedByUserLoginId" from-field="userLogin.userLoginId"/>
+        <create-value value-field="newEntity"/>
+
+        <if-not-empty field="parameters.inventoryItemDetailSeqId">
+            <entity-one entity-name="InventoryItemDetail" value-field="invDet">
+                <field-map field-name="inventoryItemDetailSeqId" from-field="parameters.inventoryItemDetailSeqId"/>
+                <field-map field-name="inventoryItemId" from-field="parameters.inventoryItemId"/>
+            </entity-one>
+            <set field="invDet.receiptId" from-field="receiptId"/>
+            <store-value value-field="invDet"/>
+        </if-not-empty>
+        
+        <!-- TODOCHANGE out of the box affectAccounting = true default -->
+        <if-not-empty field="parameters.affectAccounting">
+        	<set field="affectAccounting" type="Boolean" value="${parameters.affectAccounting}"/>
+        	<else>
+        		<set field="affectAccounting" type="Boolean" value="true"/>
+        	</else>
+        </if-not-empty>
+        
+        <entity-one value-field="product" entity-name="Product"/>
+        <if>
+            <condition>
+                <or>
+                    <if-compare field="product.productTypeId" operator="equals" value="SERVICE_PRODUCT"/>
+                    <if-compare field="product.productTypeId" operator="equals" value="ASSET_USAGE_OUT_IN"/>
+                    <if-compare field="product.productTypeId" operator="equals" value="AGGREGATEDSERV_CONF"/>
+					<if-compare field="product.productTypeId" operator="equals" value="AGGR_DIGSERV"/>
+					<if-compare field="product.productTypeId" operator="equals" value="AGGR_DIGSERV_CONF"/>
+                </or>
+            </condition>
+            <then>
+                <set field="affectAccounting" type="Boolean" value="false"/>
+            </then>
+        </if>
+        <field-to-result field="affectAccounting" result-name="affectAccounting"/>
+    </simple-method>
+
+    <simple-method method-name="createShipmentReceiptRole" short-description="Create a ShipmentReceipt Role">
+        <make-value value-field="newEntity" entity-name="ShipmentReceiptRole"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+
+        <create-value value-field="newEntity"/>
+    </simple-method>
+
+    <simple-method method-name="removeShipmentReceiptRole" short-description="Remove a ShipmentReceipt Role">
+        <make-value value-field="lookupPKMap" entity-name="ShipmentReceiptRole"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key entity-name="ShipmentReceiptRole" map="lookupPKMap" value-field="lookedUpValue"/>
+        <remove-value value-field="lookedUpValue"/>
+    </simple-method>     
+    
+	<simple-method method-name="getCostForPurchase" short-description="Get Cost Purchase for Product(s) and base application it"> <!-- VietTB get Cost for Purchase -->
+				
+		<call-simple-method method-name="getGlArithmeticSettingsInline" xml-resource="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml"/>
+						
+        <entity-one entity-name="OrderHeader" value-field="orderHeader" auto-field-map="false">
+            <field-map field-name="orderId" from-field="parameters.orderId"/>
+        </entity-one>		
+		 		
+        <entity-one entity-name="Product" value-field="product" auto-field-map="false">
+            <field-map field-name="productId" from-field="parameters.productId"/>
+        </entity-one>	
+        		 		
+		<entity-condition entity-name="OrderItem" list="listOrderItemDist" distinct="true">
+     		<condition-list>
+     			<condition-expr field-name="orderId" from-field="parameters.orderId"/>
+     		</condition-list>
+     		<select-field field-name="productId"/>
+     	</entity-condition>
+     	     	
+		<entity-condition entity-name="OrderItem" list="listOrderItem">
+     		<condition-list>
+     			<condition-expr field-name="orderId" from-field="parameters.orderId"/>
+     		</condition-list>     		
+     	</entity-condition>
+     	
+       <entity-and list="orderRoleToList" entity-name="OrderRole">
+            <field-map field-name="orderId" from-field="orderHeader.orderId"/>
+            <field-map field-name="roleTypeId" value="BILL_FROM_VENDOR"/>
+        </entity-and>
+        <first-from-list entry="orderRoleTo" list="orderRoleToList"/>
+     
+        <entity-and list="orderRoleFromList" entity-name="OrderRole">
+            <field-map field-name="orderId" from-field="orderHeader.orderId"/>
+            <field-map field-name="roleTypeId" value="BILL_TO_CUSTOMER"/>
+        </entity-and>
+        <first-from-list entry="orderRoleFrom" list="orderRoleFromList"/>
+     
+        <if-compare operator="equals" value="PURCHASE_ORDER" field="orderHeader.orderTypeId">
+            <set field="organizationPartyId" from-field="orderRoleFrom.partyId"/>
+            <else>
+                <set field="organizationPartyId" from-field="orderRoleTo.partyId"/>
+            </else>
+        </if-compare>     	
+        
+        <set field="partyAccountingPreferencesMap.organizationPartyId" from-field="organizationPartyId"/>
+        <call-service service-name="getPartyAccountingPreferences" in-map-name="partyAccountingPreferencesMap">
+             <result-to-field result-name="partyAccountingPreference" field="partyAcctgPreference"/>
+        </call-service>
+                     	
+     	<set field="totalQuantity" type="BigDecimal" value="0"/>
+     	<set field="totalWeight" type="BigDecimal" value="0"/>
+     	<set field="totalValue" type="BigDecimal" value="0"/>
+		<set field="totalAVG" value="${util:size(listOrderItemDist)}" type="BigDecimal"/>
+        <set field="unitPrice" type="BigDecimal" value="0"/>
+		
+     	<set field="productQuantity" type="BigDecimal" value="0"/>
+     	<set field="productWeight" type="BigDecimal" value="0"/>
+     	<set field="productValue" type="BigDecimal" value="0"/>
+     	<set field="productAVG" type="BigDecimal" value="1"/>
+
+        <iterate entry="orderItem" list="listOrderItem">
+     		<if-compare-field to-field="parameters.productId" operator="equals" field="orderItem.productId"> 
+     			 <set field="productQuantity" value="${productQuantity$bigDecimal + orderItem.quantity$bigDecimal}" type="BigDecimal"/>
+     			 <set field="totalQuantity" value="${totalQuantity$bigDecimal + orderItem.quantity$bigDecimal}" type="BigDecimal"/>
+     			 <set field="unitPrice" from-field="orderItem.unitPrice" type="BigDecimal"/>
+     			 <if-compare-field to-field="partyAcctgPreference.baseCurrencyUomId" operator="equals" field="orderHeader.currencyUom">
+     			 	<set field="costValue" type="BigDecimal" value="0" />
+     			    <calculate field="costValue" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+	                    <calcop operator="multiply">
+	                        <calcop operator="get" field="orderItem.quantity"/>
+	                        <calcop operator="get" field="orderItem.unitPrice"/>
+	                    </calcop>
+                	</calculate>
+                	
+                    <calculate field="productValue" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+                        <calcop operator="add">
+                            <calcop operator="get" field="costValue"/>
+                            <calcop operator="get" field="productValue"/>
+                        </calcop>
+                    </calculate>
+                    
+                    <calculate field="totalValue" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+                        <calcop operator="add">
+                            <calcop operator="get" field="costValue"/>
+                            <calcop operator="get" field="totalValue"/>
+                        </calcop>
+                    </calculate>                                    	
+     			 <else>    			 	
+	       			<clear-field field="convertUomInMap"/>
+	                <set field="convertUomInMap.originalValue" from-field="orderItem.unitPrice"/>
+	                <set field="convertUomInMap.uomId" from-field="orderHeader.currencyUom"/>
+	                <set field="convertUomInMap.uomIdTo" from-field="partyAcctgPreference.baseCurrencyUomId"/>
+					
+	                <call-service service-name="convertUom" in-map-name="convertUomInMap">
+	                     <result-to-field result-name="convertedValue" field="orderItem.unitPrice"/>
+	                </call-service>
+
+    			 	<set field="costValue" type="BigDecimal" value="0" />
+     			    <calculate field="costValue" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+	                    <calcop operator="multiply">
+	                        <calcop operator="get" field="orderItem.quantity"/>
+	                        <calcop operator="get" field="orderItem.unitPrice"/>
+	                    </calcop>
+                	</calculate>
+                	
+                    <calculate field="productValue" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+                        <calcop operator="add">
+                            <calcop operator="get" field="costValue"/>
+                            <calcop operator="get" field="productValue"/>
+                        </calcop>
+                    </calculate>
+                    
+                    <calculate field="totalValue" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+                        <calcop operator="add">
+                            <calcop operator="get" field="costValue"/>
+                            <calcop operator="get" field="totalValue"/>
+                        </calcop>
+                    </calculate>	                 
+	             </else>
+                 </if-compare-field>
+                 
+                 <if-compare operator="equals" value="WT_g" field="product.weightUomId">
+                 	<set field="costWeight" type="BigDecimal" value="0" />
+                 	<if-not-empty field="product.weight">
+	               		<set from-field="product.weight" field="weight"/>
+	               	<else>
+               			<if-not-empty field="product.productWeight">
+               				<set from-field="product.productWeight" field="weight"/>
+           				<else>
+           					<set value="1" field="weight" type="BigDecimal"/>
+           				</else>
+               			</if-not-empty>
+	               	</else>
+	               	</if-not-empty>
+     			    <calculate field="costWeight" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+	                    <calcop operator="multiply">
+	                        <calcop operator="get" field="orderItem.quantity"/>
+							<calcop operator="get" field="weight"/>
+	                    </calcop>
+                	</calculate>
+                	
+                    <calculate field="productWeight" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+                        <calcop operator="add">
+                            <calcop operator="get" field="costWeight"/>
+                            <calcop operator="get" field="productWeight"/>
+                        </calcop>
+                    </calculate>
+                    
+                    <calculate field="totalWeight" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+                        <calcop operator="add">
+                            <calcop operator="get" field="costWeight"/>
+                            <calcop operator="get" field="totalWeight"/>
+                        </calcop>
+                    </calculate> 
+                 <else>                 	
+                 	<clear-field field="convertUomInMap"/>
+                 	<if-not-empty field="product.weight">
+                 		<set field="convertUomInMap.originalValue" from-field="product.weight"/>
+                 	<else>
+                 		<if-not-empty field="product.productWeight">
+                 			<set field="convertUomInMap.originalValue" from-field="product.productWeight"/>
+               			<else>
+                			<set field="convertUomInMap.originalValue" value="1" type="BigDecimal"/>		
+               			</else>
+                 		</if-not-empty>
+                 	</else>
+                 	</if-not-empty>
+	                
+	                <set field="convertUomInMap.uomId" from-field="product.weightUomId"/>
+	                <set field="convertUomInMap.uomIdTo" value="WT_g"/>
+	                <set field="proWeight" value="0" type="BigDecimal"/>
+	                <if-not-empty field="convertUomInMap.uomId">
+	               		<call-service service-name="convertUom" in-map-name="convertUomInMap">
+	                    	 <result-to-field result-name="convertedValue" field="proWeight"/>
+	                	</call-service>
+	                </if-not-empty>
+
+	                <set field="costWeight" type="BigDecimal" value="0" />
+     			    <calculate field="costWeight" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+	                    <calcop operator="multiply">
+	                        <calcop operator="get" field="orderItem.quantity"/>
+	                        <calcop operator="get" field="proWeight"/>
+	                    </calcop>
+                	</calculate>
+                	
+                    <calculate field="productWeight" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+                        <calcop operator="add">
+                            <calcop operator="get" field="costWeight"/>
+                            <calcop operator="get" field="productWeight"/>
+                        </calcop>
+                    </calculate>
+                    
+                    <calculate field="totalWeight" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+                        <calcop operator="add">
+                            <calcop operator="get" field="costWeight"/>
+                            <calcop operator="get" field="totalWeight"/>
+                        </calcop>
+                    </calculate> 	                	                
+                 </else>                	
+                 </if-compare>
+              <else>
+              	 <set field="totalQuantity" value="${totalQuantity$bigDecimal + orderItem.quantity$bigDecimal}" type="BigDecimal"/>
+              	 
+    			 <if-compare-field to-field="partyAcctgPreference.baseCurrencyUomId" operator="equals" field="orderHeader.currencyUom">    			 	
+     			 	<set field="costValue" type="BigDecimal" value="0" />
+     			    <calculate field="costValue" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+	                    <calcop operator="multiply">
+	                        <calcop operator="get" field="orderItem.quantity"/>
+	                        <calcop operator="get" field="orderItem.unitPrice"/>
+	                    </calcop>
+                	</calculate>
+
+                    <calculate field="totalValue" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+                        <calcop operator="add">
+                            <calcop operator="get" field="costValue"/>
+                            <calcop operator="get" field="totalValue"/>
+                        </calcop>
+                    </calculate>                                    	
+     			 <else>
+	       			<clear-field field="convertUomInMap"/>
+	                <set field="convertUomInMap.originalValue" from-field="orderItem.unitPrice"/>
+	                <set field="convertUomInMap.uomId" from-field="orderHeader.currencyUom"/>
+	                <set field="convertUomInMap.uomIdTo" from-field="partyAcctgPreference.baseCurrencyUomId"/>
+	                <call-service service-name="convertUom" in-map-name="convertUomInMap">
+	                     <result-to-field result-name="convertedValue" field="orderItem.unitPrice"/>
+	                </call-service>
+	                 
+    			 	<set field="costValue" type="BigDecimal" value="0" />
+     			    <calculate field="costValue" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+	                    <calcop operator="multiply">
+	                        <calcop operator="get" field="orderItem.quantity"/>
+	                        <calcop operator="get" field="orderItem.unitPrice"/>
+	                    </calcop>
+                	</calculate>
+                    
+                    <calculate field="totalValue" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+                        <calcop operator="add">
+                            <calcop operator="get" field="costValue"/>
+                            <calcop operator="get" field="totalValue"/>
+                        </calcop>
+                    </calculate>                                         				              
+             	</else>                                     			 
+     			</if-compare-field>
+     			
+   			    <if-compare operator="equals" value="WT_g" field="product.weightUomId">
+               	   <set field="costWeight" type="BigDecimal" value="0" />
+               	    <if-not-empty field="product.weight">
+               			<set from-field="product.weight" field="weight"/>
+               		<else>
+               			<if-not-empty field="product.productWeight">
+          					<set from-field="product.productWeight" field="weight"/>
+          				<else>
+           					<set value="1" field="weight" type="BigDecimal"/>
+           				</else>
+           				</if-not-empty>
+           			</else> 
+           			</if-not-empty>             	 
+   			      <calculate field="costWeight" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+               	      	<calcop operator="multiply"> 
+                       		<calcop operator="get" field="orderItem.quantity"/>
+                   			<calcop operator="get" field="weight"/>
+                   	  	</calcop>
+              	  </calculate>              	
+                  
+                  <calculate field="totalWeight" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+                      <calcop operator="add">
+                          <calcop operator="get" field="costWeight"/>
+                          <calcop operator="get" field="totalWeight"/>
+                      </calcop>
+                  </calculate> 
+               <else>
+	               <clear-field field="convertUomInMap"/>
+	               <if-not-empty field="product.weight">
+	               		<set field="convertUomInMap.originalValue" from-field="product.weight"/>
+	               <else>
+	               		<if-not-empty field="product.weight">
+	               			<set field="convertUomInMap.originalValue" from-field="product.productWeight"/>
+	               		<else>
+	               			<set field="convertUomInMap.originalValue" value="1" type="BigDecimal"/>
+	               		</else>
+	               		</if-not-empty>
+	               </else>
+	               </if-not-empty>
+	               <if-not-empty field="convertUomInMap.originalValue">
+		               <set field="convertUomInMap.uomId" from-field="product.weightUomId"/>
+		               <set field="convertUomInMap.uomIdTo" value="WT_g"/>
+		               <set field="proWeight" value="0" type="BigDecimal"/>
+		               <if-not-empty field="convertUomInMap.uomId">
+			               <call-service service-name="convertUom" in-map-name="convertUomInMap">
+			                    <result-to-field result-name="convertedValue" field="proWeight"/>
+			               </call-service>
+		               </if-not-empty>
+		               <set field="costWeight" type="BigDecimal" value="0" />
+		   			   <calculate field="costWeight" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+		                   <calcop operator="multiply">
+		                       <calcop operator="get" field="orderItem.quantity"/>
+		                       <calcop operator="get" field="proWeight"/>
+		                   </calcop>
+		              	</calculate>
+		                  
+		                  <calculate field="totalWeight" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+		                      <calcop operator="add">
+		                          <calcop operator="get" field="costWeight"/>
+		                          <calcop operator="get" field="totalWeight"/>
+		                      </calcop>
+		                  </calculate> 	  
+	                  </if-not-empty>              	                
+               </else>                	
+               </if-compare>
+     		</else>
+     		</if-compare-field>
+     	</iterate>	
+<!--      	<log message="VIETTB totalWeight ${totalWeight}  totalValue ${totalValue}  totalQuantity ${totalQuantity}" level="info"/> -->
+<!--      	<log message="VIETTB productWeight ${productWeight}  productValue ${productValue}  productQuantity ${productQuantity}" level="info"/> -->
+      	
+      	<set field="rateQuantity" type="BigDecimal" value="0"/>
+     	<set field="rateWeight" type="BigDecimal" value="0"/>
+     	<set field="rateValue" type="BigDecimal" value="0"/>		
+		<set field="rateAVG" type="BigDecimal" value="0"/> 		
+		<set field="totalCost" type="BigDecimal" value="0"/>
+		<set field="purCost" type="BigDecimal" value="0"/>         	
+     	
+     	<if-compare operator="greater" value="0" field="totalQuantity">     	
+	  		<calculate field="rateQuantity" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+	            <calcop operator="divide">
+	                <calcop operator="get" field="productQuantity"/>
+	                <calcop operator="get" field="totalQuantity"/>
+	            </calcop>
+	       	</calculate>	    
+     	</if-compare>
+     	
+      	<if-compare operator="greater" value="0" field="totalWeight">     	
+	  		<calculate field="rateWeight" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+	            <calcop operator="divide">
+	                <calcop operator="get" field="productWeight"/>
+	                <calcop operator="get" field="totalWeight"/>
+	            </calcop>
+	       	</calculate>	    
+     	</if-compare>    	
+
+      	<if-compare operator="greater" value="0" field="totalWeight">     	
+	  		<calculate field="rateValue" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+	            <calcop operator="divide">
+	                <calcop operator="get" field="productValue"/>
+	                <calcop operator="get" field="totalValue"/>
+	            </calcop>
+	       	</calculate>	    
+     	</if-compare>       	
+
+      	<if-compare operator="greater" value="0" field="totalAVG">     	
+	  		<calculate field="rateAVG" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+	            <calcop operator="divide">
+	                <calcop operator="get" field="productAVG"/>
+	                <calcop operator="get" field="totalAVG"/>
+	            </calcop>
+	       	</calculate>	    
+     	</if-compare> 
+     	
+		<entity-condition entity-name="CostAccounting" list="listCostAccounting">
+     		<condition-list>
+     			<condition-expr field-name="orderId" from-field="parameters.orderId"/>
+     		</condition-list>     		
+     	</entity-condition>
+      	<log message="ThaiNT listCostAccounting ${listCostAccounting}" level="info"/>
+     	<if-not-empty field="listCostAccounting">
+	     	<iterate entry="costAccounting" list="listCostAccounting">
+                <set field="startTotalCost" from-field="totalCost"/>
+		        <entity-and list="listCostAccBase" entity-name="CostAccBase">
+		            <field-map field-name="costAccBaseId" from-field="costAccounting.costAccBaseId"/>
+		        </entity-and>
+		        <first-from-list entry="costAccBase" list="listCostAccBase"/>		        
+		        <log level="info" message="ThaiNT costAccBase = ${costAccBase}"/>
+		        <if-compare operator="equals" value="COST_AVG" field="costAccBase.applicationBaseId">
+		        	<set field="rateCost" type="BigDecimal" value="0"/> 
+				    <calculate field="rateCost" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+			            <calcop operator="multiply">
+			                <calcop operator="get" field="costAccounting.costPriceTemporary"/>
+			                <calcop operator="get" field="rateAVG"/>
+			            </calcop>
+			       	</calculate>
+	                <calculate field="totalCost" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+	                    <calcop operator="add">
+	                        <calcop operator="get" field="rateCost"/>
+	                        <calcop operator="get" field="totalCost"/>
+	                    </calcop>
+	                </calculate> 
+	                <log message="costAccounting.costAccBaseId ${costAccounting.costAccBaseId} rateCost ${rateCost} rateAVG ${rateAVG}" level="info"/>
+		        <else>
+		        	<if-compare operator="equals" value="COST_WEIGHT" field="costAccBase.applicationBaseId">
+		        		<set field="rateCost" type="BigDecimal" value="0"/> 
+					    <calculate field="rateCost" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+				            <calcop operator="multiply">
+				                <calcop operator="get" field="costAccounting.costPriceTemporary"/>
+				                <calcop operator="get" field="rateWeight"/>
+				            </calcop>
+				       	</calculate>
+		                <calculate field="totalCost" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+		                    <calcop operator="add">
+		                        <calcop operator="get" field="rateCost"/>
+		                        <calcop operator="get" field="totalCost"/>
+		                    </calcop>
+		                </calculate> 
+	                	<log message="costAccounting.costAccBaseId ${costAccounting.costAccBaseId} rateCost ${rateCost} rateWeight ${rateWeight}" level="info"/>		                		        			        	
+		        	<else>
+			        	<if-compare operator="equals" value="COST_VALUE" field="costAccBase.applicationBaseId">
+			        		<set field="rateCost" type="BigDecimal" value="0"/> 
+						    <calculate field="rateCost" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+					            <calcop operator="multiply">
+					                <calcop operator="get" field="costAccounting.costPriceTemporary"/>
+					                <calcop operator="get" field="rateValue"/>
+					            </calcop>
+					       	</calculate>
+			                <calculate field="totalCost" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+			                    <calcop operator="add">
+			                        <calcop operator="get" field="rateCost"/>
+			                        <calcop operator="get" field="totalCost"/>
+			                    </calcop>
+			                </calculate>
+			               	<log message="costAccounting.costAccBaseId ${costAccounting.costAccBaseId} rateCost ${rateCost} rateValue ${rateValue}" level="info"/> 			        		
+		        		<else>
+                            <if-compare operator="equals" value="COST_PERCENTAGE" field="costAccBase.applicationBaseId">
+                                <set field="productCategoryId" value=""/>
+                                <set field="exchangedRate" from-field="costAccounting.exchangedRate" type="BigDecimal"/>
+                                <if-compare operator="equals" value="PINV_IMPTAX_ITEM" field="costAccBase.invoiceItemTypeId">
+                                    <set field="productCategoryId" value="TAX_IMP_%"/>
+                                    <else>
+                                        <set field="productCategoryId" value="TAX_EXCISE_%"/>
+                                    </else>
+                                </if-compare>
+                                <entity-condition list="categories" entity-name="ProductCategoryMember">
+                                    <condition-list combine="and">
+                                        <condition-expr field-name="productId" from-field="parameters.productId"/>
+                                        <condition-expr field-name="productCategoryId" operator="like" from-field="productCategoryId"/>
+                                    </condition-list>
+                                </entity-condition>
+                                <first-from-list entry="category" list="categories"/>
+                                <entity-condition list="taxAuthorities" entity-name="TaxAuthorityRateProduct">
+                                    <condition-list combine="and">
+                                        <condition-expr field-name="productCategoryId" operator="equals" from-field="category.productCategoryId"/>
+                                    </condition-list>
+                                </entity-condition>
+                                <first-from-list entry="taxAuthority" list="taxAuthorities"/>
+                                <set field="percentage" from-field="taxAuthority.taxPercentage"/>
+                                <set field="oneHundredPercent" value="100" type="BigDecimal"/>
+                                <log level="info" message="ThaiNT percentage = ${percentage}, unitPrice = ${unitPrice}, productQuantity = ${productQuantity}, oneHundredPercent = ${oneHundredPercent}, exchangedRate = ${exchangedRate}"/>
+                                <calculate field="rateCost" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+                                    <calcop operator="multiply">
+                                        <calcop operator="get" field="percentage"/>
+                                        <calcop operator="get" field="unitPrice"/>
+                                        <calcop operator="get" field="productQuantity"/>
+                                        <calcop operator="get" field="exchangedRate"/>
+                                    </calcop>
+                                </calculate>
+                                <calculate field="rateCost" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+                                    <calcop operator="divide">
+                                        <calcop operator="get" field="rateCost"/>
+                                        <calcop operator="get" field="oneHundredPercent"/>
+                                    </calcop>
+                                </calculate>
+                                <calculate field="totalCost" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+                                    <calcop operator="add">
+                                        <calcop operator="get" field="rateCost"/>
+                                        <calcop operator="get" field="totalCost"/>
+                                    </calcop>
+                                </calculate>
+                                <else>
+                                    <set field="rateCost" type="BigDecimal" value="0"/>
+                                    <calculate field="rateCost" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+                                        <calcop operator="multiply">
+                                            <calcop operator="get" field="costAccounting.costPriceTemporary"/>
+                                            <calcop operator="get" field="rateQuantity"/>
+                                        </calcop>
+                                    </calculate>
+                                    <calculate field="totalCost" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+                                        <calcop operator="add">
+                                            <calcop operator="get" field="rateCost"/>
+                                            <calcop operator="get" field="totalCost"/>
+                                        </calcop>
+                                    </calculate>
+                                    <log message="costAccounting.costAccBaseId ${costAccounting.costAccBaseId} rateCost ${rateCost} rateQuantity ${rateQuantity}" level="info"/>
+                                </else>
+                            </if-compare>
+		        		</else>
+			        	</if-compare>
+		        	</else>
+		        	</if-compare>
+		       	</else>		        	
+		        </if-compare>
+                <clear-field field="serviceInMap"/>
+                <calculate field="costAccPerProduct" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+                    <calcop operator="subtract">
+                        <calcop operator="get" field="totalCost"/>
+                        <calcop operator="get" field="startTotalCost"/>
+                    </calcop>
+                </calculate>
+                <set field="serviceInMap.orderId" from-field="parameters.orderId"/>
+                <set field="serviceInMap.totalCost" from-field="costAccPerProduct"/>
+                <set field="serviceInMap.productId" from-field="parameters.productId"/>
+                <set field="serviceInMap.currencyUomId" from-field="parameters.currencyUomId"/>
+                <set field="serviceInMap.costAccountingId" from-field="costAccounting.costAccountingId"/>
+                <call-service service-name="createAccCostForProduct" in-map-name="serviceInMap"/>
+	     	</iterate>     	
+     	</if-not-empty> 
+     	
+<!--      	<log message="VIETTB rateAVG ${rateAVG}  rateWeight ${rateWeight} rateValue ${rateValue} rateQuantity ${rateQuantity}" level="info"/> -->
+<!--      	<log message="VIETTB totalCost ${totalCost}" level="info"/> -->
+     	
+        <calculate field="purCost" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}">
+            <calcop operator="divide">
+                <calcop operator="get" field="totalCost"/>
+                <calcop operator="get" field="productQuantity"/>
+            </calcop>
+        </calculate> 	  
+<!--         <log message="VIETTB purCost ${purCost} " level="info"/> -->
+        
+         <clear-field field="serviceInMap"/>
+         <set field="serviceInMap.orderId" from-field="parameters.orderId"/>
+         <set field="serviceInMap.productId" from-field="parameters.productId"/>
+         <set field="serviceInMap.currencyUomId" from-field="parameters.currencyUomId"/>
+         <set field="serviceInMap.ownerPartyId" from-field="parameters.ownerPartyId"/>
+<!--          <log message="VIETTB actg serviceInMap ${serviceInMap} " level="info"/> -->
+<!--          <call-service service-name="createAcctgTransForPurchaseCost" in-map-name="serviceInMap"> -->
+<!--          	<result-to-field result-name="acctgTransId" field="parameters.acctgTransId"/> -->
+<!--          </call-service> -->
+                 
+        <field-to-result field="purCost" result-name="purCost"/>   	
+<!--         <entity-one entity-name="ProductDifference" value-field="productDifference" auto-field-map="false"> -->
+<!--             <field-map field-name="productId" from-field="parameters.productId"/> -->
+<!--         </entity-one> -->
+        
+<!--         <if-not-empty field="productDifference"> -->
+<!--         	Xử lý cho phần giá trị chênh, lưu ý trường hợp giá trị chênh > chi phí lần nhập này, dẫn đến giá < 0 -->
+<!--         	<set field="totalDifference" type="BigDecimal" value="0"/> -->
+<!--             <calculate field="totalDifference" decimal-scale="${ledgerDecimals}" rounding-mode="${roundingMode}"> -->
+<!--                 <calcop operator="add"> -->
+<!--                     <calcop operator="get" field="totalCost"/> -->
+<!--                     <calcop operator="get" field="productDifference.costPrice"/> -->
+<!--                 </calcop> -->
+<!--             </calculate>       	 -->
+<!--         	<if-compare operator="less" value="0" field="totalDifference"> -->
+        		
+<!--         	</if-compare> -->
+<!--         </if-not-empty> -->
+             	    	
+	</simple-method>
+	
+    <simple-method method-name="receiveInventoryProduct" short-description="Receive Inventory in new Inventory Item(s)">
+        <!-- NOTES
+            - for serialized items with a serial number passed in: the quantityAccepted _should_ always be 1
+            - if the type is SERIALIZED_INV_ITEM but there is not serial number (which is weird...) we'll create a bunch of individual InventoryItems
+            - DEJ20070822: something to consider for the future: maybe instead of this funny looping maybe for serialized items we should only allow a quantity of 1, ie return an error if it is not 1
+        -->       	       	
+        <set field="loops" value="1" type="Double"/>
+        <if-compare value="SERIALIZED_INV_ITEM" operator="equals" field="parameters.inventoryItemTypeId">
+            <!-- if we are serialized and either a serialNumber or inventoyItemId is passed in and the quantityAccepted is greater than 1 then complain -->
+            <if>
+                <condition>
+                    <and>
+                        <or>
+                            <not><if-empty field="parameters.serialNumber"/></not>
+                            <not><if-empty field="parameters.currentInventoryItemId"/></not>
+                        </or>
+                        <if-compare field="parameters.quantityAccepted" operator="greater" value="1" type="BigDecimal"/>
+                    </and>
+                </condition>
+                <then>
+                    <add-error>
+                        <fail-property resource="ProductUiLabels" property="FacilityReceiveInventoryProduct"/>
+                    </add-error>
+                </then>
+            </if>
+
+            <set field="loops" from-field="parameters.quantityAccepted"/>
+            <set field="parameters.quantityAccepted" value="1" type="BigDecimal"/>
+        </if-compare>
+<!-- 		<log message="VIETTB VIETTB ${parameters}" level="info"/> -->
+        <set field="parameters.quantityOnHandDiff" from-field="parameters.quantityAccepted"/>
+        <set field="parameters.amountOnHandDiff" from-field="parameters.amountAccepted"/>
+        <set field="parameters.availableToPromiseDiff" from-field="parameters.quantityAccepted"/>
+
+        <!-- before getting going, see if there are any validation issues so far -->
+        <check-errors/>
+
+        <!-- Status for Non serialized and Serialized inventory are different, lets make sure correct status is stored in database -->
+        <if-compare field="parameters.inventoryItemTypeId" operator="equals" value="NON_SERIAL_INV_ITEM">
+            <if-compare field="parameters.statusId" operator="equals" value="INV_DEFECTIVE"><!-- This status may come from the Receive Return Screen -->
+                <set field="parameters.statusId" value="INV_NS_DEFECTIVE"/>
+            <else>
+                <if-compare field="parameters.statusId" operator="equals" value="INV_ON_HOLD">
+                    <set field="parameters.statusId" value="INV_NS_ON_HOLD"/>
+                <else>
+                    <if-compare field="parameters.statusId" operator="equals" value="INV_RETURNED">
+                        <set field="parameters.statusId" value="INV_NS_RETURNED"/>
+                    </if-compare>
+                </else>
+                </if-compare>
+            </else>
+            </if-compare>
+            <!-- Any other status should be just set to null, if it is not a valid status for Non Serialized inventory -->
+            <if>
+                <condition>
+                    <and>
+                        <not><if-compare field="parameters.statusId" operator="equals" value="INV_NS_DEFECTIVE"/></not>
+                        <not><if-compare field="parameters.statusId" operator="equals" value="INV_NS_ON_HOLD"/></not>
+                        <not><if-compare field="parameters.statusId" operator="equals" value="INV_NS_RETURNED"/></not>
+                        <not><if-compare field="parameters.statusId" operator="equals" value="INV_DEBT_SUPPLIER"/></not>
+                    </and>
+                </condition>
+                <then>
+                    <set field="parameters.statusId" from-field="nullField"/>
+                </then>
+            </if>
+        </if-compare>
+
+        <loop count="${loops}" field="currentLoop">
+            <log level="info" message="receiveInventoryProduct Looping and creating inventory info - ${currentLoop}"/>
+
+            <!-- if there is an inventoryItemId, update it (this will happen when receiving serialized inventory already in the system, like for returns); if not create one -->
+            <clear-field field="serviceInMap"/>
+            <clear-field field="currentInventoryItemId"/>
+
+            <!-- Set supplier partyId, if inventory received by purchase order -->
+            <if-not-empty field="parameters.orderId">
+                <entity-and entity-name="OrderRole" list="orderRoles">
+                    <field-map field-name="orderId" from-field="parameters.orderId"/>
+                    <field-map field-name="roleTypeId" value="SUPPLIER_AGENT"/>
+                </entity-and>
+                <if-not-empty field="orderRoles">
+                    <first-from-list list="orderRoles" entry="orderRole"/>
+                    <set field="parameters.partyId" from-field="orderRole.partyId"/>
+                </if-not-empty>
+            </if-not-empty>
+            
+            <!-- get Purchase cost -->
+            <clear-field field="serviceInMap"/>
+            <set field="serviceInMap.orderId" from-field="parameters.orderId"/>
+            <set field="serviceInMap.productId" from-field="parameters.productId"/>
+            <set field="serviceInMap.currencyUomId" from-field="parameters.currencyUomId"/>
+            <set field="serviceInMap.ownerPartyId" from-field="parameters.ownerPartyId"/>
+            
+            <!-- FIXED CTT -->
+            <entity-one entity-name="OrderHeader" value-field="orderHeader" auto-field-map="false">
+	            <field-map field-name="orderId" from-field="parameters.orderId"/>
+	        </entity-one>
+	        <if-not-empty field="orderHeader">
+	        	<if-compare operator="equals" value="PURCHASE_ORDER" field="orderHeader.orderTypeId">
+	            	<call-service service-name="getCostForPurchase" in-map-name="serviceInMap">
+		            	<result-to-field result-name="purCost" field="parameters.purCost"/>
+		            </call-service>
+                    <check-errors/>
+                </if-compare>
+	        </if-not-empty>
+            
+<!--             <call-service service-name="getCostForPurchase" in-map-name="serviceInMap"> -->
+<!--             	<result-to-field result-name="purCost" field="parameters.purCost"/> -->
+<!--             </call-service> -->
+            
+            <if-empty field="parameters.purCost">
+            	<set field="parameters.purCost" value="0" type="BigDecimal"/>
+            </if-empty>
+                         
+<!--             <log message="VIETTB parameters.purCost ${parameters.purCost}" level="info"/> -->
+
+            <if-empty field="parameters.currentInventoryItemId">
+                <set-service-fields service-name="createInventoryItem" map="parameters" to-map="serviceInMap"/>
+                <call-service service-name="createInventoryItem" in-map-name="serviceInMap">
+                    <result-to-field result-name="inventoryItemId" field="currentInventoryItemId"/>
+                </call-service>
+
+                <else>
+                    <if-not-empty field="parameters.currentInventoryItemId">
+                        <set field="parameters.inventoryItemId" from-field="parameters.currentInventoryItemId"/>
+                    </if-not-empty>
+                    <set-service-fields service-name="updateInventoryItem" map="parameters" to-map="serviceInMap"/>
+                    <call-service service-name="updateInventoryItem" in-map-name="serviceInMap"/>
+                    <set field="currentInventoryItemId" from-field="parameters.currentInventoryItemId"/>
+                </else>
+            </if-empty>            
+                                               	       	           	        
+            <!-- do this only for non-serialized inventory -->
+            <if-compare value="SERIALIZED_INV_ITEM" operator="not-equals" field="parameters.inventoryItemTypeId">
+                <clear-field field="serviceInMap"/>
+                <set-service-fields service-name="createInventoryItemDetail" map="parameters" to-map="serviceInMap"/>
+                <set field="serviceInMap.inventoryItemId" from-field="currentInventoryItemId"/>
+                <call-service service-name="createInventoryItemDetail" in-map-name="serviceInMap">
+                    <result-to-field result-name="inventoryItemDetailSeqId" field="parameters.inventoryItemDetailSeqId"/>
+                </call-service>
+            </if-compare>
+            
+<!-- 			<log message="VIETTB11x inventory item ${parameters}" level="info"/> -->
+			
+            <clear-field field="serviceInMap"/>
+            <set-service-fields service-name="createShipmentReceipt" map="parameters" to-map="serviceInMap"/>
+            
+            <set field="serviceInMap.inventoryItemId" from-field="currentInventoryItemId"/>
+            
+            <call-service service-name="createShipmentReceipt" in-map-name="serviceInMap">
+            	<result-to-field result-name="receiptId" field="shipmentReceiptId"/>
+            </call-service>
+			<set field="shipmentReceiptId" from-field="shipmentReceiptId"/>
+			<field-to-result field="shipmentReceiptId" result-name="shipmentReceiptId"/>
+            <!-- update serialized items to AVAILABLE (only if this is not a return), which then triggers other SECA chains -->
+            <if>
+                <condition>
+                    <and>
+                        <if-compare value="SERIALIZED_INV_ITEM" operator="equals" field="parameters.inventoryItemTypeId"/>
+                        <if-empty field="parameters.returnId"/>
+                    </and>
+                </condition>
+                <then>
+                    <!-- Retrieve the new inventoryItem -->
+                    <entity-one entity-name="InventoryItem" value-field="inventoryItem"/>
+
+                    <!-- Don't reset the status if it's already set to INV_PROMISED or INV_ON_HOLD -->
+                    <if>
+                        <condition>
+                            <and>
+                                <if-compare value="INV_PROMISED" operator="not-equals" field="inventoryItem.statusId"/>
+                                <if-compare value="INV_ON_HOLD" operator="not-equals" field="inventoryItem.statusId"/>
+                            </and>
+                        </condition>
+                        <then>
+                            <clear-field field="serviceInMap"/>
+                            <set field="serviceInMap.inventoryItemId" from-field="currentInventoryItemId"/>
+                            <set field="serviceInMap.statusId" value="INV_AVAILABLE"/> <!-- XXX set to returned instead -->
+                            <call-service service-name="updateInventoryItem" in-map-name="serviceInMap"/>
+                        </then>
+                    </if>
+                </then>
+            </if>
+
+<!--             <clear-field field="serviceInMap"/> -->
+<!--             <set-service-fields service-name="balanceInventoryItems" map="parameters" to-map="serviceInMap"/> -->
+<!--             <set field="serviceInMap.inventoryItemId" from-field="currentInventoryItemId"/> -->
+<!--             <call-service service-name="balanceInventoryItems" in-map-name="serviceInMap"/> -->
+
+            <set field="successMessageList[]" value="Received ${parameters.quantityAccepted} of ${parameters.productId} in inventory item ${currentInventoryItemId}"/>
+        </loop>
+        <!-- return the last inventory item received -->
+        <field-to-result field="currentInventoryItemId" result-name="inventoryItemId"/>
+        <if>
+           	<condition>
+            	<not>
+            		<if-empty field="parameters.requirementId"/>
+            	</not>
+           	</condition>
+           	<then>
+           		<set field="requirementId" from-field="parameters.requirementId"/>
+           		<field-to-result field="requirementId" result-name="requirementId"/>
+           	</then>
+        </if>
+        <if>
+           	<condition>
+            	<not>
+            		<and>
+            			<if-empty field="parameters.curReceiptId"/>
+            			<if-empty field="parameters.receiptItemSeqId"/>
+            		</and>
+            	</not>
+           	</condition>
+           	<then>
+           		<set field="curReceiptId" from-field="parameters.curReceiptId"/>
+           		<set field="receiptItemSeqId" from-field="parameters.receiptItemSeqId"/>
+           		<field-to-result field="curReceiptId" result-name="curReceiptId"/>
+           		<field-to-result field="receiptItemSeqId" result-name="receiptItemSeqId"/>
+           		<clear-field field="listProductVariances"/>
+           		<entity-condition list="listProductVariances" entity-name="ReceiptItemAndVariance">
+           			<condition-list combine="and">
+           				<condition-expr field-name="receiptId" from-field="curReceiptId"/>
+           				<condition-expr field-name="receiptItemSeqId" from-field="receiptItemSeqId"/>
+           			</condition-list>
+           		</entity-condition>
+           		<if-not-empty field="listProductVariances">
+           			<iterate entry="reason" list="listProductVariances">
+		           		<make-value value-field="shipmentVar" entity-name="ShipmentVarianceReason"/>
+		           		<sequenced-id sequence-name="ShipmentVarianceReason" field="shipmentVarianceId"/>
+		           		<to-string field="shipmentVarianceId"/>
+		           		<set field="shipmentVar.shipmentVarianceId" from-field="shipmentVarianceId"/>
+		           		<set field="shipmentVar.receiptId" from-field="shipmentReceiptId"/>
+		           		<set field="shipmentVar.varianceReasonId" from-field="reason.varianceReasonId"/>
+		           		<set field="shipmentVar.quantity" from-field="reason.quantity"/>
+		           		<set field="shipmentVar.partyId" from-field="reason.partyId"/>
+		           		<create-value value-field="shipmentVar"/>
+           			</iterate>
+           		</if-not-empty>
+           		<entity-one value-field="receiptItem" entity-name="ReceiptItem">
+           			<field-map field-name="receiptId" from-field="curReceiptId"/>
+           			<field-map field-name="receiptItemSeqId" from-field="receiptItemSeqId"/>
+           		</entity-one>
+           		<if-not-empty field="receiptItem">
+				 	<make-value value-field="sampleQAQuantity" entity-name="ShipmentQualityAssurance"/>
+	           		<sequenced-id sequence-name="ShipmentQualityAssurance" field="shipmentQAId"/>
+	           		<to-string field="qualityAssuranceQuantityId"/>
+	           		<set field="sampleQAQuantity.shipmentQAId" from-field="shipmentQAId"/>
+	           		<set field="sampleQAQuantity.qualityAssuranceReasonId" value="QAR_SAMPLE"/>
+	           		<set field="sampleQAQuantity.quantity" from-field="receiptItem.sampleQuantity"/>
+           			<create-value value-field="sampleQAQuantity"/>
+           			
+           			<make-value value-field="shipmentSampleQA" entity-name="ShipmentReceiptQA"/>
+	           		<set field="shipmentSampleQA.shipmentQAId" from-field="shipmentQAId"/>
+	           		<set field="shipmentSampleQA.receiptId" from-field="shipmentReceiptId"/>
+           			<create-value value-field="shipmentSampleQA"/>
+           			
+           			
+           			<clear-field field="shipmentQAId"/>
+           			<make-value value-field="lackQAQuantity" entity-name="ShipmentQualityAssurance"/>
+	           		<sequenced-id sequence-name="ShipmentQualityAssurance" field="shipmentQAId"/>
+	           		<to-string field="qualityAssuranceQuantityId"/>
+	           		<set field="lackQAQuantity.shipmentQAId" from-field="shipmentQAId"/>
+	           		<set field="lackQAQuantity.qualityAssuranceReasonId" value="QAR_LACK"/>
+	           		<set field="lackQAQuantity.quantity" from-field="receiptItem.lackQuantity"/>
+           			<create-value value-field="lackQAQuantity"/>
+           			
+           			<make-value value-field="shipmentLackQA" entity-name="ShipmentReceiptQA"/>
+	           		<set field="shipmentLackQA.shipmentQAId" from-field="shipmentQAId"/>
+	           		<set field="shipmentLackQA.receiptId" from-field="shipmentReceiptId"/>
+           			<create-value value-field="shipmentLackQA"/>
+           			
+           			<clear-field field="shipmentQAId"/>
+           			<make-value value-field="inspectQAQuantity" entity-name="ShipmentQualityAssurance"/>
+	           		<sequenced-id sequence-name="ShipmentQualityAssurance" field="shipmentQAId"/>
+	           		<to-string field="qualityAssuranceQuantityId"/>
+	           		<set field="inspectQAQuantity.shipmentQAId" from-field="shipmentQAId"/>
+	           		<set field="inspectQAQuantity.qualityAssuranceReasonId" value="QAR_INSPECT"/>
+	           		<set field="inspectQAQuantity.quantity" from-field="receiptItem.inspectQuantity"/>
+           			<create-value value-field="inspectQAQuantity"/>
+           			
+           			<make-value value-field="shipmentInspectQA" entity-name="ShipmentReceiptQA"/>
+	           		<set field="shipmentInspectQA.shipmentQAId" from-field="shipmentQAId"/>
+	           		<set field="shipmentInspectQA.receiptId" from-field="shipmentReceiptId"/>
+           			<create-value value-field="shipmentInspectQA"/>
+           			
+           			
+           			<clear-field field="shipmentQAId"/>
+           			<make-value value-field="testQAQuantity" entity-name="ShipmentQualityAssurance"/>
+	           		<sequenced-id sequence-name="ShipmentQualityAssurance" field="shipmentQAId"/>
+	           		<to-string field="qualityAssuranceQuantityId"/>
+	           		<set field="testQAQuantity.shipmentQAId" from-field="shipmentQAId"/>
+	           		<set field="testQAQuantity.qualityAssuranceReasonId" value="QAR_TEST"/>
+	           		<set field="testQAQuantity.quantity" from-field="receiptItem.testQuantity"/>
+           			<create-value value-field="testQAQuantity"/>          	
+           			
+           			<make-value value-field="shipmentTestQA" entity-name="ShipmentReceiptQA"/>
+	           		<set field="shipmentTestQA.shipmentQAId" from-field="shipmentQAId"/>
+	           		<set field="shipmentTestQA.receiptId" from-field="shipmentReceiptId"/>
+           			<create-value value-field="shipmentTestQA"/>
+           		</if-not-empty>
+           		<make-value value-field="shipmentAndReceiptItem" entity-name="ShipmentAndReceiptItem"/>
+           		<set field="shipmentAndReceiptItem.shipmentReceiptId" from-field="shipmentReceiptId"/>
+           		<set field="shipmentAndReceiptItem.receiptId" from-field="curReceiptId"/>
+           		<set field="shipmentAndReceiptItem.receiptItemSeqId" from-field="receiptItemSeqId"/>
+           		<create-value value-field="shipmentAndReceiptItem"/>
+           	</then>
+        </if>
+    </simple-method>
+
+    <simple-method method-name="quickReceiveReturn" short-description="Quick Receive Entire Return">
+        <entity-one entity-name="ReturnHeader" value-field="returnHeader">
+            <field-map field-name="returnId" from-field="parameters.returnId"/>
+        </entity-one>
+        <if-compare field="returnHeader.needsInventoryReceive" operator="equals" value="Y">
+            <!-- before receiving inventory, check to see if there is inventory information in this database -->
+            <entity-count entity-name="InventoryItem" count-field="iiCount">
+                <condition-expr field-name="facilityId" operator="equals" from-field="returnHeader.destinationFacilityId"/>
+            </entity-count>
+			
+            <if-compare field="iiCount" operator="greater" value="0" type="Integer">
+                <!-- create a return shipment for this return -->
+                <set field="shipmentCtx.returnId" from-field="parameters.returnId"/>
+                <call-service service-name="createShipmentForReturn" in-map-name="shipmentCtx">
+                    <result-to-field result-name="shipmentId"/>
+                </call-service>
+                <log level="info" message="Created new shipment ${shipmentId}"/>
+
+                <entity-condition entity-name="ReturnItem" list="returnItems">
+                    <condition-expr field-name="returnId" operator="equals" from-field="returnHeader.returnId"/>
+                </entity-condition>
+
+                <!-- if no inventory item type specified, get default from facility -->
+                <if-empty field="parameters.inventoryItemTypeId">
+                    <get-related-one value-field="returnHeader" relation-name="Facility" to-value-field="facility"/>
+                    <set field="parameters.inventoryItemTypeId" from-field="facility.defaultInventoryItemTypeId" default-value="NON_SERIAL_INV_ITEM"/>
+                </if-empty>
+
+                <now-timestamp field="nowTimestamp"/>
+
+                <entity-count entity-name="ReturnItem" count-field="returnItemCount">
+                    <condition-expr field-name="returnId" operator="equals" from-field="returnHeader.returnId"/>
+                </entity-count>
+                <set field="nonProductItems" type="Long" value="0"/>
+
+                <iterate entry="returnItem" list="returnItems">
+                    <!-- record this return item on the return shipment as well.  not sure if this is actually necessary... -->
+                    <clear-field field="shipItemCtx"/>
+                    <set from-field="shipmentId" field="shipItemCtx.shipmentId"/>
+                    <set from-field="returnItem.productId" field="shipItemCtx.productId"/>
+                    <set from-field="returnItem.returnQuantity" field="shipItemCtx.quantity"/>
+                    <log level="info" message="calling create shipment item with ${shipItemCtx}"/>
+                    <call-service service-name="createShipmentItem" in-map-name="shipItemCtx">
+                        <result-to-field result-name="shipmentItemSeqId"/>
+                    </call-service>
+                </iterate>
+                <iterate entry="returnItem" list="returnItems">
+                    <clear-field field="receiveCtx"/>
+
+                    <if-empty field="returnItem.expectedItemStatus">
+                        <set value="INV_RETURNED" field="returnItem.expectedItemStatus" type="String"/>
+                    </if-empty>
+                    <get-related-one value-field="returnItem" relation-name="OrderItem" to-value-field="orderItem"/>
+                    <if-not-empty field="orderItem.productId">
+                        <set field="costCtx.returnItemSeqId" from-field="returnItem.returnItemSeqId"/>
+                        <set field="costCtx.returnId" from-field="returnItem.returnId"/>
+                        <call-service service-name="getReturnItemInitialCost" in-map-name="costCtx">
+                            <result-to-field result-name="initialItemCost" field="receiveCtx.unitCost"/>
+                        </call-service>
+                        <!--check if the items already have SERIALIZED inventory. If so, it still puts them back as SERIALIZED with status "Accepted."-->
+                        <entity-count entity-name="InventoryItem" count-field="serializedItemCount">
+                            <condition-list combine="and">
+                                <condition-expr field-name="productId" operator="equals" from-field="returnItem.productId"/>
+                                <condition-expr field-name="facilityId" operator="equals" from-field="returnHeader.destinationFacilityId"/>
+                                <condition-expr field-name="inventoryItemTypeId" operator="equals" value="SERIALIZED_INV_ITEM"/>
+                            </condition-list>
+                        </entity-count>                        
+                        <set field="setNonSerial" value="false"/>
+                        <if-compare field="parameters.inventoryItemTypeId" value="NON_SERIAL_INV_ITEM" operator="equals">
+                            <if-compare field="serializedItemCount" value="0" operator="equals">
+                                <set field="parameters.inventoryItemTypeId" value="NON_SERIAL_INV_ITEM"/>
+                                <set field="setNonSerial" value="true"/>
+                            </if-compare>
+                        </if-compare>
+                        <if-compare field="setNonSerial" value="false" operator="equals">
+                            <set field="parameters.inventoryItemTypeId" value="SERIALIZED_INV_ITEM"/>
+                            <set field="returnItem.returnQuantity" value="1" type="BigDecimal"/>
+                        </if-compare>
+
+                        <set from-field="parameters.inventoryItemTypeId" field="receiveCtx.inventoryItemTypeId"/>
+                        <set from-field="returnItem.expectedItemStatus" field="receiveCtx.statusId"/>
+                        <set from-field="returnItem.productId" field="receiveCtx.productId"/>
+                        <set from-field="returnItem.returnItemSeqId" field="receiveCtx.returnItemSeqId"/>
+                        <set from-field="returnItem.returnId" field="receiveCtx.returnId"/>
+                        <set from-field="returnItem.returnQuantity" field="receiveCtx.quantityAccepted"/>
+                        
+                        <!-- Extend by thangnv (expiredDate, manufacturedDate, bathc) -->
+                        <set from-field="returnItem.expiredDate" field="receiveCtx.expireDate"/>
+                        <set from-field="returnItem.datetimeManufactured" field="receiveCtx.datetimeManufactured"/>
+                        <if-not-empty field="returnItem.lotId">
+                        	<clear-field field="mapLot"/>
+                        	<set field="mapLot.lotId" from-field="returnItem.lotId"/>
+                        	<find-by-primary-key entity-name="Lot" map="mapLot" value-field="lotExisted"/>
+                        	<if-empty field="lotExisted">
+                        		<clear-field field="newLot"/>
+                        		<make-value value-field="newLot" entity-name="Lot"/>
+                        		<set field="newLot.lotId" from-field="returnItem.lotId"/>
+                        		<now-timestamp field="creationDate"/>
+                        		<set field="newLot.creationDate" from-field="creationDate"/>
+                        		<create-value value-field="newLot"/>
+                        		<set from-field="returnItem.lotId" field="receiveCtx.lotId"/>
+                        	<else>
+                        		<set from-field="returnItem.lotId" field="receiveCtx.lotId"/>
+                        	</else>
+                        	</if-empty>
+                        </if-not-empty>
+                        
+                        <!-- end extend by thangnv -->
+                        <set from-field="returnHeader.destinationFacilityId" field="receiveCtx.facilityId"/>
+                        <set from-field="returnHeader.destinationFacilityId" field="receiveCtx.facilityId"/>
+                        <!-- important: associate ShipmentReceipt with return shipment created -->
+                        <set field="receiveCtx.shipmentId" from-field="shipmentId"/>
+
+                        <set field="receiveCtx.comments" value="Returned Item RA# ${returnItem.returnId}"/>                        
+                        <set field="receiveCtx.datetimeReceived" from-field="nowTimestamp"/>
+                        <if-compare field="returnHeader.returnHeaderTypeId" value="CUSTOMER_RETURN" operator="equals">
+							<set field="receiveCtx.datetimeReceived" from-field="returnHeader.entryDate"/>                               
+                        </if-compare>                                                
+                        <set field="receiveCtx.quantityRejected" value="0" type="BigDecimal"/>
+                        <set field="receiveCtx.quantityQualityAssurance" value="0" type="BigDecimal"/>
+                        <set field="receiveCtx.quantityExcess" value="0" type="BigDecimal"/>
+
+                        <call-service service-name="receiveInventoryProduct" in-map-name="receiveCtx"/>
+                    <else>
+                        <calculate field="nonProductItems" type="Long">
+                            <calcop operator="add">
+                                <number value="1"/>
+                            </calcop>
+                        </calculate>
+                    </else>
+                    </if-not-empty>
+                </iterate>
+
+                <!-- now that the receive is done; set the need flag to N -->
+                <refresh-value value-field="returnHeader"/>
+                <set field="returnHeader.needsInventoryReceive" value="N"/>
+                <store-value value-field="returnHeader"/>
+
+                <!-- always check/update the ReturnHeader status, even though it might have been from the receiving above, just make sure -->
+                <if-compare field="returnHeader.statusId" operator="not-equals" value="RETURN_RECEIVED">
+                    <set field="retStCtx.returnId" from-field="returnHeader.returnId"/>
+                    <set field="retStCtx.statusId" value="RETURN_RECEIVED"/>
+                    <call-service service-name="updateReturnHeader" in-map-name="retStCtx"/>
+                </if-compare>
+            <else>
+                <log level="info" message="Not receiving inventory for returnId ${returnHeader.returnId}, no inventory information available."/>
+            </else>
+            </if-compare>
+        </if-compare>
+    </simple-method>
+    
+    <simple-method method-name="issueOrderItemToShipmentAndReceiveAgainstPO" short-description="Issues order item quantity specified to the shipment, then receives inventory for that item and quantity">
+        <set value="Issue OrderItem to Shipment and Receive against PO" field="operationName"/>
+        <call-simple-method method-name="checkCanChangeShipmentStatusPacked" xml-resource="component://product/script/org/ofbiz/shipment/shipment/ShipmentServices.xml"/>
+
+        <!-- get orderItem -->
+        <entity-one entity-name="OrderItem" value-field="orderItem" auto-field-map="true"/>
+        <!-- get orderItemShipGroupAssoc -->
+        <entity-one entity-name="OrderItemShipGroupAssoc" value-field="orderItemShipGroupAssoc" auto-field-map="true"/>
+        <!-- get shipment -->
+        <entity-one entity-name="Shipment" value-field="shipment" auto-field-map="true"/>
+        
+        <!-- try to find an existing shipmentItem and attach to it, if none found create a new shipmentItem -->
+        <!-- if there is NO productId on the orderItem, ALWAYS create a new shipmentItem -->
+        <if-not-empty field="orderItem.productId">
+            <entity-condition entity-name="ShipmentItem" list="shipmentItems">
+                <condition-list combine="and">
+                    <condition-expr field-name="productId" from-field="orderItem.productId"/>
+                    <condition-expr field-name="shipmentId" from-field="shipment.shipmentId"/>
+                    <condition-expr field-name="shipmentItemSeqId" from-field="parameters.shipmentItemSeqId" ignore-if-empty="true"/>
+                </condition-list>
+                <order-by field-name="shipmentItemSeqId"/>
+            </entity-condition>
+            <first-from-list entry="shipmentItem" list="shipmentItems"/>
+        </if-not-empty>
+
+        <if-empty field="shipmentItem">
+            <set from-field="orderItem.productId" field="shipmentItemCreate.productId"/>
+            <set from-field="parameters.shipmentId" field="shipmentItemCreate.shipmentId"/>
+            <set from-field="parameters.quantity" field="shipmentItemCreate.quantity"/>
+            <call-service service-name="createShipmentItem" in-map-name="shipmentItemCreate">
+                <result-to-field result-name="shipmentItemSeqId" field="shipmentItemLookupPk.shipmentItemSeqId"/>
+            </call-service>
+            <set from-field="parameters.shipmentId" field="shipmentItemLookupPk.shipmentId"/>
+            <find-by-primary-key entity-name="ShipmentItem" map="shipmentItemLookupPk" value-field="shipmentItem"/>
+            
+            <!-- Create OrderShipment for this ShipmentItem -->
+            <set from-field="parameters.quantity" field="orderShipmentCreate.quantity"/>
+            <set from-field="shipmentItem.shipmentId" field="orderShipmentCreate.shipmentId"/>
+            <set from-field="shipmentItem.shipmentItemSeqId" field="orderShipmentCreate.shipmentItemSeqId"/>
+            <set from-field="orderItem.orderId" field="orderShipmentCreate.orderId"/>
+            <set from-field="orderItem.orderItemSeqId" field="orderShipmentCreate.orderItemSeqId"/>
+            
+            <if-not-empty field="orderItemShipGroupAssoc">
+                <!-- If we have a ShipGroup Assoc for this Item to focus on, set that; this is mostly the case for purchase orders and such -->
+                <set from-field="orderItemShipGroupAssoc.shipGroupSeqId" field="orderShipmentCreate.shipGroupSeqId"/>
+            </if-not-empty>
+            <call-service service-name="createOrderShipment" in-map-name="orderShipmentCreate"/>
+        <else>
+            <call-simple-method method-name="getTotalIssuedQuantityForOrderItem" xml-resource="component://product/script/org/ofbiz/shipment/issuance/IssuanceServices.xml"/>
+            <call-simple-method method-name="getReceivedQuantityForOrderItem"/>
+            <set field="receivedQuantity" value="${receivedQuantity$bigDecimal + parameters.quantity$bigDecimal}" type="BigDecimal"/>
+            <entity-and list="orderShipments" entity-name="OrderShipment">
+                <field-map field-name="orderId" from-field="orderItem.orderId"/>
+                <field-map field-name="orderItemSeqId" from-field="orderItem.orderItemSeqId"/>
+                <field-map field-name="shipmentId" from-field="shipmentItem.shipmentId"/>
+                <field-map field-name="shipmentItemSeqId" from-field="shipmentItem.shipmentItemSeqId"/>
+                <field-map field-name="shipGroupSeqId" from-field="orderItemShipGroupAssoc.shipGroupSeqId"/>
+            </entity-and>
+            <first-from-list entry="orderShipment" list="orderShipments"/>
+            <if-compare-field field="totalIssuedQuantity" operator="less" to-field="receivedQuantity" type="BigDecimal">
+                <set field="quantityToAdd" value="${receivedQuantity$bigDecimal - totalIssuedQuantity$bigDecimal}" type="BigDecimal"/>
+                <set field="shipmentItem.quantity" value="${shipmentItem.quantity$bigDecimal + quantityToAdd$bigDecimal}" type="BigDecimal"/>
+                <store-value value-field="shipmentItem"/>
+                <set field="shipmentItemSeqId" from-field="shipmentItem.shipmentItemSeqId"/>
+                
+                <set field="orderShipment.quantity" value="${orderShipment.quantity$bigDecimal + quantityToAdd$bigDecimal}" type="BigDecimal"/>
+                <store-value value-field="orderShipment"/>
+            </if-compare-field>
+        </else>
+        </if-empty>
+        <!--
+            TODO: if we want to record the role of the facility operation we have to re-implement this using ShipmentReceiptRole
+        <call-simple-method method-name="associateIssueRoles" xml-resource="component://product/script/org/ofbiz/shipment/issuance/IssuanceServices.xml"/>
+        -->
+
+        <set-service-fields service-name="receiveInventoryProduct" map="parameters" to-map="receiveInventoryProductCtx"/>
+        <set field="receiveInventoryProductCtx.shipmentItemSeqId" from-field="shipmentItemSeqId"/>
+        <call-service service-name="receiveInventoryProduct" in-map-name="receiveInventoryProductCtx">
+            <result-to-result result-name="inventoryItemId"/>
+        </call-service>
+    </simple-method>
+    
+    <simple-method method-name="getReceivedQuantityForOrderItem" short-description="Computes the till now received quantity from all ShipmentReceipts">
+        <set field="receivedQuantity" type="BigDecimal" value="0"/>
+        <entity-and list="shipmentReceipts" entity-name="ShipmentReceipt">
+            <field-map field-name="orderId" from-field="orderItem.orderId"/>
+            <field-map field-name="orderItemSeqId" from-field="orderItem.orderItemSeqId"/>
+        </entity-and>
+        <set from-field="orderItem.productId" field="newLookupProductMap.productId"/>
+        <find-by-primary-key entity-name="Product" map="newLookupProductMap" value-field="product"/>
+        
+        <if-compare field="product.requireAmount" operator="equals" value="Y">
+        	<first-from-list list="shipmentReceipts" entry="xxx"/>
+            <set field="receivedQuantity" value="${xxx.quantityAccepted}" type="BigDecimal"/>
+        <else>
+        	<iterate entry="shipmentReceipt" list="shipmentReceipts">
+	            <set field="receivedQuantity" value="${receivedQuantity$bigDecimal + shipmentReceipt.quantityAccepted$bigDecimal}" type="BigDecimal"/>
+	        </iterate>
+        </else>
+        </if-compare>
+    </simple-method>
+
+    <simple-method method-name="updateIssuanceShipmentAndPoOnReceiveInventory" short-description="Update issuance, shipment and order items if quantity received is higher than quantity on purchase order">
+        <entity-one value-field="orderItem" entity-name="OrderItem"/>
+        <if-not-empty field="parameters.orderCurrencyUnitPrice">
+            <if-compare-field field="parameters.orderCurrencyUnitPrice" operator="not-equals" to-field="orderItem.unitPrice" type="BigDecimal">
+                <set field="orderItem.unitPrice" from-field="parameters.orderCurrencyUnitPrice" type="BigDecimal"/>
+                <store-value value-field="orderItem"/>
+            </if-compare-field>
+        <else>
+            <if-compare-field field="parameters.unitCost" operator="not-equals" to-field="orderItem.unitPrice" type="BigDecimal">
+                <set field="orderItem.unitPrice" from-field="parameters.unitCost" type="BigDecimal"/>
+                <store-value value-field="orderItem"/>
+            </if-compare-field>
+        </else>
+        </if-not-empty>
+        <call-simple-method method-name="getReceivedQuantityForOrderItem"/>
+        <if-compare-field field="orderItem.quantity" operator="less" to-field="receivedQuantity" type="BigDecimal">
+            <set field="orderItem.quantity" from-field="receivedQuantity"/>
+            <store-value value-field="orderItem"/>
+        </if-compare-field>
+        <if-not-empty field="parameters.shipmentId">
+            <if-not-empty field="orderItem.productId">
+                <call-simple-method method-name="getTotalIssuedQuantityForOrderItem" xml-resource="component://product/script/org/ofbiz/shipment/issuance/IssuanceServices.xml"/>
+                <if-compare-field field="totalIssuedQuantity" operator="less" to-field="receivedQuantity" type="BigDecimal">
+                    <set field="quantityToAdd" value="${receivedQuantity$bigDecimal - totalIssuedQuantity$bigDecimal}" type="BigDecimal"/>
+                    <entity-condition entity-name="ShipmentItem" list="shipmentItems">
+                        <condition-list combine="and">
+                            <condition-expr field-name="productId" from-field="orderItem.productId"/>
+                            <condition-expr field-name="shipmentId" from-field="parameters.shipmentId"/>
+                            <condition-expr field-name="shipmentItemSeqId" from-field="parameters.shipmentItemSeqId" ignore-if-empty="true"/>
+                        </condition-list>
+                        <order-by field-name="shipmentItemSeqId"/>
+                    </entity-condition>
+                    <first-from-list entry="shipmentItem" list="shipmentItems"/>
+                    <set field="shipmentItem.quantity" value="${shipmentItem.quantity$bigDecimal + quantityToAdd$bigDecimal}" type="BigDecimal"/>
+                    <store-value value-field="shipmentItem"/>
+                    
+                    <entity-and list="orderShipments" entity-name="OrderShipment">
+                        <field-map field-name="orderId" from-field="parameters.orderId"/>
+                        <field-map field-name="orderItemSeqId" from-field="parameters.orderItemSeqId"/>
+                        <field-map field-name="shipmentId" from-field="parameters.shipmentId"/>
+                        <field-map field-name="shipmentItemSeqId" from-field="shipmentItem.shipmentItemSeqId"/>
+                    </entity-and>
+                    <first-from-list entry="orderShipment" list="orderShipments"/>
+                    <set field="orderShipment.quantity" value="${orderShipment.quantity$bigDecimal + quantityToAdd$bigDecimal}" type="BigDecimal"/>
+                    <store-value value-field="orderShipment"/>
+                    <!--
+                        TODO: if we want to record the role of the facility operation we have to re-implement this using ShipmentReceiptRole
+                    <set field="itemIssuanceId" from-field="itemIssuance.itemIssuanceId"/>
+                    <call-simple-method method-name="associateIssueRoles" xml-resource="component://product/script/org/ofbiz/shipment/issuance/IssuanceServices.xml"/>
+                    -->
+                </if-compare-field>
+            </if-not-empty>
+        </if-not-empty>
+    </simple-method>
+
+    <simple-method method-name="cancelReceivedItems" short-description="Cancel Received Items against a purchase order if received something incorrectly">
+        <!-- TODO: When items are received against a Purchase Order, service listed below changes certain things in the system. Changes done by these 
+                   services also need to be reverted and missing logic can be added later.
+            1. addProductsBackToCategory 
+            2. setUnitPriceAsLastPrice 
+            3. createAcctgTransForShipmentReceipt
+            4. updateProductIfAvailableFromShipment 
+         -->
+        <!-- update the accepted and received quantity to zero in ShipmentReceipt entity -->
+        <entity-one entity-name="ShipmentReceipt" value-field="shipmentReceipt"/>
+        <set field="shipmentReceipt.quantityAccepted" value="0" type="BigDecimal"/>
+        <set field="shipmentReceipt.quantityRejected" value="0" type="BigDecimal"/>
+        <set field="shipmentReceipt.quantityQualityAssurance" value="0" type="BigDecimal"/>
+        <set field="shipmentReceipt.quantityExcess" value="0" type="BigDecimal"/>
+        
+        <store-value value-field="shipmentReceipt"/>
+
+        <!-- create record for InventoryItemDetail entity -->
+        <get-related-one value-field="shipmentReceipt" relation-name="InventoryItem" to-value-field="inventoryItem"/>
+        <set field="inventoryItemDetailMap.inventoryItemId" from-field="inventoryItem.inventoryItemId"/>
+        <set field="inventoryItemDetailMap.quantityOnHandDiff" value="${-1 * inventoryItem.quantityOnHandTotal}" type="BigDecimal"/>
+        <set field="inventoryItemDetailMap.availableToPromiseDiff" value="${-1 * inventoryItem.availableToPromiseTotal}" type="BigDecimal"/>
+        <call-service service-name="createInventoryItemDetail" in-map-name="inventoryItemDetailMap"/>
+        
+        <!-- Balance the inventory item -->
+        <set field="balanceInventoryItemMap.inventoryItemId" from-field="inventoryItem.inventoryItemId"/>
+        <set field="balanceInventoryItemMap.priorityOrderId" from-field="shipmentReceipt.orderId"/>
+        <set field="balanceInventoryItemMap.priorityOrderItemSeqId" from-field="shipmentReceipt.orderItemSeqId"/>
+        <call-service service-name="balanceInventoryItems" in-map-name="balanceInventoryItemMap"/>
+
+        <!-- update the shipment status, if shipment was received -->
+        <get-related-one value-field="shipmentReceipt" relation-name="Shipment" to-value-field="shipment"/>
+        <if-compare field="shipment.statusId" operator="equals" value="PURCH_SHIP_RECEIVED">
+            <set field="shipmentStatusMap.shipmentId" from-field="shipment.shipmentId"/>
+            <set field="shipmentStatusMap.statusId" value="PURCH_SHIP_SHIPPED"/>
+            <call-service service-name="updateShipment" in-map-name="shipmentStatusMap"/>
+        </if-compare>
+        
+        <!-- change order item and order status -->
+        <get-related-one value-field="shipmentReceipt" relation-name="OrderItem" to-value-field="orderItem"/>
+        <if-compare field="orderItem.statusId" operator="equals" value="ITEM_COMPLETED">
+            <!-- update the order item status -->
+            <set field="orderItem.statusId" value="ITEM_APPROVED"/>
+            <set-service-fields service-name="changeOrderItemStatus" map="orderItem" to-map="orderItemCtx"/>
+            <call-service service-name="changeOrderItemStatus" in-map-name="orderItemCtx"/>
+            <get-related-one value-field="orderItem" relation-name="OrderHeader" to-value-field="orderHeader"/>
+            <!-- cancel the invoice -->
+            <entity-and entity-name="OrderItemBilling" list="orderItemBillings">
+                <field-map field-name="orderId" from-field="orderItem.orderId"/>
+            </entity-and>
+            <if-not-empty field="orderItemBillings">
+                <first-from-list list="orderItemBillings" entry="orderItemBilling"/>
+                <set field="invoiceStatusMap.invoiceId" from-field="orderItemBilling.invoiceId"/>
+                <set field="invoiceStatusMap.statusId" value="INVOICE_CANCELLED"/>
+                <call-service service-name="setInvoiceStatus" in-map-name="invoiceStatusMap"/>
+            </if-not-empty>
+        </if-compare>
+    </simple-method>
+</simple-methods>

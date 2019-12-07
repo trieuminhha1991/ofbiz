@@ -1,0 +1,646 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+	<!-- ========================================================= -->
+	<!-- ======================== Defaults ======================= -->
+	<!-- ========================================================= -->
+	<title>Entity of Delys Component</title>
+	<description>None</description>
+	<copyright></copyright>
+	<version></version>
+	
+	 <entity entity-name="InventoryItemLocation" package-name="org.ofbiz.delys">
+    	<description>Inventory Item Location for requirement</description>
+    	<field name="inventoryItemId" type="id-ne"></field>
+    	<field name="productId" type="id-ne"></field>
+    	<field name="locationId" type="id-ne"></field>
+    	<field name="quantity" type="fixed-point"></field>
+    	<field name="expireDate" type="date-time"></field>
+    	<field name="uomId" type="id-ne"></field>
+    	<prim-key field="inventoryItemId"/>
+    	<prim-key field="locationId"/>
+    	<prim-key field="uomId"/>
+    	<relation rel-entity-name="InventoryItem" type="one" fk-name="FK_INVENTORYITEM">
+    		<key-map field-name="inventoryItemId" rel-field-name="inventoryItemId"/>
+    	</relation>
+    	<relation rel-entity-name="LocationFacility" type="one" fk-name="FK_LOCATIONFACILITYID">
+    		<key-map field-name="locationId" rel-field-name="locationId"/>
+    	</relation>
+    	<relation rel-entity-name="Uom" type="one" fk-name="FK_UOM">
+    		<key-map field-name="UomId" rel-field-name="UomId"/>
+    	</relation>
+    </entity>
+    
+    <entity entity-name="LocationFacility" default-resource-name="DelysSalesUiLabels" package-name="org.ofbiz.delys">
+    	<description>Location Facility for requirement</description>
+    	<field name="locationId" type="id-ne"></field>
+    	<field name="facilityId" type="id-ne"></field>
+    	<field name="parentLocationId" type="id-ne"></field>
+    	<field name="locationCode" type="id-ne"></field>
+    	<field name="locationFacilityTypeId" type="id-ne"></field>
+    	<field name="description" type="description"></field>
+    	<prim-key field="locationId"/>
+    	<relation rel-entity-name="LocationFacilityType" type="one" fk-name="FK_LOCATIONFACILITYTYPE">
+    		<key-map field-name="locationFacilityTypeId" rel-field-name="locationFacilityTypeId"/>
+    	</relation>
+    	<relation rel-entity-name="Facility" type="one" fk-name="FK_FACILITYID">
+    		<key-map field-name="facilityId" rel-field-name="facilityId"/>
+    	</relation>
+    </entity>
+    
+    <entity entity-name="LocationFacilityType" default-resource-name="DelysSalesUiLabels"  package-name="org.ofbiz.delys">
+    	<description>Location Facility Type for requirement</description>
+    	<field name="locationFacilityTypeId" type="id-ne"></field>
+    	<field name="parentLocationFacilityTypeId" type="id-ne"></field>
+    	<field name="description" type="description"></field>
+    	<prim-key field="locationFacilityTypeId"/>
+    </entity>
+    
+    <view-entity entity-name="InventoryItemLocationAndInvemtoryItem"
+            package-name="org.ofbiz.product.inventory"
+            title="InventoryItem And InventoryItemLocation View Entity">
+      <member-entity entity-alias="II" entity-name="InventoryItem"/>
+      <member-entity entity-alias="IIL" entity-name="InventoryItemLocation"/>
+      <alias name="ProductId" entity-alias="II" field="productId"></alias>
+      <alias name="FacilityId" entity-alias="IIL" field="facilityId"></alias>
+      <alias name="InventoryItemId" entity-alias="IIL" field="inventoryItemId"></alias>
+      <alias name="LocationSeqId" entity-alias="IIL" field="locationSeqId"></alias>
+      <alias name="Quantity" entity-alias="IIL" field="quantity"></alias>
+      <view-link entity-alias="II" rel-entity-alias="IIL" rel-optional="true">
+        <key-map field-name="facilityId"/>
+        <key-map field-name="locationSeqId"/>
+        <key-map field-name="inventoryItemId"/>
+      </view-link>
+    </view-entity>
+    
+    <view-entity entity-name="FindInventoryItemByLocationSeqId"
+    		package-name="org.ofbiz.delys" 
+    		title="Find inventoryItem by locationSeqId">
+    	<member-entity entity-alias="III" entity-name="InventoryItem"/>
+    	<member-entity entity-alias="LFAC" entity-name="LocationFacility"/>
+    	<member-entity entity-alias="IIL" entity-name="InventoryItemLocation"/>
+    	<member-entity entity-alias="PROD" entity-name="Product"/>
+    	
+    	<alias name="locationId" entity-alias="LFAC" field="locationId" group-by="true"></alias>
+    	<alias name="inventoryItemId" entity-alias="IIL" field="inventoryItemId" group-by="true"></alias>
+    	<alias name="facilityId" entity-alias="LFAC" field="facilityId" group-by="true"></alias>
+    	<alias name="locationFacilityTypeId" entity-alias="LFAC" field="locationFacilityTypeId" group-by="true"></alias>
+    	<alias name="description" entity-alias="LFAC" field="description" group-by="true"></alias>
+      	<alias name="internalName" entity-alias="PROD" field="internalName" group-by="true"></alias>
+      	<alias name="productId" entity-alias="III" field="productId" group-by="true"></alias>
+      	<alias name="quantity" entity-alias="IIL" field="quantity" function="sum" group-by="false"></alias>
+      	<alias name="uomId" entity-alias="IIL" field="uomId" group-by="true"></alias>
+      	
+     	<view-link entity-alias="IIL" rel-entity-alias="III">
+	        <key-map field-name="inventoryItemId" rel-field-name="inventoryItemId"/>
+     	</view-link>
+     	<view-link entity-alias="III" rel-entity-alias="PROD">
+	        <key-map field-name="productId" rel-field-name="productId"/>
+     	</view-link>
+     	<view-link entity-alias="IIL" rel-entity-alias="LFAC">
+	        <key-map field-name="locationId" rel-field-name="locationId"/>
+     	</view-link>
+    </view-entity>
+    
+    <view-entity entity-name="ListProductByInventoryItemId" 
+    		package-name="org.ofbiz.delys"
+    		title="List Product By InventoryItemId">
+    	<member-entity entity-alias="IIM" entity-name="InventoryItem"/>
+    	<member-entity entity-alias="PRD" entity-name="Product"/>
+    	<!-- <alias name="inventoryItemId" entity-alias="IIM" field="inventoryItemId" group-by="true"></alias> -->
+    	<alias name="productId" entity-alias="PRD" field="productId" group-by="true"></alias>
+    	<alias name="facilityId" entity-alias="IIM" field="facilityId" group-by="true"></alias>
+      	<!-- <alias name="locationSeqId" entity-alias="IIM" field="locationSeqId" group-by="true"></alias> -->
+      	<alias name="internalName" entity-alias="PRD" field="internalName" group-by="true"></alias>
+      	<alias name="quantityOnHandTotal" entity-alias="IIM" field="quantityOnHandTotal" function="sum" group-by="false"></alias>
+      	<view-link entity-alias="PRD" rel-entity-alias="IIM">
+	        <key-map field-name="productId" rel-field-name="productId"/>
+     	</view-link>
+    </view-entity>
+    <view-entity entity-name="FacilityPartyFacility" package-name="org.ofbiz.product.facility">
+    	<member-entity entity-alias="FA" entity-name="Facility"></member-entity>
+    	<member-entity entity-alias="FAP" entity-name="Facility"></member-entity>
+    	<member-entity entity-alias="FAT" entity-name="FacilityType"></member-entity>
+    	<member-entity entity-alias="FAG" entity-name="FacilityGroup"></member-entity>
+    	<member-entity entity-alias="FP" entity-name="FacilityParty"></member-entity>
+    	<member-entity entity-alias="UOM" entity-name="Uom"></member-entity>
+    	<alias-all entity-alias="FA"></alias-all>
+    	<alias name="facilityNameP" field="facilityName" entity-alias="FAP"></alias>
+    	<alias name="partyId" entity-alias="FP"></alias>
+    	<alias name="roleTypeId" entity-alias="FP"></alias>
+    	<alias name="descriptionType" field="description" entity-alias="FAT"></alias>
+    	<alias name="facilityGroupName" entity-alias="FAG"></alias>
+    	<alias name="uomDesc" field="description" entity-alias="UOM"></alias>
+    	<view-link entity-alias="FA" rel-entity-alias="FP" rel-optional="true">
+    		<key-map field-name="facilityId"/>
+    	</view-link>
+    	<view-link entity-alias="FA" rel-entity-alias="FAP" rel-optional="true">
+    		<key-map field-name="parentFacilityId" rel-field-name="facilityId"/>
+    	</view-link>
+    	<view-link entity-alias="FA" rel-entity-alias="FAT" rel-optional="true">
+    		<key-map field-name="facilityTypeId"/>
+    	</view-link>
+    	<view-link entity-alias="FA" rel-entity-alias="FAG" rel-optional="true">
+    		<key-map field-name="primaryFacilityGroupId" rel-field-name="facilityGroupId"/>
+    	</view-link>
+    	<view-link entity-alias="FA" rel-entity-alias="UOM" rel-optional="true">
+    		<key-map field-name="facilitySizeUomId" rel-field-name="uomId"/>
+    	</view-link>
+    </view-entity>
+    <view-entity entity-name="FacilityFullPartyFacility" package-name="org.ofbiz.product.facility">
+        <member-entity entity-alias="FA" entity-name="Facility"></member-entity>
+        <member-entity entity-alias="PE" entity-name="Person"></member-entity>
+        <member-entity entity-alias="PG" entity-name="PartyGroup"></member-entity>
+        <member-entity entity-alias="FAP" entity-name="Facility"></member-entity>
+        <member-entity entity-alias="FAT" entity-name="FacilityType"></member-entity>
+        <member-entity entity-alias="FAG" entity-name="FacilityGroup"></member-entity>
+        <member-entity entity-alias="FP" entity-name="FacilityParty"></member-entity>
+        <member-entity entity-alias="UOM" entity-name="Uom"></member-entity>
+        <alias-all entity-alias="FA"></alias-all>
+        <alias name="facilityNameP" field="facilityName" entity-alias="FAP"></alias>
+        <alias name="partyId" entity-alias="FP"></alias>
+        <alias name="groupName" entity-alias="PG"></alias>
+        <alias name="firstName" entity-alias="PE"></alias>
+        <alias name="middleName" entity-alias="PE"></alias>
+        <alias name="lastName" entity-alias="PE"></alias>
+        <alias name="roleTypeId" entity-alias="FP"></alias>
+        <alias name="descriptionType" field="description" entity-alias="FAT"></alias>
+        <alias name="facilityGroupName" entity-alias="FAG"></alias>
+        <alias name="uomDesc" field="description" entity-alias="UOM"></alias>
+        <view-link entity-alias="FA" rel-entity-alias="FP" rel-optional="true">
+            <key-map field-name="facilityId"/>
+        </view-link>
+        <view-link entity-alias="FA" rel-entity-alias="PE" rel-optional="true">
+            <key-map field-name="ownerPartyId" rel-field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="FA" rel-entity-alias="PG" rel-optional="true">
+            <key-map field-name="ownerPartyId" rel-field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="FA" rel-entity-alias="FAP" rel-optional="true">
+            <key-map field-name="parentFacilityId" rel-field-name="facilityId"/>
+        </view-link>
+        <view-link entity-alias="FA" rel-entity-alias="FAT" rel-optional="true">
+            <key-map field-name="facilityTypeId"/>
+        </view-link>
+        <view-link entity-alias="FA" rel-entity-alias="FAG" rel-optional="true">
+            <key-map field-name="primaryFacilityGroupId" rel-field-name="facilityGroupId"/>
+        </view-link>
+        <view-link entity-alias="FA" rel-entity-alias="UOM" rel-optional="true">
+            <key-map field-name="facilitySizeUomId" rel-field-name="uomId"/>
+        </view-link>
+    </view-entity>
+    <view-entity entity-name="FacilityAll" package-name="org.ofbiz.product.facility">
+    	<member-entity entity-alias="FA" entity-name="Facility"></member-entity>
+    	<member-entity entity-alias="PE" entity-name="Person"></member-entity>
+        <member-entity entity-alias="PG" entity-name="PartyGroup"></member-entity>
+    	<member-entity entity-alias="FAP" entity-name="Facility"></member-entity>
+    	<member-entity entity-alias="FAT" entity-name="FacilityType"></member-entity>
+    	<member-entity entity-alias="FAG" entity-name="FacilityGroup"></member-entity>
+    	<member-entity entity-alias="UOM" entity-name="Uom"></member-entity>
+    	<alias-all entity-alias="FA"></alias-all>
+    	<alias name="groupName" entity-alias="PG"></alias>
+        <alias name="firstName" entity-alias="PE"></alias>
+        <alias name="middleName" entity-alias="PE"></alias>
+        <alias name="lastName" entity-alias="PE"></alias>
+    	<alias name="facilityNameP" field="facilityName" entity-alias="FAP"></alias>
+    	<alias name="descriptionType" field="description" entity-alias="FAT"></alias>
+    	<alias name="facilityGroupName" entity-alias="FAG"></alias>
+    	<alias name="uomDesc" field="description" entity-alias="UOM"></alias>
+    	 <view-link entity-alias="FA" rel-entity-alias="PE" rel-optional="true">
+            <key-map field-name="ownerPartyId" rel-field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="FA" rel-entity-alias="PG" rel-optional="true">
+            <key-map field-name="ownerPartyId" rel-field-name="partyId"/>
+        </view-link>
+    	<view-link entity-alias="FA" rel-entity-alias="FAP" rel-optional="true">
+    		<key-map field-name="parentFacilityId" rel-field-name="facilityId"/>
+    	</view-link>
+    	<view-link entity-alias="FA" rel-entity-alias="FAT" rel-optional="true">
+    		<key-map field-name="facilityTypeId"/>
+    	</view-link>
+    	<view-link entity-alias="FA" rel-entity-alias="FAG" rel-optional="true">
+    		<key-map field-name="primaryFacilityGroupId" rel-field-name="facilityGroupId"/>
+    	</view-link>
+    	<view-link entity-alias="FA" rel-entity-alias="UOM" rel-optional="true">
+    		<key-map field-name="facilitySizeUomId" rel-field-name="uomId"/>
+    	</view-link>
+    </view-entity>
+    <view-entity entity-name="FacilityPartyFacilityDetail" package-name="org.ofbiz.product.facility">
+    	<member-entity entity-alias="FA" entity-name="Facility"></member-entity>
+    	<member-entity entity-alias="FAP" entity-name="Facility"></member-entity>
+    	<member-entity entity-alias="FAT" entity-name="FacilityType"></member-entity>
+    	<member-entity entity-alias="FAPMANAGER" entity-name="FacilityParty"></member-entity>
+    	<member-entity entity-alias="FAPSK" entity-name="FacilityParty"></member-entity>
+    	<member-entity entity-alias="FG" entity-name="FacilityGroup"></member-entity>
+    	<member-entity entity-alias="UOM" entity-name="Uom"></member-entity>
+    	<alias-all entity-alias="FA"></alias-all>
+    	<alias name="facilityNameP" field="facilityName" entity-alias="FAP"></alias>
+    	<alias name="roleTypeManagerId" field="roleTypeId" entity-alias="FAPMANAGER"></alias>
+    	<alias name="roleTypeSKId" field="roleTypeId" entity-alias="FAPSK"></alias>
+    	<alias name="descriptionType" field="description" entity-alias="FAT"></alias>
+    	<alias name="partyManagerId" field="partyId" entity-alias="FAPMANAGER"></alias>
+    	<alias name="partySKId" field="partyId" entity-alias="FAPSK"></alias>
+    	<alias name="uomDesc" field="description" entity-alias="UOM"></alias>
+    	<view-link entity-alias="FA" rel-entity-alias="FAP" rel-optional="true">
+    		<key-map field-name="facilityId"/>
+    	</view-link>
+    	<view-link entity-alias="FA" rel-entity-alias="FAPMANAGER" rel-optional="false">
+    		<key-map field-name="facilityId"/>
+    		<entity-condition distinct="true" filter-by-date="true"></entity-condition>
+    	</view-link>
+    	<view-link entity-alias="FA" rel-entity-alias="FAPSK" rel-optional="false">
+    		<key-map field-name="facilityId"/>
+    		<entity-condition distinct="true" filter-by-date="true"></entity-condition>
+    	</view-link>
+    	<view-link entity-alias="FA" rel-entity-alias="FAT" rel-optional="true">
+    		<key-map field-name="facilityTypeId"/>
+    	</view-link>
+    	<view-link entity-alias="FA" rel-entity-alias="FG" rel-optional="true">
+    		<key-map field-name="primaryFacilityGroupId" rel-field-name="facilityGroupId"/>
+    	</view-link>
+    	<view-link entity-alias="FA" rel-entity-alias="UOM" rel-optional="true">
+    		<key-map field-name="facilitySizeUomId" rel-field-name="uomId"/>
+    	</view-link>
+    </view-entity>
+    <view-entity entity-name="PartyRelationShipWithPartyGroup" package-name="org.ofbiz.product.facility">
+    	<member-entity entity-alias="PR" entity-name="PartyRelationship"></member-entity>
+    	<member-entity entity-alias="PG" entity-name="PartyGroup"></member-entity>
+    	<alias name="partyId" entity-alias="PG"></alias>
+    	<alias name="groupName" entity-alias="PG"></alias>
+    	<alias name="partyIdFrom" entity-alias="PR"></alias>
+    	<alias name="roleTypeIdTo" entity-alias="PR"></alias>
+    	<view-link rel-entity-alias="PR" entity-alias="PG">
+    		<key-map rel-field-name="partyIdTo" field-name="partyId"/>
+    	</view-link>
+    </view-entity>
+    <view-entity entity-name="PartyRelationShipWithPerson" package-name="org.ofbiz.product.facility">
+    	<member-entity entity-alias="PR" entity-name="PartyRelationship"></member-entity>
+    	<member-entity entity-alias="PS" entity-name="Person"></member-entity>
+    	<alias name="partyId" entity-alias="PS"></alias>
+    	<alias name="firstName" entity-alias="PS"></alias>
+    	<alias name="middleName" entity-alias="PS"></alias>
+    	<alias name="lastName" entity-alias="PS"></alias>
+    	<alias name="fullName">
+    		<complex-alias operator="|| ||">
+    			<complex-alias-field entity-alias="PS" field="firstName"/>
+    			<complex-alias-field entity-alias="PS" field="middleName"/>
+    			<complex-alias-field entity-alias="PS" field="lastName"/>
+    		</complex-alias>
+    	</alias>
+    	<alias name="middleLast">
+    		<complex-alias operator="|| ||">
+    			<complex-alias-field entity-alias="PS" field="middleName"/>
+    			<complex-alias-field entity-alias="PS" field="lastName"/>
+    		</complex-alias>
+    	</alias>
+    	<alias name="firstLast">
+    		<complex-alias operator="|| ||">
+    			<complex-alias-field entity-alias="PS" field="firstName"/>
+    			<complex-alias-field entity-alias="PS" field="lastName"/>
+    		</complex-alias>
+    	</alias>
+    	<alias name="firstMiddle">
+    		<complex-alias operator="|| ||">
+    			<complex-alias-field entity-alias="PS" field="firstName"/>
+    			<complex-alias-field entity-alias="PS" field="middleName"/>
+    		</complex-alias>
+    	</alias>
+    	<alias name="partyIdFrom" entity-alias="PR"></alias>
+    	<alias name="roleTypeIdTo" entity-alias="PR"></alias>
+    	<view-link rel-entity-alias="PR" entity-alias="PS">
+    		<key-map rel-field-name="partyIdTo" field-name="partyId"/>
+    	</view-link>
+    </view-entity>
+    <view-entity entity-name="FacilityPartyWithDetail" package-name="org.ofbiz.product.facility">
+    	<member-entity entity-alias="FP" entity-name="FacilityParty"></member-entity>
+    	<member-entity entity-alias="PS" entity-name="Person"></member-entity>
+    	<member-entity entity-alias="RT" entity-name="RoleType"></member-entity>
+    	<alias name="facilityId" entity-alias="FP"></alias>
+    	<alias name="partyId" entity-alias="FP"></alias>
+    	<alias name="roleTypeId" entity-alias="FP"></alias>
+    	<alias name="firstName" entity-alias="PS"></alias>
+    	<alias name="middleName" entity-alias="PS"></alias>
+    	<alias name="lastName" entity-alias="PS"></alias>
+    	<alias name="fromDate" entity-alias="FP"></alias>
+    	<alias name="thruDate" entity-alias="FP"></alias>
+    	<alias name="description" entity-alias="RT"></alias>
+    	<view-link rel-entity-alias="PS" entity-alias="FP" rel-optional="true">
+    		<key-map field-name="partyId"/>
+    	</view-link>
+    	<view-link rel-entity-alias="RT" entity-alias="FP" rel-optional="true">
+    		<key-map field-name="roleTypeId"/>
+    	</view-link>
+    </view-entity>
+    
+    <view-entity entity-name="ContactMechInFacility" package-name="org.ofbiz.product.facility">
+    	<member-entity entity-alias="FCTMPE" entity-name="FacilityContactMechPurpose"></member-entity>
+    	<member-entity entity-alias="FACM" entity-name="FacilityContactMech"></member-entity>
+    	<member-entity entity-alias="CMPT" entity-name="ContactMechPurposeType"></member-entity>
+    	<member-entity entity-alias="CTMH" entity-name="ContactMech"></member-entity>
+    	<member-entity entity-alias="CMTE" entity-name="ContactMechType"></member-entity>
+    	<member-entity entity-alias="PTADD" entity-name="PostalAddress"></member-entity>
+    	<alias name="contactMechId" entity-alias="CTMH" ></alias>
+    	<alias name="contactMechTypeId" entity-alias="CMTE"></alias>
+    	<alias name="address1" entity-alias="PTADD"></alias>
+    	<alias name="toName" entity-alias="PTADD"></alias>
+    	<alias name="descriptionContactMechType" field="description" entity-alias="CMTE"></alias>
+    	<alias name="facilityId" entity-alias="FACM" ></alias>
+    	<alias name="descriptionContactMechPurpuseType"  field="description" entity-alias="CMPT" ></alias>
+    	<view-link rel-entity-alias="CTMH" entity-alias="FCTMPE" rel-optional="true">
+    		<key-map field-name="contactMechId"/>
+    	</view-link>
+    	<view-link rel-entity-alias="FACM" entity-alias="CTMH" rel-optional="true">
+    		<key-map field-name="contactMechId"/>
+    	</view-link>
+    	<view-link rel-entity-alias="CMTE" entity-alias="CTMH" rel-optional="true">
+    		<key-map field-name="contactMechTypeId"/>
+    	</view-link>
+    	<view-link rel-entity-alias="PTADD" entity-alias="CTMH" rel-optional="true">
+    		<key-map field-name="contactMechId"/>
+    	</view-link>
+    	<view-link rel-entity-alias="CMPT" entity-alias="FCTMPE" rel-optional="true">
+    		<key-map field-name="contactMechPurposeTypeId"/>
+    	</view-link>
+    	<!-- <entity-condition>
+    		<condition-list>
+    			<condition-expr field-name="contactMechTypeId" entity-alias="CMTE" rel-field-name="contactMechTypeId" operator="equals" value="POSTAL_ADDRESS" />
+    		</condition-list>
+    	</entity-condition> -->
+    </view-entity>
+    
+    
+    <view-entity entity-name="ContactMechInFacilityTypePurpose" package-name="org.ofbiz.product.facility">
+    	<member-entity entity-alias="FCTMPE" entity-name="FacilityContactMechPurpose"></member-entity>
+    	<member-entity entity-alias="FACM" entity-name="FacilityContactMech"></member-entity>
+    	<member-entity entity-alias="CMPT" entity-name="ContactMechPurposeType"></member-entity>
+    	<member-entity entity-alias="CTMH" entity-name="ContactMech"></member-entity>
+    	<member-entity entity-alias="CMTE" entity-name="ContactMechType"></member-entity>
+    	<member-entity entity-alias="PTADD" entity-name="PostalAddress"></member-entity>
+    	<member-entity entity-alias="TLNM" entity-name="TelecomNumber"></member-entity>
+    	<alias name="contactMechId" entity-alias="CTMH" ></alias>
+    	<alias name="contactMechTypeId" entity-alias="CMTE"></alias>
+    	<alias name="infoString" entity-alias="CTMH" ></alias>
+    	<alias name="address1" entity-alias="PTADD"></alias>
+    	<alias name="address2" entity-alias="PTADD"></alias>
+    	<alias name="attnName" entity-alias="PTADD"></alias>
+    	<alias name="countryGeoId" entity-alias="PTADD"></alias>
+    	<alias name="city" entity-alias="PTADD"></alias>
+    	<alias name="stateProvinceGeoId" entity-alias="PTADD"></alias>
+    	<alias name="postalCode" entity-alias="PTADD"></alias>
+    	<alias name="toName" entity-alias="PTADD"></alias>
+    	<alias name="descriptionContactMechType" field="description" entity-alias="CMTE"></alias>
+    	<alias name="facilityId" entity-alias="FACM" ></alias>
+    	<alias name="contactMechPurposeTypeId"  field="contactMechPurposeTypeId" entity-alias="CMPT" ></alias>
+    	<alias name="descriptionContactMechPurpuseType"  field="description" entity-alias="CMPT" ></alias>
+    	<alias name="countryCode"  field="countryCode" entity-alias="TLNM" ></alias>
+    	<alias name="areaCode"  field="areaCode" entity-alias="TLNM" ></alias>
+    	<alias name="contactNumber"  field="contactNumber" entity-alias="TLNM" ></alias>
+    	<alias name="askForName"  field="askForName" entity-alias="TLNM" ></alias>
+    	<alias name="extension"  field="extension" entity-alias="FACM" ></alias>
+    	<view-link rel-entity-alias="CTMH" entity-alias="FCTMPE" rel-optional="true">
+    		<key-map field-name="contactMechId"/>
+    	</view-link>
+    	<view-link rel-entity-alias="FACM" entity-alias="CTMH" rel-optional="true">
+    		<key-map field-name="contactMechId"/>
+    	</view-link>
+    	<view-link rel-entity-alias="TLNM" entity-alias="CTMH" rel-optional="true">
+    		<key-map field-name="contactMechId"/>
+    	</view-link>
+    	<view-link rel-entity-alias="CMTE" entity-alias="CTMH" rel-optional="true">
+    		<key-map field-name="contactMechTypeId"/>
+    	</view-link>
+    	<view-link rel-entity-alias="PTADD" entity-alias="CTMH" rel-optional="true">
+    		<key-map field-name="contactMechId"/>
+    	</view-link>
+    	<view-link rel-entity-alias="CMPT" entity-alias="FCTMPE" rel-optional="true">
+    		<key-map field-name="contactMechPurposeTypeId"/>
+    	</view-link>
+    </view-entity>
+    
+    
+    
+    <view-entity entity-name="ListInventoryItemForPhysicalByLocationInFacility" package-name="org.ofbiz.product.facility">
+    	<member-entity entity-alias="PRO" entity-name="Product"></member-entity>
+    	<member-entity entity-alias="IIL" entity-name="InventoryItemLocation"></member-entity>
+    	<member-entity entity-alias="LFA" entity-name="LocationFacility"></member-entity>
+    	<member-entity entity-alias="LFT" entity-name="LocationFacilityType"></member-entity>
+    	<member-entity entity-alias="IIN" entity-name="InventoryItem"></member-entity>
+    	
+    	<alias name="inventoryItemId" entity-alias="IIL" field="inventoryItemId"></alias>
+    	<alias name="internalName" entity-alias="PRO" field="internalName"></alias>
+    	<alias name="locationId" entity-alias="LFA" field="locationId"></alias>
+    	<alias name="locationCode" entity-alias="LFA" field="locationCode"></alias>
+    	<alias name="facilityId" entity-alias="LFA" field="facilityId"></alias>
+    	<alias name="quantityOnHand" entity-alias="IIN" field="quantityOnHandTotal"></alias>
+    	<alias name="availableToPromise" entity-alias="IIN" field="availableToPromiseTotal" ></alias>
+    	<alias name="QOH" entity-alias="IIN" field="QOH"></alias>
+    	<alias name="ATP" entity-alias="IIN" field="ATP"></alias>
+    	<alias name="productId" entity-alias="IIL" field="productId"></alias>
+    	<alias name="expireDate" field="expireDate" entity-alias="IIN"></alias>
+    	<view-link rel-entity-alias="LFA" entity-alias="LFT" >
+    		<key-map field-name="locationFacilityTypeId"/>
+    	</view-link>
+    	<view-link rel-entity-alias="IIL" entity-alias="LFA" >
+    		<key-map field-name="locationId"/>
+    	</view-link>
+    	<view-link rel-entity-alias="IIN" entity-alias="IIL" >
+    		<key-map field-name="inventoryItemId"/>
+    	</view-link>
+    	<view-link rel-entity-alias="PRO" entity-alias="IIN" >
+    		<key-map field-name="productId"/>
+    	</view-link>
+    	<!-- <entity-condition>
+    		<condition-list combine="and">
+    			<condition-expr field-name="QOH" entity-alias="GPI" rel-field-name="QOH" operator="greater-equals" value="0"/>
+    			<condition-expr field-name="availableToPromiseTotal" entity-alias="II" rel-field-name="availableToPromiseTotal" operator="greater" value="0"/>
+    		</condition-list>
+    	</entity-condition> -->
+    	
+    </view-entity>
+    
+    <view-entity entity-name="ListFacilityGroupAndFacilityGroupRollup" package-name="org.ofbiz.product.facility">
+    	<member-entity entity-alias="FACG" entity-name="FacilityGroup"></member-entity>
+    	<member-entity entity-alias="FAGR" entity-name="FacilityGroupRollup"></member-entity>
+    	
+    	<alias name="facilityGroupId" entity-alias="FACG" field="facilityGroupId"></alias>
+    	<alias name="facilityGroupTypeId" entity-alias="FACG" field="facilityGroupTypeId"></alias>
+    	<alias name="parentFacilityGroupId" entity-alias="FAGR" field="parentFacilityGroupId"></alias>
+    	<alias name="primaryParentGroupId" entity-alias="FACG" field="primaryParentGroupId"></alias>
+    	<alias name="facilityGroupName" entity-alias="FACG" field="facilityGroupName"></alias>
+    	<alias name="description" entity-alias="FACG" field="description"></alias>
+    	<alias name="fromDate" entity-alias="FAGR" field="fromDate"></alias>
+    	<alias name="thruDate" entity-alias="FAGR" field="thruDate"></alias>
+    	<alias name="sequenceNum" entity-alias="FAGR" field="sequenceNum"></alias>
+    	<view-link rel-entity-alias="FAGR" entity-alias="FACG" rel-optional="true">
+    		<key-map field-name="facilityGroupId"/>
+    	</view-link>
+    </view-entity>
+    
+    <view-entity entity-name="ListProductByDeliveryItemAndOrderItem" package-name="com.olbius.logistics.delivery">
+    	<description></description>
+    	<member-entity entity-alias="ORD" entity-name="OrderItem"></member-entity>
+    	<member-entity entity-alias="DLIT" entity-name="DeliveryItem"></member-entity>
+    	<alias name="deliveryId" entity-alias="DLIT"></alias>
+    	<alias name="orderId" entity-alias="ORD"></alias>
+    	<alias name="productId" entity-alias="ORD" field="productId"></alias>
+    	<alias name="fromOrderId" entity-alias="DLIT"></alias>
+    	<alias name="fromOrderItemSeqId" entity-alias="DLIT"></alias>
+    	<alias name="actualExportedQuantity" entity-alias="DLIT"></alias>
+    	<alias name="orderItemSeqId" entity-alias="ORD"></alias>
+    	<alias name="quantity" entity-alias="ORD"></alias>
+    	<alias name="expireDate" entity-alias="ORD"></alias>
+    	<alias name="actualExpireDate" entity-alias="DLIT"></alias>
+    	<alias name="quantityUomId" entity-alias="ORD"></alias>
+    	<alias name="alternativeQuantity" entity-alias="ORD"></alias>
+    	<view-link entity-alias="ORD" rel-entity-alias="DLIT" >
+    		<key-map field-name="orderId" rel-field-name="fromOrderId"/>
+    		<key-map field-name="orderItemSeqId" rel-field-name="fromOrderItemSeqId"/>
+    	</view-link>
+    </view-entity>
+    
+    <view-entity entity-name="ListOrderHeaderAndOrderItem" package-name="com.olbius.logistics.delivery">
+    	<description>Lien ket bang OrderHeader And OrderItem</description>
+    	<member-entity entity-alias="ORD" entity-name="OrderItem"></member-entity>
+    	<member-entity entity-alias="OHD" entity-name="OrderHeader"></member-entity>
+    	<alias name="productId" entity-alias="ORD" field="productId"></alias>
+    	<alias name="orderId" entity-alias="ORD"></alias>
+    	<alias name="orderItemSeqId" entity-alias="ORD"></alias>
+    	<alias name="quantity" entity-alias="ORD"></alias>
+    	<alias name="expireDate" entity-alias="OHD"></alias>
+    	<alias name="quantityUomId" entity-alias="ORD"></alias>
+    	<view-link rel-entity-alias="OHD" entity-alias="ORD">
+    		<key-map field-name="orderId" rel-field-name="orderId"/>
+    	</view-link>
+    </view-entity>
+    
+    <view-entity entity-name="ListProductByOrderInShipmentReceipt" package-name="com.olbius.logistics.delivery">
+    	<description>Lien ket bang InventoryItem and ShipmentReceipt fecth product of NPP by order</description>
+    	<member-entity entity-alias="INT" entity-name="InventoryItem"></member-entity>
+    	<member-entity entity-alias="SRT" entity-name="ShipmentReceipt"></member-entity>
+    	<member-entity entity-alias="IND" entity-name="InventoryItemDetail"></member-entity>
+    	<alias name="productId" entity-alias="SRT" field="productId"></alias>
+    	<alias name="orderId" entity-alias="SRT"></alias>
+    	<alias name="inventoryItemId" entity-alias="INT"></alias>
+    	<alias name="quantityAccepted" entity-alias="SRT"></alias>
+    	<alias name="expireDate" entity-alias="INT"></alias>
+    	<alias name="uomId" entity-alias="INT"></alias>
+    	<alias name="facilityId" entity-alias="INT"></alias>
+    	<alias name="receiptId" entity-alias="SRT"></alias>
+    	<alias name="inventoryItemDetailSeqId" entity-alias="IND"></alias>
+    	<view-link rel-entity-alias="INT" entity-alias="SRT">
+    		<key-map field-name="inventoryItemId" rel-field-name="inventoryItemId"/>
+    	</view-link>
+    	<view-link rel-entity-alias="IND" entity-alias="INT">
+    		<key-map field-name="inventoryItemId" rel-field-name="inventoryItemId"/>
+    	</view-link>
+    </view-entity>
+    
+    <view-entity entity-name="ListUomIdByProductId" package-name="com.olbius.logistics.delivery">
+    	<description>Fetch uomId by Product And ConfigPacking</description>
+    	<member-entity entity-alias="PRO" entity-name="Product"></member-entity>
+    	<member-entity entity-alias="CAAG" entity-name="ConfigPacking"></member-entity>
+    	<alias name="productId" entity-alias="PRO"></alias>
+    	<alias name="uomIdFromId" entity-alias="CAAG"></alias>
+    	<alias name="uomIdToId" entity-alias="CAAG"></alias>
+    	<alias name="quantityUomId" entity-alias="PRO"></alias>
+    	<view-link rel-entity-alias="CAAG" entity-alias="PRO">
+    		<key-map field-name="productId" rel-field-name="productId"/>
+    	</view-link>
+    </view-entity>
+    
+    <view-entity entity-name="ListProductByDeliveryInOrder" package-name="com.olbius.logistics.delivery">
+    	<description>Fetch uomId by Product And ConfigPacking</description>
+    	<member-entity entity-alias="DEY" entity-name="Delivery"></member-entity>
+    	<member-entity entity-alias="SRT" entity-name="ShipmentReceipt"></member-entity>
+    	<member-entity entity-alias="OHI" entity-name="OrderHeader"></member-entity>
+    	<alias name="productId" entity-alias="SRT"></alias>
+    	<alias name="orderId" entity-alias="OHI"></alias>
+    	<alias name="deliveryId" entity-alias="DEY"></alias>
+    	<alias name="shipmentId" entity-alias="SRT"></alias>
+    	<view-link rel-entity-alias="DEY" entity-alias="OHI">
+    		<key-map field-name="orderId" rel-field-name="orderId"/>
+    	</view-link>
+    	<view-link rel-entity-alias="SRT" entity-alias="DEY">
+    		<key-map field-name="shipmentId" rel-field-name="shipmentId"/>
+    	</view-link>
+    </view-entity>
+    
+    <extend-entity entity-name="FacilityGroupRole">
+    	<field name="fromDate" type="date-time"></field>
+    	<field name="thruDate" type="date-time"></field>
+    </extend-entity>
+    
+    
+    <view-entity entity-name="LabelTotal" package-name="org.ofbiz.product.facility">
+    	<member-entity entity-alias="LAIM" entity-name="LabelItem"></member-entity>
+    	<alias name="labelId"  entity-alias="LAIM" group-by="true"></alias>
+    	<alias name="quantityOnHandTotal" function="sum" entity-alias="LAIM"></alias>
+    	<alias name="availableToPromiseTotal" function="sum" entity-alias="LAIM"></alias>
+    	<alias name="facilityId" entity-alias="LAIM" group-by="true"></alias>
+    </view-entity>
+    
+    <view-entity entity-name="ProductLabelItemToTal" package-name="org.ofbiz.product.facility">
+    	<member-entity entity-alias="PRO" entity-name="Product"></member-entity>
+    	<member-entity entity-alias="INV" entity-name="InventoryItem"></member-entity>
+    	<alias name="productId"  entity-alias="PRO" group-by="true"></alias>
+    	<alias name="internalName"  entity-alias="PRO" group-by="true"></alias>
+    	<alias name="quantityOnHandTotal" function="sum" entity-alias="INV"></alias>
+    	<alias name="availableToPromiseTotal" function="sum" entity-alias="INV"></alias>
+    	<view-link rel-entity-alias="INV" entity-alias="PRO">
+    		<key-map field-name="productId" rel-field-name="productId"/>
+    	</view-link>
+    </view-entity>
+    
+    <view-entity entity-name="ProductLabelAndRequirement" package-name="org.ofbiz.product.facility">
+    	<member-entity entity-alias="REI" entity-name="RequirementItem"></member-entity>
+    	<member-entity entity-alias="REQ" entity-name="Requirement"></member-entity>
+    	<member-entity entity-alias="PRO" entity-name="Product"></member-entity>
+    	<alias-all entity-alias="REI"></alias-all>
+    	<alias name="facilityId" entity-alias="REQ" group-by="true"></alias>
+    	<alias name="requiremenrId" entity-alias="REQ" group-by="true"></alias>
+    	<alias name="requiremenrId" entity-alias="REQ" group-by="true"></alias>
+    	<view-link rel-entity-alias="REI" entity-alias="REQ">
+    		<key-map field-name="requirementId" rel-field-name="requirementId"/>
+    	</view-link>
+    	<view-link rel-entity-alias="PRO" entity-alias="REI">
+    		<key-map field-name="productId" rel-field-name="productId"/>
+    	</view-link>
+    	<entity-condition >
+    		<condition-expr field-name="productTypeId" value="RAW_MATERIAL" operator="equals" entity-alias="PRO" />
+    	</entity-condition>
+    </view-entity>
+    
+    
+    <view-entity entity-name="ProductByInventoryItemTotal" package-name="org.ofbiz.product.facility">
+    	<member-entity entity-alias="PRO" entity-name="Product"></member-entity>
+    	<member-entity entity-alias="IIN" entity-name="InventoryItem"></member-entity>
+    	<alias name="productId" entity-alias="PRO" field="productId" group-by="true"></alias>
+    	<alias name="internalName" entity-alias="PRO" field="internalName" group-by="true"></alias>
+    	<alias name="QOH" entity-alias="IIN" field="quantityOnHandTotal" group-by="false" function="sum"></alias>
+    	<alias name="ATP" entity-alias="IIN" field="availableToPromiseTotal" group-by="false" function="sum"></alias>
+    	<view-link rel-entity-alias="IIN" entity-alias="PRO" rel-optional="true">
+    		<key-map field-name="productId"/>
+    	</view-link>
+    	<entity-condition >
+    		<condition-list>
+    			<condition-expr field-name="ownerPartyId" operator="equals" value="company" entity-alias="IIN"/>
+    			<condition-expr field-name="productTypeId" operator="equals" value="FINISHED_GOOD" entity-alias="PRO" />
+    		</condition-list>
+    	</entity-condition>
+    </view-entity>
+    
+    <view-entity entity-name="ProductTotalAndConfigPacking" package-name="org.ofbiz.product.facility">
+    	<member-entity entity-alias="COP" entity-name="ConfigPacking"></member-entity>
+    	<member-entity entity-alias="PIT" entity-name="ProductByInventoryItemTotal"></member-entity>
+    	<alias-all entity-alias="PIT"></alias-all>
+    	<alias name="uomFromId" entity-alias="COP" field="uomFromId"></alias>
+    	<alias name="uomToId" entity-alias="COP" field="uomToId" ></alias>
+    	<view-link rel-entity-alias="COP" entity-alias="PIT" rel-optional="true">
+    		<key-map field-name="productId"/>
+    	</view-link>
+    </view-entity>
+    
+    <extend-entity entity-name="Requirement">
+    	<field name="partyId" type="id-ne"></field>
+    </extend-entity>
+</entitymodel>

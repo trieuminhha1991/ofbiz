@@ -1,0 +1,1234 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<!--
+This file contains basic services for SalesOpportunity and SalesForecast.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+    <simple-method method-name="createSalesStatement" short-description="Creates a sales statement and stores a copy in sales statement history.">
+        <!-- make the value and set the fields from the parameters -->
+        <if-not-empty field="parameters.salesId">
+        	<entity-one value-field="salesSelected" entity-name="SalesStatementHeader">
+        		<field-map field-name="salesId" from-field="parameters.salesId"/>
+        	</entity-one>
+        	<if-not-empty field="salesSelected">
+        		<set field="salesId" from-field="parameters.salesId"/>
+        	</if-not-empty>
+        <else>
+        	<make-value value-field="salesStatement" entity-name="SalesStatementHeader"/>
+	        <sequenced-id sequence-name="SalesStatementHeader" field="salesId"/>
+	        <set field="salesStatement.salesId" from-field="salesId"/>
+	        <set-nonpk-fields map="parameters" value-field="salesStatement"/>
+			<set field="salesStatement.statusId" value="SALES_SM_CREATED"/>
+	        <!-- set the creation info -->
+	        <set field="salesStatement.createdBy" from-field="userLogin.userLoginId"/>
+	        <set field="salesForecast.modifiedBy" from-field="userLogin.userLoginId"/>
+	        
+	        <!-- create the value -->
+        	<create-value value-field="salesStatement"/>
+        </else>
+        </if-not-empty>
+        <set field="parameters.salesId" from-field="salesId"/>
+        <!-- return the ID -->
+        <field-to-result result-name="salesId" field="salesId"/>
+    </simple-method>
+	<simple-method method-name="updateSalesStatement" short-description="Updates a sales statement.">
+        <!-- get the forecast -->
+        <entity-one entity-name="SalesStatementHeader" auto-field-map="true" value-field="salesStatementHeader"/>
+
+        <!-- set the fields from the parameters -->
+        <set-nonpk-fields map="parameters" value-field="salesStatementHeader"/>
+
+        <!-- store the value -->
+        <store-value value-field="salesStatementHeader"/>
+    </simple-method>
+    
+    <!-- Sales Forecast Detail -->
+    <simple-method method-name="createSalesStatementDetail" short-description="Creates a sales statement detail">
+        <set field="salesId" from-field="parameters.salesId"/>
+        
+        <entity-condition list="listProductAndCategoryId" entity-name="SalesStatementItem">
+       		<condition-list>
+       			<condition-expr field-name="salesId" from-field="salesId"/>
+       			<condition-expr field-name="productId" from-field="parameters.productId"/>
+       			<condition-expr field-name="productCategoryId" from-field="parameters.productCategoryId"/>
+       		</condition-list>
+       	</entity-condition>
+       	<if-not-empty field="listProductAndCategoryId">
+       		<add-error>
+       			<fail-property resource="DelysAdminUiLabels" property="DAThisProductIsAlreadyExists"/>
+       		</add-error>
+       	</if-not-empty>
+        <check-errors/>
+        
+        <entity-one value-field="productSelected" entity-name="Product">
+        	<field-map field-name="productId" from-field="parameters.productId"/>
+        </entity-one>
+        <entity-one value-field="salesStatementSelected" entity-name="SalesStatementHeader">
+        	<field-map field-name="salesId" from-field="salesId"/>
+        </entity-one>
+        <set field="contextMap.product" from-field="productSelected"/>
+        <set field="contextMap.findAllQuantityPrices" value="Y"/>
+        <set field="contextMap.partyId" from-field="salesStatementSelected.internalPartyId" />
+        <call-service service-name="calculateProductPrice" in-map-name="contextMap">
+        	<result-to-field result-name="basePrice" field="resultField.basePrice"/>
+        	<result-to-field result-name="listPrice" field="resultField.listPrice"/>
+        	<result-to-field result-name="price" field="resultField.price"/>
+        	<result-to-field result-name="promoPrice" field="resultField.promoPrice"/>
+        </call-service>
+        <set field="priceProduct" value="0.00" type="BigDecimal"/>
+        <set field="listPriceProduct" value="0.00"/>
+        <if-not-empty field="resultField.listPrice">
+        	<set field="listPriceProduct" from-field="resultField.listPrice"/>
+        </if-not-empty>
+        <if-not-empty field="resultField.promoPrice">
+        	<set field="priceProduct" from-field="resultField.promoPrice"/>
+        <else>
+        	<if-not-empty field="resultField.price">
+	        	<set field="priceProduct" from-field="resultField.price"/>
+	        <else>
+	        	<if-not-empty field="resultField.listPrice">
+	        		<set field="priceProduct" from-field="resultField.listPrice"/>
+	       		<else>
+	       			<set field="priceProduct" from-field="resultField.basePrice"/>
+	       		</else>
+	        	</if-not-empty>
+	        </else>
+	        </if-not-empty>
+        </else>
+        </if-not-empty>
+        <if-empty field="parameters.quantity">
+        	<set field="parameters.quantity" value="0"/>
+        </if-empty>
+        <calculate field="totalAmount" decimal-scale="2" rounding-mode="Ceiling">
+            <calcop operator="multiply">
+                <calcop operator="get" field="priceProduct"/>
+                <calcop operator="get" field="parameters.quantity"/>
+            </calcop>
+        </calculate>
+        <make-value entity-name="SalesStatementItem" value-field="newEntity"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <make-next-seq-id seq-field-name="salesItemSeqId" value-field="newEntity"/>
+        <set field="newEntity.salesItemSeqId" from-field="salesItemSeqId" />
+        <set field="newEntity.salesId" from-field="salesId" />
+        <set field="newEntity.unitPrice" from-field="priceProduct"/>
+        <set field="newEntity.amount" from-field="totalAmount"/>
+        <set field="newEntity.unitListPrice" from-field="listPriceProduct"/>
+        <field-to-result field="salesId" result-name="salesId"/>
+        <create-value value-field="newEntity"/>
+        <field-to-result field="salesItemSeqId" result-name="salesItemSeqId"/>
+    </simple-method>
+    <simple-method method-name="updateSalesStatementDetail" short-description="Updates a sales statement detail">
+        <entity-one entity-name="SalesStatementItem" value-field="lookedUpValue"/>
+        <set-nonpk-fields value-field="lookedUpValue" map="parameters"/>
+        <if-empty field="parameters.quantity">
+        	<set field="parameters.quantity" value="0"/>
+        </if-empty>
+        <calculate field="totalAmount" decimal-scale="2" rounding-mode="Ceiling">
+            <calcop operator="multiply">
+                <calcop operator="get" field="lookedUpValue.unitPrice"/>
+                <calcop operator="get" field="parameters.quantity"/>
+            </calcop>
+        </calculate>
+        <set field="lookedUpValue.amount" from-field="totalAmount"/>
+        <store-value value-field="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="deleteSalesStatementDetail" short-description="Delete a Sales statement Detail">
+        <entity-one entity-name="SalesStatementItem" value-field="lookedUpValue"/>
+        <remove-value value-field="lookedUpValue"/>
+    </simple-method>
+    
+	<!-- SALES POLICY AWARD -->
+	<simple-method method-name="updateSalesPolicyStatus">
+   	 	<!-- <check-permission permission="DELYS_PROMOS" action="_UPDATE">
+           	<fail-property resource="DelysUiLabels" property="DelysCreatePermissionError"/>
+       	</check-permission>
+       	<check-errors/> -->
+    	<if>
+    		<condition>
+    			<or>
+    				<if-compare operator="equals" value="SALES_PL_CANCELLED" field="parameters.statusId"></if-compare>
+    				<if-compare operator="equals" value="SALES_PL_ACCEPTED" field="parameters.statusId"></if-compare>
+    			</or>
+    		</condition>
+    		<then>
+    			<now-timestamp field="nowStamp"/>
+    			<set from-field="parameters.salesPolicyId" field="lookupPKMap.salesPolicyId"/>
+				<find-by-primary-key value-field="lookedUpValue" map="lookupPKMap" entity-name="SalesPolicy"/>
+				<set field="oldStatusId" from-field="lookedUpValue.statusId"/>
+				<if-compare operator="not-equals" value="SALES_PL_CREATED" field="oldProductPromoStatusId">
+					<add-error>
+						<fail-property resource="DelysAdminErrorUiLabels" property="DAStatusCouldNotChange"/>
+					</add-error>
+				</if-compare>
+				<check-errors/>
+				
+				<set field="lookedUpValue.statusId" from-field="parameters.statusId"/>
+				<store-value value-field="lookedUpValue"/>
+    		</then>
+    	</if>
+    </simple-method>
+    <simple-method method-name="createSalesPolicyRole">
+    	<check-permission permission="SALES_POLICY" action="_CREATE">
+    		<fail-property resource="DelysUiLabels" property="DelysCreatePermissionError"/>
+    	</check-permission>
+    	<set field="lookupPKMap.salesPolicyId" from-field="parameters.salesPolicyId"/>
+    	<find-by-primary-key value-field="lookedUpValue" map="lookupPKMap" entity-name="SalesPolicy"/>
+    	<if-compare operator="equals" value="SALES_PL_CREATED" field="lookedUpValue.statusId">
+			<make-value value-field="newPolicyRole" entity-name="SalesPolicyRoleTypeApply"/>
+			<set-pk-fields value-field="newPolicyRole" map="parameters"/>
+			<find-by-primary-key value-field="lookedUpValue" map="newPolicyRole"/>
+			<if-not-empty field="lookedUpValue">
+				<add-error>
+					<fail-property resource="DelysUiLabels" property="RoleExists"/>
+				</add-error>
+				<check-errors/>
+			</if-not-empty>		
+			<set-nonpk-fields value-field="newPolicyRole" map="parameters"/>				
+			<create-value value-field="newPolicyRole"/>
+		<else>
+			<add-error>
+				<fail-property resource="DelysUiLabels" property="SttNotCreated"/>
+			</add-error>
+			<check-errors/>
+		</else>	    	
+    	</if-compare>
+    </simple-method>
+    <!-- ProductStore policy apply. SalesPolicy to ProductStore methods -->
+	<simple-method method-name="createProductStorePolicyAppl">
+		<check-permission permission="SALES_POLICY" action="_CREATE">
+            <fail-property resource="DelysUiLabels" property="DelysCreatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+		<set from-field="parameters.salesPolicyId" field="lookupPKMap.salesPolicyId"/>
+        <find-by-primary-key entity-name="SalesPolicy" map="lookupPKMap" value-field="lookedUpValue"/>
+        <if-compare operator="equals" value="SALES_PL_CREATED" field="lookedUpValue.statusId">
+        	<make-value value-field="newEntity" entity-name="ProductStoreSalesPolicyAppl"/>
+	        <set-pk-fields map="parameters" value-field="newEntity"/>
+	        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+	        <if-empty field="newEntity.fromDate">
+	            <now-timestamp field="nowTimestamp"/>
+	            <set from-field="nowTimestamp" set-if-empty="true" field="newEntity.fromDate"/>
+	        </if-empty>
+	        <create-value value-field="newEntity"/>
+        <else>
+        	<add-error>
+        		<fail-property resource="DelysUiLabels" property="SttNotCreated"/>
+        	</add-error>
+        	<check-errors/>
+       	</else>
+        </if-compare>
+	</simple-method>
+    
+    <simple-method method-name="createSalesPolicy">
+        <if-empty field="parameters.policyName">
+        	<add-error>
+        		<fail-property resource="DelysAdminUiLabels" property="DANameMustNotBeEmpty"/>
+        	</add-error>
+        </if-empty>
+        <if-empty field="parameters.fromDate">
+        	<add-error>
+        		<fail-property resource="DelysAdminUiLabels" property="DAFromDateNotBeEmpty"/>
+        	</add-error>
+        </if-empty>
+        <if-empty field="parameters.geoIdsInclude">
+        	<add-error>
+        		<fail-property resource="DelysAdminErrorUiLabels" property="DAGeoIdIncludeNotBeEmpty"/>
+        	</add-error>
+        </if-empty>
+        <check-errors/>
+			
+		<make-value value-field="newEntity" entity-name="SalesPolicy"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <set field="newEntity.salesPolicyId" from-field="parameters.salesPolicyId"/>
+        <set field="newEntity.statusId" value="SALES_PL_CREATED"/>
+        <if-empty field="newEntity.salesPolicyId">
+    		<sequenced-id sequence-name="SalesPolicy" field="newEntity.salesPolicyId"/>
+    	<else>
+    		<check-id field="newEntity.salesPolicyId" />
+    		<check-errors/>
+    		<entity-one value-field="dummySalesPolicy" entity-name="SalesPolicy">
+    			<field-map field-name="salesPolicyId" from-field="parameters.salesPolicyId"/>
+    		</entity-one>
+    		<if-not-empty field="dummySalesPolicy">
+    			<add-error>
+    				<fail-property resource="CommonErrorUiLabels" property="CommonErrorDublicateKey" />
+    			</add-error>
+    		</if-not-empty>
+    		<check-errors/>
+    	</else>
+    	</if-empty>
+        
+        <field-to-result field="newEntity.salesPolicyId" result-name="salesPolicyId"/>
+		<set field="salesPolicyId" from-field="newEntity.salesPolicyId"/>
+		
+        <now-timestamp field="nowTimestamp"/>
+        <set from-field="nowTimestamp" field="newEntity.createdDate"/>
+        <set from-field="userLogin.userLoginId" field="newEntity.createdByUserLogin"/>
+
+        <create-value value-field="newEntity"/>
+		
+		<if-not-empty field="parameters.roleTypeIds">
+			<iterate entry="roleTypeId" list="parameters.roleTypeIds">
+				<set field="policyRoleCtx.roleTypeId" from-field="roleTypeId"/>
+				<set field="policyRoleCtx.salesPolicyId" from-field="salesPolicyId"/>
+				<set field="policyRoleCtx.fromDate" from-field="parameters.fromDate" default="nowTimestamp"/>
+				<call-service service-name="createSalesPolicyRole" in-map-name="policyRoleCtx"></call-service>
+			</iterate>
+		</if-not-empty>
+		<if-not-empty field="parameters.geoIdsInclude">
+			<iterate entry="geoId" list="parameters.geoIdsInclude">
+				<entity-one value-field="dummyGeo" entity-name="Geo">
+					<field-map field-name="geoId"/>
+				</entity-one>
+				<if-not-empty field="dummyGeo">
+					<set field="policyGeoCtx.salesPolicyId" from-field="salesPolicyId"/>
+					<set field="policyGeoCtx.geoId" from-field="dummyGeo.geoId"/>
+					<set field="policyGeoCtx.geoTypeId" from-field="dummyGeo.geoTypeId"/>
+					<set field="policyGeoCtx.salesPolicyGeoApplEnumId" value="SPPA_INCLUDE" />
+					<set field="policyGeoCtx.fromDate" from-field="parameters.fromDate" default="nowTimestamp"/>
+					<call-service service-name="createSalesPolicyGeoAppl" in-map-name="policyGeoCtx"></call-service>
+				</if-not-empty>
+			</iterate>
+		</if-not-empty>
+		<if-not-empty field="parameters.geoIdsExclude">
+			<iterate entry="geoId" list="parameters.geoIdsExclude">
+				<entity-one value-field="dummyGeo" entity-name="Geo">
+					<field-map field-name="geoId"/>
+				</entity-one>
+				<if-not-empty field="dummyGeo">
+					<set field="policyGeoCtx.salesPolicyId" from-field="salesPolicyId"/>
+					<set field="policyGeoCtx.geoId" from-field="dummyGeo.geoId"/>
+					<set field="policyGeoCtx.geoTypeId" from-field="dummyGeo.geoTypeId"/>
+					<set field="policyGeoCtx.salesPolicyGeoApplEnumId" value="SPPA_EXCLUDE" />
+					<set field="policyGeoCtx.fromDate" from-field="parameters.fromDate" default="nowTimestamp"/>
+					<call-service service-name="createSalesPolicyGeoAppl" in-map-name="policyGeoCtx"></call-service>
+				</if-not-empty>
+			</iterate>
+		</if-not-empty>
+		<!-- <if-not-empty field="parameters.productStoreIds">
+			<iterate entry="productStoreId" list="parameters.productStoreIds">
+				<set field="productStorePolicy.productStoreId" from-field="productStoreId"/>
+				<set field="productStorePolicy.salesPolicyId" from-field="salesPolicyId"/>
+				<if-not-empty field="parameters.fromDate">
+					<set field="productStorePolicy.fromDate" from-field="parameters.fromDate"/>
+					<else>
+						<now-timestamp field="productStorePolicy.fromDate"/>
+					</else>
+				</if-not-empty>
+				<if-not-empty field="parameters.thruDate">
+					<set field="productStorePolicy.thruDate" from-field="parameters.thruDate"/>
+				</if-not-empty>
+				//set from date, thru date for promotion
+				<call-service service-name="createProductStorePolicyAppl" in-map-name="productStorePolicy"></call-service>
+			</iterate>
+		</if-not-empty> -->
+	</simple-method>
+	<simple-method method-name="updateSalesPolicy">
+		<check-permission permission="SALES_POLICY" action="_UPDATE">
+            <fail-property resource="DelysAdminErrorUiLabels" property="DAYouHavenotUpdatePermission"/>
+        </check-permission>
+        <check-errors/>
+        
+		<set from-field="parameters.salesPolicyId" field="lookupPKMap.salesPolicyId"/>
+        <find-by-primary-key entity-name="SalesPolicy" map="lookupPKMap" value-field="lookedUpValue"/>
+        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+        
+        <set field="statusId" from-field="lookedUpValue.statusId"/>
+        <if-compare operator="equals" value="SALES_PL_CREATED" field="statusId">
+	        <!-- <now-timestamp field="nowTimestamp"/>
+	        <set from-field="nowTimestamp" field="lookedUpValue.lastModifiedDate"/>
+	        <set from-field="userLogin.userLoginId" field="lookedUpValue.lastModifiedByUserLogin"/> -->
+	        <store-value value-field="lookedUpValue"/>
+        </if-compare>        
+	</simple-method>
+	
+	<simple-method method-name="createSalesPolicyGeoAppl" short-description="Create a SalesPolicyGeoAppl">
+		<make-value value-field="newEntity" entity-name="SalesPolicyGeoAppl"/>
+		<set-pk-fields map="parameters" value-field="newEntity"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <create-value value-field="newEntity"/>
+	</simple-method>
+	<simple-method method-name="createSalesPolicyRule" short-description="Create a SalesPolicyRule">
+        <make-value value-field="newEntity" entity-name="SalesPolicyRule"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <make-next-seq-id value-field="newEntity" seq-field-name="salesPolicyRuleId" numeric-padding="2"/>
+        <field-to-result field="newEntity.salesPolicyRuleId" result-name="salesPolicyRuleId"/>
+
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateSalesPolicyRule" short-description="Update a SalesPolicyRule">
+        <check-permission permission="SALES_POLICY" action="_UPDATE">
+            <fail-property resource="DelysUiLabels" property="DelysUpdatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+        <make-value entity-name="SalesPolicyRule" value-field="lookupPKMap"/>
+		<set-pk-fields value-field="lookupPKMap" map="parameters"/>
+        <find-by-primary-key entity-name="SalesPolicyRule" map="lookupPKMap" value-field="lookedUpValue"/>
+        <if-not-empty field="lookedUpValue">
+        	<set-nonpk-fields value-field="lookedUpValue" map="parameters"/>
+        	<store-value value-field="lookedUpValue"/>
+        </if-not-empty>
+    </simple-method>
+	<simple-method method-name="deleteSalesPolicyRule" short-description="Delete a SalesPolicyRule">
+        <!-- <make-value entity-name="SalesPolicyRule" value-field="lookupPKMap"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key entity-name="SalesPolicyRule" map="lookupPKMap" value-field="lookedUpValue"/>
+        <remove-value value-field="lookedUpValue"/> -->
+        <check-permission permission="SALES_POLICY" action="_DELETE">
+            <fail-property resource="DelysAdminErrorUiLabels" property="DAYouHavenotUpdatePermission"/>
+        </check-permission>
+        <check-errors/>
+		<set from-field="parameters.salesPolicyId" field="lookupPKMap.salesPolicyId"/>
+        <find-by-primary-key entity-name="SalesPolicy" map="lookupPKMap" value-field="lookedUpValue"/>
+        
+        <if-compare operator="equals" value="SALES_PL_CREATED" field="lookedUpValue.statusId">
+        	<set field="salesPolicyRuleCtx.salesPolicyId" from-field="parameters.salesPolicyId"/>
+        	<set field="salesPolicyRuleCtx.salesPolicyRuleId" from-field="parameters.salesPolicyRuleId"/>
+        	<find-by-and list="ruleList" map="salesPolicyRuleCtx" entity-name="SalesPolicyRule"/>       	
+        	<find-by-and list="condList" map="salesPolicyRuleCtx" entity-name="SalesPolicyCond"/>
+        	<find-by-and list="actionList" map="salesPolicyRuleCtx" entity-name="SalesPolicyAction"/>
+        	<if-not-empty field="condList">
+        		<remove-list list="condList"/>
+        	</if-not-empty>
+        	<if-not-empty field="actionList">
+        		<remove-list list="actionList"/>
+        	</if-not-empty>
+        	<if-not-empty field="ruleList">
+        		<remove-list list="ruleList"/>
+        	</if-not-empty>
+        </if-compare>
+    </simple-method>
+    <!-- condition -->
+    <simple-method method-name="createSalesPolicyCategory" short-description="Create an SalesPolicyCategory">
+        <make-value value-field="newEntity" entity-name="SalesPolicyCategory"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateSalesPolicyCategory" short-description="Update an SalesPolicyCategory">
+        <make-value entity-name="SalesPolicyCategory" value-field="lookupPKMap"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+        <store-value value-field="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="deleteSalesPolicyCategory" short-description="Delete an SalesPolicyCategory">
+        <make-value entity-name="SalesPolicyCategory" value-field="lookupPKMap"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+        <remove-value value-field="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="createSalesPolicyCond" short-description="Create an SalesPolicyCond">        
+		<set field="lookupPKMap.salesPolicyId" from-field="parameters.salesPolicyId"/>
+		<find-by-primary-key value-field="salesPolicy" map="lookupPKMap" entity-name="SalesPolicy"/>
+		<if-compare operator="equals" value="SALES_PL_CREATED" field="salesPolicy.statusId">
+			<!-- create sales policy Condition -->
+			<make-value value-field="newEntity" entity-name="SalesPolicyCond"/>
+	        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+	        <if-not-empty field="parameters.carrierShipmentMethod">
+	            <set field="newEntity.otherValue" from-field="parameters.carrierShipmentMethod"/>
+	        </if-not-empty>
+	        <set-pk-fields map="parameters" value-field="newEntity"/>
+	        <make-next-seq-id value-field="newEntity" seq-field-name="salesPolicyCondSeqId" numeric-padding="2"/>
+	        <set field="salesPolicyCondSeqId" from-field="newEntity.salesPolicyCondSeqId"/>
+	        <create-value value-field="newEntity"/>
+	        
+	        <!-- create list category Condition -->
+			<if-not-empty field="parameters.productCatIdListCond">
+				<iterate entry="productCatId" list="parameters.productCatIdListCond">
+					<set field="parameters.productCategoryId" from-field="productCatId"/>
+					<set field="parameters.salesPolicyActionSeqId" value="_NA_"/>
+					<set field="parameters.salesPolicyCondSeqId" from-field="salesPolicyCondSeqId"/>
+					<set field="parameters.andGroupId" value="_NA_"/>
+					<set-service-fields service-name="createSalesPolicyCategory" to-map="productCatContext" map="parameters"/>
+					<call-service service-name="createSalesPolicyCategory" in-map-name="productCatContext"></call-service>
+				</iterate>
+			</if-not-empty>
+			<if-not-empty field="parameters.productIdListCond">
+				<iterate entry="productId" list="parameters.productIdListCond">
+					<set field="parameters.productId" from-field="productId"/>
+					<set field="parameters.salesPolicyActionSeqId" value="_NA_"/>
+					<set field="parameters.salesPolicyCondSeqId" from-field="salesPolicyCondSeqId"/>
+					<set-service-fields service-name="createSalesPolicyProduct" to-map="productContext" map="parameters"/>
+					<call-service service-name="createSalesPolicyProduct" in-map-name="productContext"></call-service>
+				</iterate>
+			</if-not-empty>
+	        <else>
+	        	<add-error>
+	        		<fail-property resource="DelysUiLabels" property="SalesPolicySttNotCreated"/>
+	        	</add-error>
+	        	<check-errors/>
+	        </else>
+		</if-compare>
+    </simple-method>
+    <simple-method method-name="updateSalesPolicyCond" short-description="Update an SalesPolicyCond">
+		<set field="lookupPKMap.salesPolicyId" from-field="parameters.salesPolicyId"/>
+		<find-by-primary-key value-field="salesPolicy" map="lookupPKMap" entity-name="SalesPolicy"/>
+		<if-compare operator="equals" value="SALES_PL_CREATED" field="salesPolicy.statusId">
+			<make-value entity-name="SalesPolicyCond" value-field="lookupPKMap"/>
+	        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+	        <find-by-primary-key entity-name="SalesPolicyCond" map="lookupPKMap" value-field="lookedUpValue"/>
+	        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+	        <if-not-empty field="parameters.carrierShipmentMethod">
+	            <set field="lookedUpValue.otherValue" from-field="parameters.carrierShipmentMethod"/>
+	        </if-not-empty>
+	        <store-value value-field="lookedUpValue"/>
+        <else>
+        	<add-error>
+        		<fail-property resource="DelysUiLabels" property="SalesPolicySttNotCreated"/>
+        	</add-error>
+        	<check-errors/>
+        </else>
+		</if-compare>
+    </simple-method>
+    <simple-method method-name="deleteSalesPolicyCond" short-description="Delete an SalesPolicyCond">
+        <set field="lookupPKMap.salesPolicyId" from-field="parameters.salesPolicyId"/>
+		<find-by-primary-key value-field="salesPolicy" map="lookupPKMap" entity-name="SalesPolicy"/>
+		<if-compare operator="equals" value="SALES_PL_CREATED" field="salesPolicy.statusId">
+			<make-value entity-name="SalesPolicyCond" value-field="lookupPKMap"/>
+	        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+	        <find-by-primary-key entity-name="SalesPolicyCond" map="lookupPKMap" value-field="lookedUpValue"/>
+	        <remove-value value-field="lookedUpValue"/>
+	    <else>
+	    	<add-error>
+        		<fail-property resource="DelysUiLabels" property="SalesPolicySttNotCreated"/>
+        	</add-error>
+        	<check-errors/>
+	    </else>    
+		</if-compare>
+    </simple-method>
+    
+    <simple-method method-name="createSalesPolicyProduct">
+    	<check-permission permission="SALES_POLICY" action="_CREATE">
+            <fail-property resource="DelysUiLabels" property="DelysCreatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+        <set field="lookupPKMap.salesPolicyId" from-field="parameters.salesPolicyId"/>
+		<find-by-primary-key value-field="salesPolicy" map="lookupPKMap" entity-name="SalesPolicy"/>
+		<if-compare operator="equals" value="SALES_PL_CREATED" field="salesPolicy.statusId">
+			<make-value value-field="newEntity" entity-name="SalesPolicyProduct"/>
+	        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+	        <set-pk-fields map="parameters" value-field="newEntity"/>
+	        <create-value value-field="newEntity"/>
+	    <else>
+	    	<add-error>
+        		<fail-property resource="DelysUiLabels" property="SalesPolicySttNotCreated"/>
+        	</add-error>
+        	<check-errors/>
+	    </else>    
+		</if-compare>
+    </simple-method>
+    <simple-method method-name="updateSalesPolicyProduct">
+    	<check-permission permission="SALES_POLICY" action="_UPDATE">
+            <fail-property resource="DelysUiLabels" property="DelysUpdatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+        <set field="lookupPKMap.salesPolicyId" from-field="parameters.salesPolicyId"/>
+		<find-by-primary-key value-field="salesPolicy" map="lookupPKMap" entity-name="SalesPolicy"/>
+		<if-compare operator="equals" value="SALES_PL_CREATED" field="salesPolicy.statusId">
+			<make-value entity-name="SalesPolicyProduct" value-field="lookupPKMap"/>
+	        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+	        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+	        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+	        <store-value value-field="lookedUpValue"/>
+	    <else>
+	    	<add-error>
+        		<fail-property resource="DelysUiLabels" property="SalesPolicySttNotCreated"/>
+        	</add-error>
+        	<check-errors/>
+	    </else>    
+		</if-compare>
+    </simple-method>
+    <simple-method method-name="deleteSalesPolicyProduct">
+    	<check-permission permission="SALES_POLICY" action="_DELETE">
+            <fail-property resource="DelysUiLabels" property="DelysDeletePermissionError"/>
+        </check-permission>
+        <check-errors/>
+        <set field="lookupPKMap.salesPolicyId" from-field="parameters.salesPolicyId"/>
+		<find-by-primary-key value-field="salesPolicy" map="lookupPKMap" entity-name="SalesPolicy"/>
+		<if-compare operator="equals" value="SALES_PL_CREATED" field="salesPolicy.statusId">
+			<make-value entity-name="SalesPolicyProduct" value-field="lookupPKMap"/>
+	        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+	        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+	        <remove-value value-field="lookedUpValue"/>
+	    <else>
+	    	<add-error>
+        		<fail-property resource="DelysUiLabels" property="SalesPolicySttNotCreated"/>
+        	</add-error>
+        	<check-errors/>
+	    </else>    
+		</if-compare>
+    </simple-method>
+    <simple-method method-name="createSalesPolicyAction" short-description="Create an SalesPolicyAction">        
+		<set field="lookupPKMap.salesPolicyId" from-field="parameters.salesPolicyId"/>
+		<find-by-primary-key value-field="salesPolicy" map="lookupPKMap" entity-name="SalesPolicy"/>
+		<if-compare operator="equals" value="SALES_PL_CREATED" field="salesPolicy.statusId">
+			
+			<make-value value-field="newEntity" entity-name="SalesPolicyAction"/>
+	        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+	        <set-pk-fields map="parameters" value-field="newEntity"/>
+	        <make-next-seq-id value-field="newEntity" seq-field-name="salesPolicyActionSeqId" numeric-padding="2"/>
+	        <set field="salesPolicyActionSeqId" from-field="newEntity.salesPolicyActionSeqId"/>
+	        <create-value value-field="newEntity"/>
+	        
+	        <if-not-empty field="parameters.productCatIdListAction">
+				<iterate entry="productCatId" list="parameters.productCatIdListAction">
+					<set field="parameters.productCategoryId" from-field="productCatId"/>
+					<set field="parameters.salesPolicyActionSeqId" from-field="salesPolicyActionSeqId"/>
+					<set field="parameters.salesPolicyCondSeqId" value="_NA_"/>
+					<set field="parameters.andGroupId" value="_NA_"/>
+					<set-service-fields service-name="createSalesPolicyCategory" to-map="productCatContext" map="parameters"/>
+					<call-service service-name="createSalesPolicyCategory" in-map-name="productCatContext"></call-service>
+				</iterate>
+			</if-not-empty>
+			<if-not-empty field="parameters.productIdListAction">
+				<iterate entry="productId" list="parameters.productIdListAction">
+					<set field="parameters.productId" from-field="productId"/>
+					<set field="parameters.salesPolicyActionSeqId" from-field="salesPolicyActionSeqId"/>
+					<set field="parameters.salesPolicyCondSeqId" value="_NA_"/>
+					<set-service-fields service-name="createSalesPolicyProduct" to-map="productContext" map="parameters"/>
+					<call-service service-name="createSalesPolicyProduct" in-map-name="productContext"></call-service>
+				</iterate>
+			</if-not-empty>
+	    <else>
+	    	<add-error>
+        		<fail-property resource="DelysUiLabels" property="SalesPolicySttNotCreated"/>
+        	</add-error>
+        	<check-errors/>
+	    </else>
+        </if-compare>
+    </simple-method>
+    <simple-method method-name="updateSalesPolicyAction" short-description="Update an SalesPolicyAction">
+        <set field="lookupPKMap.salesPolicyId" from-field="parameters.salesPolicyId"/>
+		<find-by-primary-key value-field="salesPolicy" map="lookupPKMap" entity-name="SalesPolicy"/>
+		<if-compare operator="equals" value="SALES_PL_CREATED" field="salesPolicy.statusId">
+			<make-value entity-name="SalesPolicyAction" value-field="lookupPKMap"/>
+	        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+	        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+	        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+	        <store-value value-field="lookedUpValue"/>
+		<else>
+			<add-error>
+        		<fail-property resource="DelysUiLabels" property="SalesPolicySttNotCreated"/>
+        	</add-error>
+        	<check-errors/>
+		</else>	        
+		</if-compare>
+    </simple-method>
+    <simple-method method-name="deleteSalesPolicyAction" short-description="Delete an SalesPolicyAction">
+        <set field="lookupPKMap.salesPolicyId" from-field="parameters.salesPolicyId"/>
+		<find-by-primary-key value-field="salesPolicy" map="lookupPKMap" entity-name="SalesPolicy"/>
+		<if-compare operator="equals" value="SALES_PL_CREATED" field="salesPolicy.statusId">
+			<make-value entity-name="SalesPolicyAction" value-field="lookupPKMap"/>
+	        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+	        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+	        <remove-value value-field="lookedUpValue"/>
+	    <else>
+	    	<add-error>
+        		<fail-property resource="DelysUiLabels" property="SalesPolicySttNotCreated"/>
+        	</add-error>
+        	<check-errors/>
+	    </else>
+		</if-compare>
+    </simple-method>
+	<simple-method method-name="updateSalesPolicyStatus">
+    	<!-- set status for Promotion, SalesPolicyStatus
+    	if SALES_PL_CANCELLED: Change status of ProductStoreSalesPolicyAppl => if thruDate is NULL or thruDate greater than nowStamp => set thruDate for Store
+    	 -->
+    	<if>
+    		<condition>
+    			<or>
+    				<if-compare operator="equals" value="SALES_PL_CANCELLED" field="parameters.statusId"></if-compare>
+    				<if-compare operator="equals" value="SALES_PL_ACCEPTED" field="parameters.statusId"></if-compare>
+    			</or>
+    		</condition>
+    		<then>
+    			<now-timestamp field="nowStamp"/>
+    			<set from-field="parameters.salesPolicyId" field="lookupPKMap.salesPolicyId"/>
+				<find-by-primary-key value-field="lookedUpValue" map="lookupPKMap" entity-name="SalesPolicy"/>
+				<set field="oldSalesPolicyStatusId" from-field="lookedUpValue.statusId"/>
+				<if-compare operator="not-equals" value="SALES_PL_CREATED" field="oldSalesPolicyStatusId">
+					<add-error>
+						<fail-property resource="DelysPromoUiLabels" property="DelysPromoPromotionErrorCouldNotChange"/>
+					</add-error>
+				</if-compare>
+				<check-errors/>
+				
+    			<if-compare operator="equals" value="SALES_PL_CANCELLED" field="parameters.statusId">
+	    			<entity-condition list="productStoreApplList" entity-name="ProductStoreSalesPolicyAppl" filter-by-date="true">
+	    				<condition-expr field-name="salesPolicyId" from-field="lookupPKMap.salesPolicyId"/>
+	    			</entity-condition>
+	    			<iterate entry="productStoreApplItem" list="productStoreApplList">
+	    				<!-- thru date all product store in promotion -->
+	    				<set field="productStoreApplItem.thruDate" from-field="nowStamp"/>
+	    				<store-value value-field="productStoreApplItem"/>
+	    			</iterate>
+    			</if-compare>
+				
+				<set field="lookedUpValue.statusId" from-field="parameters.statusId"/>
+				<store-value value-field="lookedUpValue"/>
+    		</then>
+    	</if>
+    </simple-method>
+    <simple-method method-name="deleteSalesPolicyRole">
+    	<check-permission permission="SALES_POLICY" action="_DELETE">
+    		<fail-property resource="DelysUiLabels" property="DelysCreatePermissionError"/>
+    	</check-permission>	
+    	<make-value value-field="lookupPKMap" entity-name="SalesPolicyRoleTypeApply"/>
+    	<set-pk-fields value-field="lookupPKMap" map="parameters"/>
+    	<find-by-primary-key value-field="lookedUpValue" map="lookupPKMap" entity-name="SalesPolicyRoleTypeApply"/>
+    	<remove-value value-field="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="changeSalesStatementStatus">
+    	<field-to-result field="parameters.salesId" result-name="salesId"/>
+    	<field-to-result field="parameters.statusId" result-name="oldStatusId"/>
+    	<if>
+    		<condition>
+    			<or>
+    				<if-compare operator="equals" value="SALES_SM_CANCELLED" field="parameters.statusId"></if-compare>
+    				<if-compare operator="equals" value="SALES_SM_ACCEPTED" field="parameters.statusId"></if-compare>
+    			</or>
+    		</condition>
+    		<then>
+    			<entity-one value-field="salesStatementSelected" entity-name="SalesStatementHeader">
+		    		<field-map field-name="salesId" from-field="parameters.salesId"/>
+		    	</entity-one>
+		    	<if-not-empty field="salesStatementSelected">
+		    		<set field="salesStatementSelected.statusId" from-field="parameters.statusId"/>
+		    		<store-value value-field="salesStatementSelected"/>
+		    	</if-not-empty>
+    		</then>
+   		</if>
+    </simple-method>
+    <simple-method method-name="createSalesForecastAdvance" short-description="Creates a sales forecast and stores a copy in sales forecast history.">
+		<if-empty field="parameters.internalPartyId">
+			<add-error>
+				<fail-property resource="DelysAdminUiLabels" property="DAInternalPartyIdCannotBeNull"/>
+			</add-error>
+		</if-empty>
+		<if-empty field="parameters.organizationPartyId">
+			<add-error>
+				<fail-property resource="DelysAdminUiLabels" property="DAOrganizationPartyIdCannotBeNull"/>
+			</add-error>
+		</if-empty>
+		<check-errors/>
+		<entity-condition list="listForecast" entity-name="SalesForecast">
+			<condition-list>
+				<condition-expr field-name="organizationPartyId" from-field="parameters.organizationPartyId"/>
+				<condition-expr field-name="internalPartyId" from-field="parameters.internalPartyId"/>
+				<condition-expr field-name="customTimePeriodId" from-field="parameters.customTimePeriodId"/>
+			</condition-list>
+		</entity-condition>
+		<if-not-empty field="listForecast">
+			<add-error>
+				<fail-property resource="DelysAdminUiLabels" property="DASalesForecastForThisPartiesIsExisted"/>
+			</add-error>
+		</if-not-empty>
+		<check-errors/>
+		
+		<set-service-fields service-name="createSalesForecast" to-map="createParams" map="parameters"/>
+		<call-service service-name="createSalesForecast" in-map-name="createParams">
+			<result-to-field result-name="salesForecastId"/>
+		</call-service>
+		<field-to-result result-name="salesForecastId" field="salesForecastId"/>
+    </simple-method>
+    
+    <simple-method method-name="createReturnItemLoose" short-description="Create Return Item">
+        <set field="lookupPKMap.returnId" from-field="parameters.returnId"/>
+        <find-by-primary-key entity-name="ReturnHeader" map="lookupPKMap" value-field="returnHeader"/>
+        <if>
+            <condition>
+            	<not><if-has-permission permission="RETURNORD_LOOSE_ROLE" action="_CREATE"/></not>
+                <!-- <and>
+                    <not><if-has-permission permission="RETURNORD_LOOSE_ROLE" action="_CREATE"/></not>
+                    <not><if-compare-field field="userLogin.partyId" to-field="returnHeader.fromPartyId" operator="equals"/></not>
+                </and> -->
+            </condition>
+            <then>
+                <add-error>
+                    <fail-property resource="OrderErrorUiLabels" property="OrderSecurityErrorToRunCreateReturnItem"/>
+                </add-error>
+            </then>
+        </if>
+        <check-errors/>
+        <if-empty field="parameters.returnItemTypeId">
+            <add-error>
+                <fail-property resource="OrderErrorUiLabels" property="OrderReturnItemTypeIsNotDefined"/>
+            </add-error>
+            <check-errors/>
+        </if-empty>
+        <if>
+            <condition>
+                <and>
+                    <if-empty field="returnHeader.paymentMethodId"/>
+                    <if-compare field="returnHeader.statusId" operator="equals" value="RETURN_ACCEPTED"/>
+                    <or>
+                        <if-compare field="parameters.returnTypeId" operator="equals" value="RTN_CSREPLACE"/>
+                        <if-compare field="parameters.returnTypeId" operator="equals" value="RTN_REPAIR_REPLACE"/>
+                    </or>
+                </and>
+            </condition>
+            <then>
+                <add-error>
+                    <fail-property resource="OrderErrorUiLabels" property="OrderReturnPaymentMethodNeededForThisTypeOfReturn"/>
+                </add-error>
+            </then>
+        </if>
+        <check-errors/>
+
+        <if-compare field="parameters.returnQuantity" operator="equals" value="0" type="BigDecimal">
+            <add-error>
+                <fail-property resource="OrderErrorUiLabels" property="OrderNoReturnQuantityAvailablePreviousReturnsMayExist"/>
+            </add-error>
+            <check-errors/>
+        </if-compare>
+
+        <!-- setup some default values for protection -->
+        <set field="returnableQuantity" value="0" type="BigDecimal"/>
+        <set field="returnablePrice" value="0" type="BigDecimal"/>
+
+        <!-- if an orderItemSeqId is provided, then find the corresponding orderItem  -->
+        <if-not-empty field="parameters.orderItemSeqId">
+            <make-value value-field="itemLookup" entity-name="OrderItem"/>
+            <set-pk-fields map="parameters" value-field="itemLookup"/>
+            <if-not-empty field="parameters.orderItemSeqId">
+                <find-by-primary-key entity-name="OrderItem" value-field="orderItem" map="itemLookup"/>
+                <log level="info" message="Return item is an OrderItem - ${orderItem.orderItemSeqId}"/>
+            </if-not-empty>
+        </if-not-empty>
+
+        <!-- get the returnableQuantity and returnablePrice:
+            for orderItems, it's found by getReturnableQuantity;
+            for adjustments, either order adjustments or manual adjustments, it's always 1 and based on input parameter -->
+        <if-not-empty field="orderItem">
+            <set field="serviceContext.orderItem" from-field="orderItem"/>
+            <call-service service-name="getReturnableQuantity" in-map-name="serviceContext">
+                <result-to-field result-name="returnableQuantity" field="returnableQuantity"/>
+                <result-to-field result-name="returnablePrice" field="returnablePrice"/>
+            </call-service>
+        </if-not-empty>
+
+        <if-compare field="returnableQuantity" value="0" operator="greater" type="BigDecimal">
+            <!-- the user is only allowed to set a returnPrice if he has ORDERMGR_CREATE privilege, otherwise only the returnablePrice calculated by service is used -->
+            <if>
+                <condition>
+                    <not>
+                        <if-has-permission permission="ORDERMGR" action="_CREATE"/>
+                    </not>
+                </condition>
+                <then>
+                    <set from-field="returnablePrice" field="parameters.returnPrice"/>
+                </then>
+            </if>
+
+            <!-- make sure the returnQuantity is not greater than the returnableQuantity from service or the quantity on the original orderItem -->
+            <if-compare-field field="parameters.returnQuantity" to-field="returnableQuantity" operator="greater" type="BigDecimal">
+                <add-error>
+                    <fail-property resource="OrderErrorUiLabels" property="OrderRequestedReturnQuantityNotAvailablePreviousReturnsMayExist"/>
+                </add-error>
+            </if-compare-field>
+            <if-not-empty field="orderItem">
+                <if-compare-field field="parameters.returnQuantity" to-field="orderItem.quantity" operator="greater" type="BigDecimal">
+                    <add-error>
+                        <fail-property resource="OrderErrorUiLabels" property="OrderReturnQuantityCannotExceedTheOrderedQuantity"/>
+                    </add-error>
+                </if-compare-field>
+            </if-not-empty>
+            <if-compare-field field="parameters.returnPrice" to-field="returnablePrice" operator="greater" type="BigDecimal">
+                <add-error>
+                    <fail-property resource="OrderErrorUiLabels" property="OrderReturnPriceCannotExceedThePurchasePrice"/>
+                </add-error>
+            </if-compare-field>
+            <check-errors/>
+
+            <else>
+            	<if>
+           			<condition>
+            			<or>
+            				<if-empty field="parameters.alterQuantity"></if-empty>
+            				<if-compare operator="less-equals" value="0" field="parameters.alterQuantity"></if-compare>
+            			</or>
+            		</condition>
+            		<then>
+            			<set from-field="parameters.orderId" field="orderId"/>
+		                <set from-field="parameters.orderItemSeqId" field="orderItemSeqId"/>
+		                <log level="error" message="Order ${orderId} item ${orderItemSeqId} has been returned in full"/>
+		                <add-error>
+		                    <fail-property resource="OrderErrorUiLabels" property="OrderIllegalReturnItemTypePassed"/>
+		                </add-error>
+		                <check-errors/>
+            		</then>
+            	</if>
+            </else>
+        </if-compare>
+
+        <make-value value-field="newEntity" entity-name="ReturnItem"/>
+        <set from-field="parameters.returnId" field="newEntity.returnId"/>
+        <make-next-seq-id seq-field-name="returnItemSeqId" value-field="newEntity"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <set field="newEntity.statusId" value="RETURN_REQUESTED"/> <!-- default status for new return items -->
+        <field-to-result field="newEntity.returnItemSeqId" result-name="returnItemSeqId"/>
+        <create-value value-field="newEntity"/>
+        <refresh-value value-field="newEntity"/>
+        
+        <if>
+            <condition>
+                <or>
+                    <if-empty field="parameters.includeAdjustments"/>
+                    <if-compare field="parameters.includeAdjustments" operator="equals" value="Y"/>
+                </or>
+            </condition>
+            <then>
+                <!-- create return adjustments for all adjustments associated with the order item -->
+                <if-not-empty field="orderItem">
+                    <get-related value-field="orderItem" relation-name="OrderAdjustment" list="orderAdjustments"/>
+                    <iterate entry="orderAdjustment" list="orderAdjustments">
+                        <clear-field field="returnAdjCtx"/>
+                        <set field="returnAdjCtx.returnId" from-field="parameters.returnId"/>
+                        <set field="returnAdjCtx.returnItemSeqId" from-field="newEntity.returnItemSeqId"/>
+                        <set field="returnAdjCtx.returnTypeId" from-field="newEntity.returnTypeId"/>
+                        <set field="returnAdjCtx.orderAdjustmentId" from-field="orderAdjustment.orderAdjustmentId"/>
+                        <call-service service-name="createReturnAdjustment" in-map-name="returnAdjCtx"/>
+                    </iterate>
+                </if-not-empty>
+            </then>
+        </if>
+    </simple-method>
+    
+    <!-- return requirement methods -->
+    <simple-method method-name="createReturnRequirementCommitment" short-description="Create ReturnRequirementCommitment">
+        <!-- The permission checking is commented out to make this service work also when triggered from ecommerce orders -->
+        <!--
+        <check-permission permission="ORDERMGR" action="_CREATE">
+            <fail-property resource="OrderErrorUiLabels" property="OrderSecurityErrorToRunCheckCreateOrderRequirementCommitment"/>
+        </check-permission>
+        <check-errors/>
+        -->
+        <make-value value-field="newEntity" entity-name="ReturnRequirementCommitment"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    
+    <simple-method method-name="updatePartyPostalAddress" short-description="Update a PostalAddress for party">
+    	<field-to-result field="parameters.contactMechId" result-name="contactMechId"/>
+    	<if-empty field="parameters.address1">
+        	<add-error>
+        		<fail-property resource="DelysAdminUiLabels" property="DAAddressMustNotBeEmpty"/>
+        	</add-error>
+        </if-empty>
+        <if>
+        	<condition>
+        		<and>
+        			<if-empty field="parameters.countryGeoId"></if-empty>
+        			<if-empty field="parameters.stateProvinceGeoId"></if-empty>
+        		</and>
+        	</condition>
+        	<then>
+        		<add-error>
+	        		<fail-property resource="DelysAdminUiLabels" property="DACityMustNotBeEmpty"/>
+	        	</add-error>
+        	</then>
+        </if>
+        <check-errors/>
+        
+        <if-empty field="parameters.partyId">
+            <set field="parameters.partyId" from-field="userLogin.partyId"/>
+        </if-empty>
+        
+        <map-to-map map="parameters" to-map="importCtx"/>
+        <entity-one value-field="userLogin" entity-name="UserLogin">
+        	<field-map field-name="userLoginId" value="distributorsuper"/>
+        </entity-one>
+        <if-not-empty field="userLogin">
+        	<set field="importCtx.userLogin" from-field="userLogin"/>
+        </if-not-empty>
+        
+        <entity-one value-field="countryGeo" entity-name="Geo">
+        	<field-map field-name="geoId" from-field="parameters.countryGeoId"/>
+        </entity-one>
+        <if-not-empty field="countryGeo">
+        	<set field="importCtx.city" from-field="countryGeo.geoName"/>
+        </if-not-empty>
+        <entity-one value-field="stateProvinceGeo" entity-name="Geo">
+        	<field-map field-name="geoId" from-field="parameters.stateProvinceGeoId"/>
+        </entity-one>
+        <if-not-empty field="stateProvinceGeo">
+        	<set field="importCtx.city" from-field="stateProvinceGeo.geoName"/>
+        </if-not-empty>
+        <if-not-empty field="parameters.districtGeoId">
+        	<set field="importCtx.countyGeoId" from-field="parameters.districtGeoId"/>
+        </if-not-empty>
+        
+        <!-- OUT contactMechId -->
+        <set-service-fields service-name="updatePartyPostalAddress" map="importCtx" to-map="updatePostalAddressMap"/>
+        <call-service in-map-name="updatePostalAddressMap" service-name="updatePartyPostalAddress">
+            <default-message resource="WidgetUiLabels" property="wgupdatesuccess"/>
+            <!-- <result-to-field result-name="contactMechId" field="contactMechId"/> -->
+        </call-service>
+        <check-errors/>
+    </simple-method>
+    <simple-method method-name="createPartyContactMechPurpose" short-description="Create a Party ContactMech Purpose">
+    	<field-to-result field="parameters.contactMechId" result-name="contactMechId"/>
+        <if-empty field="parameters.partyId">
+            <set field="parameters.partyId" from-field="userLogin.partyId"/>
+        </if-empty>
+        
+        <map-to-map map="parameters" to-map="importCtx"/>
+        <entity-one value-field="userLogin" entity-name="UserLogin">
+        	<field-map field-name="userLoginId" value="distributorsuper"/>
+        </entity-one>
+        <if-not-empty field="userLogin">
+        	<set field="importCtx.userLogin" from-field="userLogin"/>
+        </if-not-empty>
+        
+        <!-- OUT fromDate -->
+        <set-service-fields service-name="createPartyContactMechPurpose" map="importCtx" to-map="createPartyContactMechPurposeMap"/>
+        <call-service in-map-name="createPartyContactMechPurposeMap" service-name="createPartyContactMechPurpose">
+            <default-message resource="WidgetUiLabels" property="wgupdatesuccess"/>
+            <result-to-field result-name="fromDate" field="fromDate"/>
+        </call-service>
+        <field-to-result field="fromDate" result-name="fromDate"/>
+        <check-errors/>
+    </simple-method>
+    <simple-method method-name="deletePartyContactMechPurpose" short-description="Delete a Party ContactMech Purpose">
+    	<field-to-result field="parameters.contactMechId" result-name="contactMechId"/>
+        <if-empty field="parameters.partyId">
+            <set field="parameters.partyId" from-field="userLogin.partyId"/>
+        </if-empty>
+        
+        <map-to-map map="parameters" to-map="importCtx"/>
+        <entity-one value-field="userLogin" entity-name="UserLogin">
+        	<field-map field-name="userLoginId" value="distributorsuper"/>
+        </entity-one>
+        <if-not-empty field="userLogin">
+        	<set field="importCtx.userLogin" from-field="userLogin"/>
+        </if-not-empty>
+        
+        <set-service-fields service-name="deletePartyContactMechPurpose" map="importCtx" to-map="deletePartyContactMechPurposeMap"/>
+        <call-service in-map-name="deletePartyContactMechPurposeMap" service-name="deletePartyContactMechPurpose">
+            <default-message resource="WidgetUiLabels" property="wgupdatesuccess"/>
+        </call-service>
+        <check-errors/>
+    </simple-method>
+    <!-- Product Store Role Services -->
+    <simple-method method-name="createProductStoreRole" short-description="Create ProductStoreRole">
+        <check-permission permission="CATALOG" action="_CREATE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogCreatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+        
+        <if-not-empty field="parameters.fromDate">
+			<calculate field="fromDateStr" type="Long"><number value="${parameters.fromDate}"/></calculate>
+			<set field="fromDate" from-field="fromDateStr" type="Timestamp"/>
+			<set field="parameters.fromDate" from-field="fromDate"/>
+		</if-not-empty>
+		<if-not-empty field="parameters.thruDate">
+			<calculate field="thruDateStr" type="Long"><number value="${parameters.thruDate}"/></calculate>
+			<set field="thruDate" from-field="thruDateStr" type="Timestamp"/>
+			<set field="parameters.thruDate" from-field="thruDate"/>
+		</if-not-empty>
+
+        <make-value value-field="newEntity" entity-name="ProductStoreRole"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+		
+        <if-empty field="newEntity.fromDate">
+            <now-timestamp field="nowTimestamp"/>
+            <set from-field="nowTimestamp" field="newEntity.fromDate"/>
+        </if-empty>
+
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateProductStoreRole" short-description="Update a ProductStoreRole">
+        <check-permission permission="CATALOG" action="_UPDATE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogUpdatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+        
+        <if-not-empty field="parameters.fromDate">
+			<calculate field="fromDateStr" type="Long"><number value="${parameters.fromDate}"/></calculate>
+			<set field="fromDate" from-field="fromDateStr" type="Timestamp"/>
+			<set field="parameters.fromDate" from-field="fromDate"/>
+		</if-not-empty>
+		<if-not-empty field="parameters.thruDate">
+			<calculate field="thruDateStr" type="Long"><number value="${parameters.thruDate}"/></calculate>
+			<set field="thruDate" from-field="thruDateStr" type="Timestamp"/>
+			<set field="parameters.thruDate" from-field="thruDate"/>
+		</if-not-empty>
+		
+        <make-value value-field="lookupPKMap" entity-name="ProductStoreRole"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+        <store-value value-field="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="removeProductStoreRole" short-description="Remove ProductStoreRole">
+        <check-permission permission="CATALOG" action="_DELETE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogDeletePermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="lookupPKMap" entity-name="ProductStoreRole"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+
+        <now-timestamp field="nowTimestamp"/>
+        <set from-field="nowTimestamp" field="lookedUpValue.thruDate"/>
+        <store-value value-field="lookedUpValue"/>
+    </simple-method>
+    
+    <!-- ProductStore and ProdCatalog services -->
+    <simple-method method-name="createProductStoreCatalog" short-description="Create ProductStoreCatalog">
+        <check-permission permission="CATALOG" action="_CREATE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogCreatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+        
+        <call-simple-method method-name="processFromThruDateInParameters"></call-simple-method>
+
+        <make-value value-field="newEntity" entity-name="ProductStoreCatalog"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+
+        <if-empty field="newEntity.fromDate">
+            <now-timestamp field="nowTimestamp"/>
+            <set from-field="nowTimestamp" field="newEntity.fromDate"/>
+        </if-empty>
+
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateProductStoreCatalog" short-description="Update ProductStoreCatalog">
+        <check-permission permission="CATALOG" action="_UPDATE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogUpdatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+        
+        <call-simple-method method-name="processFromThruDateInParameters"></call-simple-method>
+
+        <make-value value-field="lookupPKMap" entity-name="ProductStoreCatalog"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+        <store-value value-field="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="deleteProductStoreCatalog" short-description="Delete ProductStoreCatalog">
+        <check-permission permission="CATALOG" action="_DELETE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogDeletePermissionError"/>
+        </check-permission>
+        <check-errors/>
+        
+        <make-value value-field="lookupPKMap" entity-name="ProductStoreCatalog"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+        
+        <if-not-empty field="lookedUpValue">
+        	<now-timestamp field="nowTimestamp"/>
+        	<if-not-empty field="lookedUpValue.thruDate">
+        		<if-compare operator="less" value="${nowTimestamp}" field="lookedUpValue.thruDate">
+	        		<add-error>
+			 			<fail-property resource="DelysAdminErrorUiLabels" property="DAThisRecordWasExpired"/>
+					</add-error>
+					<check-errors/>
+	        	</if-compare>
+        	</if-not-empty>
+        	<set from-field="nowTimestamp" field="lookedUpValue.thruDate"/>
+        	<store-value value-field="lookedUpValue"/>
+        </if-not-empty>
+        <!-- <remove-value value-field="lookedUpValue"/> -->
+    </simple-method>
+    
+    <simple-method method-name="processFromThruDateInParameters">
+    	<if-not-empty field="parameters.fromDate">
+			<calculate field="fromDateStr" type="Long"><number value="${parameters.fromDate}"/></calculate>
+			<set field="fromDate" from-field="fromDateStr" type="Timestamp"/>
+			<set field="parameters.fromDate" from-field="fromDate"/>
+		</if-not-empty>
+		<if-not-empty field="parameters.thruDate">
+			<calculate field="thruDateStr" type="Long"><number value="${parameters.thruDate}"/></calculate>
+			<set field="thruDate" from-field="thruDateStr" type="Timestamp"/>
+			<set field="parameters.thruDate" from-field="thruDate"/>
+		</if-not-empty>
+    </simple-method>
+    
+    <simple-method method-name="createProductStoreFacility" short-description="Create ProductStoreFacility">
+        <check-permission permission="CATALOG" action="_CREATE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogCreatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+        
+        <call-simple-method method-name="processFromThruDateInParameters"></call-simple-method>
+
+        <make-value value-field="newEntity" entity-name="ProductStoreFacility"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+
+        <if-empty field="newEntity.fromDate">
+            <now-timestamp field="nowTimestamp"/>
+            <set from-field="nowTimestamp" field="newEntity.fromDate"/>
+        </if-empty>
+
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateProductStoreFacility" short-description="Update ProductStoreFacility">
+        <check-permission permission="CATALOG" action="_UPDATE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogUpdatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+        
+        <call-simple-method method-name="processFromThruDateInParameters"></call-simple-method>
+
+        <make-value value-field="lookupPKMap" entity-name="ProductStoreFacility"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+        <store-value value-field="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="deleteProductStoreFacility" short-description="Delete ProductStoreFacility">
+        <check-permission permission="CATALOG" action="_DELETE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogDeletePermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="lookupPKMap" entity-name="ProductStoreFacility"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+        
+        <if-not-empty field="lookedUpValue">
+        	<now-timestamp field="nowTimestamp"/>
+        	<if-compare operator="less" value="${nowTimestamp}" field="lookedUpValue.thruDate">
+        		<add-error>
+		 			<fail-property resource="DelysAdminErrorUiLabels" property="DAThisRecordWasExpired"/>
+				</add-error>
+				<check-errors/>
+        	</if-compare>
+        	<set from-field="nowTimestamp" field="lookedUpValue.thruDate"/>
+        	<store-value value-field="lookedUpValue"/>
+        </if-not-empty>
+        <!-- <remove-value value-field="lookedUpValue"/> -->
+    </simple-method>
+    
+</simple-methods>

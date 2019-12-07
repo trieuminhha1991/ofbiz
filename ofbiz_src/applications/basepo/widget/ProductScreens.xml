@@ -1,0 +1,739 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-screen.xsd">
+
+	<screen name="ListProducts">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="product" />
+				<set field="selectedSubMenuItem" value="ListProducts" />
+				<set field="titleProperty" value="DmsListProducts" />
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission />
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://basepo/webapp/basepo/productnew/productList.ftl" />
+									</html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}" />
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="productTitle">
+		<section>
+			<condition>
+				<not>
+					<if-empty field="parameters.productId" />
+				</not>
+			</condition>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text="${uiLabelMap.DAId}: "></label>
+				<link url-mode="plain" target="${link}?productId=${parameters.productId}" text="${product.productCode}"></link>
+			</widgets>
+			<fail-widgets>
+				<section>
+					<condition>
+						<not>
+							<if-empty field="parameters.productIdOrg" />
+						</not>
+					</condition>
+					<widgets>
+						<label style="ibefore-icon-angle-right" text="${uiLabelMap.BSFrom}: "></label>
+						<link url-mode="plain" target="${link}?productIdOrg=${parameters.productIdOrg}" text="${parameters.productIdOrg}"></link>
+					</widgets>
+				</section>
+			</fail-widgets>
+		</section>
+	</screen>
+
+	<screen name="AddNewProduct">
+		<section>
+			<actions>
+				<entity-one value-field="product" entity-name="Product"></entity-one>
+				<set field="link" value="AddNewProduct" />
+				<set field="titleHeaderValue" value="productTitle" global="true" />
+				<set field="titleHeaderLocation" value="component://basepo/widget/ProductScreens.xml" global="true" />
+				<set field="selectedMenuItem" value="product" />
+				<set field="selectedSubMenuItem" from-field="parameters.sub" default-value="AddNewProduct" />
+				<set field="titleProperty" value="DmsAddNewProduct" />
+				<set field="tabBarName" value="ProductTabBar" global="true" />
+				<set field="tabBarLocation" value="component://appbase/widget/AppBaseMenus.xml" global="true" />
+				<set field="tabButtonItem" value="AddNewProduct" global="true" />
+				<set field="printTabBar" value="true" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not>
+							<if-empty field="product" />
+						</not>
+					</condition>
+					<actions>
+						<set field="selectedMenuItem" value="product" />
+						<set field="selectedSubMenuItem" from-field="parameters.sub" default-value="ListProducts" />
+						<set field="titleProperty" value="DmsEditProduct" />
+					</actions>
+					<widgets></widgets>
+				</section>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission />
+							</condition>
+							<widgets>
+								<screenlet title="${uiLabelMap[titleProperty]}"></screenlet>
+								<platform-specific>
+									<html>
+										<html-template location="component://basepo/webapp/basepo/product/addNewProduct.ftl" />
+									</html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}" />
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="NewProduct">
+		<section>
+			<actions>
+				<entity-one value-field="product" entity-name="Product"></entity-one>
+				<entity-one value-field="productCopy" entity-name="Product">
+					<field-map field-name="productId" from-field="parameters.productIdOrg"/>
+				</entity-one>
+				<set field="link" value="viewProduct" />
+				<set field="titleHeaderValue" value="productTitle" global="true" />
+				<set field="titleHeaderLocation" value="component://basepo/widget/ProductScreens.xml" global="true" />
+				<set field="selectedMenuItem" value="product" />
+				<set field="selectedSubMenuItem" from-field="parameters.sub" default-value="AddNewProduct" />
+				<set field="titleProperty" value="DmsAddNewProduct" />
+				<set field="tabButtonItem" value="AddNewProduct" global="true"/>
+				<set field="copyMode" type="Boolean" value="false"/>
+				<set field="isCreateAction" type="Boolean" value="false"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<and>
+							<if-empty field="product"/>
+							<not><if-empty field="productCopy"/></not>
+						</and>
+					</condition>
+					<actions>
+						<set field="product" from-field="productCopy"/>
+						<set field="copyMode" type="Boolean" value="true"/>
+						<set field="isCreateAction" type="Boolean" value="true"/>
+					</actions>
+					<widgets></widgets>
+				</section>
+				<section>
+					<condition>
+						<not>
+							<if-empty field="product" />
+						</not>
+					</condition>
+					<actions>
+						<set field="selectedMenuItem" value="product" />
+						<set field="selectedSubMenuItem" from-field="parameters.sub" default-value="ListProducts" />
+						<set field="titleProperty" value="DmsEditProductInformation" />
+						<set field="tabBarName" value="ProductTabBar" global="true" />
+						<set field="tabBarLocation" value="component://appbase/widget/AppBaseMenus.xml" global="true" />
+						<set field="printTabBar" value="true" />
+						<script location="component://basepo/webapp/basepo/WEB-INF/actions/product/ProductNew.groovy" />
+					</actions>
+					<widgets></widgets>
+				</section>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-compare operator="equals" value="true" field="isCreateAction" type="Boolean"/>
+							</condition>
+							<widgets>
+								<include-screen name="NewProductInner"/>
+							</widgets>
+							<fail-widgets>
+								<include-screen name="EditProductInner"/>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="NewProductInner">
+		<section>
+			<condition>
+				<if-olbius-has-permission />
+			</condition>
+			<widgets>
+				<screenlet title="${uiLabelMap[titleProperty]}"></screenlet>
+				<platform-specific>
+					<html>
+						<html-template location="component://basepo/webapp/basepo/productnew/productNewTotal.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+			<fail-widgets>
+				<container style="alert alert-info">
+					<label text="${uiLabelMap.BSYouHavenotCreatePermission}" />
+				</container>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="EditProductInner">
+		<section>
+			<condition>
+				<if-olbius-has-permission />
+			</condition>
+			<widgets>
+				<screenlet title="${uiLabelMap[titleProperty]}"></screenlet>
+				<platform-specific>
+					<html>
+						<html-template location="component://basepo/webapp/basepo/productnew/productNewTotal.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+			<fail-widgets>
+				<container style="alert alert-info">
+					<label text="${uiLabelMap.BSYouHavenotUpdatePermission}" />
+				</container>
+			</fail-widgets>
+		</section>
+	</screen>
+
+	<screen name="ViewChildProductFeaturesOptionAjax">
+		<section>
+			<actions>
+				<script location="component://basepo/webapp/basepo/WEB-INF/actions/product/GetProductFeatureOption.groovy" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not>
+							<if-empty field="featureTypes" />
+						</not>
+					</condition>
+					<actions>
+						<property-map map-name="uiLabelMap" resource="BaseSalesUiLabels" global="true" />
+					</actions>
+					<widgets>
+						<platform-specific>
+							<html>
+								<html-template location="component://basepo/webapp/basepo/productnew/productNewFeatureAjax.ftl" />
+							</html>
+						</platform-specific>
+					</widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="ViewProduct">
+		<section>
+			<actions>
+				<entity-one value-field="product" entity-name="Product"></entity-one>
+				<set field="link" value="viewProduct" />
+				<set field="titleHeaderValue" value="productTitle" global="true" />
+				<set field="titleHeaderLocation" value="component://basepo/widget/ProductScreens.xml" global="true" />
+				<set field="selectedMenuItem" value="product" />
+				<set field="selectedSubMenuItem" value="ListProducts" />
+				<set field="titleProperty" value="BSProductDetail" />
+				<set field="tabBarName" value="ProductDetailTabBar" global="true" />
+				<set field="tabBarLocation" value="component://appbase/widget/AppBaseMenus.xml" global="true" />
+				<set field="tabButtonItem" value="ProductDetail" global="true" />
+				<set field="printTabBar" value="true" />
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<!--<condition>-->
+								<!--<if-olbius-has-permission />-->
+							<!--</condition>-->
+							<widgets>
+								<section>
+									<condition>
+										<not>
+											<if-empty field="product" />
+										</not>
+									</condition>
+									<actions>
+										<script location="component://basepo/webapp/basepo/WEB-INF/actions/product/ProductView.groovy" />
+									</actions>
+									<widgets>
+										<screenlet title="${uiLabelMap.BSProductDetail}" navigation-menu-name="ProductEditTabBar">
+											<include-menu name="ProductEditTabBar" location="component://basepo/widget/BasePOTabBarMenus.xml" />
+											<platform-specific>
+												<html>
+													<html-template location="component://basepo/webapp/basepo/productnew/productViewTotal.ftl" />
+												</html>
+											</platform-specific>
+										</screenlet>
+									</widgets>
+									<fail-widgets>
+										<container style="alert alert-info">
+											<label text="${uiLabelMap.BSProductNotFound}" />
+										</container>
+									</fail-widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}" />
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<!-- TODOCHANGE deleted -->
+	<screen name="ProductDetail">
+		<section>
+			<actions>
+				<entity-one value-field="product" entity-name="Product"></entity-one>
+				<set field="link" value="ProductDetail" />
+				<set field="titleHeaderValue" value="productTitle" global="true" />
+				<set field="titleHeaderLocation" value="component://basepo/widget/ProductScreens.xml" global="true" />
+				<set field="selectedMenuItem" value="product" />
+				<set field="selectedSubMenuItem" value="ListProducts" />
+				<set field="titleProperty" value="BSProductDetail" />
+				<set field="tabBarName" value="ProductDetailTabBar" global="true" />
+				<set field="tabBarLocation" value="component://appbase/widget/AppBaseMenus.xml" global="true" />
+				<set field="tabButtonItem" value="ProductDetail" global="true" />
+				<set field="printTabBar" value="true" />
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission />
+							</condition>
+							<widgets>
+								<section>
+									<condition>
+										<not>
+											<if-empty field="product" />
+										</not>
+									</condition>
+									<actions>
+										<service service-name="loadConfigOfProduct" result-map="resultImages">
+											<field-map field-name="productId" from-field="parameters.productId" />
+										</service>
+										<set field="dataProdImages" from-field="resultImages.config" />
+										<service service-name="loadProductInfo" result-map="resultProductInfo">
+											<field-map field-name="productId" from-field="parameters.productId" />
+										</service>
+										<set field="dataProdInfo" from-field="resultProductInfo.product" />
+									</actions>
+									<widgets>
+										<screenlet title="${uiLabelMap.BSProductDetail}" navigation-menu-name="ProductEditTabBar">
+											<include-menu name="ProductEditTabBar" location="component://basepo/widget/BasePOTabBarMenus.xml" />
+											<platform-specific>
+												<html>
+													<html-template location="component://basepo/webapp/basepo/product/ProductDetail.ftl" />
+												</html>
+											</platform-specific>
+										</screenlet>
+									</widgets>
+									<fail-widgets>
+										<container style="alert alert-info">
+											<label text="${uiLabelMap.BSProductNotFound}" />
+										</container>
+									</fail-widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}" />
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="ProductContent">
+		<section>
+			<actions>
+				<entity-one value-field="product" entity-name="Product"></entity-one>
+				<set field="link" value="ProductContent" />
+				<set field="titleHeaderValue" value="productTitle" global="true" />
+				<set field="titleHeaderLocation" value="component://basepo/widget/ProductScreens.xml" global="true" />
+				<set field="selectedMenuItem" value="product" />
+				<set field="selectedSubMenuItem" value="ListProducts" />
+				<set field="titleProperty" value="BSProductContent" />
+				<set field="tabBarName" value="ProductDetailTabBar" global="true" />
+				<set field="tabBarLocation" value="component://appbase/widget/AppBaseMenus.xml" global="true" />
+				<set field="tabButtonItem" value="ProductContent" global="true" />
+				<set field="printTabBar" value="true" />
+				<property-map resource="EcommerceBackendUiLabels" map-name="uiLabelMap" global="true" />
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="PRODUCT" action="_VIEW" />
+							</condition>
+							<widgets>
+								<screenlet title="${uiLabelMap.BSProductContent}" navigation-menu-name="ProductEditContentTabBar">
+									<include-menu name="ProductEditContentTabBar" location="component://appbase/widget/AppBaseMenus.xml" />
+									<platform-specific>
+										<html>
+											<html-template location="component://basepo/webapp/basepo/product/ProductContent.ftl" />
+										</html>
+									</platform-specific>
+								</screenlet>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}" />
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="categoriesTitle">
+		<section>
+			<condition>
+				<not>
+					<if-empty field="parameters.prodCatalogId" />
+				</not>
+			</condition>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text="${uiLabelMap.DAId}: "></label>
+				<link url-mode="plain" target="ListProductCategories?prodCatalogId=${parameters.prodCatalogId}" text="${parameters.prodCatalogId}"></link>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="categoryTitle">
+		<section>
+			<condition>
+				<not>
+					<if-empty field="productCategory" />
+				</not>
+			</condition>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text="${uiLabelMap.BSId}: "></label>
+				<link url-mode="plain" target="viewCategory?productCategoryId=${productCategory.productCategoryId}" text="${productCategory.productCategoryId}"></link>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="ListProductCategories">
+		<section>
+			<actions>
+				<set field="titleHeaderValue" value="categoriesTitle" global="true" />
+				<set field="titleHeaderLocation" value="component://basepo/widget/ProductScreens.xml" global="true" />
+				<set field="selectedMenuItem" value="product" />
+				<set field="selectedSubMenuItem" value="ListProductCategories" />
+				<set field="titleProperty" value="BSProductCategoryList" />
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission />
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://basepo/webapp/basepo/productcatalog/productCategoryList.ftl" />
+									</html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}" />
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewProductCategory">
+		<section>
+			<actions>
+				<set field="titleHeaderValue" value="categoryTitle" global="true" />
+				<set field="titleHeaderLocation" value="component://basepo/widget/ProductScreens.xml" global="true" />
+				<set field="selectedMenuItem" value="product" />
+				<set field="selectedSubMenuItem" value="ListProductCategories" />
+				<set field="titleProperty" value="BSViewProductCategory" />
+				<set field="productCategoryId" from-field="parameters.productCategoryId" />
+				<entity-one value-field="productCategory" entity-name="ProductCategory"></entity-one>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<not>
+									<if-empty field="productCategory" />
+								</not>
+							</condition>
+							<widgets>
+								<screenlet title="${uiLabelMap[titleProperty]}: ${productCategory.categoryName} [${productCategory.productCategoryId}]">
+									<platform-specific>
+										<html>
+											<html-template location="component://basepo/webapp/basepo/productcatalog/productCategoryViewTotal.ftl" />
+										</html>
+									</platform-specific>
+								</screenlet>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSRecordIsNotFound}" />
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<!-- TODOCHANGE deleted -->
+	<screen name="ListCatalog">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="product" />
+				<set field="selectedSubMenuItem" value="DmsListCatalog" />
+				<set field="titleProperty" value="DmsListCatalog" />
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission />
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://baseecommerce/webapp/baseecommerce/backend/configproduct/catalog/listCatalogs.ftl" />
+									</html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}" />
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="ListProductCatalog">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="product" />
+				<set field="selectedSubMenuItem" value="DmsListCatalog" />
+				<set field="titleProperty" value="BSCatalogList" />
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission />
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://basepo/webapp/basepo/productcatalog/productCatalogList.ftl" />
+									</html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}" />
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewDetailProductCatalogAjax">
+		<section>
+			<actions>
+				<property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="WidgetUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="BaseSalesUiLabels" map-name="uiLabelMap" global="true" />
+				<set field="titleProperty" from-field="BSListCategory" />
+				<set field="prodCatalogId" from-field="parameters.prodCatalogId" />
+				<entity-one value-field="prodCatalog" entity-name="ProdCatalog"></entity-one>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://basepo/webapp/basepo/productcatalog/productCatalogListRowDetail.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="ConfigProduct">
+		<section>
+			<actions>
+				<entity-one value-field="product" entity-name="Product"></entity-one>
+				<set field="titleHeaderValue" value="productTitle" global="true" />
+				<set field="titleHeaderLocation" value="component://basepo/widget/ProductScreens.xml" global="true" />
+				<set field="selectedMenuItem" value="product" />
+				<set field="selectedSubMenuItem" value="ProductCategories" />
+				<set field="titleProperty" value="BSConfigProduct" />
+				<script location="component://baseecommerce/webapp/baseecommerce/WEB-INF/actions/navigator/nav_configProduct.groovy" />
+				<set field="tabBarName" value="ProductDetailTabBar" global="true" />
+				<set field="tabBarLocation" value="component://appbase/widget/AppBaseMenus.xml" global="true"/>
+				<set field="tabButtonItem" value="ProductContent" global="true"/>
+				<set field="printTabBar" value="true" />
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://baseecommerce/webapp/baseecommerce/backend/configproduct/configProduct.ftl" />
+									</html>
+								</platform-specific>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ListProductPackingUom">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="configPO"/>
+				<set field="selectedSubMenuItem" value="prodPackingUomList"/>
+<!-- 				<set field="titleProperty" value="BSProductPackingUomList"/> -->
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<platform-specific>
+							<html><html-template location="component://basepo/webapp/basepo/productuom/productUomList.ftl"/></html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ListProductCategoryTax">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="product"/>
+				<set field="selectedSubMenuItem" value="listProductCategoryTax"/>
+				<set field="titleProperty" value="BSProductCategoryTax"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission />
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://basepo/webapp/basepo/productcatalog/productCategoryTaxList.ftl" />
+									</html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}" />
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewProductCategoryTax">
+		<section>
+			<actions>
+				<set field="titleHeaderValue" value="categoryTitle" global="true" />
+				<set field="titleHeaderLocation" value="component://basepo/widget/ProductScreens.xml" global="true" />
+				<set field="selectedMenuItem" value="product" />
+				<set field="selectedSubMenuItem" value="listProductCategoryTax" />
+				<set field="titleProperty" value="BSViewProductCategoryTax" />
+				<set field="productCategoryId" from-field="parameters.productCategoryId" />
+				<entity-one value-field="productCategory" entity-name="ProductCategory"></entity-one>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<not>
+									<if-empty field="productCategory" />
+								</not>
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html><html-template location="component://basepo/webapp/basepo/productcatalog/productCategoryTaxViewProduct.ftl" /></html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSRecordIsNotFound}" />
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+</screens>

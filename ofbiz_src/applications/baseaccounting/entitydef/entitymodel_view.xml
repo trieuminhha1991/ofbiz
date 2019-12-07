@@ -1,0 +1,3293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+	<view-entity entity-name="PaymentApplicationAndInvAndParty" package-name="com.olbius.accounting">
+		<member-entity entity-alias="PMTAPPL" entity-name="PaymentApplication"></member-entity>
+		<member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+		<member-entity entity-alias="PTYFROM" entity-name="PartyFullNameDetailSimple"></member-entity>
+		<member-entity entity-alias="PTY" entity-name="PartyFullNameDetailSimple"></member-entity>
+		<alias-all entity-alias="PMTAPPL"></alias-all>
+		<alias-all entity-alias="INV"></alias-all>
+		<alias name="partyFromName" field="fullName" entity-alias="PTYFROM"></alias>
+		<alias name="partyName" field="fullName" entity-alias="PTY"></alias>
+		<view-link rel-entity-alias="INV" entity-alias="PMTAPPL">
+			<key-map field-name="invoiceId"/>
+		</view-link>
+		<view-link rel-entity-alias="PTYFROM" entity-alias="INV">
+			<key-map field-name="partyIdFrom" rel-field-name="partyId"/>
+		</view-link>
+		<view-link rel-entity-alias="PTY" entity-alias="INV">
+			<key-map field-name="partyId"/>
+		</view-link>
+	</view-entity>
+	<view-entity entity-name="InvoiceAndPaymentApplGroupBy" package-name="com.olbius.accounting">
+		<member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+		<member-entity entity-alias="PM" entity-name="Payment"></member-entity>
+		<member-entity entity-alias="PAP" entity-name="PaymentAndApplication"></member-entity>
+		<alias name="invoiceId" entity-alias="INV" group-by="true"></alias>
+		<alias name="amountApplied" entity-alias="PAP" field="amountApplied" function="sum"></alias>
+		<view-link rel-entity-alias="PAP" entity-alias="INV">
+			<key-map field-name="invoiceId" />
+		</view-link>
+		<view-link rel-entity-alias="PM" entity-alias="PAP">
+			<key-map field-name="paymentId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="statusId" entity-alias="PM" operator="not-equals" value="PMNT_CANCELLED" />
+					<condition-expr field-name="statusId" entity-alias="PM" operator="not-equals" value="PMNT_VOID" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+	<view-entity entity-name="InvoiceAndPaymentApplDetail" package-name="com.olbius.accounting">
+		<member-entity entity-alias="IAII" entity-name="InvoiceAndInvoiceItem"></member-entity>
+		<member-entity entity-alias="INVAPPL" entity-name="InvoiceAndPaymentApplGroupBy"></member-entity>
+		<member-entity entity-alias="PTYFROM" entity-name="PartyFullNameDetailSimple"></member-entity>
+		<member-entity entity-alias="PTY" entity-name="PartyFullNameDetailSimple"></member-entity>
+		<alias-all entity-alias="IAII"></alias-all>
+		<alias-all entity-alias="INVAPPL"></alias-all>
+		<alias name="amountNotApply">
+			<complex-alias operator="-">
+				<complex-alias-field field="amount" entity-alias="IAII" default-value="0"/>
+				<complex-alias-field field="amountApplied" entity-alias="INVAPPL" default-value="0"/>
+			</complex-alias>
+		</alias>
+		<alias name="partyFromName" field="fullName" entity-alias="PTYFROM"></alias>
+		<alias name="partyName" field="fullName" entity-alias="PTY"></alias>
+		<view-link rel-entity-alias="INVAPPL" entity-alias="IAII" rel-optional="true">
+			<key-map field-name="invoiceId"/>
+		</view-link>
+		<view-link rel-entity-alias="PTYFROM" entity-alias="IAII">
+			<key-map field-name="partyIdFrom" rel-field-name="partyId"/>
+		</view-link>
+		<view-link rel-entity-alias="PTY" entity-alias="IAII">
+			<key-map field-name="partyId"/>
+		</view-link>
+	</view-entity>
+	<view-entity entity-name="PartyRelationshipAndPartyFrom" package-name="com.olbius.accounting">
+		<member-entity entity-alias="PTYREL" entity-name="PartyRelationship"></member-entity>
+		<member-entity entity-alias="PTY" entity-name="PartyFullNameDetailSimple"></member-entity>
+		<alias-all entity-alias="PTYREL"></alias-all>
+		<alias name="partyCode" entity-alias="PTY"></alias>
+		<alias name="partyId" entity-alias="PTY"></alias>
+		<alias name="firstName" entity-alias="PTY"></alias>
+		<alias name="fullName" entity-alias="PTY"></alias>
+		<view-link rel-entity-alias="PTY" entity-alias="PTYREL">
+			<key-map field-name="partyIdFrom" rel-field-name="partyId"/>
+		</view-link>
+	</view-entity>
+	<view-entity entity-name="PartyRelationshipAndPartyTo" package-name="com.olbius.accounting">
+		<member-entity entity-alias="PTYREL" entity-name="PartyRelationship"></member-entity>
+		<member-entity entity-alias="PTY" entity-name="PartyFullNameDetailSimple"></member-entity>
+		<alias-all entity-alias="PTYREL"></alias-all>
+		<alias name="partyCode" entity-alias="PTY"></alias>
+		<alias name="partyId" entity-alias="PTY"></alias>
+		<alias name="firstName" entity-alias="PTY"></alias>
+		<alias name="fullName" entity-alias="PTY"></alias>
+		<view-link rel-entity-alias="PTY" entity-alias="PTYREL">
+			<key-map field-name="partyIdTo" rel-field-name="partyId"/>
+		</view-link>
+	</view-entity>	
+	<view-entity entity-name="PartyRelationshipDepartment" package-name="com.olbius.accounting">
+		<member-entity entity-alias="RLT" entity-name="RoleType"></member-entity>
+		<member-entity entity-alias="PRAPT" entity-name="PartyRelationshipAndPartyTo"></member-entity>
+		<alias-all entity-alias="PRAPT"></alias-all>
+		<alias name="parentTypeId" entity-alias="RLT"></alias>
+		<view-link rel-entity-alias="RLT" entity-alias="PRAPT">
+			<key-map field-name="roleTypeIdTo" rel-field-name="roleTypeId"/>
+		</view-link>
+	</view-entity>
+		
+	<view-entity entity-name="VoucherInvoiceAndResource" package-name="com.olbius.accounting">
+		<member-entity entity-alias="VOU" entity-name="Voucher"></member-entity>
+		<member-entity entity-alias="VOUINV" entity-name="VoucherInvoice"></member-entity>
+		<member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+		<member-entity entity-alias="RES" entity-name="DataResource"></member-entity>
+		<alias-all entity-alias="VOUINV"></alias-all>
+		<alias-all entity-alias="VOU"></alias-all>
+		<alias name="dataResourceId" entity-alias="RES"></alias>
+		<alias name="dataResourceName" entity-alias="RES"></alias>
+		<alias name="objectInfo" entity-alias="RES"></alias>
+		<alias name="currencyUomId" entity-alias="INV"></alias>
+		<alias name="totalAmount">
+			<complex-alias operator="+">
+				<complex-alias-field entity-alias="VOU" field="amount" default-value="0"/>
+				<complex-alias-field entity-alias="VOU" field="taxAmount" default-value="0"/>
+			</complex-alias>
+		</alias>
+		<view-link rel-entity-alias="VOUINV" entity-alias="VOU">
+			<key-map field-name="voucherId"/>
+		</view-link>
+		<view-link rel-entity-alias="RES" entity-alias="VOU" rel-optional="true">
+			<key-map field-name="dataResourceId"/>
+		</view-link>
+		<view-link rel-entity-alias="INV" entity-alias="VOUINV">
+			<key-map field-name="invoiceId"/>
+		</view-link>
+	</view-entity>
+	<view-entity entity-name="VoucherAndInvGroupBy" package-name="com.olbius.accounting">
+		<member-entity entity-alias="VOU" entity-name="Voucher"></member-entity>
+		<member-entity entity-alias="VOUINV" entity-name="VoucherInvoice"></member-entity>
+		<member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+		<member-entity entity-alias="INV_TYP" entity-name="InvoiceType"></member-entity>
+		<member-entity entity-alias="INV_FROM" entity-name="PartyFullNameDetailSimple"></member-entity>
+		<member-entity entity-alias="INV_TO" entity-name="PartyFullNameDetailSimple"></member-entity>
+		<alias-all entity-alias="VOU" group-by="true"></alias-all>
+		<!--<alias name="currencyUomId" entity-alias="INV" group-by="true"></alias>-->
+		<alias name="newStatusId" entity-alias="INV" group-by="true"></alias>
+		<alias name="invoiceId" function="string-agg" function-params="', '" entity-alias="VOUINV"></alias>
+        <alias name="invoiceTypeId" entity-alias="INV_TYP" group-by="true"></alias>
+		<alias name="invoiceTypeDesc" field="description" function="string-agg" function-params="', '" entity-alias="INV_TYP"></alias>
+		<alias name="fullNameFrom" field="fullName" entity-alias="INV_FROM" function="string-agg" function-params="', '"></alias>
+		<alias name="fullNameTo" field="fullName" entity-alias="INV_TO" function="string-agg" function-params="', '"></alias>
+		<alias name="partyIdFrom" field="partyIdFrom" entity-alias="INV" function="string-agg" function-params="', '"></alias>
+		<alias name="partyIdTo" field="partyId" entity-alias="INV" function="string-agg" function-params="', '"></alias>
+		<view-link rel-entity-alias="VOUINV" entity-alias="VOU">
+			<key-map field-name="voucherId"/>
+		</view-link>
+		<view-link rel-entity-alias="INV" entity-alias="VOUINV">
+			<key-map field-name="invoiceId"/>
+		</view-link>
+		<view-link rel-entity-alias="INV_TYP" entity-alias="INV">
+			<key-map field-name="invoiceTypeId"/>
+		</view-link>
+		<view-link rel-entity-alias="INV_FROM" entity-alias="INV">
+			<key-map field-name="partyIdFrom" rel-field-name="partyId"/>
+		</view-link>
+		<view-link rel-entity-alias="INV_TO" entity-alias="INV">
+			<key-map field-name="partyId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="OrderItemBillingMinItemSeq" package-name="com.olbius.accounting">
+    	<member-entity entity-alias="OIB" entity-name="OrderItemBilling"/>
+    	<alias name="orderId" entity-alias="OIB" group-by="true"></alias>
+    	<alias name="invoiceId" entity-alias="OIB" group-by="true"></alias>
+    	<alias name="orderItemSeqId" entity-alias="OIB" function="min"></alias>
+    </view-entity>
+    
+    <view-entity entity-name="InvoiceOrderDetail" package-name="com.olbius.accounting">
+    	<member-entity entity-alias="OIB" entity-name="OrderItemBillingMinItemSeq"/>
+    	<member-entity entity-alias="OH" entity-name="OrderHeader"/>
+    	<member-entity entity-alias="PS" entity-name="ProductStore"/>
+    	
+    	<alias name="orderId" entity-alias="OIB"></alias>
+    	<alias name="invoiceId" entity-alias="OIB"></alias>
+    	<alias name="productStoreId" field="originFacilityId" entity-alias="OH"></alias>
+    	<alias name="storeName" entity-alias="PS"></alias>
+    	
+    	<view-link rel-entity-alias="OH" entity-alias="OIB">
+    		<key-map field-name="orderId"/>
+    	</view-link>
+    	
+    	<view-link rel-entity-alias="PS" entity-alias="OH" rel-optional="true">
+    		<key-map field-name="originFacilityId" rel-field-name="productStoreId"/>
+    	</view-link>
+    </view-entity>
+	
+	<view-entity entity-name="VoucherAndResourceAndInv" package-name="com.olbius.accounting">
+		<member-entity entity-alias="VOU" entity-name="VoucherAndInvGroupBy"></member-entity>
+		<member-entity entity-alias="IOD" entity-name="InvoiceOrderDetail"></member-entity>
+		<member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+		<!-- <member-entity entity-alias="RES" entity-name="DataResource"></member-entity> -->
+		<alias-all entity-alias="VOU"></alias-all>
+		<alias name="productStoreId" entity-alias="IOD"></alias>
+		<alias name="storeName" entity-alias="IOD"></alias>
+		<alias name="description" entity-alias="INV"></alias>
+		<!-- <alias name="dataResourceId" entity-alias="RES"></alias>
+		<alias name="dataResourceName" entity-alias="RES"></alias>
+		<alias name="objectInfo" entity-alias="RES"></alias> -->
+		<alias name="totalAmount">
+			<complex-alias operator="+">
+				<complex-alias-field entity-alias="VOU" field="amount" default-value="0"/>
+				<complex-alias-field entity-alias="VOU" field="taxAmount" default-value="0"/>
+			</complex-alias>
+		</alias>
+		<!-- <view-link rel-entity-alias="RES" entity-alias="VOU" rel-optional="true">
+			<key-map field-name="dataResourceId"/>
+		</view-link> -->
+		<view-link rel-entity-alias="IOD" entity-alias="VOU" rel-optional="true">
+			<key-map field-name="invoiceId"/>		
+		</view-link>
+		<view-link rel-entity-alias="INV" entity-alias="VOU" rel-optional="true">
+			<key-map field-name="invoiceId"/>		
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="VoucherInvoiceAndTotal" package-name="com.olbius.accounting">
+		<member-entity entity-alias="VOU" entity-name="Voucher"></member-entity>
+		<member-entity entity-alias="VOUINV" entity-name="VoucherInvoice"></member-entity>
+		<alias name="invoiceId" entity-alias="VOUINV" group-by="true"></alias>
+		<alias name="amount" entity-alias="VOU" function="sum"></alias>
+		<alias name="taxAmount" entity-alias="VOU" function="sum"></alias>
+		<view-link rel-entity-alias="VOUINV" entity-alias="VOU">
+			<key-map field-name="voucherId"/>
+		</view-link>
+	</view-entity>
+	<view-entity entity-name="InvoiceItemAndTypeAndProduct" package-name="com.olbius.accounting">
+		<member-entity entity-alias="II" entity-name="InvoiceItem"></member-entity>
+		<member-entity entity-alias="ITEMTYPE" entity-name="InvoiceItemType"></member-entity>
+		<member-entity entity-alias="PROD" entity-name="Product"></member-entity>
+		<alias-all entity-alias="II"></alias-all>
+		<alias name="description" entity-alias="ITEMTYPE"></alias>
+		<alias name="productName" entity-alias="PROD"></alias>
+		<alias name="productId" entity-alias="PROD"></alias>
+		<alias name="totalAmount">
+			<complex-alias operator="*">
+				<complex-alias-field field="amount" entity-alias="II" default-value="0"/>
+				<complex-alias-field field="quantity" entity-alias="II" default-value="0"/>
+			</complex-alias>
+		</alias>
+		<view-link rel-entity-alias="ITEMTYPE" entity-alias="II">
+			<key-map field-name="invoiceItemTypeId"/>
+		</view-link>
+		<view-link rel-entity-alias="PROD" entity-alias="II" rel-optional="true">
+			<key-map field-name="productId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="AllocCostPeriodItemPartyGroupBy" package-name="com.olbius.accounting">
+		<member-entity entity-alias="ITEM" entity-name="AllocationCostPeriodItem"></member-entity>
+		<alias name="allocCostPeriodId" entity-alias="ITEM" group-by="true"></alias>
+		<alias name="partyId" entity-alias="ITEM" group-by="true"></alias>
+	</view-entity>
+	<view-entity entity-name="AllocCostPeriodItemGlAccGroupBy" package-name="com.olbius.accounting">
+		<member-entity entity-alias="ITEM" entity-name="AllocationCostPeriodItem"></member-entity>
+		<alias name="allocCostPeriodId" entity-alias="ITEM" group-by="true"></alias>
+		<alias name="glAccountId" entity-alias="ITEM" group-by="true"></alias>
+	</view-entity>
+	<view-entity entity-name="AllocCostPeriodItemAndParty" package-name="com.olbius.accounting">
+		<member-entity entity-alias="ITEM" entity-name="AllocCostPeriodItemPartyGroupBy"></member-entity>
+		<member-entity entity-alias="PTY" entity-name="PartyFullNameDetailSimple"></member-entity>
+		<alias-all entity-alias="ITEM"></alias-all>
+		<alias name="fullName" entity-alias="PTY"></alias>
+		<alias name="partyCode" entity-alias="PTY"></alias>
+		<view-link rel-entity-alias="PTY" entity-alias="ITEM">
+			<key-map field-name="partyId"/>
+		</view-link>
+	</view-entity>
+	<view-entity entity-name="AllocCostPeriodItemAndGlAccount" package-name="com.olbius.accounting">
+		<member-entity entity-alias="ITEM" entity-name="AllocCostPeriodItemGlAccGroupBy"></member-entity>
+		<member-entity entity-alias="GLACC" entity-name="GlAccount"></member-entity>
+		<alias-all entity-alias="ITEM"></alias-all>
+		<alias name="accountCode" entity-alias="GLACC"></alias>
+		<alias name="accountName" entity-alias="GLACC"></alias>
+		<view-link rel-entity-alias="GLACC" entity-alias="ITEM">
+			<key-map field-name="glAccountId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="GlAccountBalanceView" package-name="com.olbius.accounting">
+    	<member-entity entity-alias="GAB" entity-name="GlAccountBalance"/>
+        <member-entity entity-alias="GLA" entity-name="GlAccount"/>
+        <alias-all entity-alias="GAB"></alias-all>
+        <alias-all entity-alias="GLA"></alias-all>
+    	<view-link entity-alias="GAB" rel-entity-alias="GLA" rel-optional="false" >
+            <key-map field-name="glAccountId"/>            
+        </view-link>
+    </view-entity>
+    
+    <view-entity entity-name="GlAccountOrgDetail" package-name="com.olbius.accounting">
+		<member-entity entity-alias="GO" entity-name="GlAccountOrganization"/>
+		<member-entity entity-alias="GL" entity-name="GlAccount"/>
+		<alias-all entity-alias="GL" />		
+		<alias entity-alias="GO" name="organizationPartyId" field="organizationPartyId" />
+		<view-link entity-alias="GL" rel-entity-alias="GO" rel-optional="true">
+			<key-map field-name="glAccountId"/>
+		</view-link>
+	</view-entity>
+	<view-entity entity-name="OrderInvoiceNoteAndOrder" package-name="com.olbius.accounting">
+		<member-entity entity-alias="OIN" entity-name="OrderInvoiceNote"></member-entity>
+		<member-entity entity-alias="OH" entity-name="OrderHeader"></member-entity>
+		<alias-all entity-alias="OIN"></alias-all>
+		<alias-all entity-alias="OH"></alias-all>
+		<view-link rel-entity-alias="OH" entity-alias="OIN">
+			<key-map field-name="orderId"/>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="InvoiceItemAndSalesTax" package-name="com.olbius.accounting">
+		<member-entity entity-alias="ITEM" entity-name="InvoiceItem"></member-entity>
+		<member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+		<member-entity entity-alias="TAXRATE" entity-name="TaxAuthorityRateProduct"></member-entity>
+		<alias-all entity-alias="ITEM"></alias-all>
+		<alias name="taxPercentage" entity-alias="TAXRATE"></alias>
+		<alias name="productCategoryId" entity-alias="TAXRATE"></alias>
+		<alias name="currencyUomId" entity-alias="INV"></alias>
+		<alias name="totalTaxAmount">
+			<complex-alias operator="*">
+				<complex-alias-field default-value="1" field="quantity" entity-alias="ITEM"/>
+				<complex-alias-field default-value="1" field="amount" entity-alias="ITEM"/>
+			</complex-alias>
+		</alias>
+		<view-link rel-entity-alias="ITEM" entity-alias="INV">
+			<key-map field-name="invoiceId"/>
+		</view-link>
+		<view-link rel-entity-alias="TAXRATE" entity-alias="ITEM">
+			<key-map field-name="taxAuthorityRateSeqId"/>
+		</view-link>
+		<entity-condition>
+			<condition-expr field-name="taxAuthorityRateSeqId" operator="not-equals" value="" entity-alias="ITEM"/>
+		</entity-condition>
+	</view-entity>
+	<view-entity entity-name="InvoiceItemAndProductTaxInc" package-name="com.olbius.accounting">
+		<member-entity entity-alias="ITEM" entity-name="InvoiceItem"></member-entity>
+		<member-entity entity-alias="SALESTAX" entity-name="InvoiceItemAndSalesTax"></member-entity>
+		<member-entity entity-alias="PROD" entity-name="Product"></member-entity>
+		<member-entity entity-alias="ORDITEM_II" entity-name="OrderItemBilling"></member-entity>
+		<member-entity entity-alias="ORDITEM" entity-name="OrderItem"></member-entity>
+		<member-entity entity-alias="UOM" entity-name="Uom"></member-entity>
+		<alias-all entity-alias="ITEM">
+			<exclude field="taxAuthPartyId"/>
+			<exclude field="taxAuthGeoId"/>
+			<exclude field="taxAuthorityRateSeqId"/>
+			<exclude field="overrideGlAccountId"/>
+			<exclude field="parentInvoiceItemSeqId"/>
+			<exclude field="parentInvoiceId"/>
+			<exclude field="overrideOrgPartyId"/>
+			<exclude field="alternativeAmount"/>
+			<exclude field="alternativeQuantity"/>
+			<exclude field="salesOpportunityId"/> 
+		</alias-all>
+		<alias name="totalTaxAmount" entity-alias="SALESTAX"></alias>
+		<alias name="taxAuthPartyId" entity-alias="SALESTAX"></alias>
+		<alias name="taxAuthGeoId" entity-alias="SALESTAX"></alias>
+		<alias name="taxAuthorityRateSeqId" entity-alias="SALESTAX"></alias>
+		<alias name="taxPercentage" entity-alias="SALESTAX"></alias>
+		<alias name="productCategoryId" entity-alias="SALESTAX"></alias>
+		<alias name="invoiceIdTax" field="invoiceId" entity-alias="SALESTAX"></alias>
+		<alias name="invoiceItemSeqIdTax" field="invoiceItemSeqId" entity-alias="SALESTAX"></alias>
+		<alias name="taxDescription" field="description" entity-alias="SALESTAX"></alias>
+		<alias name="productName" entity-alias="PROD"></alias>
+		<alias name="productCode" entity-alias="PROD"></alias>
+		<alias name="quantityUomId" entity-alias="ORDITEM"></alias>
+		<alias name="uomAbbreviation" field="abbreviation"  entity-alias="UOM"></alias>
+		<alias name="uomDescription" field="description" entity-alias="UOM"></alias>
+		<alias name="currencyUomId" entity-alias="SALESTAX"></alias>
+		<alias name="amountNotTax">
+			<complex-alias operator="*">
+				<complex-alias-field default-value="1" field="quantity" entity-alias="ITEM"/>
+				<complex-alias-field default-value="1" field="amount" entity-alias="ITEM"/>
+			</complex-alias>
+		</alias>
+		<alias name="amountTaxInc">
+			<complex-alias operator="+">
+				<complex-alias-field entity-alias="SALESTAX" field="totalTaxAmount" default-value="0"/>
+				<complex-alias operator="*">
+					<complex-alias-field default-value="1" field="quantity" entity-alias="ITEM"/>
+					<complex-alias-field default-value="1" field="amount" entity-alias="ITEM"/>
+				</complex-alias>
+			</complex-alias>
+		</alias>
+		<view-link rel-entity-alias="SALESTAX" entity-alias="ITEM">
+			<key-map field-name="invoiceId" rel-field-name="parentInvoiceId"/>
+			<key-map field-name="invoiceItemSeqId" rel-field-name="parentInvoiceItemSeqId"/>
+		</view-link>
+		<view-link rel-entity-alias="PROD" entity-alias="ITEM">
+			<key-map field-name="productId"/>
+		</view-link>
+		<view-link rel-entity-alias="ORDITEM_II" entity-alias="ITEM">
+			<key-map field-name="invoiceId"/>
+			<key-map field-name="invoiceItemSeqId"/>
+		</view-link>
+		<view-link rel-entity-alias="ORDITEM" entity-alias="ORDITEM_II">
+			<key-map field-name="orderId"/>
+			<key-map field-name="orderItemSeqId"/>
+		</view-link>
+		<view-link rel-entity-alias="UOM" entity-alias="ORDITEM">
+			<key-map field-name="quantityUomId" rel-field-name="uomId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="InvoiceItemAndProductTaxSum" package-name="com.olbius.accounting">
+		<member-entity entity-alias="II" entity-name="InvoiceItemAndProductTaxInc"></member-entity>
+		<alias-all entity-alias="II" group-by="true">
+			<exclude field="totalTaxAmount"/>
+			<exclude field="amountNotTax"/>
+			<exclude field="amountTaxInc"/>
+			<exclude field="quantity"/>
+			<exclude field="invoiceId"/>
+			<exclude field="invoiceItemSeqId"/>
+			<exclude field="invoiceIdTax"/>
+			<exclude field="invoiceItemSeqIdTax"/>
+		</alias-all>
+		<alias name="quantity" entity-alias="II" function="sum"></alias>
+		<alias name="invoiceId" entity-alias="II"></alias>
+		<alias name="totalTaxAmount" entity-alias="II" function="sum"></alias>
+		<alias name="amountNotTax" entity-alias="II" function="sum"></alias>
+		<alias name="amountTaxInc" entity-alias="II" function="sum"></alias>
+	</view-entity>
+	
+	<view-entity entity-name="InvoiceItemAndTaxSum" package-name="com.olbius.accounting">
+		<member-entity entity-alias="II" entity-name="InvoiceItemProductWithTaxView"></member-entity>
+		<alias name="invoiceId" entity-alias="II" group-by="true"></alias>
+		<alias name="taxAuthorityRateSeqId" entity-alias="II" group-by="true"></alias>
+		<alias name="taxPercentage" entity-alias="II" group-by="true"></alias>
+		<!--<alias name="productCategoryId" entity-alias="II" group-by="true"></alias>-->
+		<alias name="currencyUomId" entity-alias="II" group-by="true"></alias>
+		<alias name="taxDescription" entity-alias="II" group-by="true"></alias>
+		<alias name="totalTaxAmount" entity-alias="II" function="sum"></alias>
+		<alias name="amountNotTax" entity-alias="II" function="sum"></alias>
+		<alias name="amountTaxInc" entity-alias="II" function="sum"></alias>
+	</view-entity>
+
+    <view-entity entity-name="InvoiceAndItemAndProductGroupBy" package-name="com.olbius.accounting">
+        <member-entity entity-alias="INVV" entity-name="InvoiceItemView"></member-entity>
+        <member-entity entity-alias="PROD" entity-name="Product"></member-entity>
+        <alias name="productId" entity-alias="INVV" group-by="true"></alias>
+        <alias name="productName" entity-alias="PROD" group-by="true"></alias>
+        <alias name="amount" entity-alias="INVV" group-by="true"></alias>
+        <alias name="quantity" entity-alias="INVV" function="sum"></alias>
+        <alias name="currencyUomId" entity-alias="INVV" group-by="true"></alias>
+        <alias name="invoiceDate" entity-alias="INVV"></alias>
+        <alias name="partyIdFrom" entity-alias="INVV"></alias>
+        <alias name="partyId" entity-alias="INVV"></alias>
+        <alias name="subTotalAmount">
+            <complex-alias operator="*">
+                <complex-alias-field default-value="1" field="quantity" entity-alias="INVV" function="sum"/>
+                <complex-alias-field default-value="1" field="amount" entity-alias="INVV"/>
+            </complex-alias>
+        </alias>
+        <view-link rel-entity-alias="PROD" entity-alias="INVV">
+            <key-map field-name="productId"/>
+        </view-link>
+        <entity-condition>
+            <condition-expr field-name="invoiceItemTypeId" operator="in" value="INV_FPRODEXT_ITEM,INV_SPROD_ITEM,INV_FPRODINT_ITEM,PINV_FPROD_ITEM,PINV_FPRODMEDI_ITEM,PINV_SPROD_ITEM,PINV_FPRODPRICE_ITEM,PINV_COUPON_ITEM" entity-alias="INVV"/>
+        </entity-condition>
+    </view-entity>
+    
+	<view-entity entity-name="InvoiceItemAndProdDiscount"
+		package-name="com.olbius.accounting">
+		<member-entity entity-alias="II" entity-name="InvoiceItem" />
+		<alias name="invoiceId" entity-alias="II" group-by="true" />
+		<alias name="productId" entity-alias="II" group-by="true" />
+		<alias name="parentInvoiceItemSeqId" entity-alias="II" group-by="true" />
+		<alias name="totalAmountDiscountInc" function="sum">
+			<complex-alias operator="*">
+				<complex-alias-field default-value="1" field="quantity"
+					entity-alias="II" />
+				<complex-alias-field default-value="0" field="amount"
+					entity-alias="II" />
+			</complex-alias>
+		</alias>
+		<entity-condition>
+			<condition-list>
+				<condition-expr field-name="invoiceItemTypeId" entity-alias="II" operator="not-equals" value="ITM_SALES_TAX" />
+				<condition-expr field-name="productId" entity-alias="II" operator="not-equals" value="" />
+				<condition-expr field-name="parentInvoiceItemSeqId" entity-alias="II" operator="not-equals" value="" />
+			</condition-list>
+		</entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="InvoiceItemAndProductGroupBy" package-name="com.olbius.accounting">
+		<member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+		<member-entity entity-alias="ITEM" entity-name="InvoiceItem"></member-entity>
+		<member-entity entity-alias="ITEMTYP" entity-name="InvoiceItemType"></member-entity>
+		<member-entity entity-alias="PROD" entity-name="Product"></member-entity>
+		<alias name="productId" entity-alias="ITEM" group-by="true"></alias>
+		<alias name="amount" entity-alias="ITEM" group-by="true"></alias>
+		<alias name="invoiceItemTypeId" entity-alias="ITEM" group-by="true"></alias>
+		<alias name="invoiceItemTypeDesc" field="description" entity-alias="ITEMTYP" group-by="true"></alias>
+		<alias name="quantity" entity-alias="ITEM" function="sum"></alias>
+		<alias name="productCode" entity-alias="PROD" group-by="true"></alias>
+		<alias name="description" entity-alias="ITEM" group-by="true"></alias>
+		<alias name="currencyUomId" entity-alias="INV" group-by="true"></alias>
+		<alias name="invoiceId" entity-alias="ITEM"></alias>
+		<alias name="subTotalAmount" function="sum">
+			<complex-alias operator="*">
+				<complex-alias-field default-value="1" field="quantity" entity-alias="ITEM"/>
+				<complex-alias-field default-value="1" field="amount" entity-alias="ITEM"/>
+			</complex-alias>
+		</alias>
+		<view-link rel-entity-alias="ITEM" entity-alias="INV">
+			<key-map field-name="invoiceId"/>
+		</view-link>
+		<view-link rel-entity-alias="ITEMTYP" entity-alias="ITEM">
+			<key-map field-name="invoiceItemTypeId"/>
+		</view-link>
+		<view-link rel-entity-alias="PROD" entity-alias="ITEM">
+			<key-map field-name="productId"/>
+		</view-link>
+		<entity-condition>
+			<condition-expr field-name="invoiceItemTypeId" operator="in" value="INV_FPRODEXT_ITEM,INV_SPROD_ITEM,INV_FPRODINT_ITEM" entity-alias="ITEM"/>
+		</entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="InvoiceItemGroupBy" package-name="com.olbius.accounting">
+		<member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+		<member-entity entity-alias="ITEM" entity-name="InvoiceItem"></member-entity>
+		<member-entity entity-alias="ITEMTYP" entity-name="InvoiceItemType"></member-entity>
+		<member-entity entity-alias="PRCM" entity-name="ProductCategoryMember"></member-entity>
+		<member-entity entity-alias="PRCM2" entity-name="ProductCategoryMember"></member-entity>
+		<member-entity entity-alias="PRC" entity-name="ProductCategory"></member-entity>		
+		<member-entity entity-alias="PROD" entity-name="Product"></member-entity>
+		<alias name="productId" entity-alias="PROD" group-by="true"></alias>
+		<alias name="invoiceItemTypeId" entity-alias="ITEM" group-by="true"></alias>
+		<alias name="invoiceItemTypeDesc" field="description" entity-alias="ITEMTYP" group-by="true"></alias>
+		<alias name="description" field="productName" entity-alias="PROD" group-by="true"></alias>
+		<alias name="currencyUomId" entity-alias="INV" group-by="true"></alias>
+		<alias name="invoiceId" entity-alias="ITEM"></alias>
+		<!-- <alias name="invoiceItemSeqId" entity-alias="ITEM"></alias> -->
+		<alias name="productCode" entity-alias="PROD" group-by="true"></alias>
+		<alias name="amount" function="sum">
+			<complex-alias operator="*">
+				<complex-alias-field default-value="1" field="quantity" entity-alias="ITEM"/>
+				<complex-alias-field default-value="1" field="amount" entity-alias="ITEM"/>
+			</complex-alias>
+		</alias>
+		<alias name="subTotalAmount" function="sum">
+			<complex-alias operator="*">
+				<complex-alias-field default-value="1" field="quantity" entity-alias="ITEM"/>
+				<complex-alias-field default-value="1" field="amount" entity-alias="ITEM"/>
+			</complex-alias>
+		</alias>
+		<view-link rel-entity-alias="ITEM" entity-alias="INV">
+			<key-map field-name="invoiceId"/>
+			<entity-condition>
+				<condition-expr field-name="invoiceItemTypeId" operator="in" value="INV_FPRODEXT_ITEM,INV_SPROD_ITEM,INV_FPRODINT_ITEM" entity-alias="ITEM"/>
+			</entity-condition>			
+		</view-link>
+		<view-link rel-entity-alias="ITEMTYP" entity-alias="ITEM">
+			<key-map field-name="invoiceItemTypeId"/>
+		</view-link>
+		<view-link rel-entity-alias="PRCM" entity-alias="ITEM">
+			<key-map field-name="productId"/>
+			<entity-condition>
+				<condition-list>
+       				<condition-expr field-name="fromDate" operator="less" rel-field-name="invoiceDate" rel-entity-alias="INV" entity-alias="PRCM"/>
+       				<condition-list combine="or">
+       					<condition-expr field-name="thruDate" value="" entity-alias="PRCM"/>
+       					<condition-expr field-name="thruDate" operator="greater-equals" rel-field-name="invoiceDate" rel-entity-alias="INV" entity-alias="PRCM"/>
+       				</condition-list>
+       			</condition-list>				
+			</entity-condition>			
+		</view-link>
+		<view-link rel-entity-alias="PRC" entity-alias="PRCM">
+			<key-map field-name="productCategoryId"/>
+			<entity-condition>
+				<condition-expr field-name="productCategoryTypeId" operator="equals" value="TAX_CATEGORY" entity-alias="PRC"/>        			
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="PRCM2" entity-alias="PRCM">
+			<key-map field-name="productCategoryId"/>
+			<entity-condition>
+				<condition-expr field-name="productId" operator="like" value="PRD%" entity-alias="PRCM2"/>
+			</entity-condition>			
+		</view-link>
+		<view-link rel-entity-alias="PROD" entity-alias="PRCM2">
+			<key-map field-name="productId"/>	
+		</view-link>
+	</view-entity>
+		
+	<view-entity entity-name="InvoiceItemReturnGroupBy" package-name="com.olbius.accounting">
+		<member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+		<member-entity entity-alias="ITEM" entity-name="InvoiceItem"></member-entity>
+		<member-entity entity-alias="ITEMTYP" entity-name="InvoiceItemType"></member-entity>
+		<member-entity entity-alias="PRCM" entity-name="ProductCategoryMember"></member-entity>
+		<member-entity entity-alias="PRCM2" entity-name="ProductCategoryMember"></member-entity>
+		<member-entity entity-alias="PRC" entity-name="ProductCategory"></member-entity>		
+		<member-entity entity-alias="PROD" entity-name="Product"></member-entity>
+		<alias name="productId" entity-alias="PROD" group-by="true"></alias>
+		<alias name="invoiceItemTypeId" entity-alias="ITEM" group-by="true"></alias>
+		<alias name="invoiceItemTypeDesc" field="description" entity-alias="ITEMTYP" group-by="true"></alias>
+		<alias name="description" field="productName" entity-alias="PROD" group-by="true"></alias>
+		<alias name="currencyUomId" entity-alias="INV" group-by="true"></alias>
+		<alias name="invoiceId" entity-alias="ITEM"></alias>
+		<!-- <alias name="invoiceItemSeqId" entity-alias="ITEM"></alias> -->
+		<alias name="productCode" entity-alias="PROD" group-by="true"></alias>
+		<alias name="amount" function="sum">
+			<complex-alias operator="*">
+				<complex-alias-field value="-1"/>
+				<complex-alias operator="*">
+					<complex-alias-field default-value="1" field="quantity" entity-alias="ITEM"/>
+					<complex-alias-field default-value="1" field="amount" entity-alias="ITEM"/>
+				</complex-alias>
+			</complex-alias>
+		</alias>
+		<alias name="subTotalAmount" function="sum">
+			<complex-alias operator="*">
+				<complex-alias-field value="-1"/>
+				<complex-alias operator="*">
+					<complex-alias-field default-value="1" field="quantity" entity-alias="ITEM"/>
+					<complex-alias-field default-value="1" field="amount" entity-alias="ITEM"/>
+				</complex-alias>
+			</complex-alias>
+		</alias>
+		<view-link rel-entity-alias="ITEM" entity-alias="INV">
+			<key-map field-name="invoiceId"/>
+			<entity-condition>
+				<condition-expr field-name="invoiceItemTypeId" operator="in" value="CRT_FINPROD_ITEM,CRT_FPROD_ITEM,CRT_PROD_ITEM,CRT_SPROD_ITEM" entity-alias="ITEM"/>
+			</entity-condition>			
+		</view-link>
+		<view-link rel-entity-alias="ITEMTYP" entity-alias="ITEM">
+			<key-map field-name="invoiceItemTypeId"/>
+		</view-link>
+		<view-link rel-entity-alias="PRCM" entity-alias="ITEM">
+			<key-map field-name="productId"/>
+			<entity-condition>
+				<condition-list>
+       				<condition-expr field-name="fromDate" operator="less" rel-field-name="invoiceDate" rel-entity-alias="INV" entity-alias="PRCM"/>
+       				<condition-list combine="or">
+       					<condition-expr field-name="thruDate" value="" entity-alias="PRCM"/>
+       					<condition-expr field-name="thruDate" operator="greater-equals" rel-field-name="invoiceDate" rel-entity-alias="INV" entity-alias="PRCM"/>
+       				</condition-list>
+       			</condition-list>				
+			</entity-condition>			
+		</view-link>
+		<view-link rel-entity-alias="PRC" entity-alias="PRCM">
+			<key-map field-name="productCategoryId"/>
+			<entity-condition>
+				<condition-expr field-name="productCategoryTypeId" operator="equals" value="TAX_CATEGORY" entity-alias="PRC"/>        			
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="PRCM2" entity-alias="PRCM">
+			<key-map field-name="productCategoryId"/>
+			<entity-condition>
+				<condition-expr field-name="productId" operator="like" value="PRD%" entity-alias="PRCM2"/>
+			</entity-condition>			
+		</view-link>
+		<view-link rel-entity-alias="PROD" entity-alias="PRCM2">
+			<key-map field-name="productId"/>	
+		</view-link>
+	</view-entity>
+		
+	<view-entity entity-name="InvoiceItemAndSaleTaxGroupBy" package-name="com.olbius.accounting">
+		<member-entity entity-alias="ITEM" entity-name="InvoiceItem"></member-entity>
+		<member-entity entity-alias="ITEMTYP" entity-name="InvoiceItemType"></member-entity>
+		<member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+		<alias name="invoiceItemTypeId" entity-alias="ITEM" group-by="true"></alias>
+		<alias name="invoiceItemTypeDesc" field="description" entity-alias="ITEMTYP" group-by="true"></alias>
+		<alias name="quantity" entity-alias="ITEM" function="max"></alias>
+		<alias name="currencyUomId" entity-alias="INV" group-by="true"></alias>
+		<alias name="taxAuthorityRateSeqId" entity-alias="ITEM" group-by="true"></alias>
+		<alias name="taxAuthGeoId" entity-alias="ITEM" group-by="true"></alias>
+		<alias name="taxAuthPartyId" entity-alias="ITEM" group-by="true"></alias>
+		<alias name="description" entity-alias="ITEM" group-by="true"></alias>
+		<alias name="invoiceId" entity-alias="ITEM"></alias>
+		<!-- <alias name="productId" entity-alias="ITEM"></alias> -->
+		<alias name="amount" entity-alias="ITEM" function="sum"></alias>
+		<alias name="subTotalAmount" function="sum">
+			<complex-alias operator="*">
+				<complex-alias-field default-value="1" field="quantity" entity-alias="ITEM"/>
+				<complex-alias-field default-value="1" field="amount" entity-alias="ITEM"/>
+			</complex-alias>
+		</alias>
+		<view-link rel-entity-alias="ITEM" entity-alias="INV">
+			<key-map field-name="invoiceId"/>
+		</view-link>
+		<view-link rel-entity-alias="ITEMTYP" entity-alias="ITEM">
+			<key-map field-name="invoiceItemTypeId"/>
+		</view-link>
+		<entity-condition>
+			<condition-expr field-name="taxAuthorityRateSeqId" operator="not-equals" value="" entity-alias="ITEM"/>
+		</entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="InvoiceItemAndSaleTaxRtnGroupBy" package-name="com.olbius.accounting">
+		<member-entity entity-alias="ITEM" entity-name="InvoiceItem"></member-entity>
+		<member-entity entity-alias="ITEMTYP" entity-name="InvoiceItemType"></member-entity>
+		<member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+		<alias name="invoiceItemTypeId" entity-alias="ITEM" group-by="true"></alias>
+		<alias name="invoiceItemTypeDesc" field="description" entity-alias="ITEMTYP" group-by="true"></alias>
+		<alias name="quantity" entity-alias="ITEM" function="max"></alias>
+		<alias name="currencyUomId" entity-alias="INV" group-by="true"></alias>
+		<alias name="taxAuthorityRateSeqId" entity-alias="ITEM" group-by="true"></alias>
+		<alias name="taxAuthGeoId" entity-alias="ITEM" group-by="true"></alias>
+		<alias name="taxAuthPartyId" entity-alias="ITEM" group-by="true"></alias>
+		<alias name="description" entity-alias="ITEM" group-by="true"></alias>
+		<alias name="invoiceId" entity-alias="ITEM"></alias>
+		<!-- <alias name="productId" entity-alias="ITEM"></alias> -->
+		<alias name="amount" function="sum">
+			<complex-alias operator="*">
+				<complex-alias-field value="-1"/>
+				<complex-alias-field default-value="1" field="amount" entity-alias="ITEM"/>
+			</complex-alias>
+		</alias>
+		<alias name="subTotalAmount" function="sum">
+			<complex-alias operator="*">
+				<complex-alias-field value="-1"/>
+				<complex-alias operator="*">
+					<complex-alias-field default-value="1" field="quantity" entity-alias="ITEM"/>
+					<complex-alias-field default-value="1" field="amount" entity-alias="ITEM"/>
+				</complex-alias>
+			</complex-alias>
+		</alias>
+		<view-link rel-entity-alias="ITEM" entity-alias="INV">
+			<key-map field-name="invoiceId"/>
+		</view-link>
+		<view-link rel-entity-alias="ITEMTYP" entity-alias="ITEM">
+			<key-map field-name="invoiceItemTypeId"/>
+		</view-link>
+		<entity-condition>
+			<condition-expr field-name="taxAuthorityRateSeqId" operator="not-equals" value="" entity-alias="ITEM"/>
+		</entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="InvoiceItemAndDiscountGroupBy" package-name="com.olbius.accounting">
+		<member-entity entity-alias="ITEM" entity-name="InvoiceItem"></member-entity>
+		<member-entity entity-alias="ITEMTYP" entity-name="InvoiceItemType"></member-entity>
+		<member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+		<alias name="invoiceItemTypeId" entity-alias="ITEM" group-by="true"></alias>
+		<alias name="invoiceItemTypeDesc" field="description" entity-alias="ITEMTYP" group-by="true"></alias>
+		<alias name="quantity" entity-alias="ITEM" function="max"></alias>
+		<alias name="currencyUomId" entity-alias="INV" group-by="true"></alias>
+		<alias name="description" entity-alias="ITEM" group-by="true"></alias>
+		<alias name="invoiceId" entity-alias="ITEM"></alias>
+		<!-- <alias name="invoiceItemSeqId" entity-alias="ITEM"></alias> -->
+		<alias name="amount" entity-alias="ITEM" function="sum"></alias>
+		<alias name="subTotalAmount" function="sum">
+			<complex-alias operator="*">
+				<complex-alias-field default-value="1" field="quantity" entity-alias="ITEM"/>
+				<complex-alias-field default-value="1" field="amount" entity-alias="ITEM"/>
+			</complex-alias>
+		</alias>
+		<view-link rel-entity-alias="ITEM" entity-alias="INV">
+			<key-map field-name="invoiceId"/>
+		</view-link>
+		<view-link rel-entity-alias="ITEMTYP" entity-alias="ITEM">
+			<key-map field-name="invoiceItemTypeId"/>
+		</view-link>
+		<entity-condition>
+			<condition-list>
+				<condition-expr field-name="taxAuthorityRateSeqId" operator="equals" value="" entity-alias="ITEM"/>
+				<condition-expr field-name="invoiceItemTypeId" operator="not-equals" value="INV_FPRODEXT_ITEM" entity-alias="ITEM"/>
+				<condition-expr field-name="invoiceItemTypeId" operator="not-equals" value="INV_SPROD_ITEM" entity-alias="ITEM"/>
+                <condition-expr field-name="invoiceItemTypeId" operator="not-equals" value="INV_FPRODINT_ITEM" entity-alias="ITEM"/>
+                <condition-expr field-name="amount" operator="less-equals" value="0" entity-alias="ITEM"/>
+			</condition-list>
+		</entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="InvoiceItemAndDiscountRtnGroupBy" package-name="com.olbius.accounting">
+		<member-entity entity-alias="ITEM" entity-name="InvoiceItem"></member-entity>
+		<member-entity entity-alias="ITEMTYP" entity-name="InvoiceItemType"></member-entity>
+		<member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+		<alias name="invoiceItemTypeId" entity-alias="ITEM" group-by="true"></alias>
+		<alias name="invoiceItemTypeDesc" field="description" entity-alias="ITEMTYP" group-by="true"></alias>
+		<alias name="quantity" entity-alias="ITEM" function="max"></alias>
+		<alias name="currencyUomId" entity-alias="INV" group-by="true"></alias>
+		<alias name="description" entity-alias="ITEM" group-by="true"></alias>
+		<alias name="invoiceId" entity-alias="ITEM"></alias>
+		<!-- <alias name="invoiceItemSeqId" entity-alias="ITEM"></alias> -->
+		<alias name="amount" function="sum">
+			<complex-alias operator="*">
+				<complex-alias-field value="-1"/>
+				<complex-alias-field default-value="1" field="amount" entity-alias="ITEM"/>
+			</complex-alias>
+		</alias>
+		<alias name="subTotalAmount" function="sum">
+			<complex-alias operator="*">
+				<complex-alias-field value="-1"/>
+				<complex-alias operator="*">
+					<complex-alias-field default-value="1" field="quantity" entity-alias="ITEM"/>
+					<complex-alias-field default-value="1" field="amount" entity-alias="ITEM"/>
+				</complex-alias>
+			</complex-alias>
+		</alias>
+		<view-link rel-entity-alias="ITEM" entity-alias="INV">
+			<key-map field-name="invoiceId"/>
+		</view-link>
+		<view-link rel-entity-alias="ITEMTYP" entity-alias="ITEM">
+			<key-map field-name="invoiceItemTypeId"/>
+		</view-link>
+		<entity-condition>
+			<condition-list>
+				<condition-expr field-name="taxAuthorityRateSeqId" operator="equals" value="" entity-alias="ITEM"/>
+				<condition-expr field-name="invoiceItemTypeId" operator="not-equals" value="CRT_FINPROD_ITEM" entity-alias="ITEM"/>
+				<condition-expr field-name="invoiceItemTypeId" operator="not-equals" value="CRT_FPROD_ITEM" entity-alias="ITEM"/>
+				<condition-expr field-name="invoiceItemTypeId" operator="not-equals" value="CRT_SPROD_ITEM" entity-alias="ITEM"/>
+				<condition-expr field-name="invoiceItemTypeId" operator="not-equals" value="CRT_PROD_ITEM" entity-alias="ITEM"/>
+				<condition-expr field-name="invoiceItemTypeId" operator="not-equals" value="CRT_MAN_ADJ" entity-alias="ITEM"/>
+			</condition-list>
+		</entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="ReturnItemAndBilling" package-name="com.olbius.accounting">
+		<member-entity entity-alias="RTNITEM" entity-name="ReturnItem"></member-entity>
+		<member-entity entity-alias="RTNBILLING" entity-name="ReturnItemBilling"></member-entity>
+		<alias-all entity-alias="RTNBILLING"></alias-all>
+		<alias-all entity-alias="RTNITEM"></alias-all>
+		<view-link rel-entity-alias="RTNBILLING" entity-alias="RTNITEM">
+			<key-map field-name="returnId"/>
+			<key-map field-name="returnItemSeqId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ReturnHeaderItemAndBilling" package-name="com.olbius.accounting">
+		<member-entity entity-alias="RTNITEM" entity-name="ReturnItem"></member-entity>
+		<member-entity entity-alias="RTNHEAD" entity-name="ReturnHeader"></member-entity>
+		<member-entity entity-alias="RTNBILLING" entity-name="ReturnItemBilling"></member-entity>
+		<alias-all entity-alias="RTNBILLING"></alias-all>
+		<alias-all entity-alias="RTNITEM"></alias-all>
+		<alias name="entryDate" entity-alias="RTNHEAD"></alias>
+		<alias name="destinationFacilityId" entity-alias="RTNHEAD"></alias>
+		<view-link rel-entity-alias="RTNBILLING" entity-alias="RTNITEM">
+			<key-map field-name="returnId"/>
+			<key-map field-name="returnItemSeqId"/>
+		</view-link>
+		<view-link rel-entity-alias="RTNHEAD" entity-alias="RTNITEM">
+			<key-map field-name="returnId"/>
+			<entity-condition>
+				<condition-expr field-name="returnHeaderTypeId" operator="equals" value="CUSTOMER_RETURN" entity-alias="RTNHEAD"/>
+			</entity-condition>			
+		</view-link>		
+	</view-entity>	
+		
+	<view-entity entity-name="OrderInvoiceNoteAndDetail" package-name="com.olbius.accounting">
+		<member-entity entity-alias="OINOTE" entity-name="OrderInvoiceNote"></member-entity>
+		<member-entity entity-alias="OH" entity-name="OrderHeader"></member-entity>
+		<member-entity entity-alias="INV" entity-name="OrderItemBillingAndInvGroupBy"></member-entity>
+		<alias-all entity-alias="INV"></alias-all>
+		<alias-all entity-alias="OINOTE"></alias-all>
+		<alias name="orderDate" entity-alias="OH"></alias>
+		<view-link rel-entity-alias="OH" entity-alias="OINOTE">
+			<key-map field-name="orderId"/>
+		</view-link>
+		<view-link rel-entity-alias="INV" entity-alias="OINOTE">
+			<key-map field-name="orderId"/>
+		</view-link>
+	</view-entity>
+	<view-entity entity-name="OrderItemBillingAndInvGroupBy" package-name="com.olbius.accounting">
+		<member-entity entity-alias="OIB" entity-name="OrderItemBilling"></member-entity>
+		<alias name="orderId" group-by="true" entity-alias="OIB"></alias>
+		<alias name="invoiceId" group-by="true" entity-alias="OIB"></alias>
+	</view-entity>
+	<!--<view-entity entity-name="ProductStoreAndTotalTerminal" package-name="com.olbius.accounting">-->
+		<!--<member-entity entity-alias="STORE" entity-name="ProductStore"></member-entity>-->
+		<!--<member-entity entity-alias="TERMINAL" entity-name="PosTerminal"></member-entity>-->
+		<!--<alias name="productStoreId" group-by="true" entity-alias="STORE"></alias>-->
+		<!--<alias name="posTerminalId" entity-alias="TERMINAL" function="count-distinct"></alias>-->
+		<!--<alias name="cashHandoverAmount" entity-alias="TERMINAL" function="sum"></alias>-->
+		<!--<view-link rel-entity-alias="TERMINAL" entity-alias="STORE">-->
+			<!--<key-map field-name="inventoryFacilityId" rel-field-name="facilityId"/>-->
+		<!--</view-link>-->
+	<!--</view-entity>-->
+	<view-entity entity-name="ProductStoreAndManagerRole" package-name="com.olbius.accounting">
+		<member-entity entity-alias="STORE" entity-name="ProductStore"></member-entity>
+		<member-entity entity-alias="ROLE" entity-name="ProductStoreRole"></member-entity>
+		<member-entity entity-alias="MGR" entity-name="PartyFullNameDetailSimple"></member-entity>
+		<!--<member-entity entity-alias="TERMINAL" entity-name="ProductStoreAndTotalTerminal"></member-entity>-->
+		<alias name="productStoreId" entity-alias="STORE"></alias>
+		<alias name="storeName" entity-alias="STORE"></alias>
+		<alias name="companyName" entity-alias="STORE"></alias>
+		<alias name="inventoryFacilityId" entity-alias="STORE"></alias>
+		<alias name="defaultSalesChannelEnumId" entity-alias="STORE"></alias>
+		<alias name="partyId" entity-alias="ROLE"></alias>
+		<alias name="fromDate" entity-alias="ROLE"></alias>
+		<alias name="thruDate" entity-alias="ROLE"></alias>
+		<alias name="firstName" entity-alias="MGR"></alias>
+		<alias name="fullName" entity-alias="MGR"></alias>
+		<alias name="partyCode" entity-alias="MGR"></alias>
+		<!--<alias name="totalTerminal" field="posTerminalId" entity-alias="TERMINAL"></alias>-->
+		<!--<alias name="cashHandoverAmount" entity-alias="TERMINAL"></alias>-->
+		<view-link rel-entity-alias="ROLE" entity-alias="STORE">
+			<key-map field-name="productStoreId"/>
+			<entity-condition>
+				<condition-expr field-name="roleTypeId" operator="equals" value="MANAGER" entity-alias="ROLE"/>
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="MGR" entity-alias="ROLE">
+			<key-map field-name="partyId"/>
+		</view-link>
+		<!--<view-link rel-entity-alias="TERMINAL" entity-alias="STORE">-->
+			<!--<key-map field-name="productStoreId"/>-->
+		<!--</view-link>-->
+		<entity-condition>
+			<condition-expr field-name="defaultSalesChannelEnumId" value="POS_SALES_CHANNEL" entity-alias="STORE"/>
+		</entity-condition>
+	</view-entity>	
+	<view-entity entity-name="FixedAssetAndDetail" package-name="com.olbius.accounting">
+		<member-entity entity-alias="FA" entity-name="FixedAsset"></member-entity>
+		<member-entity entity-alias="PTY" entity-name="PartyFullNameDetailSimple"></member-entity>
+		<member-entity entity-alias="SUPNAME" entity-name="PartyFullNameDetailSimple"></member-entity>
+		<member-entity entity-alias="ASSETTYP" entity-name="FixedAssetType"></member-entity>
+		<member-entity entity-alias="FADEPRE" entity-name="FixedAssetDepreciation"></member-entity>
+		<member-entity entity-alias="COSTGLACC" entity-name="GlAccount"></member-entity>
+		<member-entity entity-alias="DEPREGLACC" entity-name="GlAccount"></member-entity>
+		<member-entity entity-alias="ACCDEPGLACC" entity-name="GlAccount"></member-entity>
+		<member-entity entity-alias="FASTT" entity-name="StatusItem"></member-entity>
+		<member-entity entity-alias="PRDSTORE" entity-name="ProductStore"></member-entity>
+		<member-entity entity-alias="FATGA" entity-name="FixedAssetTypeGlAccount"></member-entity>
+		<alias-all entity-alias="FA"></alias-all>
+		<alias-all entity-alias="FADEPRE"></alias-all>
+		<alias name="fullName">
+        	<complex-alias operator="||' '||">
+        		<complex-alias-field field="groupName" entity-alias="PTY" default-value="''"/>
+        		<complex-alias-field field="storeName" entity-alias="PRDSTORE" default-value="''"/>
+        	</complex-alias>
+        </alias>
+		<alias name="lossGlAccountId" entity-alias="FATGA"></alias>
+		<alias name="supplierName" field="groupName" entity-alias="SUPNAME"></alias>
+		<alias name="fixedAssetTypeDesc" field="description" entity-alias="ASSETTYP"></alias>
+		<alias name="costGlAccountName" field="accountName" entity-alias="COSTGLACC"></alias>
+		<alias name="depGlAccountName" field="accountName" entity-alias="DEPREGLACC"></alias>
+		<alias name="accDepGlAccountName" field="accountName" entity-alias="ACCDEPGLACC"></alias>
+		<alias name="statusDesc" field="description" entity-alias="FASTT"></alias>
+		<view-link rel-entity-alias="PTY" entity-alias="FA" rel-optional="true">
+			<key-map field-name="partyId"/>
+		</view-link>
+		<view-link rel-entity-alias="PRDSTORE" entity-alias="FA" rel-optional="true">
+			<key-map field-name="productStoreId"/>
+		</view-link>
+		<view-link rel-entity-alias="ASSETTYP" entity-alias="FA">
+			<key-map field-name="fixedAssetTypeId"/>
+		</view-link>
+		<view-link rel-entity-alias="FADEPRE" entity-alias="FA">
+			<key-map field-name="fixedAssetId"/>
+		</view-link>
+		<view-link rel-entity-alias="COSTGLACC" entity-alias="FADEPRE">
+			<key-map field-name="costGlAccountId" rel-field-name="glAccountId"/>
+		</view-link>
+		<view-link rel-entity-alias="DEPREGLACC" entity-alias="FADEPRE">
+			<key-map field-name="depGlAccountId" rel-field-name="glAccountId"/>
+		</view-link>
+		<view-link rel-entity-alias="ACCDEPGLACC" entity-alias="FADEPRE">
+			<key-map field-name="accDepGlAccountId" rel-field-name="glAccountId"/>
+		</view-link>		
+		<view-link rel-entity-alias="FASTT" entity-alias="FA" rel-optional="true">
+			<key-map field-name="statusId"/>
+		</view-link>
+		<view-link rel-entity-alias="SUPNAME" entity-alias="FA" rel-optional="true">
+			<key-map field-name="supplierId" rel-field-name="partyId"/>
+		</view-link>
+        <view-link rel-entity-alias="FATGA" entity-alias="FA" rel-optional="true">
+            <key-map field-name="fixedAssetTypeId"/>
+            <entity-condition>
+                <condition-expr entity-alias="FATGA" field-name="organizationPartyId" operator="equals" value="company" />
+            </entity-condition>
+        </view-link>
+	</view-entity>
+	<view-entity entity-name="FixedAssetAllocAndParty" package-name="com.olbius.accounting">
+		<member-entity entity-alias="FAALLOC" entity-name="FixedAssetAlloc"></member-entity>
+		<member-entity entity-alias="PTY" entity-name="PartyFullNameDetailSimple"></member-entity>
+		<alias-all entity-alias="FAALLOC"></alias-all>
+		<alias name="fullName" entity-alias="PTY"></alias>
+		<alias name="partyCode" entity-alias="PTY"></alias>
+		<alias name="partyId" entity-alias="PTY"></alias>
+		<view-link rel-entity-alias="PTY" entity-alias="FAALLOC">
+			<key-map field-name="allocPartyId" rel-field-name="partyId"/>
+		</view-link>
+	</view-entity>
+	<view-entity entity-name="PartyFixedAssetAssignmentAndParty" package-name="com.olbius.accounting">
+		<member-entity entity-alias="PTYASSET" entity-name="PartyFixedAssetAssignment"></member-entity>
+		<member-entity entity-alias="PTY" entity-name="PartyFullNameDetailSimple"></member-entity>
+		<alias-all entity-alias="PTYASSET"></alias-all>
+		<alias name="fullName" entity-alias="PTY"></alias>
+		<alias name="partyCode" entity-alias="PTY"></alias>
+		<alias name="partyId" entity-alias="PTY"></alias>
+		<view-link rel-entity-alias="PTY" entity-alias="PTYASSET">
+			<key-map field-name="partyId"/>
+		</view-link>
+	</view-entity>
+	<view-entity entity-name="InvoiceItemAndProduct" package-name="com.olbius.accounting">
+		<member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+		<member-entity entity-alias="INVITEMTYP" entity-name="InvoiceItemType"></member-entity>
+		<member-entity entity-alias="IIT" entity-name="InvoiceItem"></member-entity>
+		<member-entity entity-alias="PROD" entity-name="Product"></member-entity>
+		<alias-all entity-alias="IIT"></alias-all>
+		<alias name="currencyUomId" entity-alias="INV"></alias>
+		<alias name="productName" entity-alias="PROD"></alias>
+		<alias name="productCode" entity-alias="PROD"></alias>
+		<alias name="invoiceItemTypeDesc" field="description" entity-alias="INVITEMTYP"></alias>
+		<alias name="total">
+			<complex-alias operator="*">
+				<complex-alias-field field="quantity" entity-alias="IIT" default-value="0"/>
+				<complex-alias-field field="amount" entity-alias="IIT" default-value="0"/>
+			</complex-alias>
+		</alias>
+		<view-link rel-entity-alias="IIT" entity-alias="INV">
+			<key-map field-name="invoiceId"/>
+		</view-link>
+		<view-link rel-entity-alias="PROD" entity-alias="IIT" rel-optional="true">
+			<key-map field-name="productId"/>
+		</view-link>
+		<view-link rel-entity-alias="INVITEMTYP" entity-alias="IIT">
+			<key-map field-name="invoiceItemTypeId"/>
+		</view-link>		
+	</view-entity>
+	<view-entity entity-name="InvoiceTaxInfoAndGeo" package-name="com.olbius.accounting">
+		<member-entity entity-alias="INV" entity-name="InvoiceTaxInfo"></member-entity>
+		<member-entity entity-alias="STATEGEO" entity-name="Geo"></member-entity>
+		<member-entity entity-alias="COUNTRYGEO" entity-name="Geo"></member-entity>
+		<alias-all entity-alias="INV"></alias-all>
+		<alias name="stateGeoName" field="geoName" entity-alias="STATEGEO"></alias>
+		<alias name="countryGeoName" field="geoName" entity-alias="COUNTRYGEO"></alias>
+		<view-link rel-entity-alias="STATEGEO" entity-alias="INV" rel-optional="true">
+			<key-map field-name="stateGeoId" rel-field-name="geoId"/>
+		</view-link>
+		<view-link rel-entity-alias="COUNTRYGEO" entity-alias="INV" rel-optional="true">
+			<key-map field-name="countryGeoId" rel-field-name="geoId"/>
+		</view-link>
+	</view-entity>	
+	<view-entity entity-name="FinAccountAndGeo" package-name="com.olbius.accounting">
+		<member-entity entity-alias="FINACC" entity-name="FinAccount"></member-entity>
+		<member-entity entity-alias="STATE" entity-name="Geo"></member-entity>
+		<member-entity entity-alias="COUNTRY" entity-name="Geo"></member-entity>
+		<alias-all entity-alias="FINACC"></alias-all>
+		<alias name="stateProvinceGeoName" field="geoName" entity-alias="STATE"></alias>
+		<alias name="countryGeoName" field="geoName" entity-alias="COUNTRY"></alias>
+		<view-link rel-entity-alias="STATE" entity-alias="FINACC" rel-optional="true">
+			<key-map field-name="stateProvinceGeoId" rel-field-name="geoId"/>
+		</view-link>
+		<view-link rel-entity-alias="COUNTRY" entity-alias="FINACC" rel-optional="true">
+			<key-map field-name="countryGeoId" rel-field-name="geoId"/>
+		</view-link>
+	</view-entity>
+	<view-entity entity-name="PartyAndFaxNumber" package-name="com.olbius.accounting">
+		<member-entity entity-alias="PCMP" entity-name="PartyContactMechPurpose"></member-entity>
+		<member-entity entity-alias="TN" entity-name="TelecomNumber"></member-entity>
+		<alias-all entity-alias="PCMP"></alias-all>
+		<!--<alias-all entity-alias="PA">-->
+			<!--<exclude field="postalCodeExt" />-->
+			<!--<exclude field="directions" />-->
+		<!--</alias-all>-->
+		<alias name="contactNumber" entity-alias="TN"></alias>
+		<view-link rel-entity-alias="TN" entity-alias="PCMP">
+			<key-map field-name="contactMechId" />
+			<entity-condition filter-by-date="true">
+				<condition-list>
+					<condition-expr entity-alias="PCMP" field-name="contactMechPurposeTypeId" operator="equals" value="FAX_NUMBER" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+	<view-entity entity-name="PartyTaxAuthInfoAndActive" package-name="com.olbius.accounting">
+		<member-entity entity-alias="TAXAUTH" entity-name="PartyTaxAuthInfo"></member-entity>
+		<alias-all entity-alias="TAXAUTH"></alias-all>
+		<entity-condition filter-by-date="true"></entity-condition>
+	</view-entity>
+	<view-entity entity-name="PartyCustomerAndDetail" package-name="com.olbius.accounting">
+		<member-entity entity-alias="PTYREL" entity-name="PartyRelationship"></member-entity>
+		<member-entity entity-alias="PTYNAME" entity-name="PartyFullNameDetailSimple"></member-entity>
+		<member-entity entity-alias="EMAIL" entity-name="PartyContactMechPurposePrimaryDetail"></member-entity>
+		<member-entity entity-alias="PHONE" entity-name="PartyContactMechPurposePrimaryDetail"></member-entity>
+		<member-entity entity-alias="LOCATION" entity-name="PartyContactMechPurposePrimaryDetail"></member-entity>
+		<member-entity entity-alias="FAXNBR" entity-name="PartyAndFaxNumber"></member-entity>
+		<member-entity entity-alias="FINACC" entity-name="FinAccount"></member-entity>
+		<member-entity entity-alias="BENEFICIARY" entity-name="PartyAttribute"></member-entity>
+		<member-entity entity-alias="REPRESENTATIVE" entity-name="PartyAttribute"></member-entity>
+		<member-entity entity-alias="TAXAUTH" entity-name="PartyTaxAuthInfoAndActive"></member-entity>
+		<alias name="partyId" field="partyIdFrom" entity-alias="PTYREL"></alias>
+		<alias name="fromDate" entity-alias="PTYREL"></alias>
+		<alias name="thruDate" entity-alias="PTYREL"></alias>
+		<alias name="fullName" field="groupName" entity-alias="PTYNAME"></alias>
+		<alias name="partyCode" entity-alias="PTYNAME"></alias>
+		<alias name="emailAddress" field="infoString" entity-alias="EMAIL"></alias>
+		<alias name="emailContactMechId" field="contactMechId" entity-alias="EMAIL"></alias>
+		<alias name="contactNumber" entity-alias="PHONE"></alias>
+		<alias name="phoneContactMechId" field="contactMechId" entity-alias="PHONE"></alias>
+		<alias name="addressDetail" entity-alias="LOCATION"></alias>
+		<alias name="locationContactMechId" field="contactMechId" entity-alias="LOCATION"></alias>
+		<alias name="locCountryGeoId" field="countryGeoId" entity-alias="LOCATION"></alias>
+		<alias name="locStateProvinceGeoId" field="stateProvinceGeoId" entity-alias="LOCATION"></alias>
+		<alias name="locDistrictGeoId" field="districtGeoId" entity-alias="LOCATION"></alias>
+		<alias name="locWardGeoId" field="wardGeoId" entity-alias="LOCATION"></alias>
+		<alias name="locAddress1" field="address1" entity-alias="LOCATION"></alias>
+		<alias name="faxNumber" field="contactNumber" entity-alias="FAXNBR"></alias>
+		<alias name="faxContactMechId" field="contactMechId" entity-alias="FAXNBR"></alias>
+		<alias name="finAccountId" entity-alias="FINACC"></alias>
+		<alias name="finAccountName" entity-alias="FINACC"></alias>
+		<alias name="finAccountCode" entity-alias="FINACC"></alias>
+		<alias name="finAccStateProvinceGeoId" field="stateProvinceGeoId" entity-alias="FINACC"></alias>
+		<alias name="finAccCountryGeoId" field="countryGeoId" entity-alias="FINACC"></alias>
+		<alias name="finAccStatusId" field="statusId" entity-alias="FINACC"></alias>
+		<alias name="partyRepresentative" field="attrValue" entity-alias="REPRESENTATIVE"></alias>
+		<alias name="partyBeneficiary" field="attrValue" entity-alias="BENEFICIARY"></alias>
+		<alias name="taxCode" field="partyTaxId" entity-alias="TAXAUTH"></alias>
+		<alias name="taxAuthGeoId" entity-alias="TAXAUTH"></alias>
+		<alias name="taxAuthPartyId" entity-alias="TAXAUTH"></alias>
+		<view-link rel-entity-alias="PTYNAME" entity-alias="PTYREL">
+			<key-map field-name="partyIdFrom" rel-field-name="partyId"/>
+			<entity-condition>
+				<condition-list>
+                    <condition-expr entity-alias="PTYREL" field-name="partyRelationshipTypeId" operator="in" value="CUSTOMER_REL,DISTRIBUTOR_REL"/>
+                    <condition-expr entity-alias="PTYREL" field-name="roleTypeIdFrom" operator="in" value="CUSTOMER,DISTRIBUTOR" />
+                    <condition-expr entity-alias="PTYREL" field-name="roleTypeIdTo" operator="equals" value="INTERNAL_ORGANIZATIO" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="EMAIL" entity-alias="PTYREL" rel-optional="true">
+			<key-map field-name="partyIdFrom" rel-field-name="partyId"/>
+			<entity-condition>
+				<condition-list>
+					<condition-expr entity-alias="EMAIL" field-name="contactMechPurposeTypeId" operator="equals" value="PRIMARY_EMAIL" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="PHONE" entity-alias="PTYREL" rel-optional="true">
+			<key-map field-name="partyIdFrom" rel-field-name="partyId"/>
+			<entity-condition>
+				<condition-list>
+					<condition-expr entity-alias="PHONE" field-name="contactMechPurposeTypeId" operator="equals" value="PRIMARY_PHONE" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="LOCATION" entity-alias="PTYREL" rel-optional="true">
+			<key-map field-name="partyIdFrom" rel-field-name="partyId"/>
+			<entity-condition>
+				<condition-list>
+					<condition-expr entity-alias="LOCATION" field-name="contactMechPurposeTypeId" operator="equals" value="PRIMARY_LOCATION" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="FAXNBR" entity-alias="PTYREL" rel-optional="true">
+			<key-map field-name="partyIdFrom" rel-field-name="partyId"/>
+		</view-link>
+		<view-link rel-entity-alias="FINACC" entity-alias="PTYREL" rel-optional="true">
+			<key-map field-name="partyIdFrom" rel-field-name="ownerPartyId"/>
+		</view-link>
+		<view-link rel-entity-alias="BENEFICIARY" entity-alias="PTYREL" rel-optional="true">
+			<key-map field-name="partyIdFrom" rel-field-name="partyId"/>
+			<entity-condition>	
+				<condition-list>
+					<condition-expr entity-alias="BENEFICIARY" field-name="attrName" operator="equals" value="BENEFICIARY" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="REPRESENTATIVE" entity-alias="PTYREL" rel-optional="true">
+			<key-map field-name="partyIdFrom" rel-field-name="partyId"/>
+			<entity-condition>	
+				<condition-list>
+					<condition-expr entity-alias="REPRESENTATIVE" field-name="attrName" operator="equals" value="REPRESENTATIVE" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="TAXAUTH" entity-alias="PTYREL" rel-optional="true">
+			<key-map field-name="partyIdFrom" rel-field-name="partyId"/>
+		</view-link>
+	</view-entity>
+	<view-entity entity-name="PartyDetail" package-name="com.olbius.bacc"
+            title="Party Detail Entity">
+      <member-entity entity-alias="PNV" entity-name="PartyNameView"></member-entity>
+      <alias-all entity-alias="PNV" />
+      <alias name="fullName">
+       	<complex-alias operator="||' '||">
+       		<complex-alias-field field="lastName" entity-alias="PNV" default-value="''"/>
+       		<complex-alias-field field="middleName" entity-alias="PNV" default-value="''"/>
+       		<complex-alias-field field="firstName" entity-alias="PNV" default-value="''"/>
+       		<complex-alias-field field="groupName" entity-alias="PNV" default-value="''"/>
+       	</complex-alias>
+      </alias>      
+    </view-entity>
+
+    <view-entity entity-name="PartyCustomerDetailInfoView" package-name="com.olbius.bacc">
+        <member-entity entity-alias="PC" entity-name="PartyCustomer"></member-entity>
+        <member-entity entity-alias="PCTD" entity-name="PartyContactTempData"/>
+        <member-entity entity-alias="PTAI" entity-name="PartyTaxAuthInfo"/>
+        <member-entity entity-alias="FA" entity-name="FinAccount"/>
+        <member-entity entity-alias="PA" entity-name="PartyAttribute"/>
+        <member-entity entity-alias="PCMP" entity-name="PartyContactMechPurpose"/>
+        <member-entity entity-alias="EMAIL" entity-name="ContactMech"/>
+        <member-entity entity-alias="REPRESENTATIVE" entity-name="PartyAttribute"/>
+        <member-entity entity-alias="PCMP1" entity-name="PartyContactMechPurpose"/>
+        <member-entity entity-alias="FAX" entity-name="TelecomNumber"/>
+        <member-entity entity-alias="PCMP2" entity-name="PartyContactMechPurpose"/>
+        <member-entity entity-alias="LOCATION" entity-name="PostalAddress"/>
+        <alias name="partyId" entity-alias="PC"/>
+        <alias name="partyCode" entity-alias="PC"/>
+        <alias name="statusId" entity-alias="PC"/>
+        <alias name="activatedDate" entity-alias="PC"/>
+        <alias name="fullName" entity-alias="PC"/>
+        <alias name="addressDetail" field="postalAddressName" entity-alias="PCTD"/>
+        <alias name="taxCode" field="partyTaxId" entity-alias="PTAI"/>
+        <alias name="taxAuthGeoId" entity-alias="PTAI"/>
+        <alias name="taxAuthPartyId" entity-alias="PTAI"/>
+        <alias name="finAccountId" entity-alias="FA"/>
+        <alias name="finAccountCode" entity-alias="FA"/>
+        <alias name="finAccountName" entity-alias="FA"/>
+        <alias name="partyBeneficiary" field="attrValue" entity-alias="PA"/>
+        <alias name="contactNumber" field="telecomName" entity-alias="PCTD"/>
+        <alias name="faxNumber" field="contactNumber" entity-alias="FAX"/>
+        <alias name="emailAddress" field="infoString" entity-alias="EMAIL"/>
+        <alias name="partyRepresentative" field="attrValue" entity-alias="REPRESENTATIVE"/>
+        <alias name="locationContactMechId" field="contactMechId" entity-alias="LOCATION"/>
+        <alias name="locCountryGeoId" field="countryGeoId" entity-alias="LOCATION"></alias>
+        <alias name="locStateProvinceGeoId" field="stateProvinceGeoId" entity-alias="LOCATION"></alias>
+        <alias name="locDistrictGeoId" field="districtGeoId" entity-alias="LOCATION"></alias>
+        <alias name="locWardGeoId" field="wardGeoId" entity-alias="LOCATION"></alias>
+        <alias name="locAddress1" field="address1" entity-alias="LOCATION"></alias>
+        <alias name="faxContactMechId" field="contactMechId" entity-alias="FAX"></alias>
+        <alias name="emailContactMechId" field="contactMechId" entity-alias="EMAIL"></alias>
+        <alias name="phoneContactMechId" field="telecomId" entity-alias="PCTD"></alias>
+
+        <view-link entity-alias="PC" rel-entity-alias="PCTD" rel-optional="true">
+            <key-map field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PC" rel-entity-alias="PTAI" rel-optional="true">
+            <key-map field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PC" rel-entity-alias="FA" rel-optional="true">
+            <key-map field-name="partyId" rel-field-name="ownerPartyId"/>
+        </view-link>
+        <view-link entity-alias="PC" rel-entity-alias="PA" rel-optional="true">
+            <key-map field-name="partyId"/>
+            <entity-condition>
+                <condition-list>
+                    <condition-expr entity-alias="PA" field-name="attrName" operator="equals" value="BENEFICIARY" />
+                </condition-list>
+            </entity-condition>
+        </view-link>
+        <view-link entity-alias="PC" rel-entity-alias="PCMP" rel-optional="true">
+            <key-map field-name="partyId"/>
+            <entity-condition>
+                <condition-list>
+                    <condition-expr entity-alias="PCMP" field-name="contactMechPurposeTypeId" operator="like" value="%EMAIL%" />
+                </condition-list>
+            </entity-condition>
+        </view-link>
+        <view-link entity-alias="PCMP" rel-entity-alias="EMAIL" rel-optional="true">
+            <key-map field-name="contactMechId"/>
+        </view-link>
+        <view-link entity-alias="PC" rel-entity-alias="REPRESENTATIVE" rel-optional="true">
+            <key-map field-name="partyId"/>
+            <entity-condition>
+                <condition-list>
+                    <condition-expr entity-alias="REPRESENTATIVE" field-name="attrName" operator="equals" value="REPRESENTATIVE" />
+                </condition-list>
+            </entity-condition>
+        </view-link>
+        <view-link entity-alias="PC" rel-entity-alias="PCMP1" rel-optional="true">
+            <key-map field-name="partyId"/>
+            <entity-condition>
+                <condition-list>
+                    <condition-expr entity-alias="PCMP1" field-name="contactMechPurposeTypeId" operator="equals" value="FAX_NUMBER" />
+                </condition-list>
+            </entity-condition>
+        </view-link>
+        <view-link entity-alias="PCMP1" rel-entity-alias="FAX" rel-optional="true">
+            <key-map field-name="contactMechId"/>
+        </view-link>
+        <view-link entity-alias="PC" rel-entity-alias="PCMP2" rel-optional="true">
+            <key-map field-name="partyId"/>
+            <entity-condition>
+                <condition-list>
+                    <condition-expr entity-alias="PCMP2" field-name="contactMechPurposeTypeId" operator="equals" value="PRIMARY_LOCATION" />
+                </condition-list>
+            </entity-condition>
+        </view-link>
+        <view-link entity-alias="PCMP2" rel-entity-alias="LOCATION" rel-optional="true">
+            <key-map field-name="contactMechId"/>
+        </view-link>
+    </view-entity>
+    
+	<view-entity entity-name="InvoicePartyFromDetail" package-name="com.olbius.bacc" title="Invoice Party Detail Entity">
+		<member-entity entity-alias="PD" entity-name="PartyDetail"></member-entity>
+		<member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+		<alias-all entity-alias="INV"></alias-all>
+		<alias field="fullName" entity-alias="PD" name="fullNameFrom"></alias>
+		<alias name="partyCode" entity-alias="PD"></alias>
+		<view-link entity-alias="PD" rel-entity-alias="INV">
+			<key-map field-name="partyId" rel-field-name="partyIdFrom"/>
+		</view-link>
+	</view-entity>
+    <view-entity entity-name="InvoicePartyDetail" package-name="com.olbius.bacc"
+            title="Invoice Party Detail Entity">
+      	<member-entity entity-alias="IPD" entity-name="InvoicePartyFromDetail"></member-entity>
+      	<member-entity entity-alias="PD" entity-name="PartyDetail"></member-entity>
+      	<alias-all entity-alias="IPD"></alias-all>
+      	<alias field="fullName" entity-alias="PD" name="fullNameTo"></alias>
+      	<alias name="partyCode" entity-alias="PD"></alias>
+      	<alias name="partyCodeFrom" field="partyCode" entity-alias="IPD"></alias>
+	  	<view-link entity-alias="IPD" rel-entity-alias="PD">
+			<key-map field-name="partyId" rel-field-name="partyId"/>
+	  	</view-link>
+    </view-entity>
+  
+    <view-entity entity-name="AcctgTransEntryAndDebit" package-name="com.olbius.bacc">
+    	<member-entity entity-alias="TRANSENTRY" entity-name="AcctgTransEntry"></member-entity>
+    	<member-entity entity-alias="GLACC" entity-name="GlAccount"></member-entity>
+    	<alias-all entity-alias="TRANSENTRY"></alias-all>
+    	<alias name="accountCode" entity-alias="GLACC"></alias>
+    	<view-link rel-entity-alias="GLACC" entity-alias="TRANSENTRY">
+    		<key-map field-name="glAccountId"/>
+    	</view-link>
+    	<entity-condition>
+    		<condition-expr field-name="debitCreditFlag" value="D" entity-alias="TRANSENTRY"/>
+    	</entity-condition>
+    </view-entity>
+    <view-entity entity-name="AcctgTransEntryAndCredit" package-name="com.olbius.bacc">
+    	<member-entity entity-alias="TRANSENTRY" entity-name="AcctgTransEntry"></member-entity>
+    	<member-entity entity-alias="GLACC" entity-name="GlAccount"></member-entity>
+    	<alias-all entity-alias="TRANSENTRY"></alias-all>
+    	<alias name="accountCode" entity-alias="GLACC"></alias>
+    	<view-link rel-entity-alias="GLACC" entity-alias="TRANSENTRY">
+    		<key-map field-name="glAccountId"/>
+    	</view-link>
+    	<entity-condition>
+    		<condition-expr field-name="debitCreditFlag" value="C" entity-alias="TRANSENTRY"/>
+    	</entity-condition>
+    </view-entity>
+    <view-entity entity-name="AcctgTransEntryAndDebitCredit" package-name="com.olbius.bacc">
+    	<member-entity entity-alias="DEBIT" entity-name="AcctgTransEntryAndDebit"></member-entity>
+    	<member-entity entity-alias="CREDIT" entity-name="AcctgTransEntryAndCredit"></member-entity>
+    	<member-entity entity-alias="TRANSENTRY" entity-name="AcctgTransEntry"></member-entity>
+    	<alias-all entity-alias="TRANSENTRY">
+    		<exclude field="voucherRef"/>
+    		<exclude field="theirPartyId"/>
+    		<exclude field="theirProductId"/>
+    		<exclude field="inventoryItemId"/>
+    		<exclude field="glAccountTypeId"/>
+    		<exclude field="dueDate"/>
+    		<exclude field="groupId"/>
+    		<exclude field="taxId"/>
+    		<exclude field="settlementTermId"/>
+    		<exclude field="isSummary"/>
+    	</alias-all>
+    	<alias name="debitGlAccountId" field="glAccountId" entity-alias="DEBIT"></alias>
+    	<alias name="debitAmount" field="amount" entity-alias="DEBIT"></alias>
+    	<alias name="debitOrigAmount" field="origAmount" entity-alias="DEBIT"></alias>
+    	<alias name="debitAccountCode" field="accountCode" entity-alias="DEBIT"></alias>
+    	<alias name="creditGlAccountId" field="glAccountId" entity-alias="CREDIT"></alias>
+    	<alias name="creditAmount" field="amount" entity-alias="CREDIT"></alias>
+    	<alias name="creditOrigAmount" field="origAmount" entity-alias="CREDIT"></alias>
+    	<alias name="creditAccountCode" field="accountCode" entity-alias="CREDIT"></alias>
+		<view-link rel-entity-alias="CREDIT" entity-alias="TRANSENTRY" rel-optional="true">
+			<key-map field-name="acctgTransId"/>
+			<key-map field-name="acctgTransEntrySeqId"/>
+		</view-link>
+		<view-link rel-entity-alias="DEBIT" entity-alias="TRANSENTRY" rel-optional="true">
+			<key-map field-name="acctgTransId"/>
+			<key-map field-name="acctgTransEntrySeqId"/>
+		</view-link>
+    </view-entity>
+    <view-entity entity-name="AcctgTransHistoryLast" package-name="com.olbius.bacc">
+    	<member-entity entity-alias="ACCTG" entity-name="AcctgTransHistory"></member-entity>
+    	<member-entity entity-alias="FULLNAME" entity-name="PartyFullNameDetailSimple"></member-entity>
+    	<member-entity entity-alias="UL" entity-name="UserLogin"></member-entity>
+    	<alias-all entity-alias="ACCTG" group-by="true">
+    		<exclude field="changeDate"/>
+    	</alias-all>
+    	<alias name="changeDate" entity-alias="ACCTG" function="max"></alias>
+    	<alias name="partyCode" entity-alias="FULLNAME" group-by="true"></alias>
+    	<alias name="partyId" entity-alias="FULLNAME" group-by="true"></alias>
+    	<alias name="fullName" entity-alias="FULLNAME" group-by="true"></alias>
+    	<view-link rel-entity-alias="UL" entity-alias="ACCTG">
+    		<key-map field-name="changeUserLoginId" rel-field-name="userLoginId"/>
+    	</view-link>
+    	<view-link rel-entity-alias="FULLNAME" entity-alias="UL">
+    		<key-map field-name="partyId"/>
+    	</view-link>
+    </view-entity>
+    <view-entity entity-name="AcctgTransHistoryAndParty" package-name="com.olbius.bacc">
+    	<member-entity entity-alias="ACCTG" entity-name="AcctgTransHistory"></member-entity>
+    	<member-entity entity-alias="FULLNAME" entity-name="PartyFullNameDetailSimple"></member-entity>
+    	<member-entity entity-alias="UL" entity-name="UserLogin"></member-entity>
+    	<alias-all entity-alias="ACCTG"></alias-all>
+    	<alias name="partyCode" entity-alias="FULLNAME"></alias>
+    	<alias name="partyId" entity-alias="FULLNAME"></alias>
+    	<alias name="fullName" entity-alias="FULLNAME"></alias>
+    	<view-link rel-entity-alias="UL" entity-alias="ACCTG">
+    		<key-map field-name="changeUserLoginId" rel-field-name="userLoginId"/>
+    	</view-link>
+    	<view-link rel-entity-alias="FULLNAME" entity-alias="UL">
+    		<key-map field-name="partyId"/>
+    	</view-link>
+    </view-entity>
+    
+    <view-entity entity-name="FixedAssetIncreaseAndItem" package-name="com.olbius.bacc">
+    	<member-entity entity-alias="FAITEM" entity-name="FixedAssetIncreaseItem"></member-entity>
+    	<member-entity entity-alias="FAINC" entity-name="FixedAssetIncrease"></member-entity>
+    	<alias-all entity-alias="FAITEM"></alias-all>
+    	<alias-all entity-alias="FAINC"></alias-all>
+    	<view-link rel-entity-alias="FAITEM" entity-alias="FAINC">
+    		<key-map field-name="fixedAssetIncreaseId"/>
+    	</view-link>
+    </view-entity>
+    
+    <view-entity entity-name="FixedAssetIncreaseAndItemAndFA" package-name="com.olbius.bacc">
+    	<member-entity entity-alias="FAITEM" entity-name="FixedAssetIncreaseItem"></member-entity>
+    	<member-entity entity-alias="FA" entity-name="FixedAsset"></member-entity>
+    	<alias name="fixedAssetIncreaseId" entity-alias="FAITEM" group-by="true"></alias>
+    	<alias name="fixedAssetId" function="string-agg" function-params="', '" entity-alias="FAITEM"></alias>
+    	<alias name="totalPuchaseCost" field="purchaseCost" entity-alias="FA" function="sum"></alias>
+    	<view-link rel-entity-alias="FA" entity-alias="FAITEM">
+    		<key-map field-name="fixedAssetId"/>
+    	</view-link>
+    </view-entity>
+    <view-entity entity-name="FixedAssetIncreaseAndTotal" package-name="com.olbius.bacc">
+    	<member-entity entity-alias="FAINCREASE" entity-name="FixedAssetIncrease"></member-entity>
+    	<member-entity entity-alias="FA" entity-name="FixedAssetIncreaseAndItemAndFA"></member-entity>
+    	<member-entity entity-alias="SUPNAME" entity-name="PartyFullNameDetailSimple"></member-entity>
+    	<member-entity entity-alias="EMPLNAME" entity-name="PartyFullNameDetailSimple"></member-entity>
+    	<alias-all entity-alias="FAINCREASE"></alias-all>
+    	<alias-all entity-alias="FA"></alias-all>
+    	<alias name="supplierCode" field="partyCode" entity-alias="SUPNAME"></alias>
+    	<alias name="supplierName" field="groupName" entity-alias="SUPNAME"></alias>
+    	<alias name="emplCode" field="partyCode" entity-alias="EMPLNAME"></alias>
+    	<alias name="emplName" field="fullName" entity-alias="EMPLNAME"></alias>
+    	<view-link rel-entity-alias="FA" entity-alias="FAINCREASE">
+    		<key-map field-name="fixedAssetIncreaseId"/>
+    	</view-link>
+    	<view-link rel-entity-alias="SUPNAME" entity-alias="FAINCREASE" rel-optional="true">
+    		<key-map field-name="supplierId" rel-field-name="partyId"/>
+    	</view-link>
+    	<view-link rel-entity-alias="EMPLNAME" entity-alias="FAINCREASE" rel-optional="true">
+    		<key-map field-name="employeeBuyerId" rel-field-name="partyId"/>
+    	</view-link>
+    </view-entity>
+    <view-entity entity-name="FixedAssetDecreaseAndItemAndSum" package-name="com.olbius.bacc">
+    	<member-entity entity-alias="ITEM" entity-name="FixedAssetDecreaseItem"></member-entity>
+    	<alias name="fixedAssetDecreaseId" entity-alias="ITEM" group-by="true"></alias>
+    	<alias name="fixedAssetId" function="string-agg" function-params="', '" entity-alias="ITEM"></alias>
+    	<alias name="accumulatedDepreciation" entity-alias="ITEM" function="sum"></alias>
+    	<alias name="remainValue" entity-alias="ITEM" function="sum"></alias>
+    </view-entity>
+    
+    <view-entity entity-name="FixedAssetDecreaseAndDetail" package-name="com.olbius.bacc">
+    	<member-entity entity-alias="FADECREASE" entity-name="FixedAssetDecrease"></member-entity>
+    	<member-entity entity-alias="ITEM" entity-name="FixedAssetDecreaseAndItemAndSum"></member-entity>
+    	<alias-all entity-alias="FADECREASE"></alias-all>
+    	<alias-all entity-alias="ITEM"></alias-all>
+    	<view-link rel-entity-alias="ITEM" entity-alias="FADECREASE">
+    		<key-map field-name="fixedAssetDecreaseId"/>
+    	</view-link>
+    </view-entity>
+    <view-entity entity-name="FixedAssetDecreaseAndItem" package-name="com.olbius.bacc">
+    	<member-entity entity-alias="FADECREASE" entity-name="FixedAssetDecrease"></member-entity>
+    	<member-entity entity-alias="ITEM" entity-name="FixedAssetDecreaseItem"></member-entity>
+    	<alias-all entity-alias="FADECREASE"></alias-all>
+    	<alias-all entity-alias="ITEM"></alias-all>
+    	<view-link rel-entity-alias="ITEM" entity-alias="FADECREASE">
+    		<key-map field-name="fixedAssetDecreaseId"/>
+    	</view-link>
+    </view-entity>
+    
+    <view-entity entity-name="FixedAssetDecreaseItemSumByDate" package-name="com.olbius.bacc">
+		<member-entity entity-alias="FADI" entity-name="FixedAssetDecreaseAndItem"></member-entity>
+		<member-entity entity-alias="FA" entity-name="FixedAsset"></member-entity>
+		<alias name="fixedAssetId" entity-alias="FADI" group-by="true"></alias>
+		<alias name="voucherDate" entity-alias="FADI" group-by="false"></alias>
+		<alias name="quantity" entity-alias="FA" group-by="true"></alias>
+    	<alias name="quantityDecrease" field="fixedAssetId" entity-alias="FADI" function="count"></alias>
+    	
+    	<view-link rel-entity-alias="FA" entity-alias="FADI">
+    		<key-map field-name="fixedAssetId"/>
+    	</view-link>
+	</view-entity>
+    
+    <view-entity entity-name="FixedAssetDepreciationCalcAndAmount" package-name="com.olbius.bacc">
+    	<member-entity entity-alias="DEPRE" entity-name="FixedAssetDepreciationCalc"></member-entity>
+    	<member-entity entity-alias="ITEM" entity-name="FixedAssetDepreCalcItem"></member-entity>
+    	<alias-all entity-alias="DEPRE" group-by="true"></alias-all>
+    	<alias name="depreciationAmount" entity-alias="ITEM" function="sum"></alias>
+    	<view-link rel-entity-alias="ITEM" entity-alias="DEPRE">
+    		<key-map field-name="depreciationCalcId"/>
+    	</view-link>
+    </view-entity>
+    <view-entity entity-name="FixedAssetDepreciationCalcAndItem" package-name="com.olbius.bacc">
+    	<member-entity entity-alias="DEPRE" entity-name="FixedAssetDepreciationCalc"></member-entity>
+    	<member-entity entity-alias="ITEM" entity-name="FixedAssetDepreCalcItem"></member-entity>
+    	<alias-all entity-alias="DEPRE"></alias-all>
+    	<alias-all entity-alias="ITEM"></alias-all>
+    	<view-link rel-entity-alias="ITEM" entity-alias="DEPRE">
+    		<key-map field-name="depreciationCalcId"/>
+    	</view-link>
+    </view-entity>
+    <view-entity entity-name="FixedAssetDecreaseItemAndFA" package-name="com.olbius.bacc">
+    	<member-entity entity-alias="FAITEM" entity-name="FixedAssetDecreaseItem"></member-entity>
+    	<member-entity entity-alias="FA" entity-name="FixedAssetAndDetail"></member-entity>
+    	<alias-all entity-alias="FAITEM"></alias-all>
+    	<alias name="fixedAssetName" entity-alias="FA"></alias>
+    	<alias name="groupName" field="fullName" entity-alias="FA"></alias>
+    	<alias name="costGlAccount" field="costGlAccountId" entity-alias="FA"></alias>
+    	<alias name="lossGlAccount" field="lossGlAccountId" entity-alias="FA"></alias>
+    	<alias name="purchaseCost" entity-alias="FA"></alias>
+    	<alias name="depreciationAmount" field="purchaseCost" entity-alias="FA"></alias>
+    	<view-link rel-entity-alias="FA" entity-alias="FAITEM">
+    		<key-map field-name="fixedAssetId"/>
+    	</view-link>
+    </view-entity>
+    <view-entity entity-name="FixedAssetIncreaseItemAndFA" package-name="com.olbius.bacc">
+    	<member-entity entity-alias="FAITEM" entity-name="FixedAssetIncreaseItem"></member-entity>
+    	<member-entity entity-alias="FA" entity-name="FixedAssetAndDetail"></member-entity>
+    	<alias-all entity-alias="FAITEM"></alias-all>
+    	<alias name="fixedAssetName" entity-alias="FA"></alias>
+    	<alias name="purchaseCost" entity-alias="FA"></alias>
+		<alias name="creditGlAccount" field="creditGlAccountId" entity-alias="FAITEM"></alias>    	
+		<alias name="debitGlAccount" field="debitGlAccountId" entity-alias="FAITEM"></alias>    	
+    	<view-link rel-entity-alias="FA" entity-alias="FAITEM">
+    		<key-map field-name="fixedAssetId"/>
+    	</view-link>
+    </view-entity>
+    <view-entity entity-name="FixedAssetDepreCalcItemAndFA" package-name="com.olbius.bacc">
+    	<member-entity entity-alias="ITEM" entity-name="FixedAssetDepreCalcItem"></member-entity>
+    	<member-entity entity-alias="FA" entity-name="FixedAssetAndDetail"></member-entity>
+    	<alias-all entity-alias="ITEM"></alias-all>
+    	<alias-all entity-alias="FA">
+    		<exclude field="fixedAssetId"/>
+    	</alias-all>
+    	<view-link rel-entity-alias="FA" entity-alias="ITEM">
+    		<key-map field-name="fixedAssetId"/>
+    	</view-link>
+    </view-entity>
+    <view-entity entity-name="EquipmentAndTotalPrice" package-name="com.olbius.bacc">
+    	<member-entity entity-alias="EQUIP" entity-name="Equipment"></member-entity>
+    	<alias-all entity-alias="EQUIP"></alias-all>
+    	<alias name="totalPrice">
+    		<complex-alias operator="*">
+    			<complex-alias-field default-value="0" field="quantity" entity-alias="EQUIP"/>
+    			<complex-alias-field default-value="0" field="unitPrice" entity-alias="EQUIP"/>
+    		</complex-alias>
+    	</alias>
+    </view-entity>
+    
+    <view-entity entity-name="EquipmentTypeAndTotalPrice" package-name="com.olbius.bacc">
+    	<member-entity entity-alias="EQUIP" entity-name="Equipment"></member-entity>
+    	<member-entity entity-alias="FATGA" entity-name="FixedAssetTypeGlAccount"></member-entity>
+    	<alias-all entity-alias="EQUIP"></alias-all>
+    	<alias name="totalPrice">
+    		<complex-alias operator="*">
+    			<complex-alias-field default-value="0" field="quantity" entity-alias="EQUIP"/>
+    			<complex-alias-field default-value="0" field="unitPrice" entity-alias="EQUIP"/>
+    		</complex-alias>
+    	</alias>
+    	<alias name="assetGlAccountId" entity-alias="FATGA"></alias>
+    	<alias name="accDepGlAccountId" entity-alias="FATGA"></alias>
+    	<alias name="depGlAccountId" entity-alias="FATGA"></alias>
+    	<alias name="profitGlAccountId" entity-alias="FATGA"></alias>
+    	<alias name="lossGlAccountId" entity-alias="FATGA"></alias>
+        <view-link rel-entity-alias="FATGA" entity-alias="EQUIP" rel-optional="true">
+            <key-map field-name="equipmentTypeId" rel-field-name="fixedAssetTypeId"/>
+            <entity-condition>
+                <condition-expr entity-alias="FATGA" field-name="organizationPartyId" operator="equals" value="company" />
+            </entity-condition>
+        </view-link>
+    </view-entity>
+        
+    <view-entity entity-name="EquipmentIncreaseAndItemTotal" package-name="com.olbius.bacc">
+    	<member-entity entity-alias="INCREASE" entity-name="EquipmentIncrease"></member-entity>
+    	<member-entity entity-alias="ITEM" entity-name="EquipmentIncreaseItem"></member-entity>
+    	<member-entity entity-alias="EQUIP" entity-name="EquipmentAndTotalPrice"></member-entity>
+    	<member-entity entity-alias="SUPNAME" entity-name="PartyFullNameDetailSimple"></member-entity>
+    	<alias-all entity-alias="INCREASE" group-by="true"></alias-all>
+    	<alias name="supplierName" field="groupName" group-by="true" entity-alias="SUPNAME"></alias>
+    	<alias name="supplierCode" field="partyCode" group-by="true" entity-alias="SUPNAME"></alias>
+    	<alias name="equipmentId" function="string-agg" function-params="', '" entity-alias="ITEM"></alias>
+    	<alias name="totalAmount" field="totalPrice" entity-alias="EQUIP" function="sum"></alias>
+    	<view-link rel-entity-alias="ITEM" entity-alias="INCREASE">
+    		<key-map field-name="equipmentIncreaseId"/>
+    	</view-link>
+    	<view-link rel-entity-alias="EQUIP" entity-alias="ITEM">
+    		<key-map field-name="equipmentId"/>
+    	</view-link>
+    	<view-link rel-entity-alias="SUPNAME" entity-alias="INCREASE" rel-optional="true">
+    		<key-map field-name="supplierId" rel-field-name="partyId"/>
+    	</view-link>
+    </view-entity>
+    <view-entity entity-name="EquipmentIncreaseAndItem" package-name="com.olbius.bacc">
+    	<member-entity entity-alias="INCREASE" entity-name="EquipmentIncrease"></member-entity>
+    	<member-entity entity-alias="ITEM" entity-name="EquipmentIncreaseItem"></member-entity>
+    	<member-entity entity-alias="EQUIP" entity-name="EquipmentAndTotalPrice"></member-entity>
+    	<alias-all entity-alias="INCREASE"></alias-all>
+    	<alias-all entity-alias="ITEM"></alias-all>
+    	<alias name="unitPrice" entity-alias="EQUIP"></alias>
+    	<alias name="quantity" entity-alias="EQUIP"></alias>
+    	<alias name="totalPrice" entity-alias="EQUIP"></alias>
+    	<alias name="equipmentName" entity-alias="EQUIP"></alias>
+    	<alias name="quantityUom" entity-alias="EQUIP"></alias>
+    	<alias name="currencyUomId" entity-alias="EQUIP"></alias>
+    	<alias name="equipmentTypeId" entity-alias="EQUIP"></alias>
+    	<view-link rel-entity-alias="ITEM" entity-alias="INCREASE">
+    		<key-map field-name="equipmentIncreaseId"/>
+    	</view-link>
+    	<view-link rel-entity-alias="EQUIP" entity-alias="ITEM">
+    		<key-map field-name="equipmentId"/>
+    	</view-link>
+    </view-entity>
+    <view-entity entity-name="EquipmentDecreaseItemAndPrice" package-name="com.olbius.bacc">
+    	<member-entity entity-alias="DECREASE" entity-name="EquipmentDecreaseItem"></member-entity>
+    	<member-entity entity-alias="EQUIP" entity-name="Equipment"></member-entity>
+    	<alias-all entity-alias="DECREASE"></alias-all>
+    	<alias-all entity-alias="EQUIP">
+    		<exclude field="quantity"/>
+    	</alias-all>
+    	<alias name="totalPrice">
+    		<complex-alias operator="*">
+    			<complex-alias-field field="unitPrice" entity-alias="EQUIP" default-value="0"/>
+    			<complex-alias-field field="quantityDecrease" entity-alias="DECREASE" default-value="0"/>
+    		</complex-alias>
+    	</alias>
+    	<view-link rel-entity-alias="EQUIP" entity-alias="DECREASE">
+    		<key-map field-name="equipmentId"/>
+    	</view-link>
+    </view-entity>
+    <view-entity entity-name="EquipmentDecreaseAndItemTotal" package-name="com.olbius.bacc">
+    	<member-entity entity-alias="ITEM" entity-name="EquipmentDecreaseItemAndPrice"></member-entity>
+    	<member-entity entity-alias="EQDECR" entity-name="EquipmentDecrease"></member-entity>
+    	<alias-all entity-alias="EQDECR" group-by="true"></alias-all>
+    	<alias name="totalPrice" function="sum" entity-alias="ITEM"></alias>
+    	<alias name="remainValue" function="sum" entity-alias="ITEM"></alias>
+    	<alias name="equipmentId" function="string-agg" function-params="', '" entity-alias="ITEM"></alias>
+    	<view-link rel-entity-alias="ITEM" entity-alias="EQDECR">
+    		<key-map field-name="equipmentDecreaseId"/>
+    	</view-link>
+    </view-entity>
+	<view-entity entity-name="EquipmentDecreaseItemAndDecrTotal" package-name="com.olbius.bacc">
+    	<member-entity entity-alias="EQUIPDECR" entity-name="EquipmentDecreaseItem"></member-entity>
+    	<alias name="equipmentId" entity-alias="EQUIPDECR" group-by="true"></alias>
+    	<alias name="quantityDecrease" entity-alias="EQUIPDECR" function="sum"></alias>
+	</view-entity>
+	<view-entity entity-name="EquipmentAndDecrTotalAndRemain" package-name="com.olbius.bacc">
+		<member-entity entity-alias="EQUIPDECR" entity-name="EquipmentDecreaseItemAndDecrTotal"></member-entity>
+		<member-entity entity-alias="EQUIP" entity-name="Equipment"></member-entity>
+		<alias-all entity-alias="EQUIP"></alias-all>
+		<alias name="quantityInUse">
+			<complex-alias operator="-">
+				<complex-alias-field field="quantity" entity-alias="EQUIP" default-value="0"/>
+				<complex-alias-field field="quantityDecrease" entity-alias="EQUIPDECR" default-value="0"/>
+			</complex-alias>
+		</alias>
+		<view-link rel-entity-alias="EQUIPDECR" entity-alias="EQUIP" rel-optional="true">
+			<key-map field-name="equipmentId"/>
+		</view-link>
+	</view-entity>
+	<view-entity entity-name="EquipmentDecreaseItemAndEquipment" package-name="com.olbius.bacc">
+		<member-entity entity-alias="EQUIPDECR" entity-name="EquipmentDecreaseItem"></member-entity>
+		<member-entity entity-alias="EQUIP" entity-name="Equipment"></member-entity>
+		<alias-all entity-alias="EQUIPDECR"></alias-all>
+		<alias name="quantity" field="quantityInUse" entity-alias="EQUIPDECR"></alias>
+		<alias name="equipmentName" entity-alias="EQUIP"></alias>
+		<alias name="unitPrice" entity-alias="EQUIP"></alias>
+		<alias name="totalPrice">
+			<complex-alias operator="*">
+				<complex-alias-field field="quantityDecrease" entity-alias="EQUIPDECR" default-value="0"/>
+				<complex-alias-field field="unitPrice" entity-alias="EQUIP" default-value="0"/>
+			</complex-alias>
+		</alias>
+		<view-link rel-entity-alias="EQUIP" entity-alias="EQUIPDECR">
+			<key-map field-name="equipmentId"/>
+		</view-link>
+	</view-entity>
+	<view-entity entity-name="EquipmentAllocateAndTotalAmount" package-name="com.olbius.bacc">
+		<member-entity entity-alias="EQUIPALLOC" entity-name="EquipmentAllocate"></member-entity>
+		<member-entity entity-alias="ITEM" entity-name="EquipmentAllocItem"></member-entity>
+		<alias-all entity-alias="EQUIPALLOC" group-by="true"></alias-all>
+		<alias name="allocatedAmount" entity-alias="ITEM" function="sum"></alias>
+		<alias name="equipmentId" function="string-agg" function-params="', '" entity-alias="ITEM"></alias>
+		<view-link rel-entity-alias="ITEM" entity-alias="EQUIPALLOC">
+			<key-map field-name="equipmentAllocateId"/>
+		</view-link>
+	</view-entity>
+	<view-entity entity-name="EquipmentAndParty" package-name="com.olbius.bacc">
+		<member-entity entity-alias="EQUIP" entity-name="Equipment"></member-entity>
+		<member-entity entity-alias="EQUIPPTY" entity-name="EquipmentParty"></member-entity>
+		<member-entity entity-alias="PTY" entity-name="PartyFullNameDetailSimple"></member-entity>
+		<alias-all entity-alias="EQUIPPTY"></alias-all>
+		<alias name="partyCode" entity-alias="PTY"></alias>
+		<alias name="groupName" entity-alias="PTY"></alias>
+		<alias name="totalQuantity" field="quantity" entity-alias="EQUIP"></alias>
+		<view-link rel-entity-alias="EQUIPPTY" entity-alias="EQUIP">
+			<key-map field-name="equipmentId"/>
+		</view-link>
+		<view-link rel-entity-alias="PTY" entity-alias="EQUIPPTY">
+			<key-map field-name="partyId"/>
+		</view-link>
+	</view-entity>
+	<view-entity entity-name="EquipmentAndProductStore" package-name="com.olbius.bacc">
+		<member-entity entity-alias="EQUIP" entity-name="Equipment"></member-entity>
+		<member-entity entity-alias="EQUIPSTORE" entity-name="EquipmentProductStore"></member-entity>
+		<member-entity entity-alias="PSTORE" entity-name="ProductStore"></member-entity>
+		<alias-all entity-alias="EQUIPSTORE"></alias-all>
+		<alias name="storeName" entity-alias="PSTORE"></alias>
+		<alias name="totalQuantity" field="quantity" entity-alias="EQUIP"></alias>
+		<view-link rel-entity-alias="EQUIPSTORE" entity-alias="EQUIP">
+			<key-map field-name="equipmentId"/>
+		</view-link>
+		<view-link rel-entity-alias="PSTORE" entity-alias="EQUIPSTORE">
+			<key-map field-name="productStoreId"/>
+		</view-link>
+	</view-entity>
+	<view-entity entity-name="EquipmentAndAllocateCount" package-name="com.olbius.bacc">
+		<member-entity entity-alias="ITEM" entity-name="EquipmentAllocItem"></member-entity>
+		<alias name="equipmentId" entity-alias="ITEM" group-by="true"></alias>
+		<alias name="totalAllocated" field="equipmentAllocateId" entity-alias="ITEM" function="count"></alias>
+	</view-entity>
+	
+	<view-entity entity-name="EquipmentAndAbilityAllocate" package-name="com.olbius.bacc">
+		<member-entity entity-alias="INCRITEM" entity-name="EquipmentIncreaseItem"></member-entity>
+		<member-entity entity-alias="INCREQUIP" entity-name="EquipmentIncrease"></member-entity>
+		<member-entity entity-alias="EQUIP" entity-name="Equipment"></member-entity>
+		<member-entity entity-alias="EQUIPALLOC" entity-name="EquipmentAndAllocateCount"></member-entity>
+		<alias-all entity-alias="EQUIP"></alias-all>
+		<alias name="allocationTimes" entity-alias="INCRITEM"></alias>
+		<alias name="totalAllocated" entity-alias="EQUIPALLOC"></alias>
+		<alias name="dateArising" entity-alias="INCREQUIP"></alias>
+		<alias name="allocatedAmount" field="depAmount" entity-alias="INCRITEM"> </alias>
+			
+		<view-link rel-entity-alias="INCRITEM" entity-alias="EQUIP">
+			<key-map field-name="equipmentId"/>
+		</view-link>
+		<view-link rel-entity-alias="INCREQUIP" entity-alias="INCRITEM">
+			<key-map field-name="equipmentIncreaseId"/>
+		</view-link>
+		<view-link rel-entity-alias="EQUIPALLOC" entity-alias="EQUIP" rel-optional="true">
+			<key-map field-name="equipmentId"/>
+		</view-link>
+		<entity-condition>
+			<condition-list combine="or">
+				<condition-expr field-name="allocationTimes" entity-alias="INCRITEM" operator="greater" rel-field-name="totalAllocated" rel-entity-alias="EQUIPALLOC"/>
+				<condition-expr field-name="totalAllocated" entity-alias="EQUIPALLOC" operator="equals" value=""/>
+			</condition-list>
+		</entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="EquipmentAndTypeAndAbilityAllocate" package-name="com.olbius.bacc">
+		<member-entity entity-alias="INCRITEM" entity-name="EquipmentIncreaseItem"></member-entity>
+		<member-entity entity-alias="INCREQUIP" entity-name="EquipmentIncrease"></member-entity>
+		<member-entity entity-alias="EQUIP" entity-name="Equipment"></member-entity>
+		<member-entity entity-alias="EQUIPALLOC" entity-name="EquipmentAndAllocateCount"></member-entity>
+		<member-entity entity-alias="FATGA" entity-name="FixedAssetTypeGlAccount"></member-entity>
+		<alias-all entity-alias="EQUIP"></alias-all>
+		<alias name="allocationTimes" entity-alias="INCRITEM"></alias>
+		<alias name="totalAllocated" entity-alias="EQUIPALLOC"></alias>
+		<alias name="dateArising" entity-alias="INCREQUIP"></alias>
+		<alias name="depGlAccountId" entity-alias="FATGA"></alias>		
+		<alias name="debitGlAccountId" entity-alias="INCRITEM"></alias>
+		<alias name="costGlAccountId" entity-alias="INCRITEM"></alias>
+		<alias name="allocatedAmount" field="depAmount" entity-alias="INCRITEM"> </alias>
+		<alias name="allocationAmountUsing" field="depAmount" entity-alias="INCRITEM"> </alias>
+					
+		<view-link rel-entity-alias="INCRITEM" entity-alias="EQUIP">
+			<key-map field-name="equipmentId"/>
+		</view-link>
+		<view-link rel-entity-alias="INCREQUIP" entity-alias="INCRITEM">
+			<key-map field-name="equipmentIncreaseId"/>
+		</view-link>
+		<view-link rel-entity-alias="EQUIPALLOC" entity-alias="EQUIP" rel-optional="true">
+			<key-map field-name="equipmentId"/>
+		</view-link>
+        <view-link rel-entity-alias="FATGA" entity-alias="EQUIP" rel-optional="true">
+            <key-map field-name="equipmentTypeId" rel-field-name="fixedAssetTypeId"/>
+            <entity-condition>
+                <condition-expr entity-alias="FATGA" field-name="organizationPartyId" operator="equals" value="company" />
+            </entity-condition>
+        </view-link>
+		<entity-condition>
+			<condition-list combine="or">
+				<condition-expr field-name="allocationTimes" entity-alias="INCRITEM" operator="greater" rel-field-name="totalAllocated" rel-entity-alias="EQUIPALLOC"/>
+				<condition-expr field-name="totalAllocated" entity-alias="EQUIPALLOC" operator="equals" value=""/>
+			</condition-list>
+		</entity-condition>
+	</view-entity>	
+	
+	<view-entity entity-name="EquipmentAllocItemAndEquipment" package-name="com.olbius.bacc">
+		<member-entity entity-alias="ITEM" entity-name="EquipmentAllocItem"></member-entity>
+		<member-entity entity-alias="EQUIP" entity-name="Equipment"></member-entity>
+		<alias-all entity-alias="ITEM"></alias-all>
+		<alias name="equipmentName" entity-alias="EQUIP"></alias>
+		<view-link rel-entity-alias="EQUIP" entity-alias="ITEM">
+			<key-map field-name="equipmentId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="EquipmentAllocItemPartyAndDetail" package-name="com.olbius.bacc">
+		<member-entity entity-alias="ITEMPTY" entity-name="EquipmentAllocItemParty"></member-entity>
+		<member-entity entity-alias="ITEM" entity-name="EquipmentAllocItem"></member-entity>
+		<member-entity entity-alias="EQUIP" entity-name="Equipment"></member-entity>
+		<member-entity entity-alias="PTY" entity-name="PartyFullNameDetailSimple"></member-entity>
+		<alias-all entity-alias="ITEMPTY"></alias-all>
+		<alias name="allocatedAmount" entity-alias="ITEM"></alias>
+		<alias name="allocationAmountUsing" entity-alias="ITEM"></alias>
+		<alias name="equipmentName" entity-alias="EQUIP"></alias>
+		<alias name="groupName" entity-alias="PTY"></alias>
+		<alias name="partyCode" entity-alias="PTY"></alias>
+		<alias name="orgUseName" field="groupName" entity-alias="PTY"></alias>
+		<alias name="amount">
+			<complex-alias operator="*">
+				<complex-alias-field field="allocatedAmount" entity-alias="ITEM" default-value="0"/>
+				<complex-alias operator="/">
+					<complex-alias-field field="allocatedPercent" entity-alias="ITEMPTY" default-value="0"/>
+					<complex-alias-field value="100"/>
+				</complex-alias>
+			</complex-alias>
+		</alias>
+		<view-link rel-entity-alias="ITEMPTY" entity-alias="ITEM">
+			<key-map field-name="equipmentAllocateId"/>
+			<key-map field-name="equipmentId"/>
+		</view-link>
+		<view-link rel-entity-alias="EQUIP" entity-alias="ITEMPTY">
+			<key-map field-name="equipmentId"/>
+		</view-link>
+		<view-link rel-entity-alias="PTY" entity-alias="ITEMPTY">
+			<key-map field-name="partyId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="EquipmentAllocItemStoreAndDetail" package-name="com.olbius.bacc">
+		<member-entity entity-alias="ITEMSTORE" entity-name="EquipmentAllocItemStore"></member-entity>
+		<member-entity entity-alias="ITEM" entity-name="EquipmentAllocItem"></member-entity>
+		<member-entity entity-alias="EQUIP" entity-name="Equipment"></member-entity>
+		<member-entity entity-alias="PS" entity-name="ProductStore"></member-entity>
+		<alias-all entity-alias="ITEMSTORE"></alias-all>
+		<alias name="allocatedAmount" entity-alias="ITEM"></alias>
+		<alias name="allocationAmountUsing" entity-alias="ITEM"></alias>
+		<alias name="equipmentName" entity-alias="EQUIP"></alias>
+		<alias name="storeName" entity-alias="PS"></alias>
+		<alias name="orgUseName" field="storeName" entity-alias="PS"></alias>
+		<alias name="amount">
+			<complex-alias operator="*">
+				<complex-alias-field field="allocatedAmount" entity-alias="ITEM" default-value="0"/>
+				<complex-alias operator="/">
+					<complex-alias-field field="allocatedPercent" entity-alias="ITEMSTORE" default-value="0"/>
+					<complex-alias-field value="100"/>
+				</complex-alias>
+			</complex-alias>
+		</alias>
+		<view-link rel-entity-alias="ITEMSTORE" entity-alias="ITEM">
+			<key-map field-name="equipmentAllocateId"/>
+			<key-map field-name="equipmentId"/>
+		</view-link>
+		<view-link rel-entity-alias="EQUIP" entity-alias="ITEM">
+			<key-map field-name="equipmentId"/>
+		</view-link>
+		<view-link rel-entity-alias="PS" entity-alias="ITEMSTORE">
+			<key-map field-name="productStoreId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="EquipmentAllocateAndItem" package-name="com.olbius.bacc">
+		<member-entity entity-alias="EQUIPALLOC" entity-name="EquipmentAllocate"></member-entity>
+		<member-entity entity-alias="EQUIPITEM" entity-name="EquipmentAllocItem"></member-entity>
+		<alias-all entity-alias="EQUIPALLOC"></alias-all>
+		<alias-all entity-alias="EQUIPITEM"></alias-all>
+		<view-link rel-entity-alias="EQUIPITEM" entity-alias="EQUIPALLOC">
+			<key-map field-name="equipmentAllocateId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="EquipmentAllocateAndItemDetail" package-name="com.olbius.bacc">
+		<member-entity entity-alias="EAI" entity-name="EquipmentAllocateAndItem"></member-entity>
+		<member-entity entity-alias="EQP" entity-name="Equipment"></member-entity>
+		
+		<alias-all entity-alias="EAI"></alias-all>
+		<alias name="equipmentTypeId" entity-alias="EQP"></alias>
+		<alias name="equipmentName" entity-alias="EQP"></alias>
+		<alias name="quantity" entity-alias="EQP"></alias>
+		<alias name="unitPrice" entity-alias="EQP"></alias>
+		
+		<view-link rel-entity-alias="EQP" entity-alias="EAI">
+			<key-map field-name="equipmentId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="EquipmentDecreaseAndItem" package-name="com.olbius.bacc">
+		<member-entity entity-alias="DECRITEM" entity-name="EquipmentDecreaseItem"></member-entity>
+		<member-entity entity-alias="EQUIPDECR" entity-name="EquipmentDecrease"></member-entity>
+		<alias-all entity-alias="DECRITEM"></alias-all>
+		<alias-all entity-alias="EQUIPDECR"></alias-all>
+		<view-link rel-entity-alias="DECRITEM" entity-alias="EQUIPDECR">
+			<key-map field-name="equipmentDecreaseId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="EquipmentDecreaseItemSumByDate" package-name="com.olbius.bacc">
+		<member-entity entity-alias="EDAI" entity-name="EquipmentDecreaseAndItem"></member-entity>
+		<member-entity entity-alias="EQUIP" entity-name="Equipment"></member-entity>
+		<alias name="equipmentId" entity-alias="EDAI" group-by="true"></alias>
+		<alias name="dateArising" entity-alias="EDAI" group-by="false"></alias>
+		<alias name="quantity" entity-alias="EQUIP" group-by="true"></alias>
+    	<alias name="quantityDecrease" entity-alias="EDAI" function="sum"></alias>
+    	
+    	<view-link rel-entity-alias="EQUIP" entity-alias="EDAI">
+    		<key-map field-name="equipmentId"/>
+    	</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="InvoiceAndPaymentIdGroupBy" package-name="com.olbius.bacc">
+		<member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+		<member-entity entity-alias="PMTAPPL" entity-name="PaymentApplication"></member-entity>
+		<member-entity entity-alias="PTYFROM" entity-name="PartyFullNameDetailSimple"></member-entity>
+		<member-entity entity-alias="PTY" entity-name="PartyFullNameDetailSimple"></member-entity>
+		<alias-all entity-alias="INV" group-by="true"></alias-all>
+		<alias name="partyCodeFrom" field="partyCode" entity-alias="PTYFROM" group-by="true"></alias>
+		<alias name="fullNameFrom" field="fullName" entity-alias="PTYFROM" group-by="true"></alias>
+		<alias name="groupNameFrom" field="groupName" entity-alias="PTYFROM" group-by="true"></alias>
+		<alias name="partyCode" entity-alias="PTY" group-by="true"></alias>
+		<alias name="fullName" entity-alias="PTY" group-by="true"></alias>
+		<alias name="groupName" entity-alias="PTY" group-by="true"></alias>
+		<alias name="paymentId" function="string-agg" function-params="', '" entity-alias="PMTAPPL"></alias>
+		<view-link rel-entity-alias="PMTAPPL" entity-alias="INV" rel-optional="true">
+			<key-map field-name="invoiceId"/>
+		</view-link>
+		<view-link rel-entity-alias="PTYFROM" entity-alias="INV">
+			<key-map field-name="partyIdFrom" rel-field-name="partyId"/>
+		</view-link>
+		<view-link rel-entity-alias="PTY" entity-alias="INV">
+			<key-map field-name="partyId"/>
+		</view-link>
+	</view-entity>
+	<view-entity entity-name="ProductCatergoryAndTaxRate" package-name="com.olbius.bacc">
+		<member-entity entity-alias="CAT_TAX" entity-name="ProductCategory"></member-entity>
+		<member-entity entity-alias="TAX_RATE" entity-name="TaxAuthorityRateProduct"></member-entity>
+		<alias-all entity-alias="CAT_TAX"></alias-all>
+		<alias name="taxAuthorityRateSeqId" entity-alias="TAX_RATE"></alias>
+		<alias name="taxPercentage" entity-alias="TAX_RATE"></alias>
+		<alias name="taxAuthPartyId" entity-alias="TAX_RATE"></alias>
+		<alias name="taxAuthGeoId" entity-alias="TAX_RATE"></alias>
+		<view-link rel-entity-alias="TAX_RATE" entity-alias="CAT_TAX" rel-optional="true">
+			<key-map field-name="productCategoryId"/>
+		</view-link>
+		<entity-condition>
+			<condition-expr field-name="productCategoryTypeId" value="TAX_CATEGORY" entity-alias="CAT_TAX"/>
+		</entity-condition>
+	</view-entity>
+	<view-entity entity-name="ProductTaxAndCategoryTax" package-name="com.olbius.bacc">
+		<member-entity entity-alias="PROD" entity-name="Product"></member-entity>
+		<member-entity entity-alias="CATEGROY" entity-name="ProductCatergoryAndTaxRate"></member-entity>
+		<member-entity entity-alias="MEMBER" entity-name="ProductCategoryMember"></member-entity>
+		<alias-all entity-alias="CATEGROY"></alias-all>
+		<alias name="productId" entity-alias="PROD"></alias>
+		<alias name="productCode" entity-alias="PROD"></alias>
+        <alias name="productName" entity-alias="PROD"></alias>
+        <alias name="productTypeId" entity-alias="PROD"></alias>
+		<alias name="fromDate" entity-alias="MEMBER"></alias>
+		<alias name="thruDate" entity-alias="MEMBER"></alias>
+		<view-link rel-entity-alias="MEMBER" entity-alias="CATEGROY">
+			<key-map field-name="productCategoryId"/>
+		</view-link>
+		<view-link rel-entity-alias="PROD" entity-alias="MEMBER">
+			<key-map field-name="productId"/>
+		</view-link>
+		<entity-condition filter-by-date="true"></entity-condition>
+	</view-entity>
+	<view-entity entity-name="PaymentApplicationAndInvoice" package-name="com.olbius.bacc">
+		<member-entity entity-alias="PAYMNT" entity-name="PaymentApplication"></member-entity>
+		<member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+		<alias-all entity-alias="PAYMNT"></alias-all>
+		<alias-all entity-alias="INV"></alias-all>
+		<view-link rel-entity-alias="PAYMNT" entity-alias="INV">
+			<key-map field-name="invoiceId"/>
+		</view-link>
+	</view-entity>
+	<view-entity entity-name="PaymentTypeAndGlAccountType" package-name="com.olbius.bacc">
+		<member-entity entity-alias="PMTTYPE" entity-name="PaymentType"></member-entity>
+		<member-entity entity-alias="PARENTTYPE" entity-name="PaymentType"></member-entity>
+		<member-entity entity-alias="GLACC" entity-name="GlAccountType"></member-entity>
+		<member-entity entity-alias="GLACCMAP" entity-name="PaymentGlAccountTypeMap"></member-entity>
+		<alias-all entity-alias="PMTTYPE"></alias-all>
+		<alias name="glAccountTypeId" entity-alias="GLACC"></alias>
+		<alias name="glAccountTypeDesc" field="description" entity-alias="GLACC"></alias>
+		<alias name="organizationPartyId" entity-alias="GLACCMAP"></alias>
+		<alias name="parentTypeDesc" field="description" entity-alias="PARENTTYPE"></alias>
+		<view-link rel-entity-alias="PARENTTYPE" entity-alias="PMTTYPE" rel-optional="true">
+			<key-map field-name="parentTypeId" rel-field-name="paymentTypeId"/>
+		</view-link>
+		<view-link rel-entity-alias="GLACCMAP" entity-alias="PMTTYPE" rel-optional="true">
+			<key-map field-name="paymentTypeId"/>
+		</view-link>
+		<view-link rel-entity-alias="GLACC" entity-alias="GLACCMAP" rel-optional="true">
+			<key-map field-name="glAccountTypeId"/>
+		</view-link>
+	</view-entity>	
+	<view-entity entity-name="GlAccountTypeAndGlAccount" package-name="com.olbius.bacc">
+		<member-entity entity-alias="GLACC_TYPE" entity-name="GlAccountType"></member-entity>
+		<member-entity entity-alias="PARENTTYPE" entity-name="GlAccountType"></member-entity>
+		<member-entity entity-alias="GLACC" entity-name="GlAccount"></member-entity>
+		<member-entity entity-alias="GLACC_TYP_DEFAULT" entity-name="GlAccountTypeDefault"></member-entity>
+		<alias-all entity-alias="GLACC_TYPE"></alias-all>
+		<alias name="glAccountCode" field="accountCode" entity-alias="GLACC"></alias>
+		<alias name="glAccountName" field="accountName" entity-alias="GLACC"></alias>
+		<alias name="glAccountId" entity-alias="GLACC"></alias>
+		<alias name="organizationPartyId" entity-alias="GLACC_TYP_DEFAULT"></alias>
+		<alias name="parentTypeDesc" field="description" entity-alias="PARENTTYPE"></alias>
+		<view-link rel-entity-alias="PARENTTYPE" entity-alias="GLACC_TYPE" rel-optional="true">
+			<key-map field-name="parentTypeId" rel-field-name="glAccountTypeId"/>
+		</view-link>
+		<view-link rel-entity-alias="GLACC_TYP_DEFAULT" entity-alias="GLACC_TYPE" rel-optional="true">
+			<key-map field-name="glAccountTypeId"/>
+		</view-link>
+		<view-link rel-entity-alias="GLACC" entity-alias="GLACC_TYP_DEFAULT" rel-optional="true">
+			<key-map field-name="glAccountId"/>
+		</view-link>
+	</view-entity>
+	<view-entity entity-name="InventoryItemAndProductGroupBy" package-name="com.olbius.bacc">
+		<member-entity entity-alias="INV" entity-name="InventoryItem"/>
+    	<member-entity entity-alias="PR" entity-name="Product"/>
+    	<member-entity entity-alias="FA" entity-name="Facility"/>
+    	<member-entity entity-alias="QTYUOM" entity-name="Uom"></member-entity>
+    	<alias name="productId" entity-alias="INV" group-by="true"></alias>
+    	<alias name="facilityId" entity-alias="INV" group-by="true"></alias>
+    	<alias name="ownerPartyId" entity-alias="INV" group-by="true"></alias>
+    	<alias name="productCode" entity-alias="PR" group-by="true"/>
+    	<alias name="productName" entity-alias="PR" group-by="true"/>
+    	<alias name="internalName" entity-alias="PR" group-by="true"/>
+    	<alias name="weightUomId" entity-alias="PR" group-by="true"/>
+    	<alias name="quantityUomId" entity-alias="PR" group-by="true"/>
+    	<alias name="facilityName" entity-alias="FA" group-by="true"/>
+    	<alias name="quantityUomDesc" field="description" entity-alias="QTYUOM" group-by="true"></alias>
+    	<alias name="requireAmount" entity-alias="PR" group-by="true"></alias>
+    	<alias name="amountUomTypeId" entity-alias="PR" group-by="true"></alias>
+    	<view-link rel-entity-alias="PR" entity-alias="INV">
+	       <key-map field-name="productId"/>
+	   </view-link>
+	   <view-link rel-entity-alias="FA" entity-alias="INV">
+	       <key-map field-name="facilityId"/>
+	   </view-link>
+	   <view-link rel-entity-alias="QTYUOM" entity-alias="PR">
+	   		<key-map field-name="quantityUomId" rel-field-name="uomId"/>
+	   </view-link>
+	</view-entity>
+	
+	<view-entity entity-name="OrderShipmentReceipt" package-name="com.olbius.accounting">
+		<member-entity entity-alias="OIB" entity-name="OrderItemBilling"></member-entity>
+		<member-entity entity-alias="SHR" entity-name="ShipmentReceipt"></member-entity>
+		<alias name="orderId" entity-alias="OIB" ></alias>
+		<alias name="invoiceId" entity-alias="OIB" ></alias>
+		<alias name="shipmentId" entity-alias="SHR" ></alias>
+		<view-link rel-entity-alias="OIB" entity-alias="SHR" rel-optional="true">
+			<key-map field-name="receiptId" rel-field-name="shipmentReceiptId"/>
+			<key-map field-name="orderId"/>
+			<key-map field-name="orderItemSeqId"/>
+		</view-link>								
+	</view-entity>
+	
+	<view-entity entity-name="DeliveryItemAndOrderInvoiceProduct" package-name="com.olbius.accounting">
+		<member-entity entity-alias="DLV" entity-name="Delivery"/>
+    	<member-entity entity-alias="DI" entity-name="DeliveryItem"/>
+    	<member-entity entity-alias="OI" entity-name="OrderItem"/>
+    	<member-entity entity-alias="BILLING" entity-name="OrderItemBilling"></member-entity>
+    	<member-entity entity-alias="II" entity-name="InvoiceItem"></member-entity>
+    	<member-entity entity-name="Product" entity-alias="PR"/>
+    	<alias-all entity-alias="DI" />
+		<alias name="shipmentId" entity-alias="DLV"></alias>
+		<alias name="productId" entity-alias="PR"/>
+    	<alias name="productCode" entity-alias="PR"/>
+    	<alias name="productName" entity-alias="PR"/>
+    	<alias name="requireAmount" entity-alias="PR"/>
+    	<alias name="quantityUomId" entity-alias="PR"/>
+    	<alias name="weightUomId" entity-alias="PR"/>
+    	<alias name="unitPrice" entity-alias="OI"/>
+    	<alias name="amount" entity-alias="II"></alias>
+    	<alias name="invQuantityUomId" field="quantityUomId" entity-alias="OI"></alias>
+    	<alias name="invQuantity" field="quantity" entity-alias="II"></alias>
+    	<alias name="invoiceId" field="invoiceId" entity-alias="II"></alias>
+    	<alias name="invoiceItemSeqId" field="invoiceItemSeqId" entity-alias="II"></alias>
+    	<alias name="shipmentReceiptId" field="shipmentReceiptId" entity-alias="BILLING"></alias>
+    	<view-link entity-alias="DLV" rel-entity-alias="DI">
+    		<key-map field-name="deliveryId"/>
+    	</view-link>
+    	<view-link entity-alias="DI" rel-entity-alias="OI">
+    		<key-map field-name="fromOrderId" rel-field-name="orderId"/>
+    		<key-map field-name="fromOrderItemSeqId" rel-field-name="orderItemSeqId"/>
+    	</view-link>
+    	<view-link entity-alias="OI" rel-entity-alias="PR">
+    		<key-map field-name="productId" rel-field-name="productId"/>
+    	</view-link>
+    	<view-link rel-entity-alias="BILLING" entity-alias="OI">
+    		<key-map field-name="orderId"/>
+    		<key-map field-name="orderItemSeqId"/>
+    	</view-link>
+    	<view-link rel-entity-alias="II" entity-alias="BILLING">
+    		<key-map field-name="invoiceId"/>
+    		<key-map field-name="invoiceItemSeqId"/>
+    	</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="DeliveryItemChangeLast" package-name="com.olbius.accounting">
+		<member-entity entity-alias="DLV" entity-name="DeliveryItemChange"></member-entity>
+		<alias name="deliveryId" entity-alias="DLV" group-by="true"></alias>
+		<alias name="deliveryItemSeqId" entity-alias="DLV" group-by="true"></alias>
+		<alias name="shipmentReceiptId" entity-alias="DLV" group-by="true"></alias>
+		<alias name="createdDate" entity-alias="DLV" function="max"></alias>
+	</view-entity>
+	
+	<view-entity entity-name="DeliveryItemOrderInvoice" package-name="com.olbius.accounting">
+		<member-entity entity-alias="II" entity-name="InvoiceItem"></member-entity>
+		<member-entity entity-alias="DI" entity-name="DeliveryItem"/>
+		<member-entity entity-alias="OI" entity-name="OrderItem"/>
+    	<member-entity entity-alias="BILLING" entity-name="OrderItemBilling"></member-entity>
+		<alias name="deliveryId" entity-alias="DI"></alias>
+		<alias name="deliveryItemSeqId" entity-alias="DI"></alias>
+		<alias name="actualDeliveredQuantity" entity-alias="DI"></alias>
+		<alias name="invQuantity" field="quantity" entity-alias="II"></alias>
+		<alias name="shipmentReceiptId" field="shipmentReceiptId" entity-alias="BILLING"></alias>
+		<view-link rel-entity-alias="OI" entity-alias="DI">
+			<key-map field-name="fromOrderId" rel-field-name="orderId"/>
+    		<key-map field-name="fromOrderItemSeqId" rel-field-name="orderItemSeqId"/>
+		</view-link>
+		<view-link rel-entity-alias="BILLING" entity-alias="OI">
+			<key-map field-name="orderId"/>
+    		<key-map field-name="orderItemSeqId"/>
+		</view-link>
+		<view-link rel-entity-alias="II" entity-alias="BILLING">
+			<key-map field-name="invoiceId"/>
+    		<key-map field-name="invoiceItemSeqId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="DeliveryItemChangeAndII" package-name="com.olbius.accounting">
+		<member-entity entity-alias="DIOI" entity-name="DeliveryItemOrderInvoice"></member-entity>
+		<member-entity entity-alias="DLVCHANGE" entity-name="DeliveryItemChange"></member-entity>
+		<member-entity entity-alias="DLVLAST" entity-name="DeliveryItemChangeLast"></member-entity>
+		<member-entity entity-alias="IILAST" entity-name="InvoiceItem"></member-entity>
+		<alias-all entity-alias="DLVCHANGE"></alias-all>
+		<alias-all entity-alias="IILAST"></alias-all>
+		<alias name="actualDeliveredQuantity" entity-alias="DIOI"></alias>
+		<alias name="invQuantity" entity-alias="DIOI"></alias>
+		<view-link rel-entity-alias="IILAST" entity-alias="DLVCHANGE">
+			<key-map field-name="invoiceId"/>
+			<key-map field-name="invoiceItemSeqId"/>
+		</view-link>
+		<view-link rel-entity-alias="DLVLAST" entity-alias="DLVCHANGE">
+			<key-map field-name="deliveryId"/>
+			<key-map field-name="deliveryItemSeqId"/>
+			<key-map field-name="shipmentReceiptId"/>
+			<key-map field-name="createdDate"/>
+		</view-link>
+		<view-link rel-entity-alias="DIOI" entity-alias="DLVCHANGE">
+			<key-map field-name="deliveryId"/>
+			<key-map field-name="deliveryItemSeqId"/>
+			<key-map field-name="shipmentReceiptId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="DeliveryItemAndChange" package-name="com.olbius.accounting">
+		<member-entity entity-alias="DIOI" entity-name="DeliveryItemAndOrderInvoiceProduct"/>
+    	<member-entity entity-alias="DIEDITQTY" entity-name="DeliveryItemChangeAndII"></member-entity>
+    	<alias-all entity-alias="DIOI" />
+    	<alias name="editQuantity" field="quantity" entity-alias="DIEDITQTY"></alias>
+    	<alias name="amountEdit" field="amount" entity-alias="DIEDITQTY"></alias>
+    	<alias name="adjustedQuantity">
+    		<complex-alias operator="-">
+	    		<complex-alias-field entity-alias="DIEDITQTY" field="invQuantity" default-value="0"/>
+    			<complex-alias-field entity-alias="DIEDITQTY" field="quantity" default-value="0" />
+    		</complex-alias>
+    	</alias>
+    	<alias name="modifiedUserLoginId" entity-alias="DIEDITQTY"></alias>
+    	<view-link rel-entity-alias="DIEDITQTY" entity-alias="DIOI" rel-optional="true">
+    		<key-map field-name="deliveryId"/>
+    		<key-map field-name="deliveryItemSeqId"/>
+    		<key-map field-name="shipmentReceiptId"/>
+    	</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="OrderBillingInvoice" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="OIB" entity-name="OrderItemBilling"></member-entity>
+		<member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+		<alias name="orderId" entity-alias="OIB" group-by="true" ></alias>
+		<alias name="invoiceId" entity-alias="INV" group-by="true"></alias>
+		<view-link rel-entity-alias="INV" entity-alias="OIB">
+			 <key-map field-name="invoiceId" />
+		</view-link>
+	</view-entity>	
+	 
+	 
+	<view-entity entity-name="OrderItemIssuanceShipmentDelivery" package-name="com.olbius.accounting">
+		<member-entity entity-alias="OIB" entity-name="OrderItemBilling"></member-entity>
+		<member-entity entity-alias="ITS" entity-name="ItemIssuance"></member-entity>
+		<member-entity entity-alias="DLV" entity-name="Delivery"></member-entity>
+		<alias name="orderId" entity-alias="OIB" ></alias>
+		<alias name="invoiceId" entity-alias="OIB" ></alias>
+		<alias name="shipmentId" entity-alias="ITS" ></alias>
+		<alias name="itemIssuanceId" entity-alias="ITS" ></alias>
+		<alias name="deliveryId" entity-alias="DLV" ></alias>
+		<alias name="originFacilityId" entity-alias="DLV" ></alias>
+		
+		<view-link rel-entity-alias="OIB" entity-alias="ITS" rel-optional="true">   
+			<key-map field-name="orderId"/>
+			<key-map field-name="orderItemSeqId"/>
+		</view-link>
+		
+		<view-link rel-entity-alias="DLV" entity-alias="ITS" rel-optional="true">
+			 <key-map field-name="orderId"/>
+			 <key-map field-name="shipmentId"/>
+		</view-link>
+	</view-entity>	
+	 <view-entity entity-name="InvoiceItemInvoicePdfSum" package-name="com.olbius.accounting">
+         <member-entity entity-alias="IIP" entity-name="InvoiceItemInvoicePdf"></member-entity>
+         <alias name="quantity" function="sum" entity-alias="IIP"/>
+         <alias name="invoiceId" entity-alias="IIP" group-by="true"/>
+         <alias name="productCode" entity-alias="IIP" group-by="true"/>
+         <alias name="amount" entity-alias="IIP" group-by="true" />
+         <alias name="totalAmount" entity-alias="IIP" function="sum"/>
+         <alias name="totalAmountTax" entity-alias="IIP" function="sum"/>
+     </view-entity>
+     
+	<view-entity entity-name="InvoiceItemInvoicePdf" package-name="com.olbius.accounting">
+		<member-entity entity-alias="II" entity-name="InvoiceItem"></member-entity>
+		<member-entity entity-alias="II1" entity-name="InvoiceItemTaxView"></member-entity>
+		<member-entity entity-alias="PROD" entity-name="Product"></member-entity>
+		<member-entity entity-alias="TARP" entity-name="TaxAuthorityRateProduct"></member-entity>
+		
+		<alias name="quantity" field="quantity" entity-alias="II"></alias>
+		<alias name="amount" field="amount" entity-alias="II"></alias>
+		<alias name="invoiceId" field="invoiceId" entity-alias="II"></alias>
+		<alias name="totalAmountTax" field="totalAmount" entity-alias="II1"></alias>
+		<alias name="taxPercentage" field="taxPercentage" entity-alias="TARP"></alias>		
+		
+		<alias name="productName" entity-alias="PROD"></alias>
+		<alias name="productCode" entity-alias="PROD"></alias>
+		<alias name="totalAmount">
+			<complex-alias operator="*">
+				<complex-alias-field field="amount" entity-alias="II" default-value="0"/>
+				<complex-alias-field field="quantity" entity-alias="II" default-value="1"/>
+			</complex-alias>
+		</alias>		
+		<view-link rel-entity-alias="II1" entity-alias="II" rel-optional="true">
+			<key-map field-name="invoiceId"/> 
+			<key-map field-name="invoiceItemSeqId" rel-field-name="parentInvoiceItemSeqId"/>
+		</view-link>
+		<view-link rel-entity-alias="TARP" entity-alias="II1" rel-optional="true">
+			<key-map field-name="taxAuthorityRateSeqId"/>
+		</view-link>		
+		<view-link rel-entity-alias="PROD" entity-alias="II" rel-optional="false">
+			<key-map field-name="productId"/>
+		</view-link>
+		<entity-condition>
+			<condition-expr entity-alias="II" field-name="invoiceItemTypeId" value="INV_FPRODEXT_ITEM,INV_SPROD_ITEM,INV_FPRODINT_ITEM,CRT_FINPROD_ITEM,CRT_FPROD_ITEM,CRT_PROD_ITEM,CRT_SPROD_ITEM,CRT_MAN_ADJ" operator="in" />
+		</entity-condition>
+	</view-entity>
+    
+    <view-entity entity-name="InvoiceItemGroupByTax" package-name="com.olbius.accounting">
+        <member-entity entity-alias="II" entity-name="InvoiceItem"></member-entity>
+        <member-entity entity-alias="II1" entity-name="InvoiceItem"></member-entity>
+        <member-entity entity-alias="PC" entity-name="ProductCategory"></member-entity>
+        <member-entity entity-alias="TARP" entity-name="TaxAuthorityRateProduct"></member-entity>
+        <alias name="taxAuthorityRateSeqId" entity-alias="II" group-by="true"></alias>
+        <alias name="quantity" field="quantity" entity-alias="II"></alias>
+        <alias name="amount" function="sum">
+            <complex-alias operator="*">
+                <complex-alias-field field="quantity" entity-alias="II1" default-value="1"/>
+                <complex-alias-field field="amount" entity-alias="II1" default-value="0"/>
+            </complex-alias>
+        </alias>
+        <alias name="invoiceId" field="invoiceId" entity-alias="II" group-by="true"></alias>
+        <alias name="quantityTax" field="quantity" entity-alias="II"></alias>
+        <alias name="amountTax" function="sum">
+            <complex-alias operator="*">
+                <complex-alias-field field="quantity" entity-alias="II" default-value="1"/>
+                <complex-alias-field field="amount" entity-alias="II" default-value="0"/>
+            </complex-alias>
+        </alias>
+        <alias name="taxPercentage" field="taxPercentage" entity-alias="TARP"></alias>
+        <alias name="productName" field="categoryName" entity-alias="PC"></alias>
+        <alias name="productCode" field="productCategoryId" entity-alias="PC"></alias>
+        <alias name="totalAmount" function="sum">
+            <complex-alias operator="*">
+                <complex-alias-field field="quantity" entity-alias="II1" default-value="1"/>
+                <complex-alias-field field="amount" entity-alias="II1" default-value="0"/>
+            </complex-alias>
+        </alias>
+        <alias name="totalAmountTax" function="sum">
+            <complex-alias operator="*">
+                <complex-alias-field field="quantity" entity-alias="II" default-value="1"/>
+                <complex-alias-field field="amount" entity-alias="II" default-value="0"/>
+            </complex-alias>
+        </alias>
+        <view-link entity-alias="II" rel-entity-alias="II1" rel-optional="true">
+            <key-map field-name="invoiceId"/>
+            <key-map field-name="parentInvoiceItemSeqId" rel-field-name="invoiceItemSeqId"></key-map>
+            <entity-condition>
+                <condition-expr entity-alias="II1" field-name="invoiceItemTypeId" value="INV_FPRODEXT_ITEM,INV_SPROD_ITEM,INV_FPRODINT_ITEM,CRT_FINPROD_ITEM,CRT_FPROD_ITEM,CRT_PROD_ITEM,CRT_SPROD_ITEM,CRT_MAN_ADJ" operator="in" />
+            </entity-condition>
+        </view-link>
+        <view-link entity-alias="II" rel-entity-alias="TARP" rel-optional="true">
+            <key-map field-name="taxAuthorityRateSeqId"/>
+        </view-link>
+        <view-link entity-alias="TARP" rel-entity-alias="PC" rel-optional="true">
+            <key-map field-name="productCategoryId"/>
+        </view-link>
+        <entity-condition>
+            <condition-expr entity-alias="II" field-name="invoiceItemTypeId" value="ITM_SALES_TAX,INV_SALES_TAX,CRT_SALES_TAX_ADJ" operator="in" />
+        </entity-condition>
+    </view-entity>
+
+    <view-entity entity-name="InvoiceItemDiscountPdf" package-name="com.olbius.accounting">
+        <member-entity entity-alias="II" entity-name="InvoiceItem"></member-entity>
+        <member-entity entity-alias="PROD" entity-name="Product"></member-entity>
+
+        <alias name="quantity" field-set="12" entity-alias="II"></alias>
+        <alias name="amount" function="sum">
+            <complex-alias operator="*">
+                <complex-alias-field field="quantity" entity-alias="II" default-value="1"/>
+                <complex-alias-field field="amount" entity-alias="II" default-value="0"/>
+            </complex-alias>
+        </alias>
+        <alias name="invoiceId" field="invoiceId" entity-alias="II" group-by="true"></alias>
+        <view-link rel-entity-alias="PROD" entity-alias="II" rel-optional="false">
+            <key-map field-name="productId"/>
+        </view-link>
+        <entity-condition>
+            <condition-expr entity-alias="II" field-name="amount" value="0" operator="less-equals" />
+        </entity-condition>
+    </view-entity>
+	
+	<view-entity entity-name="SumInvoiceItemInvoicePdf" package-name="com.olbius.accounting">	
+		<member-entity entity-alias="IIIP" entity-name="InvoiceItemInvoicePdf"></member-entity>
+		<alias name="invoiceId" entity-alias="IIIP" group-by="true"></alias>
+		<alias name="taxPercentage" entity-alias="IIIP" group-by="true"></alias>
+		<alias name="totalAmount" entity-alias="IIIP" function="sum"></alias>
+		<alias name="totalAmountTax" entity-alias="IIIP" function="sum"></alias>		
+	</view-entity>
+	
+	<view-entity entity-name="InvoiceItemTaxAuthProduct" package-name="com.olbius.accounting">
+		<member-entity entity-alias="II" entity-name="InvoiceItem"></member-entity>
+		<member-entity entity-alias="TARP" entity-name="TaxAuthorityRateProduct"></member-entity>
+		<member-entity entity-alias="PCM" entity-name="ProductCategoryMember"></member-entity>
+		
+		<alias name="quantityTax" field="quantity" entity-alias="II"></alias>
+		<alias name="amountTax" field="amount" entity-alias="II"></alias>	
+		<alias name="taxPercentage" field="taxPercentage" entity-alias="TARP"></alias>					
+		<alias name="invoiceId" field="invoiceId" entity-alias="II"></alias>
+		<alias name="productId" field="productId" entity-alias="PCM"></alias>
+		
+		<view-link rel-entity-alias="TARP" entity-alias="II" rel-optional="true">
+			<key-map field-name="taxAuthorityRateSeqId"/>
+		</view-link>		
+
+		<view-link rel-entity-alias="PCM" entity-alias="TARP" rel-optional="true">
+			<key-map field-name="productCategoryId"/>
+			<entity-condition>
+				<condition-expr field-name="productId" operator="like" value="PRD%" entity-alias="PCM"/>
+			</entity-condition>						
+		</view-link>
+		<entity-condition>
+			<condition-expr entity-alias="II" field-name="invoiceItemTypeId" value="ITM_SALES_TAX,INV_SALES_TAX,CRT_SALES_TAX_ADJ" operator="in" />				
+		</entity-condition>					
+	</view-entity>
+	
+	<view-entity entity-name="InvoiceItemTaxAuthRateProduct" package-name="com.olbius.accounting">
+		<member-entity entity-alias="II" entity-name="InvoiceItem"></member-entity>
+		<member-entity entity-alias="TARP" entity-name="TaxAuthorityRateProduct"></member-entity>
+		
+		<alias name="quantityTax" field="quantity" entity-alias="II" group-by="true"></alias>		
+		<alias name="taxPercentage" field="taxPercentage" entity-alias="TARP" group-by="true"></alias>					
+		<alias name="invoiceId" field="invoiceId" entity-alias="II" group-by="true"></alias>
+		<alias name="productCategoryId" field="productCategoryId" entity-alias="TARP" group-by="true"></alias>
+		<alias name="amountTax" field="amount" entity-alias="II" function="sum"></alias>	
+		
+		<view-link rel-entity-alias="TARP" entity-alias="II" rel-optional="true">
+			<key-map field-name="taxAuthorityRateSeqId"/>
+		</view-link>		
+
+		<entity-condition>
+			<condition-expr entity-alias="II" field-name="invoiceItemTypeId" value="ITM_SALES_TAX,INV_SALES_TAX,CRT_SALES_TAX_ADJ" operator="in" />				
+		</entity-condition>					
+	</view-entity>	
+	
+	<view-entity entity-name="InvoiceItemTaxAuthGroupProduct" package-name="com.olbius.accounting">
+		<member-entity entity-alias="IITARP" entity-name="InvoiceItemTaxAuthRateProduct"></member-entity>
+		<member-entity entity-alias="PCM" entity-name="ProductCategoryMember"></member-entity>
+		
+		<alias name="quantityTax" field="quantityTax" entity-alias="IITARP" ></alias>		
+		<alias name="taxPercentage" field="taxPercentage" entity-alias="IITARP"></alias>					
+		<alias name="invoiceId" field="invoiceId" entity-alias="IITARP" ></alias>
+		<alias name="productId" field="productId" entity-alias="PCM" ></alias>
+		<alias name="amountTax" field="amountTax" entity-alias="IITARP" ></alias>	
+		
+		<view-link rel-entity-alias="PCM" entity-alias="IITARP" rel-optional="true">
+			<key-map field-name="productCategoryId"/>
+			<entity-condition>
+				<condition-expr field-name="productId" operator="like" value="PRD%" entity-alias="PCM"/>
+			</entity-condition>						
+		</view-link>				
+	</view-entity>	
+	
+	<view-entity entity-name="ListInvoiceItem" package-name="com.olbius.accounting">
+		<member-entity entity-alias="II" entity-name="InvoiceItem"></member-entity>
+		<alias name="quantity" field="quantity" entity-alias="II"></alias>
+		<alias name="amount" field="amount" entity-alias="II"></alias>
+		<alias name="invoiceId" field="invoiceId" entity-alias="II"></alias>
+		<alias name="productId" field="productId" entity-alias="II"></alias>
+		<alias name="totalAmount">
+			<complex-alias operator="*">
+				<complex-alias-field field="amount" entity-alias="II" default-value="0"/>
+				<complex-alias-field field="quantity" entity-alias="II" default-value="1"/>
+			</complex-alias>
+		</alias>
+		<entity-condition>
+			<condition-expr entity-alias="II" field-name="invoiceItemTypeId" value="INV_FPRODEXT_ITEM,INV_SPROD_ITEM,INV_FPRODINT_ITEM,CRT_FINPROD_ITEM,CRT_FPROD_ITEM,CRT_PROD_ITEM,CRT_SPROD_ITEM,CRT_MAN_ADJ" operator="in" />
+		</entity-condition>					
+	</view-entity>
+	
+	<view-entity entity-name="GroupInvoiceItem" package-name="com.olbius.accounting">
+		<member-entity entity-alias="II" entity-name="ListInvoiceItem"></member-entity>
+		<alias name="quantity" field="quantity" entity-alias="II" group-by="true"></alias>
+		<alias name="invoiceId" field="invoiceId" entity-alias="II" group-by="true"></alias>
+		<alias name="productId" field="productId" entity-alias="II" group-by="true"></alias>			
+		<alias name="amount" field="amount" entity-alias="II" function="sum"/>
+	</view-entity>	
+	
+	<view-entity entity-name="InvoiceItemInvoiceSalesTotalPdf" package-name="com.olbius.accounting">
+		<member-entity entity-alias="II" entity-name="GroupInvoiceItem"></member-entity>
+		<member-entity entity-alias="II1" entity-name="InvoiceItemTaxAuthGroupProduct"></member-entity>		
+				
+		<alias name="quantity" field="quantity" entity-alias="II"></alias>
+		<alias name="amount" field="amount" entity-alias="II"></alias>
+		<alias name="invoiceId" field="invoiceId" entity-alias="II"></alias>
+		<alias name="productId" field="productId" entity-alias="II"></alias>
+		
+		<alias name="quantityTax" field="quantityTax" entity-alias="II1"></alias>
+		<alias name="amountTax" field="amountTax" entity-alias="II1"></alias>	
+		<alias name="taxPercentage" field="taxPercentage" entity-alias="II1"></alias>		
+		
+		<alias name="totalAmount">
+			<complex-alias operator="*">
+				<complex-alias-field field="amount" entity-alias="II" default-value="0"/>
+				<complex-alias-field field="quantity" entity-alias="II" default-value="1"/>
+			</complex-alias>
+		</alias>		
+		<alias name="totalAmountTax">
+			<complex-alias operator="*">
+				<complex-alias-field field="amountTax" entity-alias="II1" default-value="0"/>
+				<complex-alias-field field="quantityTax" entity-alias="II1" default-value="1"/>
+			</complex-alias>
+		</alias>
+		<view-link rel-entity-alias="II1" entity-alias="II" rel-optional="true">
+			<key-map field-name="invoiceId"/>
+			<key-map field-name="productId"/> 
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="GroupInvoiceItemInvoiceSalesTotalPdf" package-name="com.olbius.accounting">	
+		<member-entity entity-alias="IIIP" entity-name="InvoiceItemInvoiceSalesTotalPdf"></member-entity>
+		<alias name="invoiceId" entity-alias="IIIP" group-by="true"></alias>
+		<alias name="productId" entity-alias="IIIP" group-by="true"></alias>
+		<alias name="taxPercentage" entity-alias="IIIP" group-by="true"></alias>
+		<alias name="totalAmount" entity-alias="IIIP" function="sum"></alias>
+		<alias name="totalAmountTax" entity-alias="IIIP" function="sum"></alias>		
+	</view-entity>	
+	
+	<view-entity entity-name="SumInvoiceItemInvoiceSalesTotalPdf" package-name="com.olbius.accounting">	
+		<member-entity entity-alias="IIIP" entity-name="InvoiceItemInvoiceSalesTotalPdf"></member-entity>
+		<alias name="invoiceId" entity-alias="IIIP" group-by="true"></alias>
+		<alias name="taxPercentage" entity-alias="IIIP" group-by="true"></alias>
+		<alias name="totalAmount" entity-alias="IIIP" function="sum"></alias>
+		<alias name="totalAmountTax" entity-alias="IIIP" function="sum"></alias>		
+	</view-entity>
+	
+	<view-entity entity-name="VoucherInvoiceAndVoucher" package-name="com.olbius.accounting">
+		<member-entity entity-alias="VOI" entity-name="VoucherInvoice"></member-entity>
+		<member-entity entity-alias="VOU" entity-name="Voucher"></member-entity>
+		<alias-all entity-alias="VOU"></alias-all>
+		<alias name="voucherId" field="voucherId" entity-alias="VOI"></alias>
+		<alias name="invoiceId" field="invoiceId" entity-alias="VOI"></alias>		
+		
+		<view-link rel-entity-alias="VOI" entity-alias="VOU">
+			<key-map field-name="voucherId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="VoucherTaxReport" package-name="com.olbius.accounting">
+		<member-entity entity-name="Voucher" entity-alias="V"></member-entity>
+		<member-entity entity-name="VoucherInvoice" entity-alias="VI"></member-entity>
+		<member-entity entity-name="Invoice" entity-alias="I"></member-entity>
+		<member-entity entity-name="InvoiceType" entity-alias="IT"></member-entity>
+		<member-entity entity-name="InvoiceTaxInfo" entity-alias="ITI"></member-entity>
+		<member-entity entity-name="TaxAuthorityRateProduct" entity-alias="TARP"></member-entity>
+		<alias name="voucherNumber" field="voucherNumber" entity-alias="V" group-by="true"></alias>
+		<alias name="voucherForm" field="voucherForm" entity-alias="V" group-by="true"></alias>
+		<alias name="voucherSerial" field="voucherSerial" entity-alias="V" group-by="true"></alias>		
+		<alias name="issuedDate" field="issuedDate" entity-alias="V" group-by="true" function="date_format" start-function-params="'%Y-%m-%d 00:00:00'"></alias>
+		<alias name="voucherCreatedDate" field="voucherCreatedDate" entity-alias="V" group-by="true" function="date_format" start-function-params="'%Y-%m-%d 00:00:00'"></alias>
+		<alias name="parentTypeId" field="parentTypeId" entity-alias="IT" group-by="true"></alias>
+		<alias name="amount" field="amount" entity-alias="V" function="sum"></alias>
+		<alias name="taxAmount" field="taxAmount" entity-alias="V" function="sum"></alias>
+		<alias name="taxProductCategoryId" field="taxProductCategoryId" entity-alias="V" group-by="true"></alias>
+		<alias name="partyName" field="partyName" entity-alias="ITI" group-by="true"></alias>
+		<alias name="taxCode" field="taxCode" entity-alias="ITI" group-by="true"></alias>
+ 		<alias name="description" field="description" entity-alias="I" group-by="true"></alias>
+ 		<alias name="invoiceTypeId" field="invoiceTypeId" entity-alias="I" group-by="true"></alias>
+		<alias name="taxPercentage" field="taxPercentage" entity-alias="TARP" group-by="true"></alias>
+		<view-link rel-entity-alias="VI" entity-alias="V">
+			<key-map field-name="voucherId"/>
+		</view-link>
+		<view-link rel-entity-alias="I" entity-alias="VI">
+			<key-map field-name="invoiceId"/>
+		</view-link>
+		<view-link rel-entity-alias="IT" entity-alias="I">
+			<key-map field-name="invoiceTypeId"/>
+		</view-link>
+		<view-link rel-entity-alias="ITI" entity-alias="I">
+			<key-map field-name="invoiceId"/>
+		</view-link>
+		<view-link rel-entity-alias="TARP" entity-alias="V">
+			<key-map field-name="taxProductCategoryId" rel-field-name="productCategoryId"/>
+		</view-link>
+		<entity-condition>
+			<condition-list combine="and">
+				<condition-expr field-name="isVerified" entity-alias="I" operator="equals" value="Y"/>
+				<condition-list combine="or">
+					<condition-expr field-name="parentTypeId" entity-alias="IT" operator="equals" value="SALES_INVOICE"/>
+					<condition-expr field-name="parentTypeId" entity-alias="IT" operator="equals" value="PURCHASE_INVOICE"/>
+				</condition-list>
+				<condition-expr field-name="taxProductCategoryId" entity-alias="V" operator="in" value="TAX_VAT_0,TAX_VAT_5,TAX_VAT_10,TAX_VAT_KCT"/>
+			</condition-list>		
+		</entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="VoucherTaxPaymentReport" package-name="com.olbius.accounting">
+		<member-entity entity-alias="PAY" entity-name="Payment"></member-entity>
+		<member-entity entity-alias="TARP" entity-name="TaxAuthorityRateProduct"></member-entity>
+		<member-entity entity-alias="PFDS" entity-name="PartyFullNameDetailSimple"></member-entity>
+		<member-entity entity-alias="PTAI" entity-name="PartyTaxAuthInfo"></member-entity>
+		
+		<alias name="voucherNumber" field="voucherNumber" entity-alias="PAY"></alias>
+		<alias name="voucherForm" field="voucherForm" entity-alias="PAY"></alias>
+		<alias name="voucherSerial" field="voucherSerial" entity-alias="PAY"></alias>		
+		<alias name="issuedDate" field="issuedDateVoucher" entity-alias="PAY"></alias>						
+		<alias name="voucherCreatedDate" field="effectiveDate" entity-alias="PAY"></alias>
+		<alias name="amount" field="amount" entity-alias="PAY"></alias>
+		<alias name="taxAmount" field="taxAmount" entity-alias="PAY"></alias>
+		<alias name="description" field="comments" entity-alias="PAY"></alias>
+		<alias name="partyName" field="fullName" entity-alias="PFDS"></alias>
+		<alias name="taxCode" field="partyTaxId" entity-alias="PTAI"></alias>
+		<alias name="taxPercentage" field="taxPercentage" entity-alias="TARP"></alias>
+		
+		<view-link rel-entity-alias="PFDS" entity-alias="PAY">
+			<key-map field-name="partyIdTo" rel-field-name="partyId"/>
+		</view-link>
+		
+		<view-link rel-entity-alias="PTAI" entity-alias="PAY" rel-optional="true">
+			<key-map field-name="partyIdTo" rel-field-name="partyId"/>
+			<key-map field-name="taxAuthGeoId" rel-field-name="taxAuthGeoId"/>
+			<key-map field-name="taxAuthPartyId" rel-field-name="taxAuthPartyId"/>
+			<entity-condition>
+				<condition-expr field-name="thruDate" operator="equals" value="" entity-alias="PTAI"/>
+			</entity-condition>
+		</view-link>
+		
+		<view-link rel-entity-alias="TARP" entity-alias="PAY">
+			<key-map field-name="taxAuthorityRateSeqId" rel-field-name="taxAuthorityRateSeqId"/>
+		</view-link>
+		
+		<entity-condition>
+			<condition-expr field-name="paymentTypeId" operator="equals" value="FEE_TAX_BANK_PAYMENT" entity-alias="PAY"/>
+		</entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="VoucherTotalAndInv" package-name="com.olbius.accounting">
+		<member-entity entity-alias="VOU" entity-name="Voucher"></member-entity>
+		<member-entity entity-alias="VOUINV" entity-name="VoucherInvoice"></member-entity>
+		<member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+		<member-entity entity-alias="INV_TYP" entity-name="InvoiceType"></member-entity>
+				
+		<alias name="voucherNumber" field="voucherNumber" entity-alias="VOU" group-by="true"></alias>
+		<alias name="voucherForm" field="voucherForm" entity-alias="VOU" group-by="true"></alias>
+		<alias name="voucherSerial" field="voucherSerial" entity-alias="VOU" group-by="true"></alias>
+		<alias name="totalAmountVoucher" field="totalAmountVoucher" entity-alias="VOU" group-by="true"></alias>
+		<alias name="amount" field="amount" entity-alias="VOU" function="sum"></alias>
+		<alias name="taxAmount" field="taxAmount" entity-alias="VOU" function="sum"></alias>				
+		<alias name="issuedDate" field="issuedDate" entity-alias="VOU" group-by="true" function="date_format" start-function-params="'%Y-%m-%d 00:00:00'"></alias>
+		<alias name="voucherCreatedDate" field="voucherCreatedDate" entity-alias="VOU" group-by="true" function="date_format" start-function-params="'%Y-%m-%d 00:00:00'"></alias>
+		<alias name="partyIdFrom" field="partyIdFrom" entity-alias="INV" group-by="true"></alias>	
+		<alias name="partyId" field="partyId" entity-alias="INV" group-by="true"></alias>
+		<alias name="parentTypeId" field="parentTypeId" entity-alias="INV_TYP" group-by="true"></alias>			
+
+		<view-link rel-entity-alias="VOUINV" entity-alias="VOU">
+			<key-map field-name="voucherId"/>
+		</view-link>
+		<view-link rel-entity-alias="INV" entity-alias="VOUINV">
+			<key-map field-name="invoiceId"/>
+		</view-link>
+		<view-link rel-entity-alias="INV_TYP" entity-alias="INV">
+			<key-map field-name="invoiceTypeId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="VoucherAndInvTotal" package-name="com.olbius.accounting">
+		<member-entity entity-alias="VOU" entity-name="Voucher"></member-entity>
+		<member-entity entity-alias="VOUINV" entity-name="VoucherInvoice"></member-entity>
+		<member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+		<member-entity entity-alias="INV_TYP" entity-name="InvoiceType"></member-entity>
+		<alias-all entity-alias="VOU" group-by="true"></alias-all>
+		
+		<alias name="voucherNumber" field="voucherNumber" entity-alias="VOU" group-by="true"></alias>
+		<alias name="voucherForm" field="voucherForm" entity-alias="VOU" group-by="true"></alias>
+		<alias name="voucherSerial" field="voucherSerial" entity-alias="VOU" group-by="true"></alias>
+		<alias name="totalAmountVoucher" field="totalAmountVoucher" entity-alias="VOU" group-by="true"></alias>
+		<alias name="amount" field="amount" entity-alias="VOU" function="sum"></alias>
+		<alias name="taxAmount" field="taxAmount" entity-alias="VOU" function="sum"></alias>				
+		<alias name="issuedDate" field="issuedDate" entity-alias="VOU" group-by="true" function="date_format" start-function-params="'%Y-%m-%d 00:00:00'"></alias>
+		<alias name="voucherCreatedDate" field="voucherCreatedDate" entity-alias="VOU" group-by="true" function="date_format" start-function-params="'%Y-%m-%d 00:00:00'"></alias>
+		<alias name="invoiceId" field="invoiceId" entity-alias="INV" group-by="true"></alias>
+		<alias name="partyIdFrom" field="partyIdFrom" entity-alias="INV" group-by="true"></alias>	
+		<alias name="partyId" field="partyId" entity-alias="INV" group-by="true"></alias>
+		<alias name="parentTypeId" field="parentTypeId" entity-alias="INV_TYP" group-by="true"></alias>			
+
+		<view-link rel-entity-alias="VOUINV" entity-alias="VOU">
+			<key-map field-name="voucherId"/>
+		</view-link>
+		<view-link rel-entity-alias="INV" entity-alias="VOUINV">
+			<key-map field-name="invoiceId"/>
+		</view-link>
+		<view-link rel-entity-alias="INV_TYP" entity-alias="INV">
+			<key-map field-name="invoiceTypeId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="OrderReceiptNoteDetail" package-name="com.olbius.accounting">
+		<member-entity entity-alias="ORN" entity-name="OrderReceiptNote"></member-entity>
+		<member-entity entity-alias="PTS" entity-name="PosTerminalState"></member-entity>
+		<member-entity entity-alias="UL" entity-name="UserLogin"></member-entity>
+		<member-entity entity-alias="PTYB" entity-name="PartyFullNameDetailSimple"></member-entity>
+		<member-entity entity-alias="PTYE" entity-name="PartyFullNameDetailSimple"></member-entity>
+		<member-entity entity-alias="ORD" entity-name="OrderHeader"></member-entity>
+		<member-entity entity-alias="PR" entity-name="PaymentReceipt"></member-entity>
+		<member-entity entity-alias="PS" entity-name="ProductStore"></member-entity>
+		
+		<alias-all entity-alias="ORN" group-by="true"></alias-all>
+		<alias name="amountNotApply" group-by="true">
+			<complex-alias operator="-">
+				<complex-alias-field field="amount" entity-alias="ORN" default-value="0"/>
+				<complex-alias-field field="amountApplied" entity-alias="ORN" default-value="0"/>
+			</complex-alias>
+		</alias>
+		<alias name="bankName" field="fullName" entity-alias="PTYB" group-by="true"></alias>
+		<alias name="employeeId" field="openedByUserLoginId" entity-alias="PTS" group-by="true"></alias>
+		<alias name="employeeName" field="fullName" entity-alias="PTYE" group-by="true"></alias>
+		<alias name="orderDate" entity-alias="ORD" group-by="true"></alias>
+		<alias name="productStoreId" entity-alias="ORD" group-by="true"></alias>
+		<alias name="storeName" entity-alias="PS" group-by="true"></alias>
+		<alias name="paymentId" function="string-agg" function-params="', '" entity-alias="PR"></alias>
+		
+		<view-link rel-entity-alias="PTS" entity-alias="ORN" rel-optional="true">
+			<key-map field-name="posTerminalStateId"/>
+		</view-link>
+		
+		<view-link rel-entity-alias="PTYB" entity-alias="ORN" rel-optional="true">
+			<key-map field-name="bankId" rel-field-name="partyId"/>
+		</view-link>
+		
+		<view-link rel-entity-alias="UL" entity-alias="PTS" rel-optional="true">
+			<key-map field-name="openedByUserLoginId" rel-field-name="userLoginId"/>
+		</view-link>
+		
+		<view-link rel-entity-alias="PTYE" entity-alias="UL" rel-optional="true">
+			<key-map field-name="partyId"/>
+		</view-link>
+		
+		<view-link rel-entity-alias="ORD" entity-alias="ORN" rel-optional="true">
+			<key-map field-name="orderId"/>
+		</view-link>
+		
+		<view-link rel-entity-alias="PR" entity-alias="ORN" rel-optional="true">
+			<key-map field-name="receiptId"/>
+		</view-link>
+		
+		<view-link rel-entity-alias="PS" entity-alias="ORD" rel-optional="true">
+			<key-map field-name="productStoreId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="GlAccountTypeDefaultDetail" package-name="com.olbius.bacc">
+		<member-entity entity-alias="GAT" entity-name="GlAccountType"></member-entity>
+		<member-entity entity-alias="GA" entity-name="GlAccount"></member-entity>
+		<member-entity entity-alias="GATD" entity-name="GlAccountTypeDefault"></member-entity>
+		<alias-all entity-alias="GATD"></alias-all>
+		<alias name="description" entity-alias="GAT"></alias>
+		<alias name="glAccountCode" field="accountCode" entity-alias="GA"></alias>
+		<alias name="glAccountName" field="accountName" entity-alias="GA"></alias>
+		
+		<view-link rel-entity-alias="GAT" entity-alias="GATD" rel-optional="true">
+			<key-map field-name="glAccountTypeId"/>
+		</view-link>
+		<view-link rel-entity-alias="GA" entity-alias="GATD" rel-optional="true">
+			<key-map field-name="glAccountId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="GlAccountHistoryDetail" package-name="com.olbius.bacc">
+		<member-entity entity-alias="GAH" entity-name="GlAccountHistory"></member-entity>
+		<member-entity entity-alias="CTP" entity-name="CustomTimePeriod"></member-entity>
+		
+		<alias-all entity-alias="GAH"></alias-all>
+		<alias name="parentPeriodId" entity-alias="CTP"></alias>
+		<alias name="isClosed" entity-alias="CTP"></alias>
+		<alias name="fromDate" entity-alias="CTP"></alias>
+		<alias name="thruDate" entity-alias="CTP"></alias>
+		
+		<view-link rel-entity-alias="CTP" entity-alias="GAH" rel-optional="true">
+			<key-map field-name="customTimePeriodId"/>
+			<key-map field-name="organizationPartyId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="InvoiceItemAndVATCategory" package-name="com.olbius.bacc">
+		<member-entity entity-alias="ITEM" entity-name="InvoiceItem"></member-entity>
+		<member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+		<member-entity entity-alias="PCM" entity-name="ProductCategoryMember"></member-entity>
+		<member-entity entity-alias="PROD" entity-name="Product"></member-entity>
+		<member-entity entity-alias="ORDITEM_II" entity-name="OrderItemBilling"></member-entity>
+		<member-entity entity-alias="ORDITEM" entity-name="OrderItem"></member-entity>
+		<member-entity entity-alias="UOM" entity-name="Uom"></member-entity>
+		
+		<alias-all entity-alias="ITEM">
+			<exclude field="taxAuthPartyId"/>
+			<exclude field="taxAuthGeoId"/>
+			<exclude field="taxAuthorityRateSeqId"/>
+			<exclude field="overrideGlAccountId"/>
+			<exclude field="parentInvoiceItemSeqId"/>
+			<exclude field="parentInvoiceId"/>
+			<exclude field="overrideOrgPartyId"/>
+			<exclude field="alternativeAmount"/>
+			<exclude field="alternativeQuantity"/>
+			<exclude field="salesOpportunityId"/>
+			<exclude field="taxableFlag"/>
+			<exclude field="inventoryItemId"/>
+			<exclude field="productFeatureId"/>
+			<exclude field="uomId"/>
+			<exclude field="invoiceItemTypeId"/>
+		</alias-all>
+		<alias name="currencyUomId" entity-alias="INV"></alias>
+		<alias name="productCategoryId" entity-alias="PCM"></alias>
+		<alias name="productName" entity-alias="PROD"></alias>
+		<alias name="productCode" entity-alias="PROD"></alias>
+		<alias name="quantityUomId" entity-alias="ORDITEM"></alias>
+		<alias name="uomAbbreviation" field="abbreviation"  entity-alias="UOM"></alias>
+		<alias name="uomDescription" field="description" entity-alias="UOM"></alias>
+		<alias name="amountNotTax">
+			<complex-alias operator="*">
+				<complex-alias-field default-value="1" field="quantity" entity-alias="ITEM"/>
+				<complex-alias-field default-value="1" field="amount" entity-alias="ITEM"/>
+			</complex-alias>
+		</alias>
+		<alias name="amountTaxInc">
+			<complex-alias operator="*">
+				<complex-alias-field default-value="1" field="quantity" entity-alias="ITEM"/>
+				<complex-alias-field default-value="1" field="amount" entity-alias="ITEM"/>
+			</complex-alias>
+		</alias>
+		
+		<view-link rel-entity-alias="PCM" entity-alias="ITEM">
+			<key-map field-name="productId"/>
+			<entity-condition>
+				<condition-list combine="and">
+					<condition-expr field-name="taxAuthorityRateSeqId" entity-alias="ITEM" operator="equals" value=""/>
+					<condition-expr field-name="productCategoryId" entity-alias="PCM" operator="in" value="TAX_VAT_0,TAX_VAT_KCT"/>
+					<condition-expr field-name="thruDate" entity-alias="PCM" operator="equals" value=""/>
+				</condition-list>
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="INV" entity-alias="ITEM">
+			<key-map field-name="invoiceId"/>
+		</view-link>
+		<view-link rel-entity-alias="PROD" entity-alias="ITEM">
+			<key-map field-name="productId"/>
+		</view-link>
+		<view-link rel-entity-alias="ORDITEM_II" entity-alias="ITEM">
+			<key-map field-name="invoiceId"/>
+			<key-map field-name="invoiceItemSeqId"/>
+		</view-link>
+		<view-link rel-entity-alias="ORDITEM" entity-alias="ORDITEM_II">
+			<key-map field-name="orderId"/>
+			<key-map field-name="orderItemSeqId"/>
+		</view-link>
+		<view-link rel-entity-alias="UOM" entity-alias="ORDITEM">
+			<key-map field-name="quantityUomId" rel-field-name="uomId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="InvoiceItemAndVATCategorySum" package-name="com.olbius.bacc">
+		<member-entity entity-alias="II" entity-name="InvoiceItemAndVATCategory"></member-entity>
+		<alias-all entity-alias="II" group-by="true">
+			<exclude field="amountNotTax"/>
+			<exclude field="amountTaxInc"/>
+			<exclude field="quantity"/>
+			<exclude field="invoiceId"/>
+			<exclude field="invoiceItemSeqId"/>
+		</alias-all>
+		<alias name="quantity" entity-alias="II" function="sum"></alias>
+		<alias name="invoiceId" entity-alias="II" group-by="true"></alias>
+		<alias name="amountNotTax" entity-alias="II" function="sum"></alias>
+		<alias name="amountTaxInc" entity-alias="II" function="sum"></alias>
+	</view-entity>
+	
+    <view-entity entity-name="AcctgTransGlAccountSums"
+            package-name="org.ofbiz.accounting.ledger"
+            title="Sum of AcctgTransEntry entity amounts grouped by glAccountId, debitCreditFlag">
+      <member-entity entity-alias="ATE" entity-name="AcctgTransEntry"/>
+      <member-entity entity-alias="ACT" entity-name="AcctgTrans"/>      
+      <alias entity-alias="ATE" name="glAccountId" group-by="true"/>     
+      <alias entity-alias="ACT" name="acctgTransTypeId" group-by="false"/>
+      <alias entity-alias="ATE" name="debitCreditFlag" group-by="true"/>
+      <alias entity-alias="ATE" name="amount" function="sum"/>
+      <alias entity-alias="ACT" name="isPosted" group-by="false"/>
+      <alias entity-alias="ACT" name="transactionDate" group-by="false"/> <!-- so we can select the sum by date -->
+      <view-link entity-alias="ATE" rel-entity-alias="ACT">
+        <key-map field-name="acctgTransId"/>
+      </view-link>
+    </view-entity>
+    
+    <view-entity entity-name="ReturnItemBillingMinItemSeq" package-name="com.olbius.accounting">
+    	<member-entity entity-alias="RIB" entity-name="ReturnItemBilling"/>
+    	<alias name="returnId" entity-alias="RIB" group-by="true"></alias>
+    	<alias name="invoiceId" entity-alias="RIB" group-by="true"></alias>
+    	<alias name="returnItemSeqId" entity-alias="RIB" function="min"></alias>
+    </view-entity>
+    
+    <view-entity entity-name="ReturnInvoicePaymentDetail" package-name="com.olbius.accounting">
+    	<member-entity entity-alias="RIBM" entity-name="ReturnItemBillingMinItemSeq"></member-entity>
+    	<member-entity entity-alias="PA" entity-name="PaymentApplication"></member-entity>
+    	<member-entity entity-alias="P" entity-name="Payment"></member-entity>
+    	<member-entity entity-alias="RH" entity-name="ReturnHeader"></member-entity>
+    	<member-entity entity-alias="UL" entity-name="UserLogin"></member-entity>
+    	
+    	<alias-all entity-alias="RIBM"></alias-all>
+    	<alias name="paymentId" entity-alias="PA"></alias>
+    	<alias name="partyId" entity-alias="UL"></alias>
+    	
+    	<view-link rel-entity-alias="RH" entity-alias="RIBM">
+    		<key-map field-name="returnId"/>
+    	</view-link>
+    	
+    	<view-link rel-entity-alias="PA" entity-alias="RIBM" rel-optional="true">
+    		<key-map field-name="invoiceId"/>
+    	</view-link>
+    	
+    	<view-link rel-entity-alias="P" entity-alias="PA">
+    		<key-map field-name="paymentId"/>
+    		<entity-condition>
+    			<condition-expr field-name="paymentTypeId" operator="equals" value="CUSTOMER_REFUND" entity-alias="P"/>
+    		</entity-condition>
+    	</view-link>
+    	
+    	<view-link rel-entity-alias="UL" entity-alias="RH" rel-optional="true">
+    		<key-map field-name="createdBy" rel-field-name="userLoginId"/>
+    	</view-link>
+    </view-entity>
+    <entity entity-name="GlAccountHistoryAccumulate"
+            package-name="com.olbius.bacc"
+            title="GL Account History Accumulate">
+        <field name="glAccountId" type="id-ne"></field>
+        <field name="organizationPartyId" type="id-ne"></field>
+        <field name="customTimePeriodId" type="id-ne"></field>
+        <field name="postedDebits" type="currency-amount"></field>
+        <field name="postedCredits" type="currency-amount"></field>
+        <prim-key field="glAccountId"/>
+        <prim-key field="organizationPartyId"/>
+        <prim-key field="customTimePeriodId"/>
+        <relation type="one" fk-name="GLACCT_HST_ACC_GLA" rel-entity-name="GlAccount">
+            <key-map field-name="glAccountId"/>
+        </relation>
+        <relation type="one" fk-name="GLACCT_HST_ACC_PARTY" rel-entity-name="Party">
+            <key-map field-name="organizationPartyId" rel-field-name="partyId"/>
+        </relation>
+        <relation type="one" fk-name="GLACCT_HST_ACC_CTP" rel-entity-name="CustomTimePeriod">
+            <key-map field-name="customTimePeriodId"/>
+        </relation>
+    </entity>
+    <view-entity entity-name="OrderItemIssuance" package-name="com.olbius.accounting">
+        <member-entity entity-alias="OIB" entity-name="OrderItemBilling"></member-entity>
+        <member-entity entity-alias="IIS" entity-name="ItemIssuance"></member-entity>
+        <alias name="orderId" entity-alias="OIB" ></alias>
+        <alias name="invoiceId" entity-alias="OIB" ></alias>
+        <alias name="invoiceItemSeqId" entity-alias="OIB" ></alias>
+        <alias name="shipmentId" entity-alias="IIS" ></alias>
+
+        <view-link rel-entity-alias="OIB" entity-alias="IIS" rel-optional="true">
+            <key-map field-name="itemIssuanceId"/>
+            <key-map field-name="orderId"/>
+            <key-map field-name="orderItemSeqId"/>
+        </view-link>
+    </view-entity>
+    <view-entity entity-name="ShipmentItemBillingAndII" package-name="com.olbius.accounting">
+        <member-entity entity-alias="SMT" entity-name="Shipment"></member-entity>
+        <member-entity entity-alias="OIIS" entity-name="OrderItemIssuance"></member-entity>
+        <member-entity entity-alias="II" entity-name="InvoiceItem"></member-entity>
+        <member-entity entity-alias="PROD" entity-name="Product"></member-entity>
+        <alias-all entity-alias="OIIS"></alias-all>
+        <alias-all entity-alias="II"></alias-all>
+        <alias name="productCode" entity-alias="PROD"></alias>
+        <alias name="productName" entity-alias="PROD"></alias>
+        <alias name="statusId" entity-alias="SMT"></alias>
+        <alias name="subTotal">
+            <complex-alias operator="*">
+                <complex-alias-field field="quantity" entity-alias="II" default-value="1"/>
+                <complex-alias-field field="amount" entity-alias="II" default-value="0"/>
+            </complex-alias>
+        </alias>
+        <view-link rel-entity-alias="OIIS" entity-alias="SMT">
+            <key-map field-name="shipmentId"/>
+        </view-link>
+        <view-link rel-entity-alias="II" entity-alias="OIIS">
+            <key-map field-name="invoiceItemSeqId"/>
+            <key-map field-name="invoiceId"/>
+        </view-link>
+        <view-link rel-entity-alias="PROD" entity-alias="II">
+            <key-map field-name="productId"/>
+        </view-link>
+    </view-entity>
+
+    <view-entity entity-name="AcctgTransAndEntry" package-name="com.olbius.accounting">
+        <member-entity entity-alias="ACT" entity-name="AcctgTrans"></member-entity>
+        <member-entity entity-alias="ATE" entity-name="AcctgTransEntry"></member-entity>
+
+        <alias name="productId" entity-alias="ATE" distinct="true"></alias>
+        <alias name="shipmentId" entity-alias="ACT" distinct="true"></alias>
+        <alias name="acctgTransId" entity-alias="ACT" distinct="true"></alias>
+        <alias name="amount" entity-alias="ATE" distinct="true"></alias>
+
+        <view-link rel-entity-alias="ATE" entity-alias="ACT">
+            <key-map field-name="acctgTransId"/>
+        </view-link>
+        <entity-condition>
+            <condition-expr entity-alias="ACT" field-name="acctgTransTypeId" value="SALES_SHIPMENT" operator="equals" />
+        </entity-condition>
+    </view-entity>
+
+    <view-entity entity-name="AcctgTransAndEntryByInventoryItem" package-name="com.olbius.accounting">
+        <member-entity entity-alias="ACT" entity-name="AcctgTrans"></member-entity>
+        <member-entity entity-alias="ATE" entity-name="AcctgTransEntry"></member-entity>
+
+        <alias name="productId" entity-alias="ATE" group-by="true"></alias>
+        <alias name="shipmentId" entity-alias="ACT" group-by="true"></alias>
+        <alias name="acctgTransId" entity-alias="ACT" group-by="true"></alias>
+        <alias name="amount" entity-alias="ATE" group-by="true"></alias>
+        <alias name="inventoryItemId" entity-alias="ATE" group-by="true"/>
+
+        <view-link rel-entity-alias="ATE" entity-alias="ACT">
+            <key-map field-name="acctgTransId"/>
+        </view-link>
+        <entity-condition>
+            <condition-expr entity-alias="ACT" field-name="acctgTransTypeId" value="SALES_SHIPMENT" operator="equals" />
+        </entity-condition>
+    </view-entity>
+
+    <view-entity entity-name="InvoiceItemIssuranceView" package-name="com.olbius.accounting">
+        <member-entity entity-alias="OII" entity-name="OrderItemIssuance"/>
+        <member-entity entity-alias="ITEM" entity-name="InvoiceItem"/>
+        <alias-all entity-alias="OII"/>
+        <alias name="productId" entity-alias="ITEM"/>
+        <alias name="quantity" entity-alias="ITEM"/>
+        <alias name="inventoryItemId" entity-alias="ITEM"/>
+        <view-link entity-alias="OII" rel-entity-alias="ITEM">
+            <key-map field-name="invoiceId"/>
+            <key-map field-name="invoiceItemSeqId"/>
+        </view-link>
+    </view-entity>
+
+    <view-entity entity-name="InvoiceShipmentItemAndAcctgTrans" package-name="com.olbius.accounting">
+        <member-entity entity-alias="OII" entity-name="InvoiceItemIssuranceView"></member-entity>
+        <member-entity entity-alias="ACC" entity-name="AcctgTransAndEntryByInventoryItem"/>
+        <member-entity entity-alias="ITEM" entity-name="ShipmentItem"/>
+        <alias-all entity-alias="OII"/>
+        <alias name="amount" entity-alias="ACC"/>
+        <alias name="shipmentItemSeqId" entity-alias="ITEM"/>
+        <view-link entity-alias="OII" rel-entity-alias="ACC">
+            <key-map field-name="shipmentId"/>
+            <key-map field-name="inventoryItemId"/>
+        </view-link>
+        <view-link entity-alias="OII" rel-entity-alias="ITEM">
+            <key-map field-name="shipmentId"/>
+            <key-map field-name="productId"/>
+        </view-link>
+    </view-entity>
+
+    <view-entity entity-name="ShipmentItemAcctgTrans" package-name="com.olbius.accounting">
+        <member-entity entity-alias="SMI" entity-name="ShipmentItem"></member-entity>
+        <member-entity entity-alias="ATAE" entity-name="AcctgTransAndEntry"></member-entity>
+        <alias name="productId" entity-alias="SMI" group-by="true"></alias>
+        <alias name="shipmentItemSeqId" entity-alias="SMI" group-by="true"></alias>
+        <alias name="shipmentId" entity-alias="SMI" group-by="true"></alias>
+        <alias name="quantity" entity-alias="SMI" group-by="true"></alias>
+        <alias name="acctgTransId" entity-alias="ATAE" group-by="true"></alias>
+        <alias name="amount" entity-alias="ATAE" group-by="true"></alias>
+        <view-link rel-entity-alias="ATAE" entity-alias="SMI">
+            <key-map field-name="shipmentId"/>
+            <key-map field-name="productId"/>
+        </view-link>
+    </view-entity>
+
+	<view-entity entity-name="VoucherAndInvDetail" package-name="com.olbius.accounting">
+		<member-entity entity-alias="VOU" entity-name="Voucher"></member-entity>
+		<member-entity entity-alias="VOUINV" entity-name="VoucherInvoice"></member-entity>
+		<member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+		<member-entity entity-alias="INV_TYP" entity-name="InvoiceType"></member-entity>
+		<member-entity entity-alias="INV_FROM" entity-name="PartyFullNameDetailSimple"></member-entity>
+		<member-entity entity-alias="INV_TO" entity-name="PartyFullNameDetailSimple"></member-entity>
+        <member-entity entity-alias="PRS" entity-name="ProductStore"></member-entity>
+        <member-entity entity-alias="FA" entity-name="Facility"></member-entity>
+        <member-entity entity-alias="OIR" entity-name="OrderInvoiceReference"></member-entity>
+        <member-entity entity-alias="OH" entity-name="OrderHeader"></member-entity>
+		<alias-all entity-alias="VOU"></alias-all>
+		<alias name="productStoreId" entity-alias="PRS"></alias>
+		<alias name="storeName" entity-alias="PRS"></alias>
+        <alias name="facilityId" entity-alias="FA"></alias>
+        <alias name="facilityName" entity-alias="FA"></alias>
+        <alias name="orderId" entity-alias="OH"/>
+        <alias name="externalId" entity-alias="OH"/>
+		<alias name="description" entity-alias="INV"></alias>				
+		<alias name="currencyUomId" entity-alias="INV"></alias>
+		<alias name="newStatusId" entity-alias="INV"></alias>
+		<alias name="invoiceId" entity-alias="VOUINV"></alias>
+        <alias name="invoiceTypeId" entity-alias="INV_TYP" ></alias>
+		<alias name="invoiceTypeDesc" field="description" entity-alias="INV_TYP"></alias>
+		<alias name="fullNameFrom" field="fullName" entity-alias="INV_FROM" ></alias>
+		<alias name="fullNameTo" field="fullName" entity-alias="INV_TO" ></alias>
+		<alias name="partyIdFrom" field="partyIdFrom" entity-alias="INV" ></alias>
+		<alias name="partyIdTo" field="partyId" entity-alias="INV" ></alias>
+
+		<alias name="totalAmount">
+			<complex-alias operator="+">
+				<complex-alias-field entity-alias="VOU" field="amount" default-value="0"/>
+				<complex-alias-field entity-alias="VOU" field="taxAmount" default-value="0"/>
+			</complex-alias>
+		</alias>	
+		<view-link rel-entity-alias="VOUINV" entity-alias="VOU">
+			<key-map field-name="voucherId"/>
+		</view-link>
+		<view-link rel-entity-alias="INV" entity-alias="VOUINV">
+			<key-map field-name="invoiceId"/>
+		</view-link>
+		<view-link rel-entity-alias="INV_TYP" entity-alias="INV">
+			<key-map field-name="invoiceTypeId"/>
+		</view-link>
+		<view-link rel-entity-alias="INV_FROM" entity-alias="INV">
+			<key-map field-name="partyIdFrom" rel-field-name="partyId"/>
+		</view-link>
+		<view-link rel-entity-alias="INV_TO" entity-alias="INV">
+			<key-map field-name="partyId"/>
+		</view-link>
+		<view-link rel-entity-alias="PRS" entity-alias="INV" rel-optional="true">
+			<key-map field-name="productStoreId"/>		
+		</view-link>
+        <view-link rel-entity-alias="FA" entity-alias="INV" rel-optional="true">
+            <key-map field-name="facilityId"/>
+        </view-link>
+        <view-link rel-entity-alias="OIR" entity-alias="INV" rel-optional="true">
+            <key-map field-name="invoiceId"/>
+        </view-link>
+        <view-link rel-entity-alias="OH" entity-alias="OIR" rel-optional="true">
+            <key-map field-name="orderId"/>
+        </view-link>
+    </view-entity>
+
+    <view-entity entity-name="InvoiceAndTotalAndPaymentView" package-name="com.olbius.accounting">
+        <member-entity entity-alias="IATA" entity-name="InvoiceAndTotalAmountView"></member-entity>
+        <member-entity entity-alias="PA" entity-name="PaymentApplication"></member-entity>
+        <member-entity entity-alias="P" entity-name="Payment"></member-entity>
+        <alias-all entity-alias="IATA"/>
+        <alias name="paymentStatusId" field="statusId" entity-alias="P"/>
+        <alias name="amountApplied" entity-alias="PA"/>
+        <view-link entity-alias="IATA" rel-entity-alias="PA">
+            <key-map field-name="invoiceId"/>
+        </view-link>
+        <view-link entity-alias="PA" rel-entity-alias="P">
+            <key-map field-name="paymentId"/>
+        </view-link>
+    </view-entity>
+    <view-entity entity-name="CustomerTimePaymentInfoView" package-name="com.olbius.accounting">
+        <member-entity entity-alias="CTP" entity-name="CustomerTimePayment"></member-entity>
+        <member-entity entity-alias="PC" entity-name="PartyFullNameDetailSimple"></member-entity>
+        <alias-all entity-alias="CTP"/>
+        <alias name="partyName" field="fullName" entity-alias="PC"/>
+        <view-link entity-alias="CTP" rel-entity-alias="PC">
+            <key-map field-name="partyId"/>
+        </view-link>
+    </view-entity>
+
+    <view-entity entity-name="InvoiceItemProductWithTaxView" package-name="com.olbius.accounting">
+        <member-entity entity-alias="INV" entity-name="Invoice"/>
+        <member-entity entity-alias="ITEM" entity-name="InvoiceItem"/>
+        <member-entity entity-alias="TAX" entity-name="InvoiceItemTaxView"/>
+        <member-entity entity-alias="PROD" entity-name="Product"/>
+        <alias name="invoiceId" entity-alias="INV"/>
+        <alias name="productCode" entity-alias="PROD"/>
+        <alias name="productName" entity-alias="PROD"/>
+        <alias name="quantityUomId" entity-alias="ITEM"/>
+        <alias name="quantity" entity-alias="ITEM"/>
+        <alias name="amount" entity-alias="ITEM"/>
+        <alias name="currencyUomId" entity-alias="INV"/>
+        <alias name="taxPercentage" entity-alias="TAX"/>
+        <alias name="taxDescription" entity-alias="TAX"/>
+        <alias name="totalTaxAmount" field="totalAmount" entity-alias="TAX"/>
+        <alias name="taxAuthorityRateSeqId" entity-alias="TAX"/>
+        <alias name="amountNotTax">
+            <complex-alias operator="*">
+                <complex-alias-field entity-alias="ITEM" field="quantity" default-value="0"/>
+                <complex-alias-field entity-alias="ITEM" field="amount" default-value="0"/>
+            </complex-alias>
+        </alias>
+        <alias name="amountTaxInc">
+            <complex-alias operator="+">
+                <complex-alias operator="*">
+                    <complex-alias-field entity-alias="ITEM" field="quantity" default-value="0"/>
+                    <complex-alias-field entity-alias="ITEM" field="amount" default-value="0"/>
+                </complex-alias>
+                <complex-alias-field entity-alias="TAX" field="totalAmount" default-value="0"/>
+            </complex-alias>
+        </alias>
+        <view-link entity-alias="INV" rel-entity-alias="ITEM">
+            <key-map field-name="invoiceId"/>
+        </view-link>
+        <view-link entity-alias="ITEM" rel-entity-alias="TAX">
+            <key-map field-name="invoiceId"/>
+            <key-map field-name="invoiceItemSeqId" rel-field-name="parentInvoiceItemSeqId"/>
+        </view-link>
+        <view-link entity-alias="ITEM" rel-entity-alias="PROD">
+            <key-map field-name="productId"/>
+        </view-link>
+    </view-entity>
+    <view-entity entity-name="InvoiceItemTaxView" package-name="com.olbius.accounting">
+        <member-entity entity-alias="ITEM" entity-name="InvoiceItem"></member-entity>
+        <member-entity entity-alias="TAX" entity-name="TaxAuthorityRateProduct"></member-entity>
+        <alias name="invoiceId" entity-alias="ITEM" group-by="true"/>
+        <alias name="productId" group-by="true" entity-alias="ITEM"/>
+        <alias name="parentInvoiceItemSeqId" group-by="true" entity-alias="ITEM"/>
+        <alias name="taxPercentage" entity-alias="TAX" group-by="true"/>
+        <alias name="taxDescription" field="description" group-by="true" entity-alias="TAX"/>
+        <alias name="totalAmount" function="sum">
+            <complex-alias operator="*">
+                <complex-alias-field entity-alias="ITEM" field="amount" default-value="0"/>
+                <complex-alias-field entity-alias="ITEM" field="quantity" default-value="1"/>
+            </complex-alias>
+        </alias>
+        <alias name="taxAuthGeoId" group-by="true" entity-alias="ITEM"/>
+        <alias name="taxAuthorityRateSeqId" group-by="true" entity-alias="ITEM"/>
+        <view-link entity-alias="ITEM" rel-entity-alias="TAX" rel-optional="false">
+            <key-map field-name="taxAuthorityRateSeqId"/>
+        </view-link>
+    </view-entity>
+    <view-entity entity-name="InvoiceAndTotalAmountView" package-name="com.olbius.accounting">
+        <member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+        <member-entity entity-alias="ITEM" entity-name="InvoiceItem"></member-entity>
+        <alias name="invoiceId" entity-alias="INV" group-by="true"/>
+        <alias name="invoiceTypeId" entity-alias="INV" group-by="true"></alias>
+        <alias name="partyIdFrom" entity-alias="INV" group-by="true"></alias>
+        <alias name="partyId" entity-alias="INV" group-by="true"></alias>
+        <alias name="invoiceStatusId" field="statusId" entity-alias="INV" group-by="true"></alias>
+        <alias name="invoiceDate" entity-alias="INV" group-by="true"></alias>
+        <alias name="dueDate" entity-alias="INV" group-by="true"></alias>
+        <alias name="currencyUomId" entity-alias="INV" group-by="true"></alias>
+        <alias name="newStatusId" entity-alias="INV" group-by="true"></alias>
+        <alias name="totalAmount" function="sum">
+            <complex-alias operator="*">
+                <complex-alias-field entity-alias="ITEM" field="amount" default-value="1"/>
+                <complex-alias-field entity-alias="ITEM" field="quantity" default-value="1"/>
+            </complex-alias>
+        </alias>
+        <view-link rel-entity-alias="ITEM" entity-alias="INV">
+            <key-map field-name="invoiceId"/>
+        </view-link>
+    </view-entity>
+
+    <view-entity entity-name="InvoiceItemPromoView" package-name="com.olbius.accounting">
+        <member-entity entity-alias="ITEM" entity-name="InvoiceItem"></member-entity>
+        <alias name="invoiceId" entity-alias="ITEM"/>
+        <alias name="invoiceItemTypeId" entity-alias="ITEM"/>
+        <alias name="parentInvoiceId" group-by="true" entity-alias="ITEM"/>
+        <alias name="parentInvoiceItemSeqId" group-by="true" entity-alias="ITEM"/>
+        <alias name="totalAmount" function="sum">
+            <complex-alias operator="*">
+                <complex-alias-field entity-alias="ITEM" field="amount" default-value="0"/>
+                <complex-alias-field entity-alias="ITEM" field="quantity" default-value="0"/>
+            </complex-alias>
+        </alias>
+        <alias name="taxAuthGeoId" group-by="true" entity-alias="ITEM"/>
+        <alias name="taxAuthorityRateSeqId" group-by="true" entity-alias="ITEM"/>
+        <entity-condition>
+            <condition-expr field-name="taxAuthorityRateSeqId" operator="equals" value="" entity-alias="ITEM"/>
+            <condition-expr field-name="parentInvoiceItemSeqId" operator="not-equals" value="" entity-alias="ITEM"/>
+        </entity-condition>
+    </view-entity>
+
+    <view-entity entity-name="InvoiceItemTaxSumPromoSumWithProduct" package-name="com.olbius.accounting">
+        <member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+        <member-entity entity-alias="ITEM" entity-name="InvoiceItem"></member-entity>
+        <member-entity entity-alias="TAX" entity-name="InvoiceItemTaxView"></member-entity>
+        <member-entity entity-alias="PROMO" entity-name="InvoiceItemPromoView"></member-entity>
+        <alias name="invoiceId" entity-alias="INV" group-by="true"/>
+        <alias name="taxAuthorityRateSeqId" entity-alias="TAX" group-by="true"/>
+        <alias name="itemAmount" function="sum">
+            <complex-alias operator="*">
+                <complex-alias-field entity-alias="ITEM" field="amount" default-value="1"/>
+                <complex-alias-field entity-alias="ITEM" field="quantity" default-value="1"/>
+            </complex-alias>
+        </alias>
+        <alias name="taxAmount" function="sum" field="totalAmount" entity-alias="TAX"/>
+        <alias name="promoAmount" function="sum" field="totalAmount" entity-alias="PROMO"/>
+        <view-link entity-alias="INV" rel-entity-alias="ITEM" rel-optional="false">
+            <key-map field-name="invoiceId"/>
+        </view-link>
+        <view-link entity-alias="ITEM" rel-entity-alias="TAX">
+            <key-map field-name="invoiceId"/>
+            <key-map field-name="invoiceItemSeqId" rel-field-name="parentInvoiceItemSeqId"/>
+        </view-link>
+        <view-link entity-alias="ITEM" rel-entity-alias="PROMO" rel-optional="true">
+            <key-map field-name="invoiceId"/>
+            <key-map field-name="invoiceItemSeqId" rel-field-name="parentInvoiceItemSeqId"/>
+        </view-link>
+    </view-entity>
+    <view-entity entity-name="InvoiceDiscountAndPromoView" package-name="com.olbius.accounting">
+        <member-entity entity-alias="II" entity-name="InvoiceItem"></member-entity>
+        <member-entity entity-alias="IV" entity-name="Invoice"></member-entity>
+        <member-entity entity-alias="PG" entity-name="PartyGroup"></member-entity>
+        <member-entity entity-alias="PG1" entity-name="PartyGroup"></member-entity>
+        <member-entity entity-alias="OAB" entity-name="OrderAdjustmentBilling"></member-entity>
+        <member-entity entity-alias="OA" entity-name="OrderAdjustment"></member-entity>
+        <alias name="partyId" entity-alias="IV" group-by="true"/>
+        <alias name="partyIdFrom" entity-alias="IV"/>
+        <alias name="statusId" entity-alias="IV"/>
+        <alias name="newStatusId" entity-alias="IV" group-by="true"/>
+        <alias name="partyName" field="groupName" entity-alias="PG"/>
+        <alias name="partyFromName" field="groupName" entity-alias="PG1"/>
+        <alias name="description" entity-alias="OA"/>
+        <alias name="productPromoId" entity-alias="OA" group-by="true"/>
+        <alias name="totalAmount" function="sum">
+            <complex-alias operator="*">
+                <complex-alias-field entity-alias="II" field="amount" default-value="0"/>
+                <complex-alias-field entity-alias="II" field="quantity" default-value="0"/>
+            </complex-alias>
+        </alias>
+        <view-link entity-alias="II" rel-entity-alias="IV">
+            <key-map field-name="invoiceId"/>
+        </view-link>
+        <view-link entity-alias="IV" rel-entity-alias="PG">
+            <key-map field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="IV" rel-entity-alias="PG1">
+            <key-map field-name="partyIdFrom" rel-field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="II" rel-entity-alias="OAB">
+            <key-map field-name="invoiceId"/>
+            <key-map field-name="invoiceItemSeqId"/>
+        </view-link>
+        <view-link entity-alias="OAB" rel-entity-alias="OA">
+            <key-map field-name="orderAdjustmentId"/>
+        </view-link>
+        <entity-condition>
+            <condition-expr entity-alias="II" field-name="invoiceItemTypeId" operator="in" value="PITM_CUSTMARKET_COST,ITM_DISCOUNT_ADJ,PITM_MONEYOTHER_ITEM,PITM_CUSTMARKET_COST,SRT_DISCOUNT_ADJ,SRT_PROMOTION_ADJ"/>
+        </entity-condition>
+    </view-entity>
+    <view-entity entity-name="InvoiceItemDiscountAndPromoView" package-name="com.olbius.accounting">
+        <member-entity entity-alias="II" entity-name="InvoiceItem"></member-entity>
+        <member-entity entity-alias="IV" entity-name="Invoice"/>
+        <member-entity entity-alias="P" entity-name="Product"/>
+        <member-entity entity-alias="OAB" entity-name="OrderAdjustmentBilling"></member-entity>
+        <member-entity entity-alias="OA" entity-name="OrderAdjustment"></member-entity>
+
+        <alias name="amount" entity-alias="II"/>
+        <alias name="invoiceItemTypeId" entity-alias="II"/>
+        <alias name="quantity" entity-alias="II"/>
+        <alias name="invoiceId" entity-alias="II"/>
+        <alias name="partyId" entity-alias="IV"/>
+        <alias name="partyIdFrom" entity-alias="IV"/>
+        <alias name="productPromoId" entity-alias="OA"/>
+        <alias name="description" entity-alias="OA"/>
+        <alias name="productCode" entity-alias="P"/>
+        <alias name="productId" entity-alias="II"/>
+        <alias name="statusId" entity-alias="IV"/>
+        <alias name="newStatusId" entity-alias="IV"/>
+        <alias name="productName" entity-alias="P"/>
+        <alias name="totalAmount">
+            <complex-alias operator="*">
+                <complex-alias-field entity-alias="II" field="amount" default-value="0"/>
+                <complex-alias-field entity-alias="II" field="quantity" default-value="0"/>
+            </complex-alias>
+        </alias>
+        <view-link entity-alias="II" rel-entity-alias="IV">
+            <key-map field-name="invoiceId"/>
+        </view-link>
+        <view-link entity-alias="II" rel-entity-alias="P" rel-optional="true">
+            <key-map field-name="productId"/>
+        </view-link>
+        <view-link entity-alias="II" rel-entity-alias="OAB">
+            <key-map field-name="invoiceId"/>
+            <key-map field-name="invoiceItemSeqId"/>
+        </view-link>
+        <view-link entity-alias="OAB" rel-entity-alias="OA">
+            <key-map field-name="orderAdjustmentId"/>
+        </view-link>
+    </view-entity>
+</entitymodel>

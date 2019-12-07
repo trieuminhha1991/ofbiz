@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service-eca xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/service-eca.xsd">
+	<eca service="createEmployee" event="return">
+		<action service="createHrmUserLogin" mode="sync"/>
+	</eca>
+	<eca service="createHrmUserLogin" event="commit">
+		<set field-name="groupId" value="EMPLOYEE"/>
+		<action mode="sync"  service="addUserLoginToSecurityGroup"/>
+	</eca>
+	
+	<!-- <eca service="createOrgUnit" event="commit">
+		 <condition operator="is-not-empty" field-name="address1"/>
+		 <set field-name="partyId" env-name="orgUnitId"/>
+		 <action mode="sync" service="createOrgPostalAddr" />
+	</eca>
+	<eca service="createOrgUnit" event="commit">
+		 <condition operator="is-not-empty" field-name="emailAddress"/>
+		 <set field-name="partyId" env-name="orgUnitId"/>
+		 <action mode="sync" service="createOrgEmail" />
+	</eca>
+	<eca service="createOrgUnit" event="commit">
+		 <condition operator="is-not-empty" field-name="contactNumber"/>
+		 <set field-name="partyId" env-name="orgUnitId"/>		 
+		 <action mode="sync" service="createOrgTel" />
+	</eca>
+	
+	<eca service="createOrgUnit" event="commit" >
+		 <condition operator="is-not-empty" field-name="managerId"/>
+		 <condition operator="is-not-empty" field-name="title"/>
+		 <set field-name="partyId" env-name="managerId"/>
+		 <set field-name="roleTypeId" env-name="title"/>
+		 <action mode="sync" service="createPartyRole" />
+	</eca>
+	
+	<eca service="createOrgUnit" event="commit" >
+		 <condition operator="is-not-empty" field-name="parentOrgId"/>
+		 <set field-name="partyId" env-name="parentOrgId"/>
+		 <set field-name="roleTypeId" value="PARENT_ORG"/>
+		 <set field-name="partyIdFrom" env-name="parentOrgId"/>
+		 <set field-name="partyIdTo" env-name="orgUnitId"/>
+		 <set field-name="roleTypeIdFrom" env-name="parentRoleTypeId"/>
+		 <set field-name="roleTypeIdTo" env-name="orgUnitLevel"/>
+		 <set field-name="partyRelationshipTypeId" value="GROUP_ROLLUP" />
+		 <action mode="sync" service="createPartyRelationship" />
+	</eca> -->
+	
+	<eca service="CreateMgrForOrg" event="commit">
+		<condition operator="is-not-empty" field-name="title"/>
+		<condition operator="is-not-empty" field-name="managerId"/>
+		<action mode="sync" service="assignSecGroupManager"/>
+	</eca>
+	
+	
+	<eca service="perpareSalaryPeriod" event="commit">
+		<action mode="sync" service="getSalaryAmountList"/>
+	</eca>
+
+	<eca service="getSalaryAmountList" event="commit">
+		<condition operator="is-not-empty" field-name="salaryAmountList"/>
+		<action mode="sync" service="logPayrollTable"/>
+	</eca>
+	<!-- Training eca -->
+	<eca service="createTrainingProposal" event="commit">
+		<set field-name="partyId" env-name="notiToId"/>
+        <set field-name="header" env-name="header"/>
+        <set field-name="state" env-name="state"/>
+        <set field-name="targetLink" env-name="targetLink" />
+       	<set field-name="action" env-name="action"/>
+       	<set field-name="dateTime" env-name="${dateTime}"/>
+		<action mode="sync" service="createNotification"/>
+	</eca>
+	
+	<eca service="updateCheckProposeSalManPG" event="commit">
+		<condition operator="equals" field-name="statusId" value="REJECT_PG"/>
+		<set field-name="partyId" env-name="${notiToId}"/>
+        <set field-name="header" env-name="${header}"/>
+        <set field-name="state" env-name="${state}"/>
+        <set field-name="targetLink" env-name="${targetLink}" />
+       	<set field-name="action" env-name="${action}"/>
+    </eca>
+    
+    <eca service="createRatingEmpl" event="commit">
+		<set field-name="partyId" env-name="notiToId" />
+		<set field-name="header" env-name="header"/>
+		<set field-name="state" env-name="state"/>
+	</eca>
+	
+	<eca service="checkProposeTraining" event="commit">
+		<set field-name="partyId" env-name="notiToId"/>
+        <set field-name="header" env-name="header"/>
+        <set field-name="state" env-name="state"/>
+        <set field-name="targetLink" env-name="targetLink" />
+       	<set field-name="action" env-name="action"/>
+       	<set field-name="dateTime" env-name="${dateTime}"/>
+		<action mode="sync" service="createNotification"/>
+	</eca>
+	
+	<eca service="checkProposeTraining" event="commit">
+		<set field-name="partyId" env-name="returnId"/>
+        <set field-name="header" env-name="header"/>
+        <set field-name="state" env-name="state"/>
+        <set field-name="targetLink" env-name="targetLink" />
+       	<set field-name="action" env-name="action"/>
+       	<set field-name="dateTime" env-name="${dateTime}"/>
+		<action mode="sync" service="createHDNotification"/>
+	</eca>
+    
+	<eca service="checkProposeTraining" event="commit">
+		<set field-name="state" value="close"/>
+		<action mode="sync" service="updateNotification"/>
+	</eca>
+	
+	<eca service="apprTrainingPlanNotification" event="commit">
+		<set field-name="partyId" env-name="notiToId"/>
+        <set field-name="header" env-name="header"/>
+        <set field-name="state" env-name="state"/>
+       	<set field-name="action" env-name="action"/>
+       	<set field-name="dateTime" env-name="${dateTime}"/>
+		<action mode="sync" service="createNotification"/>
+	</eca>
+	
+	<eca service="ratingTrainingResults" event="commit">
+		<set field-name="partyId" env-name="notiToId"/>
+        <set field-name="header" env-name="header"/>
+        <set field-name="state" env-name="state"/>
+        <set field-name="targetLink" env-name="targetLink" />
+       	<set field-name="action" env-name="action"/>
+       	<set field-name="dateTime" env-name="${dateTime}"/>
+		<action mode="sync" service="createNotification"/>
+	</eca>
+	
+	<eca service="EditResultsTraining" event="commit">
+		<set field-name="partyId" env-name="notiToId"/>
+        <set field-name="header" env-name="header"/>
+        <set field-name="state" env-name="state"/>
+        <set field-name="targetLink" env-name="targetLink" />
+       	<set field-name="action" env-name="action"/>
+       	<set field-name="dateTime" env-name="${dateTime}"/>
+		<action mode="sync" service="createNotification"/>
+	</eca>
+	
+	
+	<eca service="createEmployeeTrainingFailed" event="commit">
+		<set field-name="partyId" env-name="notiToId"/>
+        <set field-name="header" env-name="header"/>
+        <set field-name="state" env-name="state"/>
+        <set field-name="targetLink" env-name="targetLink" />
+       	<set field-name="action" env-name="action"/>
+       	<set field-name="dateTime" env-name="${dateTime}"/>
+		<action mode="sync" service="createNotification"/>
+	</eca>
+	
+	<eca service="approveTrainingProposal" event="commit">
+		<set field-name="partyId" env-name="notiToId1"/>
+        <set field-name="header" env-name="header"/>
+        <set field-name="state" env-name="state"/>
+        <set field-name="action" env-name="action"/>
+       	<set field-name="dateTime" env-name="${dateTime}"/>
+		<action mode="sync" service="createHDNotification"/>
+	</eca>
+	<eca service="approveTrainingProposal" event="commit">
+		<set field-name="partyId" env-name="notiToId2"/>
+        <set field-name="header" env-name="header"/>
+        <set field-name="state" env-name="state"/>
+        <set field-name="action" env-name="action"/>
+       	<set field-name="dateTime" env-name="${dateTime}"/>
+		<action mode="sync" service="createHRNotification"/>
+	</eca>
+	<eca service="updateTrainingPlan" event="commit">
+		<set field-name="partyId" env-name="notiToId" />
+		<set field-name="header" env-name="header"/>
+		<set field-name="state" env-name="state"/>
+		<set field-name="targetLink" env-name="targetLink" />
+       	<set field-name="action" env-name="action"/>
+       	<set field-name="dateTime" env-name="${dateTime}"/>
+		<action mode="sync" service="createNotification"/>
+	</eca>
+	<eca service="createRatingEmpl" event="commit">
+		<set field-name="partyId" env-name="notiToId" />
+		<set field-name="header" env-name="header"/>
+		<set field-name="state" env-name="state"/>
+		<set field-name="targetLink" env-name="targetLink" />
+       	<set field-name="action" env-name="action"/>
+       	<set field-name="dateTime" env-name="${dateTime}"/>
+		<action mode="sync" service="createNotification"/>
+	</eca>
+	
+	<eca service="ratingEmployee" event="commit">
+		<set field-name="partyId" env-name="notiToId" />
+		<set field-name="header" env-name="header"/>
+		<set field-name="state" env-name="state"/>
+        <set field-name="targetLink" env-name="targetLink" />
+       	<set field-name="action" env-name="action"/>
+       	<set field-name="dateTime" env-name="${dateTime}"/>
+		<action mode="sync" service="createNotification"/>
+	</eca>
+	
+	<eca service="ratingEmployee" event="commit">
+		<set field-name="ntfId" env-name="ntfId"/>
+		<action mode="sync" service="updateNotification"/>
+	</eca>
+	
+	<eca service="proposeKPI" event="commit">
+		<set field-name="partyId" env-name="notiToId" />
+		<set field-name="header" env-name="header"/>
+		<set field-name="state" env-name="state"/>
+        <set field-name="targetLink" env-name="targetLink" />
+       	<set field-name="action" env-name="action"/>
+       	<set field-name="dateTime" env-name="${dateTime}"/>
+		<action mode="sync" service="createNotification"/>
+	</eca>
+	
+	<eca service="proposeAllKPI" event="commit">
+		<set field-name="partyId" env-name="notiToId" />
+		<set field-name="header" env-name="header"/>
+		<set field-name="state" env-name="state"/>
+        <set field-name="targetLink" env-name="targetLink" />
+       	<set field-name="action" env-name="action"/>
+       	<set field-name="dateTime" env-name="${dateTime}"/>
+		<action mode="sync" service="createNotification"/>
+	</eca>
+	
+	<eca service="assignApplicantToRecruitmentTest" event="commit">
+		<condition field-name="sendTo" operator="is-not-empty" ></condition>
+	 	<condition field-name="authPass" operator="is-not-empty" ></condition>
+	 	<condition field-name="authUser" operator="is-not-empty" ></condition>
+		<set field-name="sendTo" env-name="sendTo"/>
+		<set field-name="authPass" env-name="authPass"/>
+		<set field-name="authUser" env-name="authUser"/>
+		<set field-name="emailTemplateSettingId" value="APPLICANT_INVIT"/>
+		<set field-name="sendFrom" env-name="sendFrom"/>
+		<set field-name="partyIdTo" env-name="partyId"/>
+		<set field-name="subject" env-name="subject" />
+		<set field-name="bodyParameters.partyId" env-name="partyId"/>
+		<set field-name="bodyParameters.address" env-name="address"/>
+		<set field-name="bodyParameters.fromDate" env-name="${fromDate}"/>
+		<set field-name="bodyParameters.thruDate" env-name="${thruDate}"/>
+		<set field-name="bodyParameters.description" env-name="description"/>
+		<set field-name="bodyParameters.emplPositionType" env-name="emplPositionType"/>
+		<action mode="sync" service="sendMailFromTemplateSetting"/>
+	</eca>
+	
+	 <eca service="assignTesterToRecruitmentTest" event="commit">
+	 	<condition field-name="sendTo" operator="is-not-empty" ></condition>
+	 	<condition field-name="authPass" operator="is-not-empty" ></condition>
+	 	<condition field-name="authUser" operator="is-not-empty" ></condition>
+		<set field-name="sendTo" env-name="sendTo"/>
+		<set field-name="authPass" env-name="authPass"/>
+		<set field-name="authUser" env-name="authUser"/>
+		<set field-name="emailTemplateSettingId" value="TESTER_INVIT"/>
+		<set field-name="sendFrom" env-name="sendFrom"/>
+		<set field-name="partyIdTo" env-name="partyId"/>
+		<set field-name="subject" env-name="subject" />
+		<set field-name="bodyParameters.partyId" env-name="partyId"/>
+		<set field-name="bodyParameters.address" env-name="address"/>
+		<set field-name="bodyParameters.fromDate" env-name="${fromDate}"/>
+		<set field-name="bodyParameters.thruDate" env-name="${thruDate}"/>
+		<set field-name="bodyParameters.description" env-name="description"/>
+		<action mode="sync" service="sendMailFromTemplateSetting"/>
+	</eca> 
+	
+	<eca service="assignTesterToRecruitmentTest" event="commit">
+		<set field-name="noteParty" env-name="partyId"/>
+        <set field-name="noteInfo" env-name="noteInfo"/>
+        <set field-name="moreInfoItemName" value="workEffortId"/>
+        <set field-name="moreInfoItemId" env-name="workEffortId"/>
+        <set field-name="moreInfoUrl" value="/hrolbius/control/ListRatedApplicant"/>
+        <action service="createSystemInfoNote" mode="sync"/>
+	</eca>
+	
+	<eca service="createEmplParticipateInsurance" event="commit">
+		<condition operator="is-not-empty" field-name="reportId" />
+		<action mode="sync" service="updateInsuranceReport"/>
+	</eca>
+	<eca service="suspendEmplParticipateInsurance" event="commit">
+		<condition operator="is-not-empty" field-name="reportId" />
+		<action mode="sync" service="updateInsuranceReport"/>
+	</eca>
+</service-eca>

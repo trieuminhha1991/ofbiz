@@ -1,0 +1,454 @@
+<site-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/site-conf.xsd">
+	<include location="component://bi-x/webapp/bi-controller.xml" />
+	<description>Web Pos Component Site Configuration File</description>
+	<errorpage>/error/error.jsp</errorpage>
+	<handler name="java" type="request"
+		class="org.ofbiz.webapp.event.JavaEventHandler" />
+	<handler name="service" type="request"
+		class="org.ofbiz.webapp.event.ServiceEventHandler" />
+	<handler name="service-multi" type="request"
+		class="org.ofbiz.webapp.event.ServiceMultiEventHandler" />
+	<handler name="simple" type="request"
+		class="org.ofbiz.webapp.event.SimpleEventHandler" />
+	<handler name="groovy" type="request"
+		class="org.ofbiz.webapp.event.GroovyEventHandler" />
+	<handler name="jsp" type="view" class="org.ofbiz.webapp.view.JspViewHandler" />
+	<handler name="screen" type="view"
+		class="org.ofbiz.widget.screen.MacroScreenViewHandler" />
+
+	<!-- Events run from here for the first hit in a visit -->
+	<firstvisit>
+		<event name="autoLoginCheck" type="java"
+			path="org.ofbiz.webapp.control.LoginWorker" invoke="autoLoginCheck" />
+	</firstvisit>
+
+	<!-- Events to run on every request before security (chains exempt) -->
+	<preprocessor>
+		<!-- This event allows affilate/distributor entry on any page -->
+		<event name="checkExternalLoginKey" type="java"
+			path="org.ofbiz.webapp.control.LoginWorker" invoke="checkExternalLoginKey" />
+		<event name="keepCartUpdated" type="java"
+			path="org.ofbiz.order.shoppingcart.ShoppingCartEvents" invoke="keepCartUpdated" />
+	</preprocessor>
+
+	<after-login>
+		<event name="keepCartUpdated" type="java"
+			path="org.ofbiz.order.shoppingcart.ShoppingCartEvents" invoke="keepCartUpdated" />
+	</after-login>
+
+	<!-- Security Mappings -->
+	<request-map uri="checkLogin" edit="false">
+		<description>Verify a user is logged in.</description>
+		<security https="true" auth="false" />
+		<event type="java" path="com.olbius.basepos.login.LoginEvents"
+			invoke="checkLogin" />
+		<response name="success" type="view" value="main" />
+		<response name="requirePasswordChange" type="view"
+			value="requirePasswordChange" />
+		<response name="showOpenTerminal" type="request" value="showOpenTerminal"></response>
+		<response name="error" type="view" value="Login" />
+	</request-map>
+	<request-map uri="login">
+		<security https="true" auth="false" />
+		<event type="java" path="com.olbius.basepos.events.WebPosEvents"
+			invoke="posLogin" />
+		<response name="success" type="request-redirect" value="main" />
+		<response name="requirePasswordChange" type="view"
+			value="requirePasswordChange" />
+		<response name="error" type="view" value="Login" />
+	</request-map>
+	<request-map uri="showOpenTerminal">
+		<security https="true" auth="false" />
+		<response name="success" type="view" value="showOpenTerminal"></response>
+	</request-map>
+	<request-map uri="logout">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.webapp.control.LoginWorker"
+			invoke="logout" />
+		<response name="success" type="request-redirect-noparam"
+			value="main" />
+		<response name="error" type="request-redirect-noparam" value="main" />
+	</request-map>
+	<request-map uri="autoLogout">
+		<security https="true" auth="false" />
+		<event type="java" path="org.ofbiz.webapp.control.LoginWorker"
+			invoke="autoLoginRemove" />
+		<response name="success" type="request-redirect-noparam"
+			value="main" />
+		<response name="error" type="request-redirect-noparam" value="main" />
+	</request-map>
+	<request-map uri="forgotPassword">
+		<security https="true" auth="false" />
+		<event type="java" path="org.ofbiz.securityext.login.LoginEvents"
+			invoke="forgotPassword" />
+		<response name="success" type="view" value="forgotPassword" />
+		<response name="error" type="view" value="forgotPassword" />
+	</request-map>
+	<!-- End of Security Mappings -->
+
+	<!-- Common json reponse events, chain these after events to send json reponses -->
+	<!-- Standard json response, uses all compatible request attributes -->
+	<request-map uri="json">
+		<security direct-request="false" />
+		<event type="java" path="org.ofbiz.common.CommonEvents" invoke="jsonResponseFromRequestAttributes" />
+		<response name="success" type="none" />
+	</request-map>
+	<request-map uri="getJSONuiLabelArray">
+		<security https="false" auth="false" />
+		<event type="java" path="org.ofbiz.common.CommonEvents" invoke="getJSONuiLabelArray" />
+		<response name="success" type="none" />
+		<response name="error" type="none" />
+	</request-map>
+	<request-map uri="main">
+		<security https="true" auth="true" />
+		<event type="java" path="com.olbius.basepos.events.WebPosEvents"
+			invoke="existsWebPosSession" />
+		<response name="success" type="view" value="main" />
+		<response name="error" type="view" value="Login" />
+	</request-map>
+	<request-map uri="ListLocales">
+		<security https="true" auth="false" />
+		<response name="success" type="view" value="ListLocales"
+			save-last-view="true" />
+	</request-map>
+	<request-map uri="setSessionLocale">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.common.CommonEvents" invoke="setSessionLocale" />
+		<response name="success" type="request" value="main" />
+		<response name="error" type="request" value="main" />
+	</request-map>
+
+	<!-- User preference mapping -->
+	<request-map uri="setUserPreference">
+		<security https="true" auth="true" />
+		<event type="service" invoke="setUserPreference" />
+		<response name="success" type="view-last" value="main" />
+		<response name="error" type="request" value="main" />
+	</request-map>
+	<request-map uri="ajaxSetUserPreference">
+		<security https="true" auth="true" />
+		<event type="service" invoke="setUserPreference" />
+		<response name="success" type="none" />
+	</request-map>
+	<request-map uri="GetPartyInfo">
+		<security https="true" auth="true" />
+		<event type="java" invoke="getPartyInfoInCart" path="com.olbius.basepos.cart.CartEvents"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="ShowCartWebPOS">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="ShowCartWebPOS" />
+	</request-map>
+	<request-map uri="GetCartInfo">
+		<security https="true" auth="true" />
+		<event type="java" path="com.olbius.basepos.events.WebPosEvents"
+			invoke="getCartInfo"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="ShowCartHeaderWebPOS">
+		<security https="true" auth="true" />
+		<event type="java" path="com.olbius.basepos.events.WebPosEvents"
+			invoke="getCartHeaderInfo"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<!-- Ajax requests -->
+	<request-map uri="Error">
+		<security https="false" auth="false" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="EmptyCart">
+		<security https="true" auth="true" />
+		<event type="java" path="com.olbius.basepos.events.WebPosEvents"
+			invoke="emptyCartAndClearAutoSaveList" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="AddToCart">
+		<security https="true" auth="true" />
+		<event type="java" path="com.olbius.basepos.cart.CartEvents"
+			invoke="addToCart"></event>
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="SetPartyToCart">
+		<security https="true" auth="false" />
+		<event type="java" path="com.olbius.basepos.cart.CartEvents"
+			invoke="setPartyToCart"></event>
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="UpdateCartItem">
+		<security https="true" auth="false" />
+		<event type="java" invoke="updateCartItem" path="com.olbius.basepos.cart.CartEvents"></event>
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="DeleteCartItem">
+		<security https="true" auth="false" />
+		<event type="java" path="com.olbius.basepos.cart.CartEvents"
+			invoke="deleteCartItem" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="ReturnCartItem">
+		<security https="true" auth="false" />
+		<event type="java" path="com.olbius.basepos.cart.CartEvents"
+			invoke="returnCartItem"></event>
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="FindProducts">
+		<security https="true" auth="true" />
+		<event type="java" path="com.olbius.basepos.events.WebPosSearch"
+			invoke="findProducts"></event>
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="FindParties">
+		<security https="true" auth="true" />
+		<event type="java" path="com.olbius.basepos.events.WebPosSearch"
+			invoke="findParties"></event>
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="PayCash">
+		<security https="true" auth="true" />
+		<event type="java" path="com.olbius.basepos.events.PaymentEvents"
+			invoke="payCashNew"></event>
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="CreateOrderToLog">
+		<security https="true" auth="true" />
+		<event type="java" path="com.olbius.basepos.events.WebPosEvents"
+			invoke="createOrderToLog"></event>
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="OpenTerminal">
+		<security https="true" auth="true" />
+		<event type="java" path="com.olbius.basepos.events.WebPosEvents"
+			invoke="openTerminal"></event>
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="CloseTerminal">
+		<security https="true" auth="true" />
+		<event type="java" path="com.olbius.basepos.events.WebPosEvents"
+			invoke="closeTerminal"></event>
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="ProcessPromotionCode">
+		<security https="true" auth="true" />
+		<event type="java" path="com.olbius.basepos.events.WebPosEvents"
+			invoke="processPromotionCode"></event>
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="itemDiscount">
+		<security https="true" auth="true" />
+		<event type="java" path="com.olbius.basepos.cart.CartEvents"
+			invoke="itemDiscount"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="PaidOut">
+		<security https="true" auth="true" />
+		<event type="java" path="com.olbius.basepos.events.ManagerEvents"
+			invoke="paidOut"></event>
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="PaidIn">
+		<security https="true" auth="true" />
+		<event type="java" path="com.olbius.basepos.events.ManagerEvents"
+			invoke="paidIn"></event>
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<!-- hold Cart -->
+	<request-map uri="holdCart">
+		<security https="true" auth="true" />
+		<event type="java" path="com.olbius.basepos.cart.CartEvents"
+			invoke="holdCart" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="loadCart">
+		<security https="true" auth="true" />
+		<event type="java" path="com.olbius.basepos.cart.CartEvents"
+			invoke="loadCart" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="RemoveHoldedCart">
+		<security https="true" auth="true" />
+		<event type="java" path="com.olbius.basepos.cart.CartEvents"
+			invoke="removeHoldedCart" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="ViewHoldCart">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="ViewHoldCart" />
+	</request-map>
+	<!-- Discount -->
+	<request-map uri="DiscountWholeCart">
+		<security https="true" auth="true" />
+		<event type="java" path="com.olbius.basepos.cart.CartEvents"
+			invoke="saleDiscount" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="UpdateUomWhenSale">
+		<security https="true" auth="false" />
+		<event type="java" invoke="updateUom" path="com.olbius.basepos.cart.CartEvents"></event>
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="GetListHoldCart">
+		<security https="false" auth="false" />
+		<event type="java" path="com.olbius.basepos.order.SalesHistory"
+			invoke="getListHoldCart"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="GetHoldCartItems">
+		<security https="false" auth="false" />
+		<event type="java" path="com.olbius.basepos.order.SalesHistory"
+			invoke="getHoldCartItems"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="GetOrderSalesHistory">
+		<security https="false" auth="false" />
+		<event type="java" path="com.olbius.basepos.order.SalesHistory"
+			invoke="getOrderSalesHistory"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="GetOrderItems">
+		<security https="false" auth="true" />
+		<event type="service" invoke="getOrderItems"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="GetOverViewSalesHistory">
+		<security https="false" auth="true" />
+		<event type="java" path="com.olbius.basepos.order.SalesHistory"
+			invoke="getOverViewSalesHistory"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="returnWholeOrder">
+		<security https="true" auth="false" />
+		<event type="java" path="com.olbius.basepos.order.WebPosReturnOrder"
+			invoke="quickReturnSalesOrder"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+<!-- 	<request-map uri="returnPartialOrder"> -->
+<!-- 		<security https="true" auth="false" /> -->
+<!-- 		<event type="service" invoke="returnPartialOrder"></event> -->
+<!-- 		<response name="success" type="request" value="json"></response> -->
+<!-- 		<response name="error" type="request" value="json"></response> -->
+<!-- 	</request-map> -->
+	<request-map uri="returnPartialOrder">
+		<security https="true" auth="false" />
+		<event type="java" path="com.olbius.basepos.order.WebPosReturnOrder" invoke="returnPartialOrderEvent"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="getOrderAdjustment">
+		<security https="true" auth="false" />
+		<event type="service" invoke="getOrderAdjustment"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="GetOverviewPromotion">
+		<security https="false" auth="true" />
+		<event type="java" path="com.olbius.basepos.order.SalesHistory"
+			invoke="getOverviewPromotion"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	
+	<request-map uri="GetContentPromotion">
+		<security https="false" auth="true" />
+		<event type="service" invoke="getContentPromotion"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	
+	<request-map uri="getParReturnAbleItems">
+		<security https="false" auth="true" />
+		<event type="service" invoke="getParReturnAbleItems"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+
+	<request-map uri="configStorePOS">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="ConfigStorePOS" />
+	</request-map>
+
+	<request-map uri="uploadLogoStore">
+		<security https="true" auth="true" />
+		<event type="service" invoke="jackrabbitUploadFile"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+
+	<request-map uri="authview">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="main" />
+	</request-map>
+
+	<request-map uri="CreateCustomerPOS">
+		<security https="true" auth="true" />
+		<event type="java" path="com.olbius.basepos.customer.CustomerEvents"
+			invoke="createNewCustomerPOS"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+
+	<!--Start JQX request -->
+	<request-map uri="jqxGeneralServicer">
+		<event type="java" invoke="jqxEventProcessor" path="com.olbius.events.JqxEvents" />
+		<response name="success" type="none" />
+		<response name="error" type="none" />
+	</request-map>
+	<!--End JQX request -->
+	<!-- View Mappings -->
+	<view-map name="error" page="/error/error.jsp" />
+	<view-map name="Error" type="screen"
+		page="component://basepos/widget/WebPosScreens.xml#Main" />
+	<view-map name="main" type="screen"
+		page="component://basepos/widget/WebPosScreens.xml#Main" />
+	<view-map name="Login" type="screen"
+		page="component://basepos/widget/CommonScreens.xml#Login" />
+	<view-map name="forgotPassword" type="screen"
+		page="component://basepos/widget/CommonScreens.xml#forgotPassword" />
+	<view-map name="showOpenTerminal" type="screen"
+		page="component://basepos/widget/CommonScreens.xml#showOpenTerminal" />
+	<view-map name="ListLocales" type="screen"
+		page="component://common/widget/LookupScreens.xml#ListLocales" />
+	<view-map name="ShowCartItemSelected" type="screen"
+		page="component://basepos/widget/WebPosScreens.xml#ShowCartItemSelected" />
+	<view-map name="ShowCartWebPOS" type="screen"
+		page="component://basepos/widget/WebPosScreens.xml#ShowCartWebPOS" />
+	<view-map name="ShowCartHeaderWebPOS" type="screen"
+		page="component://basepos/widget/WebPosScreens.xml#CartHeader" />
+	<view-map name="ViewHoldCart" type="screen"
+		page="component://basepos/widget/WebPosScreens.xml#HoldCartGeneral" />
+	<view-map name="ConfigStorePOS" type="screen"
+		page="component://basepos/widget/SettingScreens.xml#ConfigStorePOS" />
+	<view-map name="requirePasswordChange" type="screen"
+		page="component://basepos/widget/CommonScreens.xml#requirePasswordChange" />
+</site-conf>

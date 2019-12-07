@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+
+	<screen name="CreateOrViewAgreement">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="imexAgreement" />
+				<set field="selectedSubMenuItem" value="CreateImExAgreements" />
+				<set field="titleProperty" value="Agreement" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission />
+					</condition>
+					<widgets>
+						<include-screen name="CreateImExAgreement" />
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-danger">
+									<label text="${uiLabelMap.DmsNotPermission}" />
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="CreateImExAgreement">
+		<section>
+			<actions>
+				<set field="productPlanId" from-field="parameters.productPlanId" />
+				<entity-one value-field="productPlan" entity-name="ProductPlanHeader">
+					<field-map field-name="productPlanId" from-field="productPlanId" />
+				</entity-one>
+				<!-- <script location="component://delys/webapp/delys/WEB-INF/actions/import/getAgreementTerms.groovy"/> -->
+				<!-- <script location="component://baseimex/webapp/baseimex/WEB-INF/actions/agreement/getAgreementAttr.groovy"/> -->
+				<script location="component://baseimex/webapp/baseimex/WEB-INF/actions/agreement/getInternalOrganization.groovy" />
+				<set field="organizations" value="${organizations}" />
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<platform-specific>
+							<html>
+								<html-template location="component://baseimex/webapp/baseimex/agreementImEx/createAgreementTotal.ftl" />
+								<!-- <html-template location="component://delys/webapp/delys/import/getProductForAgreement.ftl"/> -->
+							</html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+</screens>

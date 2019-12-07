@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+    
+    <simple-method method-name="checkProcessPaymentDms">
+    	<set field="toProcess" value="true" type="Boolean"/>
+    	<field-to-result field="toProcess" result-name="toProcess"/>
+    	
+    	<set field="orderId" from-field="parameters.orderId"/>
+    	
+    	<entity-one value-field="orderHeader" entity-name="OrderHeader">
+			<field-map field-name="orderId" from-field="orderId"/>
+		</entity-one>
+		<if-not-empty field="orderHeader">
+			<set field="statusId" from-field="orderHeader.statusId"/>
+			<if>
+				<condition>
+					<if-compare operator="equals" value="ORDER_CREATED" field="statusId"></if-compare>
+				</condition>
+				<then>
+					<set field="toProcess" value="false" type="Boolean"/>
+				</then>
+			</if>
+		</if-not-empty>
+		
+		<field-to-result field="toProcess" result-name="toProcess"/>
+    </simple-method>
+    
+    <simple-method method-name="processActionApproveOrderDms">
+		<set field="orderId" from-field="parameters.orderId"/>
+		
+		<set field="hasPermission" value="false" type="Boolean"/>
+		<set-service-fields service-name="checkPermissionApproveOrder" map="parameters" to-map="checkPermissionApproveOrderCtx"/>
+		<call-service service-name="checkPermissionApproveOrder" in-map-name="checkPermissionApproveOrderCtx">
+			<result-to-field result-name="hasPermission" field="hasPermission"/>
+		</call-service>
+		
+		<if-compare operator="equals" value="false" field="hasPermission" type="Boolean">
+			<add-error>
+				<fail-property resource="BaseSalesErrorUiLabels" property="BSTransactionNotAuthorized"/>
+			</add-error>
+			<check-errors/>
+		</if-compare>
+		
+		<entity-one value-field="orderHeader" entity-name="OrderHeader">
+			<field-map field-name="orderId" from-field="orderId"/>
+		</entity-one>
+		<set field="statusId" from-field="orderHeader.statusId"/>
+		<set field="nextStatusId" value=""/>
+		<entity-one value-field="productStore" entity-name="ProductStore">
+			<field-map field-name="productStoreId" from-field="orderHeader.productStoreId"/>
+		</entity-one>
+		<set field="faceToFace" value="false" type="Boolean"/>
+		<set field="manualHold" value="false" type="Boolean"/>
+		<if>
+			<condition>
+				<if-compare operator="equals" value="ORDER_CREATED" field="statusId"></if-compare>
+			</condition>
+			<then>
+				<set field="nextStatusId" value="ORDER_SADAPPROVED"/>
+				<set-service-fields service-name="changeOrderStatus" map="parameters" to-map="changeOrderStatusCtx"/>
+				<set field="changeOrderStatusCtx.statusId" from-field="nextStatusId"/>
+				<call-service service-name="changeOrderStatus" in-map-name="changeOrderStatusCtx" require-new-transaction="false"></call-service>
+				<check-errors/>
+				<call-class-method method-name="processPayment" class-name="com.olbius.basesales.order.CheckOutHelper" ret-field="resultValue">
+					<field field="orderHeader.orderId" type="String"/>
+					<field field="orderHeader.grandTotal" type="BigDecimal"/>
+					<field field="orderHeader.currencyUom" type="String"/>
+					<field field="productStore" type="org.ofbiz.entity.GenericValue"/>
+					<field field="userLogin" type="org.ofbiz.entity.GenericValue"/>
+					<field field="faceToFace" type="boolean"/>
+					<field field="manualHold" type="boolean"/>
+					<field field="dispatcher" type="org.ofbiz.service.LocalDispatcher"/>
+					<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+					<field field="locale" type="Locale"/>
+				</call-class-method>
+				<check-errors/>
+				<set-service-fields service-name="sendNotiChangeOrderStatus" map="parameters" to-map="sendNotiChangeOrderStatusCtx"/>
+				<call-service service-name="sendNotiChangeOrderStatus" in-map-name="sendNotiChangeOrderStatusCtx"></call-service>
+				<check-errors/>
+			</then>
+		</if>
+	</simple-method>
+	
+</simple-methods>

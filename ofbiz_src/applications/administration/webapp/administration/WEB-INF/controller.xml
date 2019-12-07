@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/site-conf.xsd">
+	<!-- The controller elements that are common to all OFBiz components can 
+		be found in the following xml file. A component can override the elements 
+		found in the common-controller.xml file. -->
+	<include location="component://common/webcommon/WEB-INF/common-controller.xml" />
+	<include
+		location="component://administration/webapp/administration/WEB-INF/controller_setting.xml" />
+	<include
+		location="component://administration/webapp/administration/WEB-INF/controller_security.xml" />
+	<include
+		location="component://administration/webapp/administration/WEB-INF/controller_synchronization.xml" />
+	<include
+		location="component://administration/webapp/administration/WEB-INF/controller_account.xml" />
+
+	<!-- Events to run on every request before security (chains exempt) -->
+	<!-- <preprocessor> </preprocessor> -->
+	<!-- Events to run on every request after all other processing (chains exempt) -->
+	<!-- <postprocessor> <event name="test" type="java" path="org.ofbiz.webapp.event.TestEvent" 
+		invoke="test"/> </postprocessor> -->
+
+	<!-- Request Mappings -->
+	<request-map uri="main">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="main" />
+	</request-map>
+
+	<request-map uri="jqxGeneralServicer">
+		<event type="java" invoke="jqxEventProcessor" path="com.olbius.events.JqxEvents"
+			global-transaction="false" />
+		<response name="success" type="none" />
+		<response name="error" type="none" />
+	</request-map>
+
+	<request-map uri="SystemLogView">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="SystemLogView" />
+	</request-map>
+	<request-map uri="SystemFindUtilCache">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="SystemFindUtilCache" />
+	</request-map>
+
+	<!-- UtilCache Maintenance Requests -->
+	<request-map uri="FindUtilCache">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="FindUtilCache" />
+	</request-map>
+	<request-map uri="FindUtilCacheClear">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.webtools.UtilCacheEvents"
+			invoke="clearEvent" />
+		<response name="success" type="view" value="FindUtilCache" />
+		<response name="error" type="view" value="FindUtilCache" />
+	</request-map>
+	<request-map uri="FindUtilCacheClearAll">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.webtools.UtilCacheEvents"
+			invoke="clearAllEvent" />
+		<response name="success" type="view" value="FindUtilCache" />
+		<response name="error" type="view" value="FindUtilCache" />
+	</request-map>
+	<request-map uri="ForceGarbageCollection">
+		<security https="true" auth="true" />
+		<event type="service" invoke="forceGarbageCollection" />
+		<response name="success" type="view" value="FindUtilCache" />
+		<response name="error" type="view" value="FindUtilCache" />
+	</request-map>
+	<request-map uri="EditUtilCache">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="EditUtilCache" />
+	</request-map>
+	<request-map uri="EditUtilCacheUpdate">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.webtools.UtilCacheEvents"
+			invoke="updateEvent" />
+		<response name="success" type="view" value="EditUtilCache" />
+		<response name="error" type="view" value="EditUtilCache" />
+	</request-map>
+	<request-map uri="EditUtilCacheClear">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.webtools.UtilCacheEvents"
+			invoke="clearEvent" />
+		<response name="success" type="view" value="EditUtilCache" />
+		<response name="error" type="view" value="EditUtilCache" />
+	</request-map>
+	<request-map uri="FindUtilCacheElements">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="FindUtilCacheElements" />
+	</request-map>
+	<request-map uri="FindUtilCacheElementsRemoveElement">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.webtools.UtilCacheEvents"
+			invoke="removeElementEvent" />
+		<response name="success" type="view" value="FindUtilCacheElements" />
+		<response name="error" type="view" value="FindUtilCacheElements" />
+	</request-map>
+
+	<!-- Service Engine Info and Job Management Requests -->
+	<request-map uri="ServiceLog">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="ServiceLog" />
+	</request-map>
+	<request-map uri="ServiceList">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="ServiceList" />
+	</request-map>
+
+	<request-map uri="threadList">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="threadList" />
+	</request-map>
+	<request-map uri="FindJob">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="FindJob" />
+	</request-map>
+	<request-map uri="JobDetails">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="JobDetails" />
+	</request-map>
+	<request-map uri="cancelJob">
+		<security https="true" auth="true" />
+		<event type="service" invoke="cancelScheduledJob" />
+		<response name="success" type="view" value="FindJob" />
+		<response name="error" type="view" value="FindJob" />
+	</request-map>
+	<request-map uri="resetJob">
+		<security https="true" auth="true" />
+		<event type="service" invoke="resetScheduledJob" />
+		<response name="success" type="view" value="FindJob" />
+		<response name="error" type="view" value="FindJob" />
+	</request-map>
+	<request-map uri="scheduleJob">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="scheduleJob" />
+	</request-map>
+	<request-map uri="runService">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="runService" />
+	</request-map>
+	<request-map uri="setServiceParameters">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="setServiceParameters" />
+	</request-map>
+	<request-map uri="setSyncServiceParameters">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="setSyncServiceParameters" />
+	</request-map>
+	<request-map uri="scheduleService">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.webapp.event.CoreEvents"
+			invoke="scheduleService" />
+		<response name="success" type="view" value="FindJob" />
+		<response name="sync_success" type="view" value="serviceResult" />
+		<response name="error" type="view" value="scheduleJob" />
+	</request-map>
+	<request-map uri="scheduleServiceSync">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.webapp.event.CoreEvents"
+			invoke="scheduleService" />
+		<response name="success" type="view" value="serviceResult" />
+		<response name="sync_success" type="view" value="serviceResult" />
+		<response name="error" type="view" value="runService" />
+	</request-map>
+	<request-map uri="serviceResult">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="serviceResult" />
+	</request-map>
+	<request-map uri="saveServiceResultsToSession">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.webapp.event.CoreEvents"
+			invoke="saveServiceResultsToSession" />
+		<response name="success" type="view" value="runService" />
+		<response name="error" type="view" value="error" />
+	</request-map>
+
+	<!-- Available services requests -->
+	<request-map uri="serviceEcaDetail">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="serviceEcaDetail" />
+	</request-map>
+	<request-map uri="exportServiceEoModelBundle">
+		<security https="true" auth="true" />
+		<event type="service" invoke="exportServiceEoModelBundle" />
+		<response name="success" type="view" value="ServiceList" />
+		<response name="error" type="view" value="ServiceList" />
+	</request-map>
+
+	<!-- Entity Information Requests -->
+	<request-map uri="entitymaint">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="entitymaint" />
+	</request-map>
+	<request-map uri="FindGeneric">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="FindGeneric" />
+	</request-map>
+	<request-map uri="ViewGeneric">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="ViewGeneric" />
+	</request-map>
+	<request-map uri="UpdateGeneric">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.webtools.GenericWebEvent"
+			invoke="updateGeneric" />
+		<response name="success" type="view" value="ViewGeneric" />
+		<response name="error" type="view" value="ViewGeneric" />
+	</request-map>
+
+	<request-map uri="ViewRelations">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="ViewRelations" />
+	</request-map>
+
+	<request-map uri="entityref">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="entityref" />
+	</request-map>
+	<request-map uri="entityrefReport">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="entityrefReport" />
+	</request-map>
+
+	<request-map uri="ModelWriter">
+		<security https="false" auth="true" />
+		<response name="success" type="view" value="ModelWriter" />
+	</request-map>
+	<request-map uri="ModelGroupWriter">
+		<security https="false" auth="true" />
+		<response name="success" type="view" value="ModelGroupWriter" />
+	</request-map>
+
+	<request-map uri="EntityEoModelBundle">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="EntityEoModelBundle" />
+	</request-map>
+	<request-map uri="exportEntityEoModelBundle">
+		<security https="true" auth="true" />
+		<event type="service" invoke="exportEntityEoModelBundle" />
+		<response name="success" type="view" value="EntityEoModelBundle" />
+		<response name="error" type="view" value="EntityEoModelBundle" />
+	</request-map>
+
+	<!-- EntitySQL requests -->
+	<request-map uri="EntitySQLProcessor">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="EntitySQLProcessor" />
+	</request-map>
+
+	<request-map uri="ConnectionPoolStatus">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="ConnectionPoolStatus" />
+	</request-map>
+
+	<!-- Entity Export/Import requests -->
+	<request-map uri="EntityExportAll">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="EntityExportAll" />
+		<response name="error" type="view" value="EntityExportAll" />
+	</request-map>
+	<request-map uri="entityExportAll">
+		<security https="true" auth="true" />
+		<event type="service" path="" invoke="entityExportAll" />
+		<response name="success" type="view" value="EntityExportAll" />
+		<response name="error" type="view" value="EntityExportAll" />
+	</request-map>
+	<request-map uri="EntityImportDir">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="EntityImportDir" />
+	</request-map>
+	<request-map uri="entityImportDir">
+		<security https="true" auth="true" />
+		<event type="service" path="" invoke="entityImportDir" />
+		<response name="success" type="view" value="EntityImportDir" />
+		<response name="error" type="view" value="EntityImportDir" />
+	</request-map>
+	<request-map uri="EntityImport">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="EntityImport" />
+	</request-map>
+	<request-map uri="entityImport">
+		<security https="true" auth="true" />
+		<event type="service" path="" invoke="entityImport" />
+		<response name="success" type="view" value="EntityImport" />
+		<response name="error" type="view" value="EntityImport" />
+	</request-map>
+	<request-map uri="EntityImportReaders">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="EntityImportReaders" />
+	</request-map>
+	<request-map uri="entityImportReaders">
+		<security https="true" auth="true" />
+		<event type="service" path="" invoke="entityImportReaders" />
+		<response name="success" type="view" value="EntityImportReaders" />
+		<response name="error" type="view" value="EntityImportReaders" />
+	</request-map>
+	<request-map uri="xmldsdump">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="xmldsdump" />
+	</request-map>
+	<request-map uri="xmldsrawdump">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="xmldsrawdump" />
+	</request-map>
+
+	<!-- ControlServlet and other stats requests -->
+	<request-map uri="StatsSinceStart">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="StatsSinceStart" />
+	</request-map>
+	<request-map uri="StatBinsHistory">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="StatBinsHistory" />
+	</request-map>
+	<request-map uri="ViewMetrics">
+		<security https="true" auth="true" />
+		<metric name="URL: webtools/ViewMetrics" /><!-- Here for demonstration -->
+		<response name="success" type="view" value="ViewMetrics" />
+	</request-map>
+	<request-map uri="ResetMetric">
+		<security https="true" auth="true" />
+		<event type="service" invoke="resetMetric" />
+		<response name="success" type="view" value="ViewMetrics" />
+		<response name="error" type="view" value="ViewMetrics" />
+	</request-map>
+
+	<request-map uri="setPropertiesValue">
+		<security https="true" auth="true" />
+		<event type="service" invoke="setPropertiesValue" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="setPropertyValue">
+		<security https="true" auth="true" />
+		<event type="service" invoke="setPropertyValue" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="getPropertyValue">
+		<security https="true" auth="true" />
+		<event type="service" invoke="getPropertyValue" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+
+	<request-map uri="exportExcelDataSampleProducts">
+		<security auth="true" https="true" />
+		<event type="export-excel-olb" path="com.olbius.administration.entity.ExportExcelProducts"></event>
+		<response name="success" type="request-redirect" value="listFileExported"/>
+		<response name="error" type="request-redirect" value="listFileExported"/>
+	</request-map>
+
+	<request-map uri="exportExcelDataSampleCustomer">
+		<security auth="true" https="true" />
+		<event type="export-excel-olb" path="com.olbius.administration.entity.ExportExcelCustomers"></event>
+		<response name="success" type="request-redirect" value="listFileExported"/>
+		<response name="error" type="request-redirect" value="listFileExported"/>
+	</request-map>
+
+	<request-map uri="exportExcelDataSampleMTCustomer">
+		<security auth="true" https="true" />
+		<event type="export-excel-olb" path="com.olbius.administration.entity.ExportExcelMTCustomers"></event>
+		<response name="success" type="request-redirect" value="listFileExported"/>
+		<response name="error" type="request-redirect" value="listFileExported"/>
+	</request-map>
+
+	<request-map uri="exportExcelDataSampleSalesman">
+		<security auth="true" https="true" />
+		<event type="export-excel-olb" path="com.olbius.administration.entity.ExportExcelSalesman"></event>
+		<response name="success" type="request-redirect" value="listFileExported"/>
+		<response name="error" type="request-redirect" value="listFileExported"/>
+	</request-map>
+
+	<request-map uri="importProduct">
+		<security https="true" auth="true"/>
+		<response name="success" type="view" value="importDataProduct"/>
+	</request-map>
+
+	<request-map uri="customerGT">
+		<security https="true" auth="true"/>
+		<response name="success" type="view" value="importCustomerGT"/>
+	</request-map>
+
+	<request-map uri="customerMT">
+		<security https="true" auth="true"/>
+		<response name="success" type="view" value="importCustomerMT"/>
+	</request-map>
+
+	<request-map uri="salesman">
+		<security https="true" auth="true"/>
+		<response name="success" type="view" value="salesman"/>
+	</request-map>
+
+	<!-- View Mappings -->
+	<view-map name="main" type="screen"
+		page="component://administration/widget/AdministrationScreens.xml#main" />
+	<view-map name="SystemLogView" type="screen"
+		page="component://administration/widget/AdministrationScreens.xml#SystemLogView" />
+	<view-map name="SystemFindUtilCache" type="screen"
+		page="component://administration/widget/AdministrationScreens.xml#SystemFindUtilCache" />
+	<view-map name="FindUtilCache" type="screen"
+		page="component://administration/widget/AdministrationScreens.xml#SystemFindUtilCache" />
+	<view-map name="entitymaint" type="screen"
+		page="component://administration/widget/EntityScreens.xml#EntityMaint" />
+	<view-map name="ViewGeneric" type="screen"
+		page="component://administration/widget/EntityScreens.xml#ViewGeneric" />
+	<view-map name="FindGeneric" type="screen"
+		page="component://administration/widget/EntityScreens.xml#FindGeneric" />
+	<view-map name="ViewRelations" type="screen"
+		page="component://administration/widget/EntityScreens.xml#ViewRelations" />
+	<view-map name="EntitySQLProcessor" type="screen"
+		page="component://administration/widget/EntityScreens.xml#EntitySQLProcessor" />
+	<view-map name="ConnectionPoolStatus" type="screen"
+		page="component://administration/widget/EntityScreens.xml#ConnectionPoolStatus" />
+	<view-map name="xmldsdump" type="screen"
+		page="component://administration/widget/EntityScreens.xml#xmldsdump" />
+	<view-map name="EntityImport" type="screen"
+		page="component://administration/widget/EntityScreens.xml#EntityImport" />
+	<view-map name="EntityExportAll" type="screen"
+		page="component://administration/widget/EntityScreens.xml#EntityExportAll" />
+	<view-map name="EntityImportDir" type="screen"
+		page="component://administration/widget/EntityScreens.xml#EntityImportDir" />
+	<view-map name="EntityImportReaders" type="screen"
+		page="component://administration/widget/EntityScreens.xml#EntityImportReaders" />
+
+	<view-map name="ServiceList" type="screen"
+		page="component://administration/widget/ServiceScreens.xml#ServiceList" />
+	<view-map name="FindJob" type="screen"
+		page="component://administration/widget/ServiceScreens.xml#FindJob" />
+	<view-map name="JobDetails" type="screen"
+		page="component://administration/widget/ServiceScreens.xml#JobDetails" />
+	<view-map name="serviceResult" type="screen"
+		page="component://administration/widget/ServiceScreens.xml#ServiceResult" />
+	<view-map name="threadList" type="screen"
+		page="component://administration/widget/ServiceScreens.xml#ThreadList" />
+	<view-map name="scheduleJob" type="screen"
+		page="component://administration/widget/ServiceScreens.xml#ScheduleJob" />
+	<view-map name="runService" type="screen"
+		page="component://administration/widget/ServiceScreens.xml#RunService" />
+	<view-map name="setServiceParameters" type="screen"
+		page="component://administration/widget/ServiceScreens.xml#setServiceParameters" />
+	<view-map name="setSyncServiceParameters" type="screen"
+		page="component://administration/widget/ServiceScreens.xml#setSyncServiceParameters" />
+
+	<view-map name="StatsSinceStart" type="screen"
+		page="component://administration/widget/StatsScreens.xml#StatsSinceStart" />
+	<view-map name="StatBinsHistory" type="screen"
+		page="component://administration/widget/StatsScreens.xml#StatBinsHistory" />
+	<view-map name="ViewMetrics" type="screen"
+		page="component://administration/widget/StatsScreens.xml#ViewMetrics" />
+
+	<view-map name="importDataProduct" type="screen" page="component://administration/widget/AdministrationScreens.xml#ImportDataProduct"/>
+	<view-map name="importCustomerGT" type="screen" page="component://administration/widget/AdministrationScreens.xml#ImportCustomerGT"/>
+	<view-map name="importCustomerMT" type="screen" page="component://administration/widget/AdministrationScreens.xml#ImportCustomerMT"/>
+	<view-map name="salesman" type="screen" page="component://administration/widget/AdministrationScreens.xml#ImportSalesman"/>
+</site-conf>

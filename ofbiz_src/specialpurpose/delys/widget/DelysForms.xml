@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
+	<form name="FindCustomer" type="single" target="FindCustomer" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="partyId" title="Party ID"><text-find/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-purple btn-small">
+            <submit button-type="button" image-location="icon-search"/>
+        </field>
+    </form>
+
+    <form name="ListCustomers" list-name="listIt" target="" title="" type="list" paginate-target="FindCustomer"
+        odd-row-style="alternate-row" default-table-style="table table-striped table-bordered table-hover dataTable" header-row-style="header-row-2">
+        <actions>
+            <set field="entityName" value="PartyRelationship"/>
+            <service service-name="findCustomer" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="requestParameters"/>
+                <field-map field-name="entityName" from-field="entityName"/>
+                <field-map field-name="orderBy" from-field="parameters.sortField"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <field name="partyId" >
+        	<display/>
+        </field>
+        <field name="partyIdTo" >
+        	<display/>
+        </field>
+    </form>
+
+    <form name="NewEmpl" type="single" target="CreateEmpl" default-map-name="personInfo"
+        focus-field-name="salutation" header-row-style="header-row" default-table-style="basic-table">
+        <alt-target use-when="personInfo==null" target="createPerson"/>
+        <field use-when="personInfo!=null" name="partyId" title="${uiLabelMap.PartyPartyId}" tooltip="${uiLabelMap.CommonNotModifRecreat}"><hidden/></field>
+        <field use-when="personInfo==null&amp;&amp;partyId==null" name="partyId" title="${uiLabelMap.PartyPartyId}"><ignored/></field>
+        <field use-when="personInfo==null&amp;&amp;partyId!=null" name="partyId" title="${uiLabelMap.PartyPartyId}" tooltip="${uiLabelMap.CommonCannotBeFound}: [${partyId}]"><display also-hidden="false"/></field>
+        <field name="firstName" title="${uiLabelMap.PartyFirstName}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="40" maxlength="60"/></field>
+        <field name="lastName" title="${uiLabelMap.PartyLastName}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text size="40" maxlength="60"/></field>
+        <field name="gender" title="${uiLabelMap.gender}">
+            <drop-down allow-empty="true">
+                <option key="M" description="${uiLabelMap.CommonMale}"/>
+                <option key="F" description="${uiLabelMap.CommonFemale}"/>
+            </drop-down>
+        </field>
+        <field name="employmentStatusEnumId" title="${uiLabelMap.employmentStatus}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="Enumeration" key-field-name="enumId" description="${description} [${enumCode}]">
+                    <entity-constraint name="enumTypeId" value="EMPLOY_STTS"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="csmPosition" title="${uiLabelMap.csmPosition}" use-when="${parameters.ptype == 'CSM'}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="PartyGroupByPartyRelationShipTypeView" key-field-name="partyId" description="${groupName}">
+                    <entity-constraint name="roleTypeId" value="DELYS_CSM"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="rsmPosition" title="${uiLabelMap.rsmPosition}" use-when="${parameters.ptype == 'RSM'}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="PartyGroupByPartyRelationShipTypeView" key-field-name="partyId" description="${groupName}">
+                    <entity-constraint name="roleTypeId" value="DELYS_RSM"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="asmPosition" title="${uiLabelMap.asmPosition}" use-when="${parameters.ptype == 'ASM'}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
+            <drop-down allow-empty="true">
+            	<auto-complete/>
+                <entity-options entity-name="PartyGroupByPartyRelationShipTypeView" key-field-name="partyId" description="${groupName}">
+                    <entity-constraint name="roleTypeId" value="DELYS_ASM"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="customerPosition" title="${uiLabelMap.customerPosition}" use-when="${parameters.ptype == 'CUST'}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
+            <drop-down allow-empty="true">
+            	<auto-complete/>
+                <entity-options entity-name="PartyGroupByPartyRelationShipTypeView" key-field-name="partyId" description="${groupName}">
+                    <entity-constraint name="roleTypeId" value="CUSTOMER"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="asmPositionParent" title="${uiLabelMap.asmPosition}" use-when="${parameters.ptype == 'SALES'}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
+            <drop-down allow-empty="true">
+            	<auto-complete/>
+                <entity-options entity-name="PartyGroupByPartyRelationShipTypeView" key-field-name="partyId" description="${groupName}">
+                    <entity-constraint name="roleTypeId" value="DELYS_ASM"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="productStoreId" title="${uiLabelMap.productStoreId}" use-when="${parameters.ptype == 'SALES'}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
+            <drop-down>
+                <entity-options entity-name="ProductStore" key-field-name="productStoreId" description="${storeName} (${productStoreId})">
+                    <entity-order-by field-name="productStoreId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="fromDate" title="${uiLabelMap.fromDate}"><date-time/></field>
+        <field name="thruDate" title="${uiLabelMap.thruDate}"><date-time/></field>
+        <field name="residenceStatusEnumId" title="${uiLabelMap.residenceStatusEnumId}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="Enumeration" key-field-name="enumId" description="${description} [${enumCode}]">
+                    <entity-constraint name="enumTypeId" value="PTY_RESID_STTS"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="preferredCurrencyUomId" title="${uiLabelMap.residenceStatusEnumId}">
+            <drop-down allow-empty="true" no-current-selected-key="${defaultOrganizationPartyCurrencyUomId}">
+                <entity-options key-field-name="uomId" description="${description} - ${abbreviation}" entity-name="Uom">
+                    <entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="statusId" use-when="person==null" title="${uiLabelMap.statusId}"><hidden/></field>
+        <field name="emplType"><hidden value="DELYS_CSM"/></field>
+        <field name="statusId" use-when="person!=null &amp;&amp; leadDescription==null" title="${uiLabelMap.statusId}">
+            <drop-down allow-empty="false">
+                <entity-options description="${description}" entity-name="StatusItem">
+                    <entity-constraint name="statusTypeId" value="PARTY_STATUS"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="statusId" use-when="person!=null &amp;&amp; leadDescription!=null" title="${uiLabelMap.statusId}">
+            <drop-down allow-empty="false">
+                <entity-options description="${description}" entity-name="StatusItem">
+                    <entity-constraint name="statusId" operator="in" value="LEAD_ASSIGNED,PARTY_ENABLED,PARTY_DISABLED"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonSave}" widget-style="btn btn-mini btn-primary"><submit image-location="icon-save" button-type="button"/></field>
+	</form>    
+    <form name="NewPartyGroup" type="single" list-name="listIt" target="CreatePartyGroup" default-map-name="partyGroup"
+        focus-field-name="groupName" header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-service service-name="createPartyGroup"/>
+        <field name="partyId"><hidden/></field>
+        <field name="groupName" use-when="${parameters.roleTypeId == 'ADMIN' || parameters.roleTypeId == null}" title="${uiLabelMap.csmName}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text/></field>
+        <field name="groupName" use-when="${parameters.roleTypeId == 'DELYS_CSM'}" title="${uiLabelMap.rsmName}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text/></field>
+        <field name="groupName" use-when="${parameters.roleTypeId == 'DELYS_RSM'}" title="${uiLabelMap.asmName}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text/></field>
+        <field name="groupName" use-when="${parameters.roleTypeId == 'DELYS_ASM'}" title="${uiLabelMap.routeName}" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text/></field>
+        <field name="partyTypeId"><ignored/></field>
+        <field name="annualRevenue"><hidden/></field>
+        <field name="numEmployees"><hidden/></field>
+        <field name="tickerSymbol"><hidden/></field>
+        <field name="logoImageUrl"><hidden/></field>
+        <field name="groupNameLocal"><hidden/></field>
+        <field name="officeSiteName"><hidden/></field>
+        <field name="externalId"><hidden/></field>
+        <field name="comments"><hidden/></field>
+        <field name="description" title="${uiLabelMap.CommonDescription}"><text/></field>
+        <field name="preferredCurrencyUomId" title="${uiLabelMap.preferredCurrencyUomId}"><hidden/></field>
+        <field name="statusId" use-when="partyGroup==null" title="${uiLabelMap.statusId}"><hidden/></field>
+        <field name="roleTypeId" title="${uiLabelMap.statusId}"><hidden value="${parameters.roleTypeId}"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSave}" widget-style="btn btn-primary btn-small"><submit image-location="icon-save" button-type="button"/></field>
+    </form>
+    <form name="projectAssoOrderDelys"  type="list" list-name="listProjectAssoOrder"
+        extends="ListProjects" extends-resource="component://projectmgr/widget/forms/ProjectForms.xml">
+        <row-actions>
+            <service service-name="getProject" result-map="resultProject">
+                <field-map field-name="projectId" value="${workEffortId}"/>
+            </service>
+        </row-actions>
+        <field name="projectName" map-name="resultProject.projectInfo" title="${uiLabelMap.ProjectMgrProjectName}" widget-style="btn btn-mini btn-primary">
+            <hyperlink description="${resultProject.projectInfo.projectName}" target-type="inter-app" target="/projectmgr/control/projectView">
+                <parameter param-name="projectId" from-field="resultProject.projectInfo.projectId"/>
+            </hyperlink>
+        </field>
+    </form>
+   <!--  <form name="FilterEmpl" type="single" target="CreatePartyGroup"
+         header-row-style="header-row" default-table-style="basic-table">
+    	<field name="CSM" title="${uiLabelMap.csm}" use-when="${parameters.roleTypeId == 'DELYS_CSM'}">
+        	<drop-down>
+        		<entity-options description="${groupName}" entity-name="PartyGroupAndRole" key-field-name="partyId">
+        			<entity-constraint name="roleTypeId" value="DELYS_CSM"/>
+        		</entity-options>
+        	</drop-down>
+        </field>
+        <field name="RSM" title="${uiLabelMap.rsm}" use-when="${parameters.roleTypeId == 'DELYS_RSM'}">
+        	<drop-down>
+        		<entity-options description="${groupName}" entity-name="PartyGroupAndRole" key-field-name="partyId">
+        			<entity-constraint name="roleTypeId" value="DELYS_RSM"/>
+        		</entity-options>
+        	</drop-down>
+        </field>
+        <field name="ASM" title="${uiLabelMap.asm}" use-when="${parameters.roleTypeId == 'DELYS_ROUTE'}">
+        	<drop-down>
+        		<entity-options description="${groupName}" entity-name="PartyGroupAndRole" key-field-name="partyId">
+        			<entity-constraint name="roleTypeId" value="DELYS_ASM"/>
+        		</entity-options>
+        	</drop-down>
+        </field>
+        <field name="ROUTE" title="${uiLabelMap.route}" use-when="${parameters.roleTypeId == 'CUSTOMER'}">
+        	<drop-down>
+        		<entity-options description="${groupName}" entity-name="PartyGroupAndRole" key-field-name="partyId">
+        			<entity-constraint name="roleTypeId" value="DELYS_ROUTE"/>
+        		</entity-options>
+        	</drop-down>
+        </field>
+    </form> -->
+</forms>

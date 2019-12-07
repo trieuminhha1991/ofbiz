@@ -1,0 +1,657 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../../framework/minilang/dtd/simple-methods-v2.xsd">
+	<simple-method method-name="createLoyaltyCustom">
+		<make-value value-field="newEntity" entity-name="Loyalty"/>
+		<if-empty field="parameters.statusId">
+		    <set field="parameters.statusId" value="LOYALTY_CREATED"/>
+		</if-empty>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <set field="newEntity.loyaltyId" from-field="parameters.loyaltyId"/>
+        <if-empty field="newEntity.loyaltyId">
+    		<sequenced-id sequence-name="Loyalty" field="newEntity.loyaltyId"/>
+    	<else>
+    		<check-id field="newEntity.loyaltyId" />
+    		<check-errors/>
+    		<entity-one value-field="dummyLoyalty" entity-name="Loyalty">
+    			<field-map field-name="loyaltyId" from-field="parameters.loyaltyId"/>
+    		</entity-one>
+    		<if-not-empty field="dummyLoyalty">
+    			<add-error>
+    				<fail-property resource="CommonErrorUiLabels" property="CommonErrorDublicateKey" />
+    			</add-error>
+    		</if-not-empty>
+    		<check-errors/>
+    	</else>
+    	</if-empty>
+        
+		<set field="loyaltyId" from-field="newEntity.loyaltyId"/>
+        <!-- <if-empty field="newEntity.userEntered">
+            <set value="Y" set-if-empty="true" field="newEntity.userEntered"/>
+        </if-empty> -->
+		
+        <now-timestamp field="nowTimestamp"/>
+        <set from-field="nowTimestamp" field="newEntity.createdDate"/>
+        <!-- <set from-field="nowTimestamp" field="newEntity.lastModifiedDate"/> -->
+        <!-- <set from-field="userLogin.userLoginId" field="newEntity.lastModifiedByUserLogin"/> -->
+        <set from-field="userLogin.userLoginId" field="newEntity.createdByUserLogin"/>
+        <create-value value-field="newEntity"/>
+        
+        <make-value value-field="newLoyaltyStatus" entity-name="LoyaltyStatus"/>
+        <sequenced-id sequence-name="LoyaltyStatus" field="newLoyaltyStatus.loyaltyStatusId"/>
+        <set field="newLoyaltyStatus.statusId" from-field="newEntity.statusId"/>
+        <set field="newLoyaltyStatus.loyaltyId" from-field="newEntity.loyaltyId"/>
+        <set field="newLoyaltyStatus.statusDatetime" from-field="nowTimestamp"/>
+        <set field="newLoyaltyStatus.statusUserLogin" from-field="userLogin.userLoginId"/>
+        <set field="newLoyaltyStatus.changeReason" from-field="parameters.changeReason"/>
+        <create-value value-field="newLoyaltyStatus"/>
+        
+		<if-not-empty field="parameters.roleTypeIds">
+			<iterate entry="roleTypeId" list="parameters.roleTypeIds">
+				<set field="loyaltyRoleCtx.roleTypeId" from-field="roleTypeId"/>
+				<set field="loyaltyRoleCtx.loyaltyId" from-field="loyaltyId"/>
+				<if-not-empty field="parameters.fromDate">
+					<set field="loyaltyRoleCtx.fromDate" from-field="parameters.fromDate"/>
+					<else>
+						<now-timestamp field="loyaltyRoleCtx.fromDate"/>		
+					</else>
+				</if-not-empty> 
+				<call-service service-name="createLoyaltyRoleCustom" in-map-name="loyaltyRoleCtx"></call-service>
+			</iterate>
+		</if-not-empty>
+		<if-not-empty field="parameters.productStoreIds"> 			
+			<iterate entry="productStoreId" list="parameters.productStoreIds">
+				<set field="productStoreLoyalty.productStoreId" from-field="productStoreId"/>
+				<set field="productStoreLoyalty.loyaltyId" from-field="loyaltyId"/>				
+				<if-not-empty field="parameters.fromDate">
+					<set field="productStoreLoyalty.fromDate" from-field="parameters.fromDate"/>
+					<else>
+						<now-timestamp field="productStoreLoyalty.fromDate"/>		
+					</else>
+				</if-not-empty>
+				<if-not-empty field="parameters.thruDate">
+					<set field="productStoreLoyalty.thruDate" from-field="parameters.thruDate"/>
+				</if-not-empty>
+				<!-- set from date, thru date for loyalty -->
+				<call-service service-name="createProductStoreLoyaltyAppl" in-map-name="productStoreLoyalty">
+				</call-service>
+			</iterate>
+		</if-not-empty>
+		<field-to-result field="loyaltyId" result-name="loyaltyId"/>
+	</simple-method>
+	
+	<!-- product role apply -->
+    <simple-method method-name="createLoyaltyRole">
+    	<set field="lookupPKMap.loyaltyId" from-field="parameters.loyaltyId"/>
+    	<find-by-primary-key value-field="lookedUpValue" map="lookupPKMap" entity-name="Loyalty"/>
+    	<if-compare operator="equals" value="LOYALTY_CREATED" field="lookedUpValue.statusId">
+			<make-value value-field="newLoyaltyRole" entity-name="LoyaltyRoleTypeAppl"/>
+			<set-pk-fields value-field="newLoyaltyRole" map="parameters"/>
+			<find-by-primary-key value-field="lookedUpValue" map="newLoyaltyRole"/>
+			<if-not-empty field="lookedUpValue">
+				<call-bsh>
+					import org.ofbiz.base.util.UtilProperties;
+					import org.ofbiz.service.ServiceUtil;
+					resourceError = "BaseSalesErrorUiLabels";
+					ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "LoyaltyRoleExists", locale));
+				</call-bsh>
+				<return/>
+			</if-not-empty>
+			<set-nonpk-fields value-field="newLoyaltyRole" map="parameters"/>
+			<create-value value-field="newLoyaltyRole"/>
+		<else>
+			<call-bsh>
+				import org.ofbiz.base.util.UtilProperties;
+				import org.ofbiz.service.ServiceUtil;
+				resourceError = "BaseSalesErrorUiLabels";
+				ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "LoyaltySttNotCreated", locale));			
+			</call-bsh>
+		</else>
+    	</if-compare>	
+    </simple-method>
+    
+	<!-- LoyaltyRule methods -->
+    <simple-method method-name="createLoyaltyRule" short-description="Create a LoyaltyRule">
+       	<if-empty field="parameters.ruleName">
+        	<add-error>
+        		<fail-property resource="BaseSalesErrorUiLabels" property="BSRuleNameMustNotBeEmpty"/>
+        	</add-error>
+        </if-empty>
+        <check-errors/>
+        
+		<set from-field="parameters.loyaltyId" field="lookupPKMap.loyaltyId"/>
+        <find-by-primary-key entity-name="Loyalty" map="lookupPKMap" value-field="lookedUpValue"/>
+        <if-compare operator="equals" value="LOYALTY_CREATED" field="lookedUpValue.statusId">
+        	<call-service service-name="createLoyaltyRule" in-map-name="parameters">
+        	    <result-to-field result-name="loyaltyRuleId" field="loyaltyRuleId"/>
+        	</call-service>
+	    <else>
+	    	<add-error>
+        		<fail-property resource="BaseSalesErrorUiLabels" property="BSLoyaltySttNotCreated"/>
+        	</add-error>
+        	<check-errors/>
+	    </else>    
+        </if-compare>
+        <field-to-result field="loyaltyRuleId" result-name="loyaltyRuleId"/>
+    </simple-method>
+    
+    <!-- LoyaltyCond methods -->
+    <simple-method method-name="createLoyaltyCond" short-description="Create an LoyaltyCond">        
+		<set field="lookupPKMap.loyaltyId" from-field="parameters.loyaltyId"/>
+		<find-by-primary-key value-field="loyalty" map="lookupPKMap" entity-name="Loyalty"/>
+		<if-compare operator="equals" value="LOYALTY_CREATED" field="loyalty.statusId">
+			<set-service-fields service-name="createLoyaltyCond" to-map="context" map="parameters"/>
+			<call-service service-name="createLoyaltyCond" in-map-name="context">
+				<result-to-field result-name="loyaltyCondSeqId" field="loyaltyCondSeqId"/>
+			</call-service>
+			<if-not-empty field="parameters.productCatIdListCond">
+				<iterate entry="productCatId" list="parameters.productCatIdListCond">
+					<set field="parameters.productCategoryId" from-field="productCatId"/>
+					<set field="parameters.loyaltyActionSeqId" value="_NA_"/>
+					<set field="parameters.loyaltyCondSeqId" from-field="loyaltyCondSeqId"/>
+					<set field="parameters.andGroupId" value="_NA_"/>
+					<set-service-fields service-name="createLoyaltyCategory" to-map="productCatContext" map="parameters"/>
+					<call-service service-name="createLoyaltyCategory" in-map-name="productCatContext"></call-service>
+				</iterate>
+			</if-not-empty>
+			<if-not-empty field="parameters.productIdListCond">
+				<iterate entry="productId" list="parameters.productIdListCond">
+					<set field="parameters.productId" from-field="productId"/>
+					<set field="parameters.loyaltyActionSeqId" value="_NA_"/>
+					<set field="parameters.loyaltyCondSeqId" from-field="loyaltyCondSeqId"/>
+					<set-service-fields service-name="createLoyaltyProduct" to-map="productContext" map="parameters"/>
+					<call-service service-name="createLoyaltyProduct" in-map-name="productContext"></call-service>
+				</iterate>
+			</if-not-empty>
+	        <else>
+	        	<call-bsh>
+					import org.ofbiz.base.util.UtilProperties;
+					import org.ofbiz.service.ServiceUtil;
+					resourceError = "BaseSalesErrorUiLabels";
+					ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "LoyaltySttNotCreated", locale));			
+				</call-bsh>
+	        </else>
+		</if-compare>
+    </simple-method>
+    
+    <!-- LoyaltyAction methods -->
+    <simple-method method-name="createLoyaltyAction" short-description="Create an LoyaltyAction">        
+		<set field="lookupPKMap.loyaltyId" from-field="parameters.loyaltyId"/>
+		<find-by-primary-key value-field="loyalty" map="lookupPKMap" entity-name="Loyalty"/>
+		<if-compare operator="equals" value="LOYALTY_CREATED" field="loyalty.statusId">
+			<set-service-fields service-name="createLoyaltyAction" to-map="context" map="parameters"/>	       
+	        <call-service service-name="createLoyaltyAction" in-map-name="context">
+	        	<result-to-field result-name="loyaltyActionSeqId" field="loyaltyActionSeqId"/>
+	        </call-service>
+	        <if-not-empty field="parameters.productCatIdListAction">
+				<iterate entry="productCatId" list="parameters.productCatIdListAction">
+					<set field="parameters.productCategoryId" from-field="productCatId"/>
+					<set field="parameters.loyaltyActionSeqId" from-field="loyaltyActionSeqId"/>
+					<set field="parameters.loyaltyCondSeqId" value="_NA_"/>
+					<set field="parameters.andGroupId" value="_NA_"/>
+					<set-service-fields service-name="createLoyaltyCategory" to-map="productCatContext" map="parameters"/>
+					<call-service service-name="createLoyaltyCategory" in-map-name="productCatContext"></call-service>
+				</iterate>
+			</if-not-empty>
+			<if-not-empty field="parameters.productIdListAction">
+				<iterate entry="productId" list="parameters.productIdListAction">
+					<set field="parameters.productId" from-field="productId"/>
+					<set field="parameters.loyaltyActionSeqId" from-field="loyaltyActionSeqId"/>
+					<set field="parameters.loyaltyCondSeqId" value="_NA_"/>
+					<set-service-fields service-name="createLoyaltyProduct" to-map="productContext" map="parameters"/>
+					<call-service service-name="createLoyaltyProduct" in-map-name="productContext"></call-service>
+				</iterate>
+			</if-not-empty>
+	    <else>
+	    	<call-bsh>
+				import org.ofbiz.base.util.UtilProperties;
+				import org.ofbiz.service.ServiceUtil;
+				resourceError = "BaseSalesErrorUiLabels";
+				ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "LoyaltySttNotCreated", locale));			
+			</call-bsh>
+	    </else>
+        </if-compare>
+    </simple-method>
+    
+    <simple-method method-name="deleteLoyalty" short-description="Delete a Loyalty">
+    	<olbius-check-permission type="MODULE" app="SALES_LOYALTY_DELETE">
+    		<fail-property resource="BaseSalesErrorUiLabels" property="BSYouHavenotDeletePermission"/>
+    	</olbius-check-permission>
+        <check-errors/>
+        
+        <set from-field="parameters.loyaltyId" field="lookupPKMap.loyaltyId"/>
+        <find-by-primary-key entity-name="Loyalty" map="lookupPKMap" value-field="lookedUpValue"/>
+        <if-empty field="lookedUpValue">
+        	<set field="loyaltyId" value="lookedUpValue.loyaltyId"/>
+        	<add-error><fail-property resource="BaseSalesErrorUiLabels" property="BSNotFoundLoyaltyHasLoyaltyIdIs"/></add-error>
+        	<check-errors/>
+        </if-empty>
+        <if-compare operator="equals" value="LOYALTY_CREATED" field="lookedUpValue.statusId">
+        	<now-timestamp field="nowTimestamp"/>
+        	
+       		<entity-condition list="listStoreLoyaltyAppl" entity-name="ProductStoreLoyaltyAppl">
+       			<condition-list>
+       				<condition-expr field-name="loyaltyId" from-field="lookupPKMap.loyaltyId"/>
+       			</condition-list>
+       		</entity-condition>
+       		<if-not-empty field="listStoreLoyaltyAppl">
+        		<iterate entry="storeLoyalty" list="listStoreLoyaltyAppl">
+        			<set field="storeLoyalty.thruDate" from-field="nowTimestamp"/>
+        		</iterate>
+        		<store-list list="listStoreLoyaltyAppl"/>
+       		</if-not-empty>
+	        <set field="lookedUpValue.thruDate" from-field="nowTimestamp"/>
+	        <set field="lookedUpValue.statusId" value="LOYALTY_CANCELLED"/>
+	        <store-value value-field="lookedUpValue"/>
+	        
+	        <make-value value-field="loyaltyStatus" entity-name="LoyaltyStatus"/>
+	        <sequenced-id sequence-name="LoyaltyStatus" field="loyaltyStatus.loyaltyStatusId"/>
+	        <set field="loyaltyStatus.statusId" value="LOYALTY_CANCELLED"/>
+	        <set field="loyaltyStatus.loyaltyId" from-field="lookedUpValue.loyaltyId"/>
+	        <set field="loyaltyStatus.statusDatetime" from-field="nowTimestamp"/>
+	        <set field="loyaltyStatus.statusUserLogin" from-field="userLogin.userLoginId"/>
+	        <create-value value-field="loyaltyStatus"/>
+       	<else>
+       		<add-error>
+       			<fail-property resource="BaseSalesErrorUiLabels" property="BSJustOnlyDeleteLoyaltyWithStatusIsCreated"/>
+       		</add-error>
+       		<check-errors/>
+       	</else>
+        </if-compare>
+    </simple-method>
+    
+    <simple-method method-name="updateLoyaltyThruDate">
+    	<olbius-check-permission type="MODULE" app="SALES_LOYALTY_APPROVE">
+    		<fail-property resource="BaseSalesErrorUiLabels" property="BSYouHavenotUpdatePermission"/>
+    	</olbius-check-permission>
+        <check-errors/>
+        
+		<if-empty field="parameters.loyaltyId">
+        	<add-error>
+        		<fail-property resource="BaseSalesErrorUiLabels" property="BSLoyaltyIdIsEmpty"/>
+        	</add-error>
+        </if-empty>
+        <if-empty field="parameters.thruDate">
+        	<add-error>
+        		<fail-property resource="BaseSalesErrorUiLabels" property="BSThruDateIsEmpty"/>
+        	</add-error>
+        </if-empty>
+        <check-errors/>
+        
+        <field-to-result field="parameters.loyaltyId" result-name="loyaltyId"/>
+        <entity-one value-field="dummyLoyalty" entity-name="Loyalty">
+        	<field-map field-name="loyaltyId" from-field="parameters.loyaltyId"/>
+        </entity-one>
+        <if-empty field="dummyLoyalty">
+        	<set field="loyaltyId" from-field="parameters.loyaltyId"/>
+   			<add-error>
+   				<fail-property resource="BaseSalesErrorUiLabels" property="BSNotFoundLoyaltyHasLoyaltyIdIs" />
+   			</add-error>
+   		</if-empty>
+   		
+   		<now-timestamp field="nowTimestamp"/>
+       	<set-calendar field="compareDate" from-field="nowTimestamp" seconds="-30" />
+       	<set field="thruDate" from-field="parameters.thruDate"/>
+       	
+       	<if-compare-field field="thruDate" operator="less" to-field="compareDate" type="Timestamp">
+       		<add-error>
+       			<fail-property resource="BaseSalesErrorUiLabels" property="BSRequiredValueGreatherOrEqualDateTimeToDay"/>
+       		</add-error>
+       	</if-compare-field>
+       	<set-calendar field="compareDate" from-field="dummyLoyalty.fromDate"/>
+       	<if-compare-field field="thruDate" operator="less" to-field="compareDate" type="Timestamp">
+       		<add-error>
+       			<fail-property resource="BaseSalesErrorUiLabels" property="BSFinishDateMustGreaterThanOrEqualStartDate"/>
+       		</add-error>
+       	</if-compare-field>
+        <check-errors/>
+        
+        <set field="dummyLoyalty.thruDate" from-field="thruDate"/>
+        <store-value value-field="dummyLoyalty"/>
+        
+        <entity-condition list="productStoreApplList" entity-name="ProductStoreLoyaltyAppl" filter-by-date="true">
+			<condition-expr field-name="loyaltyId" from-field="parameters.loyaltyId"/>
+		</entity-condition>
+		<if-not-empty field="productStoreApplList">
+			<iterate entry="productStoreApplItem" list="productStoreApplList">
+				<set field="productStoreApplItem.thruDate" from-field="thruDate"/>
+			</iterate>
+			<store-list list="productStoreApplList"/>
+		</if-not-empty>
+    </simple-method>
+    
+    <simple-method method-name="updateLoyaltyStatus">
+   	 	<olbius-check-permission type="MODULE" app="SALES_LOYALTY_EDIT">
+           	<fail-property resource="BaseSalesErrorUiLabels" property="BSYouHavenotUpdatePermission"/>
+       	</olbius-check-permission>        
+       	<check-errors/>
+    	<if>
+    		<condition>
+    			<or>
+    				<if-compare operator="equals" value="LOYALTY_CANCELLED" field="parameters.statusId"></if-compare>
+    				<if-compare operator="equals" value="LOYALTY_ACCEPTED" field="parameters.statusId"></if-compare>
+    			</or>
+    		</condition>
+    		<then>
+    			<now-timestamp field="nowTimestamp"/>
+    			<set from-field="parameters.loyaltyId" field="lookupPKMap.loyaltyId"/>
+				<find-by-primary-key value-field="lookedUpValue" map="lookupPKMap" entity-name="Loyalty"/>
+				<set field="oldStatusId" from-field="lookedUpValue.statusId"/>
+				<if-compare operator="not-equals" value="LOYALTY_CREATED" field="oldStatusId">
+					<add-error>
+						<fail-property resource="BaseSalesErrorUiLabels" property="BSJustOnlyUpdateLoyaltyWithStatusIsCreated"/>
+					</add-error>
+					<check-errors/>
+				</if-compare>
+				
+    			<if-compare operator="equals" value="LOYALTY_CANCELLED" field="parameters.statusId">
+	    			<entity-condition list="productStoreApplList" entity-name="ProductStoreLoyaltyAppl" filter-by-date="true">
+	    				<condition-expr field-name="loyaltyId" from-field="lookupPKMap.loyaltyId"/>
+	    			</entity-condition>
+	    			<if-not-empty field="productStoreApplList">
+	    				<!-- thru date all product store in loyalty -->
+	    				<iterate entry="productStoreApplItem" list="productStoreApplList">
+		    				<set field="productStoreApplItem.thruDate" from-field="nowTimestamp"/>
+		    			</iterate>
+		    			<store-list list="productStoreApplList"/>
+	    			</if-not-empty>
+    			</if-compare>
+				
+				<set field="lookedUpValue.statusId" from-field="parameters.statusId"/>
+				<store-value value-field="lookedUpValue"/>
+
+				<now-timestamp field="nowTimestamp"/>
+				<make-value value-field="newLoyaltyStatus" entity-name="LoyaltyStatus"/>
+		        <sequenced-id sequence-name="LoyaltyStatus" field="newLoyaltyStatus.loyaltyStatusId"/>
+		        <set field="newLoyaltyStatus.statusId" from-field="lookedUpValue.statusId"/>
+		        <set field="newLoyaltyStatus.loyaltyId" from-field="lookedUpValue.loyaltyId"/>
+		        <set field="newLoyaltyStatus.statusDatetime" from-field="nowTimestamp"/>
+		        <set field="newLoyaltyStatus.statusUserLogin" from-field="userLogin.userLoginId"/>
+		        <set field="newLoyaltyStatus.changeReason" from-field="parameters.changeReason"/>
+		        <create-value value-field="newLoyaltyStatus"/>
+    		</then>
+    	</if>
+    </simple-method>
+    
+    <simple-method method-name="createProductStoreLoyaltyAppl" short-description="Create ProductStoreLoyaltyAppl">
+        <make-value value-field="newEntity" entity-name="ProductStoreLoyaltyAppl"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+
+        <if-empty field="newEntity.fromDate">
+            <now-timestamp field="nowTimestamp"/>
+            <set from-field="nowTimestamp" set-if-empty="true" field="newEntity.fromDate"/>
+        </if-empty>
+
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    
+    <simple-method method-name="createLoyaltyRule" short-description="Create a LoyaltyRule">
+        <olbius-check-permission type="MODULE" app="SALES_LOYALTY_NEW">
+            <fail-property resource="BaseSalesErrorUiLabels" property="BSYouHavenotCreatePermission"/>
+        </olbius-check-permission>
+        <check-errors/>
+
+        <make-value value-field="newEntity" entity-name="LoyaltyRule"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <make-next-seq-id value-field="newEntity" seq-field-name="loyaltyRuleId" numeric-padding="2"/>
+        <field-to-result field="newEntity.loyaltyRuleId" result-name="loyaltyRuleId"/>
+
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    
+    <simple-method method-name="updateLoyaltyCode" short-description="Update an LoyaltyCode">
+        <olbius-check-permission type="MODULE" app="SALES_LOYALTY_EDIT">
+            <fail-property resource="BaseSalesErrorUiLabels" property="BSYouHavenotUpdatePermission"/>
+        </olbius-check-permission>
+        <check-errors/>
+
+        <make-value entity-name="LoyaltyCode" value-field="lookupPKMap"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+
+        <now-timestamp field="nowTimestamp"/>
+        <set from-field="nowTimestamp" field="newEntity.lastModifiedDate"/>
+        <set from-field="userLogin.userLoginId" field="newEntity.lastModifiedByUserLogin"/>
+
+        <store-value value-field="lookedUpValue"/>
+    </simple-method>
+    
+    <simple-method method-name="createLoyaltyCondCore" short-description="Create an LoyaltyCondition">
+        <olbius-check-permission type="MODULE" app="SALES_LOYALTY_NEW">
+            <fail-property resource="BaseSalesErrorUiLabels" property="BSYouHavenotCreatePermission"/>
+        </olbius-check-permission>
+        <check-errors/>
+
+        <make-value value-field="newEntity" entity-name="LoyaltyCondition"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <if-not-empty field="parameters.carrierShipmentMethod">
+            <set field="newEntity.otherValue" from-field="parameters.carrierShipmentMethod"/>
+        </if-not-empty>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <make-next-seq-id value-field="newEntity" seq-field-name="loyaltyCondSeqId" numeric-padding="2"/>
+        <field-to-result field="newEntity.loyaltyCondSeqId" result-name="loyaltyCondSeqId"/>
+
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    
+    <simple-method method-name="createLoyaltyCategory" short-description="Create an LoyaltyCategory">
+        <olbius-check-permission type="MODULE" app="SALES_LOYALTY_NEW">
+            <fail-property resource="BaseSalesErrorUiLabels" property="BSYouHavenotCreatePermission"/>
+        </olbius-check-permission>
+        <check-errors/>
+
+        <make-value value-field="newEntity" entity-name="LoyaltyCategory"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    
+    <simple-method method-name="createLoyaltyProduct" short-description="Create an LoyaltyProduct">
+        <olbius-check-permission type="MODULE" app="SALES_LOYALTY_NEW">
+            <fail-property resource="BaseSalesErrorUiLabels" property="BSYouHavenotCreatePermission"/>
+        </olbius-check-permission>
+        <check-errors/>
+
+        <make-value value-field="newEntity" entity-name="LoyaltyProduct"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    
+    <simple-method method-name="createLoyaltyActionCore" short-description="Create an LoyaltyAction">
+        <olbius-check-permission type="MODULE" app="SALES_LOYALTY_NEW">
+            <fail-property resource="BaseSalesErrorUiLabels" property="BSYouHavenotCreatePermission"/>
+        </olbius-check-permission>
+        <check-errors/>
+
+        <make-value value-field="newEntity" entity-name="LoyaltyAction"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <make-next-seq-id value-field="newEntity" seq-field-name="loyaltyActionSeqId" numeric-padding="2"/>
+        <field-to-result field="newEntity.loyaltyActionSeqId" result-name="loyaltyActionSeqId"/>
+
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    
+    <simple-method method-name="updateLoyalty" short-description="Update a Loyalty">
+        <olbius-check-permission type="MODULE" app="SALES_LOYALTY_EDIT">
+            <fail-property resource="BaseSalesErrorUiLabels" property="BSYouHavenotUpdatePermission"/>
+        </olbius-check-permission>
+        <check-errors/>
+
+        <set from-field="parameters.loyaltyId" field="lookupPKMap.loyaltyId"/>
+        <find-by-primary-key entity-name="Loyalty" map="lookupPKMap" value-field="lookedUpValue"/>
+        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+
+        <!-- <if-empty field="lookedUpValue.userEntered">
+            <set value="Y" set-if-empty="true" field="lookedUpValue.userEntered"/>
+        </if-empty> -->
+
+        <!-- <now-timestamp field="nowTimestamp"/>
+        <set from-field="nowTimestamp" field="lookedUpValue.lastModifiedDate"/>
+        <set from-field="userLogin.userLoginId" field="lookedUpValue.lastModifiedByUserLogin"/> -->
+
+        <store-value value-field="lookedUpValue"/>
+    </simple-method>
+    
+    <simple-method method-name="deleteLoyaltyRule" short-description="Delete a LoyaltyRule">
+        <olbius-check-permission type="MODULE" app="SALES_LOYALTY_DELETE">
+            <fail-property resource="BaseSalesErrorUiLabels" property="BSYouHavenotDeletePermission"/>
+        </olbius-check-permission>
+        <check-errors/>
+
+        <make-value entity-name="LoyaltyRule" value-field="lookupPKMap"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key entity-name="LoyaltyRule" map="lookupPKMap" value-field="lookedUpValue"/>
+        <log message="DungLV ${lookedUpValue}" level="info"/>
+        <remove-value value-field="lookedUpValue"/>
+    </simple-method>
+    
+    <simple-method method-name="updateLoyaltyRule" short-description="Update a LoyaltyRule">
+        <olbius-check-permission type="MODULE" app="SALES_LOYALTY_EDIT">
+            <fail-property resource="BaseSalesErrorUiLabels" property="BSYouHavenotUpdatePermission"/>
+        </olbius-check-permission>
+        <check-errors/>
+
+        <make-value entity-name="LoyaltyRule" value-field="lookupPKMap"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key entity-name="LoyaltyRule" map="lookupPKMap" value-field="lookedUpValue"/>
+        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+        <store-value value-field="lookedUpValue"/>
+    </simple-method>
+    
+    <simple-method method-name="deleteLoyaltyCond" short-description="Delete an LoyaltyCondition">
+        <olbius-check-permission type="MODULE" app="SALES_LOYALTY_DELETE">
+            <fail-property resource="BaseSalesErrorUiLabels" property="BSYouHavenotDeletePermission"/>
+        </olbius-check-permission>
+        <check-errors/>
+
+        <make-value entity-name="LoyaltyCondition" value-field="lookupPKMap"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key entity-name="LoyaltyCondition" map="lookupPKMap" value-field="lookedUpValue"/>
+        <remove-value value-field="lookedUpValue"/>
+    </simple-method>
+    
+    <simple-method method-name="updateLoyaltyCond" short-description="Update an LoyaltyCondition">
+        <olbius-check-permission type="MODULE" app="SALES_LOYALTY_EDIT">
+            <fail-property resource="BaseSalesErrorUiLabels" property="BSYouHavenotUpdatePermission"/>
+        </olbius-check-permission>
+        <check-errors/>
+
+        <make-value entity-name="LoyaltyCondition" value-field="lookupPKMap"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key entity-name="LoyaltyCondition" map="lookupPKMap" value-field="lookedUpValue"/>
+        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+        <if-not-empty field="parameters.carrierShipmentMethod">
+            <set field="lookedUpValue.otherValue" from-field="parameters.carrierShipmentMethod"/>
+        </if-not-empty>
+        <store-value value-field="lookedUpValue"/>
+    </simple-method>
+    
+    <simple-method method-name="deleteLoyaltyAction" short-description="Delete an LoyaltyAction">
+        <olbius-check-permission type="MODULE" app="SALES_LOYALTY_DELETE">
+            <fail-property resource="BaseSalesErrorUiLabels" property="BSYouHavenotDeletePermission"/>
+        </olbius-check-permission>
+        <check-errors/>
+
+        <make-value entity-name="LoyaltyAction" value-field="lookupPKMap"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+        <remove-value value-field="lookedUpValue"/>
+    </simple-method>
+    
+    <simple-method method-name="updateLoyaltyAction" short-description="Update an LoyaltyAction">
+        <olbius-check-permission type="MODULE" app="SALES_LOYALTY_EDIT">
+            <fail-property resource="BaseSalesErrorUiLabels" property="BSYouHavenotUpdatePermission"/>
+        </olbius-check-permission>
+        <check-errors/>
+
+        <make-value entity-name="LoyaltyAction" value-field="lookupPKMap"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+        <store-value value-field="lookedUpValue"/>
+    </simple-method>
+    
+    <simple-method method-name="createLoyaltyCode" short-description="Create an LoyaltyCode">
+        <olbius-check-permission type="MODULE" app="SALES_LOYALTY_NEW">
+            <fail-property resource="BaseSalesErrorUiLabels" property="BSYouHavenotCreatePermission"/>
+        </olbius-check-permission>
+        <check-errors/>
+
+        <make-value value-field="newEntity" entity-name="LoyaltyCode"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <if-empty field="newEntity.loyaltyCodeId">
+            <sequenced-id sequence-name="LoyaltyCode" field="newEntity.loyaltyCodeId" stagger-max="100"/>
+        </if-empty>
+
+        <field-to-result field="newEntity.loyaltyCodeId" result-name="loyaltyCodeId"/>
+
+        <now-timestamp field="nowTimestamp"/>
+        <if-empty field="newEntity.fromDate">
+            <set field="newEntity.fromDate" from-field="nowTimestamp"/>
+        </if-empty>
+        <set from-field="nowTimestamp" field="newEntity.createdDate"/>
+        <set from-field="nowTimestamp" field="newEntity.lastModifiedDate"/>
+        <set from-field="userLogin.userLoginId" field="newEntity.lastModifiedByUserLogin"/>
+        <set from-field="userLogin.userLoginId" field="newEntity.createdByUserLogin"/>
+
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    
+    <simple-method method-name="createLoyaltyCodeEmail" short-description="Create an LoyaltyCodeEmail">
+        <olbius-check-permission type="MODULE" app="SALES_LOYALTY_NEW">
+            <fail-property resource="BaseSalesErrorUiLabels" property="BSYouHavenotCreatePermission"/>
+        </olbius-check-permission>
+        <check-errors/>
+
+        <make-value value-field="newEntity" entity-name="LoyaltyCodeEmail"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    
+    <simple-method method-name="deleteLoyaltyCodeEmail" short-description="Delete an LoyaltyCodeEmail">
+        <olbius-check-permission type="MODULE" app="SALES_LOYALTY_DELETE">
+            <fail-property resource="BaseSalesErrorUiLabels" property="BSYouHavenotDeletePermission"/>
+        </olbius-check-permission>
+        <check-errors/>
+
+        <make-value entity-name="LoyaltyCodeEmail" value-field="lookupPKMap"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+        <remove-value value-field="lookedUpValue"/>
+    </simple-method>
+
+    <simple-method method-name="createLoyaltyCodeParty" short-description="Create an LoyaltyCodeParty">
+        <olbius-check-permission type="MODULE" app="SALES_LOYALTY_NEW">
+            <fail-property resource="BaseSalesErrorUiLabels" property="BSYouHavenotCreatePermission"/>
+        </olbius-check-permission>
+        <check-errors/>
+
+        <make-value value-field="newEntity" entity-name="LoyaltyCodeParty"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    
+    <simple-method method-name="deleteLoyaltyCodeParty" short-description="Delete an LoyaltyCodeParty">
+        <olbius-check-permission type="MODULE" app="SALES_LOYALTY_DELETE">
+            <fail-property resource="BaseSalesErrorUiLabels" property="BSYouHavenotDeletePermission"/>
+        </olbius-check-permission>
+        <check-errors/>
+
+        <make-value entity-name="LoyaltyCodeParty" value-field="lookupPKMap"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key map="lookupPKMap" value-field="lookedUpValue"/>
+        <remove-value value-field="lookedUpValue"/>
+    </simple-method>
+</simple-methods>

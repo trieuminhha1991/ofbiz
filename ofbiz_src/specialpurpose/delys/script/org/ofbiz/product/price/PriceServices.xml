@@ -1,0 +1,651 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+	
+    <!-- ProductPriceCond methods -->
+    <simple-method method-name="createProductPriceCondDelys" short-description="Create an ProductPriceCondDelys">
+        <check-permission permission="DELYS_QUOTATION" action="_CREATE">
+            <fail-property resource="DelysAdminUiLabels" property="DAQuotationCreatePermissionError"/>
+        </check-permission>
+        <check-permission permission="DELYS_QUOTATION_MAINT">
+            <fail-property resource="ProductUiLabels" property="ProductPriceMaintPermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <if-not-empty field="parameters.condValueInput">
+            <set field="parameters.condValue" from-field="parameters.condValueInput"/>
+        </if-not-empty>
+        <make-value value-field="newEntity" entity-name="ProductPriceCond"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <make-next-seq-id value-field="newEntity" seq-field-name="productPriceCondSeqId" numeric-padding="2"/>
+        <field-to-result field="newEntity.productPriceCondSeqId" result-name="productPriceCondSeqId"/>
+
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    
+    <!-- ProductPriceRule methods -->
+    <simple-method method-name="createProductPriceRuleAndRoleTypes" short-description="Create an ProductPriceRule and roleTypes">
+    	<check-permission permission="DELYS_QUOTATION" action="_CREATE">
+            <fail-property resource="DelysAdminUiLabels" property="DAQuotationCreatePermissionError"/>
+        </check-permission>
+        <check-permission permission="DELYS_QUOTATION_MAINT">
+            <fail-property resource="ProductUiLabels" property="ProductPriceMaintPermissionError"/>
+        </check-permission>
+        <check-errors/>
+
+        <make-value value-field="newEntity" entity-name="ProductPriceRule"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <if-empty field="parameters.fromDate">
+            <now-timestamp field="newEntity.fromDate"/>
+        </if-empty>
+        <sequenced-id sequence-name="ProductPriceRule" field="newEntity.productPriceRuleId"/>
+        <field-to-result field="newEntity.productPriceRuleId" result-name="productPriceRuleId"/>
+
+        <create-value value-field="newEntity"/>
+    	<set field="partyRoleTypesApplys" from-field="parameters.partyRoleTypesApply"/>
+    	
+    	<call-map-processor in-map-name="parameters" out-map-name="roleTypeContext">
+            <simple-map-processor name="newRoleType">
+                <process field="inputParamEnumId">
+                    <copy/>
+                </process>
+                <process field="operatorEnumId">
+                    <copy/>
+                </process>
+            </simple-map-processor>
+        </call-map-processor>
+        <set field="roleTypeContext.productPriceRuleId" from-field="newEntity.productPriceRuleId"/>
+        
+    	<iterate entry="partyRoleTypesApply" list="partyRoleTypesApplys">
+    		<set field="roleTypeContext.condValue" from-field="partyRoleTypesApply"/>
+    		<call-service service-name="createProductPriceCondDelys" in-map-name="roleTypeContext"></call-service>
+    	</iterate>
+    </simple-method>
+    
+    <simple-method method-name="createProductQuotation" short-description="Create an ProductQuotation">
+    	<check-permission permission="DELYS_QUOTATION" action="_CREATE">
+            <fail-property resource="DelysAdminUiLabels" property="DAQuotationCreatePermissionError"/>
+        </check-permission>
+        <check-permission permission="DELYS_QUOTATION_MAINT">
+            <fail-property resource="DelysAdminUiLabels" property="DAProductPriceMaintPermissionError"/>
+        </check-permission>
+        <check-errors/>
+        
+        <if-empty field="parameters.quotationName">
+        	<add-error>
+        		<fail-property resource="DelysAdminUiLabels" property="DAQuotaionNameMustNotBeEmpty"/>
+        	</add-error>
+        	<check-errors/>
+        </if-empty>
+		
+        <make-value value-field="newEntity" entity-name="ProductQuotation"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <set field="newEntity.fromDate" from-field="parameters.fromDate"/>
+<!--         <if-empty field="parameters.fromDate"> -->
+<!--             <now-timestamp field="newEntity.fromDate"/> -->
+<!--         </if-empty> -->
+		<set field="newEntity.salesChannel" from-field="parameters.salesChannel"/>
+        <set field="newEntity.statusId" value="QUOTATION_CREATED" />
+        <set field="newEntity.productQuotationId" from-field="parameters.productQuotationId"/>
+    	<if-empty field="newEntity.productQuotationId">
+    		<sequenced-id sequence-name="ProductQuotation" field="newEntity.productQuotationId"/>
+    	<else>
+    		<check-id field="newEntity.productQuotationId" />
+    		<check-errors/>
+    		<entity-one value-field="dummyQuotation" entity-name="ProductQuotation">
+    			<field-map field-name="productQuotationId" from-field="parameters.productQuotationId"/>
+    		</entity-one>
+    		<if-not-empty field="dummyQuotation">
+    			<add-error>
+    				<fail-property resource="CommonErrorUiLabels" property="CommonErrorDublicateKey" />
+    			</add-error>
+    		</if-not-empty>
+    		<check-errors/>
+    	</else>
+    	</if-empty>
+        <field-to-result field="newEntity.productQuotationId" result-name="productQuotationId"/>
+        
+        <create-value value-field="newEntity"/>
+        
+        <make-value value-field="newEntityQuotationStatus" entity-name="ProductQuotationStatus"/>
+        <sequenced-id sequence-name="ProductQuotationStatus" field="newEntityQuotationStatus.quotationStatusId"/>
+        <set field="newEntityQuotationStatus.statusId" value="QUOTATION_CREATED"/>
+        <set field="newEntityQuotationStatus.productQuotationId" from-field="newEntity.productQuotationId"/>
+        <now-timestamp field="newEntityQuotationStatus.statusDatetime"/>
+        <set field="newEntityQuotationStatus.statusUserLogin" from-field="userLogin.userLoginId"/>
+        <create-value value-field="newEntityQuotationStatus"/>
+        
+    	<set field="partyRoleTypesApplys" from-field="parameters.partyRoleTypesApply"/>
+    	<call-map-processor in-map-name="parameters" out-map-name="quotationRoleTypeContext"></call-map-processor>
+    	
+        <set field="quotationRoleTypeContext.productQuotationId" from-field="newEntity.productQuotationId"/>
+    	<iterate entry="partyRoleTypesApply" list="partyRoleTypesApplys">
+    		<set field="quotationRoleTypeContext.roleTypeId" from-field="partyRoleTypesApply"/>
+    		<call-service service-name="createProductQuotationRoleType" in-map-name="quotationRoleTypeContext"></call-service>
+    	</iterate>
+    </simple-method>
+    <simple-method method-name="updateProductQuotation">
+    	<check-permission permission="DELYS_QUOTATION" action="_UPDATE">
+            <fail-property resource="DelysAdminErrorUiLabels" property="DAQuotationUpdatePermissionError"/>
+        </check-permission>
+        <!-- <check-permission permission="DELYS_QUOTATION_MAINT">
+            <fail-property resource="DelysAdminUiLabels" property="DAProductPriceMaintPermissionError"/>
+        </check-permission> -->
+        <check-errors/>
+    	
+    	<field-to-result field="parameters.productQuotationId" result-name="productQuotationId"/>
+    	
+    	<entity-one value-field="quotationSelected" entity-name="ProductQuotation">
+    		<field-map field-name="productQuotationId" from-field="parameters.productQuotationId"/>
+    	</entity-one>
+    	<if-empty field="quotationSelected">
+    		<add-error>
+    			<fail-property resource="DelysAdminUiLabels" property="DAProductQuotationNotFound"/>
+    		</add-error>
+    		<check-errors/>
+    	</if-empty>
+    	<set field="quotationSelected.quotationName" from-field="parameters.quotationName"/>
+    	<set field="quotationSelected.description" from-field="parameters.description"/>
+    	<set field="quotationSelected.fromDate" from-field="parameters.fromDate"/>
+    	<set field="quotationSelected.thruDate" from-field="parameters.thruDate"/>
+<!--     	<make-value value-field="entityQuotation" entity-name="ProductQuotation"/> -->
+<!--     	<set-pk-fields value-field="entityQuotation" map="quotationSelected"/> -->
+<!--     	<set field="entityQuotation.quotationName" value="${parameters.quotationName}"/> -->
+<!--     	<set field="entityQuotation.description" value="${parameters.description}"/> -->
+<!--     	<set field="entityQuotation.currencyUomId" value="${quotationSelected.currencyUomId}"/> -->
+<!--     	<set field="entityQuotation.fromDate" value="${parameters.fromDate}"/> -->
+<!--     	<set field="entityQuotation.thruDate" value="${parameters.thruDate}"/> -->
+<!--     	<set field="entityQuotation.salesChannel" from-field="quotationSelected.salesChannel"/> -->
+<!--     	<set field="entityQuotation.statusId" value="${quotationSelected.statusId}"/> -->
+    	<store-value value-field="quotationSelected"/>
+    </simple-method>
+    <simple-method method-name="updateQuotationThruDate">
+    	<check-permission permission="QUOTATION" action="_THRUDATE">
+            <fail-property resource="DelysAdminUiLabels" property="DAQuotationUpdatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+        <field-to-result field="parameters.productQuotationId" result-name="productQuotationId"/>
+        <now-timestamp field="nowTimestamp"/>
+        <if-empty field="parameters.thruDate">
+        	<add-error>
+        		<fail-property resource="DelysAdminUiLabels" property="DAThruDateMustNotBeEmpty"/>
+        	</add-error>
+        <else>
+        	<set-calendar field="compareDate" from-field="nowTimestamp" seconds="-30" />
+        	<if-compare-field field="parameters.thruDate" operator="less" to-field="compareDate" type="Timestamp">
+        		<add-error>
+        			<fail-property resource="DelysAdminUiLabels" property="DAThruDateCantLessThanToday"/>
+        		</add-error>
+        	</if-compare-field>
+        </else>
+        </if-empty>
+        <entity-one value-field="dummyQuotation" entity-name="ProductQuotation">
+        	<field-map field-name="productQuotationId" from-field="parameters.productQuotationId"/>
+        </entity-one>
+        <if-empty field="dummyQuotation">
+   			<add-error>
+   				<fail-property resource="DelysAdminErrorUiLabels" property="DAQuotaionIdMustNotBeEmpty" />
+   			</add-error>
+   		</if-empty>
+        <check-errors/>
+        <!-- <if-compare field="dummyQuotation.thruDate" operator="less-equals" value="${nowTimestamp}">
+        	<add-error>
+   				<fail-property resource="DelysAdminErrorUiLabels" property="DAThisQuotationHasExpired" />
+   			</add-error>
+   		</if-compare>
+        <check-errors/> -->
+        <set field="dummyQuotation.thruDate" from-field="parameters.thruDate"/>
+       <!--  <make-value value-field="entityProductQuotation" entity-name="ProductQuotation"/>
+        <set field="entityProductQuotation.productQuotationId" from-field="dummyQuotation.productQuotationId"/>
+        <set field="entityProductQuotation.quotationName" from-field="dummyQuotation.quotationName"/>
+        <set field="entityProductQuotation.description" from-field="dummyQuotation.description"/>
+        <set field="entityProductQuotation.currencyUomId" from-field="dummyQuotation.currencyUomId"/>
+        <set field="entityProductQuotation.fromDate" from-field="dummyQuotation.fromDate"/>
+        <set field="entityProductQuotation.thruDate" from-field="parameters.thruDate"/>
+        <set field="entityProductQuotation.salesChannel" from-field="dummyQuotation.salesChannel"/>
+        <set field="entityProductQuotation.statusId" from-field="dummyQuotation.statusId"/> -->
+        <store-value value-field="dummyQuotation"/>
+        <entity-condition list="quotationPriceRules" entity-name="ProductPriceRule">
+        	<condition-expr field-name="productQuotationId" from-field="parameters.productQuotationId"/>
+        </entity-condition>
+        <if-not-empty field="quotationPriceRules">
+        	<!-- update all price rule in quotation -->
+        	<iterate entry="quotationPriceRule" list="quotationPriceRules">
+        		<set field="quotationPriceRule.thruDate" from-field="parameters.thruDate" />
+        	</iterate>
+        </if-not-empty>
+        <store-list list="quotationPriceRules"/>
+    </simple-method>
+    
+    <simple-method method-name="createProductQuotationRoleType">
+    	<check-permission permission="DELYS_QUOTATION" action="_CREATE">
+            <fail-property resource="DelysAdminUiLabels" property="DAQuotationCreatePermissionError"/>
+        </check-permission>
+        <!-- <check-permission permission="DELYS_QUOTATION_MAINT">
+            <fail-property resource="DelysAdminUiLabels" property="DAProductPriceMaintPermissionError"/>
+        </check-permission> -->
+        <check-errors/>
+        
+        <make-value value-field="newEntity" map="parameters" entity-name="ProductQuotationRoleType"/>
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    
+    <simple-method method-name="createQuotationRule">
+    	<check-permission permission="DELYS_QUOTATION" action="_CREATE">
+            <fail-property resource="DelysAdminUiLabels" property="DAQuotationCreatePermissionError"/>
+        </check-permission>
+        <check-permission permission="DELYS_QUOTATION_MAINT">
+            <fail-property resource="DelysAdminUiLabels" property="DAProductPriceMaintPermissionError"/>
+        </check-permission>
+        <check-errors/>
+       	
+       	<field-to-result field="parameters.productQuotationId" result-name="productQuotationId"/>
+       	
+       	<if-empty field="parameters.productQuotationId">
+       		<add-error>
+       			<fail-property resource="DelysAdminUiLabels" property="DAQuotaionIdMustNotBeEmpty"/>
+       		</add-error>
+       		<check-errors/>
+       	</if-empty>
+       	
+       	<entity-one value-field="productSelected" entity-name="Product">
+       		<field-map field-name="productId" from-field="parameters.productId"/>
+       	</entity-one>
+       	
+       	<if-empty field="productSelected">
+       		<add-error>
+       			<fail-property resource="DelysAdminUiLabels" property="DAProductNotExists"/>
+       		</add-error>
+       		<check-errors/>
+       	</if-empty>
+       	
+       	<entity-condition list="productPriceRulesSelected" entity-name="ProductQuotationAndPriceRCA" use-cache="false" distinct="true">
+			<condition-list>
+				<condition-expr field-name="pq_ProductQuotationId" value="${parameters.productQuotationId}"/>
+				<condition-expr field-name="productId" value="${parameters.productId}"/>
+				<condition-expr field-name="inputParamEnumId" value="PRIP_PRODUCT_ID"/>
+				<condition-expr field-name="productPriceActionTypeId" value="PRICE_FLAT"/>
+			</condition-list>
+		</entity-condition>
+       	
+       	<if-not-empty field="productPriceRulesSelected">
+       		<add-error>
+       			<fail-property resource="DelysAdminUiLabels" property="DAThisProductIsAlreadyExistsInQuotation"/>
+       		</add-error>
+       		<check-errors/>
+       	</if-not-empty>
+       	
+<!--   parameters: productQuotationId productId inputCategory priceToDist priceToMarket priceToConsumer -->
+<!--   productQuotationSelected: productQuotationId *, quotationName, description, currencyUomId, fromDate Timestamp -->
+       
+       	<entity-one value-field="productQuotationSelected" entity-name="ProductQuotation">
+       		<field-map field-name="productQuotationId" from-field="parameters.productQuotationId"/>
+       	</entity-one>
+       
+       	<if-empty field="productQuotationSelected">
+       		<add-error>
+       			<fail-property resource="DelysAdminUiLabels" property="DAProductQuotationNotFound"/>
+       		</add-error>
+       		<check-errors/>
+       	</if-empty>
+       
+       
+       	<entity-condition list="partyRoleTypesApplys" entity-name="ProductQuotationRoleType">
+    		<condition-expr field-name="productQuotationId" from-field="parameters.productQuotationId"/>
+       	</entity-condition>
+       	
+       	<if-empty field="partyRoleTypesApplys">
+       			<!-- Create product price rule: productPriceRuleId, ruleName, description, isSale, fromDate, thruDate, productQuotationId -->
+	    		<make-value value-field="newEntityProductPriceRule" entity-name="ProductPriceRule"/>
+	    		
+	    		<call-map-processor in-map-name="productQuotationSelected" out-map-name="productPriceRuleContext">
+		            <simple-map-processor name="newProductPriceRule">
+		                <process field="quotationName">
+		                    <copy to-field="ruleName"/>
+		                </process>
+		                <process field="description">
+		                	<copy/>
+		                </process>
+		                <process field="productQuotationId">
+		                    <copy/>
+		                </process>
+		            </simple-map-processor>
+		        </call-map-processor>
+	    		<set field="productPriceRuleContext.isSale" value="N"/>
+	<!--     		<now-timestamp field="productPriceRuleContext.fromDate"/> -->
+				<set-nonpk-fields map="productPriceRuleContext" value-field="newEntityProductPriceRule"/>
+	        	<sequenced-id sequence-name="ProductPriceRule" field="newEntityProductPriceRule.productPriceRuleId"/>
+	<!--         	<field-to-result field="newEntityProductPriceRule.productPriceRuleId" result-name="productPriceRuleId"/> -->
+	        	<create-value value-field="newEntityProductPriceRule"/>
+				
+				
+				<!-- Create product price cond: productPriceRuleId *, productPriceCondSeqId *, inputParamEnumId, operatorEnumId, condValue
+					cond1: product -->
+				<make-value value-field="newEntityProductPriceCond" entity-name="ProductPriceCond"/>
+	    		<set field="newEntityProductPriceCond.productPriceRuleId" from-field="newEntityProductPriceRule.productPriceRuleId"/>
+	    		<make-next-seq-id seq-field-name="productPriceCondSeqId" value-field="newEntityProductPriceCond" numeric-padding="2"/>
+	    		<set field="newEntityProductPriceCond.inputParamEnumId" value="PRIP_PRODUCT_ID"/>
+	    		<set field="newEntityProductPriceCond.operatorEnumId" value="PRC_EQ"/>
+	    		<set field="newEntityProductPriceCond.condValue" from-field="parameters.productId"/>
+	    		<create-value value-field="newEntityProductPriceCond"/>
+	    		
+	    		
+				<!-- Create product price action: productPriceRuleId *, productPriceActionSeqId *, productPriceActionTypeId, amount, rateCode -->
+				<!-- priceToDist -->
+				<make-value value-field="newEntityProductPriceAction" entity-name="ProductPriceAction"/>
+	    		<set field="newEntityProductPriceAction.productPriceRuleId" from-field="newEntityProductPriceRule.productPriceRuleId"/>
+	    		<make-next-seq-id seq-field-name="productPriceActionSeqId" value-field="newEntityProductPriceAction" numeric-padding="2"/>
+	    		<set field="newEntityProductPriceAction.productPriceActionTypeId" value="PRICE_FLAT"/>
+	    		<set field="newEntityProductPriceAction.amount" from-field="parameters.priceToDist"/>
+	    		<create-value value-field="newEntityProductPriceAction"/>
+				
+				<!-- priceToMarket -->
+				<if-not-empty field="parameters.priceToMarket">
+					<make-value value-field="newEntityProductPriceAction2" entity-name="ProductPriceAction"/>
+		    		<set field="newEntityProductPriceAction2.productPriceRuleId" from-field="newEntityProductPriceRule.productPriceRuleId"/>
+		    		<make-next-seq-id seq-field-name="productPriceActionSeqId" value-field="newEntityProductPriceAction2" numeric-padding="2"/>
+		    		<set field="newEntityProductPriceAction2.productPriceActionTypeId" value="PRICE_MARKET"/>
+		    		<set field="newEntityProductPriceAction2.amount" from-field="parameters.priceToMarket"/>
+		    		<create-value value-field="newEntityProductPriceAction2"/>
+				</if-not-empty>
+	    		
+	    		<!-- priceToConsumer -->
+				<if-not-empty field="parameters.priceToConsumer">
+					<make-value value-field="newEntityProductPriceAction2" entity-name="ProductPriceAction"/>
+		    		<set field="newEntityProductPriceAction2.productPriceRuleId" from-field="newEntityProductPriceRule.productPriceRuleId"/>
+		    		<make-next-seq-id seq-field-name="productPriceActionSeqId" value-field="newEntityProductPriceAction2" numeric-padding="2"/>
+		    		<set field="newEntityProductPriceAction2.productPriceActionTypeId" value="PRICE_CONSUMER"/>
+		    		<set field="newEntityProductPriceAction2.amount" from-field="parameters.priceToConsumer"/>
+		    		<create-value value-field="newEntityProductPriceAction2"/>
+				</if-not-empty>
+       	<else>
+       		<iterate entry="partyRoleTypesApply" list="partyRoleTypesApplys">
+			
+	    		<!-- Create product price rule: productPriceRuleId, ruleName, description, isSale, fromDate, thruDate, productQuotationId -->
+	    		<make-value value-field="newEntityProductPriceRule" entity-name="ProductPriceRule"/>
+	    		
+	    		<call-map-processor in-map-name="productQuotationSelected" out-map-name="productPriceRuleContext">
+		            <simple-map-processor name="newProductPriceRule">
+		                <process field="quotationName">
+		                    <copy to-field="ruleName"/>
+		                </process>
+		                <process field="description">
+		                	<copy/>
+		                </process>
+		                <process field="productQuotationId">
+		                    <copy/>
+		                </process>
+		            </simple-map-processor>
+		        </call-map-processor>
+	    		<set field="productPriceRuleContext.isSale" value="N"/>
+	<!--     		<now-timestamp field="productPriceRuleContext.fromDate"/> -->
+				<set-nonpk-fields map="productPriceRuleContext" value-field="newEntityProductPriceRule"/>
+	        	<sequenced-id sequence-name="ProductPriceRule" field="newEntityProductPriceRule.productPriceRuleId"/>
+	<!--         	<field-to-result field="newEntityProductPriceRule.productPriceRuleId" result-name="productPriceRuleId"/> -->
+	        	<create-value value-field="newEntityProductPriceRule"/>
+				
+				
+				<!-- Create product price cond: productPriceRuleId *, productPriceCondSeqId *, inputParamEnumId, operatorEnumId, condValue
+					cond1: product
+					cond2: role type for party -->
+				<make-value value-field="newEntityProductPriceCond" entity-name="ProductPriceCond"/>
+	    		<set field="newEntityProductPriceCond.productPriceRuleId" from-field="newEntityProductPriceRule.productPriceRuleId"/>
+	    		<make-next-seq-id seq-field-name="productPriceCondSeqId" value-field="newEntityProductPriceCond" numeric-padding="2"/>
+	    		<set field="newEntityProductPriceCond.inputParamEnumId" value="PRIP_PRODUCT_ID"/>
+	    		<set field="newEntityProductPriceCond.operatorEnumId" value="PRC_EQ"/>
+	    		<set field="newEntityProductPriceCond.condValue" from-field="parameters.productId"/>
+	    		<create-value value-field="newEntityProductPriceCond"/>
+	    		
+	    		
+	    		<make-value value-field="newEntityProductPriceCond2" entity-name="ProductPriceCond"/>
+	    		<set field="newEntityProductPriceCond2.productPriceRuleId" from-field="newEntityProductPriceRule.productPriceRuleId"/>
+	    		<make-next-seq-id seq-field-name="productPriceCondSeqId" value-field="newEntityProductPriceCond2" numeric-padding="2"/>
+	    		<set field="newEntityProductPriceCond2.inputParamEnumId" value="PRIP_ROLE_TYPE"/>
+	    		<set field="newEntityProductPriceCond2.operatorEnumId" value="PRC_EQ"/>
+	    		<set field="newEntityProductPriceCond2.condValue" from-field="partyRoleTypesApply.roleTypeId"/>
+	    		<create-value value-field="newEntityProductPriceCond2"/>
+				
+				
+				<!-- Create product price action: productPriceRuleId *, productPriceActionSeqId *, productPriceActionTypeId, amount, rateCode -->
+				<!-- priceToDist -->
+				<make-value value-field="newEntityProductPriceAction" entity-name="ProductPriceAction"/>
+	    		<set field="newEntityProductPriceAction.productPriceRuleId" from-field="newEntityProductPriceRule.productPriceRuleId"/>
+	    		<make-next-seq-id seq-field-name="productPriceActionSeqId" value-field="newEntityProductPriceAction" numeric-padding="2"/>
+	    		<set field="newEntityProductPriceAction.productPriceActionTypeId" value="PRICE_FLAT"/>
+	    		<set field="newEntityProductPriceAction.amount" from-field="parameters.priceToDist"/>
+	    		<create-value value-field="newEntityProductPriceAction"/>
+				
+				<!-- priceToMarket -->
+				<if-not-empty field="parameters.priceToMarket">
+					<make-value value-field="newEntityProductPriceAction2" entity-name="ProductPriceAction"/>
+		    		<set field="newEntityProductPriceAction2.productPriceRuleId" from-field="newEntityProductPriceRule.productPriceRuleId"/>
+		    		<make-next-seq-id seq-field-name="productPriceActionSeqId" value-field="newEntityProductPriceAction2" numeric-padding="2"/>
+		    		<set field="newEntityProductPriceAction2.productPriceActionTypeId" value="PRICE_MARKET"/>
+		    		<set field="newEntityProductPriceAction2.amount" from-field="parameters.priceToMarket"/>
+		    		<create-value value-field="newEntityProductPriceAction2"/>
+				</if-not-empty>
+	    		
+	    		<!-- priceToConsumer -->
+				<if-not-empty field="parameters.priceToConsumer">
+					<make-value value-field="newEntityProductPriceAction2" entity-name="ProductPriceAction"/>
+		    		<set field="newEntityProductPriceAction2.productPriceRuleId" from-field="newEntityProductPriceRule.productPriceRuleId"/>
+		    		<make-next-seq-id seq-field-name="productPriceActionSeqId" value-field="newEntityProductPriceAction2" numeric-padding="2"/>
+		    		<set field="newEntityProductPriceAction2.productPriceActionTypeId" value="PRICE_CONSUMER"/>
+		    		<set field="newEntityProductPriceAction2.amount" from-field="parameters.priceToConsumer"/>
+		    		<create-value value-field="newEntityProductPriceAction2"/>
+				</if-not-empty>
+	    	</iterate>
+       	</else>
+       	</if-empty>
+       	<property-to-field resource="DelysAdminUiLabels" property="DAAddSuccess" field="successMessageList[]"/>  
+        <field-to-list list="successMessageList" field="successMessageList[]"/>
+    </simple-method>
+    
+    <simple-method method-name="updateQuotationRule">
+    	<check-permission permission="DELYS_QUOTATION" action="_CREATE">
+            <fail-property resource="DelysAdminUiLabels" property="DAQuotationCreatePermissionError"/>
+        </check-permission>
+        <check-permission permission="DELYS_QUOTATION_MAINT">
+            <fail-property resource="DelysAdminUiLabels" property="DAProductPriceMaintPermissionError"/>
+        </check-permission>
+        <check-errors/>
+        
+        <field-to-result field="parameters.update_pq_ProductQuotationId" result-name="productQuotationId"/>
+        
+        <!-- priceToDist -->
+        <make-value value-field="entityProductPriceAction" entity-name="ProductPriceAction"/>
+        <set field="entityProductPriceAction.productPriceRuleId" from-field="parameters.update_productPriceRuleId" />
+        <set field="entityProductPriceAction.productPriceActionSeqId" from-field="parameters.update_ppa_productPriceActionSeqId"/>
+        <find-by-primary-key entity-name="ProductPriceAction" value-field="entityProductPriceActionValue" map="entityProductPriceAction"/>
+        <set field="entityProductPriceActionValue.amount" from-field="parameters.update_priceToDist"/>
+        <store-value value-field="entityProductPriceActionValue"/>
+        
+        <!-- priceToMarket -->
+        <if-not-empty field="parameters.update_priceToMarket">
+        	<make-value value-field="entityProductPriceActionMarket" entity-name="ProductPriceAction"/>
+	        <set field="entityProductPriceActionMarket.productPriceRuleId" from-field="parameters.update_productPriceRuleId" />
+	        <if-not-empty field="parameters.update_ppam_productPriceActionSeqId">
+	        	<set field="entityProductPriceActionMarket.productPriceActionSeqId" from-field="parameters.update_ppam_productPriceActionSeqId"/>
+	        	<find-by-primary-key entity-name="ProductPriceAction" value-field="entityProductPriceActionMarketValue" map="entityProductPriceActionMarket"/>
+	        	<set field="entityProductPriceActionMarketValue.amount" from-field="parameters.update_priceToMarket"/>
+	        	<store-value value-field="entityProductPriceActionMarketValue"/>
+	        <else>
+	        	<make-next-seq-id seq-field-name="productPriceActionSeqId" value-field="entityProductPriceActionMarket" numeric-padding="2"/>
+	    		<set field="entityProductPriceActionMarket.productPriceActionTypeId" value="PRICE_MARKET"/>
+	    		<set field="entityProductPriceActionMarket.amount" from-field="parameters.update_priceToMarket"/>
+	    		<create-value value-field="entityProductPriceActionMarket"/>
+	        </else>
+	        </if-not-empty>
+        </if-not-empty>
+	    		
+   		<!-- priceToConsumer -->
+		<if-not-empty field="parameters.update_priceToConsumer">
+			<make-value value-field="entityProductPriceActionConsumer" entity-name="ProductPriceAction"/>
+	        <set field="entityProductPriceActionConsumer.productPriceRuleId" from-field="parameters.update_productPriceRuleId" />
+	        <if-not-empty field="parameters.update_ppac_productPriceActionSeqId">
+	        	<set field="entityProductPriceActionConsumer.productPriceActionSeqId" from-field="parameters.update_ppac_productPriceActionSeqId"/>
+	        	<find-by-primary-key entity-name="ProductPriceAction" value-field="entityProductPriceActionConsumerValue" map="entityProductPriceActionConsumer"/>
+	        	<set field="entityProductPriceActionConsumerValue.amount" from-field="parameters.update_priceToConsumer"/>
+	        	<store-value value-field="entityProductPriceActionConsumerValue"/>
+	        <else>
+	    		<make-next-seq-id seq-field-name="productPriceActionSeqId" value-field="entityProductPriceActionConsumer" numeric-padding="2"/>
+	    		<set field="entityProductPriceActionConsumer.productPriceActionTypeId" value="PRICE_CONSUMER"/>
+	    		<set field="entityProductPriceActionConsumer.amount" from-field="parameters.update_priceToConsumer"/>
+	    		<create-value value-field="entityProductPriceActionConsumer"/>
+	        </else>
+	        </if-not-empty>
+		</if-not-empty>
+    </simple-method>
+    <simple-method method-name="deleteQuotationRule">
+    	<check-permission permission="DELYS_QUOTATION" action="_DELETE">
+            <fail-property resource="DelysAdminUiLabels" property="DAQuotationCreatePermissionError"/>
+        </check-permission>
+        <!-- <check-permission permission="DELYS_QUOTATION_MAINT">
+            <fail-property resource="DelysAdminUiLabels" property="DAProductPriceMaintPermissionError"/>
+        </check-permission> -->
+        <check-errors/>
+        
+        <field-to-result field="parameters.productQuotationId" result-name="productQuotationId"/>
+        
+		<!-- find all action of a quotation rule -->
+		<call-simple-method method-name="deleteQuotationRuleActions" />
+		
+		<!-- find all condition of a quotation rule -->
+		<call-simple-method method-name="deleteQuotationRuleConds" />
+        
+        <!-- delete rule -->
+        <make-value value-field="entityProductPriceRule" entity-name="ProductPriceRule"/>
+        <set field="entityProductPriceRule.productPriceRuleId" from-field="parameters.productPriceRuleId"/>
+        <find-by-primary-key entity-name="ProductPriceRule" map="entityProductPriceRule" value-field="entityProductPriceRuleValue"/>
+        <remove-value value-field="entityProductPriceRuleValue"/>
+        
+        <property-to-field resource="DelysAdminUiLabels" property="DADeleteSuccess" field="successMessageList[]"/>  
+        <field-to-list list="successMessageList" field="successMessageList[]"/>
+    </simple-method>
+    
+    <simple-method method-name="deleteProductQuotation">
+    	<check-permission permission="DELYS_QUOTATION" action="_DELETE">
+            <fail-property resource="DelysAdminUiLabels" property="DAQuotationCreatePermissionError"/>
+        </check-permission>
+        <!-- <check-permission permission="DELYS_QUOTATION_MAINT">
+            <fail-property resource="DelysAdminUiLabels" property="DAProductPriceMaintPermissionError"/>
+        </check-permission> -->
+        <check-errors/>
+        
+        <if-empty field="parameters.productQuotationId">
+        	<add-error>
+        		<fail-property resource="DelysAdminUiLabels" property="DAQuotaionIdMustNotBeEmpty"/>
+        	</add-error>
+        	<check-errors/>
+        </if-empty>
+        <entity-one value-field="productQuotation" entity-name="ProductQuotation">
+        	<field-map field-name="productQuotationId" from-field="parameters.productQuotationId"/>
+        </entity-one>
+        <if-empty field="productQuotation">
+        	<add-error>
+        		<fail-property resource="DelysAdminErrorUiLabels" property="DAThisProductQuotationNotAvaiable"/>
+        	</add-error>
+        	<check-errors/>
+        </if-empty>
+        <if-compare operator="not-equals" value="QUOTATION_CREATED" field="productQuotation.statusId">
+        	<set field="statusId" from-field="productQuotation.statusId"/>
+        	<add-error>
+        		<fail-property resource="DelysAdminErrorUiLabels" property="DANotAllowedToDeleteThisRecordThisRecordHasStatusIsStatusId"/>
+        	</add-error>
+        	<check-errors/>
+        </if-compare>
+        
+        <entity-condition list="productQuotationStatuses" entity-name="ProductQuotationStatus" use-cache="false" distinct="true">
+			<condition-expr field-name="productQuotationId" value="${parameters.productQuotationId}"/>
+		</entity-condition>
+		<remove-list list="productQuotationStatuses"/>
+        
+        <entity-condition list="productPriceRules" entity-name="ProductQuotationAndPriceRCA" use-cache="false" distinct="true">
+			<condition-list>
+				<condition-expr field-name="pq_ProductQuotationId" value="${parameters.productQuotationId}"/>
+				<condition-expr field-name="inputParamEnumId" value="PRIP_PRODUCT_ID"/>
+				<condition-expr field-name="productPriceActionTypeId" value="PRICE_FLAT"/>
+			</condition-list>
+		</entity-condition>
+        <if-not-empty field="productPriceRules">
+        	<iterate entry="productPriceRule" list="productPriceRules">
+        		<set field="parameters.productPriceRuleId" from-field="productPriceRule.productPriceRuleId"/>
+        		
+	        	<!-- find all action of a quotation rule -->
+				<call-simple-method method-name="deleteQuotationRuleActions" />
+				
+				<!-- find all condition of a quotation rule -->
+				<call-simple-method method-name="deleteQuotationRuleConds" />
+				
+				<!-- delete rule -->
+		        <make-value value-field="entityProductPriceRule" entity-name="ProductPriceRule"/>
+		        <set field="entityProductPriceRule.productPriceRuleId" from-field="parameters.productPriceRuleId"/>
+		        <find-by-primary-key entity-name="ProductPriceRule" map="entityProductPriceRule" value-field="entityProductPriceRuleValue"/>
+		        <if-not-empty field="entityProductPriceRuleValue"><remove-value value-field="entityProductPriceRuleValue"/></if-not-empty>
+	        </iterate>
+	        <check-errors/>
+        </if-not-empty>
+        
+        <!-- delete role types of quotation -->
+        <entity-condition list="partyRoleTypesApplys" entity-name="ProductQuotationRoleType">
+    		<condition-expr field-name="productQuotationId" from-field="parameters.productQuotationId"/>
+       	</entity-condition>
+       	<remove-list list="partyRoleTypesApplys"/>
+    	<check-errors/>
+    	
+    	<!-- delete quotation -->
+    	<make-value value-field="entityQuotation" entity-name="ProductQuotation"/>
+    	<set field="entityQuotation.productQuotationId" from-field="parameters.productQuotationId"/>
+    	<find-by-primary-key value-field="entityQuotationValue" map="entityQuotation" entity-name="ProductQuotation"/>
+    	<if-not-empty field="entityQuotation"><remove-value value-field="entityQuotation"/></if-not-empty>
+    	<check-errors/>
+    </simple-method>
+    <simple-method method-name="deleteQuotationRuleConds" short-description="Find all condition of a quotation rule">
+    	<entity-condition list="quotationRuleConds" entity-name="ProductPriceCond">
+			<condition-list>
+				<condition-expr field-name="productPriceRuleId" from-field="parameters.productPriceRuleId"/>
+			</condition-list>
+		</entity-condition>
+		<remove-list list="quotationRuleConds"/>
+		<!-- <iterate entry="quotationRuleCond" list="quotationRuleConds">
+			<make-value value-field="entityProductPriceCond" entity-name="ProductPriceCond"/>
+			<set-pk-fields map="quotationRuleCond" value-field="entityProductPriceCond"/>
+        	<find-by-primary-key entity-name="ProductPriceCond" map="entityProductPriceCond" value-field="quotationRuleCondValue"/>
+        	<remove-value value-field="quotationRuleCondValue"/>
+		</iterate> -->
+    </simple-method>
+    <simple-method method-name="deleteQuotationRuleActions" short-description="Find all action of a quotation rule">
+		<entity-condition list="quotationRuleActions" entity-name="ProductPriceAction">
+			<condition-list>
+				<condition-expr field-name="productPriceRuleId" from-field="parameters.productPriceRuleId"/>
+			</condition-list>
+		</entity-condition>
+		<remove-list list="quotationRuleActions"/>
+		<!-- <iterate entry="quotationRuleAction" list="quotationRuleActions">
+        	<make-value value-field="entityProductPriceAction" entity-name="ProductPriceAction"/>
+			<set-pk-fields map="quotationRuleAction" value-field="entityProductPriceAction"/>
+        	<find-by-primary-key entity-name="ProductPriceAction" map="entityProductPriceAction" value-field="quotationRuleActionValue"/>
+        	<remove-value value-field="quotationRuleActionValue"/>
+		</iterate> -->
+    </simple-method>
+</simple-methods>

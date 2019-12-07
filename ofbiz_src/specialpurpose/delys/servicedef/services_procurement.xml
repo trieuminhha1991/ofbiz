@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>Procurement Services</description>
+    <vendor></vendor>
+    <version>1.0</version>
+	<service name="JQListShoppingProposal" engine="java" invoke="jqGetListShoppingProposal" location="com.olbius.procurement.ProcurementJQServices">
+   		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+   		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+   		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+   		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+   		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>
+   </service>
+   <service name="JQListRequirementItem" engine="java" invoke="jqGetListRequirementItem" location="com.olbius.procurement.ProcurementJQServices">
+   		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+   		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+   		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+   		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+   		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>
+   </service>
+   <service name="JQListProductForProcurementProposal" engine="java" invoke="jqGetListProductForProcurementProposal" location="com.olbius.procurement.ProcurementJQServices">
+   		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+   		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+   		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+   		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+   		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>
+   </service>
+   
+   <service name="JQNoItem" engine="java" invoke="jqNoItem" location="com.olbius.procurement.ProcurementJQServices">
+   		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+   		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+   		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+   		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+   		<attribute name="listIterator" mode="OUT" type="java.util.List" optional="false"></attribute>
+   </service>
+   
+   <service name="createShoppingProposal" engine="simple" 
+            location="component://delys/script/org/ofbiz/procurement/ProcurementServices.xml" invoke="createShoppingProposal" auth="true">
+        <description>Create a new shopping proposal</description>
+        <!-- <implements service="requirementInterface"/> -->
+        <auto-attributes mode="IN" include="nonpk" entity-name="Requirement" allow-html="safe" optional="true"></auto-attributes>
+        <attribute name="productListStr" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="requirementId" type="String" mode="OUT" optional="true"/>
+        <attribute name="header" mode="OUT" type="String" optional="true"></attribute>
+        <attribute name="dateTime" mode="OUT" type="Timestamp"></attribute>
+        <attribute name="action" mode="OUT" type="String"></attribute>
+        <!-- <override name="description" mode="IN" optional="true" type="String" allow-html="safe" ></override> -->
+    </service> 
+    <service name="createDetailShoppingProposal" engine="java" location="com.olbius.procurement.ProcurementJQServices" invoke="createDetailShoppingProposal" auth="true">
+    	<attribute name="requirementId" mode="IN" type="String" optional="false"></attribute>
+    	<attribute name="productListStr" mode="IN" type="String" optional="false"></attribute>
+    </service>
+    <service name="createItemProcurementProposal" engine="simple" location="component://delys/script/org/ofbiz/procurement/ProcurementServices.xml"
+     invoke="createItemProcurementProposal" auth="true">
+     	<description>Create a item Procurement proposal</description>
+     	<auto-attributes mode="IN" entity-name="RequirementItem" optional="true" include="nonpk">
+     		
+     	</auto-attributes>
+     	<attribute name="reqItemSeqId" mode="IN" type="String" optional="false"></attribute>
+     	<attribute name="requirementId" mode="IN" type="String" optional="false"></attribute>
+     </service>
+     <service name="getDepartmentFromUserLogin" engine="java" location="com.olbius.procurement.ProcurementServices" invoke="getDepartmentFromUserLogin">
+     	<description>Get department from userlogin</description>
+     	<attribute name="createdByUserLogin" mode="IN" type="String" optional="false"></attribute>
+     	<attribute name="departmentName" mode="OUT" type="String" optional="true"></attribute>
+     </service>
+     <service name="createProductInProcurementProposal" engine="simple" location="component://delys/script/org/ofbiz/procurement/ProcurementServices.xml" auth="true"
+     	invoke="createProduct">	
+     	<description>Create a simple product </description>
+     	<auto-attributes mode="INOUT" include="nonpk" entity-name="Product" optional="true"></auto-attributes>
+     	<attribute name="productId" mode="OUT" type="String" ></attribute>
+     </service>
+     <service name="updateProcurementProposal" engine="java" location="com.olbius.procurement.ProcurementServices" invoke="updateProcurementProposal" auth="true">
+		<description>Update an Procurement Proposal</description>
+		<attribute name="requirementId" mode="INOUT" type="String" optional="true"/>
+		<attribute name="estimatedBudget" mode="IN" type="BigDecimal" optional="true"/>
+		<attribute name="description" mode="IN" type="String" optional="true" allow-html="safe"/>
+		<attribute name="currencyUomId" mode="IN" type="String" optional="true"/>
+		<attribute name="requirementStartDate" mode="IN" type="Timestamp" optional="true"/>
+		<attribute name="requiredByDate" mode="IN" type="Timestamp" optional="true"/>
+		<attribute name="productListStr" mode="IN" type="String" optional="true"/>
+	</service>
+	<service name="updateItemProcurementProposal" engine="simple" location="component://delys/script/org/ofbiz/procurement/ProcurementServices.xml" invoke="updateItemProcurementProposal" auth="true">
+		<description>Update Item Procurement Proposal</description>
+		<auto-attributes mode="IN" include="pk" entity-name="RequirementItem" ></auto-attributes>
+		<auto-attributes mode="IN" include="nonpk" entity-name="RequirementItem" optional="true"></auto-attributes>
+	</service>
+	<service name="removeItemProcurementProposal" engine="simple" location="component://delys/script/org/ofbiz/procurement/ProcurementServices.xml" invoke="removeItemProcurementProposal" auth="true">
+		<description>Remove Item Procurement Proposal</description>
+		<auto-attributes mode="IN" include="pk" entity-name="RequirementItem" ></auto-attributes>
+	</service>
+</services>

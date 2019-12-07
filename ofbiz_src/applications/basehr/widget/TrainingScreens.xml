@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	<screen name="ViewListTraining">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="Training" />
+				<set field="selectedSubMenuItem" value="ListTraining"/>
+				<set field="titleProperty" value="ListTraining"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="TrainingCommonDecorator"
+					location="component://basehr/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<actions>
+								<entity-condition list="trainingPurposeTypeList" entity-name="TrainingPurposeType"></entity-condition>
+								<entity-condition list="trainingFormTypeList" entity-name="TrainingFormType"></entity-condition>
+								<entity-condition list="trainingResultTypeList" entity-name="TrainingResultType"></entity-condition>
+								<entity-condition list="statusList" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="TRAING_COURS_STT"/>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>
+								<property-to-field resource="general" property="country.geo.id.default" field="defaultCountry"/>
+								<entity-condition list="geoList" entity-name="GeoAssocAndGeoTo">
+									<condition-expr field-name="geoIdFrom" operator="equals" from-field="defaultCountry"/>
+								</entity-condition>
+								<entity-condition list="trainingResultTypeList" entity-name="TrainingResultType"></entity-condition>
+								<entity-condition list="statusRegisterList" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="TRAING_COURS_REGIS"/>
+								</entity-condition>
+								<script location="component://basehr/webapp/basehr/WEB-INF/actions/getPartyGroupTree.groovy"/>
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://basehr/webapp/basehr/training/ViewListTraining.ftl"/>
+									</html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.ScreenNoPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewListTrainingProvider">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="Training" />
+				<set field="selectedSubMenuItem" value="ListTrainingProvider"/>
+				<set field="titleProperty" value="ListTrainingProvider"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="TrainingCommonDecorator"
+					location="component://basehr/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<actions>
+								<entity-condition list="geoCountryList" entity-name="Geo">
+									<condition-expr field-name="geoTypeId" value="COUNTRY"/>
+								</entity-condition>
+								<property-to-field resource="general" property="country.geo.id.default" field="defaultCountry"/>
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://basehr/webapp/basehr/training/ViewListTrainingProvider.ftl"/>
+									</html>
+								</platform-specific>
+							</widgets>	
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.ScreenNoPermission}"></label>
+								</container>
+							</fail-widgets>			
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewEmplRegisterTrainingCourse">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="profile" />
+				<set field="selectedSubMenuItem" value="ViewEmplRegisterTrainingCourse"/>
+				<set field="titleProperty" value="EmplRegisterTrainingCourse"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="TrainingCommonDecorator"
+					location="component://basehr/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<actions>
+								<entity-condition list="statusList" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="TRAING_COURS_REGIS"/>
+								</entity-condition>
+								<property-to-field resource="general" property="country.geo.id.default" field="defaultCountry"/>
+								<entity-condition list="geoList" entity-name="GeoAssocAndGeoTo">
+									<condition-expr field-name="geoIdFrom" operator="equals" from-field="defaultCountry"/>
+								</entity-condition>
+								<entity-condition list="trainingPurposeTypeList" entity-name="TrainingPurposeType"></entity-condition>
+								<entity-condition list="trainingFormTypeList" entity-name="TrainingFormType"></entity-condition>
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://basehr/webapp/basehr/training/trainingViewEmplRegisterTraining.ftl"/>
+									</html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.ScreenNoPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewListEmplRegisterTraining">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="Training" />
+				<set field="selectedSubMenuItem" value="ListTraining"/>
+				<set field="titleProperty" value="ListEmplRegistedTraining" global="true"/>
+				<entity-one value-field="trainingCourse" entity-name="TrainingCourse"></entity-one>
+				<set field="trainingCourseId" from-field="parameters.trainingCourseId"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="TrainingCommonDecorator"
+					location="component://basehr/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<section>
+									<condition>
+										<not>
+											<if-empty field="trainingCourse"/>
+										</not>
+									</condition>
+									<actions>
+										<set field="trainingCourseName" from-field="trainingCourse.trainingCourseName" global="true"/>
+										<set field="titleProperty" value="ListEmplRegistedTrainingTitle" global="true"/>
+										<entity-condition list="statusRegisterList" entity-name="StatusItem">
+											<condition-expr field-name="statusTypeId" value="TRAING_COURS_REGIS"/>
+											<order-by field-name="sequenceId"/>
+										</entity-condition>
+									</actions>
+									<widgets>
+										<platform-specific>
+											<html>
+												<html-template location="component://basehr/webapp/basehr/training/ViewListEmplRegisterTraining.ftl"/>
+											</html>
+										</platform-specific>
+									</widgets>
+									<fail-widgets>
+										<container style="alert alert-info">
+											<label text="${uiLabelMap.CannotFindTrainingCourse}"></label>
+										</container>
+									</fail-widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.ScreenNoPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewTrainingDetail">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="Training" />
+				<set field="selectedSubMenuItem" value="ListTraining"/>
+				<set field="titleProperty" value="ListTraining" global="true"/>
+				<entity-one value-field="trainingCourse" entity-name="TrainingCourse"></entity-one>
+				<set field="trainingCourseId" from-field="parameters.trainingCourseId"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="TrainingCommonDecorator"
+					location="component://basehr/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<section>
+									<condition>
+										<not>
+											<if-empty field="trainingCourse"/>
+										</not>
+									</condition>
+									<actions>
+										<set field="trainingCourseName" from-field="trainingCourse.trainingCourseName" global="true"/>
+										<set field="titleProperty" value="TrainigCourseDetailTitle" global="true"/>
+										<entity-condition list="trainingCourseList" entity-name="TrainingCourseDetail">
+											<condition-expr field-name="trainingCourseId" from-field="trainingCourseId"/>
+										</entity-condition>
+										<set field="trainingCourseDetail" from-field="trainingCourseList[0]"/>
+										<entity-condition list="trainingPurposeTypeList" entity-name="TrainingPurposeType"></entity-condition>
+										<entity-condition list="trainingFormTypeList" entity-name="TrainingFormType"></entity-condition>
+										<entity-condition list="trainingResultTypeList" entity-name="TrainingResultType"></entity-condition>
+										<entity-condition list="statusDateTimeList" entity-name="TrainingCourseStatus">
+											<condition-expr field-name="trainingCourseId" from-field="trainingCourseId"/>
+											<order-by field-name="-statusDatetime"/>
+										</entity-condition>
+										<entity-one value-field="trainingStatus" entity-name="StatusItem">
+											<field-map field-name="statusId" from-field="trainingCourse.statusId"/>
+										</entity-one>
+										<entity-condition list="statusList" entity-name="StatusItem">
+											<condition-expr field-name="statusTypeId" value="TRAING_COURS_STT"/>
+											<order-by field-name="sequenceId"/>
+										</entity-condition>
+										<entity-condition list="trainingCourseStatusList" entity-name="TrainingCourseStatusAndParty">
+											<condition-expr field-name="trainingCourseId" from-field="trainingCourseId"/>
+											<order-by field-name="-statusDatetime"/>
+										</entity-condition>
+										<script location="component://basehr/webapp/basehr/WEB-INF/actions/getPartyGroupTree.groovy"/>
+									</actions>
+									<widgets>
+										<platform-specific>
+											<html>
+												<html-template location="component://basehr/webapp/basehr/training/ViewTrainingDetail.ftl"/>
+											</html>
+										</platform-specific>
+									</widgets>
+									<fail-widgets>
+										<container style="alert alert-info">
+											<label text="${uiLabelMap.CannotFindTrainingCourse}"></label>
+										</container>
+									</fail-widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.ScreenNoPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewTrainingSummary">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="Training" />
+				<set field="selectedSubMenuItem" value="ListTraining"/>
+				<set field="titleProperty" value="ListTraining" global="true"/>
+				<entity-one value-field="trainingCourse" entity-name="TrainingCourse"></entity-one>
+				<set field="trainingCourseId" from-field="parameters.trainingCourseId"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="TrainingCommonDecorator"
+					location="component://basehr/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="HR_TRAINING" action="_VIEW"/>
+							</condition>
+							<widgets>
+								<section>
+									<condition>
+										<not>
+											<if-empty field="trainingCourse"/>
+										</not>
+									</condition>
+									<actions>
+										<set field="trainingCourseName" from-field="trainingCourse.trainingCourseName" global="true"/>
+										<set field="titleProperty" value="TrainigCourseDetailSummaryTitle" global="true"/>
+										<entity-condition list="trainingCourseList" entity-name="TrainingCourseDetail">
+											<condition-expr field-name="trainingCourseId" from-field="trainingCourseId"/>
+										</entity-condition>
+										<entity-condition list="trainingResultTypeList" entity-name="TrainingResultType">
+											<order-by field-name="sequence"/>
+										</entity-condition>
+										<script location="component://basehr/webapp/basehr/WEB-INF/actions/getPartyGroupTree.groovy"/>
+										<set field="trainingCourseDetail" from-field="trainingCourseList[0]"/>
+										<entity-condition list="totalEmplAttList" entity-name="TrainingCourseAndTotalPartyAtt">
+											<condition-expr field-name="trainingCourseId" from-field="trainingCourseId"/>
+										</entity-condition>
+										<set field="totalEmplAtt" from-field="totalEmplAttList[0]"/>
+									</actions>
+									<widgets>
+										<platform-specific>
+											<html>
+												<html-template location="component://basehr/webapp/basehr/training/ViewTrainingSummary.ftl"/>
+											</html>
+										</platform-specific>
+									</widgets>
+									<fail-widgets>
+										<container style="alert alert-info">
+											<label text="${uiLabelMap.CannotFindTrainingCourse}"></label>
+										</container>
+									</fail-widgets>
+								</section>
+							</widgets>		
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.ScreenNoPermission}"></label>
+								</container>
+							</fail-widgets>				
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+</screens>	

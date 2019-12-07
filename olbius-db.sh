@@ -1,0 +1,15 @@
+#!/bin/bash
+set -e
+
+if [[ ! -z ${DOMAIN_NAME} ]]; then
+	source pg_tenant.sh
+else
+	source util.sh
+	pg_check_env "DB" $OLBIUS_HOST $OLBIUS_DB $OLBIUS_USER $OLBIUS_PASSWORD
+	pg_check_env "Olap DB" $OLBIUS_OLAP_HOST $OLBIUS_OLAP_DB $OLBIUS_OLAP_USER $OLBIUS_OLAP_PASSWORD
+	pg_check_env "Tenant DB" $OLBIUS_TENANT_HOST $OLBIUS_TENANT_DB $OLBIUS_TENANT_USER $OLBIUS_TENANT_PASSWORD
+	export OLBIUS_URI="jdbc:postgresql://$OLBIUS_HOST:${OLBIUS_PORT:-5432}/$OLBIUS_DB"
+	export OLBIUS_OLAP_URI="jdbc:postgresql://$OLBIUS_OLAP_HOST:${OLBIUS_OLAP_PORT:-5432}/$OLBIUS_OLAP_DB"
+	export OLBIUS_TENANT_URI="jdbc:postgresql://$OLBIUS_TENANT_HOST:${OLBIUS_TENANT_PORT:-5432}/$OLBIUS_TENANT_DB"
+fi
+

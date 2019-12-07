@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+        
+    <screen name="OrderCommonDecorator">
+		<section>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+                    	<decorator-section-include name="body"/>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="PurchaseOrders">
+    	<section>
+    		<condition>
+   				<if-has-permission permission="PURCHASEORDER" action="_VIEW"/>
+    		</condition>
+            <actions>
+                <set field="selectedMenuItem" value="StockIn"/>
+                <set field="selectedSubMenuItem" value="listPO"/>
+                <set field="titleProperty" value="PurchasingOrder" global="true"/>
+                <script location="component://basepo/webapp/basepo/WEB-INF/actions/navigator/nav_purchaseOrderList.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="OrderCommonDecorator">
+                    <decorator-section name="body">
+                    	<platform-specific>
+							<html><html-template location="component://basepo/webapp/basepo/order/listPO.ftl" /></html>
+						</platform-specific>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<section>
+					<actions>
+	                 	<set field="selectedMenuItem" value="StockIn"/>
+		                <set field="selectedSubMenuItem" value="listPO"/>
+		                <set field="titleProperty" value="PurchasingOrder" global="true"/>
+					</actions>
+					<widgets>
+						<decorator-screen name="OrderCommonDecorator">
+		                    <decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</decorator-section>
+		    			</decorator-screen>
+					</widgets>
+				</section>
+			</fail-widgets>
+       </section>
+    </screen>
+    
+ </screens>

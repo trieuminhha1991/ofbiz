@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+	<entity entity-name="FacilityFact" package-name="org.ofbiz.bi.fact.product" title="Facility Fact">
+        <description>A transaction fact entity with facility.</description>
+        <field name="facilityId" type="id-ne"></field>
+        
+        <field name="productDimId" type="id-ne"></field>
+        <field name="dateDimId" type="id-ne"></field>
+        
+        <field name="receiveTotal" type="fixed-point"></field>
+        <field name="availableToPromiseTotal" type="fixed-point"></field>
+        <field name="inventoryTotal" type="fixed-point"></field>
+        
+        <prim-key field="facilityId"/>
+        <prim-key field="productDimId"/>
+        <prim-key field="dateDimId"/>
+        
+        <relation type="one" fk-name="FF_INVPRODUCT" rel-entity-name="ProductDimension">
+            <key-map field-name="productDimId" rel-field-name="dimensionId"/>
+        </relation>
+        <relation type="one" fk-name="FF_INVDATE" rel-entity-name="DateDimension">
+            <key-map field-name="dateDimId" rel-field-name="dimensionId"/>
+        </relation>
+    </entity>
+    
+    <view-entity entity-name="FacilityFactProductDate" package-name="org.ofbiz.bi.fact.product">
+    	<description>get detail for facility fact</description>
+    	<member-entity entity-alias="FF" entity-name="FacilityFact"></member-entity>
+    	<member-entity entity-alias="PD" entity-name="ProductDimension"></member-entity>
+    	<member-entity entity-alias="DD" entity-name="DateDimension"></member-entity>
+    	<alias-all entity-alias="FF"></alias-all>
+    	<alias-all entity-alias="PD"></alias-all>
+    	<alias-all entity-alias="DD"></alias-all>
+    	<view-link rel-entity-alias="PD" entity-alias="FF">
+   			<key-map field-name="productDimId" rel-field-name="dimensionId"/>
+   		</view-link>
+    	<view-link rel-entity-alias="DD" entity-alias="FF">
+    		<key-map field-name="productDimId" rel-field-name="dimensionId"/>
+    	</view-link>
+    </view-entity>
+</entitymodel>

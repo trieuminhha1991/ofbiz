@@ -1,0 +1,248 @@
+//<<<<<<< HEAD
+//package com.olbius.basesales.report;
+//
+//import java.math.BigDecimal;
+//import java.sql.ResultSet;
+//import java.util.HashMap;
+//import java.util.List;
+//import java.util.Map;
+//import org.ofbiz.base.util.Debug;
+//import org.ofbiz.base.util.UtilValidate;
+//
+//import com.olbius.bi.olap.AbstractOlap;
+//import com.olbius.bi.olap.grid.ReturnResultGrid;
+//import com.olbius.bi.olap.query.OlbiusQuery;
+//import com.olbius.bi.olap.query.OlapQuery;
+//import com.olbius.bi.olap.query.condition.Condition;
+//import com.olbius.bi.olap.query.join.Join;
+//
+//public class SynthesisTurnoverReportByStoreOlapImpl extends AbstractOlap{
+//	private OlbiusQuery query;
+//	
+//	private List<String> type;
+//	
+//	public static final String ORDER_STATUS = "ORDER_STATUS";
+//	
+//	private List<String> getType() {
+//		if(type == null) {
+//			ResultProductStore enumType = new ResultProductStore(getSQLProcessor());
+//			type = enumType.getListResultStore();
+//		}
+//		return type;
+//	}
+//	
+//	private void initQuery() {
+//		OlbiusQuery queryTmp2 = new OlbiusQuery();
+//		
+//		String status = (String) getParameter(ORDER_STATUS);
+//		
+//		Condition condition = new Condition();
+//		
+//		queryTmp2.select("product_dimension.product_id")
+//		.select("sum(quantity)", "Quantity")
+//		.select("product_dimension.product_name")
+//		.select("sum(total)", "Total")
+//		.select("product_store_dimension.product_store_id", "store_id")
+//		.select("product_store_dimension.store_name")
+//		.from("product_dimension")
+//		.join(Join.LEFT_OUTER_JOIN, "sales_order_fact", null, "sales_order_fact.product_dim_id = product_dimension.dimension_id")
+//		.join(Join.LEFT_OUTER_JOIN, "date_dimension", null, "sales_order_fact.order_date_dim_id = date_dimension.dimension_id")
+//		.join(Join.LEFT_OUTER_JOIN, "product_store_dimension", null, "sales_order_fact.product_store_dim_id = product_store_dimension.dimension_id")
+//		.where(condition)
+//		.groupBy("product_dimension.dimension_id")
+//		.groupBy("product_store_dimension.dimension_id")
+//		.orderBy("product_store_dimension.product_store_id");
+//		
+//		condition.and(Condition.makeBetween("date_dimension.date_value", getSqlDate(fromDate), getSqlDate(thruDate)));
+//		condition.and(Condition.makeEQ("sales_order_fact.order_status", status, status != null));
+//		condition.and(Condition.make("sales_order_fact.return_id isnull"));
+//		
+//		query = new OlbiusQuery(getSQLProcessor());
+//		
+//		query.from(queryTmp2, "TMP")
+//		.select("TMP.store_id").select("TMP.store_name")
+//		.groupBy("TMP.store_id").groupBy("TMP.store_name").orderBy("TMP.store_id");
+//		
+//		List<String> type = getType();
+//		
+//		for(String s: type) {
+//			query.select("sum(case when TMP.product_id = '"+s+"' then TMP.Quantity else 0 end)", '"' + s + '"');
+//		}
+//		
+//	}
+//	
+//	@Override
+//	protected OlapQuery getQuery() {
+//		if(query == null) {
+//			initQuery();
+//		}
+//		return query;
+//	}
+//	
+//	public class TuReSto extends ReturnResultGrid{
+//
+//		public TuReSto() {
+//			addDataField("stt");
+//			addDataField("storeId");
+//			addDataField("storeName");
+//			List<String> type = getType();
+//			for(String s: type) {
+//				addDataField(s);
+//			}
+//		}
+//
+//		@Override
+//		protected Map<String, Object> getObject(ResultSet result) {
+//			Map<String, Object> map = new HashMap<String, Object>();
+//			try {
+//				map.put("storeId", result.getString("store_id"));
+//				map.put("storeName", result.getString("store_name"));
+//				List<String> type = getType();
+//				for(String s: type) {
+//					BigDecimal volumeResult = result.getBigDecimal(s);
+//					if(UtilValidate.isNotEmpty(volumeResult) && !volumeResult.equals(new BigDecimal(0))){
+//						map.put(s, volumeResult);
+//					} else {
+//						map.put(s, "-");
+//					}
+//				}
+//			} catch (Exception e) {
+//				Debug.logError(e.getMessage(), TuReSto.class.getName());
+//			}
+//			return map;
+//		}
+//	}
+//	
+//}
+//=======
+////package com.olbius.basesales.report;
+////
+////import java.math.BigDecimal;
+////import java.sql.ResultSet;
+////import java.util.HashMap;
+////import java.util.List;
+////import java.util.Map;
+////import org.ofbiz.base.util.Debug;
+////import org.ofbiz.base.util.UtilValidate;
+////
+////import com.olbius.bi.olap.AbstractOlap;
+////import com.olbius.bi.olap.grid.ReturnResultGrid;
+////import com.olbius.bi.olap.query.OlbiusQuery;
+////import com.olbius.bi.olap.query.OlbiusQueryInterface;
+////import com.olbius.bi.olap.query.condition.Condition;
+////import com.olbius.bi.olap.query.join.Join;
+////
+////public class SynthesisTurnoverReportByStoreOlapImpl extends AbstractOlap{
+////	private OlbiusQuery query;
+////	public static final String ORDER_STATUS = "ORDER_STATUS";
+////	
+////	private List<Map<String,String>> type;
+////	
+////	private List<Map<String,String>> getType() {
+////		if(type == null) {
+////			ResultProductStore2 enumType = new ResultProductStore2(getSQLProcessor());
+////			type = enumType.getListResultStore2();
+////		}
+////		return type;
+////	}
+////	
+//////	private List<String> type;
+//////	private List<String> getType() {
+//////		if(type == null) {
+//////			ResultProductStore enumType = new ResultProductStore(getSQLProcessor());
+//////			type = enumType.getListResultStore();
+//////		}
+//////		return type;
+//////	}
+////	
+////	private void initQuery() {
+////		OlbiusQuery queryTmp2 = new OlbiusQuery();
+////		
+////		String status = (String) getParameter(ORDER_STATUS);
+////		
+////		Condition condition = new Condition();
+////		
+////		queryTmp2.select("product_dimension.product_id")
+////		.select("sum(quantity)", "Quantity")
+////		.select("product_dimension.product_name")
+////		.select("sum(total)", "Total")
+////		.select("product_store_dimension.product_store_id", "store_id")
+////		.select("product_store_dimension.store_name")
+////		.from("product_dimension")
+////		.join(Join.LEFT_OUTER_JOIN, "sales_order_fact", null, "sales_order_fact.product_dim_id = product_dimension.dimension_id")
+////		.join(Join.LEFT_OUTER_JOIN, "date_dimension", null, "sales_order_fact.order_date_dim_id = date_dimension.dimension_id")
+////		.join(Join.LEFT_OUTER_JOIN, "product_store_dimension", null, "sales_order_fact.product_store_dim_id = product_store_dimension.dimension_id")
+////		.where(condition)
+////		.groupBy("product_dimension.dimension_id")
+////		.groupBy("product_store_dimension.dimension_id")
+////		.orderBy("product_store_dimension.product_store_id");
+////		
+////		condition.and(Condition.makeBetween("date_dimension.date_value", getSqlDate(fromDate), getSqlDate(thruDate)));
+////		condition.and(Condition.makeEQ("sales_order_fact.order_status", status, status != null));
+////		condition.and(Condition.make("sales_order_fact.return_id isnull"));
+////		
+////		query = new OlbiusQuery(getSQLProcessor());
+////		
+////		query.from(queryTmp2, "TMP")
+////		.select("TMP.store_id").select("TMP.store_name")
+////		.groupBy("TMP.store_id").groupBy("TMP.store_name").orderBy("TMP.store_id");
+////		
+//////		List<String> type = getType();
+//////		
+//////		for(String s: type) {
+//////			query.select("sum(case when TMP.product_id = '"+s+"' then TMP.Quantity else 0 end)", '"' + s + '"');
+//////		}
+////		
+////		List<Map<String,String>> type = getType();
+////		
+////		for(int i = 0; i < type.size(); i++) {
+////			String storeId = (String) type.get(i).get("product_store_id");
+////			query.select("sum(case when TMP.store_id = '"+storeId+"' then TMP.Quantity else 0 end)", storeId);
+////		}
+////		
+////	}
+////	
+////	@Override
+////	protected OlbiusQueryInterface getQuery() {
+////		if(query == null) {
+////			initQuery();
+////		}
+////		return query;
+////	}
+////	
+////	public class TuReSto extends ReturnResultGrid{
+////
+////		public TuReSto() {
+////			addDataField("stt");
+////			addDataField("storeId");
+////			addDataField("storeName");
+////			List<String> type = getType();
+////			for(String s: type) {
+////				addDataField(s);
+////			}
+////		}                                                                                                                                                                      
+////
+////		@Override
+////		protected Map<String, Object> getObject(ResultSet result) {
+////			Map<String, Object> map = new HashMap<String, Object>();
+////			try {
+////				map.put("storeId", result.getString("store_id"));
+////				map.put("storeName", result.getString("store_name"));
+////				List<String> type = getType();
+////				for(String s: type) {
+////					BigDecimal volumeResult = result.getBigDecimal(s);
+////					if(UtilValidate.isNotEmpty(volumeResult) && !volumeResult.equals(new BigDecimal(0))){
+////						map.put(s, volumeResult);
+////					} else {
+////						map.put(s, "-");
+////					}
+////				}
+////			} catch (Exception e) {
+////				Debug.logError(e.getMessage(), TuReSto.class.getName());
+////			}
+////			return map;
+////		}
+////	}
+////	
+////}
+//>>>>>>> 20160303 update report

@@ -1,0 +1,529 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+	<!-- maybe delete -->
+	<!-- <entity entity-name="PartyInsurance" package-name="com.olbius.hrolbius">
+		<field name="partyId" type="id-ne"></field>
+		<field name="insuranceTypeId" type="id-ne"></field>
+		<field name="insuranceNumber" type="id-vlong"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<prim-key field="partyId"/>
+		<prim-key field="insuranceTypeId"/>	
+		<prim-key field="fromDate"/>	
+		<relation rel-entity-name="Party" type="one" fk-name="FK_PTY_ISRE">
+			<key-map field-name="partyId"/>
+		</relation>
+		<relation rel-entity-name="InsuranceType" type="one" fk-name="FK_PTY_ISRE_TYP">
+			<key-map field-name="insuranceTypeId"/>
+		</relation>
+	</entity> -->
+	
+	<entity entity-name="PartyInsuranceSalary" package-name="com.olbius.hrolbius">
+		<field name="partyId" type="id-ne"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<field name="salaryInsurance" type="currency-amount"></field>
+		<field name="uomId" type="id-ne"></field>
+		<prim-key field="partyId"/>
+		<prim-key field="fromDate"/>
+		<relation rel-entity-name="Party" type="one" fk-name="FK_PTY_SAL_ISRE">
+			<key-map field-name="partyId"/>
+		</relation>
+		<relation rel-entity-name="Uom" type="one" fk-name="FK_PI_SAL_UOM">
+			<key-map field-name="uomId"/>
+		</relation>	
+	</entity>
+
+	<!-- maybe delete -->
+	<entity entity-name="ParticipateInsuranceReport" package-name="com.olbius.hrolbius">
+		<field name="reportId" type="id-ne"></field>
+		<field name="reportName" type="long-varchar"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<field name="createdDate" type="date-time"></field>
+		<field name="lastModified" type="date-time"></field>
+		<prim-key field="reportId"/>
+	</entity>
+	
+	<entity entity-name="PartyInsuranceReport" package-name="com.olbius.hrolbius">
+		<field name="reportId" type="id-ne"></field>
+		<field name="partyId" type="id-ne"></field>
+		<field name="insuranceParticipateTypeId" type="id-ne"></field>
+		<field name="insuranceTypeId" type="id-ne"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<!-- <field name="insuranceSalary" type="currency-amount"></field> --><!-- maybe deduce from  PartyParticipateInsurance entity-->
+		<field name="suspendReasonId" type="id-long"></field><!-- link with leaveTypeId -->
+		<field name="statusPaymentId" type="id-ne"></field>
+		<field name="comments" type="long-varchar"></field>
+		<prim-key field="reportId"/>
+		<prim-key field="partyId"/>
+		<prim-key field="insuranceParticipateTypeId"/>
+		<prim-key field="insuranceTypeId"/>
+		<relation rel-entity-name="ParticipateInsuranceReport" type="one" fk-name="FK_PIS_PAR_INS_REP">
+			<key-map field-name="reportId"/>
+		</relation>
+		<relation rel-entity-name="Party" type="one" fk-name="PTY_UNS_REP_PTY">
+			<key-map field-name="partyId"/>
+		</relation>
+		<relation rel-entity-name="InsuranceParticipateType" type="one" fk-name="PTY_UNS_REP_TYP">
+			<key-map field-name="insuranceParticipateTypeId"/>
+		</relation>
+		<relation rel-entity-name="InsuranceType" type="one" fk-name="FK_REPORT_INS_TYP">
+			<key-map field-name="insuranceTypeId"/>
+		</relation>
+		<relation rel-entity-name="SuspendParticipateInsuranceReason" type="one" fk-name="FK_PIR_SPIR">
+			<key-map field-name="suspendReasonId"/>
+		</relation>
+		<relation rel-entity-name="StatusItem" type="one" fk-name="FK_PIR_STTPAYMENT">
+			<key-map field-name="statusPaymentId" rel-field-name="statusId"/>
+		</relation>
+	</entity>
+	
+	<entity entity-name="InsuranceParameters" package-name="com.olbius.hrolbius">
+		<field name="insuranceParameterId" type="id-long"></field>
+		<field name="insuranceParameterTypeId" type="id-ne"></field>
+		<field name="description" type="long-varchar"></field>
+		<field name="value" type="name"></field>
+		<prim-key field="insuranceParameterId"/>
+		<relation rel-entity-name="InsuranceParameterType" type="one" fk-name="FK_INS_TYPE">
+			<key-map field-name="insuranceParameterTypeId"/>
+		</relation>
+	</entity>
+	<entity entity-name="InsuranceFormula" package-name="com.olbius.hrolbius">
+		<field name="code" type="id-long"></field>
+		<field name="function" type="very-long"></field>
+		<field name="description" type="description"></field>		
+		<prim-key field="code"/>
+	</entity>
+	<entity entity-name="InsuranceFormulaParameters" package-name="com.olbius.hrolbius">
+		<field name="code" type="id-long"></field>
+		<field name="sequenceId" type="id-ne"></field>
+		<field name="parameterName" type="long-varchar"></field>
+		<prim-key field="code"/>
+		<prim-key field="sequenceId"/>
+		<relation rel-entity-name="InsuranceFormula" type="one" fk-name="FK_IFP_IF">
+			<key-map field-name="code"/>
+		</relation>
+	</entity>
+	<entity entity-name="InsuranceParameterType" package-name="com.olbius.hrolbius">
+		<field name="insuranceParameterTypeId" type="id-ne"></field>
+		<field name="parentTypeId" type="id-ne"></field>
+		<field name="description" type="description"></field>
+		<field name="periodTypeId" type="id-ne"></field>
+		<prim-key field="insuranceParameterTypeId"/>
+		<relation rel-entity-name="InsuranceParameterType" type="one" fk-name="FK_IPT_PARENT">
+			<key-map field-name="parentTypeId" rel-field-name="insuranceParameterTypeId"/>
+		</relation>
+		<relation rel-entity-name="PeriodType" type="one" fk-name="FK_IPT_PER_TYPR">
+			<key-map field-name="PeriodType"/>
+		</relation>
+	</entity>
+	
+	<entity entity-name="InsurancePayment" package-name="com.olbius.hrolbius">
+		<field name="insurancePaymentId" type="id-ne"></field>
+		<field name="insuranceTypeId" type="id-ne"></field>
+		<field name="insurancePaymentName" type="long-varchar"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<field name="createdDate" type="date-time"></field>
+		<prim-key field="insurancePaymentId"/>
+		<relation rel-entity-name="InsuranceType" type="one" fk-name="FK_INSPAY_INSTYPE">
+			<key-map field-name="insuranceTypeId"/>
+		</relation>
+	</entity>
+	<entity entity-name="PartyInsurancePayment" package-name="com.olbius.hrolbius">
+		<field name="insurancePaymentId" type="id-ne"></field>
+		<field name="partyId" type="id-ne"></field>
+		<field name="reportId" type="id-ne"></field>
+		<field name="insuranceParticipateTypeId" type="id-ne"></field>
+		<field name="insuranceTypeId" type="id-ne"></field>
+		<field name="paymentAmount" type="currency-amount"></field>
+		<field name="uomId" type="id-ne"></field>
+		<field name="comments" type="long-varchar"></field>
+		<prim-key field="insurancePaymentId"/>
+		<prim-key field="partyId"/>
+		<prim-key field="reportId"/>
+		<prim-key field="insuranceParticipateTypeId"/>
+		<prim-key field="insuranceTypeId"/>
+		<relation rel-entity-name="InsurancePayment" type="one" fk-name="FK_PTY_INS_PAYMENT">
+			<key-map field-name="insurancePaymentId"/>
+		</relation>
+		<relation rel-entity-name="PartyInsuranceReport" type="one" fk-name="FK_PTY_IR_IP">
+			<key-map field-name="partyId"/>
+			<key-map field-name="reportId"/>
+			<key-map field-name="insuranceParticipateTypeId"/>
+			<key-map field-name="insuranceTypeId"/>
+		</relation>
+		<relation rel-entity-name="Uom" type="one" fk-name="FK_PIP_UOM">
+			<key-map field-name="uomId"/>
+		</relation>
+	</entity>
+	<entity entity-name="SuspendParticipateInsuranceReason" package-name="com.olbius.hrolbius">
+		<field name="suspendReasonId" type="id-long"></field>
+		<field name="parentTypeId" type="id-ne"></field>
+		<field name="insuranceParticipateTypeId" type="id-ne"></field>
+		<field name="description" type="long-varchar"></field>
+		<field name="functionCalcBenefit" type="id-long">
+			<description>note: maybe delete</description>
+		</field>		
+		<prim-key field="suspendReasonId"/>
+		<relation rel-entity-name="InsuranceParticipateType" type="one" fk-name="FK_SPIR_IPT">
+			<key-map field-name="insuranceParticipateTypeId"/>
+		</relation>
+		<relation rel-entity-name="SuspendParticipateInsuranceReason" type="one" fk-name="FK_SPIR_PARENT">
+			<key-map field-name="parentTypeId" rel-field-name="insuranceParticipateTypeId"/>
+		</relation>
+		<relation rel-entity-name="InsuranceFormula" type="one" fk-name="FK_SUS_FORMULA">
+			<key-map field-name="functionCalcBenefit" rel-field-name="code"/>
+		</relation>
+	</entity>
+	<!-- <entity entity-name="PartyParticipateInsurance" package-name="com.olbius.hrolbius">
+		<description>store information about current status participate of employee (exp: participating, stop participating, Suspension)</description>
+		<field name="partyId" type="id-ne"></field>
+		<field name="statusId" type="id-ne"></field>
+		<field name="statusDatetime" type="date-time"></field>
+		<field name="insuranceTypeId" type="id-ne"></field>
+		<field name="changeReason" type="long-varchar"></field>
+		<prim-key field="partyId"/>
+		<prim-key field="statusId"/>
+		<prim-key field="statusDatetime"/>
+		<prim-key field="insuranceTypeId"/>		
+		<relation rel-entity-name="Party" type="one" fk-name="PTY_PAR_ISR_PTY">
+			<key-map field-name="partyId"/>
+		</relation>
+		<relation rel-entity-name="StatusItem" type="one" fk-name="FK_PTY_PAR_STT">
+			<key-map field-name="statusId"/>
+		</relation>
+		<relation rel-entity-name="InsuranceType" type="one" fk-name="FK_PPIS_INS_TYP">
+			<key-map field-name="insuranceTypeId"/>
+		</relation>
+	</entity> -->
+	
+	<!-- ============================== new entity ==========================================-->
+	<entity entity-name="PartyParticipateInsurance" package-name="com.olbius.hrolbius">
+		<field name="partyId" type="id-ne"></field>
+		<field name="statusId" type="id-ne"></field>
+		<field name="insuranceTypeId" type="id-ne"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<prim-key field="partyId"/>
+		<prim-key field="statusId"/>
+		<prim-key field="insuranceTypeId"/>
+		<prim-key field="fromDate"/>
+		<relation rel-entity-name="Party" type="one" fk-name="PTY_PAR_INS_PTY">
+			<key-map field-name="partyId"/>
+		</relation>
+		<relation rel-entity-name="StatusItem" type="one" fk-name="PTY_PAR_INS_STT_TYP">
+			<key-map field-name="insuranceTypeId"/>
+		</relation>
+		<relation rel-entity-name="InsuranceType" type="one" fk-name="PTY_PAR_INS_INS_TYP">
+			<key-map field-name="insuranceTypeId"/>
+		</relation>
+	</entity>
+	
+	<entity entity-name="InsuranceType" package-name="com.olbius.hrolbius">
+		<field name="insuranceTypeId" type="id-long"></field>
+		<field name="parentTypeId" type="id-ne"></field>
+		<field name="description" type="long-varchar"></field>
+		<field name="employerRate" type="floating-point"></field>
+		<field name="employeeRate" type="floating-point"></field>
+		<field name="employerPayment" type="indicator"></field>		
+		<field name="isCompulsory" type="indicator"></field>
+		<prim-key field="insuranceTypeId"/>
+		<relation rel-entity-name="InsuranceType" type="one" fk-name="FK_ISR_TYP_PAT">
+			<key-map field-name="parentTypeId" rel-field-name="insuranceTypeId"/>
+		</relation>
+	</entity>
+	
+	<entity entity-name="InsuranceDeclarationType" package-name="com.olbius.hrolbius">
+		<field name="declarationTypeId" type="id-ne"></field>
+		<field name="parentTypeId" type="id-ne"></field>
+		<field name="description" type="description"></field>
+		<prim-key field="declarationTypeId"/>
+		<relation rel-entity-name="InsuranceDeclarationType" type="one" fk-name="FK_INS_DECL_PARENT">
+			<key-map field-name="parentTypeId" rel-field-name="declarationTypeId"/>
+		</relation>
+	</entity>
+	<entity entity-name="InsuranceDeclaration" package-name="com.olbius.hrolbius">
+		<field name="insuranceDelarationId" type="id-ne"></field>
+		<field name="customTimePeriodId" type="id-ne"></field>
+		<field name="sequenceNum" type="numeric"></field>
+		<field name="declarationTypeId" type="id-ne"></field>
+		<prim-key field="insuranceDelarationId"/>
+		<relation rel-entity-name="CustomTimePeriod" type="one" fk-name="FK_INS_DECL_CUSTOM_PERIOD">
+			<key-map field-name="customTimePeriodId"/>
+		</relation>
+		<relation rel-entity-name="InsuranceDeclarationType" type="one" fk-name="FK_INS_DECL_TYPE">
+			<key-map field-name="declarationTypeId"/>
+		</relation>
+	</entity>
+	<entity entity-name="InsuranceParticipateType" package-name="com.olbius.hrolbius">
+		<field name="insuranceParticipateTypeId" type="id-ne"></field>
+		<field name="parentTypeId" type="id-ne"></field>
+		<field name="description" type="long-varchar"></field>
+		<field name="sign" type="description"></field>
+		<field name="isChangeStatusParticipate" type="indicator">
+			<description>change status participate insurance from PARTICIPATING to SUSPEND_PARTICIPATE/STOP_PARTICIPATE or from SUSPEND_PARTICIPATE to PARTICIPATING</description>
+		</field>
+		<prim-key field="insuranceParticipateTypeId"/>
+		<relation rel-entity-name="InsuranceParticipateType" type="one" fk-name="ISPT_PAR">
+			<key-map field-name="parentTypeId" rel-field-name="insuranceParticipateTypeId"/>
+		</relation>
+	</entity>
+	
+	<entity entity-name="PartyInsuranceDeclaration" package-name="com.olbius.hrolbius">
+		<field name="insuranceDelarationId" type="id-ne"></field>
+		<field name="partyId" type="id-ne"></field>
+		<field name="insuranceParticipateTypeId" type="id-ne"></field>
+		<field name="salary" type="currency-amount"></field>
+		<field name="uomId" type="id-ne"></field>
+		<field name="ratioSalary" type="floating-point"></field>
+		<field name="allowanceSeniority" type="floating-point"></field>
+		<field name="allowanceSeniorityExces" type="floating-point"></field>
+		<field name="allowancePosition" type="currency-amount"></field>
+		<field name="allowanceOther" type="currency-amount"></field>
+		<field name="agreementFromDate" type="date-time"></field>
+		<field name="agreementThruDate" type="date-time"></field>
+		<field name="agreementNbr" type="id-long"></field>
+		<field name="agreemenType" type="id-ne"></field>
+		<field name="agreementSignDate" type="date-time"></field>
+		<field name="rateContribution" type="floating-point"></field>
+		<field name="jobDescription" type="description"></field>
+		<field name="isReducedBefore" type="indicator"></field>
+		<field name="suspendReasonId" type="id-ne"></field>
+		<field name="isRetInsHealthCard" type="indicator"></field>
+		<field name="dateReturnCard" type="date">
+			<description>date return insurance health card</description>
+		</field>
+		<!-- <field name="statusSocicalInsId" type="id-ne"></field> -->
+		<field name="proposalInsuredMonth" type="indicator">
+			<description>proposal insurance for all month</description>
+		</field>
+		<prim-key field="insuranceDelarationId"/>
+		<prim-key field="partyId"/>
+		<relation rel-entity-name="InsuranceDeclaration" type="one" fk-name="PTY_INS_DECL_INS_DECL">
+			<key-map field-name="insuranceDelarationId"/>
+		</relation>
+		<relation rel-entity-name="Party" type="one" fk-name="PTY_INS_DECL_PTY">
+			<key-map field-name="partyId"/>
+		</relation>
+		<relation rel-entity-name="Uom" type="one" fk-name="PTY_INS_DECL_UOM">
+			<key-map field-name="uomId"/>
+		</relation>
+		<!-- <relation rel-entity-name="StatusItem" type="one" fk-name="PTY_INS_DECL_STT">
+			<key-map field-name="statusSocicalInsId" rel-field-name="statusId"/>
+		</relation> -->
+		<relation rel-entity-name="SuspendInsuranceReasonType" type="one" fk-name="PTY_INS_DECL_SUS_REASON_TYPE">
+			<key-map field-name="suspendReasonId"/>
+		</relation>
+	</entity>
+	<entity entity-name="PartyInsuranceSocialStatus" package-name="com.olbius.hrolbius">
+		<field name="partyId" type="id-ne"></field>
+		<field name="statusId" type="id-ne"></field>
+		<field name="statusDatetime" type="date-time"></field>
+		<prim-key field="partyId"/>
+		<prim-key field="statusId"/>
+		<prim-key field="statusDatetime"/>
+		<relation rel-entity-name="Party" type="one" fk-name="PTY_INS_SOCIAL_STT_PTY">
+			<key-map field-name="partyId"/>
+		</relation>
+		<relation rel-entity-name="StatusItem" type="one" fk-name="PTY_INS_SOCIAL_STT_STT">
+			<key-map field-name="statusId"/>
+		</relation>
+	</entity>
+	<entity entity-name="PartyInsuranceDeclInsuranceType" package-name="com.olbius.hrolbius">
+		<field name="insuranceDelarationId" type="id-ne"></field>
+		<field name="partyId" type="id-ne"></field>
+		<field name="insuranceTypeId" type="id-ne"></field>
+		<prim-key field="insuranceDelarationId"/>
+		<prim-key field="partyId"/>
+		<prim-key field="insuranceTypeId"/>
+		<relation rel-entity-name="PartyInsuranceDeclaration" type="one" fk-name="PTY_INS_DECL_INS_TYP_PTY_INS_DECL">
+			<key-map field-name="insuranceDelarationId"/>
+			<key-map field-name="partyId"/>
+		</relation>
+		<relation rel-entity-name="InsuranceType" type="one" fk-name="PTY_INS_DECL_INS_TYP_INS_TYP">
+			<key-map field-name="insuranceTypeId"/>
+		</relation>
+	</entity>
+	
+	<entity entity-name="SuspendInsuranceReasonType" package-name="com.olbius.hrolbius">
+		<field name="suspendReasonId" type="id-long"></field>
+		<field name="parentTypeId" type="id-long"></field>
+		<field name="description" type="long-varchar"></field>
+		<field name="sign" type="id-ne"></field>
+		<prim-key field="suspendReasonId"/>
+		<relation rel-entity-name="SuspendInsuranceReasonType" type="one" fk-name="SUS_INS_REASON_TYP_PART">
+			<key-map field-name="parentTypeId" rel-field-name="suspendReasonId"/>
+		</relation>
+	</entity>
+	<entity entity-name="Hospital" package-name="com.olbius.hrolbius">
+		<field name="hospitalId" type="id-long"></field>
+		<field name="hospitalName" type="long-varchar"></field>
+		<field name="contactMechId" type="id-ne"></field>
+		<field name="hospitalCode" type="id-ne"></field>
+		<field name="comment" type="comment"></field>
+		<prim-key field="hospitalId"/>
+		<relation rel-entity-name="Geo" type="one" fk-name="FK_POSTAL_ADDR_HOSP">
+			<key-map field-name="contactMechId"/>
+		</relation>
+	</entity>
+	<entity entity-name="PartyHealthInsurance" package-name="com.olbius.hrolbius">
+		<field name="partyId" type="id-ne"></field>
+		<field name="insHealthCard" type="long-varchar"></field>
+		<field name="hospitalId" type="id-ne"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<prim-key field="partyId"/>
+		<prim-key field="insHealthCard"/>
+		<prim-key field="fromDate"/>
+		<relation rel-entity-name="Party" type="one" fk-name="PTY_HEALTH_INS_PTY">
+			<key-map field-name="partyId"/>
+		</relation>
+		<relation rel-entity-name="Hospital" type="one" fk-name="PTY_HEALTH_INS_HOSPITAL">
+			<key-map field-name="hospitalId"/>
+		</relation>
+	</entity>
+	<entity entity-name="EmplPosTypeInsuranceSalary" package-name="com.olbius.hrolbius">
+		<field name="emplPositionTypeId" type="id-ne"></field>
+		<field name="insuranceSalary" type="currency-amount"></field>
+		<field name="allowanceSeniority" type="floating-point"></field>
+		<field name="allowanceSeniorityExces" type="floating-point"></field>
+		<field name="allowancePosition" type="currency-amount"></field>
+		<field name="allowanceOther" type="currency-amount"></field>
+		<field name="fromDate" type="date-time"></field>		
+		<field name="thruDate" type="date-time"></field>
+		<field name="periodTypeId" type="id-ne"></field>
+		<prim-key field="emplPositionTypeId"/>		
+		<prim-key field="fromDate"/>	
+		<relation rel-entity-name="EmplPositionType" type="one" fk-name="EMPL_POS_INS_SAL_EMPL_POS_TYP">
+			<key-map field-name="emplPositionTypeId"/>
+		</relation>	
+		<relation rel-entity-name="PeriodType" type="one" fk-name="EMPL_POS_INS_SAL_PERIOD">
+			<key-map field-name="periodTypeId"/>
+		</relation>
+	</entity>
+	<entity entity-name="InsuranceAllowancePaymentDecl" package-name="com.olbius.hrolbius">
+		<field name="insAllowancePaymentDeclId" type="id-ne"></field>
+		<field name="customTimePeriodId" type="id-ne"></field>
+		<field name="sequenceNum" type="numeric"></field>
+		<prim-key field="insAllowancePaymentDeclId"/>
+		<relation rel-entity-name="CustomTimePeriod" type="one" fk-name="INS_AL_PAY_DECL_CUS_TIME_PER">
+			<key-map field-name="insAllowancePaymentDeclId"/>
+		</relation>
+	</entity>
+	<entity entity-name="PartyInsuranceAllowancePayment" package-name="com.olbius.hrolbius">
+		<field name="insAllowancePaymentDeclId" type="id-ne"></field>
+		<field name="partyId" type="id-ne"></field>
+		<field name="benefitTypeId" type="id-ne"></field>
+		<field name="insuranceParticipatePeriod" type="short-varchar"></field>
+		<field name="insuranceSalary" type="currency-amount"></field>
+		<field name="statusConditionBenefit" type="long-varchar"></field>
+		<field name="timeConditionBenefit" type="date-time"></field>
+		<field name="fromDateLeave" type="date-time"></field>
+		<field name="thruDateLeave" type="date-time"></field>
+		<field name="accumulatedLeave" type="floating-point"></field>
+		<field name="allowanceAmount" type="currency-amount"></field>
+		<prim-key field="insAllowancePaymentDeclId"/>
+		<prim-key field="partyId"/>
+		<relation rel-entity-name="InsuranceAllowancePaymentDecl" type="one" fk-name="PTY_INS_AL_PAY_INS_AL">
+			<key-map field-name="insAllowancePaymentDeclId"/>
+		</relation>
+		<relation rel-entity-name="Party" type="one" fk-name="PTY_INS_AL_PAY_PTY">
+			<key-map field-name="partyId"/>
+		</relation>
+		<relation rel-entity-name="InsuranceAllowanceBenefitType" type="one" fk-name="PTY_INS_AL_PAY_BEN_TYP">
+			<key-map field-name="benefitTypeId"/>
+		</relation>
+	</entity>
+	<entity entity-name="InsuranceAllowanceBenefitType" package-name="com.olbius.hrolbius">
+		<field name="benefitTypeId" type="id-long"></field>
+		<field name="parentTypeId" type="id-long"></field>
+		<field name="description" type="long-varchar"></field>
+		<field name="benefitTypeCode" type="very-short"></field>
+		<prim-key field="benefitTypeId"/>
+		<relation rel-entity-name="InsuranceAllowanceBenefitType" type="one" fk-name="INS_AL_BEN_TYP_PAR">
+			<key-map field-name="parentTypeId" rel-field-name="benefitTypeId"/>
+		</relation>
+	</entity>
+	<entity entity-name="InsuranceContent" package-name="com.olbius.hrolbius">
+		<field name="contentId" type="id-ne"></field>
+		<field name="insuranceContentTypeId" type="id-ne"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<prim-key field="contentId"/>
+		<prim-key field="insuranceContentTypeId"/>
+		<prim-key field="fromDate"/>
+		<relation rel-entity-name="Content" type="one" fk-name="INS_CONT_CONT">
+			<key-map field-name="contentId"/>
+		</relation>
+		<relation rel-entity-name="InsuranceContentType" type="one" fk-name="INS_CONT_CONT_TYP">
+			<key-map field-name="insuranceContentTypeId"/>
+		</relation>
+	</entity>
+	<entity entity-name="InsuranceContentType" package-name="com.olbius.hrolbius">
+		<field name="insuranceContentTypeId" type="id-ne"></field>
+		<field name="parentTypeId" type="id-ne"></field>
+		<field name="description" type="description"></field>
+		<prim-key field="insuranceContentTypeId"/>
+		<relation rel-entity-name="InsuranceContentType" type="one" fk-name="INS_CONT_TYP_PAR">
+			<key-map field-name="parentTypeId" rel-field-name="insuranceContentTypeId"/>
+		</relation>
+	</entity>
+	<!-- ======================== ./end ===================================== -->
+	<!-- <view-entity entity-name="PartyInsuranceAndType" package-name="com.olbius.hrolbius">
+		<member-entity entity-alias="PI" entity-name="PartyInsurance"></member-entity>
+		<member-entity entity-alias="IT" entity-name="InsuranceType"></member-entity>
+		<alias-all entity-alias="PI"></alias-all>
+		<alias-all entity-alias="IT"></alias-all>
+		<view-link rel-entity-alias="PI" entity-alias="IT">
+			<key-map field-name="insuranceTypeId"/>
+		</view-link>
+	</view-entity>
+	<view-entity entity-name="PartyParticipateInsuranceLast" package-name="com.olbius.hrolbius">
+		<member-entity entity-alias="PPI" entity-name="PartyParticipateInsurance"></member-entity>
+		<alias name="partyId" entity-alias="PPI" group-by="true"></alias>
+		<alias name="insuranceTypeId" entity-alias="PPI" group-by="true"></alias>
+		<alias name="statusDatetimeLast" field="statusDatetime" entity-alias="PPI" function="max"></alias>
+	</view-entity>
+	<view-entity entity-name="PartyParticipateInsuranceAndStatus" package-name="com.olbius.hrolbius">
+		<member-entity entity-alias="PPIL" entity-name="PartyParticipateInsuranceLast"></member-entity>
+		<member-entity entity-alias="PPI" entity-name="PartyParticipateInsurance"></member-entity>
+		<alias-all entity-alias="PPIL"></alias-all>
+		<alias name="statusId" entity-alias="PPI"></alias>
+		<alias name="changeReason" entity-alias="PPI"></alias>
+		<view-link rel-entity-alias="PPIL" entity-alias="PPI">
+			<key-map field-name="partyId"/>
+			<key-map field-name="insuranceTypeId"/>
+			<key-map field-name="statusDatetime" rel-field-name="statusDatetimeLast"/>
+		</view-link>
+	</view-entity> -->
+	<view-entity entity-name="PartyInsuranceReportAndParticipateType" package-name="com.olbius.hrolbius">
+		<member-entity entity-alias="PIR" entity-name="PartyInsuranceReport"></member-entity>
+		<alias name="partyId" entity-alias="PIR" group-by="true"></alias>
+		<alias name="reportId" entity-alias="PIR" group-by="true"></alias>
+		<alias name="insuranceParticipateTypeId" entity-alias="PIR" group-by="true"></alias>
+	</view-entity>
+	<!-- <view-entity entity-name="PartyInsuranceAndParty" package-name="com.olbius.hrolbius">
+		<member-entity entity-alias="PI" entity-name="PartyInsurance"></member-entity>
+		<member-entity entity-alias="Person" entity-name="Person"></member-entity>
+		<alias name="firstName" entity-alias="Person" group-by="true"></alias>
+		<alias name="lastName" entity-alias="Person" group-by="true"></alias>
+		<alias name="middleName" entity-alias="Person" group-by="true"></alias>
+		<alias name="partyId" entity-alias="PI" group-by="true"></alias>
+		<view-link rel-entity-alias="PI" entity-alias="Person">
+			<key-map field-name="partyId"/>
+		</view-link>
+	</view-entity> -->
+	<!-- <view-entity entity-name="PartyParticipateAndInsurance" package-name="com.olbius.hrolbius">
+		<member-entity entity-alias="PPI" entity-name="PartyParticipateInsurance"></member-entity>
+		<member-entity entity-alias="PI" entity-name="PartyInsurance"></member-entity>
+		<alias-all entity-alias="PPI"></alias-all>
+		<alias-all entity-alias="PI"></alias-all>
+		<view-link rel-entity-alias="PPI" entity-alias="PI">
+			<key-map field-name="partyId"/>
+		</view-link>
+	</view-entity> -->
+</entitymodel>	

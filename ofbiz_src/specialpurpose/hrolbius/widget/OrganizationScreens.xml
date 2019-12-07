@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Licensed to the Apache Software Foundation (ASF) under one or more contributor 
+	license agreements. See the NOTICE file distributed with this work for additional 
+	information regarding copyright ownership. The ASF licenses this file to 
+	you under the Apache License, Version 2.0 (the "License"); you may not use 
+	this file except in compliance with the License. You may obtain a copy of 
+	the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required 
+	by applicable law or agreed to in writing, software distributed under the 
+	License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS 
+	OF ANY KIND, either express or implied. See the License for the specific 
+	language governing permissions and limitations under the License. -->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	<screen name="CreateOrganizationalUnit">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PageTitleCreateOrganizationalUnit" />
+				<set field="tabButtonItem" value="viewprofile" />
+				<set field="headerItem" value="find" />
+				<set field="labelTitleProperty" value="PageTitleCreateOrganizationalUnit" />
+				<set field="donePage" from-field="parameters.DONE_PAGE"
+					default-value="viewprofile" />
+				<set field="partyId" from-field="parameters.partyId" />
+				<entity-one entity-name="PartyAndGroup" value-field="partyGroup" />
+				
+				<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/directory/getOrgUnitLevels.groovy"></script>
+				<set field="orgUnitLevels" from-field="context.orgUnitLevels"/>	
+				<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/directory/getTitles.groovy"></script>
+				<set field="titles" from-field="context.titles"/>
+				<script location="component://party/webapp/partymgr/WEB-INF/actions/party/EditContactMech.groovy"/>
+				<set field="dependentForm" value="editOrganizationalUnit"/>
+                <set field="paramKey" value="countryGeoId"/>
+                <set field="mainId" value="countryGeoId"/>
+                <set field="dependentId" value="stateProvinceGeoId"/>
+                <set field="requestName" value="getAssociatedStateList"/>
+                <set field="responseName" value="stateList"/>
+                <set field="dependentKeyName" value="geoId"/>
+                <set field="descName" value="geoName"/>
+                <set field="selectedDependentOption" from-field="mechMap.postalAddress.stateProvinceGeoId" default-value="_none_"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonDirectoryDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<screenlet title="${uiLabelMap.PageTitleCreateOrganizationalUnit}">
+							<platform-specific>
+								<html>
+									<html-template
+										location="component://common/webcommon/includes/setDependentDropdownValuesJs.ftl" />
+									<html-template
+										location="component://hrolbius/webapp/hrolbius/ftl/editOrganizationalUnit.ftl" />
+								</html>
+							</platform-specific>
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="FindOrganizationalUnit">
+		<section>
+			<actions>
+				<set field="navMenuName" value="FindOrganizationSubTabBar"/>
+				<set field="navMenuLocation" value="component://hrolbius/widget/menus/DirectoryMenu.xml"/>
+				<set field="titleProperty" value="PageTitleFindOrganizationalUnit" />
+				<set field="tabButtonItem" value="findparty" />
+				<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/directory/getOrgUnitLevels.groovy"></script>
+				<service service-name="findParty" auto-field-map="parameters" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonDirectoryDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="HR_DIRECTORY" action="_VIEW"/>
+							</condition>
+							<widgets>
+								<container>
+									<decorator-screen name="FindScreenDecorator"
+									location="component://common/widget/CommonScreens.xml">
+										<decorator-section name="search-options">
+											<platform-specific>
+												<html>
+													<html-template
+														location="component://hrolbius/webapp/hrolbius/ftl/findOrganizationOption.ftl" />
+												</html>
+											</platform-specific>
+										</decorator-section>
+										<decorator-section name="search-results">
+											<platform-specific>
+												<html>
+													<html-template
+														location="component://hrolbius/webapp/hrolbius/ftl/findOrganization.ftl" />
+												</html>
+											</platform-specific>
+										</decorator-section>
+									</decorator-screen>	
+								</container>
+							</widgets>
+							<fail-widgets>
+								<label style="h3">${uiLabelMap.HROlbiusViewPermissionError}
+								</label>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="OrganizationalUnitProfile">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PageTitleViewOrganizationalUnitProfile" />
+				<set field="tabButtonItem" value="EmployeeProfile" />
+				<set field="partyId" from-field="parameters.partyId" />
+				<set field="layoutSettings.javaScripts[]" value="/partymgr/js/PartyProfileContent.js"
+					global="true" />
+				<script
+					location="component://party/webapp/partymgr/WEB-INF/actions/party/ViewProfile.groovy" />
+				<script
+					location="component://party/webapp/partymgr/WEB-INF/actions/party/GetUserLoginPrimaryEmail.groovy" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonDirectoryDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<not>
+									<if-empty field="party" />
+								</not>
+							</condition>
+							<widgets>
+								<section>
+									<condition>
+										<if-compare field="showOld" operator="equals"
+											value="true" type="Boolean" />
+									</condition>
+									<widgets>
+										<container>
+											<link style="btn bnt-mini btn-primary icon-eye-open open-sans"
+												target="viewprofile" text="${uiLabelMap.PartyHideOld}">
+												<parameter param-name="partyId" from-field="party.partyId" />
+											</link>
+										</container>
+									</widgets>
+									<fail-widgets>
+										<container>
+											<link style="btn btn-mini btn-primary icon-eye-open open-sans"
+												target="viewprofile" text="${uiLabelMap.PartyShowOld}">
+												<parameter param-name="partyId" from-field="party.partyId" />
+												<parameter param-name="SHOW_OLD" value="true" />
+											</link>
+										</container>
+									</fail-widgets>
+								</section>
+								<section>
+									<widgets>
+									<container style="row-fluid">
+										<container style="span6">
+											<include-screen name="Party"
+												location="component://party/widget/partymgr/ProfileScreens.xml" />
+											<include-screen name="Contact"
+												location="component://party/widget/partymgr/ProfileScreens.xml" />
+										</container>
+										<container style="span6">
+											<include-screen name="UserLogin"
+												location="component://party/widget/partymgr/ProfileScreens.xml" />
+											<include-screen name="Attributes"
+												location="component://party/widget/partymgr/ProfileScreens.xml" />
+											<include-screen name="Content"
+												location="component://party/widget/partymgr/ProfileScreens.xml" />
+											<include-screen name="Notes"
+												location="component://party/widget/partymgr/ProfileScreens.xml" />
+										</container>
+									</container>
+									</widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<container>
+									<label style="h3">${uiLabelMap.PartyNoPartyFoundWithPartyId}:
+										${parameters.partyId}
+									</label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+</screens>

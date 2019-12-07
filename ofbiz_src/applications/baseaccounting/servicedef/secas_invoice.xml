@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service-eca xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/service-eca.xsd">
+	<eca service="setInvoiceStatus" event="return">
+		<condition field-name="invoiceId" operator="is-not-empty"/>
+        <condition operator="equals" field-name="statusId" value="INVOICE_PAID"/>
+        <condition operator="equals" field-name="invoiceTypeId" value="PURC_RTN_INVOICE"/>
+        <action service="updateReturnOrderAfterInvoicePaid" mode="sync"/>
+    </eca> 
+    <eca service="createInvoice" event="commit">
+        <action service="updateInvoiceNewStatus" mode="sync"/>
+    </eca>       
+    <eca service="createVoucherInvoice" event="commit">
+        <action service="updateInvoiceNewStatus" mode="sync"/>
+    </eca>       
+    <eca service="verifyInvoiceVoucher" event="commit">
+        <action service="updateInvoiceNewStatus" mode="sync"/>
+    </eca>  
+    <eca service="createInvoice" event="commit">
+        <action service="createInvoiceTaxInfo" mode="sync"/>
+    </eca>  
+    <eca service="setInvoiceStatus" event="commit">
+    	<condition field-name="invoiceId" operator="is-not-empty"/>
+        <condition operator="equals" field-name="statusId" value="INVOICE_PAID"/>
+        <condition operator="not-equals" field-name="oldStatusId" value="INVOICE_PAID"/>
+        <set field-name="newStatusId" value="INV_PAID_NEW"/>
+        <action service="setInvoiceNewStatus" mode="sync"/>
+    </eca>     
+    <eca service="setInvoiceStatus" event="commit">	
+    	<condition field-name="invoiceId" operator="is-not-empty"/>
+        <condition operator="equals" field-name="statusId" value="INVOICE_CANCELLED"/>
+        <condition operator="not-equals" field-name="oldStatusId" value="INVOICE_CANCELLED"/>
+        <set field-name="newStatusId" value="INV_CANCELLED_NEW"/>
+        <action service="setInvoiceNewStatus" mode="sync"/>
+    </eca>     
+    <eca service="setInvoiceStatus" event="commit">
+    	<condition field-name="invoiceId" operator="is-not-empty"/>
+        <condition operator="equals" field-name="statusId" value="INVOICE_WRITEOFF"/>
+        <condition operator="not-equals" field-name="oldStatusId" value="INVOICE_WRITEOFF"/>
+        <set field-name="newStatusId" value="INV_CANCELLED_NEW"/>
+        <action service="setInvoiceNewStatus" mode="sync"/>
+    </eca>
+
+<!--    <eca service="createInvoiceForOrder" event="commit">
+        <condition field-name="invoiceId" operator="is-not-empty"/>
+        <condition field-name="invoiceTypeId" operator="equals" value="SALES_INVOICE"/>
+        <condition field-name="orderId" operator="is-not-empty"/>
+        <action service="closedAcctgTrans" mode="sync"/>
+    </eca>-->
+<!--     <eca service="verifyInvoiceVoucher" event="commit"> -->
+<!--         <condition field-name="invoiceId" operator="is-not-empty"/> -->
+<!--         <action service="updateTransactionDateForInvoice" mode="sync"/> -->
+<!--     </eca>          -->
+    <eca service="createInvoiceItemType" event="commit">
+        <condition field-name="defaultGlAccountId" operator="is-not-empty"/>
+        <set field-name="action" value="CREATE"/>
+        <action service="createOrUpdateEnumerationForInvoiceItemType" mode="sync"/>
+    </eca>
+    <eca service="updateInvoiceItemType" event="commit">
+        <set field-name="action" value="UPDATE"/>
+        <action service="createOrUpdateEnumerationForInvoiceItemType" mode="sync"/>
+    </eca>
+
+    <eca service="deleteInvoiceItemType" event="commit">
+        <set field-name="action" value="DELETE"/>
+        <action service="createOrUpdateEnumerationForInvoiceItemType" mode="sync"/>
+    </eca>
+</service-eca>

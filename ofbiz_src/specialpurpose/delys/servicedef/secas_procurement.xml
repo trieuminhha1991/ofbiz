@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service-eca xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/service-eca.xsd">
+        
+     <eca service="createShoppingProposal" event="commit">
+     	<condition operator="is-not-empty" field-name="productListStr"/>
+     	<action mode="sync" service="createDetailShoppingProposal"/>
+     </eca>
+     <eca service="createShoppingProposal" event="global-commit-post-run">
+     	<set field-name="state" value="open"/>
+     	<set field-name="header" env-name="header"/>
+     	<set field-name="targetLink" env-name="${requiremenId}"/>
+     	<set field-name="action" env-name="action"/>
+     	<set field-name="dateTime" env-name="${dateTime}" />	
+     	<set field-name="roleTypeId" value="DELYS_PROCUREMENT"/>
+     	<set field-name="ntfType" value="one"/>
+     	<action mode="sync" service="createNotification"/>
+     </eca>
+</service-eca>

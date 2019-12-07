@@ -1,0 +1,454 @@
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	<screen name="CommonAssetDecorator">
+        <section>
+            <actions>
+                <set field="selectedMenuItem" value="Asset"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="BaseAccountingCommonDecorator" location="component://baseaccounting/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="ListFixedAssets">
+        <section>
+            <actions>
+                <set field="titleProperty" value="BACCListFixedAssets"/>
+                <set field="selectedSubMenuItem" value="ListFixedAssets"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAssetDecorator">
+                    <decorator-section name="body">
+                        <section>
+                        	<condition>
+								<if-olbius-has-permission/>
+							</condition>
+                            <widgets>
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/asset/fixedAssetList.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <!-- <screen name="NewFixedAsset">
+        <section>
+            <actions>
+                <set field="titleProperty" value="BACCNewFixedAsset"/>
+                <set field="selectedSubMenuItem" value="NewFixedAsset"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAssetDecorator">
+                    <decorator-section name="body">
+                        <section>
+                        	<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<actions>
+							</actions>
+                            <widgets>
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/asset/fixedAssetNew.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen> -->
+    <screen name="ViewFixedAssetIncrease">
+        <section>
+            <actions>
+                <set field="titleProperty" value="ViewFixedAssetIncreaseTitle"/>
+                <set field="selectedSubMenuItem" value="FixedAssetIncrease"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAssetDecorator">
+                    <decorator-section name="body">
+                        <section>
+                        	<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<actions>
+								<entity-condition list="paymentMethodTypeEnumList" entity-name="Enumeration">
+									<condition-expr field-name="enumTypeId" value="PAYMENT_METHOD_TYPE"/>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>
+								<entity-condition list="finAccountListActive" entity-name="FinAccount" filter-by-date="true">
+									<condition-list>
+										<condition-expr field-name="finAccountName" operator="not-equals" value=""/>
+										<condition-expr field-name="finAccountCode" operator="not-equals" value=""/>
+										<condition-expr field-name="statusId" value="FNACT_ACTIVE"/>
+									</condition-list>
+								</entity-condition>
+							</actions>
+                            <widgets>
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/asset/ViewFixedAssetIncrease.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="FixedAssetTitle">
+        <section>
+            <condition>
+                <not><if-empty field="fixedAsset"/></not>
+            </condition>
+            <widgets>
+                <label style="ibefore-icon-angle-right" text="${uiLabelMap.BACCFixedAssetIdShort}: "></label>
+                <link url-mode="plain" target="ViewFixedAsset?fixedAssetId=${fixedAsset.fixedAssetId}" text="${fixedAsset.fixedAssetId}"></link>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="ViewFixedAsset">
+        <section>
+            <actions>
+                <set field="titleProperty" value="BACCViewFixedAsset"/>
+                <set field="selectedSubMenuItem" value="ListFixedAssets"/>
+                <set field="titleHeaderValue" value="FixedAssetTitle" global="true"/>
+                <set field="titleHeaderLocation" value="component://baseaccounting/widget/AssetScreens.xml" global="true"/>
+            </actions>
+            <widgets>
+                <section>
+                    <condition>
+                        <if-olbius-has-permission/>
+                    </condition>
+                    <actions>
+                        <entity-condition list="fixedAssetList" entity-name="FixedAssetAndDetail">
+                            <condition-expr field-name="fixedAssetId" from-field="parameters.fixedAssetId"/>
+                        </entity-condition>
+                        <set field="fixedAsset" from-field="fixedAssetList[0]"/>
+                    </actions>
+                    <widgets>
+                        <section>
+                            <condition>
+                                <not>
+                                    <if-empty field="fixedAsset"/>
+                                </not>
+                            </condition>
+                            <actions>
+                                <entity-condition list="fixedAssetAssignRoleList" entity-name="RoleType">
+                                    <condition-expr field-name="parentTypeId" value="FAM_ASSIGNEE"/>
+                                    <order-by field-name="description"/>
+                                </entity-condition>
+                                <entity-condition list="fixedAssetAssignStatusList" entity-name="StatusItem">
+                                    <condition-expr field-name="statusTypeId" value="FA_ASGN_STATUS"/>
+                                    <order-by field-name="sequenceId"/>
+                                </entity-condition>
+                            </actions>
+                            <widgets>
+                                <decorator-screen name="CommonAssetDecorator">
+                                    <decorator-section name="body">
+                                        <platform-specific>
+                                            <html>
+                                                <!-- <html-template location="component://baseaccounting/webapp/baseaccounting/asset/fixedAssetView.ftl"/> -->
+                                                <html-template location="component://baseaccounting/webapp/baseaccounting/asset/fixedAssetView2.ftl"/>
+                                            </html>
+                                        </platform-specific>
+                                    </decorator-section>
+                                </decorator-screen>
+                            </widgets>
+                            <fail-widgets>
+                                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                                    <decorator-section name="body">
+                                        <container style="alert alert-info">
+                                            <label text="${uiLabelMap.FixedAssetNotFoundFixedAssetId}"></label>
+                                        </container>
+                                    </decorator-section>
+                                </decorator-screen>
+                            </fail-widgets>
+                        </section>
+                    </widgets>
+                    <fail-widgets>
+                        <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                            <decorator-section name="body">
+                                <container style="alert alert-info">
+                                    <label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+                                </container>
+                            </decorator-section>
+                        </decorator-screen>
+                    </fail-widgets>
+                </section>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="ListAssignedParties">
+        <section>
+	        <actions>
+	        	<property-map resource="BaseAccountingUiLabels" map-name="uiLabelMap" global="true"/>
+	        	<property-map resource="WidgetUiLabels" map-name="uiLabelMap" global="true"/>
+	        </actions>
+            <widgets>
+                <platform-specific>
+                    <html>
+          				<html-template location="component://baseaccounting/webapp/baseaccounting/asset/fixedAssetViewAssign.ftl"/>
+          			</html>
+                </platform-specific>
+            </widgets>
+	    </section>
+	</screen>
+	
+	<screen name="ListFixedAssetDeps">
+        <section>
+	        <actions>
+	        	<property-map resource="BaseAccountingUiLabels" map-name="uiLabelMap" global="true"/>
+	        	<property-map resource="WidgetUiLabels" map-name="uiLabelMap" global="true"/>
+	        </actions>
+            <widgets>
+                <platform-specific>
+                    <html>
+          				<html-template location="component://baseaccounting/webapp/baseaccounting/asset/fixedAssetViewDepGrid.ftl"/>
+          			</html>
+                </platform-specific>
+            </widgets>
+	    </section>
+	</screen>
+	
+	<screen name="ListFixedAssetDepPeriods">
+        <section>
+            <actions>
+                <set field="titleProperty" value="BACCListFADepPeriods"/>
+                <set field="selectedSubMenuItem" value="ListFixedAssetDepPeriods"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAssetDecorator">
+                    <decorator-section name="body">
+                        <section>
+                        	<condition>
+								<if-olbius-has-permission/>
+							</condition>
+                            <widgets>
+                                <platform-specific>
+                                    <html>
+		                        		<!-- <html-template location="component://baseaccounting/webapp/baseaccounting/asset/fixedAssetDepPeriodList.ftl"/> -->
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/asset/ViewFixedAssetDepreciationCalc.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+	</screen>
+	
+	<screen name="ViewFixedAssetReport">
+		<section>
+			<actions>
+				<set field="titleProperty" value="BACCReportList"/>
+                <set field="selectedSubMenuItem" value="FixedAssetReport"/>
+            </actions>
+            <widgets>
+            	<decorator-screen name="CommonAssetDecorator">
+            		<decorator-section name="body">
+            			<section>
+            				<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<actions>
+								<entity-condition list="fixedAssetTypeList" entity-name="FixedAssetType">
+									<condition-expr field-name="parentTypeId" operator="not-equals" value=""/>
+									<order-by field-name="-parentTypeId"/>
+									<order-by field-name="description"/>
+								</entity-condition>
+							</actions>
+							<widgets>
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/asset/ViewFixedAssetReport.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+            			</section>
+            		</decorator-section>
+            	</decorator-screen>
+            </widgets>
+		</section>	
+	</screen>
+	
+	<screen name="ListDepFixedAssets">
+        <section>
+            <actions>
+                <set field="titleProperty" value="BACCListDepFixedAsset"/>
+                <set field="selectedSubMenuItem" value="ListFixedAssetDepPeriods"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAssetDecorator">
+                    <decorator-section name="body">
+                        <section>
+                        	<condition>
+								<if-olbius-has-permission/>
+							</condition>
+                            <widgets>
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/asset/depFixedAssetList.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+	</screen>
+	
+	<screen name="ListFADecrements">
+        <section>
+            <actions>
+                <set field="titleProperty" value="BACCListFADecrements"/>
+                <set field="selectedSubMenuItem" value="ListFADecrements"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAssetDecorator">
+                    <decorator-section name="body">
+                        <section>
+                        	<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<actions>
+								<entity-condition list="decreaseReasonTypeList" entity-name="FixedAssetDecrReasonType">
+									<order-by field-name="description"/>
+								</entity-condition>
+							</actions>
+                            <widgets>
+                                <platform-specific>
+                                    <html>
+		                        		<!-- <html-template location="component://baseaccounting/webapp/baseaccounting/asset/fixedAssetDecrementList.ftl"/> -->
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/asset/ViewFixedAssetDecrease.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+	</screen>
+	
+	<screen name="ListDecFixedAssets">
+        <section>
+            <actions>
+                <set field="titleProperty" value="BACCListDecreasedFixedAssets"/>
+                <set field="selectedSubMenuItem" value="ListFADecrements"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAssetDecorator">
+                    <decorator-section name="body">
+                        <section>
+                        	<condition>
+								<if-olbius-has-permission/>
+							</condition>
+                            <widgets>
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/asset/decFixedAssetList.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+	</screen>
+	
+	<screen name="CostAlloc">
+        <section>
+            <actions>
+                <set field="titleProperty" value="BACCCostAllocation"/>
+                <set field="selectedSubMenuItem" value="CostAlloc"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAssetDecorator">
+                    <decorator-section name="body">
+                        <section>
+                        	<condition>
+								<if-olbius-has-permission/>
+							</condition>
+                            <widgets>
+                            	<platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/asset/costAlloc.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+	</screen>
+</screens>

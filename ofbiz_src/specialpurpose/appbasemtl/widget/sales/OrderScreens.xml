@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../../../framework/widget/dtd/widget-screen.xsd">
+	<screen name="OrderCommonDecorator">
+		<section>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+                    	<decorator-section-include name="body"/>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ViewOrderDetail">
+		<section>
+			<actions>
+				<script location="component://basesalesmtl/webapp/basesalesmtl/WEB-INF/actions/navigator/nav_orderViewRole.groovy"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<and>
+							<or>
+								<if-empty field="isOwnerDistributor"/>
+								<if-compare operator="equals" value="false" field="isOwnerDistributor" type="Boolean"/>
+							</or>
+							<or>
+								<if-olbius-has-permission/>
+								<!-- DEL<if-has-permission permission="SALESORDER" action="_VIEW"/>
+								<if-has-permission permission="PURCHASEORDER_DIS" action="_VIEW"/> -->
+							</or>
+						</and>
+					</condition>
+					<actions>
+						<script location="component://basesalesmtl/webapp/basesalesmtl/WEB-INF/actions/navigator/nav_orderList.groovy"/>
+					</actions>
+					<widgets>	
+						<decorator-screen name="ViewOrderDetail" location="component://basesales/widget/OrderScreens.xml">
+							<decorator-section name="container">
+								<include-screen location="component://baseaccounting/widget/PaymentScreens.xml" name="OrderPayment"/>
+								<section>
+									<condition>
+										<if-has-permission permission="LOGISTICS" action="_VIEW"/>
+									</condition>
+									<widgets>
+										<include-screen location="component://appbasemtl/widget/logistics/DeliveryScreens.xml" name="SalesDelivery"/>
+									</widgets>
+									<fail-widgets>
+										<section>
+											<widgets>
+												<include-screen location="component://appbasemtl/widget/logistics/DeliveryScreens.xml" name="BasicViewSalesDelivery"/>
+											</widgets>
+										</section>
+										<section>
+											<condition>
+												<or>
+													<if-compare operator="equals" value="ORDER_IN_TRANSIT" field="currentStatus.statusId"/>
+													<if-compare operator="equals" value="ORDER_COMPLETED" field="currentStatus.statusId"/>
+												</or>
+											</condition>
+											<widgets>
+												<include-screen location="component://baselogistics/widget/FacilityScreens.xml" name="StockInFacility"/>
+											</widgets>
+										</section>
+									</fail-widgets>
+								</section>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<section>
+							<widgets>
+								<include-screen name="ViewOrderDetailDis"/>
+							</widgets>
+						</section>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewOrderDetailDis">
+		<section>
+			<condition>
+				<and>
+					<if-olbius-has-permission/>
+					<if-compare operator="equals" value="true" field="hasOrderSalesDisView" type="Boolean"/>
+				</and>
+			</condition>
+			<actions>
+				<script location="component://basesalesmtl/webapp/basesalesmtl/WEB-INF/actions/navigator/nav_orderListDis.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="ViewSalesOrderDetail" location="component://basesalesmtl/widget/distributor/OrderScreens.xml">
+					<decorator-section name="container">
+						<!-- <include-screen location="component://baseaccounting/widget/PaymentScreens.xml" name="OrderPayment"/> -->
+						<!-- <include-screen location="component://basesalesmtl/widget/distributor/OrderScreens.xml" name="OrderSalesOrderShippingInfo"/> -->
+						<section>
+							<condition>
+								<if-has-permission permission="LOGISTICS" action="_VIEW"/>
+							</condition>
+							<widgets>
+								<include-screen location="component://appbasemtl/widget/logistics/DeliveryScreens.xml" name="SalesDelivery"/>
+							</widgets>
+							<fail-widgets>
+								<section>
+									<condition>
+										<or>
+										<if-compare operator="equals" value="true" field="isSalesExecutive" type="Boolean"/>
+										<if-compare operator="equals" value="true" field="isOwnerDistributor" type="Boolean"/>
+										</or>
+									</condition>
+									<widgets>
+										<include-screen location="component://appbasemtl/widget/logistics/DeliveryScreens.xml" name="BasicViewSalesDelivery"/>
+									</widgets>
+									<fail-widgets>
+										<container style="alert alert-danger">
+											<label text="${uiLabelMap.BSYouHavenotViewPermission}"/>
+										</container>
+									</fail-widgets>
+								</section>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+                    	<container style="alert alert-danger">
+							<label text="${uiLabelMap.BSYouHavenotViewPermission}"/>
+						</container>
+					</decorator-section>
+				</decorator-screen>
+			</fail-widgets>
+		</section>
+	</screen>
+	
+	<screen name="NewSalesOrder">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="order"/>
+				<set field="selectedSubMenuItem" value="newSalesOrder"/>
+				<set field="titleProperty" value="BSCreateNewOrder"/>
+				<set field="layoutSettings.javaScripts[+0]" value="/aceadmin/jqw/jqwidgets/olbMain.js" global="true"/>
+				
+				<set field="enableCheckLiability" value="true" type="Boolean" />
+				<set field="enableCheckInventory" value="true" type="Boolean" />
+				<set field="enableDropShip" value="false" type="Boolean" />
+				<set field="enableFacilityConsign" value="true" type="Boolean"/>
+			</actions>
+			<widgets>
+				<include-screen name="NewSalesOrder" location="component://basesales/widget/OrderScreens.xml"/>
+			</widgets>
+		</section>
+	</screen>
+</screens>

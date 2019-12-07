@@ -1,0 +1,552 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
+    <form name="FindAgreements" target="FindAgreement" title="" type="single"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-entity entity-name="Agreement" default-field-type="find"/>
+        <field name="productId" title="${uiLabelMap.AccountingProductId}">
+            <lookup target-form-name="LookupProduct"/>
+        </field>
+        <field name="agreementTypeId" title="${uiLabelMap.AccountingAgreementTypeId}">
+            <drop-down allow-empty="true">
+                <entity-options description="${description}" entity-name="AgreementType"/>
+            </drop-down>
+        </field>
+        <field name="partyIdFrom" title="${uiLabelMap.AccountingPartyIdFrom}">
+            <lookup target-form-name="LookupPartyName"/>
+        </field>
+        <field name="partyIdTo" title="${uiLabelMap.AccountingPartyIdTo}">
+            <lookup target-form-name="LookupPartyName"/>
+        </field>
+        <field name="roleTypeIdFrom" title="${uiLabelMap.AccountingRoleTypeIdFrom}"><hidden/></field>
+        <field name="roleTypeIdTo" title="${uiLabelMap.AccountingRoleTypeIdTo}"><hidden/></field>
+        <field name="agreementDate" title="${uiLabelMap.AccountingAgreementDate}"><hidden/></field>
+        <field name="description" title="${uiLabelMap.Description}"><hidden/></field>
+        <field name="textData" title="${uiLabelMap.AccountingTextData}"><hidden/></field>
+        <field name="thruDate" title="${uiLabelMap.AccountingThruDate}"><hidden/></field>
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-primary btn-small">
+            <submit button-type="button" image-location="icon-search"/>
+        </field>
+    </form>
+	<form name="ListAgreements" list-name="listIt" target="" title="" type="list" paginate-target="findAgreement"
+        odd-row-style="alternate-row" default-table-style="table table-striped table-bordered table-hover dataTable" header-row-style="header-row-2">
+        <actions>
+            <set field="entityName" value="Agreement"/>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="requestParameters"/>
+                <field-map field-name="entityName" from-field="entityName"/>
+                <field-map field-name="orderBy" from-field="parameters.sortField"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+        </actions>
+        <auto-fields-entity entity-name="Agreement" default-field-type="display"/>
+        <field name="agreementId" title="${uiLabelMap.CommonEdit}" sort-field="true">
+            <hyperlink also-hidden="false" description="${agreementId}" target="EditAgreement">
+                <parameter param-name="agreementId"/>
+            </hyperlink>
+        </field>
+        <field name="productId" sort-field="true"></field>
+        <field name="partyIdFrom" sort-field="true">
+            <hyperlink target="/partymgr/control/viewprofile" description="${partyIdFrom}" target-type="inter-app">
+                <parameter param-name="partyId" from-field="partyIdFrom"/>
+            </hyperlink> 
+        </field>
+        <field name="partyIdTo" sort-field="true">
+            <hyperlink target="/partymgr/control/viewprofile" description="${partyIdTo}" target-type="inter-app">
+                <parameter param-name="partyId" from-field="partyIdTo"/>
+            </hyperlink>
+        </field>
+        <field name="roleTypeIdFrom" title="${uiLabelMap.AccountingRoleTypeIdFrom}"><hidden/></field>
+        <field name="roleTypeIdTo" title="${uiLabelMap.AccountingRoleTypeIdTo}" sort-field="true">
+            <display-entity entity-name="RoleType" key-field-name="roleTypeId"/>
+        </field>
+        <field name="agreementTypeId" title="${uiLabelMap.AccountingAgreementTypeId}" sort-field="true">
+            <display-entity entity-name="AgreementType"/>
+        </field>
+        <field name="fromDate" sort-field="true"></field>
+        <field name="thruDate" title="${uiLabelMap.AccountingThruDate}" sort-field="true"></field>
+        <field name="agreementDate" title="${uiLabelMap.AccountingAgreementDate}"><hidden/></field>
+        <field name="textData" title="${uiLabelMap.AccountingTextData}"><hidden/></field>
+        <field name="description" sort-field="true"></field>
+        <field name="cancelLink" title=" " widget-style="btn btn-warning btn-mini btn-position btn-cancel">
+            <hyperlink target="cancelAgreement" description="${uiLabelMap.CommonCancel}" also-hidden="false">
+                <parameter param-name="agreementId"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="SearchInventoryItemsParams" type="single" target="EditFacilityInventoryItems"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="facilityId">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="Facility" key-field-name="facilityId" description="${facilityName} [${facilityId}]">
+                    <entity-constraint name="ownerPartyId" value="${userLogin.partyId}"/>
+                    <entity-order-by field-name="facilityName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="datetimeReceived"><date-find/></field>
+        <field name="productId"><text-find/></field>
+        <field name="internalName"><text-find/></field>
+        <field name="inventoryItemId"><text-find/></field>
+        <field name="statusId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="StatusItem" description="${description}" key-field-name="statusId">
+                    <entity-constraint name="statusTypeId" operator="equals" value="INV_NON_SER_STTS"/>
+                </entity-options>
+                <entity-options entity-name="StatusItem" description="${description}" key-field-name="statusId">
+                    <entity-constraint name="statusTypeId" operator="equals" value="INV_SERIALIZED_STTS"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="serialNumber"><text-find/></field>
+        <field name="softIdentifier"><text/></field>
+        <field name="partyId" title="${uiLabelMap.FormFieldTitle_manufacturerPartyId}">
+            <lookup target-form-name="LookupPartyName"/>
+        </field>
+        <field name="lotId" title="${uiLabelMap.ProductLotId}"><text/></field>
+        <!-- the content of the softIdentifier field is converted from hex to int if it starts with "0x";
+             this is a nice example of using JavaScript in a form widget definition -->
+        <field name="submitButton" widget-style="btn btn-small btn-primary" title="${uiLabelMap.CommonFind}" event="onclick" action="javascript:var field=document.SearchInventoryItemsParams.softIdentifier;var tmp=field.value;if (tmp.substring(0, 2) == '0x') {tmp=parseInt(tmp, 16)};if (!isNaN(tmp)) {field.value=tmp};return true;">
+            <submit button-type="button" image-location="icon-search"/>
+        </field>
+    </form>
+    <form name="ListFacilityInventoryItems" type="list" list-name="listIt" header-row-style="header-row-2"
+        paginate-target="EditFacilityInventoryItems" odd-row-style="alternate-row" default-table-style="table table-hover table-striped table-bordered dataTable">
+        <actions>
+            <service service-name="performFind" result-map="results" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="InventoryItemAndLocation"/>
+                <field-map field-name="orderBy" value="statusId|quantityOnHandTotal|serialNumber"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+        </actions>
+        <field name="inventoryItemId" widget-style="">
+            <hyperlink target="editInventoryItemDis" description="${inventoryItemId}">
+                <parameter param-name="inventoryItemId"/>
+                <parameter param-name="facilityId"/>
+            </hyperlink>
+        </field>
+        <field name="inventoryItemTypeId" title="${uiLabelMap.ProductInventoryItemTypeId}">
+            <display-entity entity-name="InventoryItemType"/>
+        </field>
+        <field name="statusId"><display-entity entity-name="StatusItem"/></field>
+        <field name="datetimeReceived"><display/></field>
+        <field name="expireDate" title="${uiLabelMap.ProductExpireDate}"><display/></field>
+        <field name="productId" widget-style="">
+            <hyperlink target="/catalog/control/EditProduct" target-type="inter-app" description="${productId}">
+                <parameter param-name="productId"/>
+            </hyperlink>
+        </field>
+        <field name="internalName"><display/></field>
+        <field name="partyId"><display/></field>
+        <field name="locationSeqId" widget-style="btn btn-info btn-mini">
+            <hyperlink target="EditFacilityLocation" description="${areaId}:${aisleId}:${sectionId}:${levelId}:${positionId} [${locationSeqId}]">
+                <parameter param-name="facilityId"/>
+                <parameter param-name="locationSeqId"/>
+            </hyperlink>
+        </field>
+        <field name="enumId" entry-name="locationTypeEnumId" title="${uiLabelMap.CommonType}">
+            <display-entity entity-name="Enumeration"/>
+        </field>
+        <field name="lotId" title="${uiLabelMap.ProductLotId}"><display/></field>
+        <field name="binNumber" title="${uiLabelMap.ProductBinNumber}"><display/></field>
+        <field name="serialNumber"><display/></field>
+        <field name="softIdentifier"><display/></field>
+        <field name="quantityOnHandTotal"><display description="${availableToPromiseTotal} / ${quantityOnHandTotal}"/></field>
+        <!-- <field name="transfer" title="${uiLabelMap.ProductTransfer}" entry-name="inventoryItemId" widget-style="btn btn-info btn-mini">
+            <hyperlink target="TransferInventoryItem" description="${uiLabelMap.ProductTransfer}">
+                <parameter param-name="facilityId"/>
+                <parameter param-name="inventoryItemId"/>
+            </hyperlink>
+        </field> -->
+    </form>
+    <form name="SearchInventoryItemsDetailsParams" type="single" target="viewFacilityInventoryItemsDetailsDis"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="facilityId">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="Facility" key-field-name="facilityId" description="${facilityName} [${facilityId}]">
+                    <entity-constraint name="ownerPartyId" value="${userLogin.partyId}"/>
+                    <entity-order-by field-name="facilityName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="effectiveDate"><date-find/></field>
+        <field name="productId"><text-find/></field>
+        <field name="inventoryItemId"><text-find/></field>
+        <field name="serialNumber"><text-find/></field>
+        <field name="softIdentifier"><text/></field>
+        <field name="manufacturerPartyId">
+            <lookup target-form-name="LookupPartyName"/>
+        </field>
+        <field name="orderId">
+            <lookup target-form-name="LookupOrderHeader"/>
+        </field>
+        <field name="shipmentId"><text/></field>
+        <field name="returnId"><text/></field>
+        <field name="workEffortId"><text/></field>
+        <field name="reasonEnumId">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="Enumeration" key-field-name="enumId" description="${description}">
+                    <entity-constraint name="enumTypeId" value="IID_REASON"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <!-- the content of the softIdentifier field is converted from hex to int if it starts with "0x";
+             this is a nice example of using JavaScript in a form widget definition -->
+        <field name="quantityOnHandDiff" tooltip="${uiLabelMap.ProductMessageQoh}"><text-find default-value="0" default-option="notEqual" ignore-case="false"/></field>
+        <field name="reportType">
+            <drop-down allow-empty="false">
+                <option key="BY_ITEM" description="${uiLabelMap.ProductByInventoryItem}"/>
+                <option key="BY_PRODUCT" description="${uiLabelMap.ProductByProduct}"/>
+                <option key="BY_DATE" description="${uiLabelMap.ProductByDate}"/>
+            </drop-down>
+        </field>
+        <field name="submitButton" widget-style="btn btn-small btn-primary" title="${uiLabelMap.CommonFind}" event="onclick" action="javascript:var field=document.SearchInventoryItemsParams.softIdentifier;var tmp=field.value;if (tmp.substring(0, 2) == '0x') {tmp=parseInt(tmp, 16)};if (!isNaN(tmp)) {field.value=tmp};return true;">
+            <submit button-type="button" image-location="icon-search"/>
+        </field>
+    </form>
+    <form name="ListFacilityInventoryItemsDetailsByItem" type="list" target="" title="" list-name="listIt"
+        odd-row-style="alternate-row" default-table-style="table table-hover table-striped table-bordered dataTable">
+        <actions>
+            <service service-name="performFind" result-map="results" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="InventoryItemAndDetail"/>
+                <field-map field-name="orderBy" value="productId|inventoryItemId|-inventoryItemDetailSeqId|-effectiveDate|quantityOnHandTotal"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+        </actions>
+        <row-actions>
+            <set field="showPosition1" value="${groovy: String prev = (String) previousItem.get('inventoryItemId');return new Boolean(!(prev!=null &amp;&amp; prev.equals(inventoryItemId)));}" type="Boolean"/>
+        </row-actions>
+
+        <field name="inventoryItemId" widget-style="" position="1" use-when="showPosition1">
+            <hyperlink target="EditInventoryItem" description="${inventoryItemId}">
+                <parameter param-name="inventoryItemId"/>
+                <parameter param-name="facilityId"/>
+            </hyperlink>
+        </field>
+        <field name="productId" position="1" use-when="showPosition1" widget-style="">
+            <hyperlink target="/catalog/control/EditProduct" target-type="inter-app" description="${productId}">
+                <parameter param-name="productId"/>
+            </hyperlink>
+        </field>
+        <field name="quantityOnHandTotal" position="1" use-when="showPosition1">
+            <display description="${quantityOnHandTotal}"/>
+        </field>
+        <field name="availableToPromiseTotal" position="1" use-when="showPosition1">
+            <display description="${availableToPromiseTotal}"/>
+        </field>
+        <field name="serialNumber" position="1" use-when="showPosition1"><display/></field>
+        <field name="softIdentifier" position="1" use-when="showPosition1"><display/></field>
+
+        <field name="inventoryItemDetailSeqId" position="2"><display/></field>
+        <field name="effectiveDate" position="2"><display/></field>
+        <field name="quantityOnHandDiff" position="2"><display/></field>
+        <field name="availableToPromiseDiff" position="2"><display/></field>
+
+        <field name="reasonEnumId" position="2">
+            <display-entity entity-name="Enumeration" key-field-name="enumId" description="${description}"/>
+        </field>
+        <field name="description" position="2"><display/></field>
+        <field name="orderId" widget-style="" position="2">
+            <hyperlink target="/ordermgr/control/orderview" target-type="inter-app" description="${orderId}" >
+                <parameter param-name="orderId"/>
+            </hyperlink>
+        </field>
+        <field name="orderItemSeqId" position="2"><display/></field>
+        <field name="shipmentId" widget-style="" position="2">
+            <hyperlink target="ViewShipment" description="${shipmentId}" >
+                <parameter param-name="shipmentId"/>
+            </hyperlink>
+        </field>
+        <field name="shipmentItemSeqId" position="2"><display/></field>
+        <field name="workEffortId" widget-style="" position="2">
+            <hyperlink target="/workeffort/control/WorkEffortSummary" target-type="inter-app" description="${workEffortId}" >
+                <parameter param-name="workEffortId"/>
+            </hyperlink>
+        </field>
+        <field name="returnId" position="2"><display/></field>
+        <field name="returnItemSeqId" position="2"><display/></field>
+    </form>
+    <form name="ListFacilityInventoryItemsDetailsByProduct" type="list" target="" title="" list-name="listIt"
+        odd-row-style="alternate-row" default-table-style="table table-hover table-striped table-bordered dataTable">
+        <actions>
+            <service service-name="performFind" result-map="results" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="InventoryItemAndDetail"/>
+                <field-map field-name="orderBy" value="productId|-effectiveDate|inventoryItemId|-inventoryItemDetailSeqId|quantityOnHandTotal"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+        </actions>
+        <row-actions>
+            <set field="showPosition1" value="${groovy:String prev = (String) previousItem.get('productId'); return new Boolean(!(prev!=null &amp;&amp; prev.equals(productId)));}" type="Boolean"/>
+        </row-actions>
+
+        <field name="productId" position="1" use-when="showPosition1" widget-style="btn btn-info btn-mini">
+            <hyperlink target="/catalog/control/EditProduct" target-type="inter-app" description="${productId}">
+                <parameter param-name="productId"/>
+            </hyperlink>
+        </field>
+
+        <field name="effectiveDate" position="2"><display/></field>
+        <field name="inventoryItemId" widget-style="btn btn-info btn-mini" position="2">
+            <hyperlink target="EditInventoryItem" description="${inventoryItemId}">
+                <parameter param-name="inventoryItemId"/>
+                <parameter param-name="facilityId"/>
+            </hyperlink>
+        </field>
+        <field name="inventoryItemDetailSeqId" position="2"><display/></field>
+        <field name="quantityOnHandDiff" position="2"><display/></field>
+        <field name="availableToPromiseDiff" position="2"><display/></field>
+
+        <field name="reasonEnumId" position="2">
+            <display-entity entity-name="Enumeration" key-field-name="enumId" description="${description}"/>
+        </field>
+        <field name="description" position="2"><display/></field>
+        <field name="orderId" widget-style="btn btn-info btn-mini" position="2">
+            <hyperlink target="/ordermgr/control/orderview" target-type="inter-app" description="${orderId}" >
+                <parameter param-name="orderId"/>
+            </hyperlink>
+        </field>
+        <field name="orderItemSeqId" position="2"><display/></field>
+        <field name="shipmentId" widget-style="btn btn-info btn-mini" position="2">
+            <hyperlink target="ViewShipment" description="${shipmentId}" >
+                <parameter param-name="shipmentId"/>
+            </hyperlink>
+        </field>
+        <field name="shipmentItemSeqId" position="2"><display/></field>
+        <field name="workEffortId" widget-style="btn btn-info btn-mini" position="2">
+            <hyperlink target="/workeffort/control/WorkEffortSummary" target-type="inter-app" description="${workEffortId}" >
+                <parameter param-name="workEffortId"/>
+            </hyperlink>
+        </field>
+        <field name="returnId" position="2"><display/></field>
+        <field name="returnItemSeqId" position="2"><display/></field>
+    </form>
+    <form name="ListFacilityInventoryItemsDetailsByDate" type="list" target="" title="" list-name="listIt"
+        odd-row-style="alternate-row" default-table-style="table table-hover table-striped table-bordered dataTable">
+        <actions>
+            <service service-name="performFind" result-map="results" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="InventoryItemAndDetail"/>
+                <field-map field-name="orderBy" value="-effectiveDate|productId|inventoryItemId|-inventoryItemDetailSeqId|quantityOnHandTotal"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+        </actions>
+
+        <field name="effectiveDate"><display/></field>
+        <field name="productId" widget-style="">
+            <hyperlink target="/catalog/control/EditProduct" target-type="inter-app" description="${productId}">
+                <parameter param-name="productId"/>
+            </hyperlink>
+        </field>
+        <field name="inventoryItemId" widget-style="">
+            <hyperlink target="EditInventoryItem" description="${inventoryItemId}">
+                <parameter param-name="inventoryItemId"/>
+                <parameter param-name="facilityId"/>
+            </hyperlink>
+        </field>
+        <field name="inventoryItemDetailSeqId"><display/></field>
+        <field name="quantityOnHandDiff"><display/></field>
+        <field name="availableToPromiseDiff"><display/></field>
+
+        <field name="reasonEnumId">
+            <display-entity entity-name="Enumeration" key-field-name="enumId" description="${description}"/>
+        </field>
+        <field name="description"><display/></field>
+        <field name="orderId" widget-style="">
+            <hyperlink target="/ordermgr/control/orderview" target-type="inter-app" description="${orderId}" >
+                <parameter param-name="orderId"/>
+            </hyperlink>
+        </field>
+        <field name="orderItemSeqId"><display/></field>
+        <field name="shipmentId" widget-style="">
+            <hyperlink target="ViewShipment" description="${shipmentId}" >
+                <parameter param-name="shipmentId"/>
+            </hyperlink>
+        </field>
+        <field name="shipmentItemSeqId"><display/></field>
+        <field name="workEffortId" widget-style="">
+            <hyperlink target="/workeffort/control/WorkEffortSummary" target-type="inter-app" description="${workEffortId}" >
+                <parameter param-name="workEffortId"/>
+            </hyperlink>
+        </field>
+        <field name="returnId"><display/></field>
+        <field name="returnItemSeqId"><display/></field>
+    </form>
+    
+    <!-- Physical facility -->
+    <form name="FindPhysicalInventory" type="single" target="findFacilityPhysicalInventoryDis" title=""
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="facilityId"><hidden/></field>
+        <field name="productId" position="1"><lookup target-form-name="LookupProduct"/></field>
+        <field name="internalName" title="${uiLabelMap.ProductInternalName}">
+            <text/>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-small btn-primary">
+            <submit button-type="button" image-location="icon-search"/>
+        </field>
+    </form>
+    <form name="ListPhysicalInventory" type="multi" list-name="physicalInventory" target="createPhysicalVariancesDis?facilityId=${parameters.facilityId}&amp;productId=${parameters.productId}&amp;internalName=${parameters.internalName}" use-row-submit="true"
+        odd-row-style="alternate-row" default-table-style="table table-hover table-striped table-bordered dataTable" separate-columns="true">
+        <field name="inventoryItemId" widget-style="btn btn-info btn-mini">
+            <hyperlink description="${inventoryItemId}" target="EditInventoryItem">
+                <parameter param-name="inventoryItemId"/>
+            </hyperlink>
+        </field>
+        <field name="productId" widget-style="btn btn-info btn-mini">
+            <hyperlink description="${productId}" target="/catalog/control/EditProductInventoryItems" target-type="inter-app">
+                <parameter param-name="productId"/>
+            </hyperlink>
+        </field>
+        <field name="internalName"><display/></field>
+        <field name="availableToPromiseTotal" title="${uiLabelMap.ProductItemATP}"><display/></field>
+        <field name="quantityOnHandTotal" title="${uiLabelMap.ProductItemQOH}"><display/></field>
+        <field name="productATP" title="${uiLabelMap.ProductProductATP}"><display/></field>
+        <field name="productQOH" title="${uiLabelMap.ProductProductQOH}"><display/></field>
+        <field name="varianceReasonId">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="VarianceReason" description="${description}"/>
+            </drop-down>
+        </field>
+        <field name="availableToPromiseVar" title="${uiLabelMap.ProductProductATPVar}" event="onchange" action="document.ListPhysicalInventory._rowSubmit_o_${itemIndex}.checked = true"><text size="6"/></field>
+        <field name="quantityOnHandVar" title="${uiLabelMap.ProductProductQOHVar}" event="onchange" action="document.ListPhysicalInventory._rowSubmit_o_${itemIndex}.checked = true"><text size="6"/></field>
+        <field name="_rowSubmit" title="${uiLabelMap.CommonSelect}"><check/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="btn btn-small btn-primary btn-position-center">
+            <submit button-type="button" image-location="icon-ok"/>
+        </field>
+    </form>
+    
+    <form name="FindProductPromoSearch" type="single" target="findPromoDis" 
+    	header-row-style="header-row" default-table-style="basic-table" style="form-horizontal-mini">
+    	<field name="productPromoId" title="${uiLabelMap.DelysPromoProductPromoId}"><text-find></text-find></field>
+    	<field name="promoName" title="${uiLabelMap.PromotionContentDelys}"><text-find></text-find> </field>
+    	<field name="productPromoTypeId" title="${uiLabelMap.DelysPromotionType}">
+    		<drop-down allow-empty="true">
+    			<entity-options description="${description}" entity-name="ProductPromoType"></entity-options>
+    		</drop-down>
+    	</field>
+    	<!-- <field name="productPromoStatusId" title="${uiLabelMap.DelysProductPromoStatusId}">
+    		<drop-down allow-empty="true">
+    			<entity-options description="${description}" entity-name="StatusItem" key-field-name="statusId">
+    				<entity-constraint name="statusTypeId" value="PROMO_STATUS"/>
+    				<entity-order-by field-name="sequenceId"/>
+    			</entity-options>
+    		</drop-down>
+    	</field> -->
+    	<field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-small btn-primary open-sans">
+     		<submit image-location="icon-search" button-type="button"/>
+    	</field>
+    </form>
+    <form name="FindProductPromo" type="list" list-name="listIt" paginate-target="findPromoDis" 
+        odd-row-style="alternate-row" use-row-submit="true" default-table-style="table table-striped table-bordered table-hover dataTable">
+      	<actions>
+      		<service service-name="performFind" result-map-list="listIt">
+				<field-map field-name="entityName" value="ProductPromo"/>
+				<field-map field-name="inputFields" from-field="parameters"/>	
+				<field-map field-name="noConditionFind" value="Y"/>
+				<field-map field-name="orderBy" value="-fromDate"/>				
+			</service>
+      	</actions>
+      	<row-actions>
+			<script location="component://delys/webapp/delys/WEB-INF/actions/sales/promotions/productPromoBudgetInfo.groovy"/>
+      	</row-actions>
+      	<field name="index" title="${uiLabelMap.DANo}"><display description="${itemIndex + 1}"/></field>
+      	<field name="productPromoId" title="${uiLabelMap.DelysPromoProductPromoId}">        		
+      		<hyperlink target="viewProductPromo" description="${productPromoId}">
+      			<parameter param-name="productPromoId"/>
+      		</hyperlink>
+      	</field>
+      	<field name="promoName" title="${uiLabelMap.DelysPromoPromotionName}"><display></display></field>
+      	<field name="productPromoTypeId" title="${uiLabelMap.DelysPromotionType}">
+      		<display-entity entity-name="ProductPromoType" description="${description}"></display-entity>
+      	</field>
+      	<field name="budgetTotalId" title="${uiLabelMap.DelysBudgetTotal}">
+      		<display></display>
+      	</field>
+      	<field name="revenueMiniId" title="${uiLabelMap.DelysMiniRevenue}">
+      		<display></display>
+      	</field>
+      	<field name="productPromoStatusId" title="${uiLabelMap.DelysProductPromoStatusId}">
+      		<display-entity entity-name="StatusItem" description="${description}" key-field-name="statusId"></display-entity>        		
+      	</field>
+      	<field name="viewLink" title=" " widget-style="btn btn-mini btn-success icon-zoom-in bigger-120 no-bottom-margin border-width1" widget-area-style="width10">
+      		<hyperlink target="viewProductPromo" description=" ">
+      			<parameter param-name="productPromoId"/>
+      		</hyperlink>
+      	</field>
+    </form>
+    <form name="FindProductPromoSearchCust" type="single" target="findPromoCustDis" 
+    	header-row-style="header-row" default-table-style="basic-table" style="form-horizontal-mini">
+    	<field name="productPromoId" title="${uiLabelMap.DelysPromoProductPromoId}"><text-find></text-find></field>
+    	<field name="promoName" title="${uiLabelMap.PromotionContentDelys}"><text-find></text-find> </field>
+    	<field name="productPromoTypeId" title="${uiLabelMap.DelysPromotionType}">
+    		<drop-down allow-empty="true">
+    			<entity-options description="${description}" entity-name="ProductPromoType"></entity-options>
+    		</drop-down>
+    	</field>
+    	<!-- <field name="productPromoStatusId" title="${uiLabelMap.DelysProductPromoStatusId}">
+    		<drop-down allow-empty="true">
+    			<entity-options description="${description}" entity-name="StatusItem" key-field-name="statusId">
+    				<entity-constraint name="statusTypeId" value="PROMO_STATUS"/>
+    				<entity-order-by field-name="sequenceId"/>
+    			</entity-options>
+    		</drop-down>
+    	</field> -->
+    	<field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-small btn-primary open-sans">
+     		<submit image-location="icon-search" button-type="button"/>
+    	</field>
+    </form>
+    <form name="FindProductPromoCust" type="list" list-name="listIt" paginate-target="findPromoCustDis" 
+        odd-row-style="alternate-row" use-row-submit="true" default-table-style="table table-striped table-bordered table-hover dataTable">
+      	<actions>
+      		<service service-name="performFind" result-map-list="listIt">
+				<field-map field-name="entityName" value="ProductPromo"/>
+				<field-map field-name="inputFields" from-field="parameters"/>	
+				<field-map field-name="noConditionFind" value="Y"/>
+				<field-map field-name="orderBy" value="-fromDate"/>				
+			</service>
+      	</actions>
+      	<row-actions>
+			<script location="component://delys/webapp/delys/WEB-INF/actions/sales/promotions/productPromoBudgetInfo.groovy"/>
+      	</row-actions>
+      	<field name="index" title="${uiLabelMap.DANo}"><display description="${itemIndex + 1}"/></field>
+      	<field name="productPromoId" title="${uiLabelMap.DelysPromoProductPromoId}">        		
+      		<hyperlink target="viewProductPromo" description="${productPromoId}">
+      			<parameter param-name="productPromoId"/>
+      		</hyperlink>
+      	</field>
+      	<field name="promoName" title="${uiLabelMap.DelysPromoPromotionName}"><display></display></field>
+      	<field name="productPromoTypeId" title="${uiLabelMap.DelysPromotionType}">
+      		<display-entity entity-name="ProductPromoType" description="${description}"></display-entity>
+      	</field>
+      	<field name="budgetTotalId" title="${uiLabelMap.DelysBudgetTotal}">
+      		<display></display>
+      	</field>
+      	<field name="revenueMiniId" title="${uiLabelMap.DelysMiniRevenue}">
+      		<display></display>
+      	</field>
+      	<field name="productPromoStatusId" title="${uiLabelMap.DelysProductPromoStatusId}">
+      		<display-entity entity-name="StatusItem" description="${description}" key-field-name="statusId"></display-entity>        		
+      	</field>
+      	<field name="viewLink" title=" " widget-style="btn btn-mini btn-success icon-zoom-in bigger-120 no-bottom-margin border-width1" widget-area-style="width10">
+      		<hyperlink target="viewProductPromo" description=" ">
+      			<parameter param-name="productPromoId"/>
+      		</hyperlink>
+      	</field>
+    </form>
+    
+    
+</forms>

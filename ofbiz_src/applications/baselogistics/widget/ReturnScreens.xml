@@ -1,0 +1,615 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-screen.xsd">
+        
+    <screen name="ReturnCommonDecorator">
+		<section>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+                    	<decorator-section-include name="body"/>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ListCustomerReturn">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="StockIn"/>
+            	<set field="selectedSubMenuItem" value="ReturnSO"/>
+            	<set field="titleProperty" value="ReceiveReturn" global="true"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission/>
+					</condition>
+					<widgets>
+						<decorator-screen name="ReturnCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<platform-specific>
+									<html>
+										<html-template location="component://baselogistics/webapp/baselogistics/return/listReturnProduct.ftl"/>
+									</html>
+								</platform-specific>
+		    				</decorator-section>
+		    			</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="ReturnCommonDecorator">
+		                    <decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</decorator-section>
+		    			</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="ListVendorReturn">
+    	<section>
+            <actions>
+               	<set field="selectedMenuItem" value="StockOut"/>
+            	<set field="selectedSubMenuItem" value="ReturnPO"/>
+            	<set field="titleProperty" value="ReturnExport" global="true"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission/>
+					</condition>
+					<widgets>
+						<decorator-screen name="ReturnCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<platform-specific>
+									<html>
+										<html-template location="component://baselogistics/webapp/baselogistics/return/listReturnProduct.ftl"/>
+									</html>
+								</platform-specific>
+		    				</decorator-section>
+		    			</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="ReturnCommonDecorator">
+		                    <decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</decorator-section>
+		    			</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="ReturnTitle">
+		<section>
+			<condition>
+				<not><if-empty field="parameters.returnId"/></not>
+			</condition>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text=" ${uiLabelMap.ReturnId}: "></label>
+				<link url-mode="plain" target="getDetailCustomerReturn?returnId=${parameters.returnId}" text="${parameters.returnId}"></link>
+			</widgets>
+		</section>
+	</screen>
+	
+    <screen name="DetailCustomerReturn">
+    	<section>
+            <actions>
+            	<set field="titleProperty" value="DetailInfoForReturn" global="true"/>
+                <set field="selectedMenuItem" value="Return"/>
+                <set field="selectedSubMenuItem" value="ListCusReturn"/>
+                <set field="returnId" from-field="parameters.returnId"/>
+                <entity-one value-field="returnHeader" entity-name="ReturnHeader"/>
+                <set field="statusId" from-field="returnHeader.statusId"/>
+                <set field="titleHeaderValue" value="ReturnTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/ReturnScreens.xml" global="true"/>
+                <script location="component://baselogistics/webapp/baselogistics/WEB-INF/actions/return/getProductDetailReturn.groovy"></script>
+                <entity-condition list="listFacilityParty" entity-name="FacilityParty" filter-by-date="true">
+                	<condition-list>
+                		<condition-expr field-name="roleTypeId" value="MANAGER"/>
+                		<condition-expr field-name="partyId" value="${userLogin.partyId}"/>
+                		<condition-expr field-name="facilityId" from-field="returnHeader.destinationFacilityId"/>
+                	</condition-list>
+                </entity-condition>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission/>
+					</condition>
+					<widgets>
+						<section>
+							<condition>
+								<and>
+									<if-empty field="listFacilityParty"/>
+									<not><if-empty field="returnHeader.destinationFacilityId"/></not>
+								</and>
+							</condition>
+							<widgets>
+								<decorator-screen name="ReturnCommonDecorator">
+				                    <decorator-section name="body">
+					                    <screenlet title="${uiLabelMap.GeneralInfo}" navigation-menu-name="CustomerReturnDetailSubTabBar">
+					                    	<platform-specific>
+												<html>
+													<html-template location="component://baselogistics/webapp/baselogistics/return/detailReturn.ftl"/>
+												</html>
+											</platform-specific>
+										</screenlet>
+				    				</decorator-section>
+				    			</decorator-screen>
+							</widgets>
+							<fail-widgets>
+								<decorator-screen name="ReturnCommonDecorator">
+				                    <decorator-section name="body">
+					                    <screenlet title="${uiLabelMap.GeneralInfo}" navigation-menu-name="CustomerReturnDetailSubTabBar">
+				                  			<include-menu location="component://baselogistics/widget/BaseLogisticsMenus.xml" name="CustomerReturnDetailSubTabBar"/>
+					                    	<platform-specific>
+												<html>
+													<html-template location="component://baselogistics/webapp/baselogistics/return/detailReturn.ftl"/>
+												</html>
+											</platform-specific>
+										</screenlet>
+				    				</decorator-section>
+				    			</decorator-screen>
+							</fail-widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="ReturnCommonDecorator">
+		                    <decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</decorator-section>
+		    			</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="DetailVendorReturn">
+    	<section>
+			<actions>
+				<set field="selectedMenuItem" value="StockOut"/>
+                <set field="selectedSubMenuItem" value="ReturnPO"/>
+                <set field="returnId" from-field="parameters.returnId"/>
+				<set field="titleProperty" value="SupReturn" global="true"/>
+				<set field="activeTab" from-field="parameters.activeTab" default-value="general-tab"/>
+                <set field="titleHeaderValue" value="ReturnTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/ReturnScreens.xml" global="true"/>
+				<entity-one value-field="returnHeader" entity-name="ReturnHeader">
+                	<field-map field-name="returnId" from-field="parameters.returnId"/>
+                </entity-one>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-empty field="returnHeader"/>
+					</condition>
+					<widgets>
+						<decorator-screen name="ReturnCommonDecorator">
+		                    <decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BLReturnNotFound}: ${parameters.returnId}"></label>
+								</container>
+							</decorator-section>
+		    			</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<section>
+							<actions>
+							 	<script location="component://baselogistics/webapp/baselogistics/WEB-INF/actions/return/returnViewTotal.groovy"/>
+				                <script location="component://baselogistics/webapp/baselogistics/WEB-INF/actions/return/getProductDetailReturn.groovy"></script>
+							</actions>
+							<widgets>
+								<decorator-screen name="ReturnCommonDecorator">
+									<decorator-section name="body">
+										<platform-specific>
+											<html>
+												<html-template location="component://baselogistics/webapp/baselogistics/return/returnSupplierDetailBegin.ftl"/>
+											</html>
+										</platform-specific>
+										<include-screen name="ReturnSupplierDetailContainer"/>
+										<platform-specific>
+											<html>
+												<html-template location="component://baselogistics/webapp/baselogistics/return/returnSupplierDetailEnd.ftl"/>
+											</html>
+										</platform-specific>
+									</decorator-section>
+								</decorator-screen>
+							</widgets>
+						</section>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="ReturnSupplierDetailContainer">
+		<section>
+			<widgets>
+				<include-screen name="ReturnSupplierInfo"/>
+<!-- 				<include-screen name="ReturnSupplierProduct"/> -->
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ReturnSupplierInfo">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baselogistics/webapp/baselogistics/return/returnSupplierDetail.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ReturnSupplierProduct">
+		<section>
+			<actions>
+				<set field="activeTab" from-field="parameters.activeTab" default-value="product-tab"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baselogistics/webapp/baselogistics/return/returnDetailProduct.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+    
+    <screen name="ListReturnProductPublic">
+    	<section>
+			<widgets>
+             	<platform-specific>
+					<html>
+						<html-template location="component://baselogistics/webapp/baselogistics/return/detailReturn.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="PrepareReceiveReturn">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="StockIn"/>
+                <set field="selectedSubMenuItem" value="ReturnSO"/>
+                <set field="returnId" from-field="parameters.returnId"/>
+                <entity-one value-field="returnHeader" entity-name="ReturnHeader"/>
+                <set field="statusId" from-field="returnHeader.statusId"/>
+                <set field="titleHeaderValue" value="ReturnTitle" global="true"/>
+                <set field="titleProperty" value="ReceiveReturn" global="true"/>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/ReturnScreens.xml" global="true"/>
+				 <script location="component://baselogistics/webapp/baselogistics/WEB-INF/actions/return/getProductDetailReturn.groovy"></script>
+				<script location="component://product/webapp/facility/WEB-INF/actions/returns/ReceiveReturn.groovy"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission/>
+					</condition>
+					<widgets>
+						<decorator-screen name="ReturnCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<platform-specific>
+									<html>
+										<html-template location="component://baselogistics/webapp/baselogistics/return/receiveReturn.ftl"/>
+									</html>
+								</platform-specific>
+		    				</decorator-section>
+		    			</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="ReturnCommonDecorator">
+		                    <decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</decorator-section>
+		    			</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="ListReturns">
+    	<section>
+    		<condition>
+    			<if-compare operator="equals" value="CUSTOMER_RETURN" field="parameters.returnHeaderTypeId"/>
+    		</condition>
+            <actions>
+                <set field="selectedMenuItem" value="Return"/>
+                <set field="titleProperty" value="CusReturn" global="true"/>
+                <set field="selectedSubMenuItem" value="ListCusReturn"/>
+                <set field="returnHeaderTypeId" from-field="parameters.returnHeaderTypeId"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="ReturnCommonDecorator">
+                    <decorator-section name="body">
+                    	<platform-specific>
+							<html>
+								<html-template location="component://baselogistics/webapp/baselogistics/return/listReturnProduct.ftl"/>
+							</html>
+						</platform-specific>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<section>
+					<actions>
+						<set field="selectedMenuItem" value="Return"/>
+		                <set field="selectedSubMenuItem" value="ListSupReturn"/>
+		                <set field="returnHeaderTypeId" from-field="parameters.returnHeaderTypeId"/>
+		                <set field="titleProperty" value="SupReturn" global="true"/>
+					</actions>
+					<widgets>
+						<decorator-screen name="ReturnCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<platform-specific>
+									<html>
+										<html-template location="component://baselogistics/webapp/baselogistics/return/listReturnProduct.ftl"/>
+									</html>
+								</platform-specific>
+		    				</decorator-section>
+		    			</decorator-screen>
+					</widgets>
+				</section>
+			</fail-widgets>
+       </section>
+    </screen>
+    
+   	<screen name="PrepareExportReturn">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="StockOut"/>
+                <set field="selectedSubMenuItem" value="ReturnPO"/>
+                <set field="returnId" from-field="parameters.returnId"/>
+                 <set field="titleProperty" value="ReturnExport" global="true"/>
+                <entity-one value-field="returnHeader" entity-name="ReturnHeader"/>
+                <set field="statusId" from-field="returnHeader.statusId"/>
+                <set field="titleHeaderValue" value="ReturnTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/ReturnScreens.xml" global="true"/>
+				<script location="component://baselogistics/webapp/baselogistics/WEB-INF/actions/return/getProductDetailReturn.groovy"></script>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission/>
+					</condition>
+					<widgets>
+						<decorator-screen name="ReturnCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<platform-specific>
+									<html>
+										<html-template location="component://baselogistics/webapp/baselogistics/return/exportReturn.ftl"/>
+									</html>
+								</platform-specific>
+		    				</decorator-section>
+		    			</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="ReturnCommonDecorator">
+		                    <decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</decorator-section>
+		    			</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="SupplierReturnPDFDecorator">
+		<section>
+			<actions>
+				<property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true" />
+				<set field="defaultFontFamily" value="Arial" />
+				<script location="component://baselogistics/webapp/baselogistics/WEB-INF/actions/common/companyInfo.groovy"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<xsl-fo>
+						<html-template location="component://baselogistics/webapp/baselogistics/return/fo/returnPDFTemplate.fo.ftl" />
+					</xsl-fo>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="SupplierReturnPDF">
+        <section>
+        	<actions>
+        		<property-map map-name="uiLabelMap" resource="BaseLogisticsUiLabels" global="true"/>
+        		<property-map map-name="uiLabelMap" resource="BasePOUiLabels" global="true"/>
+        		<property-map map-name="uiLabelMap" resource="BaseSalesUiLabels" global="true"/>
+        		<property-map map-name="uiLabelMap" resource="OrderUiLabels" global="true"/>
+        		<entity-one entity-name="ReturnHeader" value-field="return">
+                    <field-map field-name="returnId" from-field="parameters.returnId"/>
+                </entity-one>
+                <entity-one entity-name="Facility" value-field="facility">
+                	<field-map field-name="facilityId" from-field="return.destinationFacilityId"></field-map>
+                </entity-one>
+        	</actions>
+        	<widgets>
+        		<section>
+        			<actions>
+		                <script location="component://baselogistics/webapp/baselogistics/WEB-INF/actions/return/detailReturn.groovy"/>
+        			</actions>
+        			<widgets>
+        				<decorator-screen name="SupplierReturnPDFDecorator">
+		                    <decorator-section name="body1">
+		                        <section>
+		                            <widgets>
+		                                <platform-specific>
+										     <xsl-fo><html-template location="component://baselogistics/webapp/baselogistics/return/fo/supReturnPDFFirstInstance.fo.ftl"/></xsl-fo>
+										</platform-specific>
+		                            </widgets>
+		                        </section>
+		                    </decorator-section>
+		                    <decorator-section name="body2">
+		                        <section>
+		                            <widgets>
+		                                <platform-specific>
+										     <xsl-fo><html-template location="component://baselogistics/webapp/baselogistics/return/fo/supReturnPDFSecondInstance.fo.ftl"/></xsl-fo>
+										</platform-specific>
+		                            </widgets>
+		                        </section>
+		                    </decorator-section>
+		                    <decorator-section name="body3">
+                                <platform-specific>
+								     <xsl-fo><html-template location="component://baselogistics/webapp/baselogistics/return/fo/supReturnPDFThirdInstance.fo.ftl"/></xsl-fo>
+								</platform-specific>
+		                    </decorator-section>
+		                    <decorator-section name="footer">
+		                        <section>
+		                            <widgets>
+		                                <platform-specific>
+										     <xsl-fo><html-template location="component://baselogistics/webapp/baselogistics/return/fo/supReturnPDFFooter.fo.ftl"/></xsl-fo>
+										</platform-specific>
+		                            </widgets>
+		                        </section>
+		                    </decorator-section>
+		                </decorator-screen>
+        			</widgets>
+        			<fail-widgets>
+        			</fail-widgets>
+        		</section>
+            </widgets>
+       	</section>
+    </screen>
+    
+    <screen name="ExportProductFromVendorReturn">
+    	<section>
+            <actions>
+               	<set field="selectedMenuItem" value="StockOut"/>
+                <set field="selectedSubMenuItem" value="ReturnPO"/>
+                <set field="returnId" from-field="parameters.returnId"/>
+                <entity-one value-field="returnHeader" entity-name="ReturnHeader"/>
+                <set field="titleProperty" value="ExportProduct" global="true"/>
+                <set field="titleHeaderValue" value="ReturnTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/ReturnScreens.xml" global="true"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not>
+							<if-empty field="returnHeader"/>
+						</not>
+					</condition>
+					<widgets>
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<decorator-screen name="ReturnCommonDecorator">
+				                    <decorator-section name="body">
+				                    	<platform-specific>
+											<html>
+												<html-template location="component://baselogistics/webapp/baselogistics/return/supReturnExportReturnTotal.ftl"/>
+											</html>
+										</platform-specific>
+				    				</decorator-section>
+				    			</decorator-screen>
+							</widgets>
+							<fail-widgets>
+								<decorator-screen name="ReturnCommonDecorator">
+				                    <decorator-section name="body">
+				                    	<container style="alert alert-info">
+											<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+										</container>
+				    				</decorator-section>
+				    			</decorator-screen>
+							</fail-widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="ReturnCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<container style="alert alert-info">
+									<label text="${uiLabelMap.BLReturnNotFound}"></label>
+								</container>
+		    				</decorator-section>
+		    			</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+       	</section> 
+	</screen>
+	
+    <screen name="ReceiveProductFromCustomerReturn">
+    	<section>
+            <actions>
+               	<set field="selectedMenuItem" value="StockIn"/>
+                <set field="selectedSubMenuItem" value="ReturnSO"/>
+                <set field="returnId" from-field="parameters.returnId"/>
+                <entity-one value-field="returnHeader" entity-name="ReturnHeader"/>
+                <set field="titleProperty" value="ReceiveProduct" global="true"/>
+                <set field="titleHeaderValue" value="ReturnTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/ReturnScreens.xml" global="true"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not>
+							<if-empty field="returnHeader"/>
+						</not>
+					</condition>
+					<widgets>
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<decorator-screen name="ReturnCommonDecorator">
+				                    <decorator-section name="body">
+				                    	<platform-specific>
+											<html>
+												<html-template location="component://baselogistics/webapp/baselogistics/return/custReturnReceiveReturnTotal.ftl"/>
+											</html>
+										</platform-specific>
+				    				</decorator-section>
+				    			</decorator-screen>
+							</widgets>
+							<fail-widgets>
+								<decorator-screen name="ReturnCommonDecorator">
+				                    <decorator-section name="body">
+				                    	<container style="alert alert-info">
+											<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+										</container>
+				    				</decorator-section>
+				    			</decorator-screen>
+							</fail-widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="ReturnCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<container style="alert alert-info">
+									<label text="${uiLabelMap.BLReturnNotFound}"></label>
+								</container>
+		    				</decorator-section>
+		    			</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+       	</section> 
+	</screen>
+	
+</screens>

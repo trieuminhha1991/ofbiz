@@ -1,0 +1,503 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+
+	<screen name="main">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="directory" />
+				<set field="selectedSubMenuItem" value="OrganizationChart"/>
+				<set field="titleProperty" value="Directory" />
+				<set field="layoutSettings.styleSheets[]" value="/images/humanres/directory.css"
+					global="true" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonDirectoryDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="HR_DIRECTORY"
+									action="_VIEW" />
+							</condition>
+							<widgets>
+								<container style="lefthalf">
+									<include-screen name="OrgTree" />
+								</container>
+							</widgets>
+							<fail-widgets>
+								<label style="h3">${uiLabelMap.HROlbiusViewPermissionError}
+								</label>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="OrgTree">
+		<section>
+			<actions>
+
+				<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/directory/jstOrgTree.groovy"></script>
+			</actions>
+			<widgets>
+				<section>
+					<widgets>
+						<!-- <screenlet title="${uiLabelMap.FormFieldTitle_company}"> -->
+						<platform-specific>
+							<html>
+								<html-template
+									location="component://hrolbius/webapp/hrolbius/ftl/OrgTree.ftl" />
+							</html>
+						</platform-specific>
+						<!-- </screenlet> -->
+					</widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="RemoveInternalOrgFtl">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template
+							location="component://hrolbius/webapp/hrolbius/ftl/removeinternalorg.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="RemoveInternalPerson">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template
+							location="component://hrolbius/webapp/hrolbius/ftl/removeinternalperson.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="mainEditEmployment">
+		<section>
+			<actions>
+				<set field="titleProperty" value="HumanResEditEmployment" />
+				<set field="headerItem" value="Employment" />
+				<set field="tabButtonItem" value="EditEmployment" />
+				<set field="fromDate" from-field="parameters.fromDate" type="Timestamp" />
+				<set field="partyId" from-field="parameters.partyId" />
+				<entity-one entity-name="Employment" value-field="employment" />
+				<property-map resource="CommonUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="hrolbiusUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="DirectoryUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="HumanResUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="RecruitmentUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/directory/getInternalOz.groovy"></script>
+				<set field="layoutSettings.companyName" from-field="uiLabelMap.hrolbiusCompanyName"
+					global="true" />
+				<set field="layoutSettings.companySubtitle" from-field="uiLabelMap.hrolbiusCompanySubtitle"
+					global="true" />
+				<set field="layoutSettings.javaScripts[]" value="/partymgr/static/partymgr.js"
+					global="true" />
+				<set field="activeApp" value="hrolbius" global="true" />
+				<set field="applicationMenuName" value="MainAppBar" global="true" />
+				<set field="applicationMenuLocation" value="component://hrolbius/widget/menus/hrolbiusMenus.xml"
+					global="true" />
+				<set field="applicationTitle" value="${uiLabelMap.hrolbiusApplication}"
+					global="true" />
+				<set field="layoutSettings.styleSheets[]" value="/images/humanres/humanres.css"
+					global="true" />
+				<set field="layoutSettings.styleSheets[]" value="/partymgr/static/partymgr.css"
+					global="true" />
+				<set field="layoutSettings.javaScripts[+0]"
+					value="/images/jquery/ui/development-bundle/external/jquery.cookie.js"
+					global="true" />
+				<set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/jsTree/jquery.jstree.js"
+					global="true" />
+			</actions>
+			<widgets>
+				<screenlet title="Thêm mới nhân viên">
+					<!-- <include-form name="EditEmployment" -->
+					<!-- location="component://hrolbius/widget/forms/EmploymentForms.xml" 
+						/> -->
+					<platform-specific>
+						<html>
+							<html-template
+								location="component://hrolbius/webapp/hrolbius/ftl/addEmployeeInernal.ftl" />
+						</html>
+					</platform-specific>
+				</screenlet>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="mainCreateOrganizationalUnit">
+		<section>
+			<condition>
+				<if-has-permission permission="HR_DIRECTORY"
+					action="_VIEW" />
+			</condition>
+			<actions>
+				<set field="titleProperty" value="PageTitleCreateOrganizationalUnit" />
+				<set field="tabButtonItem" value="viewprofile" />
+				<set field="headerItem" value="find" />
+				<set field="labelTitleProperty" value="PageTitleCreateOrganizationalUnit" />
+				<set field="donePage" from-field="parameters.DONE_PAGE"
+					default-value="viewprofile" />
+				<set field="partyId" from-field="parameters.partyId" />
+				<entity-one entity-name="PartyAndGroup" value-field="partyGroup" />
+				<set field="partyRoles" value="${groovy: com.olbius.util.SecurityUtil.getCurrentRoles(parameters.parentOrgId, delegator)}" type="List"/>
+				<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/directory/getOrgUnitLevels.groovy"></script>
+				<set field="orgUnitLevels" from-field="context.orgUnitLevels" />
+				<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/directory/getTitles.groovy"></script>
+				<set field="titles" from-field="context.titles" />
+				
+				<script
+					location="component://party/webapp/partymgr/WEB-INF/actions/party/EditContactMech.groovy" />
+				<set field="dependentForm" value="editOrganizationalUnit" />
+				<set field="paramKey" value="countryGeoId" />
+				<set field="mainId" value="countryGeoId" />
+				<set field="dependentId" value="stateProvinceGeoId" />
+				<set field="requestName" value="getAssociatedStateList" />
+				<set field="responseName" value="stateList" />
+				<set field="dependentKeyName" value="geoId" />
+				<set field="descName" value="geoName" />
+				<set field="selectedDependentOption" from-field="mechMap.postalAddress.stateProvinceGeoId"
+					default-value="_none_" />
+
+				<property-map resource="hrolbiusUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="DirectoryUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="GlobalHRSettingUiLabels"
+					map-name="uiLabelMap" global="true" />
+				<property-map resource="JobAnalysisUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="PayrollUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="PerfReviewUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="RecruitmentUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="TrainingUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="LookupUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map map-name="uiLabelMap" resource="HrCommonUiLabels" global="true"/>	
+				<property-map resource="CommonUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<set field="layoutSettings.companyName" from-field="uiLabelMap.hrolbiusCompanyName"
+					global="true" />
+				<set field="layoutSettings.companySubtitle" from-field="uiLabelMap.hrolbiusCompanySubtitle"
+					global="true" />
+				<set field="layoutSettings.javaScripts[]" value="/partymgr/static/partymgr.js"
+					global="true" />
+				<set field="activeApp" value="hrolbius" global="true" />
+				<set field="applicationMenuName" value="MainAppBar" global="true" />
+				<set field="applicationMenuLocation" value="component://hrolbius/widget/menus/hrolbiusMenus.xml"
+					global="true" />
+				<set field="applicationTitle" value="${uiLabelMap.hrolbiusApplication}"
+					global="true" />
+				<set field="layoutSettings.styleSheets[]" value="/images/humanres/humanres.css"
+					global="true" />
+				<set field="layoutSettings.styleSheets[]" value="/partymgr/static/partymgr.css"
+					global="true" />
+				<set field="layoutSettings.javaScripts[+0]"
+					value="/images/jquery/ui/development-bundle/external/jquery.cookie.js"
+					global="true" />
+				<set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/jsTree/jquery.jstree.js"
+					global="true" />
+			</actions>
+
+			<widgets>
+				<screenlet title="${uiLabelMap.PageTitleCreateOrganizationalUnit}">
+					<platform-specific>
+						<html>
+							<html-template
+								location="component://common/webcommon/includes/setDependentDropdownValuesJs.ftl" />
+							<html-template
+								location="component://hrolbius/webapp/hrolbius/ftl/editOrganizationalUnit.ftl" />
+						</html>
+					</platform-specific>
+				</screenlet>
+			</widgets>
+			<fail-widgets>
+				<label style="h3">${uiLabelMap.HROlbiusViewPermissionError}</label>
+			</fail-widgets>
+		</section>
+	</screen>
+
+	<screen name="StatisticsType">
+		<section>
+			<actions>
+				<set field="titleProperty" value="CommonMain" />
+				<set field="selectedMenuItem" value="main" />
+				<set field="layoutSettings.javaScripts[+0]" value="/highcharts/assets/js/highcharts-3d.js" global="true" />
+				<set field="layoutSettings.javaScripts[+1]" value="/highcharts/assets/js/highcharts.js" global="true" />
+				<set field="layoutSettings.javaScripts[+2]" value="/highcharts/assets/js/exporting.js" global="true" />
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="HR_DASHBOARD"
+									action="_VIEW" />
+							</condition>
+							<widgets>
+								<screenlet title="${uiLabelMap.CommonMain}">
+									<container style="row-fluid margin-top10">
+										<include-screen name="EmployeeStatChart" />
+										<include-screen name="PersonnelChangeChart" />
+									</container>
+								</screenlet>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="EmployeeStatChart">
+		<section>
+			<condition>
+				<if-empty field="parameters.emplChartType" />
+			</condition>
+			<actions>
+				<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/dashboard/EmployeeStat.groovy" />
+				<set field="femaleNumber" from-field="model.F" />
+				<set field="maleNumber" from-field="model.M" />
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template
+							location="component://hrolbius/webapp/hrolbius/ftl/EmployeeStatisticsType.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+			<fail-widgets>
+				<section>
+					<condition>
+						<if-compare operator="equals" field="parameters.emplChartType"
+							value="1" />
+					</condition>
+					<actions>
+						<property-map resource="DashBoardUiLabels" map-name="uiLabelMap"
+							global="true" />
+						<script
+							location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/dashboard/EmployeeStat.groovy" />
+						<set field="femaleNumber" from-field="model.F" />
+						<set field="maleNumber" from-field="model.M" />
+					</actions>
+					<widgets>
+						<platform-specific>
+							<html>
+								<html-template
+									location="component://hrolbius/webapp/hrolbius/ftl/GenderChart.ftl" />
+							</html>
+						</platform-specific>
+					</widgets>
+					<fail-widgets>
+						<section>
+							<condition>
+								<if-compare operator="equals" field="parameters.emplChartType"
+									value="2" />
+							</condition>
+							<actions>
+								<property-map resource="DashBoardUiLabels" map-name="uiLabelMap"
+									global="true" />
+								<script
+									location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/dashboard/EmployeeStat.groovy" />
+								<set field="formalAgreement" from-field="model.formalAgreement" />
+								<set field="probAgreement" from-field="model.probAgreement" />
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template
+											location="component://hrolbius/webapp/hrolbius/ftl/AgreementChart.ftl" />
+									</html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<section>
+									<condition>
+										<if-compare operator="equals" field="parameters.emplChartType"
+										value="3" />
+									</condition>
+									<actions>
+										<property-map resource="DashBoardUiLabels" map-name="uiLabelMap"
+											global="true" />
+										<script
+											location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/dashboard/EmployeeStat.groovy" />
+										<set field="masterDegree" from-field="model.masterDegree" />
+										<set field="uniDegree" from-field="model.uniDegree" />
+										<set field="collegeDegree" from-field="model.collegeDegree" />
+										<set field="intermediateDegree" from-field="model.intermediateDegree" />
+										<set field="secondaryDegree" from-field="model.secondaryDegree" />
+										<set field="baseDegree" from-field="model.baseDegree" />
+									</actions>
+									<widgets>
+										<platform-specific>
+											<html>
+												<html-template
+													location="component://hrolbius/webapp/hrolbius/ftl/QualificationChart.ftl" />
+											</html>
+										</platform-specific>
+									</widgets>
+								</section>
+							</fail-widgets>
+						</section>
+					</fail-widgets>
+				</section>
+			</fail-widgets>
+		</section>
+	</screen>
+
+	<screen name="PersonnelChangeChart">
+		<section>
+			<condition>
+				<if-empty field="parameters.personnelChartType" />
+			</condition>
+			<actions>
+				<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/dashboard/PersonnelStat.groovy" />
+				<set field="y2010" from-field="model.y2010" />
+				<set field="y2011" from-field="model.y2011" />
+				<set field="y2012" from-field="model.y2012" />
+				<set field="y2013" from-field="model.y2013" />
+				<set field="y2014" from-field="model.y2014" />
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template
+							location="component://hrolbius/webapp/hrolbius/ftl/PersonnelStatisticsType.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+
+	<screen name="FindEmployeesDirectory">
+		<section>
+			<actions>
+				<property-map resource="PartyUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="HumanResUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="hrolbiusUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="DirectoryUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="GlobalHRSettingUiLabels"
+					map-name="uiLabelMap" global="true" />
+				<property-map resource="JobAnalysisUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="PayrollUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="PerfReviewUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="RecruitmentUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="TrainingUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="LookupUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="DashBoardUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="CommonUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map map-name="uiLabelMap" resource="EmployeeUiLabels"
+					global="true" />
+				<property-map map-name="uiLabelMap" resource="EmploymentUiLabels"
+					global="true" />
+
+				<set field="layoutSettings.companyName" from-field="uiLabelMap.hrolbiusCompanyName"
+					global="true" />
+				<set field="layoutSettings.companySubtitle" from-field="uiLabelMap.hrolbiusCompanySubtitle"
+					global="true" />
+				<set field="layoutSettings.javaScripts[]" value="/partymgr/static/partymgr.js"
+					global="true" />
+				<set field="activeApp" value="hrolbius" global="true" />
+				<set field="applicationMenuName" value="MainAppBar" global="true" />
+				<set field="applicationMenuLocation" value="component://hrolbius/widget/menu/hrolbiusMenus.xml"
+					global="true" />
+				<set field="applicationTitle" value="${uiLabelMap.hrolbiusApplication}"
+					global="true" />
+				<set field="layoutSettings.javaScripts[+0]"
+					value="/images/jquery/ui/development-bundle/external/jquery.cookie.js"
+					global="true" />
+				<set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/jsTree/jquery.jstree.js"
+					global="true" />
+				<set field="layoutSettings.javaScripts[+01]" value="/aceadmin/jqw/jqwidgets/jqxcore.js"
+					global="true" />
+				<set field="layoutSettings.javaScripts[+02]" value="/aceadmin/jqw/jqwidgets/jqxbuttons.js"
+					global="true" />
+				<set field="layoutSettings.javaScripts[+03]" value="/aceadmin/jqw/jqwidgets/jqxscrollbar.js"
+					global="true" />
+				<set field="layoutSettings.javaScripts[+04]" value="/aceadmin/jqw/jqwidgets/jqxsplitter.js"
+					global="true" />
+				<set field="layoutSettings.javaScripts[+05]" value="/aceadmin/jqw/jqwidgets/jqxlistbox.js"
+					global="true" />
+				<set field="layoutSettings.javaScripts[+06]" value="/aceadmin/jqw/jqwidgets/jqxdata.js"
+					global="true" />
+				<set field="layoutSettings.javaScripts[+07]" value="/aceadmin/jqw/jqwidgets/jqxcombobox.js"
+					global="true" />
+				<!-- <set field="layoutSettings.javaScripts[+08]" value="/jqwidgets/scripts/demos.js"
+					global="true" /> -->
+				<set field="layoutSettings.styleSheets[+0]" value="/aceadmin/jqw/jqwidgets/styles/jqx.base.css"
+					global="true" />
+				<set field="layoutSettings.javaScripts[+03]" value="/highcharts/assets/js/exporting.js"
+					global="true" />
+				<set field="layoutSettings.javaScripts[+02]" value="/highcharts/assets/js/highcharts-3d.js"
+					global="true" />
+				<set field="layoutSettings.javaScripts[+01]" value="/highcharts/assets/js/highcharts.js"
+					global="true" />
+			</actions>
+			<widgets>
+				<decorator-screen name="FindScreenDecorator"
+					location="component://common/widget/CommonScreens.xml">
+					<decorator-section name="search-options">
+						<platform-specific>
+							<html>
+								<html-template
+									location="component://hrolbius/webapp/hrolbius/ftl/findEmployeeNoOption.ftl" />
+							</html>
+						</platform-specific>
+					</decorator-section>
+					<decorator-section name="search-results">
+						<platform-specific>
+							<html>
+								<html-template
+									location="component://hrolbius/webapp/hrolbius/ftl/findEmployee.ftl" />
+							</html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+
+			</widgets>
+		</section>
+	</screen>
+</screens>

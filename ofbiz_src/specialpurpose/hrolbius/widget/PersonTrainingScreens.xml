@@ -1,0 +1,1144 @@
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	<screen name="TrainingCalendarWithDecorator">
+		<section>
+			<actions>
+				<set field="tabButtonItem" value="TrainingCalendar" />
+				<set field="titleProperty" value="PageTitleFindTrainingCalendar" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTrainingDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<include-screen name="TrainingCalendar" />
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="TrainingCalendar">
+
+        <section>
+            <actions>
+                <set field="parameters.period" from-field="parameters.period" default-value="${initialView}"/>
+            </actions>
+            <widgets>
+                <section>
+                    <condition>
+                        <if-compare field="parameters.period" operator="equals" value="day"/>
+                    </condition>
+                    <actions>
+                        <set field="titleProperty" value="PageTitleCalendarDay"/>
+                        <set field="tabButtonItem" value="day"/>
+                        <script location="component://workeffort/webapp/workeffort/WEB-INF/actions/calendar/Days.groovy"/>
+                    </actions>
+                    <widgets>
+                        <screenlet title="${uiLabelMap.WorkEffortDayView}: ${bsh:org.ofbiz.base.util.UtilDateTime.timeStampToString(start, &quot;EEEE MMMM d, yyyy&quot;, timeZone, locale)}" navigation-menu-name="Day" icon-style="icon-calendar">
+                            <include-menu name="Day" location="component://workeffort/widget/WorkEffortMenus.xml"/>
+                            <include-screen name="trainingCalendarDetail"/>
+                            <platform-specific>
+                                <html><html-template location="component://workeffort/webapp/workeffort/calendar/day.ftl"/></html>
+                            </platform-specific>
+                        </screenlet>
+                    </widgets>
+                </section>
+                <section>
+                    <condition>
+                        <or>
+                            <if-compare field="parameters.period" operator="equals" value="week"/>
+                            <if-empty field="parameters.period"/>
+                        </or>
+                    </condition>
+                    <actions>
+                        <script location="component://workeffort/webapp/workeffort/WEB-INF/actions/calendar/Week.groovy"/>
+                    </actions>
+                    <widgets>
+                        <screenlet title="${uiLabelMap.WorkEffortWeekView}: ${uiLabelMap.CommonWeek} ${bsh:org.ofbiz.base.util.UtilDateTime.timeStampToString(start, &quot;w&quot;, timeZone, locale)}" navigation-menu-name="Week" icon-style="icon-calendar">
+                            <include-menu name="Week" location="component://workeffort/widget/WorkEffortMenus.xml"/>
+                            <include-screen name="trainingCalendarDetail"/>
+                            <platform-specific>
+                                <html><html-template location="component://workeffort/webapp/workeffort/calendar/week.ftl"/></html>
+                            </platform-specific>
+                        </screenlet>
+                    </widgets>
+                </section>
+                <section>
+                    <condition>
+                        <if-compare field="parameters.period" operator="equals" value="month"/>
+                    </condition>
+                    <actions>
+                        <script location="component://workeffort/webapp/workeffort/WEB-INF/actions/calendar/Month.groovy"/>
+                    </actions>
+                    <widgets>
+                        <screenlet title="${uiLabelMap.WorkEffortMonthView}: ${bsh:org.ofbiz.base.util.UtilDateTime.timeStampToString(start, &quot;MMMM yyyy&quot;, timeZone, locale)}" navigation-menu-name="Month" icon-style="icon-calendar">
+                            <include-menu name="Month" location="component://workeffort/widget/WorkEffortMenus.xml"/>
+                            <include-screen name="trainingCalendarDetail"/>
+                            <platform-specific>
+                                <html><html-template location="component://workeffort/webapp/workeffort/calendar/month.ftl"/></html>
+                            </platform-specific>
+                        </screenlet>
+                    </widgets>
+                </section>
+                <section>
+                    <condition>
+                        <if-compare field="parameters.period" operator="equals" value="upcoming"/>
+                    </condition>
+                    <actions>
+                        <script location="component://workeffort/webapp/workeffort/WEB-INF/actions/calendar/Upcoming.groovy"/>
+                    </actions>
+                    <widgets>
+                        <screenlet title="${uiLabelMap.WorkEffortCalendarUpComingEventsView}" navigation-menu-name="Upcoming" icon-style="icon-calendar">
+                            <include-menu name="Upcoming" location="component://workeffort/widget/WorkEffortMenus.xml"/>
+                            <platform-specific>
+                                <html><html-template location="component://workeffort/webapp/workeffort/calendar/upcoming.ftl"/></html>
+                            </platform-specific>
+                        </screenlet>
+                    </widgets>
+                </section>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="trainingCalendarDetail">
+        <section>
+            <actions>
+                <entity-one entity-name="WorkEffort" value-field="workEffort"/>
+                <script location="component://workeffort/script/isCalOwner.groovy"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <set field="trainingClassTypeId" from-field="workEffort.workEffortName"/>
+                <set field="workEffortTypeId" from-field="workEffort.workEffortTypeId"/>
+                <set field="fromDate" from-field="workEffort.estimatedStartDate"/>
+                <set field="thruDate" from-field="workEffort.estimatedCompletionDate"/>
+                <set field="loginPartyId" from-field="parameters.userLogin.partyId"/>
+                <set field="approvalStatus" from-field="workEffort.status"/>
+            </actions>
+            <widgets>
+                <section>
+                    <condition>
+                        <and>
+                            <or>
+                                <and>
+                                    <not><if-empty field="workEffort"/></not>
+                                    <if-compare field="workEffort.currentStatusId" operator="not-equals" value="CAL_CANCELLED"/>
+                                </and>
+                                <if-empty field="workEffort"/>
+                                <if-has-permission permission="WORKEFFORTMGR" action="ADMIN"/>
+                            </or>
+                            <if-compare field="parameters.form" operator="equals" value="edit"/>
+                        </and>
+                    </condition>
+                    <widgets>
+                        <section>
+                            <condition>
+                                <or>
+                                    <if-compare field="isCalOwner" operator="equals" value="true" type="Boolean"/>
+                                    <if-empty field="workEffort"/>
+                                </or>
+                            </condition>
+                            <widgets><!-- edit section -->
+	                            <container style="smaller lighter blue border-bottom">
+                                  	<label style="h3" text="${uiLabelMap.WorkEffortAddCalendarEvent}"/>
+    	                        </container>
+                                <container style="lefthalf">
+                                    <include-form name="editTrainingCalendar" location="component://hrolbius/widget/forms/PersonTrainingForms.xml"/>
+                                </container>
+                                <container style="smaller lighter blue border-bottom">
+                                    <label style="h3" text="${uiLabelMap.WorkEffortParticipants}"/>
+                                    </container>
+                                <container style="righthalf">
+                                    <include-form name="ListTrainingParticipants" location="component://hrolbius/widget/forms/PersonTrainingForms.xml"/>
+                                    <section>
+                                        <condition>
+                                            <and>
+                                                <not><if-empty field="workEffort"/></not>
+                                                <if-compare field="workEffortTypeId" operator="not-equals" value="WES_PUBLIC"/>
+                                            </and>
+                                        </condition>
+                                        <widgets>
+                                            <container>
+                                                <label/>
+                                                <include-form name="AssignTraining" location="component://hrolbius/widget/forms/PersonTrainingForms.xml"/>
+                                            </container>
+                                        </widgets>
+                                    </section>
+                                </container>
+                            </widgets>
+                            <fail-widgets><!-- view section -->
+                                <container style="lefthalf">
+                                    <label style="h1" text="${uiLabelMap.WorkEffortSummary}"/>
+                                    <include-form name="showTrainingCalendar" location="component://hrolbius/widget/forms/PersonTrainingForms.xml"/>
+                                </container>
+                            </fail-widgets>
+                        </section>                
+                    </widgets>            
+                </section>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="FindTrainingApprovals">
+        <section>
+            <actions>
+            	<set field="navMenuName" value="FindTrainingApprovalsSubTabBar"/>
+				<set field="navMenuLocation" value="component://hrolbius/widget/menus/hrolbiusMenus.xml"/>
+                <set field="tabButtonItem" value="FindTrainingApprovals"/>
+                <set field="titleProperty" value="PageTitleFindTrainingApprovals"/>
+                <service service-name="hrGenericPermission" result-map="permResult">
+                    <field-map field-name="mainAction" value="ADMIN"/>
+                </service>
+                <set field="hasAdminPermission" from-field="permResult.hasPermission"/>
+                <set field="loginPartyId" from-field="parameters.userLogin.partyId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonTrainingDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="search-options">
+                                <include-form name="FindTrainingApprovals" location="component://hrolbius/widget/forms/PersonTrainingForms.xml"/>
+                            </decorator-section>
+                            <decorator-section name="search-results">
+                                <include-form name="ListTrainingApprovals" location="component://hrolbius/widget/forms/PersonTrainingForms.xml"/>
+                            </decorator-section>
+                        </decorator-screen>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="EditTrainingApprovals">
+       <section>
+           <actions>
+               <set field="tabButtonItem" value="FindTrainingApprovals"/>
+               <set field="partyId" from-field="parameters.partyId"/>
+               <set field="trainingClassTypeId" from-field="parameters.trainingClassTypeId"/>
+               <set field="fromDate" from-field="parameters.fromDate"/>
+               <entity-one entity-name="PersonTraining" value-field="personTraining"/>
+           </actions>
+               <widgets>
+                   <decorator-screen name="CommonTrainingDecorator" location="${parameters.mainDecoratorLocation}">
+                       <decorator-section name="body">
+                           <screenlet id="EditTrainingApprovals" title="${uiLabelMap.CommonEdit} ${uiLabelMap.HROlbiusTrainingApprovals}" collapsible="true" icon-style="icon-edit">
+                               <include-form name="EditTrainingApprovals" location="component://hrolbius/widget/forms/PersonTrainingForms.xml"/>
+                           </screenlet>
+                       </decorator-section>
+                   </decorator-screen>
+               </widgets>
+       </section>
+     </screen>
+     <!-- Propose Training -->
+     <screen name="ProposeTraining">
+     	<section>
+     		<actions>
+     			<set field="selectedMenuItem" value="training"/>
+     			<set field="navMenuName" value="CreateTrainingProposal"/>
+				<set field="navMenuLocation" value="component://hrolbius/widget/menus/TrainingPlanMenus.xml"/>
+     			<set field="tabButtonItem" value="ProposeTraining"/>
+     			<set field="tabSubButtonItem" value="FindProposeTraining"/>
+     			<set field="titleProperty" value="HROlbiusApprovalSearchProposeTraining"/>
+     			<set field="partyId" from-field="parameters.partyId"/>
+     		</actions>
+     		<widgets>
+     			<decorator-screen name="CommonTrainingDecorator" location="${parameters.mainDecoratorLocation}">
+     				<decorator-section name="body">
+     					<decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+	                      <decorator-section name="search-options">
+	                   		<include-form location="component://hrolbius/widget/forms/PersonTrainingForms.xml" name="FindProposeTraining"/>
+	     				</decorator-section> 
+	     				<decorator-section name="search-results">
+                                <include-form  location="component://hrolbius/widget/forms/PersonTrainingForms.xml" name="ListProposeTraining" />
+                          </decorator-section>
+     				</decorator-screen>	
+     				</decorator-section>
+     			</decorator-screen>
+     		</widgets>
+     	</section>
+     </screen>
+     
+      <screen name="CreateTrainingProposal">
+     	<section>
+     		<actions>
+     			<set field="selectedMenuItem" value="training"/>
+     			<set field="tabButtonItem" value="ProposeTraining"/>
+     			<set field="tabSubButtonItem" value="CreateTrainingProposal"/>
+     			<set field="titleProperty" value="HROlbiusApprovalProposeTraining"/>
+     			<set field="userLogin" from-field="parameters.userLogin"/>
+     			<set field="partyId" value="${userLogin.partyId}"></set>
+     			<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/util/getDeptName.groovy" />
+			</actions>
+			
+     		<widgets>
+     			<decorator-screen name="CommonTrainingDecorator" location="${parameters.mainDecoratorLocation}">
+     				<decorator-section name="body">
+     					<section>
+     						<condition>
+								<if-has-permission permission="HR_PROP_TRAINING" action="_CREATE"/>
+							</condition>
+     						<widgets>
+     							<screenlet title="${uiLabelMap.HROlbiusCreateProposeTraining} [${internalOrgName}]">
+     								<include-form location="component://hrolbius/widget/forms/PersonTrainingForms.xml" name="CreateTrainingProposal"/>
+     							</screenlet>
+     							<platform-specific>
+     								<html>
+     									<html-template location="component://hrolbius/webapp/hrolbius/ftl/validate/ProposeTrainingValidate.ftl"/>
+     								</html>
+     							</platform-specific>
+     						</widgets>
+     					<fail-widgets>
+							<label style="h3">${uiLabelMap.HROlbiusViewPermissionError}
+							</label>
+						</fail-widgets>
+     					</section>
+     				</decorator-section>
+     			</decorator-screen>
+     		</widgets>
+     		
+     	</section>
+     </screen>
+     
+    <screen name="LookupTrainingProposal">
+			<section>
+				<actions>
+			        <property-map resource="TrainingUiLabels" map-name="uiLabelMap" global="true"/>
+			        <property-map map-name="uiLabelMap" resource="CommonUiLabels"/>
+		                <set field="title" value="${uiLabelMap.HROlbiusProposeTrainingId}"/>
+		                <script location="component://party/webapp/partymgr/WEB-INF/actions/party/StatusCondition.groovy"/>
+				</actions>
+				<widgets>
+						<decorator-screen name="LookupDecorator"
+							location="component://common/widget/CommonScreens.xml">
+							<decorator-section name="search-options">
+								<include-form name="LookupTrainingProposal"
+									location="component://hrolbius/widget/forms/PersonTrainingForms.xml" />
+							</decorator-section>
+							<decorator-section name="search-results">
+								<include-form name="ListTrainingProposal"
+									location="component://hrolbius/widget/forms/PersonTrainingForms.xml" />
+							</decorator-section>
+						</decorator-screen>
+				</widgets>
+		</section>
+	</screen>
+
+	<screen name="CheckProposeTraining">
+		<section>
+			<actions>
+				<set field="tabButtonItem" value="HROlbiusCheckProposeTraining" />
+				<set field="titleProperty" value="HROlbiusCheckProposeTraining" />
+				<set field="userLogin" from-field="parameters.userLogin" />
+				<set field="checkPropose" from-field="parameters.checkPropose" />
+				<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/util/getHeadOfCom.groovy" />
+				<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/util/getDeptName.groovy" />
+				<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/trainingplan/getListPropose.groovy" />
+				<set field="ntfId" from-field="parameters.ntfId"/>
+				<set field="targetLink" value="HdId=${parameters.HdId};HrId=${parameters.HrId};ppId=${parameters.ppId}"/>
+				<set field="header" value="Phê duyệt đề xuất đào tạo [${internalOrgName}]"/>
+				<set field="notiToId" value="${ceoId}"/>
+				<set field="returnId" value="${parameters.HdId}"/>
+			</actions>
+			
+			<widgets>
+				<decorator-screen name="CommonTrainingDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+					<section>
+						<condition>
+							<if-has-permission permission="HR_PROP_TRAINING" action="_CHECK"/>
+						</condition>
+						<widgets>
+							<screenlet title="${uiLabelMap.HROlbiusCheckProposeTraining} [${internalOrgName}]">
+								<include-form
+									location="component://hrolbius/widget/forms/PersonTrainingForms.xml"
+									name="CheckProposeTraining" />
+							</screenlet>
+						</widgets>
+						<fail-widgets>
+							<label style="h3">${uiLabelMap.HROlbiusViewPermissionError}
+							</label>
+						</fail-widgets>
+					</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ListTrainingApprovalResult">
+		<section>
+			<actions>
+				<set field="tabButtonItem" value="HROlbiusCheckProposeTraining" />
+				<set field="titleProperty" value="HROlbiusCheckProposeTraining" />
+				<set field="userLogin" from-field="parameters.userLogin" />
+				<set field="ppId" from-field="parameters.ppId"></set>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTrainingDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<screenlet title="${uiLabelMap.ResultsProposeApprove} [${ppId}]" >
+							<include-form
+								location="component://hrolbius/widget/forms/PersonTrainingForms.xml"
+								name="ListTrainingApprovalResult" />
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="ApprovalsProposeTraining">
+		<section>
+			<actions>
+				<set field="tabButtonItem" value="HROlbiusApprovalProposeTraining" />
+				<set field="titleProperty" value="HROlbiusApprovalProposeTraining" />
+				<set field="userLogin" from-field="parameters.userLogin" />
+				<set field="ntfId" from-field="parameters.ntfId"/>
+				<set field="managerId1" from-field="parameters.HdId"/>
+				<set field="managerId2" from-field="parameters.HrId"/>
+				<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/util/getHeadOfHr.groovy" />
+				<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/util/getDeptName.groovy" />
+				<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/trainingplan/getListPropose.groovy" />
+<!-- 				<script -->
+<!-- 					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/trainingplan/getManager.groovy" /> -->
+				<set field="approvalCheck" from-field="parameters.approvalCheck" />
+				<set field="header" value="Kết quả phê duyệt đề xuất đào tạo [${internalOrgName}]"/>
+				<set field="targetLink" value="HdId=${managerId1};HrId=${managerId2}"/>
+				<set field="ntfId" from-field="parameters.ntfId"/>
+				<set field="notiToId1" value="${managerId1}"/>
+				<set field="notiToId2" value="${managerId2}"/>
+				
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTrainingDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="HR_PROP_TRAINING" action="_APPR"/>
+							</condition>
+							<widgets>
+								<screenlet title="${uiLabelMap.HROlbiusApprovalProposeTraining} ">
+									<include-form
+										location="component://hrolbius/widget/forms/PersonTrainingForms.xml"
+										name="ApprovalsProposeTraining" />
+								</screenlet>
+							</widgets>
+							<fail-widgets>
+								<label style="h3">${uiLabelMap.HROlbiusViewPermissionError}
+								</label>
+							</fail-widgets>
+						</section>
+						
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="proposeTraining">
+		<section>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="NotificationUiLabels" />
+				<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/util/PrtUtil.groovy" />
+				<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/util/DateUtil.groovy" />
+				<set field="userLogin" from-field="parameters.userLogin" />
+				<set field="tabButtonItem" value="ProposeTraining" />
+				<set field="titleProperty" value="PageTitleFindTrainingCalendar" />
+				<set field="ApproveTrainingPlanNtfHeader" from-field="uiLabelMap.ApproveTrainingPlanNtfHeader" />
+				<set field="header" value="${ApproveTrainingPlanNtfHeader}" />
+				<set field="action" value="ApproveTrainingPlan" />
+				<set field="state" value="open" />
+				<set field="partyId" value="${ceoId}" />
+				<set field="dateTime" value="${currentTime}" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTrainingDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="HR_TRAINING_PLAN"
+									action="_PROPOSE" />
+							</condition>
+							<widgets>
+								<screenlet title="${uiLabelMap.ProposeTrainingPlan}">
+									<container id="table-container">
+										<include-form name="proposeTraining"
+											location="component://hrolbius/widget/forms/PersonTrainingForms.xml" />
+									</container>
+								</screenlet>
+							</widgets>
+							<fail-widgets>
+								<label style="h3">${uiLabelMap.HROlbiusViewPermissionError}
+								</label>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<!-- End -->
+
+	<!-- Rating Results Training -->
+	
+	<screen name="FindTrainingClass">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="training"/>
+				<set field="tabButtonItem" value="TrainingAndRatingTraining"/>
+				<set field="tabSubButtonItem" value="FindTrainingClass"/>
+				<set field="navMenuName" value="CreateTrainingClass"/>
+				<set field="navMenuLocation" value="component://hrolbius/widget/menus/TrainingPlanMenus.xml"/>
+				<set field="titleProperty" value="HRolbiusTrainingClassList" />
+				<set field="partyId" from-field="parameters.partyId" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTrainingDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+					<label text="${groupNameLogin}"></label>
+					<section>
+						<condition>
+							<if-has-permission permission="HR_TRAINING_RATING"
+								action="_VIEW" />
+						</condition>
+						<widgets>
+						<decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+	                      <decorator-section name="search-options">
+		                      <include-form
+									location="component://hrolbius/widget/forms/PersonTrainingForms.xml"
+									name="FindTrainingClass" />
+	     				</decorator-section> 
+	     				<decorator-section name="search-results">
+                         	<include-form
+								location="component://hrolbius/widget/forms/PersonTrainingForms.xml"
+								name="ListTrainingClass" />
+                         
+                         </decorator-section>
+     				</decorator-screen>
+						
+<!-- 						<screenlet title="${uiLabelMap.HRolbiusTrainingClass}" navigation-menu-name="CreateTrainingClass"> -->
+<!-- 							<include-menu location="component://hrolbius/widget/menu/TrainingPlanMenus.xml" name="CreateTrainingClass"/> -->
+							
+<!-- 						</screenlet> -->
+<!-- 						<screenlet title="${uiLabelMap.HRolbiusTrainingClass}"> -->
+							
+<!-- 						</screenlet> -->
+						
+						</widgets>	
+						<fail-widgets>
+							<label style="h3">${uiLabelMap.HROlbiusViewPermissionError}
+								</label>
+						</fail-widgets>
+					</section>	
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	
+	<screen name="EditTrainingClass">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="training"/>
+				<set field="tabButtonItem" value="TrainingAndRatingTraining"/>
+				<set field="tabSubButtonItem" value="FindTrainingClass"/>
+				<set field="titleProperty" value="HRolbiusTrainingClass" />
+				<set field="partyId" from-field="parameters.partyId" />
+				<set field="trainingClassId" from-field="parameters.trainingClassId" />
+				<set field="fromDate" from-field="parameters.fromDate" />
+				<set field="thruDate" from-field="parameters.thruDate" />
+				<entity-one entity-name="TrainingClass" value-field="trainingClass">
+   					<field-map field-name="trainingClassId" value="${trainingClassId}"/>
+   					<field-map field-name="fromDate" value="${fromDate}"/>
+   					<field-map field-name="thruDate" value="${thruDate}"/>
+   				</entity-one>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTrainingDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+					<section>
+						<condition>
+							<if-has-permission permission="HR_TRAINING_CLASS"
+								action="_CREATE" />
+						</condition>
+						<widgets>
+							<section>
+								<condition>
+									<if-empty field="trainingClassId"/>
+								</condition>
+								<widgets>
+									<screenlet title="${uiLabelMap.HRolbiusCreateTrainingClass}" navigation-menu-name="TrainingClassMenu">
+										<include-menu location="component://hrolbius/widget/menus/hrolbiusMenus.xml" name="TrainingClassMenu"/>
+										<include-form
+										location="component://hrolbius/widget/forms/PersonTrainingForms.xml"
+										name="EditTrainingClass" />
+									</screenlet>
+									
+									<platform-specific>
+										<html>
+											<html-template location="component://hrolbius/webapp/hrolbius/ftl/validate/EditTrainingClassValidate.ftl"/>
+										</html>
+									</platform-specific>
+								</widgets>
+								<fail-widgets>
+									<screenlet title="${uiLabelMap.HRolbiusEditTrainingClass}" navigation-menu-name="TrainingClassMenu">
+										<include-menu location="component://hrolbius/widget/menus/hrolbiusMenus.xml" name="TrainingClassMenu"/>
+										<include-form
+										location="component://hrolbius/widget/forms/PersonTrainingForms.xml"
+										name="EditTrainingClass" />
+									</screenlet>
+									<platform-specific>
+										<html>
+											<html-template location="component://hrolbius/webapp/hrolbius/ftl/validate/EditTrainingClassValidate.ftl"/>
+										</html>
+									</platform-specific>
+								</fail-widgets>
+							</section>
+						</widgets>	
+						<fail-widgets>
+							<label style="h3">${uiLabelMap.HROlbiusViewPermissionError}
+								</label>
+						</fail-widgets>
+					</section>	
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="RatingTraining">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="training"/>
+				<set field="tabButtonItem" value="TrainingAndRatingTraining"/>
+				<set field="tabSubButtonItem" value="RatingTraining"/>
+				<property-map map-name="uiLabelMap" resource="TrainingUiLabels" />
+				<set field="titleProperty" value="HRolbiusTrainingClass" />
+				<set field="partyId" from-field="parameters.partyId" />
+				<script 
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/trainingplan/getListTrainingClass.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTrainingDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="HR_TRAINING" action="_RATING"/>
+							</condition>
+						<widgets>
+						<screenlet title="${uiLabelMap.HRolbiusRatingTrainingResults} ${listEmplRequest}">
+							<include-form
+								location="component://hrolbius/widget/forms/PersonTrainingForms.xml"
+								name="searchTrainingClass" />
+						</screenlet>
+						<screenlet title="${uiLabelMap.HRolbiusTrainingResults}">
+							<include-form
+								location="component://hrolbius/widget/forms/PersonTrainingForms.xml"
+								name="RatingTraining" />
+						</screenlet>
+						</widgets>
+						<fail-widgets>
+							<label style="h3">${uiLabelMap.HROlbiusViewPermissionError}
+								</label>
+						
+						</fail-widgets>					
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ResultsRatingTraining">
+		<section>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="TrainingUiLabels" />
+				<set field="titleProperty" value="HRolbiusTrainingClass" />
+				<set field="partyId" from-field="parameters.partyId" />
+				<set field="emplId" from-field="parameters.emplId"/>
+				<script 
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/trainingplan/getListTrainingClass.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTrainingDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+<!-- 							<condition> -->
+<!-- 								<if-has-permission permission="HR_TRAINING" action="_RATING"/> -->
+<!-- 							</condition> -->
+						<widgets>
+						<screenlet title="${uiLabelMap.HRolbiusRatingTrainingResults}">
+							<include-form
+								location="component://hrolbius/widget/forms/PersonTrainingForms.xml"
+								name="ResultsRatingTraining" />
+						</screenlet>
+						</widgets>
+						<fail-widgets>
+							<label style="h3">${uiLabelMap.HROlbiusViewPermissionError}
+								</label>
+						
+						</fail-widgets>					
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="ListTrainedEmpl">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="training"/>
+				<set field="tabButtonItem" value="TrainingAndRatingTraining"/>
+				<set field="tabSubButtonItem" value="ListTrainedEmpl"/>
+				<property-map map-name="uiLabelMap" resource="TrainingUiLabels" />
+				<set field="titleProperty" value="HRolbiusVotesTrainingPersonal" />
+				<set field="partyId" from-field="parameters.partyId" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTrainingDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="HR_TRAINING_VOTES" action="_VIEW"/>
+							</condition>
+						<widgets>
+						<screenlet title="${uiLabelMap.HROlbiusProposeTrainingEmployeeList}">
+						<include-form location="component://hrolbius/widget/forms/PersonTrainingForms.xml" name="ListTrainedEmpl"/>
+						</screenlet>
+						</widgets>
+						<fail-widgets>
+								<label style="h3">${uiLabelMap.HROlbiusViewPermissionError}
+									</label>
+						
+						</fail-widgets>		
+							</section>
+     				</decorator-section>
+     			</decorator-screen>
+     		</widgets>
+     	</section>
+     </screen>
+     
+     
+     <screen name="EditResultsTraining">
+		<section>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="TrainingUiLabels" />
+				<set field="titleProperty" value="HROlbiusResultsTrainingApproval" />
+				<set field="userLogin" from-field="parameters.userLogin" />
+				<set field="partyId" from-field="parameters.partyId"/>
+				<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/trainingplan/getListTrainingPersonalVotes.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTrainingDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+					<section>
+<!-- 						<condition> -->
+<!-- 							<if-has-permission permission="HR_TRAINING_VOTES" action="_UPDATE"/> -->
+<!-- 						</condition> -->
+						<widgets>
+						<screenlet title="${uiLabelMap.HROlbiusEditResultsTraining}">
+							<include-form
+								location="component://hrolbius/widget/forms/PersonTrainingForms.xml"
+								name="EditResultsTraining" />
+						</screenlet>
+						</widgets>
+<!-- 						<fail-widgets> -->
+<!-- 								<label style="h3">${uiLabelMap.HROlbiusViewPermissionError} -->
+<!-- 								</label> -->
+<!-- 						</fail-widgets>		 -->
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	 <screen name="ViewResultsTraining">
+		<section>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="TrainingUiLabels" />
+				<set field="titleProperty" value="HRolbiusEditVotesTrainingPersonal" />
+				<set field="userLogin" from-field="parameters.userLogin" />
+				<set field="partyId" from-field="parameters.employeeId"/>
+				<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/trainingplan/getListTrainingPersonalVotes.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTrainingDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+					<section>
+<!-- 						<condition> -->
+<!-- 							<if-has-permission permission="HR_TRAINING_VOTES" action="_UPDATE"/> -->
+<!-- 						</condition> -->
+						<widgets>
+						<screenlet title="${uiLabelMap.HROlbiusResultsTraining}" >
+							<include-form
+								location="component://hrolbius/widget/forms/PersonTrainingForms.xml"
+								name="ResultsTraining" />
+						</screenlet>
+						</widgets>
+<!-- 						<fail-widgets> -->
+<!-- 								<label style="h3">${uiLabelMap.HROlbiusViewPermissionError} -->
+<!-- 								</label> -->
+<!-- 						</fail-widgets>		 -->
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EditVotesTrainingPersonal">
+		<section>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="TrainingUiLabels" />
+				<set field="titleProperty" value="HRolbiusEditVotesTrainingPersonal" />
+				<set field="userLogin" from-field="parameters.userLogin" />
+				<set field="partyId" from-field="parameters.partyId"/>
+				<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/trainingplan/getListTrainingPersonalVotes.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTrainingDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+					<section>
+						<condition>
+							<if-has-permission permission="HR_TRAINING_VOTES" action="_UPDATE"/>
+						</condition>
+						<widgets>
+						<screenlet title="${uiLabelMap.HRolbiusEditVotesTrainingPersonal} [${fullName}]">
+							<!-- <include-form location="component://hrolbius/widget/forms/PersonTrainingForms.xml" 
+								name="searchTrainingClass"/> -->
+						</screenlet>
+						<screenlet title="${uiLabelMap.HROlbiusInprocessTraining}">
+							<include-form
+								location="component://hrolbius/widget/forms/PersonTrainingForms.xml"
+								name="EditVotesTrainingPersonal" />
+						</screenlet>
+						</widgets>
+						<fail-widgets>
+								<label style="h3">${uiLabelMap.HROlbiusViewPermissionError}
+								</label>
+						</fail-widgets>		
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<!-- -->
+	<screen name="FindTrainingStatus">
+		<section>
+			<actions>
+				<set field="tabButtonItem" value="FindTrainingStatus" />
+				<set field="titleProperty" value="PageTitleFindTrainingStatus" />
+				<service service-name="hrGenericPermission" result-map="permResult">
+					<field-map field-name="mainAction" value="ADMIN" />
+				</service>
+				<set field="hasAdminPermission" from-field="permResult.hasPermission" />
+				<set field="loginPartyId" from-field="parameters.userLogin.partyId" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTrainingDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<decorator-screen name="FindScreenDecorator"
+							location="component://common/widget/CommonScreens.xml">
+							<decorator-section name="search-options">
+								<include-form name="FindTrainingStatus"
+									location="component://hrolbius/widget/forms/PersonTrainingForms.xml" />
+							</decorator-section>
+							<decorator-section name="search-results">
+								<include-form name="ListTrainingStatus"
+									location="component://hrolbius/widget/forms/PersonTrainingForms.xml" />
+							</decorator-section>
+						</decorator-screen>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ListTrainingStatus">
+		<section>
+			<actions>
+				<set field="tabButtonItem" value="EditPersonTrainings" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonPartyDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<screenlet id="TrainingStatus" title="${uiLabelMap.HROlbiusTrainingStatus}"
+							collapsible="true" icon-style="icon-table">
+							<include-form name="ListTrainingStatus"
+								location="component://hrolbius/widget/forms/PersonTrainingForms.xml" />
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="FindTrainingPlan">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="training"/>
+				<set field="navMenuName" value="FindTrainingPlanTabBar" />
+				<set field="navMenuLocation" value="component://hrolbius/widget/menus/hrolbiusMenus.xml" />
+				<set field="userLogin" from-field="parameters.userLogin" />
+				<set field="tabButtonItem" value="TrainingPlan" />
+				<set field="tabSubButtonItem" value="FindTrainingPlan" />
+				<set field="titleProperty" value="TrainingPlanList" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTrainingDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<decorator-screen name="FindScreenDecorator"
+							location="component://common/widget/CommonScreens.xml">
+							<decorator-section name="search-options">
+								<include-form name="FindTrainingPlan"
+									location="component://hrolbius/widget/forms/PersonTrainingForms.xml" />
+							</decorator-section>
+							<decorator-section name="search-results">
+								<include-form name="ListTrainingPlan"
+									location="component://hrolbius/widget/forms/PersonTrainingForms.xml" />
+							</decorator-section>
+						</decorator-screen>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+
+	<screen name="CreateTrainingPlan">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="training"/>
+				<set field="tabButtonItem" value="TrainingPlan" />
+				<set field="tabSubButtonItem" value="CreateTraningPlan" />
+				<property-map resource="TrainingUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<set field="userLogin" from-field="parameters.userLogin" />
+				<set field="titleProperty" value="HROlbiusCreateTrainingPlan" />
+				<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/util/getDeptName.groovy" />
+				<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/util/getHeadOfHr.groovy" />
+				<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/util/DateUtil.groovy" />
+				<set field="CheckTrainingPlanNtfHeader" from-field="uiLabelMap.CheckTrainingPlanNtfHeader"
+					global="true" />
+				<set field="header" value="${CheckTrainingPlanNtfHeader} [${internalOrgName}]" />
+				<set field="action" value="CheckTrainingPlan" />
+				<set field="dateTime" value="${currentTime}" />
+				<set field="state" value="open" />
+				<set field="partyId" value="${headHRId}" />
+				<set field="targetLink" value="partyId=${internalOrgId}" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTrainingDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="HR_TRAINING_PLAN"
+									action="_CREATE" />
+							</condition>
+							<widgets>
+								<screenlet
+									title="${uiLabelMap.HROlbiusCreateTrainingPlan} [${internalOrgName}]">
+									<include-form name="createTrainingPlan"
+										location="component://hrolbius/widget/forms/PersonTrainingForms.xml" />
+								</screenlet>
+							</widgets>
+							<fail-widgets>
+								<label style="h3">${uiLabelMap.HROlbiusViewPermissionError}
+								</label>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="CheckTrainingPlan">
+		<section>
+			<actions>
+				<set field="userLogin" from-field="parameters.userLogin" />
+				<set field="tabButtonItem" value="TrainingPlan" />
+				<set field="titleProperty" value="PageTitleFindTrainingCalendar" />
+				<set field="ntfId" from-field="parameters.ntfId" />
+				<set field="HdID" from-field="parameters.HdID"/>
+				<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/util/getDeptName.groovy" />
+				<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/util/getDeptName.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTrainingDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="HR_TRAINING_PLAN"
+									action="_CHECK" />
+							</condition>
+							<widgets>
+								<screenlet title="${uiLabelMap.HROlbiusCheckOutTraingingPlan} ">
+									<include-form name="CheckTrainingPlan" location="component://hrolbius/widget/forms/PersonTrainingForms.xml" />
+								</screenlet>
+							</widgets>
+							<fail-widgets>
+								<label style="h3">${uiLabelMap.HROlbiusViewPermissionError}
+								</label>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="ProposeTrainingPlan">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="training"/>
+				<property-map map-name="uiLabelMap" resource="TrainingUiLabels" />
+				<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/util/PrtUtil.groovy" />
+				<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/util/DateUtil.groovy" />
+				<set field="userLogin" from-field="parameters.userLogin" />
+				<set field="tabButtonItem" value="TrainingPlan" />
+				<set field="tabSubButtonItem" value="ProposeTrainingPlan" />
+				<set field="titleProperty" value="PageTitleFindTrainingCalendar" />
+				<set field="ApproveTrainingPlanNtfHeader" from-field="uiLabelMap.ApproveTrainingPlanNtfHeader" />
+				<set field="header" value="${ApproveTrainingPlanNtfHeader}" />
+				<set field="action" value="ApproveTrainingPlan" />
+				<set field="state" value="open" />
+				<set field="partyId" value="${ceoId}" />
+				<set field="dateTime" value="${currentTime}" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTrainingDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="HR_TRAINING_PLAN"
+									action="_PROPOSE" />
+							</condition>
+							<widgets>
+								<screenlet title="${uiLabelMap.HROlbiusListProposeTraining}">
+									<include-form name="ProposeTrainingPlan" location="component://hrolbius/widget/forms/PersonTrainingForms.xml" />
+								</screenlet>
+							</widgets>
+							<fail-widgets>
+								<label style="h3">${uiLabelMap.HROlbiusViewPermissionError}
+								</label>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="ApproveTrainingPlan">
+		<section>
+			<actions>
+				<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/util/getHeadOfHr.groovy" />
+				<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/util/PrtUtil.groovy" />
+				<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/util/getDeptName.groovy" />
+				<set field="userLogin" from-field="parameters.userLogin" />
+				<set field="HDId" from-field="parameters.HDId"/>
+				<set field="tabButtonItem" value="TrainingCalendar" />
+				<set field="titleProperty" value="PageTitleFindTrainingCalendar" />
+				<set field="ntfId" from-field="parameters.ntfId" />
+				<set field="header" value="Kết quả phê duyệt kế hoạch đào tạo [${internalOrgName}]"/>
+				<set field="notiToId2" value="${headHRId}"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTrainingDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="HR_TRAINING_PLAN"
+									action="_APPR" />
+							</condition>
+							<widgets>
+								<screenlet title="${uiLabelMap.HROlbiusTrainingApprovals}">
+									<container id="table-container">
+										<include-form name="ApproveTrainingPlan"
+											location="component://hrolbius/widget/forms/PersonTrainingForms.xml" />
+									</container>
+								</screenlet>
+							</widgets>
+							<fail-widgets>
+								<label style="h3">${uiLabelMap.HROlbiusViewPermissionError}
+								</label>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="TrainingHarvestReport">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="training"/>
+				<set field="tabButtonItem" value="TrainingAndRatingTraining"/>
+				<set field="tabSubButtonItem" value="TrainingHarvestReport"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTrainingDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="HR_TRAINING"
+									action="_REPORT" />
+							</condition>
+							<widgets>
+								<screenlet title="${uiLabelMap.HrolbiusTrainingHarvestReport}">
+									<container id="table-container">
+										<include-form name="TrainingHarvestReport"
+											location="component://hrolbius/widget/forms/PersonTrainingForms.xml" />
+									</container>
+								</screenlet>
+							</widgets>
+							<fail-widgets>
+								<label style="h3">${uiLabelMap.HROlbiusViewPermissionError}
+								</label>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+</screens>

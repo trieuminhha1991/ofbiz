@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>BaseAccounting Services</description>
+    <vendor></vendor>
+    <version>1.0</version>
+
+    <service name="noSyntaxError" engine="interface">
+        <description>
+            Dummy service to prevent empty files and syntax error - Remove when the 1st real service will be added here 
+        </description>
+    </service>
+    
+    <service name="olapInterfaceAcc" engine="interface">
+		<implements service="olapInterface" optional="true"/>
+	</service>
+    
+    <service name="olapFilterByDateGrid" engine="interface">
+  		<implements service="olapGridInterface"/>
+  		<attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="thruDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="dateType" type="String" mode="IN" optional="false"/>
+        <attribute name="hasTransTime" type="String" mode="IN" optional="true" default-value="Y"/>
+  	</service>
+  	
+  	<service name="olapFilterByDateGrowthGrid" engine="interface">
+  		<implements service="olapGridInterface"/>
+  		<attribute name="fromDate1" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="thruDate1" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="fromDate2" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="thruDate2" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="dateType" type="String" mode="IN" optional="false"/>
+  	</service>
+  	
+  	<service name="evaluateChart" engine="interface">
+  		<attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="thruDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="yAxis" mode="OUT" type="Map"/>
+        <attribute name="xAxis" mode="OUT" type="List"/>
+  	</service>
+  	
+  	<service name="evaluateGrowthChart" engine="interface">
+  		<attribute name="fromDate1" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="thruDate1" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="fromDate2" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="thruDate2" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="dateType" type="String" mode="IN" optional="false"/>
+        <attribute name="yAxis" mode="OUT" type="Map"/>
+        <attribute name="xAxis" mode="OUT" type="List"/>
+  	</service>
+    
+   	<service name="getListJqTrialBalanceAccount" engine="java" invoke="getListJqTrialBalanceAccount" 
+   		location="com.olbius.acc.report.balancetrial.BalanceTrialServices" transaction-timeout="1000000">
+   		<attribute name="organizationPartyId" type="String" mode="IN" optional="false"/>
+        <attribute name="customTimePeriodId" type="String" mode="IN" optional="false"/>
+   		<attribute name="listBal" mode="OUT" type="List"></attribute>
+   	</service>   
+   
+   	<service name="getListInventoryAverageCost" engine="java" invoke="getListInventoryAverageCost" location="com.olbius.acc.report.logistics.InventoryAverageCostsServices">
+   		<implements service="jqxGetListInterface"/>
+   		<attribute name="TotalRows" mode="OUT" type="String" optional="false"></attribute>
+   		<override name="listIterator" type="List" optional="false"></override>
+   	</service>
+
+	<service name="jqGetListImpExpStockWarehouseReportOlap" engine="java" location="com.olbius.acc.report.olap.ReportEvens" invoke="jqGetListImpExpStockWarehouseReportOlap">
+  		<implements service="olapGridInterface"/>
+  		<attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="thruDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="productId" type="String" mode="IN" optional="true"/>
+        <attribute name="facilityId" type="String" mode="IN" optional="true"/>
+  	</service>
+  	
+  	<service name="olbiusReportImpExpStockWarehouse" engine="olbius" location="com.olbius.acc.report.olap.ReportImpExpStockWarehouse">
+		<implements service="olapInterface"/>
+		<attribute name="facilityId" mode="IN" type="String" optional="true"/>
+		<attribute name="product[]" mode="IN" type="List" optional="true"/>
+	</service>
+	
+	<service name="olbiusReportImpExpStockWarehouseAcc" engine="olbius" location="com.olbius.acc.report.olap.ReportImpExpStockWarehouseAcc">
+		<implements service="olapInterface"/>
+		<attribute name="facilityId" mode="IN" type="String" optional="true"/>
+		<attribute name="product[]" mode="IN" type="List" optional="true"/>
+	</service>
+	
+	<service name="olbiusReportStockWarehouseAcc" engine="olbius" location="com.olbius.acc.report.olap.ReportStockWarehouseAcc">
+		<implements service="olapInterface"/>
+		<attribute name="facilityId[]" mode="IN" type="List" optional="true"/>
+		<attribute name="product[]" mode="IN" type="List" optional="true"/>
+	</service>
+	
+  	<service name="getExpenseStatement" engine="java" location="com.olbius.acc.report.expensestatement.ExpenseStatementServices" invoke="getData">
+  		<implements service="olapGridInterface"/>
+  		<attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="thruDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="dateType" type="String" mode="IN" optional="false"/>
+  	</service>
+  	
+  	<service name="getExpenseStatementOlap" engine="olbius" location="com.olbius.acc.report.expensestatement.ExpenseStatementOlapImplReport" auth="true">
+  		<implements service="olapInterface" optional="true"/>
+  		<attribute name="dateType" type="String" mode="IN" optional="true"/>
+  	</service> 
+  	
+ 	<!--<service name="getGeneralJournal" engine="java" invoke="getGeneralJournal" transaction-timeout="1000000" location="com.olbius.acc.report.generaljournal.GeneralJournalServices">-->
+    		<!--<implements service="jqxGetListInterface"/>-->
+    <!--</service>-->
+  	<!---->
+    <!--<service name="getGeneralJournalTotal" engine="java" invoke="getGeneralJournalTotal" transaction-timeout="1000000" location="com.olbius.acc.report.generaljournal.GeneralJournalServices">-->
+    		<!--<implements service="jqxGetListInterface"/>-->
+    <!--</service>-->
+  	
+  	
+  	<service name="getProductIncomeStm" engine="olbius" location="com.olbius.acc.report.incomestatement.query.ProductIncomeOlapImpl">
+  		<!-- <implements service="olapFilterByDateGrid"/> -->
+  		<implements service="olapInterface"/>
+  		<attribute name="productId" type="String" mode="IN" optional="true"/>
+  		<attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="thruDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="dateType" type="String" mode="IN" optional="false"/>
+        <attribute name="hasTransTime" type="String" mode="IN" optional="true" default-value="Y"/>
+  	</service>
+  	
+  	<service name="getLoyalIncomeStatement" engine="java" location="com.olbius.acc.report.incomestatement.services.LoyalIncomeStatementServices" invoke="getData">
+  		<implements service="getIncomeStatement"/>
+  	</service>
+  	
+  	<service name="getIncomeStatement" engine="java" location="com.olbius.acc.report.incomestatement.services.IncomeStatementServices" 
+  		invoke="getData" transaction-timeout="1000000">
+  		<implements service="olapGridInterface"/>
+  		<attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="thruDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="dateType" type="String" mode="IN" optional="false"/>
+        <attribute name="productId" type="String" mode="IN" optional="true"/>
+        <attribute name="partyId" type="String" mode="IN" optional="true"/>
+        <attribute name="categoryId" type="String" mode="IN" optional="true"/>
+  	</service>
+  	
+  	<service name="olbiusReportIncomeStatement" engine="olbius" location="com.olbius.acc.report.incomestatement.services.IncomeStatementReport">
+		<implements service="olapInterface"/>
+		<attribute name="party[]" mode="IN" type="List" optional="true"/>
+		<attribute name="category[]" mode="IN" type="List" optional="true"/>
+		<attribute name="product[]" mode="IN" type="List" optional="true"/>
+		<attribute name="productStore[]" mode="IN" type="List" optional="true"/>
+		<attribute name="dateType" mode="IN" type="String"/>
+		<attribute name="reportType" mode="IN" type="String"/>
+	</service>
+  	
+  	<service name="liabilityGlReport" engine="java" location="com.olbius.acc.report.liability.services.LiabilityServices" invoke="reportLiabilityGl">
+    	<implements service="olapGridInterface"/>
+		<attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="thruDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="type[]" type="List" mode="IN" optional="true"/>
+        <attribute name="SUPPLIER" type="String" mode="IN" optional="true"/>
+        <attribute name="GL_ACCOUNT" type="String" mode="IN" optional="true"/>
+        <attribute name="ORGANIZATION" type="String" mode="IN" optional="true"/>
+	</service>
+	
+    <service name="liabilityReportGlDetail" engine="java" location="com.olbius.acc.report.liability.services.LiabilityServices" invoke="reportLiabilityDetailGl">
+    	<implements service="olapGridInterface"/>
+        <attribute name="SUPPLIER" type="String" mode="IN" optional="false"/>
+        <attribute name="GL_ACCOUNT" type="String" mode="IN" optional="true"/>
+        <attribute name="ORGANIZATION" type="String" mode="IN" optional="true"/>
+	</service>
+  	
+  	<service name="evaluateProductIncomePieChart" engine="java" location="com.olbius.acc.report.incomestatement.services.ProductIncomeStmServices" invoke="evaluateProductIncomePieChart">
+		<implements service="olapChartInterface"/>
+	</service>
+	
+	<service name="evaluateCustIncomePieChart" engine="olbius" location="com.olbius.acc.report.incomestatement.query.CustIncomeChartImpl">
+		<!-- <implements service="olapChartInterface"/> -->
+		<implements service="olapInterface"/>
+	    <!-- <attribute name="dateType" mode="IN" type="String" optional="true"/> -->
+	</service>
+	
+	<service name="getCustomerIncomeStm" engine="olbius" location="com.olbius.acc.report.incomestatement.query.CustIncomeOlapImpl">
+  		<implements service="olapInterface"/>
+  		<attribute name="partyId" type="String" mode="IN" optional="true"/>
+  		<attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="thruDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="dateType" type="String" mode="IN" optional="true"/>
+  	</service>
+  	
+  	<service name="getCategoryIncomeStm" engine="java" location="com.olbius.acc.report.incomestatement.services.CatIncomeStmServices" invoke="getData">
+  		<implements service="olapFilterByDateGrid"/>
+  		<attribute name="categoryId" type="String" mode="IN" optional="true"/>
+  	</service>
+  	
+  	<service name="evaluateCatIncomePieChart" engine="java" location="com.olbius.acc.report.incomestatement.services.CatIncomeStmServices" invoke="evaluateCatIncomePieChart">
+		<implements service="olapChartInterface"/>
+	</service>
+	
+	<service name="evaluateCustGroupIncomePieChart" engine="java" location="com.olbius.acc.report.incomestatement.services.CustGroupIncomeStmServices" invoke="evaluateCustGroupIncomePieChart">
+		<implements service="evaluateChart"/>
+	</service>
+	
+	<service name="getCustGroupIncomeStm" engine="java" location="com.olbius.acc.report.incomestatement.services.CustGroupIncomeStmServices" invoke="getData">
+  		<implements service="olapFilterByDateGrid"/>
+  		<attribute name="groupId" type="String" mode="IN" optional="true"/>
+  	</service>
+  	
+  	<service name="getGeneralJournal" engine="olbius" location="com.olbius.acc.report.generaljournal.GeneralJournalOlapImplReport" auth="true">
+  		<implements service="olapInterface" optional="true"/>
+  		<attribute name="dateType" type="String" mode="IN" optional="true"/>
+  	</service>
+  	
+  	<service name="getGeneralJournalNoShort" engine="olbius" location="com.olbius.acc.report.generaljournal.GeneralJournalOlapImplNoShortReport" auth="true">
+  		<implements service="olapInterface" optional="true"/>
+  		<attribute name="dateType" type="String" mode="IN" optional="true"/>
+  	</service>  	
+  	
+  	<service name="getGeneralJournalTotal" engine="olbius" location="com.olbius.acc.report.generaljournal.GeneralJournalTotalOlapImpl" auth="true">
+  		<implements service="olapInterface"/>
+  		<attribute name="dateType" type="String" mode="IN" optional="true"/>
+  	</service>
+  	
+  	<service name="getGeneralJournalTotalV2" engine="olbius" location="com.olbius.acc.report.generaljournal.GeneralJournalTotalOlapImplV2" auth="true">
+  		<implements service="olapInterface" optional="true"/>
+  		<attribute name="dateType" type="String" mode="IN" optional="true"/>
+  	</service>
+  	  	
+  	<service name="getProductIncomeGrowthStm" engine="java" location="com.olbius.acc.report.incomegrowth.services.PIGrowthStmServices" invoke="getData">
+  		<implements service="olapFilterByDateGrowthGrid"/>
+  		<attribute name="productId" type="String" mode="IN" optional="true"/>
+  	</service>
+  	
+  	<service name="getCustIncomeGrowthStm" engine="java" location="com.olbius.acc.report.incomegrowth.services.CIGrowthStmServices" invoke="getData">
+  		<implements service="olapFilterByDateGrowthGrid"/>
+  		<attribute name="partyId" type="String" mode="IN" optional="true"/>
+  	</service>
+  	
+  	<service name="getCatIncomeGrowthStm" engine="java" location="com.olbius.acc.report.incomegrowth.services.CAIGrowthStmServices" invoke="getData">
+  		<implements service="olapFilterByDateGrowthGrid"/>
+  		<attribute name="categoryId" type="String" mode="IN" optional="true"/>
+  	</service>
+  	
+  	<service name="getCustGroupIncomeGrowthStm" engine="java" location="com.olbius.acc.report.incomegrowth.services.CGIGrowthStmServices" invoke="getData">
+  		<implements service="olapFilterByDateGrowthGrid"/>
+  		<attribute name="groupId" type="String" mode="IN" optional="true"/>
+  	</service>
+  	
+  	<service name="evaluatePIGColumnChart" engine="java" location="com.olbius.acc.report.incomegrowth.services.PIGrowthStmServices" invoke="evaluatePIGColumnChart">
+		<implements service="evaluateGrowthChart"/>
+		<attribute name="productId" type="String" mode="IN" optional="true"/>
+	</service>
+	
+	<service name="evaluateCAIGColumnChart" engine="java" location="com.olbius.acc.report.incomegrowth.services.CAIGrowthStmServices" invoke="evaluateCAIGColumnChart">
+		<implements service="evaluateGrowthChart"/>
+		<attribute name="categoryId" type="String" mode="IN" optional="true"/>
+	</service>
+	
+	<service name="evaluateCIGColumnChart" engine="java" location="com.olbius.acc.report.incomegrowth.services.CIGrowthStmServices" invoke="evaluateCIGColumnChart">
+		<implements service="evaluateGrowthChart"/>
+		<attribute name="partyId" type="String" mode="IN" optional="true"/>
+	</service>
+	
+	<service name="evaluateCGGColumnChart" engine="java" location="com.olbius.acc.report.incomegrowth.services.CGIGrowthStmServices" invoke="evaluateCGGColumnChart">
+		<implements service="evaluateGrowthChart"/>
+		<attribute name="groupId" type="String" mode="IN" optional="true"/>
+	</service>
+	
+  	<service name="getIndexAccValue" engine="java" location="com.olbius.acc.report.dashboard.services.IndexAccountingServices" invoke="evaluateIndexValue">
+		<implements service="olapGridInterface"/>
+		<attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="thruDate" type="Timestamp" mode="IN" optional="false"/>
+  	</service>	
+  	
+  	<service name="getLiabilityInvoiceData" engine="java" invoke="getLiabilityInvoiceData" location="com.olbius.acc.liability.LiabilityJQServices">
+  		 <implements service="jqxGetListInterface"/>
+        <override name="listIterator" mode="OUT" type="List" optional="false"></override>
+   </service>
+   
+   <service name="getLiabilityPaymentData" engine="java" invoke="getLiabilityPaymentData" location="com.olbius.acc.liability.LiabilityJQServices">
+    	<implements service="jqxGetListInterface"/>
+        <override name="listIterator" mode="OUT" type="List" optional="false"></override>
+   </service>
+   
+    <service name="JQGetListInvoiceForLiability" engine="java" invoke="jqGetListInvoice" location="com.olbius.acc.liability.LiabilityJQServices">
+        <implements service="jqxGetListInterface"/>
+        <attribute name="organizationPartyId" type="String" mode="IN" optional="true"/>
+        <attribute name="partyId" type="String" mode="IN" optional="true"/>	   		
+   </service> 
+   
+   <service name="JQGetListPaymentForLiability" engine="java" invoke="jqGetListPayment" location="com.olbius.acc.liability.LiabilityJQServices">
+   		<implements service="jqxGetListInterface"/>
+        <attribute name="organizationPartyId" type="String" mode="IN" optional="true"/>
+        <attribute name="partyId" type="String" mode="IN" optional="true"/>
+   </service>
+   
+   <service name="JqxGetGeneralLedger" engine="java" invoke="getGeneralLedger" location="com.olbius.acc.report.summary.GeneralLedgerServices">
+   		<implements service="jqxGetListInterface"/>
+   		<override name="listIterator" mode="OUT" type="List" optional="false"></override>
+   </service>
+   
+   <service name="JqxGetAnalysisReport" engine="java" invoke="getAnalysisReport" location="com.olbius.acc.report.summary.GeneralLedgerServices">
+   		<implements service="jqxGetListInterface"/>
+   		<override name="listIterator" mode="OUT" type="List" optional="false"></override>
+   </service>
+   
+   <service name="JqxGetCashDetailBook" engine="java" invoke="getCashDetailBook" location="com.olbius.acc.report.summary.CashServices">
+   		<implements service="jqxGetListInterface"/>
+   		<override name="listIterator" mode="OUT" type="List" optional="false"></override>
+   </service>
+   
+   <service name="JqxGetMoneyInBank" engine="java" invoke="getMoneyInBank" location="com.olbius.acc.report.summary.CashServices">
+   		<implements service="jqxGetListInterface"/>
+   		<override name="listIterator" mode="OUT" type="List" optional="false"></override>
+   </service>
+   
+   <service name="JqxGetPaymentDetailBook" engine="java" invoke="getPaymentDetailBook" location="com.olbius.acc.report.summary.PaymentReportServices" transaction-timeout="100000">
+   		<implements service="jqxGetListInterface"/>
+   		<override name="listIterator" mode="OUT" type="List" optional="false"></override>
+   </service>
+   
+   	<service engine="java" name="JqxGetCustomerList" invoke="getListCustomer" location="com.olbius.acc.utils.UtilServices">
+   		<implements service="jqxGetListInterface"/>
+   	</service>
+   	
+   	<service engine="java" name="JqxGetLiabilityBalance" invoke="getLiabilityBalance" location="com.olbius.acc.report.summary.LiabilityBalServices">
+   		<implements service="jqxGetListInterface"/>
+   		<override name="listIterator" type="List"></override>
+   	</service>
+   	
+   	<service engine="java" name="JqxGetLiabilityReceivable" invoke="getLiabilityReceivable" location="com.olbius.acc.report.summary.LiabilityBalServices">
+   		<implements service="jqxGetListInterface"/>
+   		<override name="listIterator" type="List"></override>
+   	</service>
+   	
+   	<service engine="java" name="JqxGetLiabilitySupplier" invoke="getLiabilitySupplier" location="com.olbius.acc.report.summary.LiabilityBalServices">
+   		<implements service="jqxGetListInterface"/>
+   		<override name="listIterator" type="List"></override>
+   	</service>
+   	
+   	<service engine="java" name="JqxGetLiabilityReceivableTotal" invoke="getLiabilityReceivableTotal" location="com.olbius.acc.report.summary.LiabilityBalServices">
+   		<implements service="jqxGetListInterface"/>
+   		<override name="listIterator" type="List"></override>
+   	</service>
+   	
+   	<service engine="java" name="JqxGetVoucherDeclaration" invoke="getVoucherDeclaration" location="com.olbius.acc.report.summary.VDServices">
+   		<implements service="jqxGetListInterface"/>
+   	</service>
+   	
+   	<service engine="java" name="getAccruedLiabilityPref" invoke="getAccruedLiabilityPref" location="com.olbius.acc.report.summary.LiabilityPref">
+   		<implements service="jqxGetListInterface"/>
+   		<override name="listIterator" type="List"></override>
+   	</service>
+   	
+   	<service name="JQGetListProductLiabilityPref" engine="java" invoke="getListProductLiabilityPrefJQ" auth="true"
+   		location="com.olbius.acc.report.summary.LiabilityPref">
+   		<implements service="jqxGetListInterface"/>
+ 	</service>
+   	
+   	<service name="saleInvoiceTaxReport" engine="olbius" location="com.olbius.acc.report.taxInvoice.SaleInvoiceTaxReport">
+		<implements service="olapInterface"/>
+		<attribute name="month" mode="IN" type="String" optional="true"/>
+		<attribute name="quarter" mode="IN" type="String" optional="true"/>
+		<attribute name="year" mode="IN" type="String" optional="true"/>
+		<attribute name="calendarType" mode="IN" type="String" optional="true"/>
+		<attribute name="productCategoryId" mode="IN" type="String" optional="true"></attribute>
+	</service>
+   	<service name="purchaseInvoiceTaxReport" engine="olbius" location="com.olbius.acc.report.taxInvoice.PurchaseInvoiceTaxReport">
+		<implements service="olapInterface"/>
+		<attribute name="month" mode="IN" type="String" optional="true"/>
+		<attribute name="quarter" mode="IN" type="String" optional="true"/>
+		<attribute name="year" mode="IN" type="String" optional="true"/>
+		<attribute name="calendarType" mode="IN" type="String" optional="true"/>
+	</service>
+	
+	<service name="getLiabilityPreferenceInfo" engine="java" invoke="getLiabilityPreferenceInfo" auth="true"
+		location="com.olbius.acc.report.summary.LiabilityBalServices">
+		<attribute name="partyIdFrom" mode="IN" type="String"></attribute>	
+		<attribute name="partyIdTo" mode="IN" type="String"></attribute>	
+		<attribute name="fromDate" mode="IN" type="String"></attribute>	
+		<attribute name="thruDate" mode="IN" type="String"></attribute>	
+		<attribute name="openingBalance" mode="OUT" type="java.math.BigDecimal"></attribute>	
+		<attribute name="amountPaid" mode="OUT" type="java.math.BigDecimal"></attribute>
+        <attribute name="amountNotPaid" mode="OUT" type="java.math.BigDecimal"></attribute>
+        <attribute name="amountOther" mode="OUT" type="java.math.BigDecimal"></attribute>
+    </service>
+	
+	<service name="getLiabilityPreferenceInfoNew" engine="java" invoke="getLiabilityPreferenceInfoNew" auth="true"
+		location="com.olbius.acc.report.summary.LiabilityBalServices">
+		<attribute name="partyIdFrom" mode="IN" type="String"></attribute>	
+		<attribute name="partyIdTo" mode="IN" type="String"></attribute>	
+		<attribute name="fromDate" mode="IN" type="String"></attribute>	
+		<attribute name="thruDate" mode="IN" type="String"></attribute>	
+		<attribute name="openingDrAmount" mode="OUT" type="java.math.BigDecimal"></attribute>	
+		<attribute name="openingCrAmount" mode="OUT" type="java.math.BigDecimal"></attribute>	
+		<attribute name="returnSupplierAmount" mode="OUT" type="java.math.BigDecimal"></attribute>	
+		<attribute name="paymentAmount" mode="OUT" type="java.math.BigDecimal"></attribute>	
+		<attribute name="goodsAmount" mode="OUT" type="java.math.BigDecimal"></attribute>	
+		<attribute name="receiveableAmount" mode="OUT" type="java.math.BigDecimal"></attribute>	
+		<attribute name="endingDrAmount" mode="OUT" type="java.math.BigDecimal"></attribute>	
+		<attribute name="endingCrAmount" mode="OUT" type="java.math.BigDecimal"></attribute>	
+		<attribute name="amountNotPaid" mode="OUT" type="java.math.BigDecimal"></attribute>	
+		<attribute name="amountNotPaidText" mode="OUT" type="String"></attribute>	
+	</service>
+	
+	<service engine="java" name="JQVoucherTaxReport" invoke="getJQVoucherTaxReport" location="com.olbius.acc.report.taxInvoice.VoucherTaxReport">
+   		<implements service="jqxGetListInterface"/>
+   	</service>
+   	
+	<service engine="java" name="JQVoucherTaxPaymentReport" invoke="getJQVoucherTaxPaymentReport" location="com.olbius.acc.report.taxInvoice.VoucherTaxReport">
+   		<implements service="jqxGetListInterface"/>
+   	</service>
+   	
+   	<service engine="java" name="JQGetListFacilities" invoke="jqGetListFacilities" location="com.olbius.acc.report.logistics.InventoryAverageCostsServices">
+   		<implements service="jqxGetListInterface"/>
+   	</service>
+    <service engine="java" name="JqxGetListGlAccountsLiabilityReceivable" invoke="getListGlAccountsLiabilityReceivable" location="com.olbius.acc.utils.UtilServices">
+        <implements service="jqxGetListInterface"/>
+    </service>
+
+    <service engine="java" name="JqxGetListGlAccountsLiability" invoke="getListGlAccountsLiability" location="com.olbius.acc.utils.UtilServices">
+        <implements service="jqxGetListInterface"/>
+    </service>
+   	<service engine="java" name="createGlAccountHistoryParty" invoke="createGlAccountHistoryParty" location="com.olbius.acc.report.AccountingReport" transaction-timeout="1000000">
+   	</service>
+</services>

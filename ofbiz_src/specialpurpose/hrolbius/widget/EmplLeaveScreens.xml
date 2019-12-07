@@ -1,0 +1,469 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+    <screen name="FindEmplLeaves">
+        <section>        	
+            <actions>
+            	<set field="selectedMenuItem" value="EmplTimeManager"/>
+            	<set field="navMenuName" value="EmplLeaveSubTabBar" />
+				<set field="navMenuLocation" value="component://hrolbius/widget/menus/hrolbiusMenus.xml" />
+                <set field="titleProperty" value="HROlbiusFindEmplLeave"/>
+                <set field="tabButtonItemBottom" value="EmployeeTimeMgr" />
+                <set field="tabButtonItem" value="EmployeeTimeMgr" />
+                <set field="tabSubButtonItem" value="EmplLeavesList"/>
+                <set field="leaveTypeId" from-field="parameters.leaveTypeId"/>
+                <set field="fromDate" from-field="parameters.fromDate"/>
+               <!--  <set field="partyId" from-field="${userLogin.partyId}"/> -->
+                <set field="emplLeaveCtx" from-field="parameters"/>
+                <script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/ListEmployeeLeave.groovy"/>                
+                <!-- <service service-name="hrGenericPermission" result-map="permResult">
+                    <field-map field-name="mainAction" value="ADMIN"/>
+                </service>
+                <set field="hasAdminPermission" from-field="permResult.hasPermission"/> -->
+            </actions>
+            <widgets>
+                <decorator-screen name="EmplTimeMgrDecorator" location="${parameters.mainDecoratorLocation}">                   
+                    <!-- <decorator-section name="header">
+                    	<section>
+                    		<widgets>
+                    			<screenlet title="${uiLabelMap.EmplLeaveSummary}">
+                            		<include-form name="EmplLeaveSummary" location="component://hrolbius/widget/forms/EmplLeaveForms.xml"/>
+                            	</screenlet>
+                    		</widgets>
+                    	</section>
+                    </decorator-section> -->	
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="HR_EMPLEAVE_MGR" action="_VIEW"/>
+                            </condition>
+                            <widgets>                            	
+                                <platform-specific>
+											<html>
+											    <html-template location="component://hrolbius/webapp/hrolbius/ftl/employee/ListEmployeeLeave.ftl"/>
+											</html>                                            
+                                </platform-specific>
+<!--                                 <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml"> -->
+<!--                                     <decorator-section name="menu-bar"> -->
+<!--                                         <section> -->
+<!--                                             <widgets> -->
+<!--                                                 <container> -->
+<!--                                                     <link target="EditEmplLeave" text="${uiLabelMap.HROlbiusNewLeave}" style="btn btn-small btn-primary"> -->
+<!--                                                     	<parameter param-name="partyId"/> -->
+<!--                                                     </link> -->
+<!--                                                 </container> -->
+<!--                                             </widgets> -->
+<!--                                         </section> -->
+<!--                                     </decorator-section> -->
+<!--                                     <decorator-section name="search-options"> -->
+<!--                                         <include-form name="FindEmplLeaves" location="component://hrolbius/widget/forms/EmplLeaveForms.xml"/> -->
+<!--                                     </decorator-section> -->
+<!--                                     <decorator-section name="search-results"> -->
+                                        
+<!--                                         <include-form name="ListEmplLeaves" location="component://hrolbius/widget/forms/EmplLeaveForms.xml"/> -->
+<!--                                     </decorator-section> -->
+<!--                                 </decorator-screen> -->
+                                
+                            </widgets>
+                            <fail-widgets>
+                            	 <label style="h3">${uiLabelMap.HROlbiusViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EmplLeaveSummary">
+    	<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="EmplTimeManager"/>
+            	<!-- <set field="navMenuName" value="EmplLeaveSubTabBar" />
+				<set field="navMenuLocation" value="component://hrolbius/widget/menus/hrolbiusMenus.xml" /> -->
+                <set field="titleProperty" value="EmplLeaveSummary"/>
+                <set field="tabButtonItemBottom" value="EmployeeTimeMgr" />
+                <set field="tabButtonItem" value="EmployeeTimeMgr" />
+                <set field="tabSubButtonItem" value="EmplLeaveSummary"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="EmplTimeMgrDecorator" location="${parameters.mainDecoratorLocation}">
+    				<decorator-section name="body">
+    					<section>
+    						<condition>
+    							<if-has-permission permission="HR_EMPLEAVE_MGR" action="_VIEW"/>
+    						</condition>
+    						
+    						<widgets>
+    							<decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+    							    
+                                    <!-- <decorator-section name="search-options">
+                                        <include-name="FindEmplLeaves" location="component://hrolbius/widget/forms/EmplLeaveForms.xml"/>
+                                    </decorator-section> -->
+                                    <decorator-section name="search-results">
+                                        <platform-specific>
+                                            <html>
+                                                <html-template location="component://hrolbius/webapp/hrolbius/ftl/employee/listEmployeeLeaveSummary.ftl"/>
+                                            </html>
+                                        </platform-specific>
+<!--                                         <include-form name="EmplLeaveSummary" location="component://hrolbius/widget/forms/EmplLeaveForms.xml"/> -->
+                                    </decorator-section>
+                                </decorator-screen>
+                                </widgets>
+    					</section>
+    				</decorator-section>
+    			</decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="FindLeaveApprovals">
+        <section>
+            <actions>
+            	<set field="tabButtonItemBottom" value="Approval" />
+                <set field="titleProperty" value="PageTitleFindApprovals"/>
+                <service service-name="hrGenericPermission" result-map="permResult">
+                    <field-map field-name="mainAction" value="ADMIN"/>
+                </service>
+                <set field="hasAdminPermission" from-field="permResult.hasPermission"/>
+                <set field="approverPartyId" from-field="parameters.userLogin.partyId"/>
+                                
+            </actions>
+            <widgets>
+                <decorator-screen name="LeaveDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="HROLBIUS" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                                <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                                    <decorator-section name="search-options">
+                                        <include-form name="FindLeaveApprovals" location="component://hrolbius/widget/forms/EmplLeaveForms.xml"/>
+                                    </decorator-section>
+                                    <decorator-section name="search-results">
+                                        <include-form name="ListLeaveApprovals" location="component://hrolbius/widget/forms/EmplLeaveForms.xml"/>
+                                    </decorator-section>
+                                </decorator-screen>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.HROlbiusViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditEmplLeave">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="EmplTimeManager" />
+				<set field="selectedSubMenuItem" value="EmplLeaveAppl" />
+                <set field="titleProperty" value="HROlbiusEditEmplLeave"/>
+                <!-- <set field="selectedMenuItem" value="profile"/> -->
+				<!-- <set field="selectedselectedMenuItemItem" value="profile"/> --> 
+                 <set field="partyId" from-field="userLogin.partyId"/>
+                <!--<set field="leaveTypeId" from-field="parameters.leaveTypeId"/>
+                <set field="fromDate" from-field="parameters.fromDate"/> -->
+                <!-- <entity-one entity-name="EmplLeave" value-field="leaveApp">
+                    
+                </entity-one> -->
+            </actions>
+            <widgets>
+                 <decorator-screen name="EmplTimeMgrDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<section>
+                    		<condition>
+                    			<if-has-permission permission="HR_EMPLEAVE" action="_VIEW"/>
+                    		</condition>
+                    		<actions>
+                    			<set field="emplId" from-field="partyId"/>
+                    			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrPositionEmpl.groovy"/>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrDeptEmpl.groovy"/>
+								<service service-name="getNbrDayLeaveEmplInfo" result-map="emplLeaveDayInfo">
+									<field-map field-name="partyId" from-field="partyId"/>
+								</service>
+								<set field="dateApplication" value="${groovy: org.ofbiz.base.util.UtilDateTime.nowTimestamp()}" type="Timestamp"/>
+								<entity-condition list="workingShiftList" entity-name="WorkingShift" filter-by-date="true">
+									<condition-expr field-name="workingShiftId" operator="not-equals" value="_NA_"/>
+								</entity-condition>
+								<entity-condition list="leaveReasonTypes" entity-name="EmplLeaveReasonType"></entity-condition>
+                    		</actions>
+	                    	<widgets>
+		                        <screenlet id="AddEmplLeavePanel" title="${uiLabelMap.HREmplLeaveCreate}" collapsible="false">
+		                            <platform-specific>
+		                            	<html>
+		                            		<html-template location="component://hrolbius/webapp/hrolbius/ftl/employee/EditEmplLeave.ftl"/>
+		                            	</html>
+		                            </platform-specific>
+		                        </screenlet>
+		                        <!-- <platform-specific>
+		                        	<html>
+		                        		<html-template location="component://hrolbius/webapp/hrolbius/ftl/validate/EmplLeaveValidate.ftl"/>
+		                        	</html>
+		                        </platform-specific> -->
+		                        
+	                        </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditEmplLeaveStatus">
+        <section>
+            <actions>
+            	<set field="tabButtonItemBottom" value="Approval"/>
+                <set field="titleProperty" value="PageTitleEditApprovalStatus"/>
+                <set field="partyId" from-field="parameters.partyId"/>
+                <set field="leaveTypeId" from-field="parameters.leaveTypeId"/>
+                <set field="fromDate" from-field="parameters.fromDate"/>
+                <entity-one entity-name="EmplLeave" value-field="leaveApp" auto-field-map="false">
+                    <field-map field-name="partyId" from-field="partyId"/>
+                    <field-map field-name="leaveTypeId" from-field="leaveTypeId"/>
+                    <field-map field-name="fromDate" from-field="fromDate"/>
+                </entity-one>
+            </actions>
+            <widgets>
+                <decorator-screen name="LeaveDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet id="EditEmplLeaveStatus" title="${uiLabelMap.HROlbiusEditLeaveApprovalStatus}" collapsible="true">
+                            <include-form name="EditEmplLeaveStatus" location="component://hrolbius/widget/forms/EmplLeaveForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="LeaveApprovals">
+        <section>
+            <actions>
+            	<set field="tabButtonItemBottom" value="Approval" />
+                <set field="titleProperty" value="PageTitleFindApprovals"/>
+                <service service-name="hrGenericPermission" result-map="permResult">
+                    <field-map field-name="mainAction" value="ADMIN"/>
+                </service>
+                <set field="hasAdminPermission" from-field="permResult.hasPermission"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="LeaveDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="HROLBIUS" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.PageTitleApprovalEmplLeave}">
+                                	<include-form name="ListLeaveApprovals" location="component://hrolbius/widget/forms/EmplLeaveForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.HROlbiusViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="LeaveApproval">
+        <section>
+            <actions>
+            	<set field="tabButtonItemBottom" value="EmployeeTimeMgr" />
+                <set field="titleProperty" value="PageTitleFindApprovals"/>
+                <set field="tabButtonItem" value="EmployeeTimeMgr" />
+                <!-- <service service-name="hrGenericPermission" result-map="permResult">
+                    <field-map field-name="mainAction" value="ADMIN"/>
+                </service>
+                <set field="hasAdminPermission" from-field="permResult.hasPermission"/> -->
+            </actions>
+            <widgets>
+                <decorator-screen name="EmplTimeMgrDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="HROLBIUS" action="_VIEW"/>
+                            </condition>
+                            <actions>
+                            	
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getRoleApprovalEmplLeave.groovy"/>
+								<set field="emplId" from-field="emplLeave.partyId"/>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrPositionEmpl.groovy"/>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrDeptEmpl.groovy"/>
+								<entity-condition list="workingShiftList" entity-name="WorkingShift" filter-by-date="true">
+									<condition-expr field-name="workingShiftId" operator="not-equals" value="_NA_"/>
+								</entity-condition>
+								<entity-condition list="emplLeaveWs" entity-name="EmplLeaveWorkingShift">
+									<condition-expr field-name="emplLeaveId" from-field="parameters.emplLeaveId"/>
+								</entity-condition>
+								<entity-one value-field="employee" entity-name="Person">
+									<field-map field-name="partyId" from-field="emplLeave.partyId"/>
+								</entity-one>
+								<entity-condition list="statusList" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="EMPL_LEAVE_APPR"/>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>
+								<service service-name="getNbrDayLeaveEmplInfo" result-map="emplLeaveDayInfo">
+									<field-map field-name="partyId" from-field="emplLeave.partyId"/>
+								</service>
+                            </actions>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.PageTitleApprovalEmplLeave}">
+                                	<!-- <include-form name="LeaveApproval" location="component://hrolbius/widget/forms/EmplLeaveForms.xml"/> -->
+                                	<platform-specific>
+                                		<html>
+                                			<html-template location="component://hrolbius/webapp/hrolbius/ftl/employee/ApprovalEmplLeave.ftl"/>
+                                		</html>
+                                	</platform-specific>
+                                </screenlet>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.HROlbiusViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ViewLeaveApproval">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="EmplTimeManager"/>
+            	<set field="tabButtonItemBottom" value="EmployeeTimeMgr" />
+            	<set field="tabButtonItem" value="EmployeeTimeMgr" />
+                <set field="titleProperty" value="PageTitleFindApprovals"/>
+                <!-- <service service-name="hrGenericPermission" result-map="permResult">
+                    <field-map field-name="mainAction" value="ADMIN"/>
+                </service>
+                <set field="hasAdminPermission" from-field="permResult.hasPermission"/> -->
+            </actions>
+            <widgets>
+                <decorator-screen name="EmplTimeMgrDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="HROLBIUS" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.PageTitleApprovalEmplLeave}">
+                                	<include-form name="ViewLeaveApproval" location="component://hrolbius/widget/forms/EmplLeaveForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.HROlbiusViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EmplLeaveHistory">
+    	<section>        	
+            <actions>
+            	<set field="navMenuName" value="EmplLeaveSubTabBar" />
+				<set field="navMenuLocation" value="component://hrolbius/widget/menus/hrolbiusMenus.xml" />
+                <set field="titleProperty" value="HREmplLeaveHistory"/>
+                <set field="tabSubButtonItem" value="EmplLeaveHistory" />
+                <set field="tabButtonItem" value="EmployTabBar" />
+                <set field="leaveTypeId" from-field="parameters.leaveTypeId"/>
+                <set field="fromDate" from-field="parameters.fromDate"/>
+                <set field="partyId" from-field="${userLogin.partyId}"/>
+                <set field="emplLeaveCtx" from-field="parameters"/>                                                
+            </actions>
+            <widgets>
+                <decorator-screen name="profileDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="HROLBIUS" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                                <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                                    <!-- <decorator-section name="menu-bar">
+                                        <section>
+                                            <widgets>
+                                                <container>
+                                                    <link target="EditEmplLeave" text="${uiLabelMap.HROlbiusNewLeave}" style="btn btn-small btn-primary">
+                                                    	<parameter param-name="partyId"/>
+                                                    </link>
+                                                </container>
+                                            </widgets>
+                                        </section>
+                                    </decorator-section> -->
+                                    <decorator-section name="search-options">
+                                        <include-form name="FindEmplLeaves" location="component://hrolbius/widget/forms/EmplLeaveForms.xml"/>
+                                    </decorator-section>
+                                    <decorator-section name="search-results">
+                                        <include-form name="listEmplListHistory" location="component://hrolbius/widget/forms/EmplLeaveForms.xml"/>
+                                    </decorator-section>
+                                </decorator-screen>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="ViewEmplLeaveHistory">
+    	<section>        	
+            <actions>
+		<set field="titleProperty" value="HREmplLeaveHistory"/>
+		<set field="selectedSubMenuItem" value="EmplLeaveHistory" />
+                <set field="leaveTypeId" from-field="parameters.leaveTypeId"/>
+                <set field="fromDate" from-field="parameters.fromDate"/>
+                <set field="parameters.partyId" from-field="userLogin.partyId"/>
+                <set field="emplLeaveCtx" from-field="parameters"/>
+                <set field="partyId" from-field="userLogin.partyId"/>
+                <set field="partyName" value="${groovy: org.ofbiz.party.party.PartyHelper.getPartyName(delegator, partyId, false)}"/>                                                
+				<!-- <service service-name="getNbrDayLeaveEmplInfo" result-map="emplLeaveDayInfo">
+					<field-map field-name="partyId" from-field="partyId"/>
+				</service> -->
+            </actions>
+            <widgets>
+                <decorator-screen name="profileDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="HROLBIUS" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+								<screenlet title="${uiLabelMap.HREmplLeaveHistory}">
+									<label style="aggregate-label">${uiLabelMap.NbrDayLeaveInMonth}: </label> <label style="aggregate-value">${emplLeaveDayInfo.nbrDayLeaveInMonth}</label>
+								<label style="aggregate-label">${uiLabelMap.NbrDayLeaveInYear}: </label> <label style="aggregate-value">${emplLeaveDayInfo.nbrDayLeaveInYear}</label>
+							        <label style="aggregate-label margin-bottom30">${uiLabelMap.DayLeaveRegulation}: </label> <label style="aggregate-value">${emplLeaveDayInfo.dayLeaveRegulation}</label>
+									<platform-specific>
+										<html>
+											<html-template location="component://hrolbius/webapp/hrolbius/ftl/profile/jqxListEmplLeave.ftl"></html-template>
+										</html>
+									</platform-specific>
+                            	</screenlet>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+</screens>

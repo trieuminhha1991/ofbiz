@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+    <screen name="InvoicePDF">
+        <section>
+            <actions>
+                <property-map resource="hrolbiusUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="AccountingInvoice"/>
+                <set field="currencyUomId" from-field="parameters.currencyUomId"/>
+                <script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/payroll/reportPayroll.groovy"/>
+            </actions>
+            <widgets>
+                <section>
+                    <!-- <condition>
+                        <or>
+                            <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
+                            can always see own invoice
+                            <if-compare field="invoice.partyIdFrom" operator="equals" value="${userLogin.partyId}"/>
+                            <if-compare field="invoice.partyId" operator="equals" value="${userLogin.partyId}"/>
+                            or is a contact of a company who owns the invoice
+                            <if-compare field="invoice.partyIdFrom" operator="equals" value="${myCompanyId}"/>
+                            <if-compare field="invoice.partyId" operator="equals" value="${myCompanyId}"/>
+                        </or>
+                    </condition> -->
+                    <widgets>
+                        <decorator-screen name="FoReportDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="topLeft">
+                                <include-screen name="CompanyLogo" location="component://order/widget/ordermgr/OrderPrintScreens.xml"/>
+                            </decorator-section>
+                            <decorator-section name="body">
+                               <platform-specific>
+                                   <xsl-fo><html-template location="component://hrolbius/webapp/hrolbius/ftl/employeePayroll.fo.ftl"/></xsl-fo>
+                               </platform-specific>
+                            </decorator-section>
+                        </decorator-screen>
+                    </widgets>
+                    <fail-widgets>
+                        <decorator-screen name="FoReportDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="body">
+                                <platform-specific>
+                                    <xsl-fo><html-template location="component://accounting/webapp/accounting/invoice/NoAccountingView.fo.ftl"/></xsl-fo>
+                                </platform-specific>
+                            </decorator-section>
+                        </decorator-screen>
+                    </fail-widgets>
+                </section>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="PayrollTablePartyHistory">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PayrollTableParty" />
+				<set field="selectedSubMenuItem" value="PayrollTablePartyHistory" />
+				<set field="parameters.partyId" from-field="userLogin.partyId"/>
+				<set field="parameters.statusId" value="PAYR_PAID"/>
+				<property-to-field field="defaultCurrencyUomId" resource="general" property="currency.uom.id.default" default="VND"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="profileDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="HROLBIUS" action="_VIEW"></if-has-permission>
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/profile/jqxListEmplPayrollHistory.ftl"></html-template>
+									</html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<label style="h3">${uiLabelMap.ViewPermissionError}</label>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    
+  	<screen name="PayrollTablePartyHistoryDir">
+		<section>
+			<actions>
+				<set field="navMenuName" value="EmplCommonSubTabBar" />
+				<set field="navMenuLocation" value="component://hrolbius/widget/menus/EmployeeMenus.xml" />
+				<set field="titleProperty" value="PayrollTableParty" />
+				<set field="tabButtonItem" value="EmployeeAdvancesTabBar" />
+				<set field="selectedMenuItem" value="profile" />
+				<set field="tabSubButtonItem" value="PayrollTablePartyHistoryDir" />
+				<set field="labelTitleProperty" value="PayrollTableParty" />
+				<set field="partyId" from-field="userLogin.partyId"/>
+				<property-to-field field="defaultCurrencyUomId" resource="general" property="currency.uom.id.default" default="VND"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="profileDirDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="HROLBIUS" action="_VIEW"></if-has-permission>
+							</condition>
+							<widgets>
+								<decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+		                            <decorator-section name="search-options">
+										<include-form name="FindPayrollTableParty" location="component://hrolbius/widget/forms/PayrollForms.xml"/>
+		                            </decorator-section>
+		                            <decorator-section name="search-results">
+		                                <include-form name="ListPayrollTablePartyDir" location="component://hrolbius/widget/forms/PayrollForms.xml"/>
+		                            </decorator-section>
+					</decorator-screen>
+							</widgets>
+							<fail-widgets>
+								<label style="h3">${uiLabelMap.ViewPermissionError}</label>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    
+</screens>

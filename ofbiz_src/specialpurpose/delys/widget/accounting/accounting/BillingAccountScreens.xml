@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+        
+    <screen name="CommonBillingAccountDecorator">
+        <section>
+            <widgets>
+            	<section>
+                            <!-- do check for ACCOUNTING, _VIEW permission -->
+                    <condition>
+                        <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
+                    </condition>
+                    <widgets>
+                        <section>
+                            <condition>
+                                <not><if-empty field="billingAccount"/></not>
+                            </condition>
+                            <actions>
+                            	<set field="tabBarName" value="BillingAccountTabBar" global="true" />
+								<set field="tabBarLocation" value="component://delys/widget/accounting/accounting/AccountingMenus.xml" global="true" />
+                            	<set field="titleHeaderContent" value="${billingAccount.billingAccountId}"/>
+                            	<set field="selectedSubMenuItem" value="billingaccount"/>
+                            	<set field="selectedMenuItem" value="accGeneralLedger"/>
+                            </actions>
+                            <widgets>
+                            	<section>
+									<condition>
+										<not><if-empty field="billingAccount" /></not>
+									</condition>
+									<actions>
+										<set field="printTabBar" value="true" />
+									</actions>
+									<widgets></widgets>
+								</section>
+<!--                                 <include-menu name="BillingAccountTabBar" location="component://accounting/widget/AccountingMenus.xml"/> -->
+                            </widgets>
+                        </section>
+                    </widgets>
+                </section>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="pre-body">
+<!--                         <section> -->
+<!--                             do check for ACCOUNTING, _VIEW permission -->
+<!--                             <condition> -->
+<!--                                 <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/> -->
+<!--                             </condition> -->
+<!--                             <widgets> -->
+<!--                                 <section> -->
+<!--                                     <condition> -->
+<!--                                         <not><if-empty field="billingAccount"/></not> -->
+<!--                                     </condition> -->
+<!--                                     <widgets> -->
+<!--                                         <include-menu name="BillingAccountTabBar" location="component://accounting/widget/AccountingMenus.xml"/> -->
+<!--                                     </widgets> -->
+<!--                                 </section> -->
+<!--                             </widgets> -->
+<!--                         </section> -->
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <!-- do check for ACCOUNTING, _VIEW permission -->
+                            <condition>
+                                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
+                            </condition>
+                            <widgets>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                            	<container style="header smaller lighter blue">
+                                	<label style="h3">${uiLabelMap.AccountingViewPermissionError}</label>
+                                </container>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="FindBillingAccount">
+        <section>
+            <actions>
+            	<set field="navMenuName" value="SearchFindBillingAccount"/>
+ 			   <set field="navMenuLocation" value="component://accounting/widget/AccountingMenus.xml"/>
+                <set field="titleProperty" value="PageTitleFindBillingAccount"/>
+                <set field="selectedSubMenuItem" value="billingaccount"/>
+                <set field="selectedMenuItem" value="accGeneralLedger"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-empty field="parameters.partyId"/>
+                            </condition>
+                            <widgets>
+                                <section>
+                                    <widgets>
+                                        <!-- <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                                            <decorator-section name="menu-bar">
+                                                <container style="button-bar">
+                                                    <link target="EditBillingAccount" text="${uiLabelMap.CommonCreateNew}" style="btn btn-info btn-small"/>
+                                                </container> 
+                                            </decorator-section>
+                                            <decorator-section name="search-options">
+                                                <include-form name="FindBillingAccounts" location="component://accounting/widget/BillingAccountForms.xml"/>
+                                            </decorator-section>
+                                            <decorator-section name="search-results">
+                                                <include-form name="ListBillingAccounts" location="component://accounting/widget/BillingAccountForms.xml"/>
+                                            </decorator-section>
+                                        </decorator-screen> -->
+                                        <platform-specific>
+                                        	<html>
+                                        		<html-template location="component://delys/webapp/delys/accounting/generalledger/jqxListBillingAccounts.ftl"/>
+                                        	</html>
+                                        </platform-specific>
+                                    </widgets>
+                                </section>
+                            </widgets>
+                            <fail-widgets>
+                                <section>
+                                    <actions>
+                                        <script location="component://accounting/webapp/accounting/WEB-INF/actions/payment/BillingAccounts.groovy"/>
+                                        <set field="roleTypeId" value="BILL_TO_CUSTOMER"/>
+                                    </actions>
+                                    <widgets>
+                                        <screenlet title="${uiLabelMap.PageTitleFindBillingAccount}" navigation-menu-name="NewBillingAcc">
+                                        <include-menu location="component://party/widget/partymgr/PartyMenus.xml" name="NewBillingAcc"/>
+                                            <include-form name="ListBillingAccountsByParty" location="component://accounting/widget/BillingAccountForms.xml"/>
+                                        </screenlet>
+                                    </widgets>
+                                </section>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+         </section>
+    </screen>
+    <screen name="EditBillingAccount">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditBillingAccount"/>
+                <set field="headerItem" value="billingaccount"/>
+                <set field="tabButtonItem" value="EditBillingAccount"/>
+                <property-to-field field="defaultCurrencyUomId" resource="general" property="currency.uom.id.default" default="USD"/>
+                <set field="billingAccountId" from-field="parameters.billingAccountId"/>
+                <entity-one entity-name="BillingAccount" value-field="billingAccount"/>
+                <set field="partyId" from-field="parameters.partyId"/>
+                <set field="roleTypeId" from-field="parameters.roleTypeId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonBillingAccountDecorator" location="${parameters.billingAccountDecoratorLocation}">
+                    <decorator-section name="body">
+<!--                     <container id="custom-header" style="smaller lighter blue"> -->
+<!--                     	<label text="${uiLabelMap.PageTitleEditBillingAccount}" style="h3"></label> -->
+<!--                     </container> -->
+                        <screenlet title="${uiLabelMap.PageTitleEditBillingAccount}">
+                            <include-form name="EditBillingAccount" location="component://accounting/widget/BillingAccountForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+         </section>
+    </screen>
+    <screen name="EditBillingAccountRoles">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditBillingAccountRoles"/>
+                <set field="headerItem" value="billingaccount"/>
+                <set field="tabButtonItem" value="EditBillingAccountRoles"/>
+
+                <set field="billingAccountId" from-field="parameters.billingAccountId"/>
+                <entity-one entity-name="BillingAccount" value-field="billingAccount"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonBillingAccountDecorator" location="${parameters.billingAccountDecoratorLocation}">
+                    <decorator-section name="body">
+<!--                     <container style="header smaller blue lighter"> -->
+<!--                     	<label text="${uiLabelMap.PageTitleAddBillingAccountRoles}" style="h3"> -->
+<!--                     	</label> -->
+<!--                     </container> -->
+                        <!-- <screenlet id="BllingAccountRolePanel" title="${uiLabelMap.PageTitleAddBillingAccountRoles}" collapsible="true">
+                            <include-form name="AddBillingAccountRole" location="component://accounting/widget/BillingAccountForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListBillingAccountRoles" location="component://accounting/widget/BillingAccountForms.xml"/> -->
+                        <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/generalledger/jqxListBillingAccountRoles.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+         </section>
+    </screen>
+    <screen name="EditBillingAccountTerms">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditBillingAccountTerms"/>
+                <set field="headerItem" value="billingaccount"/>
+                <set field="tabButtonItem" value="EditBillingAccountTerms"/>
+                <set field="billingAccountId" from-field="parameters.billingAccountId"/>
+                <set field="billingAccountTermId" from-field="parameters.billingAccountTermId"/>
+                <entity-one entity-name="BillingAccount" value-field="billingAccount"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonBillingAccountDecorator" location="${parameters.billingAccountDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/generalledger/jqxListBillingAccountTerms.ftl"/>
+                        	</html>
+                        </platform-specific>
+<!--                     <container style="header smaller blue lighter"> -->
+<!--                     	<label text="${uiLabelMap.PageTitleEditBillingAccountTerms} - ${uiLabelMap.AccountingAccountId} ${billingAccount.billingAccountId}" style="h3"> -->
+<!--                     	</label> -->
+<!--                     </container> -->
+                        <!-- <screenlet title="${uiLabelMap.PageTitleEditBillingAccountTerms} - ${uiLabelMap.AccountingAccountId} ${billingAccount.billingAccountId}" navigation-menu-name="EditBillingAccountTermsSubTabBar">
+                            <include-menu location="component://accounting/widget/AccountingMenus.xml" name="EditBillingAccountTermsSubTabBar"/>
+                            <include-form name="ListBillingAccountTerms" location="component://accounting/widget/BillingAccountForms.xml"/>
+                        </screenlet> -->
+<!--                         <section> -->
+<!--                             <condition> -->
+<!--                                 <not><if-empty field="parameters.billingAccountTermId"/></not> -->
+<!--                             </condition> -->
+<!--                             <actions> -->
+<!--                                 <entity-one entity-name="BillingAccountTerm" value-field="billingAccountTerm"/> -->
+<!--                             </actions> -->
+<!--                             <widgets> -->
+<!--                             <container style="header smaller blue lighter"> -->
+<!--                     			<label text="${uiLabelMap.PageTitleEditBillingAccountTerms}" style="h3"> -->
+<!--                     			</label> -->
+<!--                     		</container> -->
+<!--                                 <screenlet title="${uiLabelMap.PageTitleEditBillingAccountTerms}"> -->
+<!--                                     <include-form name="EditBillingAccountTerms" location="component://accounting/widget/BillingAccountForms.xml"/> -->
+<!--                                 </screenlet> -->
+<!--                             </widgets> -->
+<!--                             <fail-widgets> -->
+<!--                             <container style="header smaller blue lighter"> -->
+<!--                     			<label text="${uiLabelMap.AccountingCreateBillingAccountTerm}" style="h3"> -->
+<!--                     			</label> -->
+<!--                     		</container> -->
+<!--                                 <screenlet title="${uiLabelMap.AccountingCreateBillingAccountTerm}"> -->
+<!--                                     <include-form name="EditBillingAccountTerms" location="component://accounting/widget/BillingAccountForms.xml"/> -->
+<!--                                 </screenlet> -->
+<!--                             </fail-widgets> -->
+<!--                         </section> -->
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+         </section>
+    </screen>
+    
+        <screen name="NewBillingAccountTerms">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditBillingAccountTerms"/>
+                <set field="headerItem" value="billingaccount"/>
+                <set field="tabButtonItem" value="EditBillingAccountTerms"/>
+
+                <set field="billingAccountId" from-field="parameters.billingAccountId"/>
+                <set field="billingAccountTermId" from-field="parameters.billingAccountTermId"/>
+                <entity-one entity-name="BillingAccount" value-field="billingAccount"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonBillingAccountDecorator" location="${parameters.billingAccountDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <not><if-empty field="parameters.billingAccountTermId"/></not>
+                            </condition>
+                            <actions>
+                                <entity-one entity-name="BillingAccountTerm" value-field="billingAccountTerm"/>
+                            </actions>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.PageTitleEditBillingAccountTerms}" navigation-menu-name="EditBillingAccountTermsSubTabBar">
+                                    <include-menu location="component://accounting/widget/AccountingMenus.xml" name="EditBillingAccountTermsSubTabBar"/>
+                                    <include-form name="EditBillingAccountTerms" location="component://accounting/widget/BillingAccountForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                            <fail-widgets>
+                                <screenlet title="${uiLabelMap.AccountingCreateBillingAccountTerm}">
+                                    <include-form name="EditBillingAccountTerms" location="component://accounting/widget/BillingAccountForms.xml"/>
+                                </screenlet>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+         </section>
+    </screen>
+    <screen name="BillingAccountInvoices">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditBillingAccountInvoices"/>
+                <set field="headerItem" value="billingaccount"/>
+                <set field="tabButtonItem" value="BillingAccountInvoices"/>
+
+                <set field="billingAccountId" from-field="parameters.billingAccountId"/>
+                <set field="billingAccountTermId" from-field="parameters.billingAccountTermId"/>
+                <entity-one entity-name="BillingAccount" value-field="billingAccount"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonBillingAccountDecorator" location="${parameters.billingAccountDecoratorLocation}">
+                    <decorator-section name="body">
+                    <!-- <container id="custom-header" style="smaller lighter blue">
+                    	<label text="${uiLabelMap.AccountingFindInvoices}" style="h3"></label>
+                    </container>
+                        <screenlet id="BillingAccountInvoicePanel" title="${uiLabelMap.AccountingFindInvoices}" collapsible="true">
+                            <include-form name="lookupInvoicesStatus" location="component://accounting/widget/InvoiceForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListBillingAccountInvoices" location="component://accounting/widget/BillingAccountForms.xml"/> -->
+                        <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/generalledger/jqxListBillingAccountInvoices.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+         </section>
+    </screen>
+    <screen name="BillingAccountOrders">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditBillingAccountOrders"/>
+                <set field="headerItem" value="billingaccount"/>
+                <set field="tabButtonItem" value="BillingAccountOrders"/>
+
+                <set field="billingAccountId" from-field="parameters.billingAccountId"/>
+                <entity-one entity-name="BillingAccount" value-field="billingAccount"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/order/BillingAccountOrders.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonBillingAccountDecorator" location="${parameters.billingAccountDecoratorLocation}">
+                    <decorator-section name="body">
+<!--                     	<container id="custom-header" style="smaller lighter blue"> -->
+<!--                     		<label text="${uiLabelMap.PageTitleEditBillingAccountOrders}" style="h3"></label> -->
+<!--                     	</container> -->
+                        <!-- <screenlet title="${uiLabelMap.PageTitleEditBillingAccountOrders}">
+                            <include-form name="ListBillingAccountOrders" location="component://accounting/widget/BillingAccountForms.xml"/>
+                        </screenlet> -->
+                        <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/generalledger/jqxListBillingAccountOrders.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="BillingAccountPayments">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditBillingAccountPayments"/>
+                <set field="headerItem" value="billingaccount"/>
+                <set field="tabButtonItem" value="BillingAccountPayments"/>
+
+                <set field="billingAccountId" from-field="parameters.billingAccountId"/>
+                <entity-one entity-name="BillingAccount" value-field="billingAccount"/>
+                <entity-condition entity-name="BillingAccountAndRole" list="billToCustomers" filter-by-date="true">
+                    <condition-list>
+                        <condition-expr field-name="billingAccountId" from-field="billingAccountId"/>
+                        <condition-expr field-name="roleTypeId" value="BILL_TO_CUSTOMER"/>
+                    </condition-list>
+                </entity-condition>
+                <set field="billToCustomer" from-field="billToCustomers[0]"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonBillingAccountDecorator" location="${parameters.billingAccountDecoratorLocation}">
+                    <decorator-section name="body">
+<!--                     	<container id="custom-header" style="smaller lighter blue"> -->
+<!--                     		<label text="${uiLabelMap.AccountingCreatePayment}" style="h3"></label> -->
+<!--                     	</container> -->
+                        <!-- <screenlet id="BillingAccountPaymentPanel" title="${uiLabelMap.AccountingCreatePayment}" collapsible="true">
+                            <include-form name="CreateIncomingBillingAccountPayment" location="component://accounting/widget/BillingAccountForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListBillingAccountPayments" location="component://accounting/widget/BillingAccountForms.xml"/> -->
+                        <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/generalledger/jqxListBillingAccountPayments.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+         </section>
+    </screen>
+</screens>

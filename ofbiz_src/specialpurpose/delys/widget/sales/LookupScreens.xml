@@ -1,0 +1,446 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+    <!-- Global decorator for Lookup pop-up windows or layered CSS -->
+    <screen name="LookupDecorator">
+        <section>
+            <condition>
+                <not><if-compare operator="equals" value="Y" field="parameters.ajaxLookup"/></not>
+            </condition>
+            <widgets>
+                <section>
+                    <actions>
+                        <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                        <service service-name="getUserPreferenceGroup" result-map="prefResult"><field-map field-name="userPrefGroupTypeId" value="GLOBAL_PREFERENCES"/></service>
+                        <set field="userPreferences" from-field="prefResult.userPrefMap" global="true"/>
+                        <property-map resource="general" map-name="generalProperties" global="true"/>
+                        <set field="visualThemeId" from-field="userPreferences.VISUAL_THEME" global="true"/>
+                        <service service-name="getVisualThemeResources"><field-map field-name="visualThemeId"/><field-map field-name="themeResources" from-field="layoutSettings"/></service>
+                        <set field="layoutSettings" from-field="themeResources" default-value="${layoutSettings}" global="true"/>
+                        <set field="layoutSettings.javaScripts[]" value="/images/fieldlookup.js" global="true"/>
+                        <set field="messagesTemplateLocation" from-field="layoutSettings.VT_MSG_TMPLT_LOC[0]" default-value="component://common/webcommon/includes/messages.ftl"/>
+                    </actions>
+                    <widgets>
+                        <section>
+	                        <condition><if-compare value="layer" operator="not-equals" field="parameters.presentation"/></condition>
+	                        <widgets>
+	                        	<platform-specific><html><html-template location="component://common/webcommon/includes/lookup.ftl" /></html></platform-specific>
+	                        </widgets>
+                        </section>
+                        <platform-specific><html><html-template location="${messagesTemplateLocation}"/></html></platform-specific>
+                        <section>
+                            <condition><not><if-empty-section section-name="body"/></not></condition>
+                            <widgets><decorator-section-include name="body"/></widgets>
+                            <fail-widgets>
+                                <screenlet id="findScreenlet" icon-style="icon-search" title="${title}" collapsible="true" padded="false" initially-collapsed="false">
+                                    <decorator-section-include name="search-options"/>
+                                </screenlet>
+<!--                                 <screenlet id="findResult" collapsible="true" padded="false" initially-collapsed="false"> -->
+<!--                                     <decorator-section-include name="search-results"/> -->
+<!--                                 </screenlet> -->
+								<container id="search-results"><decorator-section-include name="search-results"/></container>
+                            </fail-widgets>
+                        </section>
+                        <section>
+                        	<condition><if-compare value="layer" operator="not-equals" field="parameters.presentation"/></condition>
+                            <widgets><platform-specific><html><html-template location="component://common/webcommon/includes/lookupFooter.ftl"/></html></platform-specific></widgets>
+                        </section>
+                    </widgets>
+                </section>
+            </widgets>
+            <fail-widgets>
+                <section>
+                    <actions>
+                        <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                        <set field="searchType" from-field="parameters.searchType" default-value="${searchType}"/>
+                        <script location="component://common/webcommon/WEB-INF/actions/includes/FindAutocompleteOptions.groovy"/>
+                    </actions>
+                    <widgets>
+                        <decorator-screen name="AjaxGlobalDecorator">
+                            <decorator-section name="body">
+                                <platform-specific>
+                                    <html>
+                                        <html-template location="component://common/webcommon/includes/ajaxAutocompleteOptions.ftl" />
+                                    </html>
+                                </platform-specific>
+                            </decorator-section>
+                        </decorator-screen>
+                    </widgets>
+                </section>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="AjaxGlobalDecorator">
+        <section>
+            <actions>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true" />
+            </actions>
+            <widgets>
+                <platform-specific>
+                    <html>
+                        <html-template location="component://common/webcommon/includes/htmlheader-for-ajax.ftl" />
+                    </html>
+                </platform-specific>
+                <decorator-section-include name="body" />
+                <platform-specific>
+                    <html>
+                        <html-template location="component://common/webcommon/includes/htmlfooter-for-ajax.ftl" />
+                    </html>
+                </platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    
+	<screen name="LookupSalesOrderHeaderAndShipInfo">
+        <section>
+            <condition>
+                <if-has-permission permission="ORDERMGR" action="_VIEW"/>
+            </condition>
+            <actions>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="DelysAdminUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="title" value="${uiLabelMap.PageTitleLookupSalesOrderHeaderAndShipInfo}"/>
+                <set field="queryString" from-field="result.queryString"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="OrderHeaderAndShipGroupsByUserLoginManager"/>
+                <set field="searchFields" value="[orderId, orderName, toName]"/>
+                <set field="andCondition" value="${groovy: return org.ofbiz.entity.condition.EntityCondition.makeCondition(org.ofbiz.base.util.UtilMisc.toMap('orderTypeId', 'SALES_ORDER', 'roleTypeId', 'SHIP_TO_CUSTOMER', 'partyId', parameters.userLogin.partyId))}"/>
+            	<set field="searchDistinct" value="true"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="LookupDecorator"><!-- location="component://common/widget/CommonScreens.xml" -->
+                    <decorator-section name="search-options">
+                        <include-form name="lookupSalesOrderHeaderAndShipInfo" location="component://delys/widget/sales/FieldLookupForms.xml"/>
+                    </decorator-section>
+                    <decorator-section name="search-results">
+                		<include-form name="ListLookupSalesOrderHeaderAndShipInfo" location="component://delys/widget/sales/FieldLookupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="LookupSalesOrderHeaderAndShipInfoMini">
+        <section>
+            <condition>
+                <if-has-permission permission="ORDERMGR" action="_VIEW"/>
+            </condition>
+            <actions>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="WidgetUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="DelysAdminUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="title" value="${uiLabelMap.PageTitleLookupSalesOrderHeaderAndShipInfo}"/>
+                <set field="queryString" from-field="result.queryString"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="OrderHeaderAndShipGroupsByUserLoginManager"/>
+                <set field="searchFields" value="[orderId, orderName, toName]"/>
+                <set field="andCondition" value="${groovy: return org.ofbiz.entity.condition.EntityCondition.makeCondition(org.ofbiz.base.util.UtilMisc.toMap('orderTypeId', 'SALES_ORDER', 'roleTypeId', 'SHIP_TO_CUSTOMER', 'partyId', parameters.userLogin.partyId))}"/>
+            	<set field="searchDistinct" value="true"/>
+            	<property-map map-name="uiLabelMap" resource="DelysUiLabels"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="LookupDecorator"><!-- location="component://common/widget/CommonScreens.xml" -->
+                	<decorator-section name="body">
+                    	<platform-specific>
+							<html><html-template location="component://delys/webapp/delys/sales/lookup/LookupOrderHeaderAndShipGroupJQ.ftl"/></html>
+						</platform-specific>
+                    </decorator-section>
+                    <!-- <decorator-section name="search-options">
+                        <include-form name="lookupSalesOrderHeaderAndShipInfoMini" location="component://delys/widget/sales/FieldLookupForms.xml"/>
+                    </decorator-section>
+                    <decorator-section name="search-results">
+                		<include-form name="ListLookupSalesOrderHeaderAndShipInfoMini" location="component://delys/widget/sales/FieldLookupForms.xml"/>
+                    </decorator-section> -->
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="LookupPartyGroupName">
+        <section>
+            <condition>
+                <if-service-permission service-name="partyBasePermissionCheck" main-action="VIEW"/>
+            </condition>
+            <actions>
+                <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="title" value="${uiLabelMap.PartyLookupPartyByName}"/>
+                <set field="queryString" from-field="result.queryString"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                
+                <!-- entries needed for lookup ajax auto completer -->
+                <!-- required: entity to search in -->
+                <set field="entityName" value="PartyNameView"/>
+                <set field="andCondition" value="${groovy: return org.ofbiz.entity.condition.EntityCondition.makeCondition(org.ofbiz.base.util.UtilMisc.toMap('parentTypeId', 'PARTY_GROUP'))}"/>
+            	
+                <!-- required: fields to search a match -->
+                <!-- the first element from searchFields is returned after user selection --> 
+                <!-- it might be hidden based on widget.autocompleter.displayReturnField property in widget.properties -->                
+                <set field="searchFields" value="[partyId, firstName, middleName, lastName, groupName]"/>
+ 
+                <!-- optional: fields to display in the given order, default is searchFields -->
+                <set field="displayFields" value="[firstName, lastName, groupName]"/>
+                
+                <!-- optional: additional entity condition (named andCondition) added to search query -->
+                <script location="component://party/webapp/partymgr/WEB-INF/actions/party/StatusCondition.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="search-options">
+                        <include-form name="lookupPartyGroupName" location="component://delys/widget/sales/LookupForms.xml"/>
+                    </decorator-section>
+                    <decorator-section name="search-results">
+                        <include-form name="listLookupPartyGroupName" location="component://delys/widget/sales/LookupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="LookupCustomTimeSalesPeriod">
+        <section>
+            <!-- <condition>
+                <if-service-permission service-name="partyBasePermissionCheck" main-action="VIEW"/>
+            </condition> -->
+            <actions>
+                <property-map resource="DelysAdminUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="title" value="${uiLabelMap.DALookupCustomTimeSalesPeriodByName}"/>
+                <set field="queryString" from-field="result.queryString"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="CustomTimePeriod"/>
+                <set field="searchFields" value="[customTimePeriodId, periodName]"/>
+                <set field="displayFields" value="[customTimePeriodId, periodName]"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/LookupCustomTimeSalesPeriod.groovy"/>
+            	<set field="parameters.periodTypeId_op" value="in"/>
+    			<set field="parameters.periodTypeId_value" value="${groovy: ['SALES_MONTH', 'SALES_QUARTER', 'SALES_YEAR', 'SALES_WEEK']}"/>
+            	<set field="parameters.isClosed_op" value="notEqual"/>
+            	<set field="parameters.isClosed_value" value="N"/>
+            </actions>
+            <widgets>
+            	<section>
+            		<condition>
+            			<not><if-empty field="parameters.periodTypeId"/></not>
+            		</condition>
+            		<actions>
+            			<set field="parameters.periodTypeId_op" value=""/>
+        				<set field="parameters.periodTypeId_value" value=""/>
+            		</actions>
+            		<widgets></widgets>
+            	</section>
+                <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="search-options">
+                        <include-form name="lookupCustomTimeSalesPeriod" location="component://delys/widget/sales/LookupForms.xml"/>
+                    </decorator-section>
+                    <decorator-section name="search-results">
+                        <include-form name="listLookupCustomTimeSalesPeriod" location="component://delys/widget/sales/LookupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <!-- SalesForecast Lookup Screen -->
+    <screen name="LookupSalesForecast">
+        <section>
+            <actions>
+                <property-map resource="MarketingUiLabels" map-name="uiLabelMap" global="true"/>
+
+                <set field="title" value="${uiLabelMap.PageTitleLookupSalesForecast}"/>
+                <set field="queryString" from-field="result.queryString"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="search-options">
+                        <include-form name="LookupSalesForecast" location="component://marketingdelys/widget/LookupForms.xml"/>
+                    </decorator-section>
+                    <decorator-section name="search-results">
+                        <include-form name="ListLookupSalesForecast" location="component://marketingdelys/widget/LookupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <!-- Lookup JQX -->
+    <screen name="LookupCustomerNameOfDis">
+        <section>
+            <actions>
+                <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="WidgetUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="DelysAdminUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="title" value="${uiLabelMap.PartyLookupPartyByName}" global="true"/>
+                <set field="queryString" from-field="result.queryString"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="PartyRoleNameDetailPartyRelTo"/>
+                <set field="searchFields" value="[partyId, firstName, middleName, lastName, groupName]"/>
+                <set field="andCondition" value="${groovy: org.ofbiz.entity.condition.EntityCondition.makeCondition(org.ofbiz.base.util.UtilMisc.toMap('partyIdFrom', parameters.userLogin.partyId, 'partyRelationshipTypeId', 'CUSTOMER', 'roleTypeId', 'DELYS_CUSTOMER_GT'))}"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
+                    <!-- <decorator-section name="search-options">
+                        <include-form name="lookupCustomerName" location="component://party/widget/partymgr/LookupForms.xml"/>
+                    </decorator-section>
+                    <decorator-section name="search-results">
+                        <include-form name="listLookupCustomerName" location="component://party/widget/partymgr/LookupForms.xml"/>
+                    </decorator-section> -->
+                    <decorator-section name="body">
+                    	<platform-specific>
+							<html><html-template location="component://delys/webapp/delys/sales/lookup/LookupCustomerNameOfDisJQ.ftl"/></html>
+						</platform-specific>
+						<!-- <label>Hello</label> -->
+                    </decorator-section>
+                    
+                    <!-- 
+                    <form name="lookupCustomerName" target="LookupCustomerName" type="single"
+				        header-row-style="header-row" default-table-style="basic-table">
+				        <field name="roleTypeId"><hidden value="CUSTOMER"/></field>
+				        <field name="partyId" title="${uiLabelMap.PartyPartyId}"><text-find/></field>
+				        <field name="partyTypeId" title="${uiLabelMap.PartyTypeId}">
+				            <drop-down allow-empty="true">
+				                <entity-options description="${description}" entity-name="PartyType"/>
+				            </drop-down>
+				        </field>
+				        <field name="firstName" title="${uiLabelMap.PartyFirstName}"><text-find/></field>
+				        <field name="lastName"  title="${uiLabelMap.PartyLastName}"><text-find/></field>
+				        <field name="groupName" title="${uiLabelMap.PartyGroupName}"><text-find/></field>
+				        <field name="noConditionFind"><hidden value="Y"/>if this isn't there then with all fields empty no query will be done</field>
+				        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-small btn-primary open-sans"><submit image-location="icon-search" button-type="button"/></field>
+				    </form>
+    
+    				<form name="listLookupCustomerName" type="list" list-name="listIt" paginate-target="LookupCustomerName"
+				        odd-row-style="alternate-row" default-table-style="table table-striped table-bordered table-hover dataTable">
+				        <actions>
+				            <set field="inputFields" from-field="parameters"/>
+				            <set field="orderBy" value="partyId"/>
+				            <set field="entityName" value="PartyRoleNameDetail"/>
+				            <script location="component://party/webapp/partymgr/WEB-INF/actions/party/FindLookUp.groovy"/>
+				        </actions>
+				        <field name="partyId" title="${uiLabelMap.PartyPartyId}"  widget-style="btn btn-mini btn-info">
+				            <hyperlink also-hidden="false" target-type="plain" description="${partyId}" target="javascript:set_value('${partyId}')"/>
+				        </field>
+				        <field name="partyTypeId" title="${uiLabelMap.PartyTypeId}">
+				            <display-entity also-hidden="false" entity-name="PartyType" description="${description}"/>
+				        </field>
+				        <field name="firstName" title="${uiLabelMap.PartyFirstName}"><display/></field>
+				        <field name="lastName"  title="${uiLabelMap.PartyLastName}"><display/></field>
+				        <field name="groupName" title="${uiLabelMap.PartyGroupName}"><display/></field>
+				    </form>
+                     -->
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="LookupCustomerGTNameOfCompany">
+        <section>
+            <actions>
+                <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="WidgetUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="DelysAdminUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="productStoreId" from-field="parameters.productStoreId" default-value="${parameters.parm0}"/>
+                <set field="title" value="${uiLabelMap.PartyLookupPartyByName}" global="true"/>
+                <set field="queryString" from-field="result.queryString"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="entityName" value="ProductStoreRoleDetailPartyStatus"/>
+                <set field="searchFields" value="[partyId, firstName, middleName, lastName, groupName]"/>
+                <set field="andCondition" value="${groovy: org.ofbiz.entity.condition.EntityCondition.makeCondition(org.ofbiz.base.util.UtilMisc.toMap('productStoreId', productStoreId, 'roleTypeId', 'CUSTOMER'))}"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                    	<platform-specific>
+							<html><html-template location="component://delys/webapp/delys/sales/lookup/LookupCustomerGTNameOfCompanyJQ.ftl"/></html>
+						</platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="LookupProductJQ">
+        <section>
+            <actions>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="title" value="${uiLabelMap.PageTitleLookupProduct}"/>
+                <set field="queryString" from-field="result.queryString"/>
+                <set field="entityName" value="Product"/>
+                <set field="searchFields" value="[productId, internalName, brandName]"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
+                    <!-- <decorator-section name="search-options">
+                        <include-form name="lookupProduct" location="component://product/widget/catalog/FieldLookupForms.xml"/>
+                    </decorator-section>
+                    <decorator-section name="search-results">
+                        <include-form name="listLookupProduct" location="component://product/widget/catalog/FieldLookupForms.xml"/>
+                    </decorator-section> -->
+                    <decorator-section name="body">
+                    	<platform-specific>
+							<html><html-template location="component://delys/webapp/delys/sales/lookup/LookupProductJQ.ftl"/></html>
+						</platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    
+    
+    <!-- HUNGNC START EDIT -->
+    <screen name="LookupInventoryItemsNotLocation">
+        <section>
+            <actions>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="DelysUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="DelysSalesUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="title" value="${uiLabelMap.ProductLookupInventory}"/>
+                <!-- <set field="entityName" value="Product"/>
+                <set field="searchFields" value="[productId, internalName, brandName]"/> -->
+                <set field="facilityId" from-field="parameters.facilityId" default-value="${parameters.parm0}"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="search-options">
+                        <include-form name="lookupInventoryItemsNotLocation" location="component://delys/widget/sales/LookupForms.xml"/>
+                    </decorator-section>
+                    <decorator-section name="search-results">
+                        <include-form name="listLookupInventoryItemsNotLocation" location="component://delys/widget/sales/LookupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="LookupInventoryItemLocation">
+        <section>
+            <actions>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="DelysUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="DelysSalesUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="title" value="${uiLabelMap.ProductLookupInventoryLocation}"/>
+                <!-- <set field="entityName" value="Product"/>
+                <set field="searchFields" value="[productId, internalName, brandName]"/> -->
+                <set field="facilityId" from-field="parameters.facilityId" default-value="${parameters.parm0}"/>
+                <set field="productId" from-field="parameters.productId" default-value="${parameters.parm1}"/>
+                <set field="parameters.facilityId" from-field="facilityId"/>
+                <set field="parameters.productId" from-field="productId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="search-options">
+                        <include-form name="lookupInventoryItemLocation" location="component://delys/widget/sales/LookupForms.xml"/>
+                    </decorator-section>
+                    <decorator-section name="search-results">
+                        <include-form name="listLookupInventoryItemLocation" location="component://delys/widget/sales/LookupForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <!-- HUNGNC START EDIT -->
+    
+</screens>

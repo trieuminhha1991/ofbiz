@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>BaseAccounting Services</description>
+    <vendor></vendor>
+    <version>1.0</version>
+
+    <service name="noSyntaxError" engine="interface">
+        <description>
+            Dummy service to prevent empty files and syntax error - Remove when the 1st real service will be added here 
+        </description>
+    </service> 
+    
+   <service name="getInvoiceTotal" engine="groovy" invoke="" location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/invoice/getInvoiceTotal.groovy">
+   		<attribute name="invoiceId" mode="IN" type="String" optional="false"></attribute>
+   		<attribute name="total" mode="OUT" type="String" optional="false"></attribute>
+   </service>
+   
+   <service name="getInvoiceNotApplied" engine="groovy" invoke="" location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/invoice/getInvoiceNotApplied.grooovy">
+   		<attribute name="invoiceId" mode="IN" type="String" optional="false"></attribute>
+   		<attribute name="amountToApply" mode="OUT" type="String" optional="false"></attribute>
+   </service>
+   
+   <service engine="java" name="JqxGetListInvoices" invoke="getListInvoices" location="com.olbius.acc.invoice.JqxInvoiceServices">
+   		<implements service="jqxGetListInterface"/>
+   		<override name="listIterator" type="List"></override>
+   </service>
+    <service engine="java" name="jqxGetListDiscountAndPromotion" invoke="jqxGetListDiscountAndPromotion" location="com.olbius.acc.invoice.JqxInvoiceServices">
+        <implements service="jqxGetListInterface"/>
+    </service>
+    <service engine="java" name="jqxGetDetailDiscountForParty" invoke="jqxGetDetailDiscountForParty" location="com.olbius.acc.invoice.JqxInvoiceServices">
+        <implements service="jqxGetListInterface"/>
+    </service>
+   <service engine="java" name="JQGetAllListInvoice" invoke="getAllListInvoiceJQ" location="com.olbius.acc.invoice.JqxInvoiceServices">
+   		<implements service="jqxGetListInterface"/>
+   </service>
+   
+   <service engine="java" name="JqxGetListInvoiceItems" invoke="getListInvoiceItemJQ" location="com.olbius.acc.invoice.JqxInvoiceServices" auth="true">
+   		<implements service="jqxGetListInterface"/>
+   </service>
+   
+   <service engine="java" name="JQGetListOrderInvoiceNote" invoke="getListOrderInvoiceNoteJQ" location="com.olbius.acc.invoice.JqxInvoiceServices">
+   		<implements service="jqxGetListInterface"/>
+   </service>
+   <service engine="java" name="JQGetListProductStoreManager" invoke="getListProductStoreManagerJQ" location="com.olbius.acc.invoice.JqxInvoiceServices">
+   		<implements service="jqxGetListInterface"/>
+   </service>
+   
+   <service engine="java" name="getListInvoiceProducts" invoke="getListInvoiceProducts" location="com.olbius.acc.invoice.JqxInvoiceServices">
+   		<implements service="jqxGetListInterface"/>
+       <override name="listIterator" type="List"></override>
+   </service>
+
+    <service name="jqxGetListInvoiceByDueDate" engine="java" invoke="jqxGetListInvoiceByDueDate" location="com.olbius.acc.invoice.JqxInvoiceServices">
+        <implements service="jqxGetListInterface" />
+        <override name="listIterator" type="List"></override>
+    </service>
+   
+   <service name="JqxGetListPaymentNotApplied" engine="java" invoke="getListNotAppliedPayments" location="com.olbius.acc.invoice.JqxInvoiceServices">
+   		<implements service="jqxGetListInterface"/>
+   		<override name="listIterator" type="List"></override>
+   </service>
+   
+   <service name="getListApplications" engine="groovy" invoke="" location="component://accounting/webapp/accounting/WEB-INF/actions/invoice/CreateApplicationList.groovy">
+       <attribute name="invoice" mode="IN" type="org.ofbiz.entity.GenericValue" optional="false"></attribute>
+       <attribute name="invoiceApplications" mode="OUT" type="List" optional="false" ></attribute>
+   </service>
+   
+   	<service name="JqxGetListInvoiceApplications" engine="java" invoke="getListInvoiceApplications" location="com.olbius.acc.invoice.JqxInvoiceServices">
+   		<implements service="jqxGetListInterface"/>
+   		<override name="listIterator" type="List"></override>
+   	</service>
+   	<service name="JQGetListPosTerminalByProductStore" engine="java" invoke="getListPosTerminalByProductStoreJQ" location="com.olbius.acc.invoice.JqxInvoiceServices">
+   		<implements service="jqxGetListInterface"/>
+   	</service>
+   
+   	<service name="getListNotAppliedPayments" engine="groovy" invoke="" location="component://accounting/webapp/accounting/WEB-INF/actions/invoice/ListNotAppliedPayments.groovy">
+       <attribute name="invoiceId" mode="IN" type="String" optional="false"></attribute>
+       <attribute name="payments" mode="OUT" type="List" optional="true" ></attribute>
+   	</service>
+   
+   	<service name="getInvoicesItemTypes" engine="groovy" invoke="" location="component://accounting/webapp/accounting/WEB-INF/actions/invoice/GetInvoiceItemTypes.groovy">
+       <attribute name="invoiceTypeId" mode="IN" type="String" optional="false"></attribute>
+       <attribute name="invoiceItemTypes" mode="OUT" type="List" optional="true" ></attribute>
+   	</service>
+   	<service name="updateReturnOrderAfterInvoicePaid" engine="java"
+        location="com.olbius.acc.invoice.InvoiceServices" invoke="updateReturnOrderAfterInvoicePaid" auth="true">
+        <attribute name="invoiceId" mode="IN" type="String"></attribute>
+   	</service>
+	<service name="createVoucherInvoice" engine="java"
+        location="com.olbius.acc.invoice.InvoiceServices" invoke="createVoucherInvoice" auth="true" default-entity-name="Voucher">
+        <auto-attributes mode="OUT" include="pk" optional="false"></auto-attributes>
+        <auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+        <attribute name="uploadedFile" type="java.nio.ByteBuffer" mode="IN" optional="true"/>
+		<attribute name="_uploadedFile_fileName" type="String" mode="IN" optional="true"/>
+        <attribute name="_uploadedFile_contentType" type="String" mode="IN" optional="true"/>
+        <attribute name="invoiceId" type="String" mode="IN" optional="true"/>
+        <override name="voucherForm" optional="false"></override>
+        <override name="voucherSerial" optional="false"></override>
+		<override name="voucherNumber" optional="false"></override>
+   	</service>
+   	<service name="updateInvoiceVoucher" engine="java" invoke="updateInvoiceVoucher" auth="true" default-entity-name="Voucher"
+   		location="com.olbius.acc.invoice.InvoiceServices" >
+   		<auto-attributes mode="IN" include="pk" optional="false"></auto-attributes>
+        <auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+        <attribute name="uploadedFile" type="java.nio.ByteBuffer" mode="IN" optional="true"/>
+		<attribute name="_uploadedFile_fileName" type="String" mode="IN" optional="true"/>
+        <attribute name="_uploadedFile_contentType" type="String" mode="IN" optional="true"/>
+        <attribute name="invoiceId" type="String" mode="IN" optional="true"/>
+        <override name="voucherForm" optional="false"></override>
+        <override name="voucherSerial" optional="false"></override>
+		<override name="voucherNumber" optional="false"></override>
+	</service>
+   	<service engine="java" name="JQGetListVoucherInvoice" invoke="getListVoucherInvoiceJQ" location="com.olbius.acc.invoice.JqxInvoiceServices">
+   		<implements service="jqxGetListInterface"/>
+   	</service>
+   	<service engine="java" name="JQGetListVoucher" invoke="getListVoucherJQ" location="com.olbius.acc.invoice.JqxInvoiceServices" auth="true">
+   		<implements service="jqxGetListInterface"/>
+   	</service>
+   	<service engine="java" name="JQGetInvoiceItemTypeList" invoke="getInvoiceItemTypeListJQ" location="com.olbius.acc.invoice.JqxInvoiceServices" auth="true">
+   		<implements service="jqxGetListInterface"/>
+   	</service>
+   	<service name="getInvoiceItemExcludeTax" engine="java" invoke="getInvoiceItemExcludeTax" 
+   		location="com.olbius.acc.invoice.InvoiceServices" auth="true">
+   		<attribute name="invoiceId" mode="IN" type="String"></attribute>
+   		<attribute name="listReturn" mode="OUT" type="List"></attribute>
+	</service>
+   	<service name="getInvoiceItemTax" engine="java" invoke="getInvoiceItemTax" 
+   		location="com.olbius.acc.invoice.InvoiceServices" auth="true">
+   		<attribute name="invoiceId" mode="IN" type="String"></attribute>
+   		<attribute name="listReturn" mode="OUT" type="List"></attribute>
+	</service>
+	<service name="updateInvoiceItemOlbius" engine="java" invoke="updateInvoiceItem" location="com.olbius.acc.invoice.InvoiceServices"
+		auth="true" default-entity-name="InvoiceItem">
+		<permission-service service-name="acctgInvoicePermissionCheck" main-action="UPDATE"/>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+        <override name="description" allow-html="safe"/>	
+	</service>
+	<service name="createInvoiceItemOlbius" engine="java" invoke="createInvoiceItem" location="com.olbius.acc.invoice.InvoiceServices"
+		auth="true" default-entity-name="InvoiceItem">
+		<permission-service service-name="acctgInvoicePermissionCheck" main-action="CREATE"/>
+        <auto-attributes mode="IN" include="pk" optional="true"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+        <override name="invoiceId" optional="false"></override>
+        <override name="description" allow-html="safe"/>	
+	</service>
+	<service name="removeInvoiceVoucher" engine="java" invoke="removeInvoiceVoucher" location="com.olbius.acc.invoice.InvoiceServices"
+		auth="true" default-entity-name="Voucher">
+		<auto-attributes mode="IN" include="pk" optional="false"></auto-attributes>	
+	</service>
+	<service name="verifyInvoiceVoucher" engine="java" invoke="verifyInvoiceVoucher" location="com.olbius.acc.invoice.InvoiceServices"
+		auth="true">
+		<attribute name="invoiceId" mode="IN" type="String"></attribute>	
+	</service>
+	<service name="updateTransactionDateForInvoice" engine="java" invoke="updateTransactionDateForInvoice" location="com.olbius.acc.invoice.InvoiceServices"
+		auth="true">
+		<attribute name="invoiceId" mode="IN" type="String"></attribute>	
+	</service>	
+	<service name="JQGetListOrderExternalNotVAT" engine="java" invoke="getGetListOrderExternalNotVATJQ" location="com.olbius.acc.invoice.InvoiceServices">
+		<implements service="jqxGetListInterface"/>
+   	</service>
+   	<service name="getInvoiceItemListByOrderNotVAT" engine="java" invoke="getInvoiceItemListByOrderNotVAT" auth="true"
+   		location="com.olbius.acc.invoice.InvoiceServices">
+   		<attribute name="listOrderId" mode="IN" type="List"></attribute>
+   		<attribute name="returnDate" mode="IN" type="String"></attribute>
+   		<attribute name="listReturn" mode="OUT" type="List"></attribute>	
+	</service>
+	<service name="getPOSTerminalNotCashHandover" engine="java" invoke="getPOSTerminalNotCashHandover" auth="true"
+		location="com.olbius.acc.invoice.InvoiceServices">
+		<attribute name="productStoreId" mode="IN" type="String"></attribute>
+		<attribute name="listReturn" mode="OUT" type="List"></attribute>	
+	</service>
+	<service name="createCashHandoverTerminal" engine="java" invoke="createCashHandoverTerminal" auth="true"
+		location="com.olbius.acc.invoice.InvoiceServices">
+		<attribute name="partyId" mode="IN" type="String"></attribute>	
+		<attribute name="productStoreId" mode="IN" type="String"></attribute>	
+		<attribute name="dateReceived" mode="IN" type="Timestamp"></attribute>	
+		<attribute name="posTerminalIdList" mode="IN" type="List"></attribute>	
+		<attribute name="amount" mode="IN" type="BigDecimal"></attribute>	
+	</service>
+	<service name="updateInvoiceNewStatus" engine="java" invoke="updateInvoiceNewStatus" auth="true"
+		location="com.olbius.acc.invoice.InvoiceServices">
+		<attribute name="invoiceId" mode="IN" type="String"></attribute>	
+	</service>
+	<service name="setInvoiceNewStatus" engine="java" invoke="setInvoiceNewStatus" auth="true"
+		location="com.olbius.acc.invoice.InvoiceServices">
+		<attribute name="invoiceId" mode="IN" type="String" optional="false"></attribute>
+		<attribute name="newStatusId" mode="IN" type="String"></attribute>	
+	</service>
+	<service name="createInvoiceTaxInfo" engine="java" invoke="createInvoiceTaxInfo" auth="true"
+		location="com.olbius.acc.invoice.InvoiceServices">
+		<attribute name="invoiceId" mode="IN" type="String"></attribute>	
+		<attribute name="partyName" mode="IN" type="String" optional="true"></attribute>	
+		<attribute name="taxCode" mode="IN" type="String" optional="true"></attribute>	
+		<attribute name="address" mode="IN" type="String" optional="true"></attribute>	
+		<attribute name="countryGeoId" mode="IN" type="String" optional="true"></attribute>	
+		<attribute name="stateGeoId" mode="IN" type="String" optional="true"></attribute>	
+		<attribute name="phoneNbr" mode="IN" type="String" optional="true"></attribute>	
+	</service>
+	<service name="editInvoiceTaxInfo" engine="java" invoke="editInvoiceTaxInfo" auth="true"
+		location="com.olbius.acc.invoice.InvoiceServices" default-entity-name="InvoiceTaxInfo">
+		<auto-attributes mode="IN" include="pk" optional="false"></auto-attributes>
+		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>	
+	</service>
+	<service name="getInvoiceSpecification" engine="java" invoke="getInvoiceSpecification" auth="true"
+		location="com.olbius.acc.invoice.InvoiceServices">
+		<attribute name="invoiceId" mode="IN" type="String"></attribute>
+		<attribute name="listProduct" mode="OUT" type="List"></attribute>
+        <attribute name="listSalesTax" mode="OUT" type="List"></attribute>
+        <attribute name="listDiscount" mode="OUT" type="List"></attribute>
+        <attribute name="listProductTax0" mode="OUT" type="List"></attribute>
+	</service>
+	<service name="createOrStoreVoucherInvoiceSystemConfig" engine="java" invoke="createOrStoreVoucherInvoiceSystemConfig" auth="true"
+		location="com.olbius.acc.invoice.InvoiceServices" default-entity-name="VoucherInvoiceSystemConfig">
+		<auto-attributes mode="IN" include="pk" optional="false"></auto-attributes>
+		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+		<override name="systemValue" optional="false"></override>	
+		<override name="fromDate" optional="true"></override>
+	</service>
+	<service name="getInvoiceVoucherDiffValueConfig" engine="java" invoke="getInvoiceVoucherDiffValueConfig" auth="true"
+		location="com.olbius.acc.invoice.InvoiceServices">
+		<attribute name="invoiceId" mode="IN" type="String"></attribute>
+		<attribute name="systemValue" mode="OUT" type="String" optional="true"></attribute>	
+	</service>
+	<service name="getDeliveryItemDetailByInvoice" engine="java" invoke="getDeliveryItemDetailByInvoice" auth="true"
+		location="com.olbius.acc.invoice.InvoiceServices">
+		<attribute name="invoiceId" mode="IN" type="String"></attribute>
+		<attribute name="deliveryItemList" mode="OUT" type="List" optional="true"></attribute>	
+	</service>
+	<service name="modifyDeliveryItem" engine="java" invoke="modifyDeliveryItem" auth="true"
+		location="com.olbius.acc.invoice.InvoiceServices">
+		<attribute name="deliveryItemChange" mode="IN" type="String"></attribute>	
+		<attribute name="invoiceId" mode="IN" type="String"></attribute>
+	</service>
+	<service name="createDeliveryItemChange" engine="java" invoke="createDeliveryItemChange"
+		auth="true" location="com.olbius.acc.invoice.InvoiceServices" default-entity-name="DeliveryItemChange">
+		<auto-attributes mode="OUT" include="pk" optional="false"></auto-attributes>
+		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+		<override name="deliveryId" optional="false"></override>	
+		<override name="deliveryItemSeqId" optional="false"></override>	
+		<override name="invoiceId" optional="false"></override>	
+		<override name="invoiceItemSeqId" optional="false"></override>	
+	</service>
+	<service name="exportProductFromFacility" engine="java" invoke="exportProductFromFacility" auth="true"
+		location="com.olbius.acc.invoice.InvoiceServices">
+		<attribute name="productId" mode="IN" type="String"></attribute>
+		<attribute name="facilityId" mode="IN" type="String"></attribute>
+		<attribute name="orderId" mode="IN" type="String"></attribute>
+		<attribute name="orderItemSeqId" mode="IN" type="String"></attribute>
+		<attribute name="ownerPartyId" type="String" mode="IN" optional="false"/>
+		<attribute name="unitCost" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="purCost" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="quantity" type="BigDecimal" mode="IN" optional="false"/>
+        <attribute name="currencyUomId" type="String" mode="IN" optional="true"/>	
+	</service>
+    <service name="importProductToFacility" engine="java" invoke="importProductToFacility" auth="true"
+             location="com.olbius.acc.invoice.InvoiceServices">
+        <attribute name="productId" mode="IN" type="String"></attribute>
+        <attribute name="facilityId" mode="IN" type="String"></attribute>
+        <attribute name="orderId" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="orderItemSeqId" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="ownerPartyId" type="String" mode="IN" optional="false"/>
+        <attribute name="unitCost" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="purCost" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="quantity" type="BigDecimal" mode="IN" optional="false"/>
+        <attribute name="currencyUomId" type="String" mode="IN" optional="true"/>
+        <attribute name="oldInventoryItemId" type="String" mode="IN" optional="true"/>
+    </service>
+    <service engine="java" name="JQGetShipmentItemBillingByInvoice" invoke="getShipmentItemBillingByInvoiceJQ" auth="true"
+             location="com.olbius.acc.invoice.JqxInvoiceServices">
+        <implements service="jqxGetListInterface"/>
+    </service>
+    <service name="cancelShipmentAndDeliveryByShipment" engine="java" invoke="cancelShipmentAndDeliveryByShipment" auth="true"
+             location="com.olbius.acc.invoice.InvoiceServices">
+        <attribute name="shipmentIds" mode="IN" type="List"></attribute>
+    </service>
+    <service name="updateOrderAndItemByInvoice" engine="java" invoke="updateOrderAndItemByInvoice" auth="true"
+             location="com.olbius.acc.invoice.InvoiceServices">
+        <attribute name="invoiceId" mode="IN" type="String"></attribute>
+    </service>
+</services>

@@ -1,0 +1,1 @@
+<h3 class="header smaller lighter blue">${uiLabelMap.CommonView}</h3>

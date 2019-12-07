@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+
+	<simple-method method-name="getLastSystemInfoNote"
+		short-description="Get the last 3 system info notes" login-required="false">
+		<if-not-empty field="userLogin">
+			<entity-and entity-name="NoteData" list="systemInfoNotes">
+				<field-map field-name="noteParty" from-field="userLogin.partyId" />
+				<field-map field-name="noteName" value="SYSTEMNOTE" />
+				<order-by field-name="-noteDateTime" />
+			</entity-and>
+			<else>
+				<entity-and entity-name="NoteData" list="systemInfoNotes">
+					<field-map field-name="noteParty" value="_NA_" />
+					<field-map field-name="noteName" value="SYSTEMNOTE" />
+					<order-by field-name="-noteDateTime" />
+				</entity-and>
+			</else>
+		</if-not-empty>
+		<if-not-empty field="systemInfoNotes">		
+			<set field="lastSystemInfoNote1" from-field="systemInfoNotes[0]" />
+			<field-to-result field="lastSystemInfoNote1" />
+			<if-not-empty field="systemInfoNotes[2]">
+				<set field="lastSystemInfoNote2" from-field="systemInfoNotes[1]" />
+				<field-to-result field="lastSystemInfoNote2" />
+			</if-not-empty>
+			<if-not-empty field="systemInfoNotes[3]">
+				<set field="lastSystemInfoNote3" from-field="systemInfoNotes[2]" />
+				<field-to-result field="lastSystemInfoNote3" />
+			</if-not-empty>
+		</if-not-empty>
+	</simple-method>
+</simple-methods>

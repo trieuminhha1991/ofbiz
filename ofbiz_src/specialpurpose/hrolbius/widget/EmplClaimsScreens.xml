@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-screen.xsd">
+	<screen name="FindEmplClaims">
+		<section>
+			<actions>
+				<set field="headerItem" value="emplClaims" global="true"/>
+				<set field="titleProperty" value="FindEmplClaims" />
+				<set field="navMenuName" value="FindEmplClaimSubTarBar"/>
+				<set field="navMenuLocation" value="component://hrolbius/widget/menus/EmplClaimMenus.xml"/>
+				<set field="layoutSettings.javaScripts[+0]" value="/delys/images/js/ckeditor/ckeditor.js"
+					global="true" />
+				<set field="formName" value="EditEmplClaim"/>	
+				<entity-condition list="claimTypeList" entity-name="ClaimType"></entity-condition>
+			</actions>
+			<widgets>
+				<decorator-screen name="EmplClaimsCommonDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<widgets>
+<!-- 								<decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml"> -->
+<!-- 		                      		<decorator-section name="search-options"> -->
+<!-- 		                                <include-form name="FindEmplClaim" location="component://hrolbius/widget/forms/EmplClaimsForm.xml"/> -->
+<!-- 		                            </decorator-section> -->
+<!-- 		                            <decorator-section name="search-results"> -->
+<!-- 		                                <include-form location="component://hrolbius/widget/forms/EmplClaimsForm.xml" name="EmplClaimList"/> -->
+<!-- 		                            </decorator-section> -->
+<!-- 		                        </decorator-screen> -->
+		                        <platform-specific>
+		                            <html>
+		                                <html-template location="component://hrolbius/webapp/hrolbius/ftl/listJQEmplClaim.ftl"/>
+		                            </html>
+		                        </platform-specific>
+		                    </widgets>								
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EditEmplClaim">
+		<section>
+			<actions>
+				<set field="headerItem" value="emplClaims" global="true"/>
+				<set field="titleProperty" value="EditEmplClaim" />
+				<set field="layoutSettings.javaScripts[+0]" value="/delys/images/js/ckeditor/ckeditor.js"
+					global="true" />
+				<set field="formName" value="EditEmplClaim"/>	
+				<!-- <set field="textAreaId" value="description"/> -->	
+			</actions>
+			<widgets>
+				<decorator-screen name="EmplClaimsCommonDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<entity-condition list="claimTypeList" entity-name="ClaimType"></entity-condition>
+							</actions>
+							<widgets>
+								<screenlet title="${uiLabelMap.EditEmplClaim}">
+									<!-- <include-form location="component://hrolbius/widget/forms/EmplClaimsForm.xml" name="EditEmplClaim"/> -->
+									<platform-specific>
+										<html>		
+											<html-template location="component://hrolbius/webapp/hrolbius/ftl/Claims/EditEmplClaim.ftl"/>																				
+										</html>
+									</platform-specific>
+								</screenlet>
+							</widgets>
+						</section>
+					</decorator-section>		
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EmplClaimApproval">
+		<section>
+			<actions>
+				<set field="headerItem" value="emplClaims" global="true"/>
+				<set field="titleProperty" value="EmplClaimApproval" />
+				<entity-one value-field="emplClaim" entity-name="EmplClaim"></entity-one>
+			</actions>
+			<widgets>
+				<decorator-screen name="EmplClaimsCommonDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<not>
+									<if-empty field="emplClaim"/>
+								</not>
+							</condition>
+							<actions>
+								<entity-one value-field="partyClaimming" entity-name="Person">
+									<field-map field-name="partyId" from-field="emplClaim.partyId"/>
+								</entity-one>
+								<entity-condition list="emplClaimAssoc" entity-name="EmplClaimAssoc">
+									<condition-expr field-name="emplClaimId" from-field="emplClaim.emplClaimId"/>
+									<order-by field-name="emplClaimIdTo"/>
+								</entity-condition>
+								<entity-condition list="emplClaimSettlementList" entity-name="EmplClaimRoleType" filter-by-date="true">
+									<condition-list>
+										<condition-expr field-name="emplClaimId" from-field="emplClaim.emplClaimId"/>
+										<condition-expr field-name="roleTypeId" value="CLAIM_SETTLEMENT"/>
+									</condition-list>
+								</entity-condition>
+								<!-- <entity-condition list="statusList" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="EMPL_CLAIM_STATUS"/>
+									<order-by field-name=""/>
+								</entity-condition> -->
+							</actions>
+							<widgets>
+								<screenlet title="${uiLabelMap.EmplClaimApproval}">
+									<!-- <include-form location="component://hrolbius/widget/forms/EmplClaimsForm.xml" name="EditEmplClaim"/> -->
+									<platform-specific>
+										<html>		
+											<html-template location="component://hrolbius/webapp/hrolbius/ftl/Claims/EmplClaimApproval.ftl"/>																				
+										</html>
+									</platform-specific>
+								</screenlet>
+							</widgets>
+							<fail-widgets>
+								<label style="h3">${uiLabelMap.CannotFoundClaim}</label>
+							</fail-widgets>
+						</section>
+					</decorator-section>		
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+</screens>	

@@ -1,0 +1,1376 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+    <!-- ========================================================= -->
+    <!-- ======================== Defaults ======================= -->
+    <!-- ========================================================= -->
+    <title>View Entity of BaseSales Component</title>
+    <description>None</description>
+    <copyright></copyright>
+    <version></version>
+    
+	<view-entity entity-name="SalesStatementAndCustomTimePeriod"
+            package-name="org.ofbiz.statement"
+            title="View for selecting the sales statement with its time period.">
+      	<member-entity entity-alias="STM" entity-name="SalesStatement"/>
+      	<member-entity entity-alias="CTP" entity-name="CustomTimePeriod"/>
+      	<alias-all entity-alias="STM"/>
+      	<alias-all entity-alias="CTP">
+          	<exclude field="organizationPartyId"/>
+      	</alias-all>
+      	<view-link entity-alias="STM" rel-entity-alias="CTP">
+        	<key-map field-name="customTimePeriodId"/>
+      	</view-link>
+    </view-entity>
+    <view-entity entity-name="SalesStatementItemDetail" package-name="com.olbius.statement">
+    	<member-entity entity-alias="SS" entity-name="SalesStatement"/>
+    	<member-entity entity-alias="SSD" entity-name="SalesStatementDetail"/>
+    	<alias-all entity-alias="SS"></alias-all>
+    	<alias-all entity-alias="SSD">
+    		<exclude field="salesStatementId"/>
+    	</alias-all>
+    	<view-link entity-alias="SS" rel-entity-alias="SSD">
+    		<key-map field-name="salesStatementId"/>
+    	</view-link>
+    </view-entity>
+    
+    <view-entity entity-name="OrderHeaderNeedDelivery" package-name="com.olbius.order" never-cache="true"
+            title="Order Header And Roles View Entity from Customer Id to Seller Id And Salesman, Sup, ...">
+      	<member-entity entity-alias="OH" entity-name="OrderHeader"/>
+      	<member-entity entity-alias="ORLCUST" entity-name="OrderRole"><description>Placing customer</description></member-entity>
+      	<member-entity entity-alias="ORLVEND" entity-name="OrderRole"><description>Bill from vendor</description></member-entity>
+      	<member-entity entity-alias="PRTCUST" entity-name="Party"/>
+      	<member-entity entity-alias="PRTVEND" entity-name="Party"/>
+      	<member-entity entity-alias="ARG" entity-name="Agreement"/>
+      	<member-entity entity-alias="OIMD" entity-name="OrderItemMinDetail"/>
+      	<member-entity entity-alias="PFND" entity-name="PartyFullNameDetailSimple"/>
+      	<member-entity entity-alias="REQ" entity-name="Requirement"/>
+      	<member-entity entity-alias="OREQCOM" entity-name="OrderRequirementCommitment"/>
+      	<alias-all entity-alias="OH"/>
+      	<alias-all entity-alias="OIMD">
+      		<exclude field="orderId"/>
+      	</alias-all>
+      	<alias name="customerId" entity-alias="ORLCUST" field="partyId"/>
+      	<alias name="customerCode" entity-alias="PRTCUST" field="partyCode"/>
+      	<alias name="sellerId" entity-alias="ORLVEND" field="partyId"/>
+      	<alias name="sellerCode" entity-alias="PRTVEND" field="partyCode"/>
+      	<alias name="sellerTypeId" entity-alias="PRTVEND" field="partyTypeId"/>
+      	<alias name="agreementId" entity-alias="ARG"/>
+      	<alias name="agreementCode" entity-alias="ARG"/>
+      	<alias name="customerFullName" entity-alias="PFND" field="fullName"/>
+      	<alias name="requirementStatusId" entity-alias="REQ" field="statusId"/>
+      	<view-link entity-alias="OH" rel-entity-alias="ORLCUST" rel-optional="true">
+        	<key-map field-name="orderId"/>
+      	</view-link>
+      	<view-link entity-alias="OH" rel-entity-alias="ORLVEND" rel-optional="true">
+        	<key-map field-name="orderId"/>
+      	</view-link>
+      	<view-link entity-alias="ORLCUST" rel-entity-alias="PRTCUST" rel-optional="true">
+        	<key-map field-name="partyId"/>
+      	</view-link>
+      	<view-link entity-alias="ORLVEND" rel-entity-alias="PRTVEND" rel-optional="true">
+        	<key-map field-name="partyId"/>
+      	</view-link>
+      	<view-link entity-alias="OH" rel-entity-alias="ARG" rel-optional="true">
+        	<key-map field-name="agreementId"/>
+      	</view-link>
+      	<view-link entity-alias="OH" rel-entity-alias="OIMD" rel-optional="true">
+      		<key-map field-name="orderId"/>
+      	</view-link>
+      	<view-link entity-alias="ORLCUST" rel-entity-alias="PFND" rel-optional="true">
+      		<key-map field-name="partyId"/>
+      	</view-link>
+      	<view-link entity-alias="OH" rel-entity-alias="OREQCOM" rel-optional="true">
+      		<key-map field-name="orderId"/>
+      	</view-link>
+     	<view-link entity-alias="OREQCOM" rel-entity-alias="REQ" rel-optional="true">
+      		<key-map field-name="requirementId"/>
+      	</view-link>
+      	<entity-condition>
+      		<condition-list>
+      			<condition-expr field-name="roleTypeId" entity-alias="ORLCUST" value="PLACING_CUSTOMER"/>
+      			<condition-expr field-name="roleTypeId" entity-alias="ORLVEND" value="BILL_FROM_VENDOR"/>
+      		</condition-list>
+      	</entity-condition>
+  	</view-entity>
+  	
+  	
+  	<view-entity entity-name="OrderHeaderDelivery" package-name="com.olbius.order" never-cache="true"
+            title="Order Header And Roles View Entity from Customer Id to Seller Id And Salesman, Sup, ...">
+      	<member-entity entity-alias="OH" entity-name="OrderHeader"/>
+      	<member-entity entity-alias="ORLCUST" entity-name="OrderRole"><description>Placing customer</description></member-entity>
+      	<member-entity entity-alias="ORLVEND" entity-name="OrderRole"><description>Bill from vendor</description></member-entity>
+      	<member-entity entity-alias="PRTCUST" entity-name="Party"/>
+      	
+      	<member-entity entity-alias="PTCTDCUST" entity-name="PartyContactTempData"/>
+      	<member-entity entity-alias="PTCACUST" entity-name="PostalAddress"/>
+      	<member-entity entity-alias="GEOPOINT" entity-name="GeoPoint"></member-entity>
+      	
+      	<member-entity entity-alias="PRTVEND" entity-name="Party"/>
+      	<member-entity entity-alias="ARG" entity-name="Agreement"/>
+      	<member-entity entity-alias="OIMD" entity-name="OrderItemMinDetail"/>
+      	<member-entity entity-alias="PFND" entity-name="PartyFullNameDetailSimple"/>
+      	<member-entity entity-alias="REQ" entity-name="Requirement"/>
+      	<member-entity entity-alias="OREQCOM" entity-name="OrderRequirementCommitment"/>
+      	<alias-all entity-alias="OH"/>
+      	<alias-all entity-alias="OIMD">
+      		<exclude field="orderId"/>
+      	</alias-all>
+      	
+      	<alias name="latitude" entity-alias="GEOPOINT"></alias>
+		<alias name="longitude" entity-alias="GEOPOINT"></alias>
+		<alias name="geoPointId" entity-alias="GEOPOINT"></alias>
+		<alias name="address" field="address1" entity-alias="PTCACUST"></alias>
+      	
+      	<alias name="customerId" entity-alias="ORLCUST" field="partyId"/>
+      	<alias name="customerCode" entity-alias="PRTCUST" field="partyCode"/>
+      	<alias name="sellerId" entity-alias="ORLVEND" field="partyId"/>
+      	<alias name="sellerCode" entity-alias="PRTVEND" field="partyCode"/>
+      	<alias name="sellerTypeId" entity-alias="PRTVEND" field="partyTypeId"/>
+      	<alias name="agreementId" entity-alias="ARG"/>
+      	<alias name="agreementCode" entity-alias="ARG"/>
+      	<alias name="customerFullName" entity-alias="PFND" field="fullName"/>
+      	<alias name="requirementStatusId" entity-alias="REQ" field="statusId"/>
+      	<view-link entity-alias="OH" rel-entity-alias="ORLCUST" rel-optional="true">
+        	<key-map field-name="orderId"/>
+      	</view-link>
+      	
+      	<view-link entity-alias="ORLCUST" rel-entity-alias="PTCTDCUST" rel-optional="true">
+        	<key-map field-name="partyId" rel-field-name="partyId"/>
+      	</view-link>
+      	<view-link  entity-alias="PTCTDCUST" rel-entity-alias="PTCACUST" rel-optional="true">
+			<key-map field-name="postalAddressId" rel-field-name="contactMechId"/>
+		</view-link>
+      	<view-link  entity-alias="PTCACUST" rel-entity-alias="GEOPOINT" rel-optional="true">
+			<key-map field-name="geoPointId" rel-field-name="geoPointId"/>
+		</view-link>
+      	
+      	<view-link entity-alias="OH" rel-entity-alias="ORLVEND" rel-optional="true">
+        	<key-map field-name="orderId"/>
+      	</view-link>
+      	<view-link entity-alias="ORLCUST" rel-entity-alias="PRTCUST" rel-optional="true">
+        	<key-map field-name="partyId"/>
+      	</view-link>
+      	<view-link entity-alias="ORLVEND" rel-entity-alias="PRTVEND" rel-optional="true">
+        	<key-map field-name="partyId"/>
+      	</view-link>
+      	<view-link entity-alias="OH" rel-entity-alias="ARG" rel-optional="true">
+        	<key-map field-name="agreementId"/>
+      	</view-link>
+      	<view-link entity-alias="OH" rel-entity-alias="OIMD" rel-optional="true">
+      		<key-map field-name="orderId"/>
+      	</view-link>
+      	<view-link entity-alias="ORLCUST" rel-entity-alias="PFND" rel-optional="true">
+      		<key-map field-name="partyId"/>
+      	</view-link>
+      	<view-link entity-alias="OH" rel-entity-alias="OREQCOM" rel-optional="true">
+      		<key-map field-name="orderId"/>
+      	</view-link>
+     	<view-link entity-alias="OREQCOM" rel-entity-alias="REQ" rel-optional="true">
+      		<key-map field-name="requirementId"/>
+      	</view-link>
+      	<entity-condition>
+      		<condition-list>
+      			<condition-expr field-name="roleTypeId" entity-alias="ORLCUST" value="PLACING_CUSTOMER"/>
+      			<condition-expr field-name="roleTypeId" entity-alias="ORLVEND" value="BILL_FROM_VENDOR"/>
+      		</condition-list>
+      	</entity-condition>
+  	</view-entity>
+  	
+  	<view-entity entity-name="OrderReqCommitDetail" package-name="com.olbius.requirement">
+  		<member-entity entity-alias="ORDCOM" entity-name="OrderRequirementCommitment"/>
+  		<member-entity entity-alias="ORDHRD" entity-name="OrderHeader"/>
+  		<member-entity entity-alias="ORLCUST" entity-name="OrderRole"><description>Placing customer</description></member-entity>
+  		<member-entity entity-alias="OIMD" entity-name="OrderItemMinDetail"/>
+  		<member-entity entity-alias="PFND" entity-name="PartyFullNameDetailSimple"/>
+  		<alias-all entity-alias="OIMD" group-by="true">
+      		<exclude field="orderId"/>
+      		<exclude field="orderItemSeqId"/>
+      		<exclude field="productId"/>
+      	</alias-all>
+  		<alias name="orderId" entity-alias="ORDCOM" group-by="true"/>
+  		<alias name="requirementId" entity-alias="ORDCOM" group-by="true"/>
+  		<alias name="quantity" entity-alias="ORDCOM" function="sum"/>
+  		<alias name="orderDate" entity-alias="ORDHRD" group-by="true"/>
+  		<alias name="grandTotal" entity-alias="ORDHRD" group-by="true"/>
+  		<alias name="customerId" entity-alias="ORLCUST" field="partyId" group-by="true"/>
+      	<alias name="customerCode" entity-alias="PFND" field="partyCode" group-by="true"/>
+      	<alias name="customerFullName" entity-alias="PFND" field="fullName" group-by="true"/>
+  		<view-link entity-alias="ORDCOM" rel-entity-alias="ORDHRD">
+  			<key-map field-name="orderId"/>
+  		</view-link>
+  		<view-link entity-alias="ORDHRD" rel-entity-alias="OIMD" rel-optional="true">
+        	<key-map field-name="orderId"/>
+      	</view-link>
+  		<view-link entity-alias="ORDHRD" rel-entity-alias="ORLCUST" rel-optional="true">
+        	<key-map field-name="orderId"/>
+      	</view-link>
+  		<view-link entity-alias="ORLCUST" rel-entity-alias="PFND" rel-optional="true">
+      		<key-map field-name="partyId"/>
+      	</view-link>
+  		<entity-condition>
+      		<condition-list>
+      			<condition-expr field-name="roleTypeId" entity-alias="ORLCUST" value="PLACING_CUSTOMER"/>
+      		</condition-list>
+      	</entity-condition>
+  	</view-entity>
+  	
+  	<view-entity entity-name="OrderReqCommitItemDetail" package-name="com.olbius.requirement">
+  		<member-entity entity-alias="ORDCOM" entity-name="OrderRequirementCommitment"/>
+  		<member-entity entity-alias="ORDITEM" entity-name="OrderItem"/>
+  		<member-entity entity-alias="PROD" entity-name="Product"/>
+  		<alias-all entity-alias="ORDCOM"></alias-all>
+  		<alias name="itemQuantity" entity-alias="ORDITEM" field="quantity"/>
+  		<alias name="itemCancelQuantity" entity-alias="ORDITEM" field="cancelQuantity"/>
+  		<alias name="itemRemainQuantity">
+  			<complex-alias operator="-">
+  				<complex-alias-field field="quantity" entity-alias="ORDITEM" default-value="0"/>
+  				<complex-alias-field field="cancelQuantity" entity-alias="ORDITEM" default-value="0"/>
+  			</complex-alias>
+  		</alias>
+  		<alias name="productId" entity-alias="ORDITEM"/>
+  		<alias name="unitPrice" entity-alias="ORDITEM"/>
+  		<alias name="unitListPrice" entity-alias="ORDITEM"/>
+  		<alias name="productCode" entity-alias="PROD"/>
+  		<alias name="quantityUomId" entity-alias="PROD"/>
+  		<alias name="productName" entity-alias="PROD"/>
+  		<alias name="primaryProductCategoryId" entity-alias="PROD"/>
+  		<view-link entity-alias="ORDCOM" rel-entity-alias="ORDITEM">
+  			<key-map field-name="orderId"/>
+  			<key-map field-name="orderItemSeqId"/>
+  		</view-link>
+  		<view-link entity-alias="ORDITEM" rel-entity-alias="PROD">
+  			<key-map field-name="productId"/>
+  		</view-link>
+  	</view-entity>
+  	
+  	<view-entity entity-name="PartyToAndPartyNameAndTelephoneDetail" package-name="com.olbius.party"
+        title="Get info of partyIdTo. Party Relationship (PartyIdTo) and Party Detail (Person, PartyGroup, etc.) and Telephone View Entity">
+        <member-entity entity-alias="PTYF" entity-name="PartyToAndPartyNameDetail"/>
+        <member-entity entity-alias="PCM" entity-name="PartyContactMechPurpose"/>
+        <member-entity entity-alias="TN" entity-name="TelecomNumber" />
+        <alias-all entity-alias="PTYF"/>
+        <alias name="askForName" entity-alias="TN"/>
+        <alias name="phoneNumber" entity-alias="TN" field="contactNumber"/>
+        <view-link entity-alias="PTYF" rel-entity-alias="PCM" rel-optional="true">
+        	<key-map field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PCM" rel-entity-alias="TN" rel-optional="true">
+        	<key-map field-name="contactMechId"/>
+        </view-link>
+    </view-entity>
+  	
+  	<!-- <view-entity entity-name="PartyFromAndPartyNameCustomerDetail" package-name="com.olbius.party">
+		<member-entity entity-alias="PTYREL" entity-name="PartyFromAndPartyNameDetail"/>
+		<member-entity entity-alias="PTYCO" entity-name="PartyContactTempData"/>
+		<member-entity entity-alias="TELCOM" entity-name="TelecomNumber"/>
+		<alias-all entity-alias="PTYREL"/>
+		<alias-all entity-alias="PTYCO">
+			<exclude field="partyId"/>
+		</alias-all>
+		<alias name="telecomNumber" entity-alias="TELCOM" field="contactNumber"/>
+		<view-link entity-alias="PTYREL" rel-entity-alias="PTYCO" rel-optional="true">
+			<key-map field-name="partyId"/>
+		</view-link>
+		<view-link entity-alias="PTYCO" rel-entity-alias="TELCOM" rel-optional="true">
+			<key-map field-name="telecomId" rel-field-name="contactMechId"/>
+		</view-link>
+	</view-entity> -->
+	<view-entity entity-name="PartyToAndNameRelOutletDetail" package-name="com.olbius.party">
+		<member-entity entity-alias="PTYREL" entity-name="PartyToAndPartyNameDetail"/>
+		<member-entity entity-alias="PTYCO" entity-name="PartyContactTempData"/>
+		<member-entity entity-alias="TELCOM" entity-name="TelecomNumber"/>
+		<member-entity entity-alias="DISREL" entity-name="PartyToDistributorActive"/><!-- distributor -->
+		<member-entity entity-alias="EXEREL" entity-name="PartyFromSalesmanActive"/><!-- sales executive -->
+		<alias-all entity-alias="PTYREL"/>
+		<alias-all entity-alias="PTYCO">
+			<exclude field="partyId"/>
+		</alias-all>
+		<alias name="telecomNumber" entity-alias="TELCOM" field="contactNumber"/>
+		<alias name="distributorId" entity-alias="DISREL" field="partyId"/>
+		<alias name="distributorCode" entity-alias="DISREL" field="partyCode"/>
+		<alias name="distributorName" entity-alias="DISREL" field="fullName"/>
+		<alias name="salesmanId" entity-alias="EXEREL" field="partyId"/>
+		<alias name="salesmanCode" entity-alias="EXEREL" field="partyCode"/>
+		<alias name="salesmanName" entity-alias="EXEREL" field="fullName"/>
+		<view-link entity-alias="PTYREL" rel-entity-alias="PTYCO" rel-optional="true">
+			<key-map field-name="partyId"/>
+		</view-link>
+		<view-link entity-alias="PTYCO" rel-entity-alias="TELCOM" rel-optional="true">
+			<key-map field-name="telecomId" rel-field-name="contactMechId"/>
+		</view-link>
+		<view-link entity-alias="PTYREL" rel-entity-alias="DISREL" rel-optional="true">
+			<key-map field-name="partyId" rel-field-name="partyIdFrom"/>
+		</view-link>
+		<view-link entity-alias="PTYREL" rel-entity-alias="EXEREL" rel-optional="true">
+			<key-map field-name="partyId" rel-field-name="partyIdTo"/>
+		</view-link>
+	</view-entity>
+	<view-entity entity-name="PartyFromAndNameRelOutletDetail" package-name="com.olbius.party">
+		<member-entity entity-alias="PTYREL" entity-name="PartyFromAndPartyNameDetail"/>
+		<member-entity entity-alias="PTYCO" entity-name="PartyContactTempData"/>
+		<member-entity entity-alias="TELCOM" entity-name="TelecomNumber"/>
+		<member-entity entity-alias="DISREL" entity-name="PartyToDistributorActive"/><!-- distributor -->
+		<member-entity entity-alias="EXEREL" entity-name="PartyFromSalesmanActive"/><!-- sales executive -->
+		
+		<member-entity entity-alias="PA" entity-name="PostalAddress"></member-entity>
+		<member-entity entity-alias="GP" entity-name="GeoPoint"></member-entity>		
+		
+		<alias-all entity-alias="PTYREL"/>
+		<alias-all entity-alias="PTYCO">
+			<exclude field="partyId"/>
+		</alias-all>
+		<alias name="telecomNumber" entity-alias="TELCOM" field="contactNumber"/>
+		<alias name="distributorId" entity-alias="DISREL" field="partyId"/>
+		<alias name="distributorCode" entity-alias="DISREL" field="partyCode"/>
+		<alias name="distributorName" entity-alias="DISREL" field="fullName"/>
+		<alias name="salesmanId" entity-alias="EXEREL" field="partyId"/>
+		<alias name="salesmanCode" entity-alias="EXEREL" field="partyCode"/>
+		<alias name="salesmanName" entity-alias="EXEREL" field="fullName"/>
+		
+		<alias name="geoPointId" entity-alias="GP"></alias>
+		<alias name="latitude" entity-alias="GP"></alias>
+		<alias name="longitude" entity-alias="GP"></alias>
+
+		<view-link entity-alias="PTYREL" rel-entity-alias="PTYCO" rel-optional="true">
+			<key-map field-name="partyId"/>
+		</view-link>
+		<view-link entity-alias="PTYCO" rel-entity-alias="TELCOM" rel-optional="true">
+			<key-map field-name="telecomId" rel-field-name="contactMechId"/>
+		</view-link>
+		<view-link entity-alias="PTYREL" rel-entity-alias="DISREL" rel-optional="true">
+			<key-map field-name="partyId" rel-field-name="partyIdFrom"/>
+		</view-link>
+		<view-link entity-alias="PTYREL" rel-entity-alias="EXEREL" rel-optional="true">
+			<key-map field-name="partyId" rel-field-name="partyIdTo"/>
+		</view-link>
+		
+		
+		<view-link  entity-alias="PTYCO" rel-entity-alias="PA" rel-optional="true">
+			<key-map field-name="postalAddressId" rel-field-name="contactMechId" />
+		</view-link>
+		<view-link entity-alias="PA" rel-entity-alias="GP"  rel-optional="true">
+			<key-map field-name="geoPointId" rel-field-name="geoPointId" />
+		</view-link>
+		
+	</view-entity>
+	<view-entity entity-name="PartyToDistributorActive" package-name="com.olbius.party"
+        title="Get info of partyIdFrom. Party Relationship (PartyIdFrom) and Party Detail (Person, PartyGroup, etc.) View Entity">
+        <member-entity entity-alias="PRSP" entity-name="PartyRelationship"/>
+        <member-entity entity-alias="PTYF" entity-name="PartyFullNameDetailSimple"/>
+        <alias-all entity-alias="PTYF"/>
+        <alias name="partyIdFrom" entity-alias="PRSP"/>
+        <alias name="partyRelationshipTypeId" entity-alias="PRSP"/>
+        <alias name="fromDate" entity-alias="PRSP"/>
+        <alias name="thruDate" entity-alias="PRSP"/>
+        <alias name="roleTypeIdFrom" entity-alias="PRSP"/>
+        <alias name="roleTypeIdTo" entity-alias="PRSP"/>
+        <alias name="relStatusId" field="statusId" entity-alias="PRSP"/>
+        <view-link entity-alias="PRSP" rel-entity-alias="PTYF">
+        	<key-map field-name="partyIdTo" rel-field-name="partyId"/>
+        </view-link>
+        <entity-condition filter-by-date="true">
+        	<condition-list>
+        		<condition-expr field-name="roleTypeIdFrom" entity-alias="PRSP" value="CUSTOMER"/>
+				<condition-expr field-name="roleTypeIdTo" entity-alias="PRSP" value="DISTRIBUTOR"/>
+				<condition-expr field-name="partyRelationshipTypeId" entity-alias="PRSP" value="CUSTOMER_REL"/>
+        	</condition-list>
+        </entity-condition>
+    </view-entity>
+    <view-entity entity-name="PartyFromSalesmanActive" package-name="com.olbius.party"
+        title="Get info of partyIdFrom. Party Relationship (PartyIdFrom) and Party Detail (Person, PartyGroup, etc.) View Entity">
+        <member-entity entity-alias="PRSP" entity-name="PartyRelationship"/>
+        <member-entity entity-alias="PTYF" entity-name="PartyFullNameDetailSimple"/>
+        <alias-all entity-alias="PTYF"/>
+        <alias name="partyIdTo" entity-alias="PRSP"/>
+        <alias name="partyRelationshipTypeId" entity-alias="PRSP"/>
+        <alias name="fromDate" entity-alias="PRSP"/>
+        <alias name="thruDate" entity-alias="PRSP"/>
+        <alias name="roleTypeIdFrom" entity-alias="PRSP"/>
+        <alias name="roleTypeIdTo" entity-alias="PRSP"/>
+        <view-link entity-alias="PRSP" rel-entity-alias="PTYF">
+        	<key-map field-name="partyIdFrom" rel-field-name="partyId"/>
+        </view-link>
+        <entity-condition filter-by-date="true">
+        	<condition-list>
+				<condition-expr field-name="roleTypeIdFrom" entity-alias="PRSP" value="SALES_EXECUTIVE"/>
+				<condition-expr field-name="roleTypeIdTo" entity-alias="PRSP" value="CUSTOMER"/>
+				<condition-expr field-name="partyRelationshipTypeId" entity-alias="PRSP" value="SALES_REP_REL"/>
+			</condition-list>
+        </entity-condition>
+    </view-entity>
+    
+    
+	<view-entity entity-name="PartyOutletSimple" package-name="com.olbius.party">
+		<member-entity entity-alias="PTY" entity-name="Party"></member-entity>
+		<member-entity entity-alias="PRS" entity-name="PartyRelationship"></member-entity>
+		<alias-all entity-alias="PTY"></alias-all>
+		<alias name="fromDate" entity-alias="PRS"></alias>
+		<alias name="thruDate" entity-alias="PRS"></alias>
+		<view-link rel-entity-alias="PTY" entity-alias="PRS">
+			<key-map field-name="partyIdFrom" rel-field-name="partyId"/>
+		</view-link>
+		<entity-condition filter-by-date="true">
+			<condition-list>
+				<condition-expr field-name="roleTypeIdFrom" entity-alias="PRS" value="CUSTOMER"/>
+				<condition-expr field-name="roleTypeIdTo" entity-alias="PRS" value="INTERNAL_ORGANIZATIO"/>
+				<condition-expr field-name="partyRelationshipTypeId" entity-alias="PRS" value="CUSTOMER_REL"/>
+				<condition-expr field-name="partyTypeId" entity-alias="PTY" value="RETAIL_OUTLET"/>
+			</condition-list>
+		</entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="PartyContactAddressAndGeoPoint" package-name="com.olbius.party">
+		<member-entity entity-alias="PCMP" entity-name="PartyContactMechPurpose"></member-entity>
+		<member-entity entity-alias="PAD" entity-name="PostalAddress"></member-entity>
+		<member-entity entity-alias="GPT" entity-name="GeoPoint"></member-entity>
+		<alias-all entity-alias="PCMP"></alias-all>
+		<alias name="stateProvinceGeoId" entity-alias="PAD"></alias>
+		<alias name="districtGeoId" entity-alias="PAD"></alias>
+		<alias name="latitude" entity-alias="GPT"></alias>
+		<alias name="longitude" entity-alias="GPT"></alias>
+		<view-link rel-entity-alias="PAD" entity-alias="PCMP">
+			<key-map field-name="contactMechId"/>
+			<entity-condition filter-by-date="true">
+				<condition-expr field-name="contactMechPurposeTypeId" entity-alias="PCMP" value="PRIMARY_LOCATION"/>
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="GPT" entity-alias="PAD">
+			<key-map field-name="geoPointId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="PartyOutletLocation" package-name="com.olbius.party">
+		<member-entity entity-alias="POS" entity-name="PartyOutletSimple"></member-entity>
+		<member-entity entity-alias="PTGP" entity-name="PartyContactAddressAndGeoPoint"></member-entity>
+		<alias name="partyId" entity-alias="POS" group-by="true"></alias>
+		<alias name="latitude" entity-alias="PTGP" group-by="true"></alias>
+		<alias name="stateProvinceGeoId" entity-alias="PTGP" group-by="true"></alias>
+		<alias name="districtGeoId" entity-alias="PTGP" group-by="true"></alias>
+		<alias name="longitude" entity-alias="PTGP" group-by="true"></alias>
+		<alias name="fromDate" entity-alias="PTGP" field="fromDate" function="max"></alias>
+		<view-link rel-entity-alias="PTGP" entity-alias="POS">
+			<key-map field-name="partyId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="PartyOutletOrdered" package-name="com.olbius.party.order">
+		<member-entity entity-alias="POL" entity-name="PartyOutletLocation"></member-entity>
+		<member-entity entity-alias="OCMR" entity-name="OrderAndCustomerMostRecent"></member-entity>
+		<alias-all entity-alias="POL">
+			<exclude field="fromDate"/>
+			<exclude field="partyId"/>
+		</alias-all>
+		<alias name="orderDate" entity-alias="OCMR"></alias>
+		<alias name="productId" entity-alias="OCMR"></alias>
+		<alias name="productCode" entity-alias="OCMR"></alias>
+		<alias name="productName" entity-alias="OCMR"></alias>
+		<alias name="brandName" entity-alias="OCMR"></alias>
+		<alias name="primaryProductCategoryId" entity-alias="OCMR"></alias>
+		<alias name="statusId" entity-alias="OCMR"></alias>
+		<alias name="partyId" entity-alias="OCMR"></alias>
+		<view-link rel-entity-alias="POL" entity-alias="OCMR">
+			<key-map field-name="partyId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="CheckInHistoryDetail" package-name="com.olbius.party">
+		<member-entity entity-alias="CIH" entity-name="CheckInHistory"></member-entity>
+		<member-entity entity-alias="PTY" entity-name="PartyFullNameDetail"></member-entity>
+		<alias-all entity-alias="CIH"></alias-all>
+		<alias name="partyCode" entity-alias="PTY"></alias>
+		<alias name="partyName" field="fullName" entity-alias="PTY"></alias>
+		<view-link rel-entity-alias="PTY" entity-alias="CIH">
+			<key-map field-name="partyId"/>
+		</view-link>
+	</view-entity>
+	
+	<!-- [PQD] view represents the address and geo location of outlets -->
+	<view-entity entity-name="OutletAddressGeo" package-name="com.olbius.party">
+		<member-entity entity-alias="PCTD" entity-name="PartyContactTempData"></member-entity>
+		<member-entity entity-alias="PA" entity-name="PostalAddress"></member-entity>
+		<member-entity entity-alias="GP" entity-name="GeoPoint"></member-entity>		
+		<alias-all entity-alias="PCTD"></alias-all>
+		<alias-all entity-alias="PA"></alias-all>
+		<alias name="geoPointId" entity-alias="GP"></alias>
+		<alias name="latitude" entity-alias="GP"></alias>
+		<alias name="longitude" entity-alias="GP"></alias>
+		<view-link entity-alias="PCTD" rel-entity-alias="PA" rel-optional="true">
+			<key-map field-name="postalAddressId"  rel-field-name="contactMechId"/>
+		</view-link>
+		<view-link  entity-alias="PA" rel-entity-alias="GP" rel-optional="true">
+			<key-map field-name="geoPointId" rel-field-name="geoPointId"/>
+		</view-link>
+	</view-entity>
+
+    <view-entity entity-name="PartyDistributorAddressGeoPoint" package-name="com.olbius.salesmtl">
+        <member-entity entity-alias="PD" entity-name="PartyDistributor"></member-entity>
+        <member-entity entity-alias="PCTD" entity-name="PartyContactTempData"></member-entity>
+        <member-entity entity-alias="PA" entity-name="PostalAddress"></member-entity>
+        <member-entity entity-alias="GP" entity-name="GeoPoint"></member-entity>
+
+        <alias-all entity-alias="PD"></alias-all>
+        <alias name="latitude" entity-alias="GP" field="latitude"></alias>
+        <alias name="longitude" entity-alias="GP" field="longitude"></alias>
+        <alias name="geoPointId" entity-alias="GP" field="geoPointId"></alias>
+        <view-link rel-entity-alias="PCTD" entity-alias="PD" rel-optional="true">
+            <key-map field-name="partyId" rel-field-name="partyId"/>
+        </view-link>
+        <view-link rel-entity-alias="PA" entity-alias="PCTD" rel-optional="true">
+            <key-map field-name="postalAddressId" rel-field-name="contactMechId"/>
+        </view-link>
+        <view-link rel-entity-alias="GP" entity-alias="PA" rel-optional="true">
+            <key-map field-name="geoPointId" rel-field-name="geoPointId"/>
+        </view-link>
+
+
+    </view-entity>
+
+	<view-entity entity-name="PartyDistributorInfos" package-name="com.olbius.salesmtl">
+		<member-entity entity-alias="PD" entity-name="PartyDistributor"></member-entity>
+		<member-entity entity-alias="PCTD" entity-name="PartyContactTempData"></member-entity>
+		<member-entity entity-alias="PA" entity-name="PostalAddress"></member-entity>
+		<member-entity entity-alias="GP" entity-name="GeoPoint"></member-entity>
+		<member-entity entity-alias="PCMPE" entity-name="PartyContactMechPurpose"></member-entity>
+		<member-entity entity-alias="CME" entity-name="ContactMech"></member-entity>
+		<member-entity entity-alias="PNV" entity-name="PartyNameView"></member-entity>
+
+		<alias-all entity-alias="PD"></alias-all>
+		<alias name="groupName" entity-alias="PD" field="fullName"></alias>
+		<alias name="latitude" entity-alias="GP" field="latitude"></alias>
+		<alias name="longitude" entity-alias="GP" field="longitude"></alias>
+		<alias name="geoPointId" entity-alias="GP" field="geoPointId"></alias>
+		<alias name="emailAddress" entity-alias="CME" field="infoString"></alias>
+		<alias name="contactNumber" entity-alias="PCTD" field="telecomName"></alias>
+		<alias name="address1" entity-alias="PCTD" field="postalAddressName"></alias>
+		<alias name="supervisor">
+			<complex-alias operator="||' '||" >
+				<complex-alias-field entity-alias="PNV" field="lastName" default-value="''"/>
+				<complex-alias-field entity-alias="PNV" field="middleName" default-value="''"/>
+				<complex-alias-field entity-alias="PNV" field="firstName" default-value="''"/>
+			</complex-alias>
+		</alias>
+
+		<view-link rel-entity-alias="PCTD" entity-alias="PD" rel-optional="true">
+			<key-map field-name="partyId" rel-field-name="partyId"/>
+		</view-link>
+		<view-link rel-entity-alias="PA" entity-alias="PCTD" rel-optional="true">
+			<key-map field-name="postalAddressId" rel-field-name="contactMechId"/>
+		</view-link>
+		<view-link rel-entity-alias="GP" entity-alias="PA" rel-optional="true">
+			<key-map field-name="geoPointId" rel-field-name="geoPointId"/>
+		</view-link>
+		<view-link rel-entity-alias="PCMPE" entity-alias="PD" rel-optional="true">
+			<key-map field-name="partyId" rel-field-name="partyId"/>
+			<entity-condition>
+				<condition-expr field-name="contactMechPurposeTypeId" entity-alias="PCMPE" operator="equals" value="PRIMARY_EMAIL"/>
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="CME" entity-alias="PCMPE" rel-optional="true">
+			<key-map field-name="contactMechId" rel-field-name="contactMechId"/>
+		</view-link>
+		<view-link rel-entity-alias="PNV" entity-alias="PD" rel-optional="true">
+			<key-map field-name="supervisorId" rel-field-name="partyId"/>
+		</view-link>
+	</view-entity>
+
+    <view-entity entity-name="RouteCustomerAndPartyCustomer" package-name="com.olbius.salesmtl">
+        <member-entity entity-alias="RC" entity-name="RouteCustomer"></member-entity>
+        <member-entity entity-alias="PC" entity-name="PartyCustomer"></member-entity>
+
+        <alias entity-alias="RC" name="routeId"/>
+        <alias entity-alias="RC" name="customerId"/>
+        <alias entity-alias="RC" name="fromDate"/>
+        <alias entity-alias="RC" name="thruDate"/>
+        <alias entity-alias="RC" name="sequenceNum"/>
+
+        <alias-all entity-alias="PC">
+            <exclude field="partyId"/>
+        </alias-all>
+        <view-link entity-alias="RC" rel-entity-alias="PC" rel-optional="false">
+            <key-map field-name="customerId" rel-field-name="partyId"/>
+        </view-link>
+    </view-entity>
+
+    <view-entity entity-name="RouteCustomerAndPartyCustomerDetail" package-name="com.olbius.salesmtl">
+        <member-entity entity-alias="RC" entity-name="RouteCustomer"></member-entity>
+        <member-entity entity-alias="PCAGP" entity-name="PartyCustomerAddressGeoPoint"></member-entity>
+
+        <alias entity-alias="RC" name="routeId"/>
+        <alias entity-alias="RC" name="customerId"/>
+        <alias entity-alias="RC" name="fromDate"/>
+        <alias entity-alias="RC" name="thruDate"/>
+        <alias entity-alias="RC" name="sequenceNum"/>
+        <alias-all entity-alias="PCAGP"/>
+        <view-link entity-alias="RC" rel-entity-alias="PCAGP" rel-optional="false">
+            <key-map field-name="customerId" rel-field-name="partyId"/>
+        </view-link>
+    </view-entity>
+
+    <view-entity entity-name="PartyCustomerAndRouteFullDetail" package-name="com.olbius.salesmtl">
+        <member-entity entity-alias="RC" entity-name="RouteCustomerAvailable"></member-entity>
+        <member-entity entity-alias="PCAGP" entity-name="PartyCustomerAddressGeoPoint"></member-entity>
+        <member-entity entity-alias="PD" entity-name="PartyDistributor"></member-entity>
+        <member-entity entity-alias="PS" entity-name="PartySalesman"></member-entity>
+
+        <alias entity-alias="RC" name="routeId"/>
+        <alias entity-alias="RC" name="customerId"/>
+        <alias entity-alias="RC" name="fromDate"/>
+        <alias entity-alias="RC" name="thruDate"/>
+        <alias entity-alias="RC" name="sequenceNum"/>
+
+        <alias entity-alias="PD" name="distributorCode" field="partyCode"/>
+        <alias entity-alias="PD" name="distributorName" field="fullName"/>
+
+        <alias entity-alias="PS" name="salesmanCode" field="partyCode"/>
+        <alias entity-alias="PS" name="salesmanName" field="fullName"/>
+
+        <alias entity-alias="PCAGP" name="address1" field="postalAddressName"/>
+
+        <alias-all entity-alias="PCAGP"/>
+        <view-link entity-alias="PCAGP" rel-entity-alias="RC" rel-optional="true">
+            <key-map field-name="partyId" rel-field-name="customerId"/>
+        </view-link>
+        <view-link entity-alias="PCAGP" rel-entity-alias="PD" rel-optional="true">
+            <key-map field-name="distributorId" rel-field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PCAGP" rel-entity-alias="PS" rel-optional="true">
+            <key-map field-name="salesmanId" rel-field-name="partyId"/>
+        </view-link>
+    </view-entity>
+
+    <view-entity entity-name="PartyCustomerFullDetail" package-name="com.olbius.salesmtl">
+        <member-entity entity-alias="PCAGP" entity-name="PartyCustomerAddressGeoPoint"></member-entity>
+        <member-entity entity-alias="PD" entity-name="PartyDistributor"></member-entity>
+        <member-entity entity-alias="PS" entity-name="PartySalesman"></member-entity>
+        <member-entity entity-alias="PSUP" entity-name="PartyFullNameDetailSimple"></member-entity>
+
+        <alias entity-alias="PD" name="distributorCode" field="partyCode"/>
+        <alias entity-alias="PD" name="distributorName" field="fullName"/>
+
+        <alias entity-alias="PS" name="salesmanCode" field="partyCode"/>
+        <alias entity-alias="PS" name="salesmanName" field="fullName"/>
+        <alias entity-alias="PSUP" name="supervisorName" field="fullName"/>
+
+        <alias entity-alias="PCAGP" name="address1" field="postalAddressName"/>
+
+        <alias-all entity-alias="PCAGP"/>
+        <view-link entity-alias="PCAGP" rel-entity-alias="PD" rel-optional="true">
+            <key-map field-name="distributorId" rel-field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PCAGP" rel-entity-alias="PS" rel-optional="true">
+            <key-map field-name="salesmanId" rel-field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PCAGP" rel-entity-alias="PSUP" rel-optional="true">
+            <key-map field-name="supervisorId" rel-field-name="partyId"/>
+        </view-link>
+    </view-entity>
+
+    <view-entity entity-name="PartyCustomerDetailSimple" package-name="com.olbius.salesmtl">
+        <member-entity entity-alias="PC" entity-name="PartyCustomer"></member-entity>
+        <member-entity entity-alias="PCTD" entity-name="PartyContactTempData"></member-entity>
+        <member-entity entity-alias="PA" entity-name="PostalAddress"></member-entity>
+        <member-entity entity-alias="PD" entity-name="PartyDistributor"></member-entity>
+        <member-entity entity-alias="PS" entity-name="PartySalesman"></member-entity>
+        <member-entity entity-alias="PSUP" entity-name="PartyFullNameDetailSimple"></member-entity>
+        <member-entity entity-alias="REL" entity-name="PartyRelationship"></member-entity>
+
+        <alias entity-alias="PD" name="distributorCode" field="partyCode"/>
+        <alias entity-alias="PD" name="distributorName" field="fullName"/>
+
+        <alias entity-alias="PS" name="salesmanCode" field="partyCode"/>
+        <alias entity-alias="PS" name="salesmanName" field="fullName"/>
+        <alias entity-alias="PSUP" name="supervisorName" field="fullName"/>
+
+        <alias entity-alias="PCTD" name="address1" field="postalAddressName"/>
+        <alias entity-alias="PCTD" name="postalAddressName" field="postalAddressName"/>
+
+        <alias entity-alias="PA" name="countryGeoId" />
+        <alias entity-alias="PA" name="stateProvinceGeoId" />
+        <alias entity-alias="PA" name="districtGeoId" />
+        <alias entity-alias="PA" name="wardGeoId" />
+
+        <alias entity-alias="REL" name="groupId" field="partyIdFrom"/>
+
+        <alias-all entity-alias="PC"/>
+        <view-link entity-alias="PC" rel-entity-alias="PCTD" rel-optional="true">
+            <key-map field-name="partyId" rel-field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PC" rel-entity-alias="PD" rel-optional="true">
+            <key-map field-name="distributorId" rel-field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PC" rel-entity-alias="PS" rel-optional="true">
+            <key-map field-name="salesmanId" rel-field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PC" rel-entity-alias="PSUP" rel-optional="true">
+            <key-map field-name="supervisorId" rel-field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PC" rel-entity-alias="REL" rel-optional="true">
+            <key-map field-name="partyId" rel-field-name="partyIdTo"/>
+            <entity-condition>
+                <condition-list>
+                    <condition-expr entity-alias="REL" field-name="roleTypeIdFrom" operator="equals" value="CUSTOMER_CHAIN_GROUP" />
+                    <condition-expr entity-alias="REL" field-name="roleTypeIdTo" operator="equals" value="CHILD_MEMBER" />
+                </condition-list>
+            </entity-condition>
+        </view-link>
+        <view-link entity-alias="PCTD" rel-entity-alias="PA" rel-optional="true">
+            <key-map field-name="postalAddressId" rel-field-name="contactMechId"/>
+        </view-link>
+    </view-entity>
+
+    <view-entity entity-name="PartyCustomerAndRoute" package-name="com.olbius.salesmtl">
+        <member-entity entity-alias="RC" entity-name="RouteCustomer"></member-entity>
+        <member-entity entity-alias="PC" entity-name="PartyCustomer"></member-entity>
+        <alias entity-alias="RC" name="routeId"/>
+        <alias entity-alias="RC" name="fromDate"/>
+        <alias entity-alias="RC" name="thruDate"/>
+        <alias-all entity-alias="PC"/>
+        <view-link entity-alias="PC" rel-entity-alias="RC" rel-optional="true">
+            <key-map field-name="partyId" rel-field-name="customerId"/>
+        </view-link>
+    </view-entity>
+
+    <view-entity entity-name="PartyCustomerDetailAndRoute" package-name="com.olbius.salesmtl">
+        <member-entity entity-alias="RC" entity-name="RouteCustomer"></member-entity>
+        <member-entity entity-alias="PCAGP" entity-name="PartyCustomerAddressGeoPoint"></member-entity>
+        <alias entity-alias="RC" name="routeId"/>
+        <alias entity-alias="RC" name="fromDate"/>
+        <alias entity-alias="RC" name="thruDate"/>
+        <alias entity-alias="PCAGP" name="customerId" field="partyId"/>
+        <alias-all entity-alias="PCAGP"/>
+        <view-link entity-alias="PCAGP" rel-entity-alias="RC" rel-optional="true">
+            <key-map field-name="partyId" rel-field-name="customerId"/>
+        </view-link>
+    </view-entity>
+
+    <view-entity entity-name="RouteScheduleDetailDateAndSalesmanAndCust" package-name="com.olbius.salesmtl">
+        <member-entity entity-alias="RSDD" entity-name="RouteScheduleDetailDate"></member-entity>
+        <member-entity entity-alias="SRS" entity-name="SalesRouteSchedule"></member-entity>
+        <member-entity entity-alias="PS" entity-name="PartySalesman"></member-entity>
+        <member-entity entity-alias="PC" entity-name="PartyCustomer"></member-entity>
+        <member-entity entity-alias="R" entity-name="Route"></member-entity>
+
+        <alias-all entity-alias="RSDD"/>
+        <alias name="salesmanId" field="partyId" entity-alias="PS"/>
+        <alias name="salesmanCode" field="partyCode" entity-alias="PS"/>
+        <alias name="salesmanName" field="fullName" entity-alias="PS"/>
+        <alias name="customerId" field="partyId" entity-alias="PC"/>
+        <alias name="customerCode" field="partyCode" entity-alias="PC"/>
+        <alias name="customerName" field="fullName" entity-alias="PC"/>
+        <alias name="routeCode" entity-alias="R"/>
+        <alias name="routeName" entity-alias="R"/>
+        <alias name="routeDescription" field="description" entity-alias="R"/>
+        <alias name="scheduleRoute" entity-alias="SRS"/>
+
+        <view-link entity-alias="RSDD" rel-entity-alias="PS" rel-optional="false">
+            <key-map field-name="salesmanId" rel-field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="RSDD" rel-entity-alias="R" rel-optional="false">
+            <key-map field-name="routeId" rel-field-name="routeId"/>
+        </view-link>
+        <view-link entity-alias="RSDD" rel-entity-alias="PC" rel-optional="false">
+            <key-map field-name="customerId" rel-field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="RSDD" rel-entity-alias="SRS" rel-optional="false">
+            <key-map field-name="salesRouteScheduleId"/>
+        </view-link>
+    </view-entity>
+
+    <view-entity entity-name="RouteScheduleDetailDateAndSchedule" package-name="com.olbius.salesmtl">
+        <member-entity entity-alias="RSDD" entity-name="RouteScheduleDetailDate"></member-entity>
+        <member-entity entity-alias="SRS" entity-name="SalesRouteSchedule"></member-entity>
+        <member-entity entity-alias="PS" entity-name="PartySalesman"></member-entity>
+
+        <alias-all entity-alias="RSDD"/>
+        <alias name="scheduleRoute" entity-alias="SRS"/>
+        <alias name="salesmanName" field="fullName" entity-alias="PS"/>
+        <alias name="salesmanCode" field="partyCode" entity-alias="PS"/>
+
+        <view-link entity-alias="RSDD" rel-entity-alias="SRS" rel-optional="false">
+            <key-map field-name="salesRouteScheduleId"/>
+        </view-link>
+        <view-link entity-alias="RSDD" rel-entity-alias="PS" rel-optional="false">
+            <key-map field-name="salesmanId" rel-field-name="partyId"/>
+        </view-link>
+    </view-entity>
+
+    <view-entity entity-name="SalesRouteScheduleAvailable" package-name="com.olbius.salesmtl">
+        <member-entity entity-alias="SRS" entity-name="SalesRouteSchedule"></member-entity>
+        <alias-all entity-alias="SRS"/>
+        <entity-condition filter-by-date="true"></entity-condition>
+    </view-entity>
+
+    <view-entity entity-name="RouteCustomerAvailable" package-name="com.olbius.salesmtl">
+        <member-entity entity-alias="RC" entity-name="RouteCustomer"></member-entity>
+        <alias-all entity-alias="RC"/>
+        <entity-condition filter-by-date="true"></entity-condition>
+    </view-entity>
+
+    <view-entity entity-name="RouteCustomerAndCustomerAndScheduleAvail" package-name="com.olbius.salesmtl">
+        <member-entity entity-alias="RCAPC" entity-name="RouteCustomerAndPartyCustomer"></member-entity>
+        <member-entity entity-alias="SRC" entity-name="SalesRouteScheduleAvailable"></member-entity>
+        <member-entity entity-alias="R" entity-name="Route"></member-entity>
+        <alias-all entity-alias="RCAPC" group-by="true"/>
+        <alias name="routeCode" entity-alias="R" group-by="true"/>
+        <alias name="routeName" entity-alias="R" group-by="true"/>
+        <alias name="salesmanId" field="executorId" entity-alias="R" group-by="true"/>
+        <alias name="description" entity-alias="R" group-by="true"/>
+        <alias name="scheduleRoute" entity-alias="SRC" function="string-agg" function-params="', '"></alias>
+        <view-link entity-alias="RCAPC" rel-entity-alias="SRC" rel-optional="true">
+            <key-map field-name="routeId"/>
+        </view-link>
+        <view-link entity-alias="RCAPC" rel-entity-alias="R" rel-optional="true">
+            <key-map field-name="routeId"/>
+        </view-link>
+        <entity-condition filter-by-date="true"></entity-condition>
+    </view-entity>
+
+    <view-entity entity-name="RouteAndSalesRouteSchedule" package-name="com.olbius.salesmtl">
+        <member-entity entity-alias="R" entity-name="Route"></member-entity>
+        <member-entity entity-alias="SRC" entity-name="SalesRouteScheduleAvailable"></member-entity>
+        <alias-all entity-alias="R" />
+        <alias name="scheduleRoute" entity-alias="SRC"/>
+        <view-link entity-alias="R" rel-entity-alias="SRC" rel-optional="true">
+            <key-map field-name="routeId"/>
+        </view-link>
+    </view-entity>
+
+    <view-entity entity-name="PartySalesmanDetail" package-name="com.olbius.salesmtl">
+        <member-entity entity-alias="PS" entity-name="PartySalesman"/>
+        <member-entity entity-alias="PER" entity-name="Person"/>
+        <member-entity entity-alias="PTYCO" entity-name="PartyContactTempData"/>
+        <member-entity entity-alias="TELCOM" entity-name="TelecomNumber"/>
+        <alias-all entity-alias="PS"/>
+        <alias-all entity-alias="PTYCO">
+            <exclude field="partyId"/>
+        </alias-all>
+        <alias name="contactNumber" entity-alias="TELCOM" field="contactNumber"/>
+        <alias name="gender" entity-alias="PER" field="gender"/>
+        <alias name="birthDate" entity-alias="PER" field="birthDate"/>
+        <view-link entity-alias="PS" rel-entity-alias="PTYCO" rel-optional="true">
+            <key-map field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PS" rel-entity-alias="PER" rel-optional="true">
+            <key-map field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PTYCO" rel-entity-alias="TELCOM" rel-optional="true">
+            <key-map field-name="telecomId" rel-field-name="contactMechId"/>
+        </view-link>
+    </view-entity>
+    <view-entity entity-name="PartySalesmanAndSupNameDetail" package-name="com.olbius.salesmtl">
+        <member-entity entity-alias="PSD" entity-name="PartySalesmanDetail"></member-entity>
+        <member-entity entity-alias="PFNDS" entity-name="PartyFullNameDetailSimple"></member-entity>
+        <alias-all entity-alias="PSD" />
+        <alias name="supervisorCode" entity-alias="PFNDS" field="partyCode"/>
+        <alias name="supervisorName" entity-alias="PFNDS" field="fullName"/>
+        <view-link entity-alias="PSD" rel-entity-alias="PFNDS" rel-optional="true">
+            <key-map field-name="supervisorId" rel-field-name="partyId"/>
+        </view-link>
+    </view-entity>
+
+	<!--<view-entity entity-name="CheckInHistoryDetailGeo"-->
+            <!--package-name="com.olbius.party"-->
+            <!--title="View location check in history detail">-->
+            <!---->
+      	<!--<member-entity entity-alias="CIH" entity-name="CheckInHistory"/>-->
+      	<!--<member-entity entity-alias="PCTDCUS" entity-name="PartyContactTempData"/>-->
+      	<!--<member-entity entity-alias="TEN" entity-name="TelecomNumber"/>-->
+      	<!--<member-entity entity-alias="ADCUS" entity-name="AddressDetail"/>-->
+      	<!--<member-entity entity-alias="SALES" entity-name="PartyFullNameDetailSimple"/>-->
+      	<!---->
+      	<!--<alias-all entity-alias="CIH">-->
+      		<!--<exclude field="partyId"/>-->
+      	<!--</alias-all>-->
+      	<!---->
+      	<!--<alias name="customerCode" field="partyCode" entity-alias="PCTDCUS"></alias>-->
+      	<!--<alias name="customerName" field="partyName" entity-alias="PCTDCUS"></alias>-->
+      	<!--<alias name="customerTelephone" field="contactNumber" entity-alias="TEN"></alias>-->
+      	<!---->
+      	<!--<alias name="customerAddress" field="fullName" entity-alias="ADCUS"></alias>-->
+      	<!---->
+      	<!--<alias name="partyId" field="partyId" entity-alias="SALES"/>-->
+        <!--<alias name="salesmanCode" field="partyCode" entity-alias="SALES"/>-->
+        <!--<alias name="salesmanTypeId" field="partyTypeId" entity-alias="SALES"/>-->
+        <!--<alias name="firstName" entity-alias="SALES"/>-->
+        <!--<alias name="middleName" entity-alias="SALES"/>-->
+        <!--<alias name="lastName" entity-alias="SALES"/>-->
+        <!--<alias name="groupName" entity-alias="SALES"/>-->
+        <!--<alias name="fullName" entity-alias="SALES"/>-->
+      	<!---->
+      	<!--<view-link entity-alias="CIH" rel-entity-alias="PCTDCUS">-->
+      		<!--<key-map field-name="customerId" rel-field-name="partyId"/>-->
+      	<!--</view-link>-->
+      	<!--<view-link entity-alias="PCTDCUS" rel-entity-alias="ADCUS" rel-optional="true">-->
+        	<!--<key-map field-name="postalAddressId" rel-field-name="contactMechId"/>-->
+      	<!--</view-link>-->
+      	<!--<view-link entity-alias="PCTDCUS" rel-entity-alias="TEN" rel-optional="true">-->
+        	<!--<key-map field-name="telecomId" rel-field-name="contactMechId"/>-->
+      	<!--</view-link>-->
+      	<!--<view-link entity-alias="CIH" rel-entity-alias="SALES">-->
+        	<!--<key-map field-name="partyId"/>-->
+      	<!--</view-link>-->
+      	<!---->
+    <!--</view-entity>-->
+	<view-entity entity-name="ProductAndUom" package-name="com.olbius.salesmtl">
+		<member-entity entity-alias="PROD" entity-name="Product"></member-entity>
+		<member-entity entity-alias="UOM" entity-name="Uom"></member-entity>
+		<alias name="productId" entity-alias="PROD"/>
+		<alias name="productCode" entity-alias="PROD"/>
+		<alias name="productName" entity-alias="PROD"/>
+		<alias name="productTypeId" entity-alias="PROD"/>
+		<alias name="primaryProductCategoryId" entity-alias="PROD"/>
+		<alias name="weightUomId" entity-alias="PROD"/>
+		<alias name="isVirtual" entity-alias="PROD"/>
+		<alias name="isVariant" entity-alias="PROD"/>
+		<alias name="quantityUomDescription" field="description" entity-alias="UOM"/>
+		<view-link entity-alias="PROD" rel-entity-alias="UOM" rel-optional="true">
+			<key-map field-name="quantityUomId" rel-field-name="uomId"/>
+		</view-link>
+		<entity-condition>
+			<condition-list>
+				<condition-expr field-name="uomTypeId" entity-alias="UOM" value="PRODUCT_PACKING"/>
+			</condition-list>
+		</entity-condition>
+	</view-entity>
+
+	<view-entity entity-name="CheckInHistoryPartyCustomer" package-name="com.olbius.salesmtl">
+		<member-entity entity-alias="PC" entity-name="PartyCustomer"></member-entity>
+		<member-entity entity-alias="CIH" entity-name="CheckInHistory"></member-entity>
+		<alias-all entity-alias="CIH"></alias-all>
+		<alias name="customerName" field="fullName" entity-alias="PC"/>
+		<alias name="customerCode" field="partyCode" entity-alias="PC"/>
+		<alias name="customerStatus" field="statusId" entity-alias="PC"/>
+		<view-link entity-alias="PC" rel-entity-alias="CIH">
+			<key-map field-name="partyId" rel-field-name="customerId"/>
+		</view-link>
+	</view-entity>
+    <view-entity entity-name="CheckInHistoryDetails" package-name="com.olbius.salesmtl">
+        <member-entity entity-alias="PC" entity-name="PartyCustomer"></member-entity>
+        <member-entity entity-alias="PS" entity-name="PartySalesman"></member-entity>
+        <member-entity entity-alias="CIH" entity-name="CheckInHistory"></member-entity>
+        <alias-all entity-alias="CIH"></alias-all>
+        <alias name="customerName" field="fullName" entity-alias="PC"/>
+        <alias name="customerCode" field="partyCode" entity-alias="PC"/>
+        <alias name="customerStatus" field="statusId" entity-alias="PC"/>
+        <alias name="salesmanName" field="fullName" entity-alias="PS"/>
+        <alias name="salesmanId" field="partyId" entity-alias="PS"/>
+        <alias name="salesmanCode" field="partyCode" entity-alias="PS"/>
+        <alias name="salesmanStatus" field="statusId" entity-alias="PS"/>
+        <view-link entity-alias="CIH" rel-entity-alias="PC">
+            <key-map field-name="customerId" rel-field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="CIH" rel-entity-alias="PS">
+            <key-map field-name="partyId"/>
+        </view-link>
+    </view-entity>
+    
+    <view-entity entity-name="ProductStoreRoleAndRelSalesman" package-name="com.olbius.party">
+    	<member-entity entity-alias="PSTROLE" entity-name="ProductStoreRole"/>
+    	<member-entity entity-alias="PTYREL" entity-name="PartyRelationship"/>
+    	<member-entity entity-alias="PFND" entity-name="PartyFullNameDetailSimple"/>
+    	<alias name="productStoreId" entity-alias="PSTROLE"/>
+    	<alias name="partyId" entity-alias="PSTROLE"/>
+    	<alias name="partyCode" entity-alias="PFND"/>
+    	<alias name="fullName" entity-alias="PFND"/>
+    	<alias name="storeFromDate" entity-alias="PSTROLE" field="fromDate"/>
+    	<alias name="storeThruDate" entity-alias="PSTROLE" field="thruDate"/>
+    	<alias name="partyRelFromDate" entity-alias="PTYREL" field="fromDate"/>
+    	<alias name="partyRelThruDate" entity-alias="PTYREL" field="thruDate"/>
+    	<view-link entity-alias="PSTROLE" rel-entity-alias="PTYREL">
+    		<key-map field-name="partyId" rel-field-name="partyIdFrom"/>
+    	</view-link>
+    	<view-link entity-alias="PTYREL" rel-entity-alias="PFND">
+    		<key-map field-name="partyIdFrom" rel-field-name="partyId"/>
+    	</view-link>
+    	<entity-condition>
+    		<condition-list>
+    			<condition-expr field-name="roleTypeId" entity-alias="PSTROLE" value="SELLER"/>
+    			<condition-expr field-name="roleTypeIdFrom" entity-alias="PTYREL" value="SALES_EMPLOYEE"/>
+    		</condition-list>
+    	</entity-condition>
+    </view-entity>
+    <view-entity entity-name="TemporaryPartyDetail" package-name="org.ofbiz.mobileservices">
+	    <member-entity entity-alias="TP" entity-name="TemporaryParty"/>
+	    <member-entity entity-alias="CO" entity-name="Geo"/>
+	    <member-entity entity-alias="ST" entity-name="Geo"/>
+	    <member-entity entity-alias="DI" entity-name="Geo"/>
+	    <member-entity entity-alias="WA" entity-name="Geo"/>
+	    <member-entity entity-alias="R" entity-name="Route"/>
+	    <member-entity entity-alias="PST" entity-name="ProductStore"/>
+        <member-entity entity-alias="PSM" entity-name="PartySalesman"/>
+	    <alias-all entity-alias="TP"/>
+	    <alias name="countryGeoNameG" field="geoName" entity-alias="CO"/>
+	    <alias name="stateProvinceGeoNameG" field="geoName" entity-alias="ST"/>
+	    <alias name="districtGeoNameG" field="geoName" entity-alias="DI"/>
+	    <alias name="wardGeoNameG" field="geoName" entity-alias="WA"/>
+	    <alias name="routeName" field="routeName" entity-alias="R"/>
+	    <alias name="storeName" entity-alias="PST"/>
+        <alias name="salesmanName" field="fullName" entity-alias="PSM"/>
+        <alias name="salesMethodChannelEnumId" entity-alias="PST"/>
+	    <view-link rel-entity-alias="CO" entity-alias="TP" rel-optional="true">
+	        <key-map field-name="countryGeoId" rel-field-name="geoId"/>
+	    </view-link>
+	    <view-link rel-entity-alias="ST" entity-alias="TP" rel-optional="true">
+	        <key-map field-name="stateProvinceGeoId" rel-field-name="geoId"/>
+	    </view-link>
+        <view-link rel-entity-alias="PSM" entity-alias="TP" rel-optional="true">
+            <key-map field-name="salesmanId" rel-field-name="partyId"/>
+        </view-link>
+	    <view-link rel-entity-alias="DI" entity-alias="TP" rel-optional="true">
+	        <key-map field-name="districtGeoId" rel-field-name="geoId"/>
+	    </view-link>
+	    <view-link rel-entity-alias="WA" entity-alias="TP" rel-optional="true">
+	        <key-map field-name="wardGeoId" rel-field-name="geoId"/>
+	    </view-link>
+	    <view-link rel-entity-alias="R" entity-alias="TP" rel-optional="true">
+	        <key-map field-name="routeId"/>
+	    </view-link>
+	    <view-link rel-entity-alias="PST" entity-alias="TP" rel-optional="true">
+	        <key-map field-name="productStoreId"/>
+	    </view-link>
+	</view-entity>
+
+	<view-entity entity-name="PostalAddressAndGeoPoint" package-name="com.olbius.salesmtl">
+		<member-entity entity-alias="PA" entity-name="PostalAddress"></member-entity>
+		<member-entity entity-alias="GP" entity-name="GeoPoint"></member-entity>
+		<alias-all entity-alias="PA"/>
+		<alias name="latitude" entity-alias="GP"/>
+		<alias name="longitude" entity-alias="GP"/>
+		<view-link entity-alias="PA" rel-entity-alias="GP" rel-optional="true">
+			<key-map field-name="geoPointId" rel-field-name="geoPointId"/>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="RepresentativeParty" package-name="com.olbius.salesmtl">
+		<member-entity entity-alias="P" entity-name="Party"></member-entity>
+		<member-entity entity-alias="PG" entity-name="PartyGroup"></member-entity>
+		<member-entity entity-alias="PR" entity-name="PartyRelationship"></member-entity>
+		<member-entity entity-alias="PCTD" entity-name="PartyContactTempData"></member-entity>
+		<member-entity entity-alias="CME" entity-name="ContactMechEmail"></member-entity>
+		<member-entity entity-alias="PAGP" entity-name="PostalAddressAndGeoPoint"></member-entity>
+		<alias-all entity-alias="P"/>
+		<alias name="groupName" entity-alias="PG"/>
+		<alias name="partyIdTo" entity-alias="PR"/>
+		<alias name="postalAddressName" entity-alias="PCTD"/>
+		<alias name="telecomName" entity-alias="PCTD"/>
+		<alias name="emailAddress" field="emailName" entity-alias="CME"/>
+		<alias name="geoPointId" entity-alias="PAGP"/>
+		<alias name="latitude" entity-alias="PAGP"/>
+		<alias name="longitude" entity-alias="PAGP"/>
+		<view-link entity-alias="P" rel-entity-alias="PG" rel-optional="true">
+			<key-map field-name="partyId" rel-field-name="partyId"/>
+		</view-link>
+		<view-link entity-alias="P" rel-entity-alias="PR" rel-optional="true">
+			<key-map field-name="partyId" rel-field-name="partyIdFrom"/>
+		</view-link>
+		<view-link entity-alias="P" rel-entity-alias="PCTD" rel-optional="true">
+			<key-map field-name="partyId" rel-field-name="partyId"/>
+		</view-link>
+		<view-link entity-alias="P" rel-entity-alias="CME" rel-optional="true">
+			<key-map field-name="partyId" rel-field-name="partyId"/>
+		</view-link>
+		<view-link entity-alias="PCTD" rel-entity-alias="PAGP" rel-optional="true">
+			<key-map field-name="postalAddressId" rel-field-name="contactMechId"/>
+		</view-link>
+		<entity-condition>
+			<condition-list combine="and">
+				<condition-expr field-name="roleTypeIdFrom" entity-alias="PR" value="CUSTOMER_MT"/>
+				<condition-expr field-name="roleTypeIdTo" entity-alias="PR" value="INTERNAL_ORGANIZATIO"/>
+			</condition-list>
+		</entity-condition>
+	</view-entity>
+
+	<view-entity entity-name="PartyPrimartyAddressAndPostalAddress" package-name="com.olbius.salesmtl">
+		<member-entity entity-alias="PPTNO" entity-name="PartyContactMechPurposeAndPostalAddress"></member-entity>
+		<alias-all entity-alias="PPTNO"/>
+		<entity-condition>
+			<condition-expr field-name="contactMechPurposeTypeId" entity-alias="PPTNO" value="PRIMARY_LOCATION"/>
+		</entity-condition>
+	</view-entity>
+	<view-entity entity-name="ShippingCustomerGroup" package-name="com.olbius.salesmtl">
+		<member-entity entity-alias="P" entity-name="Party"></member-entity>
+		<member-entity entity-alias="PG" entity-name="PartyGroup"></member-entity>
+		<member-entity entity-alias="PR" entity-name="PartyRelationship"></member-entity>
+		<member-entity entity-alias="PPTNO" entity-name="PartyPurposeAndTelecomNumberOrder"></member-entity>
+		<member-entity entity-alias="PCAG" entity-name="PartyPrimartyAddressAndPostalAddress"></member-entity>
+		<member-entity entity-alias="PNAE" entity-name="PartyNameAndEmail"></member-entity>
+		<alias-all entity-alias="P" />
+		<alias name="groupName" entity-alias="PG"/>
+		<alias name="partyIdTo" entity-alias="PR" />
+		<alias name="postalAddressName" field="fullName" entity-alias="PCAG"/>
+		<alias name="telecomName" field="contactNumber" entity-alias="PPTNO"/>
+		<alias name="emailAddress" field="email" entity-alias="PNAE"/>
+		<alias name="geoPointId" entity-alias="PCAG"/>
+		<view-link entity-alias="P" rel-entity-alias="PR">
+			<key-map field-name="partyId" rel-field-name="partyIdFrom"/>
+		</view-link>
+		<view-link entity-alias="P" rel-entity-alias="PG">
+			<key-map field-name="partyId" rel-field-name="partyId"/>
+		</view-link>
+		<view-link entity-alias="P" rel-entity-alias="PNAE" rel-optional="true">
+			<key-map field-name="partyId" rel-field-name="partyId"/>
+		</view-link>
+		<view-link entity-alias="P" rel-entity-alias="PPTNO" rel-optional="true">
+			<key-map field-name="partyId" rel-field-name="partyId"/>
+		</view-link>
+		<view-link entity-alias="P" rel-entity-alias="PCAG" >
+			<key-map field-name="partyId" rel-field-name="partyId"/>
+		</view-link>
+		<entity-condition>
+			<condition-list combine="and">
+				<condition-expr field-name="roleTypeIdFrom" entity-alias="PR" value="CONSIGNEE"/>
+				<condition-expr field-name="roleTypeIdTo" entity-alias="PR" value="INTERNAL_ORGANIZATIO"/>
+			</condition-list>
+		</entity-condition>
+	</view-entity>
+
+    <view-entity entity-name="MTCustomerRelationship" package-name="com.olbius.salesmtl">
+        <member-entity entity-alias="P1" entity-name="Party"></member-entity>
+        <member-entity entity-alias="PC" entity-name="PartyCustomer"/>
+        <member-entity entity-alias="P2" entity-name="Party"></member-entity>
+        <member-entity entity-alias="PR" entity-name="PartyRelationship"></member-entity>
+
+        <alias name="partyIdFrom" field="partyId" entity-alias="P1"/>
+        <alias name="partyIdTo" field="partyId" entity-alias="P2"/>
+        <alias name="fullName" entity-alias="PC"/>
+        <alias name="partyCodeFrom" field="partyCode" entity-alias="PC"/>
+        <alias name="thruDate" entity-alias="PR"/>
+        <alias name="fromDate" entity-alias="PR"/>
+        <alias name="partyRelationshipTypeId" entity-alias="PR"/>
+        <alias name="roleTypeIdFrom" entity-alias="PR"/>
+        <alias name="roleTypeIdTo" entity-alias="PR"/>
+        <alias name="statusId" entity-alias="PC"/>
+
+        <view-link entity-alias="PC" rel-entity-alias="P1">
+            <key-map field-name="partyId" rel-field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="P1" rel-entity-alias="PR" rel-optional="true">
+            <key-map field-name="partyId" rel-field-name="partyIdFrom"/>
+            <entity-condition filter-by-date="true">
+                <condition-list combine="and">
+                    <condition-expr field-name="partyRelationshipTypeId" entity-alias="PR" value="CUSTOMER_REL"
+                                    ignore-if-empty="false" ignore-if-null="false"/>
+                    <condition-expr field-name="roleTypeIdFrom" operator="equals" entity-alias="PR" value="CUSTOMER"
+                                    ignore-if-empty="false" ignore-if-null="false"/>
+                    <condition-expr field-name="roleTypeIdTo" entity-alias="PR" value="CONSIGNEE"
+                                    ignore-if-empty="false" ignore-if-null="false"/>
+                </condition-list>
+            </entity-condition>
+        </view-link>
+        <view-link entity-alias="PR" rel-entity-alias="P2" rel-optional="true">
+            <key-map field-name="partyIdTo" rel-field-name="partyId"/>
+        </view-link>
+        <entity-condition>
+            <condition-expr field-name="salesMethodChannelEnumId" entity-alias="PC" value="SMCHANNEL_MT"/>
+        </entity-condition>
+    </view-entity>
+
+	<view-entity entity-name="MTCustomerRepresentatives" package-name="com.olbius.salesmtl">
+		<member-entity entity-alias="P1" entity-name="Party"></member-entity>
+		<member-entity entity-alias="PC" entity-name="PartyCustomer"/>
+		<member-entity entity-alias="P2" entity-name="Party"></member-entity>
+		<member-entity entity-alias="PR" entity-name="PartyRelationship"></member-entity>
+
+		<alias name="partyIdFrom" field="partyId" entity-alias="P1"/>
+		<alias name="partyIdTo" field="partyId" entity-alias="PC"/>
+		<alias name="fullName" entity-alias="PC"/>
+		<alias name="partyCodeTo" field="partyCode" entity-alias="PC"/>
+
+		<view-link entity-alias="P1" rel-entity-alias="PR" rel-optional="true">
+			<key-map field-name="partyId" rel-field-name="partyIdFrom"/>
+		</view-link>
+		<view-link entity-alias="PR" rel-entity-alias="P2" rel-optional="true">
+			<key-map field-name="partyIdTo" rel-field-name="partyId"/>
+		</view-link>
+		<view-link entity-alias="P2" rel-entity-alias="PC" rel-optional="true">
+			<key-map field-name="partyId" rel-field-name="partyId"/>
+		</view-link>
+		<entity-condition>
+			<condition-list combine="and">
+				<condition-expr field-name="salesMethodChannelEnumId" entity-alias="PC" value="SMCHANNEL_MT"/>
+				<condition-expr field-name="partyRelationshipTypeId" entity-alias="PR" value="OWNER"/>
+				<condition-expr field-name="roleTypeIdFrom" entity-alias="PR" value="CUSTOMER"/>
+				<condition-expr field-name="roleTypeIdTo" entity-alias="PR" value="CHILD_MEMBER"/>
+				<condition-expr field-name="thruDate" entity-alias="PR" operator="equals" value=""/>
+			</condition-list>
+		</entity-condition>
+	</view-entity>
+
+    <view-entity entity-name="MTCustomerAndPartyToAndRepresentative" package-name="com.olbius.salesmtl">
+        <member-entity entity-alias="PC" entity-name="PartyCustomer"/>
+        <member-entity entity-alias="PR" entity-name="PartyRelationship"/>
+
+        <alias name="partyIdTo" field="partyId" entity-alias="PC"/>
+        <alias name="partyCode" entity-alias="PC"/>
+        <alias name="fullName" entity-alias="PC"/>
+
+        <view-link entity-alias="PC" rel-entity-alias="PR" rel-optional="false">
+            <key-map field-name="partyId" rel-field-name="partyIdTo"/>
+        </view-link>
+        <entity-condition>
+            <condition-list combine="and">
+                <condition-expr field-name="salesMethodChannelEnumId" entity-alias="PC" value="SMCHANNEL_MT"/>
+                <condition-expr field-name="partyRelationshipTypeId" entity-alias="PR" value="OWNER"/>
+                <condition-expr field-name="roleTypeIdFrom" entity-alias="PR" value="CUSTOMER"/>
+                <condition-expr field-name="roleTypeIdTo" entity-alias="PR" value="CHILD_MEMBER"/>
+            </condition-list>
+        </entity-condition>
+    </view-entity>
+
+	<view-entity entity-name="MTCustomerAndPartyTo" package-name="com.olbius.salesmtl">
+		<member-entity entity-alias="PC" entity-name="PartyCustomer"/>
+		<member-entity entity-alias="MT" entity-name="MTCustomerAndPartyToAndRepresentative"/>
+		<member-entity entity-alias="PR" entity-name="PartyRole"/>
+
+		<alias-all entity-alias="PC"/>
+		<alias name="partyIdTo" entity-alias="MT"/>
+
+		<view-link entity-alias="PC" rel-entity-alias="MT" rel-optional="true">
+			<key-map field-name="partyId" rel-field-name="partyIdTo"/>
+		</view-link>
+		<view-link entity-alias="PC" rel-entity-alias="PR" rel-optional="true">
+			<key-map field-name="partyId" rel-field-name="partyId"/>
+		</view-link>
+		<entity-condition>
+			<condition-list combine="and">
+				<condition-expr field-name="salesMethodChannelEnumId" entity-alias="PC" value="SMCHANNEL_MT"/>
+				<condition-expr field-name="partyTypeId" entity-alias="PC" value="SUPERMARKET"/>
+				<condition-expr field-name="statusId" entity-alias="PC" value="PARTY_ENABLED"/>
+				<condition-expr field-name="roleTypeId" entity-alias="PR" value="CHILD_MEMBER"/>
+			</condition-list>
+		</entity-condition>
+	</view-entity>
+
+	<view-entity entity-name="MTPartyRelAndParty" package-name="com.olbius.salesmtl">
+		<member-entity entity-alias="PRS" entity-name="PartyRelationship"/>
+		<member-entity entity-alias="PT" entity-name="Party"/>
+
+		<alias-all entity-alias="PRS">
+			<exclude field="partyIdFrom"/>
+		</alias-all>
+		<alias name="partyId" entity-alias="PT"/>
+		<alias name="fullName" field="description" entity-alias="PT"/>
+		<alias name="partyCode" entity-alias="PT"/>
+
+		<view-link entity-alias="PRS" rel-entity-alias="PT" rel-optional="true">
+			<key-map field-name="partyIdFrom" rel-field-name="partyId"/>
+		</view-link>
+	</view-entity>
+
+    <view-entity entity-name="MTPartyRelAndPartyAndPartyCus" package-name="com.olbius.salesmtl">
+        <member-entity entity-alias="MTPRPPC" entity-name="MTPartyRelAndParty"/>
+        <member-entity entity-alias="PC" entity-name="PartyCustomer"/>
+
+        <alias-all entity-alias="MTPRPPC">
+            <exclude field="partyCode"/>
+            <exclude field="partyIdTo"/>
+            <exclude field="statusId"/>
+            <exclude field="fullName"/>
+        </alias-all>
+        <alias-all entity-alias="PC"/>
+        <alias name="customerId" field="partyId" entity-alias="PC"/>
+
+        <view-link entity-alias="MTPRPPC" rel-entity-alias="PC" rel-optional="false">
+            <key-map field-name="partyIdTo" rel-field-name="partyId"/>
+        </view-link>
+        <entity-condition>
+            <condition-list combine="and">
+                <condition-expr field-name="salesMethodChannelEnumId" entity-alias="PC" value="SMCHANNEL_MT"/>
+                <condition-expr field-name="roleTypeIdFrom" entity-alias="MTPRPPC" value="CUSTOMER_CHAIN_GROUP"/>
+                <condition-expr field-name="partyTypeId" entity-alias="PC" value="SUPERMARKET"/>
+                <condition-expr field-name="statusId" entity-alias="PC" value="PARTY_ENABLED"/>
+            </condition-list>
+        </entity-condition>
+    </view-entity>
+    <view-entity entity-name="MTPartyRelPartyCusAndProdInvent" package-name="com.olbius.salesmtl">
+        <member-entity entity-alias="MTPRPP" entity-name="MTPartyRelAndPartyAndPartyCus"/>
+        <member-entity entity-alias="CPI" entity-name="CustomerProductInventory"/>
+
+        <alias-all entity-alias="MTPRPP">
+            <exclude field="fromDate"/>
+            <exclude field="createdDate"/>
+            <exclude field="thruDate"/>
+        </alias-all>
+        <alias-all entity-alias="CPI"/>
+
+        <view-link entity-alias="CPI" rel-entity-alias="MTPRPP" rel-optional="false">
+            <key-map field-name="partyId" rel-field-name="customerId"/>
+        </view-link>
+    </view-entity>
+
+	<view-entity entity-name="ProductPromoExtRegisterDetailSUP" package-name="com.olbius.product.promo.ext">
+		<member-entity entity-alias="PPE" entity-name="ProductPromoExtRegister"/>
+		<member-entity entity-alias="PP" entity-name="ProductPromoExt"/>
+		<member-entity entity-alias="PPER" entity-name="ProductPromoExtRule"/>
+		<member-entity entity-alias="PC" entity-name="PartyCustomer"/>
+		<alias-all entity-alias="PPE"/>
+		<alias name="promoName" entity-alias="PP"/>
+		<alias name="productPromoTypeId" entity-alias="PP"/>
+		<alias name="ruleName" entity-alias="PPER"/>
+		<alias name="partyCode" entity-alias="PC"/>
+		<alias name="fullName" entity-alias="PC"/>
+		<alias name="salesmanId" entity-alias="PC"/>
+		<alias name="distributorId" entity-alias="PC"/>
+		<alias name="supervisorId" entity-alias="PC"/>
+		<view-link entity-alias="PPE" rel-entity-alias="PP">
+			<key-map field-name="productPromoId"/>
+		</view-link>
+		<view-link entity-alias="PPE" rel-entity-alias="PPER">
+			<key-map field-name="productPromoId"/>
+			<key-map field-name="productPromoRuleId"/>
+		</view-link>
+		<view-link entity-alias="PPE" rel-entity-alias="PC">
+			<key-map field-name="partyId"/>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="TermTypeAttrAgreementAgent" package-name="com.olbius.product.promo.ext">
+		<member-entity entity-alias="TTA1" entity-name="TermTypeAttr"/>
+		<member-entity entity-alias="TTA2" entity-name="TermTypeAttr"/>
+		<alias-all entity-alias="TTA1"/>
+		<alias name="attrValueTree2" field="attrValue" entity-alias="TTA2"/>
+		<view-link entity-alias="TTA1" rel-entity-alias="TTA2">
+			<key-map field-name="attrName"/>
+		</view-link>
+		<entity-condition>
+			<condition-list>
+				<condition-expr field-name="termTypeId" entity-alias="TTA1" value="AGREEMENT_AGENT_ARTICLE_TEXT"/>
+				<condition-expr field-name="termTypeId" entity-alias="TTA2" value="AGREEMENT_AGENT_TERM_TEXT"/>
+			</condition-list>
+		</entity-condition>
+	</view-entity>
+
+	<view-entity entity-name="TermTypeAttrAgreementDistributor" package-name="com.olbius.product.promo.ext">
+		<member-entity entity-alias="TTA1" entity-name="TermTypeAttr"/>
+		<member-entity entity-alias="TTA2" entity-name="TermTypeAttr"/>
+		<alias-all entity-alias="TTA1"/>
+		<alias name="attrValueTree2" field="attrValue" entity-alias="TTA2"/>
+		<view-link entity-alias="TTA1" rel-entity-alias="TTA2">
+			<key-map field-name="attrName"/>
+		</view-link>
+		<entity-condition>
+			<condition-list>
+				<condition-expr field-name="termTypeId" entity-alias="TTA1" value="AGREEMENT_DIS_ARTICLE_TEXT"/>
+				<condition-expr field-name="termTypeId" entity-alias="TTA2" value="AGREEMENT_DIS_TERM_TEXT"/>
+			</condition-list>
+		</entity-condition>
+	</view-entity>
+
+	<view-entity entity-name="TermTypeAttrAgreementViewBold" package-name="com.olbius.product.promo.ext">
+		<member-entity entity-alias="TTA1" entity-name="TermTypeAttr"/>
+		<member-entity entity-alias="TTA2" entity-name="TermTypeAttr"/>
+		<alias-all entity-alias="TTA1"/>
+		<alias name="attrValueBold" field="attrValue" entity-alias="TTA2"/>
+		<view-link entity-alias="TTA1" rel-entity-alias="TTA2" rel-optional="true">
+			<key-map field-name="attrName"/>
+		</view-link>
+		<entity-condition>
+			<condition-list>
+				<condition-expr field-name="termTypeId" entity-alias="TTA1" value="AGREEMENT_AGENT_TERM_TREE_TEXT" operator="equals"/>
+				<condition-expr field-name="termTypeId" entity-alias="TTA2" value="AGREEMENT_AGENT_TERM_TREE_BOLD_TEXT" operator="equals"/>
+			</condition-list>
+		</entity-condition>
+	</view-entity>
+
+</entitymodel>

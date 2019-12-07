@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+	<title>Extend Entity for BaseEcommerce Component</title>
+	<description>None</description>
+	<version>1.0</version>
+
+	<extend-entity entity-name="ProdCatalog">
+		<field name="description" type="long-varchar"></field>
+	</extend-entity>
+
+	<entity entity-name="ProductCacheData" package-name="com.olbius.ecommerce">
+		<field name="productId" type="id-ne" />
+		<field name="productStoreId" type="id-ne" />
+		<field name="partyId" type="id-ne" />
+		<field name="productCategoryId" type="id" />
+		<field name="productCode" type="id" />
+		<field name="productName" type="value" />
+		<field name="description" type="description" />
+		<field name="metaTitle" type="value" />
+		<field name="metaDescription" type="description" />
+		<field name="metaKeywords" type="description" />
+		<field name="originalImageUrl" type="value" />
+		<field name="mediumImageUrl" type="value" />
+		<field name="largeImageUrl" type="value" />
+		<field name="smallImageUrl" type="value" />
+		<field name="defaultPrice" type="currency-amount" />
+		<field name="listPrice" type="currency-amount" />
+		<field name="price" type="currency-amount" />
+		<field name="brandName" type="id" />
+		<field name="originGeoId" type="id" />
+		<field name="totalReview" type="fixed-point" />
+		<field name="rating" type="fixed-point" />
+		<field name="currencyUsed" type="id" />
+		<prim-key field="productId" />
+		<prim-key field="productStoreId" />
+		<prim-key field="partyId" />
+	</entity>
+	
+	<entity entity-name="ProductSocial" package-name="org.ofbiz.baseecommerce" title="track all product's social activity">
+		<field name="productSocialId" type="id-ne"></field>
+		<field name="productId" type="id-ne"></field>
+		<field name="partyId" type="id"></field>
+		<field name="fbId" type="id"></field>
+		<field name="status" type="name"></field>
+		<prim-key field="productSocialId" />
+		<relation type="many" fk-name="product_social"
+			rel-entity-name="Product">
+			<key-map field-name="productId" />
+		</relation>
+		<relation type="many" fk-name="user_social" rel-entity-name="Party">
+			<key-map field-name="partyId" />
+		</relation>
+	</entity>
+
+	<entity entity-name="ContentCategoryType" package-name="com.olbius.ecommerce">
+		<field name="contentCategoryTypeId" type="id-ne" />
+		<field name="parentTypeId" type="id" />
+		<field name="description" type="description" />
+		<prim-key field="contentCategoryTypeId" />
+		<relation rel-entity-name="ContentCategoryType" type="one">
+			<key-map field-name="parentTypeId" rel-field-name="contentCategoryTypeId" />
+		</relation>
+	</entity>
+	
+	<entity entity-name="ContentCategory" package-name="com.olbius.ecommerce">
+		<field name="contentCategoryId" type="id-ne" />
+		<field name="parentCategoryId" type="id" />
+		<field name="contentCategoryTypeId" type="id" />
+		<field name="categoryName" type="name" />
+		<field name="description" type="description" />
+		<field name="longDescription" type="very-long" />
+		<field name="categoryImageUrl" type="long-varchar" />
+		<field name="icon" type="long-varchar" />
+		<field name="linkOneImageUrl" type="long-varchar" />
+		<field name="linkTwoImageUrl" type="long-varchar" />
+		<field name="showInSelect" type="indicator" />
+		<prim-key field="contentCategoryId" />
+		<prim-key field="contentCategoryTypeId" />
+		<relation rel-entity-name="ContentCategoryType" type="one" fk-name="CONCATTYPE">
+			<key-map field-name="contentCategoryTypeId" />
+		</relation>
+	</entity>
+	
+	<entity entity-name="ContentCategoryMember" package-name="com.olbius.ecommerce">
+		<field name="contentId" type="id-ne" />
+		<field name="contentCategoryId" type="id-ne" />
+		<field name="fromDate" type="date-time" />
+		<field name="thruDate" type="date-time" />
+		<field name="comments" type="description" />
+		<field name="sequenceNum" type="numeric" />
+		<prim-key field="contentId" />
+		<prim-key field="contentCategoryId" />
+		<prim-key field="fromDate" />
+		<!-- <relation rel-entity-name="ContentCategory" type="one"
+			fk-name="CONCATMEM">
+			<key-map field-name="contentCategoryId" />
+		</relation> -->
+		<relation rel-entity-name="Content" type="one" fk-name="CTINCAT">
+			<key-map field-name="contentId" />
+		</relation>
+	</entity>
+	
+	<entity entity-name="WebsiteContentCategory" package-name="com.olbius.ecommerce">
+		<field name="webSiteId" type="id-ne" />
+		<field name="contentCategoryId" type="id-ne" />
+		<field name="fromDate" type="date-time" />
+		<field name="thruDate" type="date-time" />
+		<prim-key field="webSiteId" />
+		<prim-key field="contentCategoryId" />
+		<prim-key field="fromDate" />
+		<relation rel-entity-name="WebSite" type="one" fk-name="WEBINCON">
+			<key-map field-name="webSiteId" />
+		</relation>
+		<!-- <relation rel-entity-name="ContentCategory" type="one"
+			fk-name="WEBCONCAT">
+			<key-map field-name="contentCategoryId" />
+		</relation> -->
+	</entity>
+
+	<extend-entity entity-name="ProductCategory">
+		<field name="icon" type="long-varchar" />
+		<field name="url" type="long-varchar" />
+	</extend-entity>
+	
+	<extend-entity entity-name="Product">
+		<field name="originGeoId" type="id" />
+		<field name="brandName" type="id" />
+		<relation rel-entity-name="Geo" type="one" fk-name="MADEINCOUNTRY">
+			<key-map field-name="originGeoId" rel-field-name="geoId" />
+		</relation>
+		<relation rel-entity-name="PartyGroup" type="one">
+			<key-map field-name="brandName" rel-field-name="partyId" />
+		</relation>
+	</extend-entity>
+	
+	<extend-entity entity-name="Content">
+		<field name="detailImageUrl" type="long-varchar" />
+		<field name="smallImageUrl" type="long-varchar" />
+		<field name="mediumImageUrl" type="long-varchar" />
+		<field name="largeImageUrl" type="long-varchar" />
+		<field name="originalImageUrl" type="long-varchar" />
+		<field name="longDescription" type="very-long" />
+		<field name="infoString" type="long-varchar" />
+		<field name="author" type="long-varchar" />
+		<field name="url" type="long-varchar" />
+	</extend-entity>
+	
+	<entity entity-name="ContentTypeMember" package-name="com.olbius.ecommerce">
+		<field name="contentTypeId" type="id-ne" />
+		<field name="contentId" type="id-ne" />
+		<field name="fromDate" type="date-time" />
+		<field name="thruDate" type="date-time" />
+		<field name="description" type="description" />
+		<prim-key field="contentTypeId" />
+		<prim-key field="contentId" />
+		<prim-key field="fromDate" />
+		<relation rel-entity-name="Content" type="many">
+			<key-map field-name="contentId" />
+		</relation>
+		<relation rel-entity-name="ContentType" type="many">
+			<key-map field-name="contentTypeId" />
+		</relation>
+	</entity>
+
+</entitymodel>

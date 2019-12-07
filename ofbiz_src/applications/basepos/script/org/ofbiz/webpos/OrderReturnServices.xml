@@ -1,0 +1,481 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+	<simple-method method-name="quickReturnFromOrder" short-description="Create Quick Return From Order">
+		<if>
+			<condition>
+				<and>
+					<not>
+						<if-has-permission permission="ORDERMGR" action="_CREATE" />
+					</not>
+					<not>
+						<if-compare-field field="userLogin.partyId" to-field="parameters.fromPartyId" operator="equals" />
+					</not>
+				</and>
+			</condition>
+			<then>
+				<add-error>
+					<fail-property resource="OrderErrorUiLabels" property="OrderSecurityErrorToRunQuickReturnFromOrder" />
+				</add-error>
+			</then>
+		</if>
+		<check-errors />
+
+		<!-- get primary information from the order header -->
+		<entity-one entity-name="OrderHeader" value-field="orderHeader">
+			<field-map from-field="parameters.orderId" field-name="orderId" />
+		</entity-one>
+		<set field="returnHeaderTypeId" from-field="parameters.returnHeaderTypeId" />
+		<if-compare field="returnHeaderTypeId" operator="equals" value="CUSTOMER_RETURN">
+			<set field="roleTypeId" value="BILL_TO_CUSTOMER" />
+			<else>
+				<set field="roleTypeId" value="BILL_FROM_VENDOR" />
+			</else>
+		</if-compare>
+
+		<!-- find the bill to customer; for return's fromPartyId -->
+		<entity-condition entity-name="OrderRole" list="orderRoles">
+			<condition-list combine="and">
+				<condition-expr field-name="orderId" operator="equals" from-field="orderHeader.orderId" />
+				<condition-expr field-name="roleTypeId" operator="equals" from-field="roleTypeId" />
+			</condition-list>
+		</entity-condition>
+		<first-from-list entry="orderRole" list="orderRoles" />
+		<!-- create the return header -->
+		<if-not-empty field="parameters.facilityId">
+			<set from-field="parameters.facilityId" field="createHeaderCtx.destinationFacilityId" />
+			<else>
+				<set from-field="orderHeader.originFacilityId" field="createHeaderCtx.destinationFacilityId" />
+			</else>
+		</if-not-empty>
+
+		<set value="Y" field="updateHeaderCtx.needsInventoryReceive" />
+		<set from-field="returnHeaderTypeId" field="createHeaderCtx.returnHeaderTypeId" />
+		<set from-field="parameters.grandTotal" field="createHeaderCtx.grandTotal"/>
+		<set from-field="parameters.taxTotal" field="createHeaderCtx.taxTotal"/>
+
+		<!-- get the return to party for customer return and return from party 
+			for vendor return from the product store -->
+		<get-related-one relation-name="ProductStore" value-field="orderHeader" to-value-field="productStore" />
+		<if-compare field="returnHeaderTypeId" operator="equals" value="CUSTOMER_RETURN">
+			<set field="createHeaderCtx.fromPartyId" from-field="orderRole.partyId" />
+			<set field="createHeaderCtx.toPartyId" from-field="productStore.payToPartyId" />
+			<if-empty field="createHeaderCtx.destinationFacilityId">
+				<set field="createHeaderCtx.destinationFacilityId" from-field="productStore.inventoryFacilityId" />
+			</if-empty>
+			<else>
+				<set field="createHeaderCtx.fromPartyId" from-field="productStore.payToPartyId" />
+				<set field="createHeaderCtx.toPartyId" from-field="orderRole.partyId" />
+			</else>
+		</if-compare>
+		<!-- copy over the currency of the order to the currency of the return -->
+		<set from-field="orderHeader.currencyUom" field="createHeaderCtx.currencyUomId" />
+
+		<call-service service-name="createReturnHeader" in-map-name="createHeaderCtx" include-user-login="true">
+			<result-to-field result-name="returnId" />
+		</call-service>
+
+		<!-- get the available to return order items -->
+		<entity-condition entity-name="OrderItem" list="orderItems">
+			<condition-list combine="and">
+				<condition-expr field-name="orderId" operator="equals" from-field="orderHeader.orderId" />
+				<condition-expr field-name="statusId" operator="equals" value="ITEM_COMPLETED" />
+			</condition-list>
+		</entity-condition>
+
+		<if-empty field="parameters.returnReasonId">
+			<set value="RTN_NOT_WANT" field="parameters.returnReasonId" />
+		</if-empty>
+		<if-empty field="parameters.returnTypeId">
+			<set value="RTN_REFUND" field="parameters.returnTypeId" />
+		</if-empty>
+
+		<!-- create the return items -->
+		<iterate entry="orderItem" list="orderItems">
+			<set from-field="returnId" field="newItemCtx.returnId" />
+			<set from-field="parameters.returnReasonId" field="newItemCtx.returnReasonId" />
+			<set from-field="parameters.returnTypeId" field="newItemCtx.returnTypeId" />
+
+			<if-not-empty field="orderItem.productId">
+				<set from-field="orderItem.productId" field="newItemCtx.productId" />
+			</if-not-empty>
+
+			<set from-field="orderItem.orderId" field="newItemCtx.orderId" />
+			<set from-field="orderItem.orderItemSeqId" field="newItemCtx.orderItemSeqId" />
+			<set from-field="orderItem.itemDescription" field="newItemCtx.description" />
+			<set from-field="orderItem.quantityUomId" field="newItemCtx.quantityUomId" />
+
+			<!-- get the returnable price and quantity -->
+			<set from-field="orderItem" field="itemCheckMap.orderItem" />
+			<call-service service-name="getReturnableQuantity" in-map-name="itemCheckMap">
+				<result-to-field result-name="returnableQuantity" field="newItemCtx.returnQuantity" />
+				<result-to-field result-name="returnablePrice" field="newItemCtx.returnPrice" />
+			</call-service>
+
+			<!-- get the matching return item type from the order item type -->
+
+			<set from-field="orderItem.orderItemTypeId" field="orderItemTypeId" />
+			<if-compare field="orderItemTypeId" value="PRODUCT_ORDER_ITEM" operator="equals">
+				<!-- Check if orderItemTypeId equals PRODUCT_ORDER_ITEM, if so, use ProductType 
+					and ReturnItemTypeMap to get ReturnItemType -->
+				<entity-one entity-name="Product" value-field="product">
+					<field-map field-name="productId" from-field="orderItem.productId" />
+					<select-field field-name="productTypeId" />
+				</entity-one>
+				<entity-one entity-name="ReturnItemTypeMap" value-field="returnItemTypeMapping">
+					<field-map from-field="product.productTypeId" field-name="returnItemMapKey" />
+					<field-map from-field="returnHeaderTypeId" field-name="returnHeaderTypeId" />
+				</entity-one>
+				<else>
+					<!-- if not, try the ReturnItemTypeMap, but this may not actually work, 
+						so log a warning -->
+					<entity-one entity-name="ReturnItemTypeMap" value-field="returnItemTypeMapping">
+						<field-map from-field="orderItemTypeId" field-name="returnItemMapKey" />
+						<field-map from-field="returnHeaderTypeId" field-name="returnHeaderTypeId" />
+					</entity-one>
+				</else>
+			</if-compare>
+
+			<if-empty field="returnItemTypeMapping.returnItemTypeId">
+				<add-error>
+					<fail-property resource="OrderErrorUiLabels" property="OrderReturnItemTypeOrderItemNoMatching" />
+				</add-error>
+				<check-errors />
+				<else>
+					<set from-field="returnItemTypeMapping.returnItemTypeId" field="newItemCtx.returnItemTypeId" />
+				</else>
+			</if-empty>
+
+			<!-- create the return item -->
+			<if-not-empty field="newItemCtx.orderAdjustmentId">
+				<clear-field field="newItemCtx.orderAdjustmentId" />
+			</if-not-empty>
+			<if-compare field="newItemCtx.returnQuantity" value="0" operator="greater" type="BigDecimal">
+				<!-- otherwise, items which have been fully returned would still get 
+					passed in and then come back with an error -->
+				<call-service service-name="createReturnItem" in-map-name="newItemCtx" include-user-login="true" />
+			</if-compare>
+		</iterate>
+
+		<!-- create a return adjustment for all order adjustments not attached 
+			to a particular orderItem (orderItemSeqId = "_NA_") -->
+		<entity-condition entity-name="OrderAdjustment" list="orderAdjustments">
+			<condition-list combine="and">
+				<condition-expr field-name="orderId" operator="equals" from-field="orderHeader.orderId" />
+				<condition-expr field-name="orderItemSeqId" operator="equals" value="_NA_" />
+			</condition-list>
+		</entity-condition>
+		<iterate entry="orderAdjustment" list="orderAdjustments">
+			<clear-field field="returnAdjCtx" />
+			<set from-field="orderAdjustment.orderAdjustmentId" field="returnAdjCtx.orderAdjustmentId" />
+			<set from-field="returnId" field="returnAdjCtx.returnId" />
+			<set from-field="orderAdjustment.amount" field="returnAdjCtx.amount" />
+			<!--filter out orderAdjustment that have been returned -->
+			<entity-count entity-name="ReturnAdjustment" count-field="returnCount">
+				<condition-expr field-name="orderAdjustmentId" operator="equals" from-field="orderAdjustment.orderAdjustmentId" />
+			</entity-count>
+			<if-compare field="returnCount" value="0" operator="equals">
+				<call-service service-name="createReturnAdjustment" in-map-name="returnAdjCtx" include-user-login="true" />
+			</if-compare>
+		</iterate>
+		<set field="orderAvailableCtx.orderId" from-field="orderHeader.orderId" />
+		<set field="orderAvailableCtx.countNewReturnItems" value="true" type="Boolean" />
+		<call-service service-name="getOrderAvailableReturnedTotal" in-map-name="orderAvailableCtx">
+			<result-to-field result-name="availableReturnTotal" field="availableReturnTotal" />
+			<result-to-field result-name="returnTotal" field="returnTotal" />
+			<result-to-field result-name="orderTotal" field="orderTotal" />
+		</call-service>
+		<!-- create a manual balance adjustment based on the difference between 
+			order total and return total -->
+		<if-compare field="availableReturnTotal" operator="not-equals" value="0.00" type="BigDecimal">
+			<set value="Balance Adjustment" field="balanceItemCtx.description" />
+			<set value="RET_MAN_ADJ" field="balanceItemCtx.returnAdjustmentTypeId" />
+			<set from-field="returnId" field="balanceItemCtx.returnId" />
+			<set field="balanceItemCtx.returnItemSeqId" value="_NA_" />
+			<set from-field="availableReturnTotal" field="balanceItemCtx.amount" type="BigDecimal" />
+
+			<!-- create the balance adjustment return item -->
+			<call-service service-name="createReturnAdjustment" in-map-name="balanceItemCtx" include-user-login="true" />
+		</if-compare>
+
+		<!-- update the header status -->
+		<if-compare field="returnHeaderTypeId" operator="equals" value="CUSTOMER_RETURN">
+			<set field="updateHeaderCtx.statusId" value="RETURN_ACCEPTED" />
+			<else>
+				<set field="updateHeaderCtx.statusId" value="SUP_RETURN_ACCEPTED" />
+			</else>
+		</if-compare>
+		<set from-field="returnId" field="updateHeaderCtx.returnId" />
+		<call-service service-name="updateReturnHeader" in-map-name="updateHeaderCtx" include-user-login="true" />
+
+		<if-compare field="returnHeaderTypeId" operator="equals" value="CUSTOMER_RETURN">
+			<!-- auto-receive this return if we passed in the flag -->
+			<if-compare field="parameters.receiveReturn" operator="equals" value="true" type="Boolean">
+				<set from-field="returnId" field="receiveCtx.returnId" />
+				<call-service service-name="quickReceiveReturn" in-map-name="receiveCtx" />
+			</if-compare>
+		</if-compare>
+		<field-to-result field="returnId" />
+	</simple-method>
+	
+	<simple-method method-name="partialReturnFromOrder" short-description="Create Quick Return From Order">
+		<if>
+			<condition>
+				<and>
+					<not>
+						<if-has-permission permission="ORDERMGR" action="_CREATE" />
+					</not>
+					<not>
+						<if-compare-field field="userLogin.partyId" to-field="parameters.fromPartyId" operator="equals" />
+					</not>
+				</and>
+			</condition>
+			<then>
+				<add-error>
+					<fail-property resource="OrderErrorUiLabels" property="OrderSecurityErrorToRunQuickReturnFromOrder" />
+				</add-error>
+			</then>
+		</if>
+		<check-errors />
+
+		<!-- get primary information from the order header -->
+		<entity-one entity-name="OrderHeader" value-field="orderHeader">
+			<field-map from-field="parameters.orderId" field-name="orderId" />
+		</entity-one>
+		<set field="returnHeaderTypeId" from-field="parameters.returnHeaderTypeId" />
+		<if-compare field="returnHeaderTypeId" operator="equals" value="CUSTOMER_RETURN">
+			<set field="roleTypeId" value="BILL_TO_CUSTOMER" />
+			<else>
+				<set field="roleTypeId" value="BILL_FROM_VENDOR" />
+			</else>
+		</if-compare>
+
+		<!-- find the bill to customer; for return's fromPartyId -->
+		<entity-condition entity-name="OrderRole" list="orderRoles">
+			<condition-list combine="and">
+				<condition-expr field-name="orderId" operator="equals" from-field="orderHeader.orderId" />
+				<condition-expr field-name="roleTypeId" operator="equals" from-field="roleTypeId" />
+			</condition-list>
+		</entity-condition>
+		<first-from-list entry="orderRole" list="orderRoles" />
+		<!-- create the return header -->
+		<set from-field="orderHeader.originFacilityId" field="createHeaderCtx.destinationFacilityId" />
+
+		<set value="Y" field="updateHeaderCtx.needsInventoryReceive" />
+		<set from-field="returnHeaderTypeId" field="createHeaderCtx.returnHeaderTypeId" />
+		<set from-field="parameters.grandTotal" field="createHeaderCtx.grandTotal"/>
+		<set from-field="parameters.taxTotal" field="createHeaderCtx.taxTotal"/>
+
+		<!-- get the return to party for customer return and return from party 
+			for vendor return from the product store -->
+		<get-related-one relation-name="ProductStore" value-field="orderHeader" to-value-field="productStore" />
+		<if-compare field="returnHeaderTypeId" operator="equals" value="CUSTOMER_RETURN">
+			<set field="createHeaderCtx.fromPartyId" from-field="orderRole.partyId" />
+			<set field="createHeaderCtx.toPartyId" from-field="productStore.payToPartyId" />
+			<if-empty field="createHeaderCtx.destinationFacilityId">
+				<set field="createHeaderCtx.destinationFacilityId" from-field="productStore.inventoryFacilityId" />
+			</if-empty>
+			<else>
+				<set field="createHeaderCtx.fromPartyId" from-field="productStore.payToPartyId" />
+				<set field="createHeaderCtx.toPartyId" from-field="orderRole.partyId" />
+			</else>
+		</if-compare>
+		<!-- copy over the currency of the order to the currency of the return -->
+		<set from-field="orderHeader.currencyUom" field="createHeaderCtx.currencyUomId" />
+
+		<call-service service-name="createReturnHeader" in-map-name="createHeaderCtx" include-user-login="true">
+			<result-to-field result-name="returnId" />
+		</call-service>
+
+		<!-- get the available to return order items -->
+		<entity-condition entity-name="OrderItem" list="orderItems">
+			<condition-list combine="and">
+				<condition-expr field-name="orderId" operator="equals" from-field="orderHeader.orderId" />
+				<condition-expr field-name="statusId" operator="equals" value="ITEM_COMPLETED" />
+			</condition-list>
+		</entity-condition>
+
+		<if-empty field="parameters.returnReasonId">
+			<set value="RTN_NOT_WANT" field="parameters.returnReasonId" />
+		</if-empty>
+		<if-empty field="parameters.returnTypeId">
+			<set value="RTN_REFUND" field="parameters.returnTypeId" />
+		</if-empty>
+
+		<!-- create the return items -->
+		<iterate entry="orderItem" list="orderItems">
+		    <set field="continueL1" value="true"/>
+		    <set field="parReturnQuantity" value="0"/>
+			<iterate entry="returnOrderItem" list="parameters.returnOrderItems">
+			    <if-compare operator="equals" value="${orderItem.orderItemSeqId}" field="returnOrderItem.orderItemSeqId">
+			        <set field="continueL1" value="false"/>
+			        <set field="parReturnQuantity" from-field="returnOrderItem.quantity"/>
+			        <break></break>
+			    </if-compare>
+		    </iterate>
+		    <if-compare operator="equals" value="true" field="continueL1">
+		        <continue></continue>
+		    </if-compare>
+			<set from-field="returnId" field="newItemCtx.returnId" />
+			<set from-field="parameters.returnReasonId" field="newItemCtx.returnReasonId" />
+			<set from-field="parameters.returnTypeId" field="newItemCtx.returnTypeId" />
+
+			<if-not-empty field="orderItem.productId">
+				<set from-field="orderItem.productId" field="newItemCtx.productId" />
+			</if-not-empty>
+
+			<set from-field="orderItem.orderId" field="newItemCtx.orderId" />
+			<set from-field="orderItem.orderItemSeqId" field="newItemCtx.orderItemSeqId" />
+			<set from-field="orderItem.itemDescription" field="newItemCtx.description" />
+			<set from-field="orderItem.quantityUomId" field="newItemCtx.quantityUomId" />
+
+			<!-- get the returnable price and quantity -->
+			<set from-field="orderItem" field="itemCheckMap.orderItem" />
+			<set field="returnableQuantity" default=""/>
+			<call-service service-name="getReturnableQuantity" in-map-name="itemCheckMap">
+				<result-to-field result-name="returnableQuantity" field="returnableQuantity" />
+				<result-to-field result-name="returnablePrice" field="newItemCtx.returnPrice" />
+			</call-service>
+			<!-- FIXME Check returnAbleQuantity -->
+			<set field="newItemCtx.returnQuantity" from-field="parReturnQuantity"/>
+			<!-- get the matching return item type from the order item type -->
+
+			<set from-field="orderItem.orderItemTypeId" field="orderItemTypeId" />
+			<if-compare field="orderItemTypeId" value="PRODUCT_ORDER_ITEM" operator="equals">
+				<!-- Check if orderItemTypeId equals PRODUCT_ORDER_ITEM, if so, use ProductType 
+					and ReturnItemTypeMap to get ReturnItemType -->
+				<entity-one entity-name="Product" value-field="product">
+					<field-map field-name="productId" from-field="orderItem.productId" />
+					<select-field field-name="productTypeId" />
+				</entity-one>
+				<entity-one entity-name="ReturnItemTypeMap" value-field="returnItemTypeMapping">
+					<field-map from-field="product.productTypeId" field-name="returnItemMapKey" />
+					<field-map from-field="returnHeaderTypeId" field-name="returnHeaderTypeId" />
+				</entity-one>
+				<else>
+					<!-- if not, try the ReturnItemTypeMap, but this may not actually work, 
+						so log a warning -->
+					<entity-one entity-name="ReturnItemTypeMap" value-field="returnItemTypeMapping">
+						<field-map from-field="orderItemTypeId" field-name="returnItemMapKey" />
+						<field-map from-field="returnHeaderTypeId" field-name="returnHeaderTypeId" />
+					</entity-one>
+				</else>
+			</if-compare>
+
+			<if-empty field="returnItemTypeMapping.returnItemTypeId">
+				<add-error>
+					<fail-property resource="OrderErrorUiLabels" property="OrderReturnItemTypeOrderItemNoMatching" />
+				</add-error>
+				<check-errors />
+				<else>
+					<set from-field="returnItemTypeMapping.returnItemTypeId" field="newItemCtx.returnItemTypeId" />
+				</else>
+			</if-empty>
+
+			<!-- create the return item -->
+			<if-not-empty field="newItemCtx.orderAdjustmentId">
+				<clear-field field="newItemCtx.orderAdjustmentId" />
+			</if-not-empty>
+			<if-compare field="newItemCtx.returnQuantity" value="0" operator="greater" type="BigDecimal">
+				<!-- otherwise, items which have been fully returned would still get 
+					passed in and then come back with an error -->
+				<call-service service-name="createReturnItem" in-map-name="newItemCtx" include-user-login="true" />
+			</if-compare>
+			<entity-condition entity-name="OrderAdjustment" list="orderAdjustments">
+				<condition-list combine="and">
+					<condition-expr field-name="orderId" operator="equals" from-field="orderHeader.orderId" />
+					<condition-expr field-name="orderItemSeqId" operator="equals" value="${orderItem.orderItemSeqId}" />
+					<condition-expr field-name="orderAdjustmentTypeId" operator="equals" value="SALES_TAX" />
+				</condition-list>
+			</entity-condition>
+		</iterate>
+		
+		<!-- Return adjustment -->
+		<iterate entry="retAdj" list="returnedAdjustment">
+		    <entity-one entity-name="OrderAdjustment" value-field="orderAdjustment">
+				<field-map from-field="retAdj" field-name="orderAdjustmentId" />
+			</entity-one>
+		    <clear-field field="returnAdjCtx" />
+			<set from-field="orderAdjustment.orderAdjustmentId" field="returnAdjCtx.orderAdjustmentId" />
+			<set from-field="returnId" field="returnAdjCtx.returnId" />
+			<set from-field="orderAdjustment.amount" field="returnAdjCtx.amount" />
+<!-- 			filter out orderAdjustment that have been returned -->
+			<entity-count entity-name="ReturnAdjustment" count-field="returnCount">
+				<condition-expr field-name="orderAdjustmentId" operator="equals" from-field="orderAdjustment.orderAdjustmentId" />
+			</entity-count>
+<!-- 			<calculate field="returnAdjCtx.amount" decimal-scale="2"> -->
+<!-- 			    <calcop operator="divide"> -->
+<!-- 				    <calcop operator="multiply"> -->
+<!-- 				        <calcop operator="get" field="parReturnQuantity"/> -->
+<!--                         <calcop operator="get" field="orderAdjustment.amount"/> -->
+<!-- 				    </calcop> -->
+<!-- 				    <calcop operator="get" field="returnableQuantity"></calcop> -->
+<!-- 			    </calcop> -->
+<!-- 			</calculate> -->
+			<if-compare field="returnCount" value="0" operator="equals">
+				<call-service service-name="createReturnAdjustment" in-map-name="returnAdjCtx" include-user-login="true" />
+			</if-compare>
+		</iterate>
+		
+		<!-- create a return adjustment for all order adjustments not attached 
+			to a particular orderItem (orderItemSeqId = "_NA_") -->
+		<entity-condition entity-name="OrderAdjustment" list="orderAdjustments">
+			<condition-list combine="and">
+				<condition-expr field-name="orderId" operator="equals" from-field="orderHeader.orderId" />
+				<condition-expr field-name="orderItemSeqId" operator="equals" value="_NA_" />
+			</condition-list>
+		</entity-condition>
+		<iterate entry="orderAdjustment" list="orderAdjustments">
+			<clear-field field="returnAdjCtx" />
+			<set from-field="orderAdjustment.orderAdjustmentId" field="returnAdjCtx.orderAdjustmentId" />
+			<set from-field="returnId" field="returnAdjCtx.returnId" />
+			<set from-field="orderAdjustment.amount" field="returnAdjCtx.amount" />
+			<!--filter out orderAdjustment that have been returned -->
+			<entity-count entity-name="ReturnAdjustment" count-field="returnCount">
+				<condition-expr field-name="orderAdjustmentId" operator="equals" from-field="orderAdjustment.orderAdjustmentId" />
+			</entity-count>
+			<if-compare field="returnCount" value="0" operator="equals">
+				<call-service service-name="createReturnAdjustment" in-map-name="returnAdjCtx" include-user-login="true" />
+			</if-compare>
+		</iterate>
+		<set field="orderAvailableCtx.orderId" from-field="orderHeader.orderId" />
+		<set field="orderAvailableCtx.countNewReturnItems" value="true" type="Boolean" />
+		<call-service service-name="getOrderAvailableReturnedTotal" in-map-name="orderAvailableCtx">
+			<result-to-field result-name="availableReturnTotal" field="availableReturnTotal" />
+			<result-to-field result-name="returnTotal" field="returnTotal" />
+			<result-to-field result-name="orderTotal" field="orderTotal" />
+		</call-service>
+		<!-- create a manual balance adjustment based on the difference between 
+			order total and return total -->
+		<if-compare field="availableReturnTotal" operator="not-equals" value="0.00" type="BigDecimal">
+			<set value="Balance Adjustment" field="balanceItemCtx.description" />
+			<set value="RET_MAN_ADJ" field="balanceItemCtx.returnAdjustmentTypeId" />
+			<set from-field="returnId" field="balanceItemCtx.returnId" />
+			<set field="balanceItemCtx.returnItemSeqId" value="_NA_" />
+			<set from-field="availableReturnTotal" field="balanceItemCtx.amount" type="BigDecimal" />
+
+			<!-- create the balance adjustment return item -->
+			<call-service service-name="createReturnAdjustment" in-map-name="balanceItemCtx" include-user-login="true" />
+		</if-compare>
+
+		<!-- update the header status -->
+		<if-compare field="returnHeaderTypeId" operator="equals" value="CUSTOMER_RETURN">
+			<set field="updateHeaderCtx.statusId" value="RETURN_ACCEPTED" />
+			<else>
+				<set field="updateHeaderCtx.statusId" value="SUP_RETURN_ACCEPTED" />
+			</else>
+		</if-compare>
+		<set from-field="returnId" field="updateHeaderCtx.returnId" />
+		<call-service service-name="updateReturnHeader" in-map-name="updateHeaderCtx" include-user-login="true" />
+
+		<if-compare field="returnHeaderTypeId" operator="equals" value="CUSTOMER_RETURN">
+			<!-- auto-receive this return if we passed in the flag -->
+			<if-compare field="parameters.receiveReturn" operator="equals" value="true" type="Boolean">
+				<set from-field="returnId" field="receiveCtx.returnId" />
+				<call-service service-name="quickReceiveReturn" in-map-name="receiveCtx" />
+			</if-compare>
+		</if-compare>
+		<field-to-result field="returnId" />
+	</simple-method>
+
+</simple-methods>

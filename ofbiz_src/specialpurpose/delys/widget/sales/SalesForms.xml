@@ -1,0 +1,845 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
+    <form name="FindSalesForecast" type="single" target="findSalesForecast" header-row-style="header-row" 
+    		default-table-style="basic-table" default-title-style="control-label" style="basic-custom-form">
+        <!-- extends="LookupSalesForecast" extends-resource="component://delys/widget/sales/LookupForms.xml" -->
+        <field name="createdByUserLoginId"><hidden/></field>
+        <field name="modifiedByUserLoginId"><hidden/></field>
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="salesForecastId" title="${uiLabelMap.DAFormFieldTitle_salesForecastId} :"><text-find></text-find></field>
+        <field name="parentSalesForecastId" title="${uiLabelMap.DAFormFieldTitle_parentSalesForecastId} :"><text-find></text-find></field>
+        <field name="organizationPartyId" title="${uiLabelMap.DAFormFieldTitle_organizationPartyId} :"><text-find></text-find></field>
+        <field name="internalPartyId" title="${uiLabelMap.DAFormFieldTitle_internalPartyId} :"><text-find></text-find></field>
+        <field name="customTimePeriodId" title="${uiLabelMap.DAFormFieldTitle_customTimePeriodId} :"><text-find></text-find></field>
+        <field name="currencyUomId" title="${uiLabelMap.DAFormFieldTitle_currencyUomId} :">
+            <drop-down allow-empty="true" no-current-selected-key="${defaultOrganizationPartyCurrencyUomId}">
+                <entity-options key-field-name="uomId" description="${description} - ${abbreviation}" entity-name="Uom">
+                    <entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="quotaAmount" title="${uiLabelMap.DAFormFieldTitle_quotaAmount} :"><range-find></range-find></field>
+        <field name="forecastAmount" title="${uiLabelMap.DAFormFieldTitle_forecastAmount} :"><range-find></range-find></field>
+        <field name="bestCaseAmount" title="${uiLabelMap.DAFormFieldTitle_bestCaseAmount} :"><range-find></range-find></field>
+        <field name="closedAmount" title="${uiLabelMap.DAFormFieldTitle_closedAmount} :"><range-find></range-find></field>
+        <field name="pipelineAmount" title="${uiLabelMap.DAFormFieldTitle_pipelineAmount} :"><range-find></range-find></field>
+        <!-- <field name="percentOfQuotaForecast" title="${uiLabelMap.DAFormFieldTitle_percentOfQuotaForecast}"><text-find></text-find></field>
+        <field name="percentOfQuotaClosed" title="${uiLabelMap.DAFormFieldTitle_percentOfQuotaClosed}"><text-find></text-find></field> -->
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-primary btn-small">
+        	<submit image-location="icon-search" button-type="button"/>
+       	</field>
+    </form>
+    <form name="SalesForecastSearchResults" type="list" list-name="listIt" paginate-target="findSalesForecast" view-size="15"
+            odd-row-style="alternate-row" default-table-style="table table-striped table-bordered table-hover dataTable" header-row-style="header-row-2" separate-columns="true">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="SalesForecast"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+        </actions>
+        <field name="percentOfQuotaForecast"><hidden/></field>
+        <field name="percentOfQuotaClosed"><hidden/></field>
+        <field name="pipelineAmount"><hidden/></field>
+        <field name="createdByUserLoginId"><hidden/></field>
+        <field name="modifiedByUserLoginId"><hidden/></field>
+        <field name="salesForecastId" title="${uiLabelMap.DAFormFieldTitle_salesForecastId}">
+        	<hyperlink target="editSalesForecast" description="${salesForecastId}" also-hidden="false">
+                <parameter param-name="salesForecastId"/>
+            </hyperlink>
+        </field>
+        <field name="parentSalesForecastId" title="${uiLabelMap.DAFormFieldTitle_parentSalesForecastId}"><display></display></field>
+        <field name="organizationPartyId" title="${uiLabelMap.DAFormFieldTitle_organizationPartyId}"><display></display></field>
+        <field name="internalPartyId" title="${uiLabelMap.DAFormFieldTitle_internalPartyId}"><display></display></field>
+        <field name="customTimePeriodId" title="${uiLabelMap.DAFormFieldTitle_customTimePeriodId}"><display></display></field>
+        <field name="currencyUomId" title="${uiLabelMap.DAFormFieldTitle_currencyUomId}"><display></display></field>
+        <field name="quotaAmount" title="${uiLabelMap.DAFormFieldTitle_quotaAmount}"><display></display></field>
+        <field name="forecastAmount" title="${uiLabelMap.DAFormFieldTitle_forecastAmount}"><display></display></field>
+        <field name="bestCaseAmount" title="${uiLabelMap.DAFormFieldTitle_bestCaseAmount}"><display></display></field>
+        <field name="closedAmount" title="${uiLabelMap.DAFormFieldTitle_closedAmount}"><display></display></field>
+    </form>
+    <form name="EditSalesForecast" type="single" target="updateSalesForecast" default-map-name="salesForecast" default-title-style="control-label">
+        <alt-target use-when="salesForecast==null" target="createSalesForecast"/>
+        <auto-fields-service service-name="updateSalesForecast"/>
+        
+        <field name="salesForecastId" title="${uiLabelMap.DAFormFieldTitle_salesForecastId}" use-when="salesForecastId!=null" tooltip="${uiLabelMap.CommonNotModifRecreat}"><display/></field>
+        <field name="salesForecastId" title="${uiLabelMap.DAFormFieldTitle_salesForecastId}" use-when="salesForecast==null&amp;&amp;salesForecastId==null"><ignored/></field>
+        <field name="salesForecastId" title="${uiLabelMap.DAFormFieldTitle_salesForecastId}" use-when="salesForecast==null&amp;&amp;salesForecastId!=null" tooltip="${uiLabelMap.CommonCannotBeFound}: [${salesForecastId}]"><display also-hidden="false"/></field>
+
+        <field name="parentSalesForecastId" title="${uiLabelMap.DAFormFieldTitle_parentSalesForecastId}">
+            <lookup target-form-name="LookupSalesForecast"/>
+        </field>
+        <field name="organizationPartyId" title="${uiLabelMap.DAFormFieldTitle_organizationPartyId}">
+            <lookup target-form-name="LookupPartyName"/>
+        </field>
+        <field name="internalPartyId" title="${uiLabelMap.DAFormFieldTitle_internalPartyId}">
+            <lookup target-form-name="LookupPartyName"/>
+        </field>
+        <field name="customTimePeriodId" title="${uiLabelMap.DAFormFieldTitle_customTimePeriodId}">
+        	<lookup target-form-name="LookupCustomTimeSalesPeriod"/>
+        </field>
+        <field name="currencyUomId" title="${uiLabelMap.DAFormFieldTitle_currencyUomId}">
+            <drop-down allow-empty="true" no-current-selected-key="${defaultOrganizationPartyCurrencyUomId}">
+                <entity-options key-field-name="uomId" description="${description} - ${abbreviation}" entity-name="Uom">
+                    <entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="createdByUserLoginId"><hidden/></field>
+        <field name="modifiedByUserLoginId"><hidden/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSave}" use-when="salesForecast==null" widget-style="btn btn-small btn-primary"><submit button-type="button"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" use-when="salesForecast!=null" widget-style="btn btn-small btn-primary"><submit button-type="button"/></field>
+        
+        <sort-order>
+        	<field-group style="no-widget-header no-left-margin span6">
+        		<sort-field name="salesForecastId"/>
+    			<sort-field name="parentSalesForecastId"/>
+    			<sort-field name="organizationPartyId"/>
+    			<sort-field name="internalPartyId"/>
+    			<sort-field name="customTimePeriodId"/>
+    			<sort-field name="currencyUomId"/>
+    			<sort-field name="quotaAmount"/>
+        	</field-group>
+        	<field-group style="no-widget-header no-left-margin span6">
+        		<sort-field name="forecastAmount"/>
+    			<sort-field name="bestCaseAmount"/>
+    			<sort-field name="closedAmount"/>
+    			<sort-field name="percentOfQuotaForecast"/>
+    			<sort-field name="percentOfQuotaClosed"/>
+    			<sort-field name="pipelineAmount"/>
+    			<sort-field name="changeNote"/>
+        	</field-group>
+        	<field-group style="no-widget-header no-left-margin span12 align-center">
+        		<sort-field name="submitButton"/>
+        	</field-group>
+        </sort-order>
+    </form>
+    <form name="AddSalesForecastDetail" type="single" target="createSalesForecastDetail" default-title-style="control-label" style="basic-custom-form">
+        <auto-fields-entity entity-name="SalesForecastDetail"/>
+        <field name="salesForecastId"><hidden/></field>
+        <field name="salesForecastDetailId"><hidden/></field>
+        <field name="quantityUomId" title="${uiLabelMap.DAFormFieldTitle_quantityUomId}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="UomAndType" key-field-name="uomId" description="[${typeDescription}] ${description}">
+                    <entity-order-by field-name="uomTypeId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="productId" title="${uiLabelMap.DAProductId}">
+            <lookup target-form-name="LookupProduct"/>
+        </field>
+        <field name="productCategoryId" title="${uiLabelMap.DAFormFieldTitle_productCategoryId}">
+            <lookup target-form-name="LookupProductCategory"/>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}" widget-style="btn btn-small btn-primary"><submit button-type="button"/></field>
+        
+        <sort-order>
+        	<field-group style="no-widget-header no-left-margin span6">
+        		<sort-field name="productId"/>
+        		<sort-field name="productCategoryId"/>
+        	</field-group>
+        	<field-group style="no-widget-header no-left-margin span6">
+        		<sort-field name="quantity"/>
+        		<sort-field name="quantityUomId"/>
+        		<sort-field name="amount"/>
+        	</field-group>
+        	<field-group style="no-widget-header no-left-margin span12 align-center">
+        		<sort-field name="submitButton"/>
+        	</field-group>
+        </sort-order>
+    </form>
+    <form name="ListSalesForecastDetails" type="list" target="updateSalesForecastDetail" view-size="10"
+            odd-row-style="alternate-row" default-table-style="table table-striped table-bordered table-hover dataTable ofx-scroll" separate-columns="true">
+        <actions>
+            <entity-condition entity-name="SalesForecastDetail">
+                <condition-expr field-name="salesForecastId" from-field="parameters.salesForecastId"/>
+            </entity-condition>
+        </actions>
+        <auto-fields-entity entity-name="SalesForecastDetail" default-field-type="edit"/>
+        <field name="salesForecastId"><hidden/></field>
+        <field name="salesForecastDetailId" title="${uiLabelMap.DAFormFieldTitle_salesForecastDetailId}"><display/></field>
+        <field name="productId" title="${uiLabelMap.DAProductId}" widget-area-style="nowrap width150px">
+            <lookup target-form-name="LookupProduct"/>
+        </field>
+        <field name="productCategoryId" title="${uiLabelMap.DAFormFieldTitle_productCategoryId}" widget-area-style="nowrap width150px">
+            <lookup target-form-name="LookupProductCategory"/>
+        </field>
+        <field name="quantity" widget-style="width-cell-100px"><text></text></field>
+        <field name="quantityUomId" title="${uiLabelMap.DAFormFieldTitle_productCategoryId}" widget-area-style="width210px">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="UomAndType" key-field-name="uomId" description="[${typeDescription}] ${description}">
+                    <entity-order-by field-name="uomTypeId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+       	<field name="amount" widget-style="width-cell-100px"><text size="10"></text></field>
+        <field name="submitButton" title=" " widget-style="btn btn-mini btn-success icon-ok bigger-120 no-bottom-margin" widget-area-style="width-26px">
+        	<submit button-type="button"/>
+       	</field>
+        <field name="deleteLink" title=" " widget-style="btn btn-mini btn-danger icon-trash open-sans no-bottom-margin" widget-area-style="width-26px no-border-left no-left-padding">
+            <hyperlink target="deleteSalesForecastDetail" description=" " also-hidden="false">
+                <parameter param-name="salesForecastId"/>
+                <parameter param-name="salesForecastDetailId"/>
+            </hyperlink>
+        </field>
+        
+        <sort-order>
+        	<sort-field name="salesForecastDetailId"/>
+        	<sort-field name="productId"/>
+        	<sort-field name="productCategoryId"/>
+        	<sort-field name="quantity"/>
+        	<sort-field name="quantityUomId"/>
+        	<sort-field name="amount"/>
+        </sort-order>
+    </form>
+    
+    <form name="FindSalesIn" type="single" target="findSalesIn" header-row-style="header-row" 
+    		default-table-style="basic-table" default-title-style="control-label" style="basic-custom-form">
+    	<field name="salesId"><text-find></text-find></field>
+    	<!-- <field name="salesTypeId">
+    		<drop-down allow-empty="true">
+    			<entity-options key-field-name="salesTypeId" description="${description}" entity-name="SalesStatementType"></entity-options>
+   			</drop-down>
+    	</field> -->
+    	<field name="parentSalesId"><text-find></text-find></field>
+    	<field name="salesName"><text-find></text-find></field>
+    	<field name="statusId">
+    		<drop-down allow-empty="true">
+    			<entity-options key-field-name="statusId" description="${description}" entity-name="StatusItem">
+    				<entity-constraint name="statusTypeId" value="SALES_SM_STATUS"/>
+    			</entity-options>
+    		</drop-down>
+    	</field>
+    	<field name="salesForecastId"><text-find></text-find></field>
+    	<field name="organizationPartyId" title="${uiLabelMap.HumanResEmploymentPartyIdFrom}">
+    		<drop-down allow-empty="true" no-current-selected-key="${defaultOrganizationPartyId}">
+                <entity-options description="${groupName} [${partyId}]" entity-name="PartyAcctgPrefAndGroup" key-field-name="partyId">
+                    <entity-order-by field-name="groupName"/>
+                </entity-options>
+            </drop-down>
+    	</field>
+    	<field name="internalPartyId">
+    		<lookup target-form-name="LookupPartyName"></lookup>
+    	</field>
+        <field name="fromDate"><date-find/></field>
+        <field name="thruDate"><date-find/></field>
+        <!-- <field name="quotaAmount"><range-find></range-find></field>
+        <field name="forecastAmount"><range-find></range-find></field>
+        <field name="bestCaseAmount"><range-find></range-find></field>
+        <field name="closedAmount"><range-find></range-find></field> -->
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-primary btn-small">
+        	<submit image-location="icon-search" button-type="button"/>
+       	</field>
+    </form>
+    <form name="SalesInSearchResults" type="list" list-name="listIt" paginate-target="findSalesIn" view-size="5"
+            odd-row-style="alternate-row" default-table-style="table table-striped table-bordered table-hover dataTable" header-row-style="header-row-2" separate-columns="true">
+        <actions>
+        	<set field="salesTypeId" value="SALES_IN"/>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="SalesStatementHeader"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+        </actions>
+        <field name="salesId"><display></display></field>
+    	<!-- <field name="salesTypeId">
+    		<display-entity description="${description}" entity-name="SalesStatementType"></display-entity>
+    	</field> -->
+    	<field name="parentSalesId"><display></display></field>
+    	<field name="salesName"><display></display></field>
+    	<field name="statusId">
+    		<display-entity description="${description}" entity-name="StatusItem"></display-entity>
+    	</field>
+    	<field name="currencyUom"><display></display></field>
+    	<field name="salesForecastId">
+    		<hyperlink target="editSalesForecast">
+    			<parameter param-name="salesForecastId" from-field="salesForecastId"/>
+    		</hyperlink>
+    	</field>
+    	<field name="organizationPartyId"><display></display></field>
+    	<field name="internalPartyId"><display></display></field>
+        <field name="createdBy"><display></display></field>
+        <field name="fromDate"><display type="date-time"></display></field>
+        <field name="thruDate"><display type="date-time"></display></field>
+        <!-- <field name="quotaAmount"><display type="accounting-number" currency="${currencyUomId}"></display></field>
+        <field name="forecastAmount"><display type="accounting-number" currency="${currencyUomId}"></display></field>
+        <field name="bestCaseAmount"><display type="accounting-number" currency="${currencyUomId}"></display></field>
+        <field name="closedAmount"><display type="accounting-number" currency="${currencyUomId}"></display></field> -->
+    </form>
+    <form name="FindSalesStatement" type="single" target="findSalesStatement" header-row-style="header-row" 
+    		default-table-style="basic-table" default-title-style="control-label" style="basic-custom-form">
+    	<field name="salesId"><text-find></text-find></field>
+    	<field name="salesTypeId">
+    		<drop-down allow-empty="true">
+    			<entity-options key-field-name="salesTypeId" description="${description}" entity-name="SalesStatementType"></entity-options>
+   			</drop-down>
+    	</field>
+    	<field name="parentSalesId"><text-find></text-find></field>
+    	<field name="salesName"><text-find></text-find></field>
+    	<field name="statusId">
+    		<drop-down allow-empty="true">
+    			<entity-options key-field-name="statusId" description="${description}" entity-name="StatusItem">
+    				<entity-constraint name="statusTypeId" value="SALES_SM_STATUS"/>
+    			</entity-options>
+    		</drop-down>
+    	</field>
+    	<field name="salesForecastId"><text-find></text-find></field>
+    	<field name="organizationPartyId" title="${uiLabelMap.HumanResEmploymentPartyIdFrom}">
+    		<drop-down allow-empty="true" no-current-selected-key="${defaultOrganizationPartyId}">
+                <entity-options description="${groupName} [${partyId}]" entity-name="PartyAcctgPrefAndGroup" key-field-name="partyId">
+                    <entity-order-by field-name="groupName"/>
+                </entity-options>
+            </drop-down>
+    	</field>
+    	<field name="internalPartyId">
+    		<lookup target-form-name="LookupPartyName"></lookup>
+    	</field>
+        <field name="fromDate"><date-find/></field>
+        <field name="thruDate"><date-find/></field>
+        <!-- <field name="quotaAmount"><range-find></range-find></field>
+        <field name="forecastAmount"><range-find></range-find></field>
+        <field name="bestCaseAmount"><range-find></range-find></field>
+        <field name="closedAmount"><range-find></range-find></field> -->
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-primary btn-small">
+        	<submit image-location="icon-search" button-type="button"/>
+       	</field>
+    </form>
+    <form name="SalesStatementSearchResults" type="list" list-name="listIt" paginate-target="findSalesStatement" view-size="5"
+            odd-row-style="alternate-row" default-table-style="table table-striped table-bordered table-hover dataTable" header-row-style="header-row-2" separate-columns="true">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="SalesStatementHeader"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+        </actions>
+        <field name="salesId">
+        	<hyperlink target="viewSalesStatement" description="${salesId}">
+        		<parameter param-name="salesId" from-field="salesId"/>
+        	</hyperlink>
+        </field>
+    	<field name="salesTypeId">
+    		<display-entity description="${description}" entity-name="SalesStatementType"></display-entity>
+    	</field>
+    	<field name="parentSalesId" title="${uiLabelMap.DAParentSalesStatementId}"><display></display></field>
+    	<field name="salesName"><display></display></field>
+    	<field name="statusId">
+    		<display-entity description="${description}" entity-name="StatusItem"></display-entity>
+    	</field>
+    	<field name="currencyUom"><display></display></field>
+    	<field name="salesForecastId">
+    		<hyperlink target="editSalesForecast">
+    			<parameter param-name="salesForecastId" from-field="salesForecastId"/>
+    		</hyperlink>
+    	</field>
+    	<field name="organizationPartyId"><display></display></field>
+    	<field name="internalPartyId"><display></display></field>
+        <field name="createdBy"><display></display></field>
+        <field name="fromDate"><display type="date-time"></display></field>
+        <field name="thruDate"><display type="date-time"></display></field>
+        <!-- <field name="quotaAmount"><display type="accounting-number" currency="${currencyUomId}"></display></field>
+        <field name="forecastAmount"><display type="accounting-number" currency="${currencyUomId}"></display></field>
+        <field name="bestCaseAmount"><display type="accounting-number" currency="${currencyUomId}"></display></field>
+        <field name="closedAmount"><display type="accounting-number" currency="${currencyUomId}"></display></field> -->
+    </form>
+    <form name="EditSalesStatement" type="single" target="updateSalesStatement" default-map-name="salesStatement" default-title-style="control-label">
+        <alt-target use-when="salesStatement==null" target="createSalesStatement"/>
+        <auto-fields-service service-name="updateSalesStatement"/>
+        <field name="changeNote"><hidden/></field>
+        <field name="salesId"><hidden/></field>
+        <field name="salesId2" title="${uiLabelMap.DASalesStatementId}" use-when="salesId!=null"><display default-value="${salesId}"/></field><!--  tooltip="${uiLabelMap.CommonNotModifRecreat}" -->
+        <field name="salesId2" title="${uiLabelMap.DASalesStatementId}" use-when="salesStatement==null&amp;&amp;salesId==null"><ignored/></field>
+        <field name="salesId2" title="${uiLabelMap.DASalesStatementId}" use-when="salesStatement==null&amp;&amp;salesId!=null" tooltip="${uiLabelMap.CommonCannotBeFound}: [${salesId}]"><display also-hidden="false" default-value="${salesId}"/></field>
+		<field name="statusId" title="${uiLabelMap.DAStatus}" use-when="salesStatement==null"><ignored/></field>
+		<field name="statusId" title="${uiLabelMap.DAStatus}" use-when="salesStatement!=null">
+			<display-entity entity-name="StatusItem" description="${description}"></display-entity>
+		</field>
+		<field name="salesTypeId" use-when="salesStatement!=null">
+			<display-entity entity-name="SalesStatementType" description="${description}"></display-entity>
+		</field>
+        <field name="salesTypeId" use-when="salesStatement==null">
+        	<drop-down>
+    			<entity-options key-field-name="salesTypeId" description="${description}" entity-name="SalesStatementType"></entity-options>
+   			</drop-down>
+        </field>
+        <field name="salesForecastId" title="${uiLabelMap.DAFormFieldTitle_salesForecastId}">
+        	<lookup target-form-name="LookupSalesForecast"/>
+        </field>
+        <field name="parentSalesId">
+        	<text></text>
+        </field>
+        <field name="organizationPartyId" title="${uiLabelMap.DAFormFieldTitle_organizationPartyId}">
+            <lookup target-form-name="LookupPartyName"/>
+        </field>
+        <field name="internalPartyId" title="${uiLabelMap.DAFormFieldTitle_internalPartyId}">
+            <lookup target-form-name="LookupPartyName"/>
+        </field>
+        <field name="fromDate" use-when="salesStatement==null" required-field="true"><date-time type="timestamp"/></field>
+        <field name="thruDate" use-when="salesStatement==null" required-field="true"><date-time type="timestamp"/></field>
+        <field name="fromDate" use-when="salesStatement!=null"><display type="date-time"></display></field>
+        <field name="thruDate" use-when="salesStatement!=null"><display type="date-time"></display></field>
+        <field name="currencyUomId" title="${uiLabelMap.DAFormFieldTitle_currencyUomId}">
+            <drop-down allow-empty="true" no-current-selected-key="${defaultOrganizationPartyCurrencyUomId}">
+                <entity-options key-field-name="uomId" description="${description} - ${abbreviation}" entity-name="Uom">
+                    <entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="createdBy"><hidden/></field>
+        <field name="modifiedBy"><hidden/></field>
+        <field name="submitButton" title="${uiLabelMap.DACreate}" use-when="salesStatement==null" widget-style="btn btn-small btn-primary"><submit button-type="button"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" use-when="salesStatement!=null" widget-style="btn btn-small btn-primary"><submit button-type="button"/></field>
+        
+        <sort-order>
+        	<field-group style="no-widget-header no-left-margin span6">
+        		<sort-field name="salesId2"/>
+        		<sort-field name="salesTypeId"/>
+        		<sort-field name="salesName"/>
+    			<sort-field name="organizationPartyId"/>
+    			<sort-field name="internalPartyId"/>
+    			<sort-field name="currencyUomId"/>
+    			<sort-field name="fromDate"/>
+    			<sort-field name="thruDate"/>
+        	</field-group>
+        	<field-group style="no-widget-header no-left-margin span6">
+        		<sort-field name="statusId"/>
+        		<sort-field name="salesForecastId"/>
+    			<sort-field name="parentSalesId"/>
+        		<sort-field name="quotaAmount"/>
+        		<sort-field name="forecastAmount"/>
+    			<sort-field name="bestCaseAmount"/>
+    			<sort-field name="closedAmount"/>
+    			<sort-field name="createdBy"/>
+    			<sort-field name="modifiedBy"/>
+        	</field-group>
+        	<field-group style="no-widget-header no-left-margin span12 align-center">
+        		<sort-field name="submitButton"/>
+        	</field-group>
+        </sort-order>
+    </form>
+    <form name="AddSalesStatementDetail" type="single" target="createSalesStatementDetail" default-title-style="control-label" 
+    		style="basic-custom-form" focus-field-name="productId">
+        <auto-fields-entity entity-name="SalesStatementItem"/>
+        <field name="salesId"><hidden/></field>
+        <field name="salesItemSeqId"><hidden value=""/></field>
+        <field name="unitPrice"><hidden/></field>
+        <field name="unitListPrice"><hidden/></field>
+        <field name="quantityActual"><hidden/></field>
+        <field name="amountActual"><hidden/></field>
+        <field name="changeByUserLoginId"><hidden/></field>
+        <field name="quantityUomId" title="${uiLabelMap.DAFormFieldTitle_quantityUomId}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="UomAndType" key-field-name="uomId" description="[${typeDescription}] ${description}">
+                    <entity-order-by field-name="uomTypeId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="productId" title="${uiLabelMap.DAProductId}">
+            <lookup target-form-name="LookupProduct"/>
+        </field>
+        <field name="productCategoryId" title="${uiLabelMap.DAFormFieldTitle_productCategoryId}">
+            <lookup target-form-name="LookupProductCategory"/>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}" widget-style="btn btn-small btn-primary"><submit button-type="button"/></field>
+        
+        <sort-order>
+        	<field-group style="no-widget-header no-left-margin span6">
+        		<sort-field name="productId"/>
+        		<sort-field name="productCategoryId"/>
+        		<sort-field name="quantity"/>
+        	</field-group>
+        	<field-group style="no-widget-header no-left-margin span6">
+        		<sort-field name="quantityUomId"/>
+        		<sort-field name="amount"/>
+        	</field-group>
+        	<field-group style="no-widget-header no-left-margin span12 align-center">
+        		<sort-field name="submitButton"/>
+        	</field-group>
+        </sort-order>
+    </form>
+    <form name="ListSalesStatementDetails" type="list" target="updateSalesStatementDetail" view-size="10"
+            odd-row-style="alternate-row" default-table-style="table table-striped table-bordered table-hover dataTable ofx-scroll" separate-columns="true">
+        <actions>
+            <entity-condition entity-name="SalesStatementItem">
+                <condition-expr field-name="salesId" from-field="parameters.salesId"/>
+            </entity-condition>
+        </actions>
+        <auto-fields-entity entity-name="SalesStatementItem" default-field-type="edit"/>
+        <field name="unitPrice"><hidden/></field>
+        <field name="unitListPrice"><hidden/></field>
+        <field name="quantityActual"><hidden/></field>
+        <field name="amountActual"><hidden/></field>
+        <field name="changeByUserLoginId"><hidden/></field>
+        <field name="salesId"><display/></field>
+        <field name="salesItemSeqId"><display/></field>
+        <field name="productId" title="${uiLabelMap.DAProductId}" widget-area-style="nowrap width210px">
+            <lookup target-form-name="LookupProduct"/>
+        </field>
+        <field name="productCategoryId" title="${uiLabelMap.DAFormFieldTitle_productCategoryId}" widget-area-style="nowrap width150px">
+            <lookup target-form-name="LookupProductCategory"/>
+        </field>
+        <field name="quantity" widget-style="width-cell-100px"><text></text></field>
+        <field name="quantityUomId" title="${uiLabelMap.DAFormFieldTitle_quantityUomId}" widget-area-style="width210px width-cell-150px chzn-select-custom-250px" widget-style="chzn-select">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="UomAndType" key-field-name="uomId" description="[${typeDescription}] ${description}">
+                    <entity-order-by field-name="uomTypeId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+       	<field name="amount" widget-style="width-cell-100px"><text size="10"></text></field>
+       	<!-- <field name="quantityActual" use-when="salesId != null"><display type="accounting-number"></display></field>
+       	<field name="amountActual" use-when="salesId != null"><display type="currency" currency="${currencyUomId}"></display></field> -->
+        <field name="dsubmitButton" title=" " widget-style="btn btn-mini btn-success icon-ok bigger-120 no-bottom-margin" widget-area-style="width-26px">
+        	<submit button-type="button"/>
+       	</field>
+        <field name="deleteLink" title=" " widget-style="btn btn-mini btn-danger icon-trash open-sans no-bottom-margin" widget-area-style="width-26px no-border-left no-left-padding">
+            <hyperlink target="deleteSalesStatementDetail" description=" " also-hidden="false">
+                <parameter param-name="salesId"/>
+                <parameter param-name="salesItemSeqId"/>
+            </hyperlink>
+        </field>
+        <sort-order>
+        	<sort-field name="salesId"/>
+        	<sort-field name="salesItemSeqId"/>
+        	<sort-field name="productId"/>
+        	<sort-field name="productCategoryId"/>
+        	<sort-field name="quantity"/>
+        	<sort-field name="quantityUomId"/>
+        	<sort-field name="amount"/>
+        	<!-- <sort-field name="quantityActual"/>
+        	<sort-field name="amountActual"/> -->
+        </sort-order>
+    </form>
+    
+    <!-- REPORTS -->
+    <!-- form for generating a report of open order items -->
+    <form name="OpenOrderItemsReport" type="single" target="OpenOrderItemsReport" title="" header-row-style="header-row" default-table-style="basic-table">
+        <field name="productStoreId">
+            <drop-down allow-empty="false">
+                <option key="" description="- ${uiLabelMap.CommonSelectAny} -"/>
+                <entity-options entity-name="ProductStore" description="${storeName} [${productStoreId}]">
+                    <entity-order-by field-name="storeName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="orderTypeId">
+            <drop-down allow-empty="false">
+                <option key="SALES_ORDER" description="${uiLabelMap.OrderSalesOrder}"/>
+                <option key="PURCHASE_ORDER" description="${uiLabelMap.OrderPurchaseOrder}"/>
+            </drop-down>
+        </field>
+        <field name="orderStatusId">
+            <drop-down allow-empty="false">
+                <option key="" description="- ${uiLabelMap.CommonSelectAny} -"/>
+                <entity-options entity-name="StatusItem" description="${description}" key-field-name="statusId">
+                    <entity-constraint name="statusTypeId" operator="equals" value="ORDER_STATUS"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="fromOrderDate" title="${uiLabelMap.OrderReportFromDate}"><date-time type="timestamp"/></field>
+        <field name="thruOrderDate" title="${uiLabelMap.OrderReportThruDate}"><date-time type="timestamp"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonRun}" widget-style="btn btn-primary btn-small"><submit image-location="icon-ok" button-type="button"/></field>
+    </form>
+    
+    <!-- list open order items -->
+    <form name="OpenOrderItemsList" type="list" list-name="orderItemList" paginate-target="OpenOrderItemsReport"
+        odd-row-style="alternate-row" default-table-style="table table-striped table-bordered table-hover dataTable ofx-scroll">
+        <field name="orderDate" title="${uiLabelMap.OrderDate}" widget-area-style="nowrap"><display type="date-time"/></field>
+        <field name="orderId" title="${uiLabelMap.DAOrderId}">
+            <hyperlink target="orderView" description="${orderId}">
+                <parameter param-name="orderId"/>
+            </hyperlink>
+        </field>
+        <field name="productId" title="${uiLabelMap.DAProduct}"><display/></field>
+        <!-- <field name="itemDescription" title="${uiLabelMap.CommonDescription}"><display/></field> -->
+        <field name="quantityOrdered" title="${uiLabelMap.ProductQuantity}"><display/></field>
+        <field name="quantityIssued" title="${uiLabelMap.OrderQtyShipped}"><display/></field>
+        <field name="quantityOpen" title="${uiLabelMap.ProductOpenQuantity}"><display/></field>
+        <!-- <field name="shipAfterDate" title="${uiLabelMap.OrderShipAfterDate}"><display/></field>
+        <field name="shipBeforeDate" title="${uiLabelMap.OrderShipBeforeDate}"><display/></field>
+        <field name="comments" title="${uiLabelMap.CommonComments}"><display/></field> -->
+        <field name="costPrice" title="${uiLabelMap.ProductCostPrice}"><display/></field>
+        <field name="listPrice" title="${uiLabelMap.ProductListPrice}"><display/></field>
+        <field name="retailPrice" title="${uiLabelMap.ProductRetailPrice}"><display/></field>
+        <field name="discount" title="${uiLabelMap.ProductDiscount}"><display/></field>
+        <field name="calculatedMarkup" title="${uiLabelMap.OrderCalculatedMarkup}"><display/></field>
+        <field name="percentMarkup" title="${uiLabelMap.OrderPercentageMarkup}"><display/></field>
+    </form>
+
+    <form name="OpenOrderItemsTotal" type="list" list-name="totalAmountList"
+        odd-row-style="alternate-row" default-table-style="table table-striped table-bordered table-hover dataTable ofx-scroll">
+        <field name="total" title="${uiLabelMap.CommonTotal}"><display/></field>
+        <field name="totalQuantityOrdered"><display/></field>
+        <field name="totalQuantityOpen"><display/></field>
+        <field name="totalCostPrice"><display/></field>
+        <field name="totalListPrice"><display/></field>
+        <field name="totalRetailPrice"><display/></field>
+        <field name="totalDiscount"><display/></field>
+        <field name="totalMarkup"><display/></field>
+        <field name="totalPercentMarkup"><display/></field>
+    </form>
+    
+    <!-- SALES POLICY AWARD -->
+    <form name="FindSalesPolicy" type="single" target="findSalesPolicy" header-row-style="header-row" 
+    		default-table-style="basic-table" default-title-style="control-label" style="basic-custom-form">
+    	<field name="salesPolicyId"><text-find></text-find></field>
+    	<field name="policyName"><text-find></text-find></field>
+    	<field name="policyText"><text-find></text-find></field>
+    	<field name="createdDate"><date-find/></field>
+    	<field name="fromDate"><date-find/></field>
+    	<field name="thruDate"><date-find/></field>
+    	<field name="statusId">
+    		<drop-down allow-empty="true">
+    			<entity-options key-field-name="statusId" description="${description}" entity-name="StatusItem">
+    				<entity-constraint name="statusTypeId" value="SALES_PL_STATUS"/>
+    			</entity-options>
+    		</drop-down>
+    	</field>
+    	<field name="salesStatementId"><text-find></text-find></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-primary btn-small">
+        	<submit image-location="icon-search" button-type="button"/>
+       	</field>
+    </form>
+    <form name="SalesPolicySearchResults" type="list" list-name="listIt" paginate-target="findSalesPolicy" view-size="5"
+            odd-row-style="alternate-row" default-table-style="table table-striped table-bordered table-hover dataTable" header-row-style="header-row-2" separate-columns="true">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="SalesPolicy"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+        </actions>
+        <field name="salesPolicyId">
+        	<hyperlink target="editSalesPolicy" description="${salesPolicyId}">
+        		<parameter param-name="salesPolicyId" from-field="salesPolicyId"/>
+        	</hyperlink>
+        </field>
+    	<field name="policyName"><display></display></field>
+    	<field name="createdDate"><display type="date-time"></display></field>
+    	<field name="fromDate"><display type="date-time"></display></field>
+    	<field name="thruDate"><display type="date-time"></display></field>
+    	<field name="salesStatementId">
+    		<hyperlink target="editSalesStatement" description="${salesStatementId}">
+        		<parameter param-name="salesId" from-field="salesStatementId"/>
+        	</hyperlink>
+    	</field>
+    	<field name="statusId">
+    		<display-entity description="${description}" entity-name="StatusItem"></display-entity>
+    	</field>
+    </form>
+    <form name="EditSalesPolicyRole" type="list" paginate-target="editSalesPolicyRole" list-name="listIt"
+      	odd-row-style="alternate-row" default-table-style="table table-striped table-bordered table-hover dataTable">
+    	<actions>
+    		<entity-condition entity-name="SalesPolicyRoleTypeApply">
+    			<condition-expr field-name="salesPolicyId" from-field="parameters.salesPolicyId"/>
+    		</entity-condition>    		
+    	</actions>
+    	<field name="roleTypeId" title="${uiLabelMap.DelysRoleTypeApply}">
+    		<display-entity entity-name="RoleType" key-field-name="roleTypeId" description="${description} [${roleTypeId}]"></display-entity>
+    	</field>
+    	<field name="deleteLink" title=" " widget-style="btn btn-trash btn-danger btn-mini btn-position icon-remove">
+    		<hyperlink target="deleteSalesPolicyRole" also-hidden="false" description="${uiLabelMap.CommonDelete}">
+    			<parameter param-name="salesPolicyId"/>
+    			<parameter param-name="roleTypeId"/>
+    		</hyperlink>
+    	</field>
+    </form>
+    <form name="AddSalesPolicyRole" type="single" target="addSalesPolicyRole" header-row-style="header-row" default-table-style="basic-table">   		
+   		<field name="salesPolicyId"><hidden/> </field>
+   		<field name="roleTypeId" title="${uiLabelMap.DelysRoleTypeApply}">
+   			<drop-down allow-empty="false">
+   				<entity-options description="${description}" entity-name="RoleType">   					
+   				</entity-options>
+   			</drop-down>
+   		</field>
+   		<field name="submitButton" title="${uiLabelMap.CommonAdd}" widget-style="btn btn-small btn-primary open-sans">
+			<submit image-location="icon-ok" button-type="button"/>
+		</field>    	 
+	</form>
+	<form name="FindSalesStatementReportList" type="single" target="findSalesIn" header-row-style="header-row" 
+    		default-table-style="basic-table" default-title-style="control-label" style="basic-custom-form">
+    	<field name="salesId"><text-find></text-find></field>
+    	<field name="salesTypeId">
+    		<drop-down allow-empty="true">
+    			<entity-options key-field-name="salesTypeId" description="${description}" entity-name="SalesStatementType"></entity-options>
+   			</drop-down>
+    	</field>
+    	<field name="parentSalesId"><text-find></text-find></field>
+    	<field name="salesName"><text-find></text-find></field>
+    	<field name="statusId">
+    		<drop-down allow-empty="true">
+    			<entity-options key-field-name="statusId" description="${description}" entity-name="StatusItem">
+    				<entity-constraint name="statusTypeId" value="SALES_SM_STATUS"/>
+    			</entity-options>
+    		</drop-down>
+    	</field>
+    	<field name="salesForecastId"><text-find></text-find></field>
+    	<field name="organizationPartyId" title="${uiLabelMap.HumanResEmploymentPartyIdFrom}">
+    		<drop-down allow-empty="true" no-current-selected-key="${defaultOrganizationPartyId}">
+                <entity-options description="${groupName} [${partyId}]" entity-name="PartyAcctgPrefAndGroup" key-field-name="partyId">
+                    <entity-order-by field-name="groupName"/>
+                </entity-options>
+            </drop-down>
+    	</field>
+    	<field name="internalPartyId">
+    		<lookup target-form-name="LookupPartyName"></lookup>
+    	</field>
+        <field name="fromDate"><date-find/></field>
+        <field name="thruDate"><date-find/></field>
+        <!-- <field name="quotaAmount"><range-find></range-find></field>
+        <field name="forecastAmount"><range-find></range-find></field>
+        <field name="bestCaseAmount"><range-find></range-find></field>
+        <field name="closedAmount"><range-find></range-find></field> -->
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-primary btn-small">
+        	<submit image-location="icon-search" button-type="button"/>
+       	</field>
+    </form>
+    <form name="SalesStatementReportListSearchResults" type="list" list-name="listIt" target="runSalesStatementReport"
+    		paginate-target="salesStatementReportList" view-size="5"
+            odd-row-style="alternate-row" default-table-style="table table-striped table-bordered table-hover dataTable" header-row-style="header-row-2" separate-columns="true">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="SalesStatementHeader"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+        </actions>
+        <field name="salesId"><hidden/></field>
+        <field name="salesId2" title="${uiLabelMap.DASalesStatementId}">
+        	<hyperlink target="viewSalesStatement" description="${salesId}">
+        		<parameter param-name="salesId" from-field="salesId"/>
+        	</hyperlink>
+        </field>
+    	<field name="salesTypeId">
+    		<display-entity description="${description}" entity-name="SalesStatementType"></display-entity>
+    	</field>
+    	<field name="parentSalesId" title="${uiLabelMap.DAParentSalesStatementId}"><display></display></field>
+    	<field name="salesName"><display></display></field>
+    	<field name="currencyUom"><display></display></field>
+    	<field name="salesForecastId">
+    		<hyperlink target="editSalesForecast">
+    			<parameter param-name="salesForecastId" from-field="salesForecastId"/>
+    		</hyperlink>
+    	</field>
+    	<field name="organizationPartyId"><display></display></field>
+    	<field name="internalPartyId"><display></display></field>
+        <field name="createdBy"><display></display></field>
+        <field name="fromDate"><display type="date-time"></display></field>
+        <field name="thruDate"><display type="date-time"></display></field>
+        <field name="statusId" title="${uiLabelMap.DAStatusId}">
+    		<display-entity description="${description}" entity-name="StatusItem"></display-entity>
+    	</field>
+        <field name="btnRunSalesStatementReport" title="${uiLabelMap.CommonRun}" widget-area-style="nowrap" widget-style="btn btn-mini btn-primary" 
+        	 use-when="${groovy: return (statusId == &quot;SALES_SM_ACCEPTED&quot;) &amp;&amp; (nowTimestamp &gt; thruDate)}">
+        	 <submit button-type="button"/>
+        </field>
+        <field name="btnRunSalesStatementReport" title="${uiLabelMap.CommonRun}" widget-area-style="nowrap" widget-style="btn btn-mini btn-primary disabled"  
+        	 use-when="${groovy: return !((statusId == &quot;SALES_SM_ACCEPTED&quot;) &amp;&amp; (nowTimestamp &gt; thruDate))}">
+        	 <display default-value="${uiLabelMap.CommonRun}"></display>
+        </field>
+    </form>
+    
+    <form name="SalesCommissionRun" type="single" target="salesCommissionRun">
+        <!-- 
+        <field name="partyIds" field-name="partyId" title="${uiLabelMap.PartyPartyId}">
+            <drop-down allow-multiple="true" allow-empty="true">
+                <entity-options entity-name="PartyRoleAndPartyDetail" description="${firstName} ${middleName} ${lastName} ${groupName}(${partyId})">
+                    <entity-constraint name="roleTypeId" operator="equals" value="SALES_REP"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="invoiceTypeId"><hidden value="SALES_INVOICE"/></field>
+        <field name="statusId"><hidden value="INVOICE_PAID"/></field>
+         -->
+        <field name="fromDate"><date-time/></field>
+        <field name="thruDate"><date-time/></field>
+        <field name="roleTypeId" widget-area-style="width210px width-cell-150px chzn-select-custom-250px" widget-style="chzn-select">
+        	<drop-down allow-empty="true">
+        		<entity-options description="[${roleTypeId}] ${description}" entity-name="RoleType" key-field-name="roleTypeId"></entity-options>
+        	</drop-down>
+        </field>
+        <field name="search" title="${uiLabelMap.CommonRun}" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-search"/></field>
+    </form>
+    <form name="SalesCommissionDataList" type="list" list-name="listIt" target="runSalesStatementReport" paginate-target="salesStatementReportList" view-size="5"
+            odd-row-style="alternate-row" default-table-style="table table-striped table-bordered table-hover dataTable" header-row-style="header-row-2" separate-columns="true">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="SalesCommissionData"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+        </actions>
+        <field name="salesCommissionId"><display></display></field>
+        <field name="partyId"><display></display></field>
+        <field name="salesStatementId">
+        	<hyperlink target="viewSalesStatement" description="${salesStatementId}">
+        		<parameter param-name="salesId" from-field="salesStatementId"/>
+        	</hyperlink>
+       	</field>
+       	<field name="amount"><display type="currency"></display></field>
+       	<field name="hasQuantity"><display></display></field>
+    </form>
+    <form name="SalesCommissionReport" type="single" target="FindCommissions">
+        <field name="isSearch"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="productId" position="1"><lookup target-form-name="LookupProduct"/></field>
+        <field name="partyId" position="2" title="${uiLabelMap.PartyPartyId}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="PartyRoleAndPartyDetail" description="${firstName} ${middleName} ${lastName} ${groupName}(${partyId})">
+                    <entity-constraint name="roleTypeId" operator="equals" value="SALES_REP"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="fromDate" position="1"><date-time/></field>
+        <field name="thruDate" position="2"><date-time/></field>
+        <field name="search" title="${uiLabelMap.CommonFind}" widget-style="btn btn-small btn-primary" position="1"><submit button-type="button" image-location="icon-search"/></field>
+    </form>
+    <form name="FindChooseCustomTimePeriod" type="single" target="findSalesForecastByYear">
+    	<actions>
+    		<entity-condition entity-name="CustomTimePeriod" list="listCustomTimePeriod">
+    			<condition-expr field-name="periodTypeId" value="SALES_YEAR"/>
+    		</entity-condition>
+    	</actions>
+    	<field name="customTimePeriodId" title="${uiLabelMap.DAChooseCustomTimePeriodId}">
+    		<drop-down current="selected" allow-empty="true">
+    			<list-options key-name="customTimePeriodId" description="${periodName} [${customTimePeriodId}]" list-name="listCustomTimePeriod"/>
+    		</drop-down>
+    	</field>
+    	<field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-primary btn-small" widget-area-style="no-left-margin">
+        	<submit image-location="icon-search" button-type="button"/>
+       	</field>
+       	<sort-order>
+        	<field-group style="no-widget-header no-left-margin span6">
+        		<sort-field name="customTimePeriodId"/>
+       		</field-group>
+       		<field-group style="no-widget-header no-left-margin span6">
+       			<sort-field name="submitButton"/>
+       		</field-group>
+       	</sort-order>
+    </form>
+    <form name="FindCustomTimePeriodInForecast" type="list" list-name="listCustomTimePeriodByForecast" target="findSalesForecastByYear" paginate-target="findSalesForecastByYear" view-size="5"
+            odd-row-style="alternate-row" default-table-style="table table-striped table-bordered table-hover dataTable" header-row-style="header-row-2" separate-columns="true">
+    	<field name="customTimePeriodId" title="${uiLabelMap.DAFormFieldTitle_customTimePeriodId}">
+    		<hyperlink target="viewSalesForecastByYear" description="${customTimePeriodId}"><parameter param-name="customTimePeriodId"/></hyperlink>
+    	</field>
+    	<field name="periodName" title="${uiLabelMap.DAFormFieldTitle_periodName}"><display></display></field>
+    </form>
+    
+    
+</forms>

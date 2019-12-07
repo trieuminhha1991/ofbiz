@@ -1,0 +1,376 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+
+	<screen name="FoReportDecorator">
+		<section>
+			<actions>
+				<property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true" />
+				<set field="logoImageUrl" value="/images/ofbiz_logo.gif" />
+				<set field="defaultFontFamily" value="Arial" />
+			</actions>
+			<widgets>
+				<platform-specific>
+					<xsl-fo>
+						<html-template location="component://baseaccounting/webapp/baseaccounting/pdf/reportTemplate.fo.ftl" />
+					</xsl-fo>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="PaymentVoucherPDF">
+		<section>
+			<actions>
+				<property-map resource="BaseAccountingUiLabels" map-name="uiLabelMap" global="true" />
+				<set field="titleProperty" value="AccountingPayment" />
+				<entity-one value-field="payment" entity-name="Payment">
+					<field-map field-name="paymentId" from-field="parameters.paymentId" />
+				</entity-one>
+<!-- 				<set field="pageLayoutName" value="main-page-landscape"/> -->
+				<script location="component://accounting/webapp/accounting/WEB-INF/actions/payment/PrintPayment.groovy"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<or>
+							<if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW" />
+						</or>
+					</condition>
+					<widgets>
+						<decorator-screen name="FoReportDecorator" location="component://baseaccounting/widget/PrintScreens.xml">
+							<decorator-section name="body">
+								<platform-specific>
+									<xsl-fo>
+										<html-template location="component://baseaccounting/webapp/baseaccounting/pdf/pdfPaymentVoucher.fo.ftl" />
+									</xsl-fo>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="FoReportDecorator" location="component://common/widget/CommonScreens.xml">
+							<decorator-section name="body">
+								<platform-specific>
+									<xsl-fo>
+										<html-template location="component://accounting/webapp/accounting/invoice/NoAccountingView.fo.ftl" />
+									</xsl-fo>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+
+	<screen name="ReceiptVoucherPDF">
+		<section>
+			<actions>
+				<property-map resource="BaseAccountingUiLabels" map-name="uiLabelMap" global="true" />
+				<set field="titleProperty" value="AccountingPayment" />
+				<entity-one value-field="payment" entity-name="Payment">
+					<field-map field-name="paymentId" from-field="parameters.paymentId" />
+				</entity-one>
+				<script location="component://accounting/webapp/accounting/WEB-INF/actions/payment/PrintPayment.groovy"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<or>
+							<if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW" />
+						</or>
+					</condition>
+					<widgets>
+						<decorator-screen name="FoReportDecorator" location="component://baseaccounting/widget/PrintScreens.xml">
+							<decorator-section name="body">
+								<platform-specific>
+									<xsl-fo>
+										<html-template location="component://baseaccounting/webapp/baseaccounting/pdf/pdfReceiptVoucher.fo.ftl" />
+									</xsl-fo>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="FoReportDecorator" location="component://common/widget/CommonScreens.xml">
+							<decorator-section name="body">
+								<platform-specific>
+									<xsl-fo>
+										<html-template location="component://accounting/webapp/accounting/invoice/NoAccountingView.fo.ftl" />
+									</xsl-fo>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="InvoicePDF">
+		<section>
+			<actions>
+				<property-map resource="BaseAccountingUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true" />
+				<set field="titleProperty" value="AccountingInvoice" />
+				<script location="component://accounting/webapp/accounting/WEB-INF/actions/invoice/EditInvoice.groovy" />
+				<script location="component://party/webapp/partymgr/WEB-INF/actions/party/GetMyCompany.groovy" />
+				<entity-one value-field="invoice" entity-name="Invoice">
+					<field-map field-name="invoiceId" from-field="parameters.invoiceId" />
+				</entity-one>
+				<entity-condition list="listInvoiceItems" entity-name="InvoiceItem">
+					<condition-list combine="and">
+						<condition-expr field-name="invoiceId" from-field="parameters.invoiceId" />
+						<!-- <condition-expr field-name="taxAuthPartyId" operator="not-equals" value="VNM_TAX"/> -->
+					</condition-list>
+				</entity-condition>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<or>
+							<if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW" />
+							<!-- can always see own invoice -->
+							<if-compare field="invoice.partyIdFrom" operator="equals" value="${userLogin.partyId}" />
+							<if-compare field="invoice.partyId" operator="equals" value="${userLogin.partyId}" />
+							<!-- or is a contact of a company who owns the invoice -->
+							<if-compare field="invoice.partyIdFrom" operator="equals" value="${myCompanyId}" />
+							<if-compare field="invoice.partyId" operator="equals" value="${myCompanyId}" />
+						</or>
+					</condition>
+					<widgets>
+						<decorator-screen name="FoReportDecorator" location="component://common/widget/CommonScreens.xml">
+							<decorator-section name="body">
+								<platform-specific>
+									<xsl-fo>
+										<html-template location="component://baseaccounting/webapp/baseaccounting/invoice/InvoicePDF.fo.ftl" />
+									</xsl-fo>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="FoReportDecorator" location="component://common/widget/CommonScreens.xml">
+							<decorator-section name="body">
+								<platform-specific>
+									<xsl-fo>
+										<html-template location="component://component://accounting/webapp/accounting/invoice/NoAccountingView.fo.ftl" />
+									</xsl-fo>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="LiabilityPrefPDF">
+		<section>
+			<actions>
+				<property-map resource="BaseAccountingUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true" />
+				<set field="titleProperty" value="BACCLiabilityPref" />
+			</actions>
+			<widgets>
+				<section>
+					<widgets>
+						<decorator-screen name="FoReportDecorator" location="component://common/widget/CommonScreens.xml">
+							<decorator-section name="body">
+								<platform-specific>
+									<xsl-fo>
+										<html-template location="component://baseaccounting/webapp/baseaccounting/report/summary/liabilityPref.fo.ftl" />
+									</xsl-fo>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="XXX">
+		<section>
+			<actions>
+				<property-map resource="BaseAccountingUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true" />
+				<set field="titleProperty" value="BACCLiabilityPref" />
+			</actions>
+			<widgets>
+				<platform-specific>
+					<xsl-fo>
+						<html-template location="component://baseaccounting/webapp/baseaccounting/report/summary/XXX.fo.ftl" />
+					</xsl-fo>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+    <screen name="InvoiceSGCPDF">
+        <section>
+            <actions>
+                <property-map resource="BaseAccountingUiLabels" map-name="uiLabelMap" global="true" />
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true" />
+                <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true" />
+                <set field="titleProperty" value="AccountingInvoice" />
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/invoice/EditInvoice.groovy" />
+                <script location="component://party/webapp/partymgr/WEB-INF/actions/party/GetMyCompany.groovy" />
+                <entity-one value-field="invoice" entity-name="Invoice">
+                    <field-map field-name="invoiceId" from-field="parameters.invoiceId" />
+                </entity-one>
+                <entity-condition list="listInvoiceItems" entity-name="InvoiceItem">
+                    <condition-list combine="and">
+                        <condition-expr field-name="invoiceId" from-field="parameters.invoiceId" />
+                        <!-- <condition-expr field-name="taxAuthPartyId" operator="not-equals" value="VNM_TAX"/> -->
+                    </condition-list>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <section>
+                    <condition>
+                        <or>
+                            <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW" />
+                            <!-- can always see own invoice -->
+                            <if-compare field="invoice.partyIdFrom" operator="equals" value="${userLogin.partyId}" />
+                            <if-compare field="invoice.partyId" operator="equals" value="${userLogin.partyId}" />
+                            <!-- or is a contact of a company who owns the invoice -->
+                            <if-compare field="invoice.partyIdFrom" operator="equals" value="${myCompanyId}" />
+                            <if-compare field="invoice.partyId" operator="equals" value="${myCompanyId}" />
+                        </or>
+                    </condition>
+                    <widgets>
+                        <platform-specific>
+                            <xsl-fo>
+                                <html-template location="component://baseaccounting/webapp/baseaccounting/report/summary/invoiceSgcPdf.fo.ftl" />
+                            </xsl-fo>
+                        </platform-specific>
+                    </widgets>
+                    <fail-widgets>
+                        <decorator-screen name="FoReportDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="body">
+                                <platform-specific>
+                                    <xsl-fo>
+                                        <html-template location="component://component://accounting/webapp/accounting/invoice/NoAccountingView.fo.ftl" />
+                                    </xsl-fo>
+                                </platform-specific>
+                            </decorator-section>
+                        </decorator-screen>
+                    </fail-widgets>
+                </section>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="InvoiceSpecificationPDF">
+		<section>
+			<actions>
+				<property-map resource="BaseAccountingUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="WidgetUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="BaseSalesUiLabels" map-name="uiLabelMap" global="true" />
+				<set field="titleProperty" value="InvoiceSpecification" />
+				<entity-one value-field="invoice" entity-name="Invoice"></entity-one>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<xsl-fo>
+						<html-template location="component://baseaccounting/webapp/baseaccounting/report/summary/InvoiceSpecificationPDF.fo.ftl" />
+					</xsl-fo>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="FixedAssetReportS09DNNPdf">
+		<section>
+			<actions>
+				<property-map resource="BaseAccountingUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="WidgetUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="BaseSalesUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true" />
+				<set field="titleProperty" value="S09DNNTSCD" />
+				<service service-name="getFixedAssetReportS09DNNData" auto-field-map="true" result-map="resultService"></service>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<xsl-fo>
+						<html-template location="component://baseaccounting/webapp/baseaccounting/asset/FixedAssetReportS09DNNPdf.fo.ftl" />
+					</xsl-fo>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EquipmentOverviewReportPdf">
+		<section>
+			<actions>
+				<property-map resource="BaseAccountingUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="WidgetUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="BaseSalesUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true" />
+				<set field="titleProperty" value="BACCEquipmentOverviewReport" />
+				<service service-name="getEquipmentOverviewReportData" auto-field-map="true" result-map="resultService"></service>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<xsl-fo>
+						<html-template location="component://baseaccounting/webapp/baseaccounting/equipment/EquipmentOverviewReportPdf.fo.ftl" />
+					</xsl-fo>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+    <screen name="InvoiceExportRawPDF">
+        <section>
+            <actions>
+                <property-map resource="BaseAccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="AccountingInvoice"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/invoice/EditInvoiceRaw.groovy"/>
+                <script location="component://party/webapp/partymgr/WEB-INF/actions/party/GetMyCompany.groovy"/>
+                <entity-one value-field="invoice" entity-name="Invoice">
+                    <field-map field-name="invoiceId" from-field="parameters.invoiceId"/>
+                </entity-one>
+                <entity-condition list="listInvoiceItems" entity-name="InvoiceItem">
+                    <condition-list combine="and">
+                        <condition-expr field-name="invoiceId" from-field="parameters.invoiceId"/>
+                        <!-- 		            	<condition-expr field-name="taxAuthPartyId" operator="not-equals" value="VNM_TAX"/> -->
+                    </condition-list>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <section>
+                    <condition>
+                        <or>
+                            <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
+                            <!-- can always see own invoice -->
+                            <if-compare field="invoice.partyIdFrom" operator="equals" value="${userLogin.partyId}"/>
+                            <if-compare field="invoice.partyId" operator="equals" value="${userLogin.partyId}"/>
+                            <!-- or is a contact of a company who owns the invoice-->
+                            <if-compare field="invoice.partyIdFrom" operator="equals" value="${myCompanyId}"/>
+                            <if-compare field="invoice.partyId" operator="equals" value="${myCompanyId}"/>
+                        </or>
+                    </condition>
+                    <widgets>
+                        <platform-specific>
+                            <xsl-fo><html-template location="component://baseaccounting/webapp/baseaccounting/invoice/InvoiceRawPDF.fo.ftl"/></xsl-fo>
+                        </platform-specific>
+                    </widgets>
+                    <fail-widgets>
+                        <decorator-screen name="FoReportDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="body">
+                                <platform-specific>
+                                    <xsl-fo><html-template location="component://component://accounting/webapp/accounting/invoice/NoAccountingView.fo.ftl"/></xsl-fo>
+                                </platform-specific>
+                            </decorator-section>
+                        </decorator-screen>
+                    </fail-widgets>
+                </section>
+            </widgets>
+        </section>
+    </screen>
+
+</screens>

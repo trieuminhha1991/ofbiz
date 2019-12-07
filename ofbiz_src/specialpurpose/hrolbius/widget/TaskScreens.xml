@@ -1,0 +1,824 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+    <screen name="Dependencies">
+        <section>
+            <actions>
+                <set field="headerItem" value="task"/>
+                <set field="titleProperty" value="PageTitleDependencies"/>
+                <set field="tabButtonItem" value="dependencies"/>
+<!--                 <set field="tabSubButtonItem" value="FindMyTask"/> -->
+                <set field="selectedMenuItem" value="FindResource"/>
+                 <set field="selectedSubMenuItem" value="mytasks"/>
+<!--                 <property-map resource="ProjectMgrUiLabels" -->
+<!-- 						map-name="uiLabelMap" global="true" /> -->
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <service service-name="getProjectIdAndNameFromTask" result-map="result">
+                    <field-map field-name="taskId" from-field="parameters.workEffortId"/>
+                </service>
+                <set field="projectId" from-field="result.projectId"/>	
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonTaskDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                            <section>
+                                <actions>
+                                    <entity-and entity-name="WorkEffortAssocView" list="depList" filter-by-date="true">
+                                        <field-map field-name="workEffortIdTo" from-field="parameters.workEffortId"/>
+                                        <field-map field-name="workEffortAssocTypeId" value="WORK_EFF_DEPENDENCY"/>
+                                    </entity-and>
+                                </actions>
+                                <widgets>
+                                    <container style="lefthalf">
+                                        <include-form name="DependenciesBefore" location="component://hrolbius/widget/forms/TaskForms.xml"/>
+                                        <screenlet id="AddDependenciesBeforePanel" title="${uiLabelMap.PageTitleAddDependencyBefore}" collapsible="true">
+                                            <include-form name="AddDependencyBefore" location="component://hrolbius/widget/forms/TaskForms.xml"/>
+                                        </screenlet>
+                                    </container>
+                                </widgets>
+                            </section>
+                            <section>
+                                <actions>
+                                    <entity-and entity-name="WorkEffortAssocView" list="depList" filter-by-date="true">
+                                        <field-map field-name="workEffortIdFrom" from-field="parameters.workEffortId"/>
+                                        <field-map field-name="workEffortAssocTypeId" value="WORK_EFF_DEPENDENCY"/>
+                                    </entity-and>
+                                </actions>
+                                <widgets>
+                                    <container style="righthalf">
+                                        <include-form name="DependenciesAfter" location="component://hrolbius/widget/forms/TaskForms.xml"/>
+                                        <screenlet id="AddDependenciesAfterPanel" title="${uiLabelMap.PageTitleAddDependencyAfter}" collapsible="true">
+                                            <include-form name="AddDependencyAfter" location="component://hrolbius/widget/forms/TaskForms.xml"/>
+                                        </screenlet>
+                                    </container>
+                                </widgets>
+                            </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="FindMyTask">
+    	<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="FindResource"/>
+    			<set field="selectedSubMenuItem" value="mytasks"/>
+    			<set field="titleProperty" value="WorkEffortMyTasks"/>
+                <set field="headerItem" value="mytasks"/>
+                <set field="tabButtonItem" value="mytasks"/>
+                <set field="tabSubButtonItem" value="FindMyTask"/>
+                <set field="labelTitleProperty" value="ProjectMgrMyTasks"/>
+                <set field="navMenuName" value="ProjectSearchMenu" />
+				<set field="navMenuLocation" value="component://hrolbius/widget/menus/ProjectMenus.xml" />
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="CommonProjectTaskDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<decorator-screen name="FindScreenDecorator"
+							location="component://common/widget/CommonScreens.xml">
+							<decorator-section name="search-options">
+								<include-form name="FindMyTask"
+									location="component://hrolbius/widget/forms/TaskForms.xml" />
+							</decorator-section>
+							<decorator-section name="search-results">
+								<container id="table-container"><include-form name="ListMyTask"
+									location="component://hrolbius/widget/forms/TaskForms.xml" /></container>
+							</decorator-section>
+						</decorator-screen>
+                    </decorator-section>
+                </decorator-screen>    
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="MyTasks">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="FindResource"/>     
+            	<set field="selectedSubMenuItem" value="mytasks"/>       	
+                <set field="titleProperty" value="WorkEffortMyTasks"/>
+                <set field="headerItem" value="mytasks"/>
+                <set field="tabButtonItem" value="mytasks"/>
+                <set field="tabSubButtonItem" value="MyTaskOpen"/>
+                <set field="labelTitleProperty" value="ProjectMgrMyTasks"/>
+                <entity-and entity-name="WorkEffortAndPartyAssign" list="projects" filter-by-date="true">
+                    <field-map field-name="partyId" from-field="userLogin.partyId"/>
+                    <field-map field-name="workEffortTypeId" value="PROJECT"/>
+                </entity-and>
+                <entity-one entity-name="WorkEffort" value-field="task">
+                    <field-map field-name="workEffortId" value="dummy"/>
+                </entity-one>
+                <set field="myTask" value="notNull"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProjectTaskDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                        	<condition>
+                                <not><if-empty field="projects"/></not>
+                            </condition>
+                            <widgets>
+                                <include-screen name="MyTaskList"/>
+                                <!-- <section>
+                                    <widgets>
+                                    	<screenlet title="${uiLabelMap.ProjectMgrAssignATaskToMe}" navigation-menu-name="MyTasksListTabBar">
+                                    		<include-menu location="component://hrolbius/widget/menus/ProjectMenus.xml" name="MyTasksListTabBar"/>
+                                        </screenlet>
+                                    </widgets>
+                                </section> -->
+                            </widgets>
+                            <fail-widgets>
+                                <screenlet title="${uiLabelMap.ProjectMgrAssignATaskToMe}">
+                                    <label style="h3" text="${uiLabelMap.ProjectMgrTaskMember}"/>
+                                </screenlet>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="AssignTaskToMe">
+    	<section>
+            <actions>
+            	<set field="selectedMenuItem" value="FindResource"/>
+            	<set field="selectedSubMenuItem" value="mytasks"/>
+            	<property-map resource="ProjectMgrUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="ProjectMgrAssignATaskToMe"/>
+                <set field="headerItem" value="mytasks"/>
+                <set field="tabButtonItem" value="mytasks"/>
+                <set field="labelTitleProperty" value="ProjectMgrMyTasks"/>
+                <entity-and entity-name="WorkEffortAndPartyAssign" list="projects" filter-by-date="true">
+                    <field-map field-name="partyId" from-field="userLogin.partyId"/>
+                    <field-map field-name="workEffortTypeId" value="PROJECT"/>
+                </entity-and>
+                <entity-one entity-name="WorkEffort" value-field="task">
+                    <field-map field-name="workEffortId" value="dummy"/>
+                </entity-one>
+                <set field="myTask" value="notNull"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<screenlet title="${uiLabelMap.ProjectMgrAssignATaskToMe}">
+                        	<include-form name="assignTaskToMe" location="component://hrolbius/widget/forms/TaskForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="ProjectMgrAddNewTask">
+    	<section>
+            <actions>
+            	<property-map resource="ProjectMgrUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="ProjectMgrAddNewTask"/>
+                <set field="headerItem" value="mytasks"/>
+                <set field="tabButtonItem" value="MyTaskOpen"/>
+                <set field="selectedSubMenuItem" value="mytasks"/>
+                <set field="labelTitleProperty" value="ProjectMgrMyTasks"/>
+                <entity-and entity-name="WorkEffortAndPartyAssign" list="projects" filter-by-date="true">
+                    <field-map field-name="partyId" from-field="userLogin.partyId"/>
+                    <field-map field-name="workEffortTypeId" value="PROJECT"/>
+                </entity-and>
+                <entity-one entity-name="WorkEffort" value-field="task">
+                    <field-map field-name="workEffortId" value="dummy"/>
+                </entity-one>
+                <set field="myTask" value="notNull"/>
+                <set field="selectedMenuItem" value="FindResource"/>
+                <set field="layoutSettings.javaScripts[]" value="/hrolbius/js/custom.js" global="true"/>
+                <set field="dependentForm" value="EditTask"/>
+                <set field="paramKey" value="workEffortParentId"/>
+                <set field="mainId" value="workEffortParentId"/>
+                <set field="dependentId" value="roleTypeId"/>
+                <set field="requestName" value="getRoleTypeInPhase"/>
+                <set field="responseName" value="roleTypeList"/>
+                <set field="dependentKeyName" value="roleTypeId"/>
+                <set field="descName" value="description"/>
+                <set field="selectedDependentOption" value="_none_"/>
+                
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<platform-specific>
+                    		<html>
+                    			<html-template location="component://common/webcommon/includes/setDependentDropdownValuesJs.ftl"/>
+                    		</html>
+                   		</platform-specific>
+                    	<screenlet title="${uiLabelMap.HRProjectMgrAddNewTask}">
+                        	<include-form name="EditTask" location="component://hrolbius/widget/forms/TaskForms.xml"/>
+                        </screenlet>
+                        <platform-specific>
+                        	<html>
+                        		<html-template location="component://hrolbius/webapp/hrolbius/ftl/ProjectMgrAddNewTaskValidate.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="MyTaskList">
+        <section>
+            <actions>
+            	<set field="layoutSettings.javaScripts[]" value="/hrolbius/js/custom.js" global="true"/>
+                <property-map resource="ProjectMgrUiLabels" map-name="uiLabelMap" global="true"/>
+                <entity-and entity-name="WorkEffortAndPartyAssign" list="tasks" filter-by-date="true">
+                    <field-map field-name="partyId" from-field="userLogin.partyId"/>
+                    <field-map field-name="workEffortTypeId" value="TASK"/>
+                    <field-map field-name="currentStatusId" value="PTS_CREATED"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                    <section>
+                        <condition>
+                            <not><if-empty field="tasks"/></not>
+                        </condition>
+                        <widgets>                        	
+                        	<platform-specific>
+                        		<html>
+                        			<html-template location="component://hrolbius/webapp/hrolbius/ftl/setPartyRoleTypeInProjectJs.ftl"/>
+                        		</html>
+                        	</platform-specific>
+                            <screenlet title="${uiLabelMap.PageTitleTaskAssignedToMe}" navigation-form-name="MyTasks" navigation-menu-name="MyTasksListTabBar">
+                                <include-menu location="component://hrolbius/widget/menus/ProjectMenus.xml" name="MyTasksListTabBar"/>	
+                                <container id="table-container"><include-form name="MyTasks" location="component://hrolbius/widget/forms/TaskForms.xml"/></container>
+                            </screenlet>
+                        </widgets>
+                        <fail-widgets>
+                            <screenlet title="${uiLabelMap.PageTitleTaskAssignedToMe}" navigation-menu-name="MyTasksListTabBar">
+                            	<include-menu location="component://hrolbius/widget/menus/ProjectMenus.xml" name="MyTasksListTabBar"/>
+                                <container style="height48 margin-top15">
+                                    <label style="alert alert-info" text="${uiLabelMap.ProjectMgrTaskNoOpen1}"/>
+                                </container>
+                                <container style="height48">
+                                    <label style="alert alert-info" text="${uiLabelMap.ProjectMgrTaskNoOpen2}"/>
+                                </container>
+                            </screenlet>
+                        </fail-widgets>
+                    </section>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="FindTask">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindTask"/>
+                <set field="headerItem" value="task"/>
+                <set field="tabButtonItem" value="find"/>
+                <set field="labelTitleProperty" value="ProjectMgrListTasks"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProjectTaskDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <or>
+                                    <if-has-permission permission="PROJECTMGR_ADMIN"/>
+                                    <if-has-permission permission="PROJECTMGR_VIEW"/>
+                                </or>
+                            </condition>
+                            <widgets>
+                                <screenlet  title="${uiLabelMap.PageTitleFindTask}" collapsible="true" id="findTask">
+                                    <include-form name="FindTask" location="component://hrolbius/widget/forms/TaskForms.xml"/>
+                                    <include-form name="ListTasks" location="component://hrolbius/widget/forms/TaskForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditTask">
+        <section>
+            <actions>
+                <set field="headerItem" value="task"/>
+                <set field="titleProperty" value="PageTitleEditTask"/>
+                <set field="tabButtonItem" value="edittask"/>
+<!--                 <set field="tabSubButtonItem" value="FindMyTask"/> -->
+                <set field="selectedMenuItem" value="FindResource"/>
+                 <set field="selectedSubMenuItem" value="mytasks"/>
+                <set field="labelTitleProperty" value="PageTitleEditTaskList"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <entity-one entity-name="WorkEffort" value-field="task"/>
+                <script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/projectmgr/getProjectId.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonTaskDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <!-- To add a new Project -->
+                            <widgets>
+                                <container style="lefthalf">
+                                    <screenlet title="${uiLabelMap.PageTitleEditTask} #${task.workEffortId} ${uiLabelMap.CommonInformation}">
+                                        <include-form name="EditTask" location="component://hrolbius/widget/forms/TaskForms.xml"/>
+                                    </screenlet>
+                                </container>
+                                <container style="righthalf">
+                                <screenlet title="${uiLabelMap.PageTitleEditTask} #${task.workEffortId} ${uiLabelMap.CommonInformation}">
+                                    <include-form name="AssignTaskOtherProject" location="component://hrolbius/widget/forms/TaskForms.xml"/>
+                                </screenlet>
+                                </container>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditTaskSkills">
+        <section>
+            <actions>
+                <set field="headerItem" value="task"/>
+                <set field="titleProperty" value="PageTitleEditSkill"/>
+                <property-map resource="ProjectMgrUiLabels"
+						map-name="uiLabelMap" global="true" />
+				<set field="tabButtonItem" value="Advance"/>
+                <set field="tabButtonItemSub" value="taskskills"/>
+                <set field="selectedMenuItem" value="FindResource"/>
+                <set field="selectedSubMenuItem" value="mytasks"/>
+                <set field="labelTitleProperty" value="PageTitleEditSkill"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <entity-and entity-name="WorkEffortSkillStandard" list="workEffortSkillStandards">
+                    <field-map field-name="workEffortId" from-field="workEffortId"/>
+                </entity-and>
+                
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonTaskDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-form name="ListTaskSkills" location="component://hrolbius/widget/forms/TaskForms.xml"/>
+                        <screenlet title="${uiLabelMap.${titleProperty}}">
+                            <include-form name="AddTaskSkill" location="component://hrolbius/widget/forms/TaskForms.xml"/>
+                        </screenlet>
+                        <platform-specific>
+                        	<html>
+                        		<html-template location="component://hrolbius/webapp/hrolbius/ftl/EditTaskSkillsValidate.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditTimeEntries">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListTimeEntries"/>
+               	<set field="tabButtonItem" value="Advance"/>
+                <set field="tabButtonItemSub" value="timeEntries"/>
+                <set field="selectedMenuItem" value="FindResource"/>
+                <set field="selectedSubMenuItem" value="mytasks"/>
+                <set field="labelTitleProperty" value="PageTitleEditSkill"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                
+                <set field="layoutSettings.javaScripts[]" value="/hrolbius/js/custom.js" global="true"/>
+                <set field="dependentForm" value="createTimeEntry"/>
+                
+                <set field="paramMap.partyId" value="${dependentForm}_partyId"/>
+                <set field="paramMap.workEffortId" value="${dependentForm}_workEffortId"/>               
+                <set field="mainId" value="partyId"/>                
+                <set field="dependentId" value="roleTypeId"/>
+                <set field="requestName" value="getRoleTypeTaskParties"/>
+                <set field="responseName" value="roleTypeList"/>
+                <set field="dependentKeyName" value="roleTypeId"/>
+                <set field="descName" value="description"/>
+                <set field="selectedDependentOption" value="_none_"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonTaskDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<platform-specific>
+                    		<html>
+                    			<html-template location="component://hrolbius/webapp/hrolbius/ftl/setDependentDropDownMultiField.ftl"/>
+                    		</html>
+                    	</platform-specific>
+                        <include-form name="ListTimeEntries" location="component://hrolbius/widget/forms/TaskForms.xml"/>
+                        <screenlet title="${uiLabelMap.ProjectMgrAddTimeEntry}">
+                            <include-form name="createTimeEntry" location="component://hrolbius/widget/forms/TaskForms.xml"/>
+                        </screenlet>
+                        <platform-specific>
+                        	<html>
+                        		<html-template location="component://hrolbius/webapp/hrolbius/ftl/EditTimeEntriesValidate.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditTaskPartyAssigns">
+        <section>
+            <actions>
+                <set field="headerItem" value="task"/>
+                <set field="titleProperty" value="PageTitleListWorkEffortPartyAssigns"/>
+				<set field="tabButtonItem" value="Advance"/>
+                <set field="tabButtonItemSub" value="parties"/>
+                <set field="selectedMenuItem" value="FindResource"/>
+                <set field="selectedSubMenuItem" value="mytasks"/>
+                <set field="labelTitleProperty" value="PageTitleListWorkEffortPartyAssigns"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+                <entity-one entity-name="WorkEffortPartyAssignment" value-field="workEffortPartyAssignment"/>
+                <set field="nowDate" value="${bsh:org.ofbiz.base.util.UtilDateTime.nowDateString(&quot;yyyy-MM-dd HH:mm:ss.S&quot;)}" type="String"/>
+                <service service-name="getProjectIdAndNameFromTask" result-map="result">
+                    <field-map field-name="taskId" from-field="parameters.workEffortId"/>
+                </service>
+                <set field="layoutSettings.javaScripts[]" value="/hrolbius/js/custom.js" global="true"/>
+                <set field="projectId" from-field="result.projectId"/>
+                <set field="dependentForm" value="AddWorkEffortPartyAssign"/>
+                
+                <set field="paramMap.partyId" value="${dependentForm}_partyId"/>
+                <set field="paramMap.workEffortId" value="${dependentForm}_projectId"/>               
+                <set field="mainId" value="partyId"/>                
+                <set field="dependentId" value="roleTypeId"/>
+                <set field="requestName" value="getRoleTypeTaskParties"/>
+                <set field="responseName" value="roleTypeList"/>
+                <set field="dependentKeyName" value="roleTypeId"/>
+                <set field="descName" value="description"/>
+                <set field="selectedDependentOption" value="_none_"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonTaskDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<platform-specific>
+                    		<html>
+                    			<html-template location="component://hrolbius/webapp/hrolbius/ftl/setDependentDropDownMultiField.ftl"/>
+                    		</html>
+                    	</platform-specific>
+                        <include-form name="EditWorkEffortPartyAssigns" location="component://hrolbius/widget/forms/TaskForms.xml"/>
+                        <screenlet title="${uiLabelMap.PageTitleAddTaskPartyAssign}" collapsible="false">
+                            <include-form name="AddWorkEffortPartyAssign" location="component://hrolbius/widget/forms/ProjectForms.xml"/>
+                        </screenlet>
+                        <platform-specific>
+                        	<html>
+                        		<html-template location="component://hrolbius/webapp/hrolbius/ftl/EditTaskPartyAssignsValidate.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditTaskNotes">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListTaskNotes"/>
+                <set field="headerItem" value="task"/>
+<!--                 <property-map resource="ProjectMgrUiLabels" -->
+<!-- 						map-name="uiLabelMap" global="true" /> -->
+				<set field="tabButtonItem" value="Advance"/>
+                <set field="tabButtonItemSub" value="notes"/>
+                <set field="selectedMenuItem" value="FindResource"/>
+                <set field="selectedSubMenuItem" value="mytasks"/>
+                <set field="labelTitleProperty" value="PageTitleListTaskNotes"/>
+
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonTaskDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-form name="ListTaskNotes" location="component://hrolbius/widget/forms/TaskForms.xml"/>
+                        <screenlet id="AddTaskNotesPanel" title="${uiLabelMap.PageTitleAddTaskNotes}" collapsible="true">
+                            <include-form name="AddTaskNote" location="component://hrolbius/widget/forms/TaskForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="ViewProjectTask">
+        <section>
+            <actions>
+                <set field="workEffortId" from-field="parameters.workEffortId" default-value="${parameters.id}"/>
+                <set field="projectId" from-field="parameters.workEffortId"/>
+                <set field="isReadable" value="true"/>
+                <property-map resource="ProjectMgrUiLabels"
+						map-name="uiLabelMap" global="true" />
+                <service service-name="getProjectTask" result-map="taskResult">
+                    <field-map field-name="taskId" from-field="workEffortId"/>
+                </service>
+                <set field="task" from-field="taskResult.taskInfo"/>
+                <service service-name="getProjectIdAndNameFromTask" result-map="projectResult">
+                    <field-map field-name="taskId" from-field="workEffortId"/>
+                </service>
+            </actions>
+            <widgets>
+            	<container style="row-fluid">
+            	<container style="span12 no-left-margin">
+            		  <include-screen name="taskInfo"/>
+            	</container>
+            	<container style="clear-all"></container>
+            	<horizontal-separator></horizontal-separator>
+            	<container style="span12 no-left-margin">
+            		<container style="span6 no-left-margin">
+	                    <screenlet title="${uiLabelMap.PageTitleTasksBefore}" id="taskBeforeId" collapsible="true" initially-collapsed="true">
+                    		 <container id="table-container"> <include-screen name="taskBefore"/></container>
+	                    </screenlet>
+                      	<screenlet title="${uiLabelMap.PageTitleTasksAfter}" id="taskAfterId" collapsible="true" initially-collapsed="true">
+	                    	 <container id="table-container"><include-screen name="taskAfter"/></container>
+                    	</screenlet>
+                    	<screenlet title="${uiLabelMap.ProjectMgrTaskTeam}" id="TaskTeamInfoId" collapsible="true" initially-collapsed="true">
+		                    <container id="table-container"> <include-screen name="TaskTeamInfo"/></container>
+	                    </screenlet>
+	                </container>
+	                <container style="span6">
+	                    <screenlet title="${uiLabelMap.PageTitleListTaskContent}" id="ListTaskContentId" collapsible="true" initially-collapsed="true">
+	                   		<container id="table-container"> <include-screen name="ListTaskContent"/></container>
+	                    </screenlet>
+	                     <screenlet title="${uiLabelMap.WorkEffortNotes}" id="NoteInfoId" collapsible="true" initially-collapsed="true">
+	                   		<container id="table-container"><include-screen name="NoteInfo"/></container>
+                   		</screenlet>
+                   		<screenlet title="${uiLabelMap.PageTitleRequestList}" id="ListWorkEffortRequestsId" collapsible="true" initially-collapsed="true">
+	                    	<container id="table-container"><include-screen name="ListWorkEffortRequests"/></container>
+                    	</screenlet>
+                    	<screenlet title="${uiLabelMap.CommonList} ${uiLabelMap.EcommerceSurveys}" id="ListWorkEffortSurveyApplsId" collapsible="true" initially-collapsed="true">
+	                    	<container id="table-container"><include-screen name="ListWorkEffortSurveyAppls"/></container>
+                    	</screenlet>
+	                </container>
+            	</container>
+            	</container>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="TaskView">
+        <section>
+            <actions>
+                <set field="titleProperty" value="ProjectMgrTaskSummary"/>
+                <set field="tabButtonItem" value="taskView"/>
+<!--                 <set field="tabSubButtonItem" value="FindMyTask"/> -->
+                <set field="selectedMenuItem" value="FindResource"/>
+                <set field="selectedSubMenuItem" value="mytasks"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonTaskDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-screen name="ViewProjectTask"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="taskInfo">
+        <section>
+            <widgets>
+                <screenlet title="${uiLabelMap.PageTitleTaskInformation}">
+                    <include-form name="TaskInfo" location="component://hrolbius/widget/forms/TaskForms.xml"/>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="SubTasksInfo">
+        <section>
+            <actions>
+                <set field="parameters.workEffortIdFrom" from-field="parameters.workEffortId"/>
+                <set field="parameters.workEffortTypeId" value="TASK"/>
+                <script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/projectmgr/ChildWorkEffort.bsh"/>
+            </actions>
+            <widgets>
+                <screenlet title="${uiLabelMap.ProjectMgrSubTasks}">
+                    <include-form name="ListTasks" location="component://hrolbius/widget/forms/TaskForms.xml"/>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ListTaskContent">
+        <section>
+            <widgets>
+<!--                 <screenlet title="${uiLabelMap.PageTitleListTaskContent}"> -->
+                    <include-form name="ListTaskContent" location="component://hrolbius/widget/forms/TaskForms.xml"/>
+<!--                 </screenlet> -->
+            </widgets>
+        </section>
+    </screen>
+    <screen name="NoteInfo">
+        <section>
+            <actions>
+                <entity-and entity-name="WorkEffortNoteAndData" list="workEffortNoteandDetails">
+                    <field-map field-name="workEffortId" from-field="workEffortId"/>
+                    <order-by field-name="-noteDateTime"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <platform-specific>
+                    <html><html-template location="component://hrolbius/webapp/hrolbius/project/summary/noteinfo.ftl"/></html>
+                </platform-specific>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="TaskTeamInfo">
+        <section>
+            <actions>
+                <service service-name="getTasksByParties" result-map="result">
+                    <field-map field-name="workEffortId" from-field="workEffortId"/>
+                </service>
+                <set field="taskParties" from-field="result.taskParties"/>
+            </actions>
+            <widgets>
+<!--                 <screenlet title="${uiLabelMap.ProjectMgrTaskTeam}"> -->
+                    <include-form name="ListTaskParties" location="component://hrolbius/widget/forms/TaskForms.xml"/>
+<!--                 </screenlet> -->
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ListWorkEffortRequests">
+        <section>
+            <actions>
+                <set field="tabButtonItem" value="taskView"/>
+            </actions>
+            <widgets>
+<!--                 <screenlet title="${uiLabelMap.PageTitleRequestList}"> -->
+                    <include-form name="ListWorkEffortRequests" location="component://hrolbius/widget/forms/TaskForms.xml"/>
+<!--                 </screenlet> -->
+            </widgets>
+        </section>
+    </screen>
+    <screen name="taskBefore">
+        <section>
+            <actions>
+                <entity-and entity-name="WorkEffortAssocView" list="depList" filter-by-date="true">
+                    <field-map field-name="workEffortIdTo" from-field="workEffortId"/>
+                    <field-map field-name="workEffortAssocTypeId" value="WORK_EFF_DEPENDENCY"/>
+                </entity-and>
+            </actions>
+            <widgets>
+<!--                 <screenlet title="${uiLabelMap.PageTitleTasksBefore}"> -->
+                    <include-form name="TaskBefore" location="component://hrolbius/widget/forms/TaskForms.xml"/>
+<!--                 </screenlet> -->
+            </widgets>
+        </section>
+    </screen>
+    <screen name="taskAfter">
+        <section>
+            <actions>
+                <entity-and entity-name="WorkEffortAssocView" list="depList" filter-by-date="true">
+                    <field-map field-name="workEffortIdFrom" from-field="workEffortId"/>
+                    <field-map field-name="workEffortAssocTypeId" value="WORK_EFF_DEPENDENCY"/>
+                </entity-and>
+            </actions>
+            <widgets>
+<!--                 <screenlet title="${uiLabelMap.PageTitleTasksAfter}"> -->
+                    <include-form name="TaskAfter" location="component://hrolbius/widget/forms/TaskForms.xml"/>
+<!--                 </screenlet> -->
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditTaskFromRequest">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditTask"/>
+                <set field="headerItem" value="request"/>
+                <set field="tabButtonItem" value="edittask"/>
+                <set field="labelTitleProperty" value="PageTitleEditTask"/>
+                <entity-one entity-name="CustRequest" value-field="custRequest"/>
+                <entity-one entity-name="PartyNameView" value-field="partyName">
+                    <field-map field-name="partyId" from-field="custRequest.fromPartyId"/>
+                </entity-one>
+                </actions>
+            <widgets>
+                <decorator-screen name="CommonTaskDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <label style="h1" text="${uiLabelMap.OrderRequest} : ${custRequest.custRequestName} [${parameters.custRequestId}] ${uiLabelMap.CommonFrom} ${partyName.firstName} ${partyName.middleName} ${partyName.lastName} ${partyName.groupName} "/>
+                        <container style="lefthalf">
+                            <screenlet title="${uiLabelMap.PageTitleCreateTaskbyRequest}">
+                                <include-form name="EditTaskFromRequest" location="component://hrolbius/widget/forms/TaskForms.xml"/>
+                            </screenlet>
+                        </container>
+                        <container style="righthalf">
+                            <screenlet title="${uiLabelMap.ProjectMgrCreateByExistingTask}">
+                               <include-form name="CreateCustRequestWorkEffortByExistingTaskForm" location="component://hrolbius/widget/forms/TaskForms.xml"/>
+                            </screenlet>
+                        </container>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditTaskContents">
+        <section>
+            <actions>
+                <property-map resource="ContentUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="PageTitleListContent"/>
+<!--                 <property-map resource="ProjectMgrUiLabels" -->
+<!-- 						map-name="uiLabelMap" global="true" /> -->
+				<set field="tabButtonItem" value="Advance"/>
+                <set field="tabButtonItemSub" value="taskContent"/>
+                <set field="selectedMenuItem" value="FindResource"/>
+                <set field="selectedSubMenuItem" value="mytasks"/>
+                <set field="headerItem" value="EditTaskContents"/>
+                <set field="contentId" from-field="parameters.contentId"/>
+                <entity-one entity-name="Content" value-field="content"/>
+                <set field="workEffortId" from-field="parameters.workEffortId" default-value="${parameters.workEffortId}"/>
+                <entity-and entity-name="WorkEffortAndContentDataResource" list="workEffortAndContentDataResources">
+                    <field-map field-name="workEffortId" from-field="workEffortId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonTaskDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <or>
+                                    <if-has-permission permission="PROJECTMGR_ADMIN"/>
+                                    <if-has-permission permission="PROJECTMGR_ROLE_ADMIN"/>
+                                    <if-has-permission permission="PROJECTMGR_ROLE_TASK_CREATE"/>
+                                    <if-has-permission permission="PROJECTMGR_ROLE_UPDATE"/>
+                                </or>
+                            </condition>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.ProjectMgrTaskContentList}" navigation-menu-name="EditTaskContentsTabBar">
+                                    <!-- <container>
+                                        <link target="EditTaskContents" text="${uiLabelMap.CommonCreateNew}" style="btn btn-mini btn-primary">
+                                            <parameter param-name="workEffortId"/>
+                                        </link>
+                                    </container> -->
+                                    <include-menu location="component://hrolbius/widget/menus/ProjectMenus.xml" name="EditTaskContentsTabBar"/>
+                                    <include-form name="ListContents" location="component://hrolbius/widget/forms/ProjectForms.xml"/>
+                                </screenlet>
+                                <screenlet title="${uiLabelMap.PageTitleAddTaskContent}">
+                                    <include-form name="UploadWorkEffortContent" location="component://hrolbius/widget/forms/ProjectForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                            <fail-widgets>
+                                <include-screen name="ListTaskContent"/>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <!-- Survey  -->
+    <screen name="EditWorkEffortSurveyAppls">
+        <section>
+            <actions>
+                <set field="headerItem" value="task"/>
+                <property-map resource="ProjectMgrUiLabels"
+						map-name="uiLabelMap" global="true" />
+				<set field="tabButtonItem" value="Advance"/>
+                <set field="tabButtonItemSub" value="EditWorkEffortSurveyAppls"/>
+                <set field="selectedMenuItem" value="FindResource"/>
+                <set field="selectedSubMenuItem" value="mytasks"/>
+                <set field="workEffortId" from-field="parameters.workEffortId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonTaskDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <include-screen name="ListWorkEffortSurveyAppls"/>
+                        <screenlet title="${uiLabelMap.CommonAdd} ${uiLabelMap.EcommerceSurveys}">
+                            <include-form name="AddWorkEffortSurveyAppl" location="component://hrolbius/widget/forms/TaskForms.xml"/>
+                        </screenlet>
+                   </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ListWorkEffortSurveyAppls">
+        <section>
+            <actions>
+                <set field="nowTimeStampString" default-value="${groovy: org.ofbiz.base.util.UtilDateTime.nowTimestamp()}"/>
+                <entity-and entity-name="WorkEffortSurveyAppl" list="workEffortSurveyAppls">
+                    <field-map field-name="workEffortId" from-field="parameters.workEffortId"/>
+                    <order-by field-name="workEffortId"/>
+                </entity-and>
+            </actions>
+            <widgets>
+                <section>
+                    <condition>
+                        <not><if-empty field="workEffortSurveyAppls"/></not>
+                    </condition>
+                    <widgets>
+                        <platform-specific>
+                            <html><html-template location="component://hrolbius/webapp/hrolbius/survey/ListSurveys.ftl"/></html>
+                        </platform-specific>
+                    </widgets>
+                </section>
+            </widgets>
+        </section>
+    </screen>
+</screens>

@@ -1,0 +1,42 @@
+<ion-list can-swipe="enableSwipe" class='cart' show-delete="showDeleteButton"  ng-if="products.length">
+	<ion-item ng-repeat="product in products | filter:search track by $index"
+	class='item-thumbnail-left item-icon-right cart-item' ng-if="product[displayPrice] != 0 && (!lastIndex || $index < lastIndex)"
+	ng-class="{'product-not-available' : !product.available}">
+		<div
+		ng-click="setQuantity(product, 'quantity', true)"
+		ng-swipe-left="setQuantity(product, 'quantity', false, 0)"
+		ng-swipe-right="setQuantity(product, 'quantity', true)"
+		on-hold="handleHoldQuantity(product, 'quantity', true)"
+		on-release="handleReleaseQuantity(product, 'quantity', true)"  class='product-content cart-content'>
+			<div class='cart-content-img' on-double-tap='getProductDetail(product.productId)'>
+				<img src="assets/images/default.jpg" ng-if="!product.image && !product.image_small">
+				<img ng-src="{{imageUrl}}{{product.image}}" ng-if="product.image">
+				<img ng-src="{{imageUrl}}{{product.image_small}}" ng-if="!product.image && product.image_small">
+			</div>
+			<div class='product-content-text'>
+				<h3>{{product.productName}}</h3>
+				<p>
+					<i class='fa fa-money'></i>&nbsp;{{formatNumberDecimal(product[displayPrice])}}<sup>đ</sup>
+				</p>
+			</div>
+		</div>
+		<div class="cartquantity">
+			<input type="number" name="input" placeholder="0" ng-keyup="changeQuantity(product, 'quantity')" ng-model="product.quantity" min="0"  ng-if="canEditItem" required>
+			<div ng-if="!canEditItem" class='quantity-content'>{{product.quantity}}</div>
+			<div class='regulator' ng-if="canEditItem">
+				<div class="rexsub" ng-class="{'disabled': product.quantity==0}"
+				ng-click="setQuantity(product, 'quantity', false, 0)"
+				on-hold="handleHoldQuantity(product, 'quantity', false, 0)"
+				on-release="handleReleaseQuantity(product, 'quantity', false)">
+					<i class="ion-ios-minus-outline"></i>
+				</div>
+				<div class="rexadd" ng-click="setQuantity(product, 'quantity', true)"
+				on-hold="handleHoldQuantity(product, 'quantity', true)"
+				on-release="handleReleaseQuantity(product, 'quantity', true)">
+					<i class="ion-ios-plus-outline"></i>
+				</div>
+			</div>
+		</div>
+		<ion-delete-button class="ion-minus-circled" ng-click="removeCartItem($index)"></ion-delete-button>
+	</ion-item>
+</ion-list>

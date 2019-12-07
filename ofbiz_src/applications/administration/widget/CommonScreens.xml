@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-screen.xsd">
+
+	<screen name="main-decorator">
+		<section>
+			<actions>
+				<property-map resource="AdministrationUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="DmsUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="BaseHREmployeeUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="BaseHRUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="BaseSalesUiLabels" map-name="uiLabelMap" global="true" />
+				<set field="layoutSettings.companyName" from-field="uiLabelMap.AdministrationCompanyName" global="true" />
+				<set field="layoutSettings.companySubtitle" from-field="uiLabelMap.AdministrationCompanySubtitle" global="true" />
+				<set field="activeApp" value="administration" global="true" />
+				<set field="applicationMenuName" value="MainAppBar" global="true" />
+				<set field="applicationMenuLocation" value="component://administration/widget/AdministrationMenus.xml" global="true" />
+				<set field="applicationTitle" value="${uiLabelMap.AdministrationApplication}" global="true" />
+				<set field="componentResourceName" value="Administration" global="true" />
+				<set field="componentNameSc" value="administration" global="true" />
+				<script location="component://administration/webapp/administration/WEB-INF/actions/businessTitle.groovy"></script>
+			</actions>
+			<widgets>
+				<include-screen name="ApplicationDecorator" location="component://commonext/widget/CommonScreens.xml" />
+				<platform-specific>
+					<html>
+						<html-template location="component://administration/webapp/administration/common/AdministrationConfig.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="AdministrationCommonDecorator">
+		<section>
+			<actions>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="ADMINISTRATION" action="_VIEW" />
+							</condition>
+							<widgets>
+								<decorator-section-include name="body" />
+							</widgets>
+							<fail-widgets>
+								<label style="h3">${uiLabelMap.AdministrationViewPermissionError}
+								</label>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="CommonEntityDecorator">
+		<section>
+			<actions>
+				<set field="headerItem" value="entity" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-has-permission permission="ENTITY_MAINT" />
+					</condition>
+					<widgets>
+						<section>
+							<actions>
+								<set field="tabBarName" value="EntityTabBar" global="true" />
+								<set field="tabBarLocation" value="component://administration/widget/AdministrationMenus.xml" global="true" />
+							</actions>
+							<widgets>
+								<section>
+									<actions>
+										<set field="printTabBar" value="true" />
+									</actions>
+									<widgets></widgets>
+								</section>
+							</widgets>
+						</section>
+					</widgets>
+				</section>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="pre-body">
+						<section>
+							<condition>
+								<if-has-permission permission="ENTITY_MAINT" />
+							</condition>
+							<widgets>
+								<!-- <include-menu name="EntityTabBar" location="component://webtools/widget/Menus.xml"/> -->
+							</widgets>
+						</section>
+					</decorator-section>
+					<decorator-section name="body">
+						<section>
+							<!-- do check for WEBTOOLS, _VIEW permission -->
+							<condition>
+								<if-has-permission permission="ENTITY_MAINT" />
+							</condition>
+							<widgets>
+								<decorator-section-include name="body" />
+							</widgets>
+							<fail-widgets>
+								<label style="h3">${uiLabelMap.WebtoolsPermissionError}</label>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="CommonServiceDecorator">
+		<section>
+			<actions>
+				<set field="headerItem" value="service" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-has-permission permission="WEBTOOLS" action="_VIEW" />
+					</condition>
+					<widgets>
+						<section>
+							<actions>
+								<set field="tabBarName" value="serviceTabBar" global="true" />
+								<set field="tabBarLocation" value="component://administration/widget/AdministrationMenus.xml" global="true" />
+							</actions>
+							<widgets>
+								<section>
+									<actions>
+										<set field="printTabBar" value="true" />
+									</actions>
+									<widgets></widgets>
+								</section>
+							</widgets>
+						</section>
+					</widgets>
+				</section>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="pre-body">
+						<section>
+							<condition>
+								<if-has-permission permission="WEBTOOLS" action="_VIEW" />
+							</condition>
+							<widgets>
+								<!-- <include-menu name="serviceTabBar" -->
+								<!-- location="component://webtools/widget/Menus.xml" /> -->
+							</widgets>
+						</section>
+					</decorator-section>
+					<decorator-section name="body">
+						<section>
+							<!-- do check for WEBTOOLS, _VIEW permission -->
+							<condition>
+								<if-has-permission permission="WEBTOOLS" action="_VIEW" />
+							</condition>
+							<widgets>
+								<decorator-section-include name="body" />
+							</widgets>
+							<fail-widgets>
+								<label style="h3">${uiLabelMap.WebtoolsPermissionError}</label>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="CommonImportExportDecorator">
+		<section>
+			<actions>
+				<set field="headerItem" value="importExport" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-has-permission permission="ENTITY_MAINT" />
+					</condition>
+					<widgets>
+						<section>
+							<actions>
+								<set field="subTabBarName" value="importExportTabBarAdvance" global="true" />
+								<set field="subTabBarLocation" value="component://webtools/widget/Menus.xml" global="true" />
+								<!-- <set field="titleHeaderContent" value="${uiLabelMap.WebtoolsImportExport}" global="true"/> -->
+							</actions>
+							<widgets>
+								<section>
+									<actions>
+										<set field="printTabBar" value="true" />
+									</actions>
+									<widgets></widgets>
+								</section>
+							</widgets>
+						</section>
+					</widgets>
+				</section>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="pre-body">
+						<section>
+							<condition>
+								<if-has-permission permission="ENTITY_MAINT" />
+							</condition>
+							<widgets>
+								<!-- <include-menu name="importExportTabBar" -->
+								<!-- location="component://webtools/widget/Menus.xml" /> -->
+							</widgets>
+						</section>
+					</decorator-section>
+					<decorator-section name="body">
+						<section>
+							<!-- do check for WEBTOOLS, _VIEW permission -->
+							<condition>
+								<if-has-permission permission="ENTITY_MAINT" />
+							</condition>
+							<widgets>
+								<decorator-section-include name="body" />
+							</widgets>
+							<fail-widgets>
+								<label style="h3">${uiLabelMap.WebtoolsPermissionError}</label>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="administration">
+		<section>
+			<widgets>
+				<include-menu location="component://administration/widget/AdministrationMenus.xml" name="AdministrationAppBar" />
+			</widgets>
+		</section>
+	</screen>
+</screens>

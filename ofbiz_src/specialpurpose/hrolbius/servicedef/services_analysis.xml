@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>hrolbius Services</description>
+    <vendor></vendor>
+    <version>1.0</version>
+
+    <service name="noSyntaxError" engine="interface">
+        <description>
+            Dummy service to prevent empty files and syntax error - Remove when the 1st real service will be added here 
+        </description>
+    </service> 
+    <!-- Permission Services -->
+    <service name="hrGenericPermission" engine="simple"
+             location="component://hrolbius/script/com/olbius/services/PermissionServices.xml" invoke="hrGenericPermission">
+        <implements service="permissionInterface"/>
+    </service>
+    <!-- End of Permission Services -->
+    <!-- Services for Job requisition -->
+    <service name="createJobRequistion" engine="java" invoke="createRequistion" location="com.olbius.jobanalysis.services.JobAnalysisServices" auth="true">
+    	<permission-service service-name="hrGenericPermission" main-action="CREATE"/>
+    	<attribute name="jobLocation" mode="IN" type="String" optional="false"></attribute>
+    	<attribute name="jobRequestId" mode="IN" type="String" optional="false"></attribute>
+    	<attribute name="age" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="noOfResources" mode="IN" type="Long" optional="false"></attribute>
+    	<attribute name="gender" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="fromDate" mode="IN" type="Timestamp" optional="true"></attribute>
+    	<attribute name="thruDate" mode="IN" type="Timestamp" optional="true"></attribute>
+    	<attribute name="statusId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="qualifications" mode="IN" type="List" optional="false"></attribute>
+    	<attribute name="examTypeEnumId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="skillTypeIds" mode="IN" type="List" optional="false"></attribute>
+    	<attribute name="experienceMonths" mode="IN" type="Long" optional="false"></attribute>
+    	<attribute name="experienceYears" mode="IN" type="Long" optional="false"></attribute>
+    	<attribute name="jobPostingTypeEnumId" mode="IN" type="String" optional="true"></attribute>
+    </service>
+    
+    <service name="findJobRequistion" engine="java" invoke="findRequistion" location="com.olbius.jobanalysis.services.JobAnalysisServices" auth="true">
+    	<permission-service service-name="hrGenericPermission" main-action="VIEW"/>
+    	<attribute name="entityName" type="String" mode="IN" optional="false"/>
+        <attribute name="inputFields" type="java.util.Map" mode="IN" optional="false"/>
+        <attribute name="fieldList" type="java.util.List" mode="IN" optional="true"/>
+        <attribute name="orderBy" type="String" mode="IN" optional="true"/>
+        <attribute name="noConditionFind" type="String" mode="IN" optional="true"><!-- find with no condition (empty entityConditionList) only done when this is Y --></attribute>
+        <attribute name="distinct" type="String" mode="IN" optional="true"><!-- distinct find only done when this is Y --></attribute>
+        <attribute name="filterByDate" type="String" mode="IN" optional="true"/>
+        <attribute name="filterByDateValue" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="viewIndex" type="Integer" mode="IN" optional="true"/>
+        <attribute name="viewSize" type="Integer" mode="IN" optional="true"/>
+        <attribute name="listIt" type="List" mode="OUT" optional="true"/>
+    </service>
+    
+     <service name="editJobRequistion" engine="java" invoke="updateRequistion" location="com.olbius.jobanalysis.services.JobAnalysisServices" auth="true">
+    	<permission-service service-name="hrGenericPermission" main-action="UPDATE"/>
+    	<attribute name="jobRequisitionId" mode="IN" type="String" optional="false"></attribute>
+    	<attribute name="jobRequestId" mode="IN" type="String" optional="false"></attribute>
+    	<attribute name="jobLocation" mode="IN" type="String" optional="false"></attribute>
+    	<attribute name="age" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="noOfResources" mode="IN" type="Long" optional="false"></attribute>
+    	<attribute name="gender" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="fromDate" mode="IN" type="Timestamp" optional="true"></attribute>
+    	<attribute name="thruDate" mode="IN" type="Timestamp" optional="true"></attribute>
+    	<attribute name="qualifications" mode="IN" type="List" optional="false"></attribute>
+    	<attribute name="examTypeEnumId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="skillTypeIds" mode="IN" type="List" optional="false"></attribute>
+    	<attribute name="experienceMonths" mode="IN" type="Long" optional="false"></attribute>
+    	<attribute name="experienceYears" mode="IN" type="Long" optional="false"></attribute>
+    	<attribute name="jobPostingTypeEnumId" mode="IN" type="String" optional="true"></attribute>
+    </service>
+    
+    <service name="approveJobRequisition" engine="simple" invoke="approveJobRequisition" location="component://hrolbius/script/com/olbius/services/CommonServices.xml" auth="true">
+    	<permission-service service-name="hrGenericPermission" main-action="UPDATE"/>
+    	<attribute name="jobRequisitionId" mode="IN" type="String" optional="false"></attribute>
+    	<attribute name="statusId" mode="IN" type="String" optional="false"></attribute>
+    </service>
+    <!-- /Services for Job requisition -->
+     <service name="deleteJobRequest" location="component://hrolbius/script/com/olbius/services/CommonServices.xml" engine="simple" invoke="deleteJobRequest" default-entity-name="JobRequest">
+    	<permission-service service-name="hrGenericPermission" main-action="DELETE"/>
+    	<auto-attributes mode="IN" include="pk" optional="false"></auto-attributes>
+    </service>
+    
+    <service name="approveJobRequest" engine="simple" invoke="approveJobRequest" location="component://hrolbius/script/com/olbius/services/CommonServices.xml" auth="true">
+    	<permission-service service-name="hrGenericPermission" main-action="UPDATE"/>
+    	<attribute name="jobRequestId" mode="IN" type="String" optional="false"></attribute>
+    	<attribute name="statusId" mode="IN" type="String" optional="false"></attribute>
+    </service>
+</services>

@@ -1,0 +1,86 @@
+<div class='order-statistic'>
+	<h3 class='report-title'>{{LanguageFactory.getLabel('Kpi')}}</h3>
+	<loading id="KpiLoading" elements="loadings"></loading>
+	<div class='row col-lg-12 center' ng-repeat="kpi in currentKpi">
+		<span class='report-value'>{{FormatNumberBy3(kpi.target)}}<sup>{{LanguageFactory.getLabel(kpi.uomId)}}</sup>/{{LanguageFactory.getLabel(kpi.periodTypeId)}}</span>
+	</div>
+</div>
+<div class='order-statistic'>
+	<h3 class='report-title'>{{LanguageFactory.getLabel('SalesReport')}}</h3>
+	<loading id="salesReportId" elements="loadings"></loading>
+	<div class='row'>
+		<div class="col-lg-6 col-md-6 col-xs-6 col-sm-6 no-padding-right">
+			<select ng-model="reports.salesReport.time" class="full-width-input right">
+				<option value="TODAY">{{LanguageFactory.getLabel('Today')}}</option>
+				<option value="WEEK">{{LanguageFactory.getLabel('Thisweek')}}</option>
+				<option value="MONTH">{{LanguageFactory.getLabel('Thismonth')}}</option>
+				<option value="RANGE">{{LanguageFactory.getLabel('Range')}}</option>
+			</select>
+		</div>
+		<div class="col-lg-6 col-md-6 col-xs-6 col-sm-6">
+			<button class="btn btn-app btn-primary" ng-click="calculateSalesReport()">
+				<i class="ace-icon fa fa-download"></i> {{LanguageFactory.getLabel('LoadData')}}
+			</button>
+		</div>
+	</div>
+	<div class='row margin-top-10'>
+		<div class="col-lg-6 col-md-6 col-xs-6 col-sm-6 no-padding-right" ng-if="reports.salesReport.time == 'RANGE'">
+			<input type="date" ng-model="reports.salesReport.fromDate" class='full-width-input'/>
+		</div>
+		<div class="col-lg-6 col-md-6 col-xs-6 col-sm-6" ng-if="reports.salesReport.time == 'RANGE'">
+			<input type="date" ng-model="reports.salesReport.thruDate" class='full-width-input'/>
+		</div>
+	</div>
+	<div class='report-value' ng-if="reports.salesReport.value">
+		{{FormatNumberBy3(reports.salesReport.value)}}<sup>đ</sup>
+	</div>
+</div>
+
+<div class='order-statistic'>
+	<h3 class='report-title'>{{LanguageFactory.getLabel('TopCustomers')}}</h3>
+	<loading id="customerReportId" elements="loadings"></loading>
+	<div class='row'>
+		<div class="col-lg-6 col-md-6 col-xs-4 col-sm-4 no-padding-right">
+			<select ng-model="reports.customerReport.time" class="full-width-input right">
+				<option value="TODAY">{{LanguageFactory.getLabel('Today')}}</option>
+				<option value="WEEK">{{LanguageFactory.getLabel('Thisweek')}}</option>
+				<option value="MONTH">{{LanguageFactory.getLabel('Thismonth')}}</option>
+				<option value="RANGE">{{LanguageFactory.getLabel('Range')}}</option>
+			</select>
+		</div>
+		<div class="col-lg-2 col-md-2 col-xs-3 col-sm-3 no-padding-right">
+			<select class='full-width-input' ng-options="obj for obj in reports.customerReport.quantityRange" ng-model="reports.customerReport.limit"></select>
+		</div>
+		<div class="col-lg-4 col-md-4 col-xs-5 col-sm-5">
+			<button class="btn btn-app btn-primary" ng-click="getCustomerOrderReport()">
+				<i class="ace-icon fa fa-download"></i> {{LanguageFactory.getLabel('LoadData')}}
+			</button>
+		</div>
+	</div>
+	<div class='row margin-top-10'>
+		<div class="col-lg-6 col-md-6 col-xs-6 col-sm-6 no-padding-right" ng-if="reports.customerReport.time == 'RANGE'">
+			<input type="date" ng-model="reports.customerReport.fromDate" class='full-width-input'/>
+		</div>
+		<div class="col-lg-6 col-md-6 col-xs-6 col-sm-6" ng-if="reports.customerReport.time == 'RANGE'">
+			<input type="date" ng-model="reports.customerReport.thruDate" class='full-width-input'/>
+		</div>
+	</div>
+	<div>
+		<table class="table table-striped table-bordered table-hover center">
+			<thead>
+				<tr>
+					<th>{{LanguageFactory.getLabel('Seq')}}</th>
+					<th>{{LanguageFactory.getLabel('CustomerName')}}</th>
+					<th>{{LanguageFactory.getLabel('OrderValue')}} ({{LanguageFactory.getLabel('Currency')}})</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="obj in reports.customerReport.value track by $index">
+					<td>{{$index + 1}}</td>
+					<td>{{obj.cusName}}</td>
+					<td>{{FormatNumberBy3(obj.orderValue)}}</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

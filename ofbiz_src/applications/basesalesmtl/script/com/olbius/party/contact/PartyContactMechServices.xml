@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+
+	<simple-method method-name="createPartyPostalAddress" short-description="Create a PostalAddress for party">
+        <if-empty field="parameters.partyId">
+            <set field="parameters.partyId" from-field="userLogin.partyId"/>
+        </if-empty>
+
+        <set-service-fields service-name="createPostalAddressWithOutAddress" map="parameters" to-map="createPostalAddressMap"/>
+        <call-service in-map-name="createPostalAddressMap" service-name="createPostalAddressWithOutAddress">
+            <default-message resource="PartyUiLabels" property="PartyPostalAddressSuccessfullyCreated"/>
+            <result-to-field result-name="contactMechId" field="newPartyContactMech.contactMechId"/>
+        </call-service>
+
+        <check-errors/>
+        <set-service-fields service-name="createPartyContactMech" map="parameters" to-map="createPartyContactMechMap"/>
+        <set field="createPartyContactMechMap.contactMechId" from-field="newPartyContactMech.contactMechId"/>
+        <set field="createPartyContactMechMap.contactMechTypeId" value="POSTAL_ADDRESS"/>
+
+        <call-service service-name="createPartyContactMech" in-map-name="createPartyContactMechMap" break-on-error="true">
+            <default-message resource="PartyUiLabels" property="PartyPostalAddressSuccessfullyCreated"/>
+        </call-service>
+        <field-to-request field="newPartyContactMech.contactMechId" request-name="contactMechId"/>
+        <field-to-result field="newPartyContactMech.contactMechId" result-name="contactMechId"/>
+    </simple-method>
+    
+    <simple-method method-name="updatePartyPostalAddress" short-description="Update a PostalAddress for party">
+        <make-value entity-name="PartyContactMech" value-field="newPartyContactMech"/>
+        <if-empty field="parameters.partyId">
+            <set field="parameters.partyId" from-field="userLogin.partyId"/>
+        </if-empty>
+        <set-service-fields service-name="updatePostalAddress" map="parameters" to-map="updatePostalAddressMap"/>
+        <call-service in-map-name="updatePostalAddressMap" service-name="updatePostalAddressWithOutAddress">
+            <default-message resource="PartyUiLabels" property="PartyPostalAddressSuccessfullyUpdated"/>
+            <result-to-field result-name="contactMechId" field="newPartyContactMech.contactMechId"/>
+        </call-service>
+
+        <set-service-fields service-name="updatePartyContactMech" map="parameters" to-map="updatePartyContactMechMap"/>
+        <set field="updatePartyContactMechMap.newContactMechId" from-field="newPartyContactMech.contactMechId"/>
+        <set field="updatePartyContactMechMap.contactMechTypeId" value="POSTAL_ADDRESS"/>
+        <log level="info" message="Copied id to updatePartyContactMechMap: ${updatePartyContactMechMap.newContactMechId}"/>
+        <call-service service-name="updatePartyContactMech" in-map-name="updatePartyContactMechMap">
+            <default-message resource="PartyUiLabels" property="PartyPostalAddressSuccessfullyUpdated"/>
+        </call-service>
+        <field-to-request field="newPartyContactMech.contactMechId" request-name="contactMechId"/>
+        <field-to-result field="newPartyContactMech.contactMechId" result-name="contactMechId"/>
+    </simple-method>
+    
+</simple-methods>

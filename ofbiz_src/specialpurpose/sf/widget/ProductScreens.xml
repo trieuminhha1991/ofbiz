@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	<screen name="CommonProductDecorator">
+		<section>
+			<actions>
+				<property-map resource="PartyUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="OrderUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<set field="productId" from-field="parameters.productId" global="true" />
+				<entity-one entity-name="Product" value-field="product" />
+				<set field="product" from-field="product" global="true" />
+			</actions>
+			<widgets>
+				<section>
+					<actions>
+						<set field="productId" from-field="parameters.productId" />
+						<entity-one entity-name="Product" value-field="product" />
+					</actions>
+					<widgets>
+						<section>
+							<condition>
+								<or>
+									<not>
+										<if-empty field="product" />
+									</not>
+									<not>
+										<if-empty field="parameters.bypassIfNoProduct" />
+									</not>
+								</or>
+							</condition>
+							<actions>
+								<set field="tabBarName" value="ProductTabBar" global="true" />
+								<set field="tabBarLocation"
+									value="component://product/widget/catalog/CatalogMenus.xml"
+									global="true" />
+								<set field="subTabBarName" value="ProductTabBarAdvance"
+									global="true" />
+								<set field="subTabBarLocation"
+									value="component://product/widget/catalog/CatalogMenus.xml"
+									global="true" />
+								<set field="extraFunctionNamePage" value="${${extraFunctionName}}"
+									global="true" />
+								<set field="titleHeaderValue" value="producttitle" global="true" />
+								<set field="titleHeaderLocation"
+									value="component://product/widget/catalog/ProductScreens.xml"
+									global="true" />
+							</actions>
+							<widgets>
+								<section>
+									<condition>
+										<not>
+											<if-empty field="productId" />
+										</not>
+									</condition>
+									<actions>
+										<set field="printTabBar" value="true" />
+									</actions>
+									<widgets></widgets>
+								</section>
+							</widgets>
+						</section>
+					</widgets>
+				</section>
+				<decorator-screen name="main-decorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="left-column">
+						<include-screen name="leftbar"
+							location="component://product/widget/catalog/CommonScreens.xml" />
+					</decorator-section>
+
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<set field="productId" from-field="parameters.productId" />
+								<entity-one entity-name="Product" value-field="product" />
+							</actions>
+							<widgets>
+								<section>
+									<condition>
+										<or>
+											<not>
+												<if-empty field="product" />
+											</not>
+											<not>
+												<if-empty field="parameters.bypassIfNoProduct" />
+											</not>
+										</or>
+									</condition>
+									<widgets>
+									</widgets>
+									<fail-widgets>
+										<section>
+											<condition>
+												<if-compare operator="not-equals" value="EditProduct"
+													field="tabButtonItem" />
+											</condition>
+											<widgets>
+											</widgets>
+										</section>
+									</fail-widgets>
+								</section>
+								<decorator-section-include name="body" />
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="FindProduct">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PageTitleFindProduct" />
+				<set field="navMenuName" value="ProductSubTabBar" />
+				<set field="navMenuLocation" value="component://sf/widget/sfMenus.xml" />
+				<set field="headerItem" value="sfProduct"/>
+				<set field="sup" from-field="parameters.sup"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonProductDecorator"
+					location="${parameters.productDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<and>
+									<not><if-empty field="sup"/></not>
+									<if-compare operator="equals" value="Y" field="sup"/>
+								</and>
+							</condition>
+							<widgets>
+								<decorator-screen name="FindScreenDecorator"
+									location="component://common/widget/CommonScreens.xml">
+									<decorator-section name="search-options">
+										<include-form name="FindProduct"
+											location="component://product/widget/catalog/ProductForms.xml" />
+									</decorator-section>
+									<decorator-section name="search-results">
+										<include-form name="ListProductsSupply"
+											location="component://sf/widget/sfForms.xml" />
+									</decorator-section>
+								</decorator-screen>
+							</widgets>
+							<fail-widgets>
+								<decorator-screen name="FindScreenDecorator"
+									location="component://common/widget/CommonScreens.xml">
+									<decorator-section name="search-options">
+										<include-form name="FindProduct"
+											location="component://product/widget/catalog/ProductForms.xml" />
+									</decorator-section>
+									<decorator-section name="search-results">
+										<include-form name="ListProducts"
+											location="component://sf/widget/sfForms.xml" />
+									</decorator-section>
+								</decorator-screen>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+</screens>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service-eca xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/service-eca.xsd">
+	<!-- <eca service="createProductQuotation" event="commit">
+		<set field-name="partyId" env-name="notiToId"/>
+        <set field-name="header" env-name="header"/>
+        <set field-name="state" env-name="state"/>
+        <set field-name="targetLink" env-name="targetLink" />
+       	<set field-name="action" env-name="action"/>
+       	<set field-name="dateTime" env-name="${dateTime}"/>
+		<action mode="sync" service="createNotification"/>
+	</eca> -->
+	<eca service="changeQuotationStatus" event="commit">
+		<condition operator="is-not-empty" field-name="ntfId"/>
+		<set field-name="ntfId" env-name="ntfId"/>
+        <set field-name="state" value="close"/>
+		<action mode="sync" service="updateNotification"/>
+	</eca>
+	<!-- order item status changes -->
+    <eca service="storeOrderDelys" event="return">
+        <action service="resetGrandTotal" mode="sync"/>
+        <action service="addSuggestionsToShoppingList" mode="async" persist="true"/>
+    </eca>
+    <eca service="storeOrderDelys" event="return">
+        <condition field-name="orderTypeId" operator="equals" value="SALES_ORDER"/>
+        <action service="checkCreateDropShipPurchaseOrders" mode="sync" run-as-user="system"/>
+    </eca>
+    <eca service="storeOrderDelys" event="return">
+        <action service="balanceOrderItemsWithNegativeReservations" mode="sync"/>
+    </eca>
+    <eca service="storeOrderDelys" event="return">
+        <condition field-name="orderTypeId" operator="equals" value="PURCHASE_ORDER"/>
+        <action service="setUnitPriceAsLastPrice" mode="sync"/>
+    </eca>
+    <eca service="storeOrderDelys" event="return">
+        <action service="setOrderReservationPriority" mode="sync"/>
+    </eca>
+    
+    <eca service="storeOrderDelys" event="commit">
+        <condition field-name="originOrderId" operator="is-not-empty"/>
+        <action service="createExchangeOrderAssoc" mode="sync"/>
+    </eca>
+    <eca service="storeOrderDelys" event="commit">
+        <action service="updateShoppingListQuantitiesFromOrder" mode="sync"/>
+    </eca>
+    <!-- Group Buying -->
+    <eca service="storeOrderDelys" event="commit">
+        <condition field-name="orderTypeId" operator="equals" value="SALES_ORDER"/>
+        <action service="checkOrderItemForProductGroupOrder" mode="sync"/>
+    </eca>
+    
+    <eca service="changeOrderStatus" event="commit">
+    	<action service="sendNotifyChangeOrderStatus" mode="sync"/>
+    </eca>
+    
+    <eca service="storeOrderDis" event="return">
+        <action service="resetGrandTotal" mode="sync"/>
+        <action service="addSuggestionsToShoppingList" mode="async" persist="true"/>
+    </eca>
+    <eca service="storeOrderDis" event="return">
+        <condition field-name="orderTypeId" operator="equals" value="SALES_ORDER"/>
+        <action service="checkCreateDropShipPurchaseOrders" mode="sync" run-as-user="system"/>
+    </eca>
+    <eca service="storeOrderDis" event="return">
+        <action service="balanceOrderItemsWithNegativeReservations" mode="sync"/>
+    </eca>
+    <eca service="storeOrderDis" event="return">
+        <condition field-name="orderTypeId" operator="equals" value="PURCHASE_ORDER"/>
+        <action service="setUnitPriceAsLastPrice" mode="sync"/>
+    </eca>
+    <eca service="storeOrderDis" event="return">
+        <action service="setOrderReservationPriority" mode="sync"/>
+    </eca>
+    
+    <eca service="storeOrderDis" event="commit">
+        <condition field-name="originOrderId" operator="is-not-empty"/>
+        <action service="createExchangeOrderAssoc" mode="sync"/>
+    </eca>
+    <eca service="storeOrderDis" event="commit">
+        <action service="updateShoppingListQuantitiesFromOrder" mode="sync"/>
+    </eca>
+    <!-- Group Buying -->
+    <eca service="storeOrderDis" event="commit">
+        <condition field-name="orderTypeId" operator="equals" value="SALES_ORDER"/>
+        <action service="checkOrderItemForProductGroupOrder" mode="sync"/>
+    </eca>
+</service-eca>

@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
+
+	<!-- Forms for Payroll -->
+	<form name="FindParameters" type="single" target="parameters">
+		<actions>
+		</actions>
+		<auto-fields-entity entity-name="PayrollParameters"
+			default-field-type="find" />
+		<field name="noConditionFind">
+			<hidden value="Y" />
+		</field>
+		<field name="searchButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-success btn-small">
+			<submit button-type="button" image-location="icon-search" />
+		</field>
+	</form>
+
+	<form name="ListNotification" list-name="listIt" type="list"
+		odd-row-style="alternate-row" header-row-style="header-row-2"
+		paginate-target="NotificationList"
+		default-table-style="table table-hover table-striped table-bordered dataTable">
+		<actions>
+			<!-- <service service-name="listAllNotification" result-map="result"
+				result-map-list="listIt">
+				<field-map field-name="partyId" from-field="${userLogin.partyId}" />
+			</service> -->
+			<set field="entityName" value="Notification" />
+			<set field="requestParameters.partyId" value="${userLogin.partyId}"/>
+			<service service-name="performFind" result-map="result"
+				result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="requestParameters"/>
+				<field-map field-name="entityName" from-field="entityName"/>
+				<field-map field-name="viewIndex" from-field="viewIndex"/>
+				<field-map field-name="viewSize" from-field="viewSize"/>
+				<field-map field-name="orderBy" value="ntfGroupId"/>
+			</service>
+		</actions>
+		<row-actions>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/notification/getLinkNotification.groovy"/>
+		</row-actions>
+		<field name="ntfId" title="${uiLabelMap.NotificationId}">
+			<hyperlink target="${notificationLink}" description="${ntfId}" link-type="hidden-form">
+				<parameter param-name="ntfId"/>
+			</hyperlink>
+		</field>
+		<field name="ntfGroupId" title="${uiLabelMap.NtfGroup}">
+			<display-entity entity-name="NotificationGroup" description="${description}" key-field-name="ntfGroupId"></display-entity>
+		</field>
+		<field name="header" title="${uiLabelMap.NotificationHeader}">
+			<display></display>
+		</field>
+<!-- 		<field name="partyId" widget-style="btn btn-mini btn-primary" title="${uiLabelMap.EmployeePartyId}"> -->
+<!-- 			<hyperlink target="EmployeeProfile" description="${partyId}"> -->
+<!-- 				<parameter param-name="partyId" /> -->
+<!-- 			</hyperlink> -->
+<!-- 		</field> -->
+		<field name="dateTime" title="${uiLabelMap.NotificationDateTime}">
+			<display type="date-time"></display>
+		</field>
+		<field name="state" title="${uiLabelMap.NotificationState}">
+			<display></display>
+		</field>
+	</form>
+	<form name="EditParameters" target="updateParameters" type="single" default-map-name="payrollParameters">
+		<alt-target use-when="payrollParameters==null" target="createParameters"/>
+        <field name="code" title="${uiLabelMap.parameterCode}" use-when="payrollParameters==null" widget-style="required" tooltip="${uiLabelMap.CommonRequired}"><text /></field>
+        <field name="code" title="${uiLabelMap.parameterCode}" use-when="payrollParameters!=null"><display /></field>
+        <field name="name" title="${uiLabelMap.parameterName}" widget-style="required" tooltip="${uiLabelMap.CommonRequired}"><text/></field>
+        <field name="defaultValue" title="${uiLabelMap.defaultValue}"><text/></field>
+        <field name="type" title="${uiLabelMap.parameterType}" widget-style="required" tooltip="${uiLabelMap.CommonRequired}">
+        	<drop-down allow-empty="false">
+        		<entity-options description="${name}-(${description})"
+					key-field-name="code" entity-name="PayrollEmplParameterType">
+					<entity-order-by field-name="code" />
+				</entity-options>
+        	</drop-down>
+       	</field>
+        <field name="actualValue" title="${uiLabelMap.actualValue}"><text/></field>
+        <field name="description"><text/></field>
+        <field name="submitButton" use-when="payrollParameters==null" title="${uiLabelMap.CommonCreate}" widget-style="btn btn-small btn-success"><submit button-type="button" image-location="icon-ok"/></field>
+        <field name="submitButton" use-when="payrollParameters!=null" title="${uiLabelMap.CommonUpdate}" widget-style="btn btn-primary btn-small"><submit button-type="button" image-location="icon-ok-circle"/></field>
+	</form>
+	
+	<form name="FindFormula" type="single" target="formula">
+		<actions>
+		</actions>
+		<auto-fields-entity entity-name="PayrollFormula"
+			default-field-type="find" />
+		<field name="noConditionFind">
+			<hidden value="Y" />
+		</field>
+		<field name="searchButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-success btn-small">
+			<submit button-type="button" image-location="icon-search" />
+		</field>
+	</form>
+	<form name="ListFormula" list-name="listIt" type="list"
+		odd-row-style="alternate-row" header-row-style="header-row-2"
+		paginate-target="formula"
+		default-table-style="table table-striped table-bordered table-hover">
+		<actions>
+			<set field="entityName" value="PayrollFormula" />
+			<service service-name="performFind" result-map="result"
+				result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="requestParameters" />
+				<field-map field-name="entityName" from-field="entityName" />
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+			</service>
+		</actions>
+		<field name="code" title="${uiLabelMap.formulaCode}" widget-style="btn btn-mini btn-primary" >
+			<hyperlink target="EditFormula" description="${code}">
+				<parameter param-name="code" />
+			</hyperlink>
+		</field>
+		<field name="name" title="${uiLabelMap.formulaName}">
+			<display></display>
+		</field>
+		<field name="function" title="${uiLabelMap.formulaFunction}">
+			<display></display>
+		</field>
+	</form>
+	<form name="EditFormula" target="updateFormula" type="single" default-map-name="payrollFormula">
+		<alt-target use-when="payrollFormula==null" target="createFormula"/>
+        <field name="code" title="${uiLabelMap.formulaCode}" use-when="payrollFormula==null" widget-style="required" tooltip="${uiLabelMap.CommonRequired}"><text /></field>
+        <field name="code" title="${uiLabelMap.formulaCode}" use-when="payrollFormula!=null"><display /></field>
+        <field name="name" title="${uiLabelMap.formulaName}" widget-style="required" tooltip="${uiLabelMap.CommonRequired}"><text/></field>
+        <field name="invoiceItemTypeId" title="${uiLabelMap.AccountingInvoicePurchaseItemType}">
+            <drop-down allow-empty="false" >
+                <entity-options description="${description}" entity-name="InvoiceItemType">
+                    <entity-constraint name="invoiceItemTypeId" operator="like" value="PAYROL%"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="function" title="${uiLabelMap.formulaFunction}" widget-style="required" tooltip="${uiLabelMap.CommonRequired}"><text/></field>
+        <field name="functionType" title="${uiLabelMap.formulaFunctionType}" widget-style="required" tooltip="${uiLabelMap.CommonRequired}">
+        	<drop-down allow-empty="false">
+        		<entity-options description="${name}-(${description})"
+					key-field-name="code" entity-name="PayrollFormulaType">
+					<entity-order-by field-name="code" />
+				</entity-options>
+        	</drop-down>
+       	</field>
+       	<field name="maxValue" title="${uiLabelMap.maxValue}"><text/></field>
+        <field name="description" title="${uiLabelMap.formulaDescription}"><text/></field>
+        <field name="submitButton" use-when="payrollFormula==null" title="${uiLabelMap.CommonCreate}" widget-style="btn btn-primary btn-small"><submit button-type="button" image-location="icon-ok"/></field>
+        <field name="submitButton" use-when="payrollFormula!=null" title="${uiLabelMap.CommonUpdate}" widget-style="btn btn-primary btn-small"><submit button-type="button" image-location="icon-ok-circle"/></field>
+	</form>
+	<!-- End of forms for Payroll -->
+	<!-- Payroll's Reports --> 
+	<form name="ListPayrollReport" type="single" target="Payroll">
+        <field name="formulaList" field-name="code" title="${uiLabelMap.formulaCode}">
+            <drop-down allow-multiple="true" allow-empty="false">
+                <entity-options entity-name="PayrollFormula" description="${name}-(${code})">
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="fromDate" title="${uiLabelMap.fromDate}"><date-time/></field>
+        <field name="thruDate" title="${uiLabelMap.thruDate}"><date-time/></field>
+        <field name="search" title="${uiLabelMap.CommonFind}" widget-style="btn btn-small btn-success"><submit button-type="button" image-location="icon-search"/></field>
+    </form>
+    <!-- End of Payroll's Reports --> 
+    <!-- Payroll's invoice and payment -->
+    <form name="PayrollInvAndPaym" type="single" target="PayrollInvAndPaym">
+    	<field name="formularCode" field-name="code"><hidden value="${parameters.formulaList}"></hidden></field>
+    	<field name="InvAndPaym" title="${uiLabelMap.InvAndPaym}" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-hand-right"/></field>
+    </form>
+    <!-- End of Payroll's invoice and payment -->
+    <!-- Payroll's TaxAuthority -->
+    <form name="FindTaxAuthority" type="list" list-name="taxAuthorityList"
+        odd-row-style="alternate-row" default-table-style="table table-hover table-striped table-bordered dataTable">
+        <actions>
+        	<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/payroll/getPayrollTaxAuthority.groovy"/>
+        </actions>
+        <auto-fields-entity entity-name="TaxAuthority" default-field-type="display"/>
+
+        <field name="taxAuthGeoId"><display-entity entity-name="Geo" key-field-name="geoId" description="${geoName} [${geoCode}] [${geoId}]"/></field>
+        <field name="taxAuthPartyId">
+            <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${firstName} ${middleName} ${lastName} ${groupName}">
+                <sub-hyperlink description="${taxAuthPartyId}" target="/partymgr/control/viewprofile" target-type="inter-app" link-style="btn btn-primary btn-mini">
+                    <parameter param-name="partyId" from-field="taxAuthPartyId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+		<field name="includeTaxInPrice"><hidden/></field>
+        <field name="taxAuthorityEdit" title=" " widget-style="btn btn-primary btn-mini icon-edit">
+            <hyperlink description="${uiLabelMap.CommonEdit}" target="editTaxAuthority" also-hidden="false">
+                <parameter param-name="taxAuthPartyId"/>
+                <parameter param-name="taxAuthGeoId"/>
+            </hyperlink>
+        </field>
+    </form>
+	<form name="EditTaxAuthority" type="single" target="updateTaxAuthority"
+	title="" default-map-name="taxAuthority" header-row-style="header-row"
+	default-table-style="basic-table">
+        <alt-target use-when="taxAuthority==null" target="createTaxAuthority"/>
+        <auto-fields-service service-name="updateTaxAuthority" map-name="taxAuthority"/>
+
+        <field use-when="taxAuthority!=null" name="taxAuthPartyId" title="${uiLabelMap.PartyParty}" tooltip="${uiLabelMap.CommonNotModifRecreat}"><display/></field>
+        <field use-when="taxAuthority==null&amp;&amp;taxAuthPartyId==null" name="taxAuthPartyId" title="${uiLabelMap.PartyParty}"><lookup target-form-name="LookupPartyName"/></field>
+        <field use-when="taxAuthority==null&amp;&amp;taxAuthPartyId!=null" name="taxAuthPartyId" title="${uiLabelMap.PartyParty}" tooltip="${uiLabelMap.CommonCannotBeFound}:[${taxAuthPartyId}]"><lookup target-form-name="LookupPartyName"/></field>
+
+        <field use-when="taxAuthority!=null" name="taxAuthGeoId" title="${uiLabelMap.CommonGeo}" tooltip="${uiLabelMap.CommonNotModifRecreat}"><display/></field>
+        <field use-when="taxAuthority==null&amp;&amp;taxAuthGeoId==null" name="taxAuthGeoId" title="${uiLabelMap.CommonGeo}"><lookup target-form-name="LookupGeo"/></field>
+        <field use-when="taxAuthority==null&amp;&amp;taxAuthGeoId!=null" name="taxAuthGeoId" title="${uiLabelMap.CommonGeo}" tooltip="${uiLabelMap.CommonCannotBeFound}:[${taxAuthGeoId}]"><lookup target-form-name="LookupGeo"/></field>
+
+		<field name="formulaCode"><lookup target-form-name="LookupPayrollFormula"/></field>
+        <field name="requireTaxIdForExemption" widget-style="smallSelect">
+            <drop-down no-current-selected-key="Y"><option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/></drop-down>
+        </field>
+        <field name="includeTaxInPrice" widget-style="smallSelect">
+            <drop-down no-current-selected-key="N"><option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/></drop-down>
+        </field>
+        <field name="taxIdFormatPattern" tooltip="${uiLabelMap.AccountingValidationPattern}"></field>
+
+        <field use-when="taxAuthority==null" name="submitButton" title="${uiLabelMap.CommonCreate}" widget-style="btn btn-small btn-success"><submit image-location="icon-ok" button-type="button"/></field>
+        <field use-when="taxAuthority!=null" name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="btn btn-small btn-primary"><submit image-location="icon-ok-circle" button-type="button"/></field>
+    </form>    
+    <form name="ListTaxAuthorityRate" list-name="taxAuthorityPayrollList" type="list"
+		odd-row-style="alternate-row" header-row-style="header-row-2"
+		paginate-target="ListTaxAuthorityRate"
+		default-table-style="table table-hover table-striped table-bordered dataTable">
+		<actions>
+			<entity-condition entity-name="TaxAuthorityRatePayroll" list="taxAuthorityPayrollList">
+				<condition-list combine="and">
+					<condition-expr field-name="taxAuthGeoId" from-field="parameters.taxAuthGeoId"/>
+					<condition-expr field-name="taxAuthPartyId" from-field="parameters.taxAuthPartyId"/>	
+				</condition-list>
+                <order-by field-name="taxAuthorityRateSeqId"/>
+            </entity-condition>
+		</actions>
+		<field name="taxAuthorityRateSeqId"><display/></field>
+		<field name="taxAuthGeoId"><display-entity entity-name="Geo" key-field-name="geoId" description="${geoName} [${geoCode}] [${geoId}]"/></field>
+        <field name="taxAuthPartyId">
+            <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${firstName} ${middleName} ${lastName} ${groupName}">
+                <sub-hyperlink description="${taxAuthPartyId}" target="/partymgr/control/viewprofile" target-type="inter-app" link-style="btn btn-primary btn-mini">
+                    <parameter param-name="partyId" from-field="taxAuthPartyId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+		<field name="name">
+			<display></display>
+		</field>
+		<field name="fromValue">
+			<display></display>
+		</field>
+		<field name="thruValue">
+			<display></display>
+		</field>
+		<field name="taxPercentage">
+			<display></display>
+		</field>
+		<field name="taxAuthorityRateSeqId" widget-style="btn btn-mini btn-primary">
+			<hyperlink target="EditTaxAuthorityRate" description="${taxAuthorityRateSeqId}">
+				<parameter param-name="taxAuthorityRateSeqId" />
+			</hyperlink>
+		</field>
+	</form>
+	<form name="CreateTaxAuthorityRate" target="CreateTaxAuthorityRate" type="single" default-map-name="paramTARP">
+		<alt-target use-when="paramTARP!=null" target="CreateTaxAuthorityRate"/>
+		<field use-when="paramTARP!=null" name="taxAuthorityRateSeqId" title="${uiLabelMap.taxAuthorityRateSeqId}"><display /></field>
+        <field name="taxAuthPartyId" title="${uiLabelMap.parameterCode}"><display /></field>
+        <field name="taxAuthGeoId" title="${uiLabelMap.parameterCode}"><display /></field>
+        <field name="name" title="${uiLabelMap.parameterName}"><text/></field>
+        <field name="fromValue"><text/></field>
+        <field name="thruValue"><text/></field>
+        <field name="taxPercentage"><text/></field>
+        <field name="fromDate" title="${uiLabelMap.fromDate}"><date-time/></field>
+        <field name="thruDate" title="${uiLabelMap.thruDate}"><date-time/></field>
+        <field use-when="paramTARP==null" name="submitButton" title="${uiLabelMap.CommonCreate}" widget-style="btn btn-small btn-success"><submit button-type="button" image-location="icon-ok"/></field>
+        <field use-when="paramTARP!=null" name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="btn btn-small btn-success"><submit button-type="button" image-location="icon-ok"/></field>
+	</form>
+    <!-- End of Payroll's TaxAuthority -->
+</forms>

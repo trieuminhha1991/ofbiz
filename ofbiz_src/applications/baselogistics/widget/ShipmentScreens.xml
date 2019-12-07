@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+        
+    <screen name="ShipmentCommonDecorator">
+		<section>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+                    	<decorator-section-include name="body"/>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ShipmentCosts">
+    	<section>
+            <actions>	
+            	<set field="titleProperty" value="ShippingCost" global="true"/>
+                <set field="selectedMenuItem" value="Configuration"/>
+                <set field="selectedSubMenuItem" value="ShippingCost"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="ShipmentCommonDecorator">
+                    <decorator-section name="body">
+                    	<platform-specific>
+							<html>
+								<html-template location="component://baselogistics/webapp/baselogistics/shipment/shipmentCostConfig.ftl"/>
+							</html>
+						</platform-specific>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="ListTransferShipment">
+    	<section>
+    		<condition>
+    			<if-has-permission permission="SHIPMENT" action="_VIEW"/>
+    		</condition>
+            <actions>
+                <set field="selectedMenuItem" value="Transfer"/>
+                <set field="selectedSubMenuItem" value="ListShipmentTransfer"/>
+           	 	<set field="title" value="ListTransferShipment"/>
+       			<set field="titleProperty" value="ListTransferShipment"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="ShipmentCommonDecorator">
+                    <decorator-section name="body">
+                    	<platform-specific>
+							<html>
+								<html-template location="component://baselogistics/webapp/baselogistics/shipment/listShipments.ftl"/>
+							</html>
+						</platform-specific>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<section>
+					<actions>
+					 	<set field="selectedMenuItem" value="Transfer"/>
+	               	 	<set field="selectedSubMenuItem" value="ListShipmentTransfer"/>
+              			<set field="title" value="ListTransferShipment"/>
+              			<set field="titleProperty" value="ListTransferShipment"/>
+					</actions>
+					<widgets>
+						<decorator-screen name="ShipmentCommonDecorator">
+	                    	<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</fail-widgets>
+       </section>
+    </screen>
+    
+    <screen name="NewShipment">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="Transfer"/>
+                <set field="selectedSubMenuItem" value="NewShipment"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="ShipmentCommonDecorator">
+                    <decorator-section name="body">
+                    	<platform-specific>
+							<html>
+								<html-template location="component://baselogistics/webapp/baselogistics/shipment/shipmentNewShipmentTemplate.ftl"/>
+							</html>
+						</platform-specific>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="NewShipmentInfo">
+    	<section>
+			<widgets>
+                <platform-specific>
+					<html>
+						<html-template location="component://baselogistics/webapp/baselogistics/shipment/shipmentNewShipmentInfo.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="NewShipmentConfirm">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="Transfer"/>
+                <set field="selectedSubMenuItem" value="NewShipment"/>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true" />
+                <property-map resource="BaseLogisticsUiLabels" map-name="uiLabelMap" global="true" />
+			</actions>
+			<widgets>
+                 <platform-specific>
+					<html>
+						<html-template location="component://baselogistics/webapp/baselogistics/shipment/shipmentNewShipmentConfirm.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="ShipmentTitle">
+		<section>
+			<condition>
+				<not><if-empty field="parameters.shipmentId"/></not>
+			</condition>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text=" ${uiLabelMap.Shipment}: "></label>
+				<link url-mode="plain" target="viewShipmentDetail?shipmentId=${parameters.shipmentId}" text="${parameters.shipmentId}"></link>
+			</widgets>
+		</section>
+	</screen>
+    
+    <screen name="ShipmentDetail">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="Transfer"/>
+                <set field="selectedSubMenuItem" value="ListShipmentTransfer"/>
+                <set field="titleHeaderValue" value="ShipmentTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/ShipmentScreens.xml" global="true"/>
+			    <set field="titleProperty" value="GeneralInfo"/>
+			    <set field="activeTab" from-field="parameters.activeTab" default-value="general-tab"/>
+			    <entity-one value-field="shipment" entity-name="Shipment"/>
+			</actions>
+			<widgets>
+                 <decorator-screen name="ShipmentCommonDecorator">
+                    <decorator-section name="body">
+					<include-screen name="ShipmentDetailContainer"/>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="ShipmentDetailContainer">
+		<section>
+			<widgets>
+				<include-screen name="ShipmentInfo"/>
+				<include-screen name="ShipmentDelivery"/>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ShipmentInfo">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baselogistics/webapp/baselogistics/shipment/shipmentDetailInfo.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	
+ 	<screen name="ShipmentDelivery">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baselogistics/webapp/baselogistics/shipment/shipmentDelivery.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	
+</screens>

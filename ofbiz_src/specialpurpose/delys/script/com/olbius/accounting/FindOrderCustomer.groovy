@@ -1,0 +1,13 @@
+import java.util.*;
+import java.lang.*;
+import org.ofbiz.entity.*;
+import org.ofbiz.entity.condition.*;
+import org.ofbiz.base.util.*;
+import org.ofbiz.base.util.UtilMisc;
+import org.ofbiz.service.ServiceUtil;
+import org.ofbiz.order.order.OrderReadHelper;
+result = ServiceUtil.returnSuccess();
+orderHeader = delegator.findOne("OrderHeader", [orderId : context.inputValue], false);
+orh = OrderReadHelper.getHelper(orderHeader);
+result.outputValue = orh.getPlacingParty().get("partyId");
+return result;    

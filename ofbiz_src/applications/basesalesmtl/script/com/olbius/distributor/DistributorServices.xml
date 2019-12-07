@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+    <!-- PartyRelationship services -->
+    <simple-method method-name="createPartyRelationDmsLog"
+                   short-description="create party relation dms log">
+        <if-empty field="parameters.roleTypeIdFrom">
+            <set field="parameters.roleTypeIdFrom" value="_NA_"/>
+        </if-empty>
+        <if-empty field="parameters.roleTypeIdTo">
+            <set field="parameters.roleTypeIdTo" value="_NA_"/>
+        </if-empty>
+        <if-empty field="parameters.partyIdFrom">
+            <set field="parameters.partyIdFrom" from-field="userLogin.partyId"/>
+        </if-empty>
+
+        <if-empty field="parameters.fromDate">
+            <now-timestamp field="parameters.fromDate"/>
+        </if-empty>
+
+        <!-- check if not already exist -->
+        <entity-and entity-name="PartyRelationDmsLog" list="partyRels" filter-by-date="true">
+            <field-map field-name="partyIdFrom" from-field="parameters.partyIdFrom"/>
+            <field-map field-name="roleTypeIdFrom" from-field="parameters.roleTypeIdFrom"/>
+            <field-map field-name="partyIdTo" from-field="parameters.partyIdTo"/>
+            <field-map field-name="roleTypeIdTo" from-field="parameters.roleTypeIdTo"/>
+        </entity-and>
+
+        <if-empty field="partyRels">
+            <make-value value-field="newEntity" entity-name="PartyRelationDmsLog"/>
+            <set-pk-fields map="parameters" value-field="newEntity"/>
+            <set-nonpk-fields map="parameters" value-field="newEntity"/>
+            <create-value value-field="newEntity"/>
+        </if-empty>
+    </simple-method>
+</simple-methods>

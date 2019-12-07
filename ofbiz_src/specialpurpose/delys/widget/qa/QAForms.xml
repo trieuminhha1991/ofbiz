@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
+
+	<form name="ListProductStoreFacility" type="list" list-name="listFacilities" target=""
+            default-table-style="table table-striped dataTable table-hover table-bordered" odd-row-style="alternate-row">
+        <field name="facilityId" title="${uiLabelMap.facilityId}">
+       		<hyperlink target="editFacilityInfo" description="${facilityId}">
+        		<parameter param-name="facilityId" value="${facilityId}"/>		
+       		</hyperlink>
+        </field>
+    </form>
+    
+    <form name="QAListReceipts" type="list" title="" list-name="listIt" odd-row-style="alternate-row" default-table-style="table-bordered table table-striped table-hover dataTable">
+        <actions>
+            <service service-name="performFind"  result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="Receipt"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+        </actions>
+        <field name="receiptId" title="${uiLabelMap.ReceiptId}">
+       		<hyperlink target="getQADetailReceipts" description="${receiptId}">
+        		<parameter param-name="receiptId" from-field="receiptId"/>
+        	</hyperlink>
+       	</field>
+       	<field name="facilityId" title="${uiLabelMap.facility}"><display-entity description="${facilityName}" entity-name="Facility"/></field>
+       	<field name="agreementId" title="${uiLabelMap.AgreementId}"><display/></field>
+       	<field name="createDate" title="${uiLabelMap.createDate}"><display/></field>
+       	<field name="receiptDate" title="${uiLabelMap.ReceiptDate}"><display/></field>
+       	<field name="statusId" title="${uiLabelMap.Status}"><display-entity entity-name="StatusItem" description="${description}"/></field>
+    </form>
+    
+    <form name="ListProductByReceipt" type="multi" target="updateReceiptByQA" list-name="listItemToReceives" default-table-style="table table-striped table-bordered table-hover dataTable" use-row-submit="false">
+    	<actions>
+    	</actions>
+    	<field name="receiptId"><hidden value="${receiptId}"/></field>
+    	<field name="receiptItemSeqId"><hidden value="${receiptItemSeqId}"/></field>
+    	<field name="itemSeqId" title="${uiLabelMap.SequenceId}"><display default-value="${receiptItemSeqId}"/></field>
+    	<field name="productId" title="${uiLabelMap.ProductProduct}"><display/></field>
+   		<field name="orderedQuantity" title="${uiLabelMap.QuantityOrdered}"><hidden value="${orderedQuantity}"/></field>
+    	<field name="inventoryItemTypeId"><hidden value="NON_SERIAL_INV_ITEM"/></field>
+    	<field name="expireDate" title="${uiLabelMap.ProductExpireDate}"><display default-value="${expireDate}"/></field>
+    	<field name="quantityUomId" title="${uiLabelMap.QuantityUomId}"><display-entity description="${description}" entity-name="Uom" key-field-name="uomId"/></field>
+  	   	<field name="quantityOrdered" title="${uiLabelMap.QuantityOrdered}"><display default-value="${orderedQuantity}"/></field>
+  	   	<field name="unitPrice" title="${uiLabelMap.UnitCost}">
+    		<display type="currency" currency="${currencyUomId}"/>
+   		</field>
+   		<field name="subTotal" title="${uiLabelMap.SubTotal}">
+    		<display type="currency" currency="${currencyUomId}"/>
+   		</field>
+    	<field name="actualQuantity" title="${uiLabelMap.QuantityActualReceipt}"><display default-value="${actualQuantity}"/></field>
+    	<field name="quantityRejected" title="${uiLabelMap.QuantityReject}"><display default-value="${quantityRejected}"/></field>
+    	<field name="rejectionId" title="${uiLabelMap.RejectReason}"> 
+    		<display-entity entity-name="RejectionReason" key-field-name="rejectionId" description="${description}"></display-entity>
+    	</field>
+    	<field name="roleTypeId"><hidden value="LOG_SPECIALIST"/></field>
+    	<field name="header"><hidden value="${uiLabelMap.NewReceiptIncoming}"/></field>
+    	<field name="action"><hidden value="getDetailReceipts"/></field>
+    	<field name="openTime"><hidden value="${receipt.receiptDate}"/></field>
+    	<field name="targetLink"><hidden value="receiptId=${receiptId}"/></field>
+    	
+    	<field name="statusId"><hidden value="RECEIPT_QA_ACCEPTED"/></field>
+   		<field name="testQuantity" title="${uiLabelMap.ProductTestQuantity}" widget-style="width80pc" separate-column="true"><text default-value="${testQuantity}"/></field>
+   		<field name="sampleQuantity" title="${uiLabelMap.ProductSampleQuantity}" widget-style="width80pc" separate-column="true"><text default-value="${sampleQuantity}"/></field>
+   		<field name="inspectQuantity" title="${uiLabelMap.ProductInspectQuantity}"  widget-style="width80pc" separate-column="true"><text default-value="${inspectQuantity}"/></field>
+   		<field name="lackQuantity" title="${uiLabelMap.ProductLackQuantity}" widget-style="width80pc" separate-column="true"><text default-value="${lackQuantity}"/></field>
+    	<field name="comment" title="${uiLabelMap.Note}" widget-style="width80pc" separate-column="true"><text default-value="${comment}"/></field>
+    	<field name="lotId"><hidden value="${parameters.lotId}"/></field>
+        <field name="updateButton" title="${uiLabelMap.CommonUpdate}" widget-style="btn btn-small btn-primary" use-when="&quot;RECEIPT_CREATED&quot;.equals(receipt.get(&quot;statusId&quot;)) || &quot;RECEIPT_QA_ACCEPTED&quot;.equals(receipt.get(&quot;statusId&quot;))">
+            <submit button-type="button" image-location="icon-ok"/>
+        </field>
+        <field name="acceptButton" title="${uiLabelMap.CommonSubmit}" widget-style="btn btn-small btn-primary" use-when="&quot;RECEIPT_STK_ACCEPTED&quot;.equals(receipt.get(&quot;statusId&quot;))">
+            <submit button-type="button" image-location="icon-ok"/>
+        </field>
+    </form>
+</forms>

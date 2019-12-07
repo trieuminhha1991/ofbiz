@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/site-conf.xsd">
+	<request-map uri="procurement">
+		<security https="true" auth="true"/>
+		<response name="success" type="view" value="ProcurementPlan"></response>
+	</request-map>
+	<request-map uri="newProcurementPlan">
+		<security https="true" auth="true"/>
+		<response name="success" type="view" value="ProcurementPlan"></response>
+	</request-map>
+	<request-map uri="newProcurementProposal">
+		<security  https="true"  auth="true"/>
+		<response name="success" type="view" value="newProcurementProposal"></response>
+	</request-map>
+	<request-map uri="createProcurementProposal">
+		<security https="true" auth="true"/>
+		<event type="service" invoke="createShoppingProposal"></event>
+		<response name="success" type="request-redirect" value="shoppingProposal"></response>
+		<response name="error" type="view" value="newProcurementProposal"></response>
+	</request-map>
+	<request-map uri="viewProcurementProposal">
+		<security https="true" auth="true"/>
+		<response name="success" type="view" value="viewProcurementProposal"/>	
+	</request-map>
+	<request-map uri="editProcurementProposal">
+		<security https="true" auth="true"/>
+		<response name="success" type="view" value="editProcurementProposal"/>	
+	</request-map>
+	<request-map uri="shoppingProposal">
+		<security https="true" auth="true"/>
+		<response name="success" type="view" value="shoppingProposal"></response>
+	</request-map>
+	<request-map uri="showProductInRequirement">
+		<security https="true" auth="true"/>
+		<response name="success" type="view" value="showProductInRequirement"></response>
+	</request-map>
+	<request-map uri="createProductInProcurementProposal">
+		<security https="true" auth="true"/>
+		<event type="service" invoke="createProductInProcurementProposal"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="updateProcurementProposal">
+    	<security https="true" auth="true"/>
+    	<event type="service" invoke="updateProcurementProposal"/>
+    	<response name="success" type="request-redirect" value="viewProcurementProposal"><redirect-parameter name="requirementId"/></response>
+    	<response name="error" type="view" value="editProcurementProposal"/>
+    </request-map>
+    <request-map uri="sendProcurementProposal">
+    	<security https="true" auth="true"/>
+    	<event type="java" path="com.olbius.procurement.ProcurementEvents" invoke="sendProposalToCeo"></event>
+    	<response name="success" type="request-redirect" value="viewProcurementProposal"><redirect-parameter name="requirementId"/></response>
+    	<response name="error" type="view" value="viewProcurementProposal"/>
+    </request-map>
+    <request-map uri="approveProcurementProposal">
+    	<security https="true" auth="true"/>
+    	<event type="java" path="com.olbius.procurement.ProcurementEvents" invoke="approveRequirement"></event>
+    	<response name="success" type="request-redirect" value="viewProcurementProposal"><redirect-parameter name="requirementId"/></response>
+    	<response name="error" type="view" value="viewProcurementProposal"/>
+    </request-map>
+    <request-map uri="cancelProcurementProposal">
+    	<security https="true" auth="true"/>
+    	<event type="java" path="com.olbius.procurement.ProcurementEvents" invoke="rejectRequirement"></event>
+    	<response name="success" type="request-redirect" value="shoppingProposal"></response>
+    	<response name="error" type="view" value="viewProcurementProposal"/>
+    </request-map>
+    <request-map uri="rejectedFromProcurementDepartment">
+    	<security https="true" auth="true"/>
+    	<event type="java" path="com.olbius.procurement.ProcurementEvents" invoke="rejectedFromProcurementDepartment"></event>
+    	<response name="success" type="request-redirect" value="viewProcurementProposal"><redirect-parameter name="requirementId"/></response>
+    	<response name="error" type="view" value="viewProcurementProposal"/>
+    </request-map>
+    
+    
+	<!-- end request map -->
+	<!-- start view map -->
+	<view-map name="ProcurementPlan" type="screen" page="component://delys/widget/procurement/ProcurementScreens.xml#ProcurementPlan" />
+	<view-map name="shoppingProposal" type="screen" page="component://delys/widget/procurement/ShoppingProposalScreens.xml#ShoppingProposal"></view-map>
+	<!-- <view-map name="showProductInRequirement" type="screen" page="component://delys/widget/procurement/ShoppingProposalScreens.xml#showProductInRequirement"></view-map> -->
+	<view-map name="newProcurementProposal" type="screen" page="component://delys/widget/procurement/ShoppingProposalScreens.xml#newProcurementProposal"></view-map>
+	<view-map name="viewProcurementProposal" type="screen" page="component://delys/widget/procurement/ShoppingProposalScreens.xml#viewProcurementProposal"></view-map>
+	<view-map name="editProcurementProposal" type="screen" page="component://delys/widget/procurement/ShoppingProposalScreens.xml#editProcurementProposal"></view-map>
+</site-conf>

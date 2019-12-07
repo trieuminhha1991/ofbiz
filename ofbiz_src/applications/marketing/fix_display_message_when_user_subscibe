@@ -1,0 +1,218 @@
+From 19771cdb686ea37dd11604a76997e9cdd23bac72 Mon Sep 17 00:00:00 2001
+From: rongnguyen <rong.nguyenkhac@olbius.com>
+Date: Tue, 3 Sep 2013 11:08:06 +0700
+Subject: [PATCH] fix_display_message_when_subscibe
+
+---
+ ant                                                |   2 +-
+ ...ix_display_subscibe_messages_when_user_subscibe |   0
+ .../marketing/marketing/MarketingServices.java     |   3 +-
+ build.xml                                          | 133 ++++++++++++++++++++-
+ framework/common/config/general.properties         |   4 +-
+ 5 files changed, 135 insertions(+), 7 deletions(-)
+ create mode 100644 applications/marketing/fix_display_subscibe_messages_when_user_subscibe
+
+diff --git a/ant b/ant
+index 96af8f1..8232105 100755
+--- a/ant
++++ b/ant
+@@ -15,7 +15,7 @@
+ # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ # KIND, either express or implied.  See the License for the
+ # specific language governing permissions and limitations
+-# under the License.
++# under the License. 
+ #####################################################################
+ 
+ # location of java executable
+diff --git a/applications/marketing/fix_display_subscibe_messages_when_user_subscibe b/applications/marketing/fix_display_subscibe_messages_when_user_subscibe
+new file mode 100644
+index 0000000..e69de29
+diff --git a/applications/marketing/src/org/ofbiz/marketing/marketing/MarketingServices.java b/applications/marketing/src/org/ofbiz/marketing/marketing/MarketingServices.java
+index caa9c7e..e216961 100644
+--- a/applications/marketing/src/org/ofbiz/marketing/marketing/MarketingServices.java
++++ b/applications/marketing/src/org/ofbiz/marketing/marketing/MarketingServices.java
+@@ -115,6 +115,7 @@ public class MarketingServices {
+             Debug.logInfo(e, error + e.getMessage(), module);
+             return ServiceUtil.returnError(error);
+         }
+-        return ServiceUtil.returnSuccess();
++        String strSubSuccess = UtilProperties.getMessage(resourceMarketing, "SubscibeSuccess", locale);
++        return ServiceUtil.returnSuccess(strSubSuccess);
+     }
+ }
+diff --git a/build.xml b/build.xml
+index bd9c2dc..c20871c 100644
+--- a/build.xml
++++ b/build.xml
+@@ -30,7 +30,8 @@ under the License.
+ 
+     <available file="applications/build.xml" property="applications.present"/>
+     <available file="specialpurpose/build.xml" property="specialpurpose.present"/>
+-
++	<!-- Include config file containing FTP credentials -->
++	<property file="build.properties" />
+     <!-- ================================================================== -->
+     <!-- Initialization of all property settings                            -->
+     <!-- ================================================================== -->
+@@ -313,9 +314,135 @@ under the License.
+             <fileset dir="${basedir}/contrib" excludes="contrib/**,**/*.class"/>
+         </copy>
+     </target>
++	<target name="olbius-make-contrib">
++	        <copy todir="${basedir}/contrib" overwrite="true" verbose="true" >
++	            <fileset dir="${basedir}" excludes="contrib/**,**/*.class,**/*.java,**/src/**"/>
++	        </copy>
++    </target>
++	<target name="build-contrib" depends="copy-contrib,refresh"/>
++	
++	<!-- ================================================================== -->
++    <!-- FTP Targets                                                    -->
++    <!-- ================================================================== -->
+ 
+-    <target name="build-contrib" depends="copy-contrib,refresh"/>
+-
++	<target name="olbius-ftp-clean-all-server-files">
++		<!-- Clean cache of web application on ftp server -->
++	    <ftp action="delete" server="${ftp.server}" userid="${ftp.user}"
++	         password="${ftp.password}" remotedir="${ftp.dir}"
++	         verbose="true" passive="yes">
++	      <fileset>
++	        <include name="**/*"/>
++	      </fileset>
++	    </ftp>
++	</target>
++	<target name="olbius-ftp-clean-ofbiz-jar-file">
++		<!-- Clean cache of web application on ftp server -->
++	    <ftp action="delete" server="${ftp.server}" userid="${ftp.user}"
++	         password="${ftp.password}" remotedir="${ftp.dir}"
++	         verbose="true" passive="yes">
++	      <fileset>
++	        <include name="ofbiz.jar"/>
++	      </fileset>
++	    </ftp>
++	</target>
++	<target name="olbius-ftp-clean-applications-folders">
++		<!-- Clean cache of web application on ftp server -->
++	    <ftp action="delete" server="${ftp.server}" userid="${ftp.user}"
++	         password="${ftp.password}" remotedir="${ftp.dir}/applications"
++	         verbose="true" passive="yes">
++	      <fileset>
++	        <include name="**/*"/>
++	      </fileset>
++	    </ftp>
++	</target>
++	<target name="olbius-ftp-upload-contrib-applications">
++		<!-- Upload applications folder to ftp server -->
++		<ftp server="${ftp.server}" userid="${ftp.user}"
++	         password="${ftp.password}" remotedir="${ftp.dir}/applications"
++	         binary="yes" verbose="false" passive="yes" >
++	      <fileset dir="contrib/applications">
++	        <include name="**/*" />
++	      </fileset>
++	    </ftp>
++	</target>
++	<target name="olbius-ftp-upload-contrib-framework">
++		<!-- Upload framework folder to ftp server -->
++		<ftp server="${ftp.server}" userid="${ftp.user}"
++	         password="${ftp.password}" remotedir="${ftp.dir}/framework"
++	         binary="yes" verbose="false" passive="yes" >
++	      <fileset dir="contrib/framework">
++	        <include name="**/*" />
++	      </fileset>
++	    </ftp>
++	</target>
++	<target name="olbius-ftp-upload-contrib-specialperpose">
++		<!-- Upload specialpurpose folder to ftp server -->
++		<ftp server="${ftp.server}" userid="${ftp.user}"
++	         password="${ftp.password}" remotedir="${ftp.dir}/specialpurpose"
++	         binary="yes" verbose="false" passive="yes" >
++	      <fileset dir="contrib/specialpurpose">
++	        <include name="**/*" />
++	      </fileset>
++	    </ftp>
++	</target>
++	<target name="olbius-ftp-upload-contrib-themes">
++		<!-- Upload themes folder to ftp server -->
++		<ftp server="${ftp.server}" userid="${ftp.user}"
++	         password="${ftp.password}" remotedir="${ftp.dir}/themes"
++	         binary="yes" verbose="false" passive="yes" >
++	      <fileset dir="contrib/themes">
++	        <include name="**/*" />
++	      </fileset>
++	    </ftp>
++	</target>
++	<target name="olbius-ftp-upload-contrib-lib">
++		<!-- Upload lib folder to ftp server -->
++		<ftp server="${ftp.server}" userid="${ftp.user}"
++	         password="${ftp.password}" remotedir="${ftp.dir}/lib"
++	         binary="yes" verbose="false" passive="yes" >
++	      <fileset dir="contrib/lib">
++	        <include name="**/*" />
++	      </fileset>
++	    </ftp>
++	</target>
++	<target name="olbius-ftp-upload-contrib-runtime">
++		<!-- Upload runtime folder to ftp server -->
++		<ftp server="${ftp.server}" userid="${ftp.user}"
++	         password="${ftp.password}" remotedir="${ftp.dir}/runtime"
++	         binary="yes" verbose="false" passive="yes" >
++	      <fileset dir="contrib/runtime">
++	        <include name="**/*" />
++	      </fileset>
++	    </ftp>
++	</target>
++	<target name="olbius-ftp-upload-contrib-tools">
++		<!-- Upload tools folder to ftp server -->
++		<ftp server="${ftp.server}" userid="${ftp.user}"
++	         password="${ftp.password}" remotedir="${ftp.dir}/tools"
++	         binary="yes" verbose="false" passive="yes" >
++	      <fileset dir="contrib/tools">
++	        <include name="**/*" />
++	      </fileset>
++	    </ftp>
++	</target>
++	<target name="olbius-ftp-upload-contrib-hot-deploy">
++		<!-- Upload hot-deploy folder to ftp server -->
++		<ftp server="${ftp.server}" userid="${ftp.user}"
++	         password="${ftp.password}" remotedir="${ftp.dir}/hot-deploy"
++	         binary="yes" verbose="false" passive="yes" >
++	      <fileset dir="contrib/hot-deploy">
++	        <include name="**/*" />
++	      </fileset>
++	    </ftp>
++	</target>
++	<target name="olbius-ftp-upload-contrib-ofbiz-jar">
++		<!-- Upload hot-deploy folder to ftp server -->
++		<ftp server="${ftp.server}" userid="${ftp.user}"
++	         password="${ftp.password}" remotedir="${ftp.dir}/contrib"
++	         binary="yes" verbose="false" passive="yes" >
++	      <fileset file="ofbiz.jar" />
++	    </ftp>
++	</target>
+     <!-- ================================================================== -->
+     <!-- WebSite Targets                                                    -->
+     <!-- ================================================================== -->
+diff --git a/framework/common/config/general.properties b/framework/common/config/general.properties
+index 13c0bf1..1c23916 100644
+--- a/framework/common/config/general.properties
++++ b/framework/common/config/general.properties
+@@ -74,13 +74,13 @@ partner.trackingCodeId.default=
+ usps.address.match=(^.*?p[\\. ]*o[\\. ]*box.*$)|(^.*?post.*?office.*?box.*$)|((^|(^.*? ))r[\\. ]*r[\\. ]*(( +)|([0-9#]+)).*$)|(^.*?rural.*?route.*$)
+ 
+ # -- general default 'fromEmailAddress' can be overridden in: EmailTemplateSetting
+-defaultFromEmailAddress=ofbiztest@example.com
++defaultFromEmailAddress=contact@olbius.com
+ 
+ # -- The default domainname used in the notification emails links
+ # as 'baseUrl' and 'baseSecureUrl' are set in the url.properties file. 
+ 
+ # -- mail notifications enabled (Y|N)
+-mail.notifications.enabled=N
++mail.notifications.enabled=Y
+ 
+ # -- redirect all mail notifications to this address for testing
+ #mail.notifications.redirectTo=
+-- 
+1.8.1.2
+

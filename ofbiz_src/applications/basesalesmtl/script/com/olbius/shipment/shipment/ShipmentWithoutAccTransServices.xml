@@ -1,0 +1,1634 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+	
+	<!-- a method to centralize facility security code, meant to be called in-line with
+        call-simple-method, and the checkAction and callingMethodName attributes should be in the method context -->
+    <simple-method method-name="checkFacilityRelatedPermissionWithoutAccTrans" short-description="Check Facility Related Permission">
+        <if-empty field="callingMethodName">
+            <set value="this operation" field="callingMethodName"/>
+        </if-empty>
+        <if-empty field="checkAction">
+            <set value="UPDATE" field="checkAction"/>
+        </if-empty>
+
+        <if>
+            <condition>
+                <not>
+                    <or>
+                        <if-has-permission permission="DIS_CATALOG" action="_${checkAction}"/>
+                        <if-has-permission permission="DIS_CATALOG_ADMIN"/>
+                        <if-has-permission permission="DIS_FACILITY" action="_${checkAction}"/>
+                        <if-has-permission permission="DIS_FACILITY_ADMIN"/>
+                        <and>
+                            <not><if-empty field="alternatePermissionRoot"/></not>
+                            <if-has-permission permission="${alternatePermissionRoot}" action="_${checkAction}"/>
+                        </and>
+                    </or>
+                </not>
+            </condition>
+            <then>
+                <add-error>
+                    <fail-property resource="ProductUiLabels" property="ProductCatalogCreatePermissionError"/>
+                </add-error>
+            </then>
+        </if>
+    </simple-method>
+	<simple-method method-name="facilityGenericPermissionWithoutAccTrans" short-description="Main permission logic">
+        <set field="mainAction" from-field="parameters.mainAction"/>
+        <if-empty field="mainAction">
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="ProductMissingMainActionInPermissionService"/>
+            </add-error>
+            <check-errors/>
+        </if-empty>
+
+        <set field="callingMethodName" from-field="parameters.resourceDescription"/>
+        <set field="checkAction" from-field="parameters.mainAction"/>
+        <call-simple-method method-name="checkFacilityRelatedPermissionWithoutAccTrans"/>
+
+        <if-empty field="error_list">
+            <set field="hasPermission" type="Boolean" value="true"/>
+            <field-to-result field="hasPermission"/>
+
+            <else>
+                <property-to-field resource="ProductUiLabels" property="ProductFacilityPermissionError" field="failMessage"/>
+                <set field="hasPermission" type="Boolean" value="false"/>
+                <field-to-result field="hasPermission"/>
+                <field-to-result field="failMessage"/>
+            </else>
+        </if-empty>
+    </simple-method>
+	
+	<!-- DONENOACCTRANS: copy from "ShipmentServices.xml"-->
+	<!-- quick ship entire order in one package per facility & ship group -->
+    <simple-method method-name="quickShipEntireOrder" short-description="Quick ships an entire order from multiple facilities">
+        <!-- first get the order header; make sure we have a product store -->
+        <field-to-result field="parameters.orderId" result-name="orderId"/>
+        <entity-one entity-name="OrderHeader" value-field="orderHeader"/>
+        <if-empty field="orderHeader.productStoreId">
+            <!-- no store cannot use quick ship; throw error -->
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="FacilityShipmentMissingProductStore"/>
+            </add-error>
+            <check-errors/>
+        </if-empty>
+
+        <!-- get the product store entity -->
+        <entity-one entity-name="ProductStore" value-field="productStore" auto-field-map="false">
+            <field-map field-name="productStoreId" from-field="orderHeader.productStoreId"/>
+        </entity-one>
+
+        <if-compare field="productStore.reserveInventory" operator="not-equals" value="Y">
+            <!-- no reservations; no shipment; cannot use quick ship -->
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="FacilityShipmentNotCreatedForNotReserveInventory"/>
+            </add-error>
+        </if-compare>
+        <if-compare field="productStore.explodeOrderItems" operator="equals" value="Y">
+            <!-- can't insert duplicate rows in shipmentPackageContent -->
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="FacilityShipmentNotCreatedForExplodesOrderItems"/>
+            </add-error>
+        </if-compare>
+        <check-errors/>
+
+        <!-- locate shipping facilities associated with order item rez's -->
+        <entity-condition entity-name="OrderItemAndShipGrpInvResAndItem" list="orderItemAndShipGrpInvResAndItemList">
+            <condition-list>
+                <condition-expr field-name="orderId" from-field="orderHeader.orderId"/>
+                <condition-expr field-name="statusId" value="ITEM_APPROVED"/>
+            </condition-list>
+        </entity-condition>
+        <iterate list="orderItemAndShipGrpInvResAndItemList" entry="orderItemAndShipGrpInvResAndItem">
+            <if>
+                <condition><not><if-compare-field field="orderItemShipGrpInvResFacilityIds" to-field="orderItemAndShipGrpInvResAndItem.facilityId" operator="contains"/></not></condition>
+                <then><field-to-list field="orderItemAndShipGrpInvResAndItem.facilityId" list="orderItemShipGrpInvResFacilityIds"/></then>
+            </if>
+        </iterate>
+
+        <!-- DONENOACCTRANS: copy from "ShipmentServices.xml"-->
+        <call-simple-method method-name="getOrderItemShipGroupLists" xml-resource="component://product/script/org/ofbiz/shipment/shipment/ShipmentServices.xml"/>
+
+        <!-- traverse facilities, instantiate shipment for each -->
+        <iterate list="orderItemShipGrpInvResFacilityIds" entry="orderItemShipGrpInvResFacilityId">
+            <!-- sanity check for valid facility -->
+            <entity-one entity-name="Facility" value-field="facility">
+                <field-map field-name="facilityId" from-field="orderItemShipGrpInvResFacilityId"/>
+            </entity-one>
+            <!-- should never be empty - referential integrity enforced -->
+
+            <set field="eventDate" from-field="parameters.eventDate"/>
+            <call-simple-method method-name="createShipmentForFacilityAndShipGroup"/>
+        </iterate>
+
+        <log level="info" message="Finished quickShipEntireOrder:\nshipmentShipGroupFacilityList=${shipmentShipGroupFacilityList}\nsuccessMessageList=${successMessageList}"/>
+        <field-to-result field="shipmentShipGroupFacilityList"/>
+        <field-to-result field="successMessageList"/>
+
+        <if-empty field="shipmentShipGroupFacilityList">
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="FacilityShipmentNotCreated"/>
+            </add-error>
+        </if-empty>
+        <check-errors/>
+    </simple-method>
+    
+    <simple-method method-name="createShipmentForFacilityAndShipGroup" short-description="Sub-method used by quickShip methods to create a shipment">
+
+        <!-- for OrderItemShipGroup need to split all OISGIRs into their ship groups and create a shipment for each -->
+        <iterate list="orderItemShipGroupList" entry="orderItemShipGroup">
+            <!-- lookup all the approved items -->
+            <entity-and entity-name="OrderItemAndShipGroupAssoc" list="orderItems">
+                <field-map field-name="orderId" from-field="orderHeader.orderId"/>
+                <field-map field-name="shipGroupSeqId" from-field="orderItemShipGroup.shipGroupSeqId"/>
+                <field-map field-name="statusId" value="ITEM_APPROVED"/>
+            </entity-and>
+
+            <set from-field="orderItemListByShGrpMap[orderItemShipGroup.shipGroupSeqId]" field="perShipGroupItemList"/>
+
+            <!-- make sure we have something to ship -->
+            <if-empty field="perShipGroupItemList">
+                <set field="argListNames[]" from-field="orderItemShipGroup.shipGroupSeqId"/>
+                <property-to-field property="FacilityShipmentNoItemsAvailableToShip" resource="ProductUiLabels" field="successMessage" arg-list-name="argListNames"/>
+            <else>
+                <!-- create the shipment for this facility and ship group combination -->
+                <set from-field="orderHeader.orderId" field="shipmentContext.primaryOrderId"/>
+                <set from-field="orderItemShipGroup.shipGroupSeqId" field="shipmentContext.primaryShipGroupSeqId"/>
+                <!-- for Sales Shipment, order items' reservation facilityId is the originFacilityId, and the initial status is "INPUT"
+                     for Purchase Shipment, the facilityId parameter is the destinationFacilityId, and the initial status is "CREATED" -->
+                <if><condition><if-compare field="orderHeader.orderTypeId" operator="equals" value="SALES_ORDER"/></condition>
+                  <then>
+                    <if-not-empty field="orderItemShipGroup.vendorPartyId">
+                      <set field="partyIdFrom" from-field="orderItemShipGroup.vendorPartyId"/>
+                    <else>
+                      <entity-one entity-name="Facility" value-field="facility" auto-field-map="false">
+                        <field-map field-name="facilityId" from-field="orderItemShipGrpInvResFacilityId"/>
+                      </entity-one>
+                      <if-not-empty field="facility.ownerPartyId">
+                        <set field="partyIdFrom" from-field="facility.ownerPartyId"/>
+                      </if-not-empty>
+                      <if-empty field="partyIdFrom">
+                        <entity-and entity-name="OrderRole" list="orderRoles">
+                          <field-map field-name="orderId" from-field="orderHeader.orderId"/>
+                          <field-map field-name="roleTypeId" value="SHIP_FROM_VENDOR"/>
+                        </entity-and>
+                        <if-not-empty field="orderRoles">
+                          <first-from-list list="orderRoles" entry="orderRole"/>
+                          <set field="partyIdFrom" from-field="orderRole.partyId"/>
+                        <else>
+                          <entity-and entity-name="OrderRole" list="orderRoles">
+                            <field-map field-name="orderId" from-field="orderHeader.orderId"/>
+                            <field-map field-name="roleTypeId" value="BILL_FROM_VENDOR"/>
+                          </entity-and>
+                          <first-from-list list="orderRoles" entry="orderRole"/>
+                          <set field="partyIdFrom" from-field="orderRole.partyId"/>
+                        </else>
+                        </if-not-empty>
+                      </if-empty>
+                    </else>
+                    </if-not-empty>
+                    <set field="shipmentContext.partyIdFrom" from-field="partyIdFrom"/>
+                    <set from-field="orderItemShipGrpInvResFacilityId" field="shipmentContext.originFacilityId"/>
+                    <set value="SHIPMENT_INPUT" field="shipmentContext.statusId"/>
+                  </then>
+                  <else>
+                    <set from-field="facility.facilityId" field="shipmentContext.destinationFacilityId"/>
+                    <set value="PURCH_SHIP_CREATED" field="shipmentContext.statusId"/>
+                  </else>
+                </if>
+                <entity-one value-field="userLogin" entity-name="UserLogin">
+		        	<field-map field-name="userLoginId" value="system"/>
+		        </entity-one>
+		        <if-not-empty field="userLogin">
+		        	<set field="shipmentContext.userLogin" from-field="userLogin"/>
+		        </if-not-empty>
+                <call-service service-name="createShipment" in-map-name="shipmentContext">
+                    <result-to-field result-name="shipmentId" field="shipmentLookupMap.shipmentId"/>
+                </call-service>
+                <find-by-primary-key entity-name="Shipment" map="shipmentLookupMap" value-field="shipment"/>
+
+                <if><condition><if-compare field="orderHeader.orderTypeId" operator="equals" value="SALES_ORDER"/></condition>
+                  <then>
+                    <iterate list="perShipGroupItemList" entry="orderItemAndShipGroupAssoc">
+                      <!-- just get the OrderItemShipGrpInvResAndItem records for this facility and this ship group, since that is what this shipment is for -->
+                      <clear-field field="itemResFindMap"/>
+                      <set from-field="orderItemShipGrpInvResFacilityId" field="itemResFindMap.facilityId"/>
+                      <get-related value-field="orderItemAndShipGroupAssoc" relation-name="OrderItemShipGrpInvResAndItem" map="itemResFindMap" list="itemResList"/>
+                      <iterate list="itemResList" entry="itemRes">
+                        <set from-field="shipment.shipmentId" field="issueContext.shipmentId"/>
+                        <set from-field="itemRes.orderId" field="issueContext.orderId"/>
+                        <set from-field="itemRes.orderItemSeqId" field="issueContext.orderItemSeqId"/>
+                        <set from-field="itemRes.shipGroupSeqId" field="issueContext.shipGroupSeqId"/>
+                        <set from-field="itemRes.inventoryItemId" field="issueContext.inventoryItemId"/>
+                        <set from-field="itemRes.quantity" field="issueContext.quantity"/>
+                        <set from-field="eventDate" field="issueContext.eventDate"/>
+                        <call-service service-name="issueOrderItemShipGrpInvResToShipmentWithoutAccTrans" in-map-name="issueContext"/>
+                      </iterate>
+                    </iterate>
+                  </then>
+                  <else> <!-- Issue all purchase order items -->
+                    <clear-field field="itemResFindMap"/>
+                    <set from-field="facilityId" field="itemResFindMap.facilityId"/>
+                    <iterate list="orderItemAndShipGroupAssocList" entry="item">
+                      <set from-field="shipment.shipmentId" field="issueContext.shipmentId"/>
+                      <set from-field="item.orderId" field="issueContext.orderId"/>
+                      <set from-field="item.orderItemSeqId" field="issueContext.orderItemSeqId"/>
+                      <set from-field="item.shipGroupSeqId" field="issueContext.shipGroupSeqId"/>
+                      <set from-field="item.quantity" field="issueContext.quantity"/>
+                      <call-service service-name="issueOrderItemToShipment" in-map-name="issueContext"/>
+                    </iterate>
+                  </else>
+                </if>
+
+                <!-- place all issued items into a single package -->
+                <entity-and entity-name="ItemIssuance" list="itemIssuances">
+                    <field-map field-name="orderId" from-field="orderHeader.orderId"/>
+                    <field-map field-name="shipGroupSeqId" from-field="orderItemShipGroup.shipGroupSeqId"/>
+                    <field-map field-name="shipmentId" from-field="shipment.shipmentId"/>
+                </entity-and>
+
+                <set value="New" field="shipmentPackageSeqId"/>
+                <iterate list="itemIssuances" entry="itemIssuance">
+                    <log level="verbose" message="In quick ship adding item to package: ${shipmentPackageSeqId}"/>
+                    <clear-field field="shipItemContext"/>
+                    <set from-field="itemIssuance.shipmentId" field="shipItemContext.shipmentId"/>
+                    <set from-field="itemIssuance.shipmentItemSeqId" field="shipItemContext.shipmentItemSeqId"/>
+                    <set from-field="itemIssuance.quantity" field="shipItemContext.quantity"/>
+                    <set from-field="shipmentPackageSeqId" field="shipItemContext.shipmentPackageSeqId"/>
+                    <entity-one value-field="userLogin" entity-name="UserLogin">
+			        	<field-map field-name="userLoginId" value="system"/>
+			        </entity-one>
+			        <if-not-empty field="userLogin">
+			        	<set field="shipItemContext.userLogin" from-field="userLogin"/>
+			        </if-not-empty>
+                    <call-service service-name="addShipmentContentToPackage" in-map-name="shipItemContext">
+                        <result-to-field result-name="shipmentPackageSeqId" field="shipmentPackageSeqId"/>
+                    </call-service>
+                </iterate>
+
+                <if><condition><if-compare field="orderHeader.orderTypeId" operator="equals" value="SALES_ORDER"/></condition>
+                  <then>
+                    <!-- update the shipment status to packed -->
+                    <set from-field="shipment.shipmentId" field="packedContext.shipmentId"/>
+                    <set from-field="eventDate" field="packedContext.eventDate"/>
+                    <set value="SHIPMENT_PACKED" field="packedContext.statusId"/>
+                    <call-service service-name="updateShipmentWithoutAccTrans" in-map-name="packedContext"/>
+                    <!-- update the shipment status to shipped -->
+                    <if-not-empty field="setPackedOnly">
+                        <set from-field="shipment.shipmentId" field="packedContext.shipmentId"/>
+                        <set value="SHIPMENT_SHIPPED" field="packedContext.statusId"/>
+                        <call-service service-name="updateShipmentWithoutAccTrans" in-map-name="packedContext"/>
+                    </if-not-empty>
+                  </then>
+                  <else> <!-- PURCHASE_ORDER -->
+                    <!-- update the shipment status to shipped -->
+                    <set from-field="shipment.shipmentId" field="packedContext.shipmentId"/>
+                    <set value="PURCH_SHIP_SHIPPED" field="packedContext.statusId"/>
+                    <call-service service-name="updateShipmentWithoutAccTrans" in-map-name="packedContext"/>
+                  </else>
+                </if>
+
+                <set from-field="shipment.shipmentId" field="shipmentShipGroupFacility.shipmentId"/>
+                <set from-field="facility.facilityId" field="shipmentShipGroupFacility.facilityId"/>
+                <set from-field="orderItemShipGroup.shipGroupSeqId" field="shipmentShipGroupFacility.shipGroupSeqId"/>
+                <field-to-list field="shipmentShipGroupFacility" list="shipmentShipGroupFacilityList"/>
+                <set field="argListNames[]" from-field="shipmentShipGroupFacility.shipmentId"/>
+                <set field="argListNames[]" from-field="shipmentShipGroupFacility.shipGroupSeqId"/>
+                <set field="argListNames[]" from-field="shipmentShipGroupFacility.facilityId"/>
+                <!-- <property-to-field property="FacilityShipmentIdCreated" resource="ProductUiLabels" field="successMessage" arg-list-name="argListNames"/> -->
+                <property-to-field property="BSOrderHadCompletedYouCanPrintDeliveryDocumentInDeliveryNoteTab" resource="BaseSalesMtlUiLabels" field="successMessage" arg-list-name="argListNames"/><!-- TODOCHANGE -->
+                <clear-field field="shipmentShipGroupFacility"/>
+            </else>
+            </if-empty>
+        </iterate>
+    </simple-method>
+    
+    <!-- DONENOACCTRANS: copy from "IssuanceServices.xml"-->
+    <simple-method method-name="issueOrderItemShipGrpInvResToShipment" short-description="Issue OrderItemShipGrpInvRes to Shipment">
+        <set value="Issue OrderItemShipGrpInvRes to Shipment" field="operationName"/>
+        <call-simple-method method-name="checkCanChangeShipmentStatusPacked" xml-resource="component://product/script/org/ofbiz/shipment/shipment/ShipmentServices.xml"/>
+        <!-- get orderItemShipGrpInvRes -->
+        <make-value entity-name="OrderItemShipGrpInvRes" value-field="OrderItemShipGrpInvResLookupPk"/>
+        <set-pk-fields value-field="OrderItemShipGrpInvResLookupPk" map="parameters"/>
+        <find-by-primary-key map="OrderItemShipGrpInvResLookupPk" value-field="orderItemShipGrpInvRes"/>
+        <log level="info" message="order item ship grp inv res info: ${orderItemShipGrpInvRes}"/>
+
+        <!-- get orderHeader -->
+        <make-value entity-name="OrderHeader" value-field="orderHeaderLookupPk"/>
+        <set-pk-fields value-field="orderHeaderLookupPk" map="parameters"/>
+        <find-by-primary-key map="orderHeaderLookupPk" value-field="orderHeader"/>
+
+        <!-- make sure the order is of orderTypeId: SALES_ORDER -->
+        <if-compare field="orderHeader.orderTypeId" operator="not-equals" value="SALES_ORDER">
+            <string-to-list string="Not issuing Order Item Ship Group Inventory Reservation to shipment [${parameters.shipmentId}] because the order is not a Sales Order for order [${orderItemShipGrpInvRes.orderId}] order item [${orderItemShipGrpInvRes.orderItemSeqId}] inventoryItem [${orderItemShipGrpInvRes.inventoryItemId}] (should call the issueOrderItemToShipment service)" list="error_list"/>
+        </if-compare>
+
+        <!-- make sure specified quantity is not empty -->
+        <if-empty field="parameters.quantity">
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="ProductNotIssueOrderToShipment"/>
+            </add-error>
+        </if-empty>
+        <if-empty field="orderItemShipGrpInvRes.quantity">
+            <log level="info" message="Order item reservation amount is null! PK lookup: ${OrderItemShipGrpInvResLookupPk}"/>
+        </if-empty>
+
+        <!-- make sure specified quantity is not less than or equal to 0 -->
+        <if-compare field="parameters.quantity" operator="less-equals" value="0" type="BigDecimal">
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="ProductNotIssueOrderToShipmentQuantityLess"/>
+            </add-error>
+        </if-compare>
+        <!-- make sure specified quantity is not greater than reserved quantity left to be issued, ie orderItemShipGrpInvRes.quantity -->
+        <if-compare-field field="parameters.quantity" to-field="orderItemShipGrpInvRes.quantity" operator="greater" type="BigDecimal">
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="ProductNotIssueOrderToShipmentQuantityGreater"/>
+            </add-error>
+        </if-compare-field>
+
+        <check-errors/>
+        <!-- get orderItem -->
+        <entity-one entity-name="OrderItem" value-field="orderItem"/>
+        <!-- get inventoryItem -->
+        <entity-one entity-name="InventoryItem" value-field="inventoryItem"/>
+        <entity-one entity-name="Product" value-field="objProduct">
+        	<field-map field-name="productId" from-field="orderItem.productId"/>
+        </entity-one>
+        <if-compare field="objProduct.requireAmount" operator="equals" type="String" value="Y">
+        	 <if-compare-field field="InventoryItem.amountOnHandTotal" to-field="parameters.quantity" operator="less" type="BigDecimal">
+	        	<add-error>
+	                <fail-property resource="ProductUiLabels" property="NotEnoughInventoryAOH"/>
+	            </add-error>
+	           	<check-errors/>
+	        </if-compare-field>
+        <else>
+        	<if-not-empty field="inventoryItem.quantityOnHandTotal">
+        		<if-compare-field field="inventoryItem.quantityOnHandTotal" to-field="parameters.quantity" operator="less" type="BigDecimal">
+		        	<add-error>
+		                <fail-property resource="ProductUiLabels" property="NotEnoughInventoryQOH"/>
+		            </add-error>
+		            <check-errors/>
+		        </if-compare-field>
+        	<else>
+	        	<add-error>
+	                <fail-property resource="ProductUiLabels" property="NotEnoughInventoryQOH"/>
+	            </add-error>
+	            <check-errors/>
+        	</else>
+        	</if-not-empty>
+        </else>
+        </if-compare>
+        <!-- get shipment -->
+        <entity-one entity-name="Shipment" value-field="shipment"/>
+        <!-- get orderShipment -->
+        <make-value entity-name="OrderShipment" value-field="orderShipmentLookupPk"/>
+        <set-pk-fields value-field="orderShipmentLookupPk" map="parameters"/>
+        <find-by-and entity-name="OrderShipment" map="orderShipmentLookupPk" list="orderShipments"/>
+        <first-from-list entry="orderShipment" list="orderShipments"/>
+
+        <!-- will create qtyForShipmentItem -->
+        <!-- DONENOACCTRANS: copy from "IssuanceServices.xml"-->
+        <call-simple-method method-name="calcQtyForShipmentItemInline" xml-resource="component://product/script/org/ofbiz/shipment/issuance/IssuanceServices.xml"/>
+        <log level="info" message="qtyForShipmentItem: ${qtyForShipmentItem}"/>
+        <if-compare value="0" operator="greater-equals" field="qtyForShipmentItem" type="BigDecimal">
+            <if-not-empty field="orderShipment">
+                <field-to-result field="orderShipment.shipmentItemSeqId" result-name="shipmentItemSeqId"/>
+                <make-value entity-name="ShipmentItem" value-field="shipmentItemLookupPk"/>
+                <set-pk-fields value-field="shipmentItemLookupPk" map="parameters"/>
+                <set from-field="orderShipment.shipmentItemSeqId" field="shipmentItemLookupPk.shipmentItemSeqId"/>
+                <find-by-primary-key map="shipmentItemLookupPk" value-field="shipmentItem"/>
+            </if-not-empty>
+            <if-compare value="0" operator="not-equals" field="qtyForShipmentItem" type="BigDecimal">
+                <!-- add the qtyForShipmentItem to the shipmentItem -->
+                <set from-field="parameters.quantity" field="originalQuantity"/>
+                <set from-field="qtyForShipmentItem" field="parameters.quantity"/>
+                <!-- DONENOACCTRANS: copy from "IssuanceServices.xml"-->
+                <call-simple-method method-name="findCreateIssueShipmentItem"/>
+                <set from-field="originalQuantity" field="parameters.quantity"/>
+            </if-compare>
+        <else>
+            <!-- A reduction in the quantity, so OrderShipment must exist. -->
+            <calculate field="orderShipment.quantity">
+                <calcop field="orderShipment.quantity" operator="subtract">
+                    <calcop operator="get" field="parameters.quantity"/>
+                </calcop>
+            </calculate>
+            <store-value value-field="orderShipment"/>
+            <field-to-result field="orderShipment.shipmentItemSeqId" result-name="shipmentItemSeqId"/>
+            <make-value entity-name="ShipmentItem" value-field="shipmentItemLookupPk"/>
+            <set-pk-fields value-field="shipmentItemLookupPk" map="parameters"/>
+            <set from-field="orderShipment.shipmentItemSeqId" field="shipmentItemLookupPk.shipmentItemSeqId"/>
+            <find-by-primary-key map="shipmentItemLookupPk" value-field="shipmentItem"/>
+        </else>
+        </if-compare>
+        <set field="eventDate" from-field="parameters.eventDate"/>
+        <set field="shipmentId" from-field="parameters.shipmentId"/>
+        <call-simple-method method-name="findCreateItemIssuance"/>
+        <!-- DONENOACCTRANS: copy from "IssuanceServices.xml"-->
+        <call-simple-method method-name="associateIssueRoles"/><!--  xml-resource="component://product/script/org/ofbiz/shipment/issuance/IssuanceServices.xml" -->
+        <!-- decrement quantity still reserved -->
+        <calculate field="orderItemShipGrpInvRes.quantity">
+            <calcop operator="subtract">
+                <calcop operator="get" field="orderItemShipGrpInvRes.quantity"/>
+                <calcop operator="get" field="parameters.quantity"/>
+            </calcop>
+        </calculate>
+        <if-compare value="0" operator="equals" field="orderItemShipGrpInvRes.quantity" type="BigDecimal">
+            <!-- if none left reserved, remove OIIR -->
+            <remove-value value-field="orderItemShipGrpInvRes"/>
+            <if-compare field="shipment.statusId" operator="not-equals" value="SHIPMENT_SCHEDULED">
+                <!-- if there are no more OIIRs for the orderItem, set the orderItem.statusId to ITEM_COMPLETED -->
+                <get-related value-field="orderItem" relation-name="OrderItemShipGrpInvRes" list="otherOiirs"/>
+                <if-empty field="otherOiirs">
+                    <set value="ITEM_COMPLETED" field="changeOrderItemStatusMap.statusId"/>
+                    <set from-field="orderItem.orderId" field="changeOrderItemStatusMap.orderId"/>
+                    <set from-field="orderItem.orderItemSeqId" field="changeOrderItemStatusMap.orderItemSeqId"/>
+                    <call-service service-name="changeOrderItemStatusWithoutAccTrans" in-map-name="changeOrderItemStatusMap"/>
+                </if-empty>
+            <else>
+                <log level="info" message="orderId: ${orderItem.orderId} orderItemSeqId: ${orderItem.orderItemSeqId}"/>
+                <log level="info" message="Items issued but can't set order item status to ITEM_COMPLETED because shipment status is SHIPMENT_SCHEDULED" />
+            </else>
+            </if-compare>
+        <else>
+            <store-value value-field="orderItemShipGrpInvRes"/>
+        </else>
+        </if-compare>
+
+        <!-- Decrement InventoryItem quantityOnHand -->
+        <!-- instead of updating InventoryItem, add an InventoryItemDetail -->
+        <set from-field="inventoryItem.inventoryItemId" field="createDetailMap.inventoryItemId"/>
+        <set from-field="orderItem.orderId" field="createDetailMap.orderId"/>
+        <set from-field="orderItem.orderItemSeqId" field="createDetailMap.orderItemSeqId"/>
+        <set from-field="orderItemShipGrpInvRes.shipGroupSeqId" field="createDetailMap.shipGroupSeqId"/>
+        <set from-field="shipmentItem.shipmentId" field="createDetailMap.shipmentId"/>
+        <set from-field="shipmentItem.shipmentItemSeqId" field="createDetailMap.shipmentItemSeqId"/>
+        <set from-field="itemIssuanceId" field="createDetailMap.itemIssuanceId"/>
+        <if-compare field="objProduct.requireAmount" operator="equals" type="String" value="Y">
+        	<calculate field="createDetailMap.amountOnHandDiff">
+	            <calcop field="parameters.quantity" operator="negative"/>
+	        </calculate>
+	        <set field="createDetailMap.quantityOnHandDiff" type="BigDecimal" value="-1"/>
+        <else>
+	        <calculate field="createDetailMap.quantityOnHandDiff">
+	            <calcop field="parameters.quantity" operator="negative"/>
+	        </calculate>
+        </else>
+        </if-compare>
+        <call-service service-name="createInventoryItemDetailWithoutAccTrans" in-map-name="createDetailMap"/>
+        <clear-field field="createDetailMap"/>
+    </simple-method>
+    
+    <simple-method method-name="findCreateIssueShipmentItem" short-description="Find or Create ShipmentItem to Issue To - meant to be called in-line">
+        <!-- try to find an existing shipmentItem and attach to it, if none found create a new shipmentItem -->
+        <!-- if there is NO productId on the orderItem, ALWAYS create a new shipmentItem -->
+        <if-not-empty field="orderItem.productId">
+            <entity-condition entity-name="ShipmentItem" list="shipmentItems">
+                <condition-list combine="and">
+                    <condition-expr field-name="productId" from-field="orderItem.productId"/>
+                    <condition-expr field-name="shipmentId" from-field="parameters.shipmentId"/>
+                    <condition-expr field-name="shipmentItemSeqId" from-field="parameters.shipmentItemSeqId" ignore-if-empty="true"/>
+                </condition-list>
+                <order-by field-name="shipmentItemSeqId"/>
+            </entity-condition>
+            <first-from-list entry="shipmentItem" list="shipmentItems"/>
+        </if-not-empty>
+
+        <if-empty field="shipmentItem">
+            <set from-field="orderItem.productId" field="shipmentItemCreate.productId"/>
+            <set from-field="parameters.shipmentId" field="shipmentItemCreate.shipmentId"/>
+            <set from-field="parameters.quantity" field="shipmentItemCreate.quantity"/>
+            <entity-one value-field="userLogin" entity-name="UserLogin">
+	        	<field-map field-name="userLoginId" value="system"/>
+	        </entity-one>
+	        <if-not-empty field="userLogin">
+	        	<set field="shipmentItemCreate.userLogin" from-field="userLogin"/>
+	        </if-not-empty>
+            <call-service service-name="createShipmentItem" in-map-name="shipmentItemCreate">
+                <result-to-field result-name="shipmentItemSeqId" field="shipmentItemLookupPk.shipmentItemSeqId"/>
+            </call-service>
+            <set from-field="parameters.shipmentId" field="shipmentItemLookupPk.shipmentId"/>
+            <find-by-primary-key entity-name="ShipmentItem" map="shipmentItemLookupPk" value-field="shipmentItem"/>
+        <else>
+            <calculate field="shipmentItem.quantity">
+                <calcop operator="add" field="shipmentItem.quantity">
+                    <calcop operator="get" field="parameters.quantity"/>
+                </calcop>
+            </calculate>
+            <store-value value-field="shipmentItem"/>
+        </else>
+        </if-empty>
+
+        <call-simple-method method-name="createOrUpdateOrderShipmentInline" />
+        
+        <field-to-result field="shipmentItem.shipmentItemSeqId" result-name="shipmentItemSeqId"/>
+    </simple-method>
+    
+    <simple-method method-name="createOrUpdateOrderShipmentInline" short-description="Create or update the OrderShipment - meant to be called in-line">
+        <set from-field="parameters.shipmentId" field="orderShipmentCreate.shipmentId"/>
+        <set from-field="shipmentItem.shipmentItemSeqId" field="orderShipmentCreate.shipmentItemSeqId"/>
+        <set from-field="orderItem.orderId" field="orderShipmentCreate.orderId"/>
+        <set from-field="orderItem.orderItemSeqId" field="orderShipmentCreate.orderItemSeqId"/>
+
+        <if-not-empty field="orderItemShipGroupAssoc">
+            <set from-field="orderItemShipGroupAssoc.shipGroupSeqId" field="orderShipmentCreate.shipGroupSeqId"/>
+        </if-not-empty>
+        <if-not-empty field="orderItemShipGrpInvRes">
+            <set from-field="orderItemShipGrpInvRes.shipGroupSeqId" field="orderShipmentCreate.shipGroupSeqId"/>
+        </if-not-empty>
+
+        <make-value entity-name="OrderShipment" value-field="orderShipmentLookupPk"/>
+        <set-pk-fields value-field="orderShipmentLookupPk" map="orderShipmentCreate"/>
+        <find-by-and entity-name="OrderShipment" map="orderShipmentLookupPk" list="orderShipments"/>
+        <first-from-list entry="orderShipment" list="orderShipments"/>
+
+        <if-empty field="orderShipment">
+            <set from-field="parameters.quantity" field="orderShipmentCreate.quantity"/>
+            <entity-one value-field="userLogin" entity-name="UserLogin">
+	        	<field-map field-name="userLoginId" value="system"/>
+	        </entity-one>
+	        <if-not-empty field="userLogin">
+	        	<set field="orderShipmentCreate.userLogin" from-field="userLogin"/>
+	        </if-not-empty>
+            <call-service service-name="createOrderShipment" in-map-name="orderShipmentCreate"/>
+        <else>
+            <calculate field="orderShipment.quantity">
+                <calcop field="orderShipment.quantity" operator="add">
+                    <calcop operator="get" field="parameters.quantity"/>
+                </calcop>
+            </calculate>
+            <store-value value-field="orderShipment"/>
+        </else>
+        </if-empty>
+    </simple-method>
+    
+    <simple-method method-name="findCreateItemIssuance" short-description="Find Create ItemIssuance - meant to be called in-line">
+        <!-- If a non-sales order find ItemIssuance for orderItemSeqId-shimentItemSeqId-shipGroupSeqId pair, update it and return -->
+        <if-compare field="orderHeader.orderTypeId" operator="not-equals" value="SALES_ORDER">
+            <entity-and list="itemIssuances" entity-name="ItemIssuance">
+                <field-map field-name="orderId" from-field="orderItem.orderId"/>
+                <field-map field-name="orderItemSeqId" from-field="orderItem.orderItemSeqId"/>
+                <field-map field-name="shipmentId" from-field="shipmentItem.shipmentId"/>
+                <field-map field-name="shipmentItemSeqId" from-field="shipmentItem.shipmentItemSeqId"/>
+                <field-map field-name="shipGroupSeqId" from-field="orderItemShipGroupAssoc.shipGroupSeqId"/>
+                <order-by field-name="-issuedDateTime"/>
+            </entity-and>
+            <if-not-empty field="itemIssuances">
+                <first-from-list entry="itemIssuance" list="itemIssuances"/>
+                <set field="itemIssuance.quantity" value="${itemIssuance.quantity$bigDecimal + parameters.quantity$bigDecimal}" type="BigDecimal"/>
+                <store-value value-field="itemIssuance"/>
+                <set field="itemIssuanceId" from-field="itemIssuance.itemIssuanceId"/>
+                <field-to-result field="itemIssuanceId"/>
+                <return/>
+            </if-not-empty>
+        </if-compare>
+        
+        <!-- create the ItemIssuance -->
+        <set from-field="parameters.quantity" field="itemIssuanceCreate.quantity"/>
+        <set from-field="shipmentItem.shipmentId" field="itemIssuanceCreate.shipmentId"/>
+        <set from-field="shipmentItem.shipmentItemSeqId" field="itemIssuanceCreate.shipmentItemSeqId"/>
+        <set from-field="orderItem.orderId" field="itemIssuanceCreate.orderId"/>
+        <set from-field="orderItem.orderItemSeqId" field="itemIssuanceCreate.orderItemSeqId"/>
+        <set from-field="eventDate" field="itemIssuanceCreate.issuedDateTime"/>
+
+        <if-not-empty field="orderItemShipGrpInvRes">
+            <!-- if this is coming from an OrderItem issue instead of an OrderItemShipGrpInvRes issue, we won't have this info -->
+            <set from-field="orderItemShipGrpInvRes.inventoryItemId" field="itemIssuanceCreate.inventoryItemId"/>
+            <set from-field="orderItemShipGrpInvRes.shipGroupSeqId" field="itemIssuanceCreate.shipGroupSeqId"/>
+        </if-not-empty>
+        <if-not-empty field="orderItemShipGroupAssoc">
+            <!-- If we have a ShipGroup Assoc for this Item to focus on, set that; this is mostly the case for purchase orders and such -->
+            <set from-field="orderItemShipGroupAssoc.shipGroupSeqId" field="itemIssuanceCreate.shipGroupSeqId"/>
+        </if-not-empty>
+
+        <set from-field="userLogin.userLoginId" field="itemIssuanceCreate.issuedByUserLoginId"/>
+        <call-service service-name="createItemIssuanceWithoutAccTrans" in-map-name="itemIssuanceCreate">
+            <result-to-field result-name="itemIssuanceId"/>
+        </call-service>
+        <field-to-result field="itemIssuanceId"/>
+    </simple-method>
+    <simple-method method-name="associateIssueRoles" short-description="Associate Roles for ItemIssuance - meant to be called in-line">
+       <!--  make sure the party is in the PACKER role -->
+        <make-value entity-name="PartyRole" value-field="partyRole"/>
+        <set field="partyRole.partyId" from-field="userLogin.partyId"/>
+        <set field="partyRole.roleTypeId" value="PACKER"/>
+        <find-by-primary-key entity-name="PartyRole" map="partyRole" value-field="checkPartyRole"/>
+        <if-empty field="checkPartyRole">
+            <create-value value-field="partyRole"/>
+        </if-empty>
+
+        <!-- Add ItemIssuanceRole for party that issues this... -->
+        <entity-one value-field="itemIssuanceRole" entity-name="ItemIssuanceRole">
+            <field-map field-name="itemIssuanceId" from-field="itemIssuanceId"/>
+            <field-map field-name="partyId" from-field="userLogin.partyId"/>
+            <field-map field-name="roleTypeId" value="PACKER"/>
+        </entity-one>
+        <if-empty field="itemIssuanceRole">
+            <set from-field="itemIssuanceId" field="itemIssuanceRoleCreate.itemIssuanceId"/>
+            <set from-field="userLogin.partyId" field="itemIssuanceRoleCreate.partyId"/>
+            <set value="PACKER" field="itemIssuanceRoleCreate.roleTypeId"/>
+            <set from-field="shipmentId" field="itemIssuanceRoleCreate.shipmentId"/>
+            <entity-one value-field="userLogin" entity-name="UserLogin">
+	        	<field-map field-name="userLoginId" value="system"/>
+	        </entity-one>
+	        <if-not-empty field="userLogin">
+	        	<set field="itemIssuanceRoleCreate.userLogin" from-field="userLogin"/>
+	        </if-not-empty>
+            <call-service service-name="createItemIssuanceRole" in-map-name="itemIssuanceRoleCreate"/>
+        </if-empty>
+    </simple-method>
+    
+    <simple-method method-name="checkCancelItemIssuanceAndOrderShipmentFromShipment" short-description="Check Shipment Items and Cancel Item Issuance and Order Shipment">
+        <entity-and entity-name="OrderShipment" list="orderShipmentList">
+            <field-map field-name="shipmentId" from-field="parameters.shipmentId"/>
+        </entity-and>
+        <iterate entry="orderShipment" list="orderShipmentList">
+            <clear-field field="deleteOrderShipmentMap"/>
+            <set-service-fields service-name="deleteOrderShipment" map="orderShipment" to-map="deleteOrderShipmentMap"/>
+            <call-service service-name="deleteOrderShipment" in-map-name="deleteOrderShipmentMap"/>
+        </iterate>
+
+        <log level="info" message="Cancelling Item Issuances for shimpentId: ${parameters.shipmentId}"/>
+        <entity-one entity-name="Shipment" value-field="shipment"/>
+        <get-related value-field="shipment" relation-name="ItemIssuance" list="issuances"/>
+        <iterate list="issuances" entry="issuance">
+            <set from-field="issuance.itemIssuanceId" field="inputMap.itemIssuanceId"/>
+            <call-service service-name="cancelOrderItemIssuanceFromSalesShipmentWithoutAccTrans" in-map-name="inputMap"/>
+        </iterate>
+    </simple-method>
+    <simple-method method-name="cancelOrderItemIssuanceFromSalesShipment" short-description="Cancel an ItemIssuance quantity from Sales Shipment">
+        <!-- get ItemIssuance and related entities-->
+        <entity-one entity-name="ItemIssuance" value-field="itemIssuance"/>
+        <get-related-one value-field="itemIssuance" relation-name="OrderHeader" to-value-field="orderHeader"/>
+        <get-related-one value-field="itemIssuance" relation-name="InventoryItem" to-value-field="inventoryItem"/>
+        <get-related-one value-field="itemIssuance" relation-name="Shipment" to-value-field="shipment"/>
+
+        <!-- issuance can be canceled only if the sales shipment is not packed -->
+
+        <if-compare field="shipment.statusId" operator="not-equals" value="SHIPMENT_CANCELLED">
+            <set from-field="itemIssuance.shipmentId" field="shipmentId"/>
+            <call-simple-method method-name="checkCanChangeShipmentStatusPacked" xml-resource="component://product/script/org/ofbiz/shipment/shipment/ShipmentServices.xml"/>
+            <check-errors/>
+        </if-compare>
+
+        <!-- make sure the order is of orderTypeId: SALES_ORDER -->
+        <if-compare field="orderHeader.orderTypeId" operator="not-equals" value="SALES_ORDER">
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="ProductNotIssueOrderForNotSalesOrders"/>
+            </add-error>
+        </if-compare>
+
+        <!-- get the quantity that can be cancelled ItemIssuance -->
+        <calculate field="qtyIssuedLeft">
+            <calcop field="itemIssuance.quantity" operator="subtract">
+                <calcop operator="get" field="itemIssuance.cancelQuantity"/>
+            </calcop>
+        </calculate>
+
+        <!-- if not provided, get the left issued quantity -->
+         <set from-field="parameters.cancelQuantity" field="toCancelQuantity"/>
+         <if-empty field="toCancelQuantity">
+            <set from-field="qtyIssuedLeft" field="toCancelQuantity"/>
+         </if-empty>
+
+        <!-- make sure specified cancel Quantity is not less than or equal to 0 -->
+        <if-compare field="toCancelQuantity" operator="less" value="0" type="BigDecimal">
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="ProductNotIssueOrderQuantityCancelLess"/>
+            </add-error>
+        </if-compare>
+
+        <if-compare field="toCancelQuantity" operator="equals" value="0" type="BigDecimal">
+            <return response-code="success"/>
+        </if-compare>
+
+        <!-- make sure specified quantity is not greater than issued quantity left -->
+        <if-compare-field field="toCancelQuantity" to-field="qtyIssuedLeft" operator="greater" type="BigDecimal">
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="ProductNotIssueOrderQuantityCancelGreater"/>
+            </add-error>
+        </if-compare-field>
+        <check-errors/>
+
+        <!-- update ItemIssuance -->
+        <calculate field="totalCancelQty">
+            <calcop operator="add" field="itemIssuance.cancelQuantity"/>
+            <calcop operator="add" field="toCancelQuantity"/>
+        </calculate>
+        <set from-field="totalCancelQty" field="itemIssuanceUpdate.cancelQuantity"/>
+        <set from-field="parameters.itemIssuanceId" field="itemIssuanceUpdate.itemIssuanceId"/>
+        <call-service service-name="updateItemIssuanceWithoutAccTrans" in-map-name="itemIssuanceUpdate"/>
+
+        <!-- increment InventoryItem quantityOnHand AND availableToPromise -->
+        <!-- instead of updating InventoryItem, add an InventoryItemDetail -->
+        <set from-field="itemIssuance.inventoryItemId" field="createDetailMap.inventoryItemId"/>
+        <set from-field="itemIssuance.itemIssuanceId" field="createDetailMap.itemIssuanceId"/>
+        <set from-field="toCancelQuantity" field="createDetailMap.availableToPromiseDiff"/>
+        <set from-field="toCancelQuantity" field="createDetailMap.quantityOnHandDiff"/>
+        <!-- DONENOACCTRANS: deleted -->
+        <!-- <call-service service-name="createInventoryItemDetail" in-map-name="createDetailMap"/> -->
+
+        <!-- reassign inventory reservations  -->
+        <set field="reassignInventoryReservationsCtx.productId" from-field="inventoryItem.productId"/>
+        <set field="reassignInventoryReservationsCtx.facilityId" from-field="inventoryItem.facilityId"/>
+        <call-service service-name="reassignInventoryReservationsWithoutAccTrans" in-map-name="reassignInventoryReservationsCtx"/>
+
+        <!-- reserve the order item -->
+        <entity-one entity-name="ProductStore" value-field="productStore" auto-field-map="false">
+            <field-map field-name="productStoreId" from-field="orderHeader.productStoreId"/>
+        </entity-one>
+        <if-compare value="Y" operator="equals" field="productStore.isImmediatelyFulfilled">
+            <log level="verbose" message="ProductStore with id ${productStore.productStoreId}, is immediatly fulfilled. Not reserving inventory"/>
+            <else>
+                <set field="reserveStoreInventoryMap.productId" from-field="inventoryItem.productId"/>
+                <set field="reserveStoreInventoryMap.orderId" from-field="itemIssuance.orderId"/>
+                <set field="reserveStoreInventoryMap.orderItemSeqId" from-field="itemIssuance.orderItemSeqId"/>
+                <set field="reserveStoreInventoryMap.shipGroupSeqId" from-field="itemIssuance.shipGroupSeqId"/>
+                <set field="reserveStoreInventoryMap.quantity" from-field="toCancelQuantity"/>
+                <set field="reserveStoreInventoryMap.productStoreId" from-field="orderHeader.productStoreId"/>
+                <call-service service-name="reserveStoreInventoryWithoutAccTrans" in-map-name="reserveStoreInventoryMap"/>
+            </else>
+        </if-compare>
+
+        <field-to-result field="toCancelQuantity" result-name="canceledQuantity"/>
+    </simple-method>
+    
+    <simple-method method-name="checkCreateStockRequirementQoh" short-description="Create a Requirement if QOH goes under the minimum stock level">
+        <check-permission permission="ORDERMGR" action="_CREATE">
+            <fail-property resource="OrderErrorUiLabels" property="OrderSecurityErrorToRunCheckCreateStockRequirement"/>
+        </check-permission>
+        <check-errors/>
+
+        <!-- If the service is triggered by the updateItemIssuance service, get the ItemIssuance by the passed itemIssuanceId -->
+        <if-not-empty field="parameters.itemIssuanceId">
+            <entity-one entity-name="ItemIssuance" auto-field-map="true" value-field="itemIssuance"/>
+            <entity-one entity-name="InventoryItem" value-field="inventoryItem">
+                <field-map from-field="itemIssuance.inventoryItemId" field-name="inventoryItemId"/>
+            </entity-one>
+        <else>
+            <entity-one entity-name="InventoryItem" auto-field-map="true" value-field="inventoryItem"/>
+        </else>
+        </if-not-empty>
+
+        <set from-field="inventoryItem.productId" field="parameters.productId"/>
+        <!-- DONENOACCTRANS: copy from "OrderServices.xml"-->
+        <call-simple-method method-name="getProductRequirementMethod" xml-resource="component://order/script/org/ofbiz/order/order/OrderServices.xml"/>
+
+        <if-compare field="requirementMethodId" operator="equals" value="PRODRQM_STOCK">
+            <!-- get QOH, ATP quantities and find ProductFacility which has the minimum stock -->
+            <!-- DONENOACCTRANS: copy from "OrderServices.xml"-->
+        	<call-simple-method method-name="getProductFacilityAndQuantities" xml-resource="component://order/script/org/ofbiz/order/order/OrderServices.xml"/>
+
+            <if-not-empty field="productFacility.minimumStock">
+                <!-- No requirements are created if we are already under stock -->
+                <if-compare-field field="quantityOnHandTotal" to-field="productFacility.minimumStock" operator="greater-equals" type="BigDecimal">
+                    <calculate field="newQuantityOnHand">
+                        <calcop field="quantityOnHandTotal" operator="subtract">
+                            <calcop operator="get" field="parameters.quantity"/>
+                        </calcop>
+                    </calculate>
+                    <!-- If this new issuance will cause the quantityOnHandTotal to go below the minimumStock, create a new requirement -->
+                    <if-compare-field field="newQuantityOnHand" to-field="productFacility.minimumStock" operator="less" type="BigDecimal">
+                        <set from-field="inventoryItem.productId" field="inputMap.productId"/>
+                        <set from-field="productFacility.facilityId" field="inputMap.facilityId"/>
+                        <if-not-empty field="productFacility.reorderQuantity">
+                            <set from-field="productFacility.reorderQuantity" field="inputMap.quantity"/>
+                        <else>
+                            <set from-field="parameters.quantity" field="inputMap.quantity"/>
+                        </else>
+                        </if-not-empty>
+                        <set value="PRODUCT_REQUIREMENT" field="inputMap.requirementTypeId"/>
+                        <!-- DONENOACCTRANS: deleted -->
+                        <!-- <call-service service-name="createRequirement" in-map-name="inputMap">
+                            <result-to-field field="parameters.requirementId" result-name="requirementId"/>
+                        </call-service> -->
+                        <field-to-result field="parameters.requirementId" result-name="requirementId"/>
+                    </if-compare-field>
+                </if-compare-field>
+            </if-not-empty>
+        </if-compare>
+    </simple-method>
+    
+    <simple-method method-name="reassignInventoryReservations" short-description="Balances available-to-promise on inventory items">
+        <entity-condition entity-name="OrderItemShipGrpInvResAndItem" list="relatedRes">
+            <condition-list combine="and">
+                <condition-expr field-name="productId" operator="equals" from-field="parameters.productId"/>
+                <condition-expr field-name="facilityId" operator="equals" from-field="parameters.facilityId"/>
+                <condition-expr field-name="inventoryItemTypeId" operator="equals" value="NON_SERIAL_INV_ITEM"/>
+                <condition-list combine="or">
+                    <condition-expr field-name="currentPromisedDate" operator="greater" from-field="parameters.fromDate" ignore-if-null="true"/>
+                    <condition-list combine="or">
+                        <condition-expr field-name="quantityNotAvailable" operator="greater" value="0"/>
+                        <condition-expr field-name="availableToPromiseTotal" operator="equals" from-field="nullField"/>
+                        <condition-expr field-name="availableToPromiseTotal" operator="equals" value=""/>
+                        <condition-expr field-name="availableToPromiseTotal" operator="less" value="0"/>
+                    </condition-list>
+                </condition-list>
+            </condition-list>
+            <order-by field-name="priority"/>
+            <order-by field-name="currentPromisedDate"/>
+            <order-by field-name="reservedDatetime"/>
+            <order-by field-name="sequenceId"/>
+        </entity-condition>
+
+        <iterate list="relatedRes" entry="oneRelatedRes">
+            <entity-condition entity-name="PicklistAndBinAndItem" list="picklistItemList">
+                <condition-list combine="and">
+                    <condition-expr field-name="orderId" from-field="oneRelatedRes.orderId"/>
+                    <condition-expr field-name="shipGroupSeqId" from-field="oneRelatedRes.shipGroupSeqId"/>
+                    <condition-expr field-name="orderItemSeqId" from-field="oneRelatedRes.orderItemSeqId"/>
+                    <condition-expr field-name="inventoryItemId" from-field="oneRelatedRes.inventoryItemId"/>
+                    <condition-expr field-name="statusId" operator="not-equals" value="PICKLIST_CANCELLED"/>
+                    <condition-expr field-name="statusId" operator="not-equals" value="PICKLIST_PICKED"/>
+                </condition-list>
+            </entity-condition>
+
+            <!-- only cancel/re-reserve when there are no picklists associated; this will prevent
+                     orders appearing on duplicate pick lists -->
+
+            <if-empty field="picklistItemList">
+                <log level="info" message="Order [${oneRelatedRes.orderId}] was not found on any picklist for InventoryItem [${oneRelatedRes.inventoryItemId}]"/>
+                <if>
+                    <condition>
+                        <and>
+                            <if-compare-field field="parameters.priorityOrderId" to-field="oneRelatedRes.orderId" operator="equals"/>
+                            <if-compare-field field="parameters.priorityOrderItemSeqId" to-field="oneRelatedRes.orderItemSeqId" operator="equals"/>
+                        </and>
+                    </condition>
+                    <then>
+                        <field-to-list field="oneRelatedRes" list="privilegedReservations"/>
+                    </then>
+                    <else>
+                        <field-to-list field="oneRelatedRes" list="reservations"/>
+                    </else>
+                </if>
+            </if-empty>
+        </iterate>
+
+        <list-to-list list="privilegedReservations" to-list="allReservations"/>
+        <list-to-list list="reservations" to-list="allReservations"/>
+
+        <!-- FIRST, cancel all the reservations -->
+        <iterate list="allReservations" entry="oisgir">
+            <clear-field field="cancelOisgirMap"/>
+            <set field="cancelOisgirMap.orderId" from-field="oisgir.orderId"/>
+            <set field="cancelOisgirMap.orderItemSeqId" from-field="oisgir.orderItemSeqId"/>
+            <set field="cancelOisgirMap.inventoryItemId" from-field="oisgir.inventoryItemId"/>
+            <set field="cancelOisgirMap.shipGroupSeqId" from-field="oisgir.shipGroupSeqId"/>
+            <call-service service-name="cancelOrderItemShipGrpInvResWithoutAccTrans" in-map-name="cancelOisgirMap"/>
+        </iterate>
+
+        <!-- THEN, re-reserve the cancelled items -->
+        <iterate list="allReservations" entry="oisgir">
+            <!-- maintain a Set (in a Map) of orderIds that we have reallocated for, but only if they had some quantityNotReserved -->
+            <if-not-empty field="oisgir.quantityNotAvailable">
+                <if-compare field="oisgir.quantityNotAvailable" operator="greater" value="0" type="BigDecimal">
+                    <set field="touchedOrderIdMap[oisgir.orderId]" value="Y"/>
+                    <log level="verbose" message="Adding ${oisgir.orderId} to touchedOrderIdMap"/>
+                </if-compare>
+            </if-not-empty>
+            <entity-one entity-name="OrderHeader" value-field="orderHeader">
+                <field-map field-name="orderId" from-field="oisgir.orderId"/>
+            </entity-one>
+
+            <!-- require inventory is N because it had to be N to begin with to have a negative ATP -->
+            <clear-field field="resMap"/>
+            <set field="resMap.productId" from-field="parameters.productId"/>
+            <set field="resMap.orderId" from-field="oisgir.orderId"/>
+            <set field="resMap.orderItemSeqId" from-field="oisgir.orderItemSeqId"/>
+            <set field="resMap.quantity" from-field="oisgir.quantity"/>
+            <set field="resMap.reservedDatetime" from-field="oisgir.reservedDatetime"/>
+            <set field="resMap.reserveOrderEnumId" from-field="oisgir.reserveOrderEnumId"/>
+            <set field="resMap.requireInventory" value="N"/>
+            <set field="resMap.shipGroupSeqId" from-field="oisgir.shipGroupSeqId"/>
+            <set field="resMap.sequenceId" from-field="oisgir.sequenceId"/>
+            <set field="resMap.facilityId" from-field="parameters.facilityId"/>
+            <set field="resMap.priority" from-field="orderHeader.priority"/>
+            <log level="info" message="Re-reserving product [${resMap.productId}] for order item [${resMap.orderId}:${resMap.orderItemSeqId}] quantity [${resMap.quantity}]; facility [${parameters.facilityId}]"/>
+            <call-service service-name="reserveProductInventoryByFacilityWithoutAccTrans" in-map-name="resMap"/>
+        </iterate>
+
+        <!-- now go through touchedOrderIdMap keys and make a Set/Map of orderIds that are no longer on back-order -->
+        <iterate-map key="touchedOrderId" value="throwAwayValue" map="touchedOrderIdMap">
+            <set field="checkOrderIsOnBackOrderMap.orderId" from-field="touchedOrderId"/>
+            <call-service service-name="checkOrderIsOnBackOrder" in-map-name="checkOrderIsOnBackOrderMap">
+                <result-to-field result-name="isBackOrder"/>
+            </call-service>
+
+            <if-compare field="isBackOrder" operator="equals" value="false" type="Boolean">
+                <set field="noLongerOnBackOrderIdMap[touchedOrderId]" value="Y"/>
+            </if-compare>
+        </iterate-map>
+        <if-not-empty field="noLongerOnBackOrderIdMap">
+            <call-object-method obj-field="noLongerOnBackOrderIdMap" method-name="keySet" ret-field="noLongerOnBackOrderIdSet"/>
+            <field-to-result field="noLongerOnBackOrderIdSet"/>
+        </if-not-empty>
+    </simple-method>
+    <simple-method method-name="cancelOrderItemShipGrpInvRes" short-description="Cancel An Inventory Reservation">
+        <entity-one entity-name="OrderItemShipGrpInvRes" value-field="orderItemShipGrpInvRes"/>
+        <get-related-one relation-name="InventoryItem" value-field="orderItemShipGrpInvRes" to-value-field="inventoryItem"/>
+        <if-compare value="SERIALIZED_INV_ITEM" operator="equals" field="inventoryItem.inventoryItemTypeId">
+            <log level="verbose" message="Serialized inventory re-enabled."/>
+            <set value="INV_AVAILABLE" field="inventoryItem.statusId"/>
+            <remove-value value-field="orderItemShipGrpInvRes"/>
+            <store-value value-field="inventoryItem"/>
+        </if-compare>
+        <if-compare value="NON_SERIAL_INV_ITEM" operator="equals" field="inventoryItem.inventoryItemTypeId">
+            <log level="verbose" message="Non-Serialized inventory item incrementing availableToPromise."/>
+            <set from-field="parameters.cancelQuantity" field="cancelQuantity"/>
+            <if-empty field="cancelQuantity">
+                <set from-field="orderItemShipGrpInvRes.quantity" field="cancelQuantity"/>
+            </if-empty>
+
+            <!-- instead of updating InventoryItem, add an InventoryItemDetail -->
+            <set from-field="inventoryItem.inventoryItemId" field="createDetailMap.inventoryItemId"/>
+            <set from-field="parameters.orderId" field="createDetailMap.orderId"/>
+            <set from-field="parameters.orderItemSeqId" field="createDetailMap.orderItemSeqId"/>
+            <set from-field="parameters.shipGroupSeqId" field="createDetailMap.shipGroupSeqId"/>
+            <set from-field="cancelQuantity" field="createDetailMap.availableToPromiseDiff"/>
+            <call-service service-name="createInventoryItemDetailWithoutAccTrans" in-map-name="createDetailMap"/>
+            <clear-field field="createDetailMap"/>
+
+            <if-compare-field field="cancelQuantity" to-field="orderItemShipGrpInvRes.quantity" operator="less" type="BigDecimal">
+                <calculate field="orderItemShipGrpInvRes.quantity">
+                    <calcop operator="subtract" field="orderItemShipGrpInvRes.quantity">
+                        <calcop operator="get" field="cancelQuantity"/>
+                    </calcop>
+                </calculate>
+                <store-value value-field="orderItemShipGrpInvRes"/>
+            <else>
+                <remove-value value-field="orderItemShipGrpInvRes"/>
+            </else>
+            </if-compare-field>
+        </if-compare>
+    </simple-method>
+    
+    <simple-method method-name="reserveProductInventory" short-description="Reserve Inventory for a Product">
+        <!--
+            this method can be called with some optional parameters:
+                -facilityId
+                -containerId
+            If the service definitions are used then only one of these two will ever be specified, or neither of them.
+
+            Whatever it is called with, it will basically get a list of InventoryItems and reserve the first available inventory.
+
+            If requireInventory is Y the quantity not reserved is returned, if N then a negative
+            availableToPromise will be used to track quantity ordered beyond what is in stock.
+        -->
+
+        <log level="verbose" message="Parameters : ${parameters}"/>
+        <now-timestamp field="nowTimestamp"/>
+
+        <!-- check the product; make sure its a physical item -->
+        <entity-one entity-name="Product" value-field="product"/>
+        <entity-one entity-name="Facility" value-field="facility" use-cache="true"/>
+        <get-related-one value-field="product" relation-name="ProductType" to-value-field="productType"/>
+        <if-compare field="productType.isPhysical" operator="equals" value="N">
+            <set field="parameters.quantityNotReserved" value="0" type="BigDecimal"/>
+            <else>
+                <entity-one entity-name="OrderHeader" value-field="orderHeader"/>
+
+                <!-- before we do the find, put together the orderBy list based on which reserveOrderEnumId is specified -->
+                <!-- FIFO=first in first out, so it should be order by ASCending receive or expire date
+                     LIFO=last in first out, so it means order by DESCending receive or expire date
+                     -->
+                <if-compare value="INVRO_GUNIT_COST" operator="equals" field="parameters.reserveOrderEnumId">
+                    <set value="-unitCost" field="orderByString"/>
+                <else>
+                    <if-compare value="INVRO_LUNIT_COST" operator="equals" field="parameters.reserveOrderEnumId">
+                        <set value="+unitCost" field="orderByString"/>
+                    <else>
+                        <if-compare value="INVRO_FIFO_EXP" operator="equals" field="parameters.reserveOrderEnumId">
+                            <set value="+expireDate" field="orderByString"/>
+                        <else>
+                            <if-compare value="INVRO_LIFO_EXP" operator="equals" field="parameters.reserveOrderEnumId">
+                                <set value="-expireDate" field="orderByString"/>
+                            <else>
+                                <if-compare value="INVRO_LIFO_REC" operator="equals" field="parameters.reserveOrderEnumId">
+                                    <set value="-datetimeReceived" field="orderByString"/>
+                                <else>
+                                    <!-- the default reserveOrderEnumId is INVRO_FIFO_REC, ie FIFO based on date received -->
+                                    <set value="+datetimeReceived" field="orderByString"/>
+                                    <set value="INVRO_FIFO_REC" field="parameters.reserveOrderEnumId"/>
+                                </else>
+                                </if-compare>
+                            </else>
+                            </if-compare>
+                        </else>
+                        </if-compare>
+                    </else>
+                    </if-compare>
+                </else>
+                </if-compare>
+
+                <set from-field="parameters.quantity" field="parameters.quantityNotReserved"/>
+
+                <!-- first reserve against InventoryItems in FLT_PICKLOC type locations, then FLT_BULK locations, then InventoryItems with no locations -->
+                <entity-one value-field="orderItemTemp" entity-name="OrderItem">
+                	<field-map field-name="orderId" from-field="parameters.orderId"/>
+                	<field-map field-name="orderItemSeqId" from-field="parameters.orderItemSeqId"/>
+                </entity-one>
+                <if-empty field="orderItemTemp">
+                	<entity-condition entity-name="InventoryItemAndLocation" list="inventoryItemAndLocations">
+	                    <condition-list combine="and">
+	                        <condition-expr field-name="productId" from-field="parameters.productId"/>
+	                        <condition-expr field-name="facilityId" from-field="parameters.facilityId" ignore-if-empty="true" ignore-if-null="true"/>
+	                        <condition-expr field-name="containerId" from-field="parameters.containerId" ignore-if-empty="true" ignore-if-null="true"/>
+	                        <condition-expr field-name="lotId" from-field="parameters.lotId" ignore-if-empty="true" ignore-if-null="true"/>
+	                        <condition-expr field-name="quantityOnHandTotal" operator="greater" value="0.0"/>
+	                        <condition-expr field-name="locationTypeEnumId" operator="equals" value="FLT_PICKLOC"/>
+	                        <condition-expr field-name="statusId" operator="not-equals" value="INV_NS_DEFECTIVE"/>
+	                        <condition-expr field-name="statusId" operator="not-equals" value="INV_DEFECTIVE"/>
+	                    </condition-list>
+	                    <order-by field-name="${orderByString}"/>
+	                </entity-condition>
+	            <else>
+	            	<entity-condition entity-name="InventoryItemAndLocation" list="inventoryItemAndLocations">
+	                    <condition-list combine="and">
+	                    	<condition-expr field-name="inventoryItemId" from-field="orderItemTemp.fromInventoryItemId"/>
+	                    	<condition-expr field-name="quantityOnHandTotal" operator="greater" value="0.0"/>
+	                        <condition-expr field-name="locationTypeEnumId" operator="equals" value="FLT_PICKLOC"/>
+	                        <condition-expr field-name="statusId" operator="not-equals" value="INV_NS_DEFECTIVE"/>
+	                        <condition-expr field-name="statusId" operator="not-equals" value="INV_DEFECTIVE"/>
+	                    </condition-list>
+	                    <order-by field-name="${orderByString}"/>
+	            	</entity-condition>
+	            </else>
+                </if-empty>
+                <iterate entry="inventoryItemAndLocation" list="inventoryItemAndLocations">
+                    <if-compare field="parameters.quantityNotReserved" operator="greater" value="0" type="Double">
+                        <!-- this is a little trick to get the InventoryItem value object without doing a query, possible since all fields on InventoryItem are also on InventoryItemAndLocation with the same names -->
+                        <make-value entity-name="InventoryItem" map="inventoryItemAndLocation" value-field="inventoryItem"/>
+                        <call-simple-method method-name="reserveForInventoryItemInline"/>
+                    </if-compare>
+                </iterate>
+
+                <!-- still some left? try the FLT_BULK locations -->
+                <if-compare field="parameters.quantityNotReserved" operator="greater" value="0" type="BigDecimal">
+	                <if-empty field="orderItemTemp">
+	                    <entity-condition entity-name="InventoryItemAndLocation" list="inventoryItemAndLocations">
+	                        <condition-list combine="and">
+	                            <condition-expr field-name="productId" from-field="parameters.productId"/>
+	                            <condition-expr field-name="facilityId" from-field="parameters.facilityId" ignore-if-empty="true" ignore-if-null="true"/>
+	                            <condition-expr field-name="containerId" from-field="parameters.containerId" ignore-if-empty="true" ignore-if-null="true"/>
+	                            <condition-expr field-name="lotId" from-field="parameters.lotId" ignore-if-empty="true" ignore-if-null="true"/>
+	                            <condition-expr field-name="quantityOnHandTotal" operator="greater" value="0.0"/>
+	                            <condition-expr field-name="locationTypeEnumId" operator="equals" value="FLT_BULK"/>
+	                            <condition-expr field-name="statusId" operator="not-equals" value="INV_NS_DEFECTIVE"/>
+	                            <condition-expr field-name="statusId" operator="not-equals" value="INV_DEFECTIVE"/>
+	                        </condition-list>
+	                        <order-by field-name="${orderByString}"/>
+	                    </entity-condition>
+	                <else>
+		            	<entity-condition entity-name="InventoryItemAndLocation" list="inventoryItemAndLocations">
+		                    <condition-list combine="and">
+		                    	<condition-expr field-name="inventoryItemId" from-field="orderItemTemp.fromInventoryItemId"/>
+		                    	<condition-expr field-name="quantityOnHandTotal" operator="greater" value="0.0"/>
+		                        <condition-expr field-name="locationTypeEnumId" operator="equals" value="FLT_BULK"/>
+		                        <condition-expr field-name="statusId" operator="not-equals" value="INV_NS_DEFECTIVE"/>
+		                        <condition-expr field-name="statusId" operator="not-equals" value="INV_DEFECTIVE"/>
+		                    </condition-list>
+		                    <order-by field-name="${orderByString}"/>
+		            	</entity-condition>
+		            </else>
+	                </if-empty>
+                    <iterate entry="inventoryItemAndLocation" list="inventoryItemAndLocations">
+                        <if-compare field="parameters.quantityNotReserved" operator="greater" value="0" type="Double">
+                            <!-- this is a little trick to get the InventoryItem value object without doing a query, possible since all fields on InventoryItem are also on InventoryItemAndLocation with the same names -->
+                            <make-value entity-name="InventoryItem" map="inventoryItemAndLocation" value-field="inventoryItem"/>
+                            <call-simple-method method-name="reserveForInventoryItemInline"/>
+                        </if-compare>
+                    </iterate>
+                </if-compare>
+
+                <!-- last of all try reserving in InventoryItems that have no locationSeqId, ie are not in any particular location -->
+                <if-compare field="parameters.quantityNotReserved" operator="greater" value="0" type="BigDecimal">
+	                <if-empty field="orderItemTemp">
+	                    <entity-condition entity-name="InventoryItem" list="inventoryItems">
+	                        <condition-list combine="and">
+	                            <condition-expr field-name="productId" from-field="parameters.productId"/>
+	                            <condition-expr field-name="facilityId" from-field="parameters.facilityId" ignore-if-empty="true" ignore-if-null="true"/>
+	                            <condition-expr field-name="containerId" from-field="parameters.containerId" ignore-if-empty="true" ignore-if-null="true"/>
+	                            <condition-expr field-name="lotId" from-field="parameters.lotId" ignore-if-empty="true" ignore-if-null="true"/>
+	                            <condition-expr field-name="quantityOnHandTotal" operator="greater" value="0.0"/>
+	                            <condition-expr field-name="locationSeqId" operator="equals" from-field="nullField"/>
+	                            <condition-expr field-name="statusId" operator="not-equals" value="INV_NS_DEFECTIVE"/>
+	                            <condition-expr field-name="statusId" operator="not-equals" value="INV_DEFECTIVE"/>
+	                        </condition-list>
+	                        <order-by field-name="${orderByString}"/>
+	                    </entity-condition>
+                   	<else>
+		            	<entity-condition entity-name="InventoryItem" list="inventoryItems">
+		                    <condition-list combine="and">
+		                    	<condition-expr field-name="inventoryItemId" from-field="orderItemTemp.fromInventoryItemId"/>
+		                    	<condition-expr field-name="quantityOnHandTotal" operator="greater" value="0.0"/>
+		                        <condition-expr field-name="locationSeqId" operator="equals" from-field="nullField"/>
+		                        <condition-expr field-name="statusId" operator="not-equals" value="INV_NS_DEFECTIVE"/>
+		                        <condition-expr field-name="statusId" operator="not-equals" value="INV_DEFECTIVE"/>
+		                    </condition-list>
+		                    <order-by field-name="${orderByString}"/>
+		            	</entity-condition>
+		            </else>
+	                </if-empty>
+                    <iterate entry="inventoryItem" list="inventoryItems">
+                        <if>
+                            <condition>
+                                <and>
+                                    <if-compare field="parameters.quantityNotReserved" operator="greater" value="0" type="Double"/>
+                                    <if-empty field="inventoryItem.locationSeqId"/>
+                                </and>
+                            </condition>
+                            <then>
+                                <call-simple-method method-name="reserveForInventoryItemInline"/>
+                            </then>
+                        </if>
+                    </iterate>
+                </if-compare>
+
+                <!--
+                    if inventory is not required for purchase and quantityNotReserved != 0:
+                        - subtract the remaining quantityNotReserved from the availableToPromise of the last non-serialized inventory item
+                        - or if none was found create a non-ser InventoryItem with availableToPromise = -quantityNotReserved
+                -->
+                <if-compare field="parameters.quantityNotReserved" operator="not-equals" value="0" type="BigDecimal">
+                    <if-compare field="parameters.requireInventory" operator="equals" value="Y">
+                        <!-- use this else pattern to accomplish the anything but Y logic, ie if not specified default to inventory NOT required -->
+                    <else>
+                        <if-not-empty field="lastNonSerInventoryItem">
+                            <!-- subtract from quantityNotReserved from the availableToPromise of existing inventory item -->
+                            <!-- instead of updating InventoryItem, add an InventoryItemDetail -->
+                            <set from-field="lastNonSerInventoryItem.inventoryItemId" field="createDetailMap.inventoryItemId"/>
+                            <set from-field="parameters.orderId" field="createDetailMap.orderId"/>
+                            <set from-field="parameters.orderItemSeqId" field="createDetailMap.orderItemSeqId"/>
+                            <set from-field="parameters.shipGroupSeqId" field="createDetailMap.shipGroupSeqId"/>
+                            <calculate field="createDetailMap.availableToPromiseDiff">
+                                <calcop field="parameters.quantityNotReserved" operator="negative"/>
+                            </calculate>
+                            
+                            <if-not-empty field="parameters.reserveReasonEnumId"><set from-field="parameters.reserveReasonEnumId" field="createDetailMap.reasonEnumId"/></if-not-empty>
+                            <call-service service-name="createInventoryItemDetail" in-map-name="createDetailMap"/>
+                            <clear-field field="createDetailMap"/>
+
+                            <!-- get the promiseDatetime -->
+                            <get-related-one value-field="lastNonSerInventoryItem" relation-name="ProductFacility" to-value-field="productFacility"/>
+                            <clear-field field="daysToShip"/>
+                            <set field="daysToShip" from-field="productFacility.daysToShip"/>
+                            <if-empty field="daysToShip">
+                                <!-- if the product does not have its own days to ship, use Facility.defaultDaysToShip, if not then use 30 days as a USA industry default -->
+                                <if-not-empty field="facility.defaultDaysToShip">
+                                        <set field="daysToShip" from-field="facility.defaultDaysToShip" type="Long"/>
+                                    <else>
+                                        <set field="daysToShip" value="30" type="Long"/>
+                                    </else>
+                                </if-not-empty>
+                            </if-empty>
+                            <!-- TODO: Convert this to a <set-calendar> operation -->
+                            <call-bsh><![CDATA[
+                            java.sql.Timestamp orderDate = orderHeader.getTimestamp("orderDate");
+                            com.ibm.icu.util.Calendar cal = com.ibm.icu.util.Calendar.getInstance();
+                            cal.setTimeInMillis(orderDate.getTime());
+                            cal.add(com.ibm.icu.util.Calendar.DAY_OF_YEAR, daysToShip.intValue());
+                            return org.ofbiz.base.util.UtilMisc.toMap("promisedDatetime", new java.sql.Timestamp(cal.getTimeInMillis()));
+                            ]]></call-bsh>
+
+                            <!-- create or update OrderItemShipGrpInvRes record -->
+                            <set from-field="parameters.orderId" field="reserveOisgirMap.orderId"/>
+                            <set from-field="parameters.orderItemSeqId" field="reserveOisgirMap.orderItemSeqId"/>
+                            <set from-field="parameters.shipGroupSeqId" field="reserveOisgirMap.shipGroupSeqId"/>
+                            <set from-field="lastNonSerInventoryItem.inventoryItemId" field="reserveOisgirMap.inventoryItemId"/>
+                            <set from-field="parameters.reserveOrderEnumId" field="reserveOisgirMap.reserveOrderEnumId"/>
+                            <set from-field="parameters.quantityNotReserved" field="reserveOisgirMap.quantity" type="BigDecimal"/>
+                            <set from-field="parameters.quantityNotReserved" field="reserveOisgirMap.quantityNotAvailable" type="BigDecimal"/>
+                            <set from-field="parameters.reservedDatetime" field="reserveOisgirMap.reservedDatetime"/>
+                            <set from-field="promisedDatetime" field="reserveOisgirMap.promisedDatetime"/>
+                            <set from-field="parameters.sequenceId" field="reserveOisgirMap.sequenceId"/>
+                            <set from-field="parameters.priority" field="reserveOisgirMap.priority"/>
+                            <call-service service-name="reserveOrderItemInventoryWithoutAccTrans" in-map-name="reserveOisgirMap"/>
+                            <clear-field field="reserveOisgirMap"/>
+                        <else>
+                            <!-- no non-ser inv item, create a non-ser InventoryItem with availableToPromise = -quantityNotReserved -->
+                            <clear-field field="createInventoryItemInMap"/>
+                            <clear-field field="createInventoryItemOutMap"/>
+                            <!-- the createInventoryItem service is run by the the system user here -->
+                            <entity-one entity-name="UserLogin" value-field="permUserLogin">
+                                <field-map field-name="userLoginId" value="system"/>
+                            </entity-one>
+                            <set from-field="parameters.productId" field="createInventoryItemInMap.productId"/>
+                            <set from-field="parameters.facilityId" field="createInventoryItemInMap.facilityId"/>
+                            <set from-field="parameters.containerId" field="createInventoryItemInMap.containerId"/>
+                            <set value="NON_SERIAL_INV_ITEM" field="createInventoryItemInMap.inventoryItemTypeId"/>
+                            <set from-field="permUserLogin" field="createInventoryItemInMap.userLogin"/>
+                            <call-service service-name="createInventoryItem" in-map-name="createInventoryItemInMap" include-user-login="false">
+                                <result-to-field result-name="inventoryItemId" field="createInventoryItemOutMap.inventoryItemId"/>
+                            </call-service>
+                            <entity-one entity-name="InventoryItem" value-field="newNonSerInventoryItem">
+                                <field-map field-name="inventoryItemId" from-field="createInventoryItemOutMap.inventoryItemId"/>
+                            </entity-one>
+
+                            <!-- also create a detail record with the quantities -->
+                            <set from-field="newNonSerInventoryItem.inventoryItemId" field="createDetailMap.inventoryItemId"/>
+                            <set from-field="parameters.orderId" field="createDetailMap.orderId"/>
+                            <set from-field="parameters.orderItemSeqId" field="createDetailMap.orderItemSeqId"/>
+                            <set from-field="parameters.shipGroupSeqId" field="createDetailMap.shipGroupSeqId"/>
+                            <calculate field="createDetailMap.availableToPromiseDiff">
+                                <calcop field="parameters.quantityNotReserved" operator="negative"/>
+                            </calculate>
+                            <if-not-empty field="parameters.reserveReasonEnumId"><set from-field="parameters.reserveReasonEnumId" field="createDetailMap.reasonEnumId"/></if-not-empty>
+                            <call-service service-name="createInventoryItemDetail" in-map-name="createDetailMap"/>
+                            <clear-field field="createDetailMap"/>
+
+                            <!-- get the promiseDatetime -->
+                            <get-related-one value-field="newNonSerInventoryItem" relation-name="ProductFacility" to-value-field="productFacility"/>
+                            <clear-field field="daysToShip"/>
+                            <set field="daysToShip" from-field="productFacility.daysToShip"/>
+                            <if-empty field="daysToShip">
+                                <!-- if the product does not have its own days to ship, use Facility.defaultDaysToShip, if not then use 30 days as a USA industry default -->
+                                <if-not-empty field="facility.defaultDaysToShip">
+                                    <set field="daysToShip" from-field="facility.defaultDaysToShip" type="Long"/>
+                                    <else>
+                                        <set field="daysToShip" value="30" type="Long"/>
+                                    </else>
+                                </if-not-empty>
+                            </if-empty>
+                            <!-- TODO: Convert this to a <set-calendar> operation -->
+                            <call-bsh><![CDATA[
+                            java.sql.Timestamp orderDate = orderHeader.getTimestamp("orderDate");
+                            com.ibm.icu.util.Calendar cal = com.ibm.icu.util.Calendar.getInstance();
+                            cal.setTimeInMillis(orderDate.getTime());
+                            cal.add(com.ibm.icu.util.Calendar.DAY_OF_YEAR, daysToShip.intValue());
+                            return org.ofbiz.base.util.UtilMisc.toMap("promisedDatetime", new java.sql.Timestamp(cal.getTimeInMillis()));
+                            ]]></call-bsh>
+
+                            <!-- create OrderItemShipGrpInvRes record -->
+                            <set from-field="parameters.orderId" field="reserveOisgirMap.orderId"/>
+                            <set from-field="parameters.orderItemSeqId" field="reserveOisgirMap.orderItemSeqId"/>
+                            <set from-field="parameters.shipGroupSeqId" field="reserveOisgirMap.shipGroupSeqId"/>
+                            <set from-field="newNonSerInventoryItem.inventoryItemId" field="reserveOisgirMap.inventoryItemId"/>
+                            <set from-field="parameters.reserveOrderEnumId" field="reserveOisgirMap.reserveOrderEnumId"/>
+                            <set from-field="parameters.quantityNotReserved" field="reserveOisgirMap.quantity" type="BigDecimal"/>
+                            <set from-field="parameters.quantityNotReserved" field="reserveOisgirMap.quantityNotAvailable" type="BigDecimal"/>
+                            <set from-field="parameters.reservedDatetime" field="reserveOisgirMap.reservedDatetime"/>
+                            <set from-field="promisedDatetime" field="reserveOisgirMap.promisedDatetime"/>
+                            <set from-field="parameters.sequenceId" field="reserveOisgirMap.sequenceId"/>
+                            <call-service service-name="reserveOrderItemInventory" in-map-name="reserveOisgirMap"/>
+                            <clear-field field="reserveOisgirMap"/>
+                        </else>
+                        </if-not-empty>
+
+                        <set field="parameters.quantityNotReserved" value="0" type="BigDecimal"/>
+                    </else>
+                    </if-compare>
+                </if-compare>
+            </else>
+        </if-compare>
+
+        <field-to-result field="parameters.quantityNotReserved" result-name="quantityNotReserved"/>
+    </simple-method>
+    <simple-method method-name="reserveForInventoryItemInline" short-description="Does a reservation for one InventoryItem, meant to be called in-line">
+        <!-- only do something with this inventoryItem if there is more inventory to reserve -->
+        <if-compare field="parameters.quantityNotReserved" operator="greater" value="0" type="BigDecimal">
+
+            <if-compare value="SERIALIZED_INV_ITEM" operator="equals" field="inventoryItem.inventoryItemTypeId">
+                <if-compare value="INV_AVAILABLE" operator="equals" field="inventoryItem.statusId">
+                    <!-- change status on inventoryItem -->
+                    <set value="INV_PROMISED" field="inventoryItem.statusId"/>
+                    <store-value value-field="inventoryItem"/>
+
+                    <!-- store OrderItemShipGrpInvRes record -->
+                    <!-- DONENOACCTRANS: copy from "InventoryReserveServices.xml"-->
+                    <call-simple-method method-name="getPromisedDateTime" xml-resource="component://product/script/org/ofbiz/product/inventory/InventoryReserveServices.xml"/>
+                    <set from-field="parameters.orderId" field="reserveOisgirMap.orderId"/>
+                    <set from-field="parameters.orderItemSeqId" field="reserveOisgirMap.orderItemSeqId"/>
+                    <set from-field="parameters.shipGroupSeqId" field="reserveOisgirMap.shipGroupSeqId"/>
+                    <set from-field="inventoryItem.inventoryItemId" field="reserveOisgirMap.inventoryItemId"/>
+                    <set from-field="parameters.reserveOrderEnumId" field="reserveOisgirMap.reserveOrderEnumId"/>
+                    <set from-field="parameters.reservedDatetime" field="reserveOisgirMap.reservedDatetime"/>
+                    <set from-field="promisedDatetime" field="reserveOisgirMap.promisedDatetime"/>
+                    <set field="reserveOisgirMap.quantity" value="1" type="BigDecimal"/>
+                    <if-not-empty field="parameters.sequenceId">
+                        <set field="reserveOisgirMap.sequenceId" from-field="parameters.sequenceId"/>
+                    </if-not-empty>
+                    <call-service service-name="reserveOrderItemInventory" in-map-name="reserveOisgirMap"/>
+                    <clear-field field="reserveOisgirMap"/>
+
+                    <calculate field="parameters.quantityNotReserved">
+                        <calcop field="parameters.quantityNotReserved" operator="subtract"><number value="1.0"/></calcop>
+                    </calculate>
+                </if-compare>
+            </if-compare>
+            <if-compare field="inventoryItem.inventoryItemTypeId" operator="equals" value="NON_SERIAL_INV_ITEM">
+                <!-- check reasonenumId reserve for ebay inventory  -->
+                <if-not-empty field="parameters.reserveReasonEnumId">
+                    <if-compare field="parameters.reserveReasonEnumId" value="EBAY_INV_RES" operator="equals">
+                        <set field="ebayReserveReasonEnumId" from-field="parameters.reserveReasonEnumId"/>
+                    </if-compare>
+                </if-not-empty>
+                <!-- reduce atp on inventoryItem if availableToPromise greater than 0, if not the code at the end of this method will handle it -->
+                <if>
+                    <condition>
+                        <and>
+                            <if-compare field="inventoryItem.statusId" operator="not-equals" value="INV_NS_ON_HOLD"/>
+                            <if-compare field="inventoryItem.statusId" operator="not-equals" value="INV_NS_DEFECTIVE"/>
+                            <not><if-empty field="inventoryItem.availableToPromiseTotal"/></not>
+                            <if-compare field="inventoryItem.availableToPromiseTotal" operator="greater" value="0" type="BigDecimal"/>
+                        </and>
+                    </condition>
+                    <then>
+                        <if-compare-field field="parameters.quantityNotReserved" to-field="inventoryItem.availableToPromiseTotal" operator="greater" type="BigDecimal">
+                            <set from-field="inventoryItem.availableToPromiseTotal" field="parameters.deductAmount"/>
+                        <else>
+                            <set from-field="parameters.quantityNotReserved" field="parameters.deductAmount"/>
+                        </else>
+                        </if-compare-field>
+
+                        <!-- instead of updating InventoryItem, add an InventoryItemDetail -->
+                        <set from-field="inventoryItem.inventoryItemId" field="createDetailMap.inventoryItemId"/>
+                        <set from-field="parameters.orderId" field="createDetailMap.orderId"/>
+                        <set from-field="parameters.orderItemSeqId" field="createDetailMap.orderItemSeqId"/>
+                        <calculate field="createDetailMap.availableToPromiseDiff">
+                            <calcop field="parameters.deductAmount" operator="negative"/>
+                        </calculate>
+                        <if-not-empty field="ebayReserveReasonEnumId"><set from-field="parameters.reserveReasonEnumId" field="createDetailMap.reasonEnumId"/></if-not-empty>
+                        <call-service service-name="createInventoryItemDetail" in-map-name="createDetailMap"/>
+                        <clear-field field="createDetailMap"/>
+
+                        <!-- create OrderItemShipGrpInvRes record  and check for reserved from ebay don't need shipgroup-->
+                        <if-empty field="ebayReserveReasonEnumId">
+                            <!-- DONENOACCTRANS: copy from "InventoryReserveServices.xml"-->
+                    		<call-simple-method method-name="getPromisedDateTime" xml-resource="component://product/script/org/ofbiz/product/inventory/InventoryReserveServices.xml"/>
+                            <set from-field="parameters.orderId" field="reserveOisgirMap.orderId"/>
+                            <set from-field="parameters.orderItemSeqId" field="reserveOisgirMap.orderItemSeqId"/>
+                            <set from-field="parameters.shipGroupSeqId" field="reserveOisgirMap.shipGroupSeqId"/>
+                            <set from-field="inventoryItem.inventoryItemId" field="reserveOisgirMap.inventoryItemId"/>
+                            <set from-field="parameters.reserveOrderEnumId" field="reserveOisgirMap.reserveOrderEnumId"/>
+                            <set from-field="parameters.reservedDatetime" field="reserveOisgirMap.reservedDatetime"/>
+                            <set from-field="parameters.deductAmount" field="reserveOisgirMap.quantity" type="BigDecimal"/>
+                            <set from-field="promisedDatetime" field="reserveOisgirMap.promisedDatetime"/>
+                            <set from-field="parameters.priority" field="reserveOisgirMap.priority"/>
+                            <if-not-empty field="parameters.sequenceId">
+                                <set field="reserveOisgirMap.sequenceId" from-field="parameters.sequenceId"/>
+                            </if-not-empty>
+                            <call-service service-name="reserveOrderItemInventoryWithoutAccTrans" in-map-name="reserveOisgirMap"/>
+                            <clear-field field="reserveOisgirMap"/>
+                        </if-empty>
+                        <calculate field="parameters.quantityNotReserved">
+                            <calcop operator="subtract" field="parameters.quantityNotReserved">
+                                <calcop operator="get" field="parameters.deductAmount"/>
+                            </calcop>
+                        </calculate>
+                    </then>
+                </if>
+                <!-- keep track of the last non-serialized inventory item for use if inventory is not required for purchase -->
+                <!-- use env variable named lastNonSerInventoryItem -->
+                <set from-field="inventoryItem" field="lastNonSerInventoryItem"/>
+            </if-compare>
+        </if-compare>
+    </simple-method>
+    <simple-method method-name="reserveOrderItemInventory" short-description="Reserve Order Item Inventory">
+        <entity-one entity-name="OrderItemShipGrpInvRes" value-field="checkOisgirEntity"/>
+
+        <entity-one entity-name="OrderItem" value-field="orderItem"/>
+        <set field="parameters.promisedDatetime" from-field="orderItem.shipBeforeDate"/>
+        <set field="parameters.currentPromisedDate" from-field="orderItem.shipBeforeDate"/>
+
+        <if-empty field="checkOisgirEntity">
+            <!-- create OrderItemShipGrpInvRes record -->
+            <make-value entity-name="OrderItemShipGrpInvRes" value-field="newOisgirEntity"/>
+            <set-pk-fields map="parameters" value-field="newOisgirEntity"/>
+            <set-nonpk-fields map="parameters" value-field="newOisgirEntity"/>
+            <now-timestamp field="nowTimestamp"/>
+            <set from-field="nowTimestamp" field="newOisgirEntity.createdDatetime"/>
+            <set from-field="parameters.priority" field="newOisgirEntity.priority"/>
+            <if-empty field="newOisgirEntity.reservedDatetime">
+                <set from-field="nowTimestamp" field="newOisgirEntity.reservedDatetime"/>
+            </if-empty>
+            <create-value value-field="newOisgirEntity"/>
+        <else>
+            <calculate field="checkOisgirEntity.quantity">
+                <calcop operator="add" field="checkOisgirEntity.quantity"/>
+                <calcop operator="add" field="parameters.quantity"/>
+            </calculate>
+            <calculate field="checkOisgirEntity.quantityNotAvailable">
+                <calcop operator="add" field="checkOisgirEntity.quantityNotAvailable"/>
+                <calcop operator="add" field="parameters.quantityNotAvailable"/>
+            </calculate>
+            <store-value value-field="checkOisgirEntity"/>
+        </else>
+        </if-empty>
+    </simple-method>
+    <simple-method method-name="checkCreateStockRequirementAtp" short-description="Create a Requirement if ATP goes under the minimum stock level">
+        <check-permission permission="ORDERMGR" action="_CREATE">
+            <fail-property resource="OrderErrorUiLabels" property="OrderSecurityErrorToRunCheckCreateStockRequirement"/>
+        </check-permission>
+        <check-errors/>
+
+        <!-- assumes that inventoryItemId is one of the parameters and get the inventory item of the reservation -->
+        <entity-one entity-name="InventoryItem" value-field="inventoryItem" auto-field-map="true"/>
+
+        <!-- find the requirement method for this product -->
+        <set from-field="inventoryItem.productId" field="parameters.productId"/>
+        <!-- DONENOACCTRANS: copy from "OrderServices.xml"-->
+        <call-simple-method method-name="getProductRequirementMethod" xml-resource="component://order/script/org/ofbiz/order/order/OrderServices.xml"/>
+
+        <if-compare field="requirementMethodId" operator="equals" value="PRODRQM_STOCK_ATP">
+            <!-- get QOH, ATP quantities and find ProductFacility which has the minimum stock -->
+            <!-- DONENOACCTRANS: copy from "OrderServices.xml"-->
+            <call-simple-method method-name="getProductFacilityAndQuantities" xml-resource="component://order/script/org/ofbiz/order/order/OrderServices.xml"/>
+
+            <if-not-empty field="productFacility.minimumStock">
+                <!-- No requirements are created if we are not under stock -->
+                <!-- this service is supposed to be called after inventory is reserved, so inventory should have been updated already -->
+                <if-compare-field field="availableToPromiseTotal" to-field="productFacility.minimumStock" operator="less" type="BigDecimal">
+                    <calculate field="oldAvailableToPromise">
+                        <calcop field="availableToPromiseTotal" operator="add">
+                            <calcop operator="get" field="parameters.quantity"/>
+                        </calcop>
+                    </calculate>
+                    <!-- If before this reservation the availableToPromiseTotal was over minimumStock, create a new requirement -->
+                    <if-compare-field field="oldAvailableToPromise" to-field="productFacility.minimumStock" operator="greater-equals" type="BigDecimal">
+                        <set from-field="inventoryItem.productId" field="inputMap.productId"/>
+                        <set from-field="productFacility.facilityId" field="inputMap.facilityId"/>
+                        <if-not-empty field="productFacility.reorderQuantity">
+                            <set from-field="productFacility.reorderQuantity" field="inputMap.quantity"/>
+                        <else>
+                            <set from-field="parameters.quantity" field="inputMap.quantity"/>
+                        </else>
+                        </if-not-empty>
+                        <set value="PRODUCT_REQUIREMENT" field="inputMap.requirementTypeId"/>
+                        <!-- DONENOACCTRANS: deleted -->
+                        <!-- <call-service service-name="createRequirement" in-map-name="inputMap">
+                            <result-to-field field="parameters.requirementId" result-name="requirementId"/>
+                        </call-service> -->
+                        <field-to-result field="parameters.requirementId" result-name="requirementId"/>
+                    </if-compare-field>
+                </if-compare-field>
+            </if-not-empty>
+        </if-compare>
+    </simple-method>
+    <!-- Store Inventory Services -->
+    <simple-method method-name="reserveStoreInventory" short-description="Reserve Store Inventory">
+        <entity-one entity-name="Product" value-field="product" use-cache="true"/>
+        <entity-one entity-name="ProductStore" value-field="productStore" use-cache="true"/>
+        <entity-one entity-name="OrderHeader" value-field="orderHeader" use-cache="true"/>
+        <set field="parameters.priority" from-field="orderHeader.priority"/>
+        <if-empty field="productStore">
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="ProductProductStoreNotFound"/>
+            </add-error>
+            <check-errors/>
+        </if-empty>
+
+        <!-- if prodCatalog is set to not reserve inventory, break here -->
+        <if-compare value="N" operator="equals" field="productStore.reserveInventory">
+            <!-- note: if not set, defaults to yes, reserve inventory -->
+            <log level="verbose" message="ProductStore with id ${productStore.productStoreId}, is set to NOT reserve inventory, not reserving inventory"/>
+            <field-to-result field="parameters.quantity" result-name="quantityNotReserved"/>
+            <return response-code="success"/>
+        </if-compare>
+
+        <call-simple-method method-name="isStoreInventoryRequiredInline"/>
+
+        <set from-field="parameters.facilityId" field="facilityId"/>
+        <if-empty field="facilityId">
+            <if-compare value="Y" field="productStore.oneInventoryFacility" operator="equals">
+                <if-empty field="productStore.inventoryFacilityId">
+                    <add-error>
+                        <fail-property resource="ProductUiLabels" property="ProductProductStoreNoSpecifiedInventoryFacility"/>
+                    </add-error>
+                    <check-errors/>
+                </if-empty>
+                <set-service-fields map="parameters" to-map="callServiceMap" service-name="reserveProductInventoryByFacility"/>
+                <set from-field="productStore.inventoryFacilityId" field="callServiceMap.facilityId"/>
+                <set from-field="requireInventory" field="callServiceMap.requireInventory"/>
+                <set from-field="productStore.reserveOrderEnumId" field="callServiceMap.reserveOrderEnumId"/>
+                <call-service service-name="reserveProductInventoryByFacility" in-map-name="callServiceMap">
+                    <result-to-field result-name="quantityNotReserved"/>
+                </call-service>
+
+                <if-compare value="0" field="quantityNotReserved" operator="equals" type="BigDecimal">
+                    <log level="info" message="Inventory IS reserved in facility with id [${productStore.inventoryFacilityId}] for product id [${parameters.productId}]; desired quantity was ${parameters.quantity}"/>
+                <else>
+                    <log level="info" message="There is insufficient inventory available in facility with id [${productStore.inventoryFacilityId}] for product id [${parameters.productId}]; desired quantity is ${parameters.quantity}, amount could not reserve is ${quantityNotReserved}"/>
+                </else>
+                </if-compare>
+            <else>
+                <entity-and entity-name="ProductStoreFacility" list="productStoreFacilities" use-cache="true">
+                    <field-map from-field="productStore.productStoreId" field-name="productStoreId"/>
+                    <order-by field-name="sequenceNum"/>
+                </entity-and>
+                <iterate list="productStoreFacilities" entry="productStoreFacility">
+                    <!-- in this case quantityNotReserved will always be empty until it finds a facility it can totally reserve from, then it will be 0.0 and we are done -->
+                    <if-empty field="storeFound">
+                        <!-- TODO: must entire quantity be available in one location? -->
+                        <!-- Right now the answer is yes, it only succeeds if one facility has sufficient inventory for the order. -->
+                        <set from-field="parameters.productId" field="callServiceMap.productId"/>
+                        <set from-field="productStoreFacility.facilityId" field="callServiceMap.facilityId"/>
+                        <log level="info" message="ProductStoreService:In productStoreFacilities loop: [${parameters.facilityId}]"/>
+                        <call-service service-name="getInventoryAvailableByFacility" in-map-name="callServiceMap">
+                            <result-to-field result-name="availableToPromiseTotal"/>
+                        </call-service>
+                        <clear-field field="callServiceMap"/>
+
+                        <if-compare-field field="availableToPromiseTotal" to-field="parameters.quantity" operator="greater-equals" type="BigDecimal">
+                            <set field="storeFound" from-field="productStoreFacility"/>
+                        </if-compare-field>
+                        <clear-field field="availableToPromiseTotal"/>
+                    </if-empty>
+                </iterate>
+
+                <!-- didn't find anything? Take the first facility from list -->
+                <if-empty field="storeFound">
+                    <first-from-list list="productStoreFacilities" entry="storeFound"/>
+                </if-empty>
+                <set from-field="storeFound.facilityId" field="facilityId" default-value=""/>
+                <set-service-fields map="parameters" to-map="callServiceMap" service-name="reserveProductInventoryByFacility"/>
+                <set from-field="facilityId" field="callServiceMap.facilityId"/>
+                <set from-field="requireInventory" field="callServiceMap.requireInventory"/>
+                <set from-field="productStore.reserveOrderEnumId" field="callServiceMap.reserveOrderEnumId"/>
+                <call-service service-name="reserveProductInventoryByFacility" in-map-name="callServiceMap">
+                    <result-to-field result-name="quantityNotReserved"/>
+                </call-service>
+                <log level="info" message="Inventory IS reserved in facility with id [${storeFound.facilityId}] for product id [${parameters.productId}]; desired quantity was ${parameters.quantity}"/>
+            </else>
+            </if-compare>
+        <else>
+            <entity-and entity-name="ProductStoreFacility" list="productStoreFacilities" use-cache="true">
+                <field-map from-field="productStore.productStoreId" field-name="productStoreId"/>
+                <field-map from-field="facilityId" field-name="facilityId"/>
+                <order-by field-name="sequenceNum"/>
+            </entity-and>
+            <iterate list="productStoreFacilities" entry="productStoreFacility">
+                <!-- Search Product Store Facilities to insure the facility passed in is associated to the Product Store passed in -->
+                <set field="facilityFound" from-field="productStoreFacility"/>
+                <log level="info" message="ProductStoreService:Facility Found : [${facilityFound}]"/>
+            </iterate>
+            <if-empty field="facilityFound">
+                <add-error>
+                    <fail-property resource="ProductUiLabels" property="FacilityNoAssociatedWithProcuctStore"/>
+                </add-error>
+                <check-errors/>
+            </if-empty>
+            <set-service-fields map="parameters" to-map="callServiceMap" service-name="reserveProductInventoryByFacility"/>
+            <set from-field="facilityId" field="callServiceMap.facilityId"/>
+            <set from-field="requireInventory" field="callServiceMap.requireInventory"/>
+            <set from-field="productStore.reserveOrderEnumId" field="callServiceMap.reserveOrderEnumId"/>
+            <call-service service-name="reserveProductInventoryByFacilityWithoutAccTrans" in-map-name="callServiceMap">
+                <result-to-field result-name="quantityNotReserved"/>
+            </call-service>
+            <if-compare value="0" field="quantityNotReserved" operator="equals" type="BigDecimal">
+                <log level="info" message="Inventory IS reserved in facility with id [${facilityId}] for product id [${parameters.productId}]; desired quantity was ${parameters.quantity}"/>
+            <else>
+                <log level="info" message="There is insufficient inventory available in facility with id [${facilityId}] for product id [${parameters.productId}]; desired quantity is ${parameters.quantity}, amount could not reserve is ${quantityNotReserved}"/>
+            </else>
+            </if-compare>
+        </else>
+        </if-empty>
+        <field-to-result field="quantityNotReserved"/>
+    </simple-method>
+    
+    
+    <simple-method method-name="createShipmentReceipt" short-description="Create a ShipmentReceipt">
+        <make-value value-field="newEntity" entity-name="ShipmentReceipt"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <sequenced-id sequence-name="ShipmentReceipt" field="receiptId"/>
+        <to-string field="receiptId"/>
+        <set field="newEntity.receiptId" from-field="receiptId"/>
+        <field-to-result field="receiptId" result-name="receiptId"/>
+
+        <if-empty field="newEntity.datetimeReceived">
+            <now-timestamp field="nowTimestamp"/>
+            <set field="newEntity.datetimeReceived" from-field="nowTimestamp"/>
+        </if-empty>
+
+        <set field="newEntity.receivedByUserLoginId" from-field="userLogin.userLoginId"/>
+        <create-value value-field="newEntity"/>
+
+        <if-not-empty field="parameters.inventoryItemDetailSeqId">
+            <entity-one entity-name="InventoryItemDetail" value-field="invDet">
+                <field-map field-name="inventoryItemDetailSeqId" from-field="parameters.inventoryItemDetailSeqId"/>
+                <field-map field-name="inventoryItemId" from-field="parameters.inventoryItemId"/>
+            </entity-one>
+            <set field="invDet.receiptId" from-field="receiptId"/>
+            <store-value value-field="invDet"/>
+        </if-not-empty>
+        <set field="affectAccounting" type="Boolean" value="false"/><!-- TODOCHANGE out of the box is true -->
+        <!-- <entity-one value-field="product" entity-name="Product"/>
+        <if>
+            <condition>
+                <or>
+                    <if-compare field="product.productTypeId" operator="equals" value="SERVICE_PRODUCT"/>
+                    <if-compare field="product.productTypeId" operator="equals" value="ASSET_USAGE_OUT_IN"/>
+                    <if-compare field="product.productTypeId" operator="equals" value="AGGREGATEDSERV_CONF"/>
+					<if-compare field="product.productTypeId" operator="equals" value="AGGR_DIGSERV"/>
+					<if-compare field="product.productTypeId" operator="equals" value="AGGR_DIGSERV_CONF"/>
+                </or>
+            </condition>
+            <then>
+                <set field="affectAccounting" type="Boolean" value="false"/>
+            </then>
+        </if> -->
+        <field-to-result field="affectAccounting" result-name="affectAccounting"/>
+    </simple-method>
+</simple-methods>

@@ -1,0 +1,802 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/site-conf.xsd">
+	<!-- <request-map uri="Payroll">
+		<security https="true" auth="true" />
+		<event type="service" invoke="getSalaryAmountList" />
+		<response name="success" type="view" value="PayrollMain"></response>
+	</request-map> -->
+	<request-map uri="calcPayroll">
+		<security https="true" auth="true" />
+		<event type="service" invoke="calcPayrollTable"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="PayrollTableList">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="PayrollTableList"></response>
+		<response name="error" type="view" value="PayrollTableList"></response>
+	</request-map>
+	<request-map uri="EditPayrollTable">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="EditPayrollTable"></response>
+		<response name="error" type="view" value="EditPayrollTable"></response>
+	</request-map>
+	<request-map uri="sendProposalPayrollTable">
+		<security https="true" auth="true" />
+		<event type="service" invoke="sendProposalPayrollTable"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="approvalPayrollTable">
+		<security https="true" auth="true" />
+		<!-- <event type="service" invoke="approvalWorkFlowRequest"></event> -->
+		<event type="java" invoke="approvalPayrollTable" path="com.olbius.payroll.events.PayrollEvents"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="getPartyAttendance">
+		<security https="true" auth="true" />
+		<event type="service" invoke="getPartyAttendance"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="getEmplTimesheetAttendanceWorkdayAndHours">
+		<security https="true" auth="true" />
+		<event type="java" invoke="getEmplTimesheetAttendanceWorkdayAndHours" path="com.olbius.payroll.events.TimekeepingEvents"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="deletePartyAttendance">
+		<security https="true" auth="true" />
+		<event type="java" invoke="deletePartyAttendance" path="com.olbius.payroll.events.TimekeepingEvents"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="deletePayrollTable">
+		<security https="true" auth="true" />
+		<event type="service" invoke="deletePayrollTable"></event>
+		<response name="success" type="request-redirect-noparam" value="PayrollTableList"></response>
+		<response name="error" type="request-redirect-noparam" value="PayrollTableList"></response>
+	</request-map>
+	<request-map uri="viewPayrollTable">
+		<security https="true" auth="true" />
+		<!-- <event type="service" invoke="getPayrollTableRecord"></event> -->
+		<response name="success" type="view" value="PayrollMain"></response>
+		<response name="error" type="view" value="PayrollTableList"></response>
+	</request-map>
+	<request-map uri="getPayrollTableRecord">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="PayrollTableRecord"></response>
+		<response name="error" type="view" value="PayrollTableRecord"></response>
+	</request-map>
+	<request-map uri="getPayrollTableRecordOfParty">
+		<security https="true" auth="true" />
+		<event type="service" invoke="getPayrollTableRecordOfParty"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="getPayrollTableDetailParty">
+		<security https="true" auth="true" />
+		<event type="java" invoke="getPayrollTableDetailParty" path="com.olbius.payroll.events.PayrollEvents"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="updatePayrollTableOfParty">
+		<security https="true" auth="true" />
+		<event type="java" invoke="updatePayrollTableOfParty" path="com.olbius.payroll.events.PayrollEvents"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="showPayrollTableRecord">
+		<security https="true" auth="true" />
+		<event type="service" invoke="getPayrollTableRecord"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="createPayrollTableRecord">
+		<security https="true" auth="true" />
+		<event type="service" invoke="createPayrollTableRecord"></event>
+		<response name="success" type="request-redirect-noparam" value="PayrollTableList"></response>
+		<response name="error" type="view" value="PayrollTableList"></response>
+	</request-map>
+	<request-map uri="formula">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="FormulaIncome"></response>
+		<response name="error" type="view" value="FormulaIncome"></response>
+	</request-map>
+	<request-map uri="formulaDeduction">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="FormulaDeduction"></response>
+		<response name="error" type="view" value="FormulaDeduction"></response>
+	</request-map>
+	<request-map uri="formulaOther">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="FormulaOther"></response>
+		<response name="error" type="view" value="FormulaOther"></response>
+	</request-map>
+	
+	<request-map uri="updateFormulaIncludedPayrollTable">
+		<security https="true" auth="true" />
+		<event type="service" invoke="updateFormulaIncludedPayrollTable"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	
+	<request-map uri="getPartyFormulaInvoiceItemType">
+		<security https="true" auth="true" />
+		<event type="java" invoke="getPartyFormulaInvoiceItemType" path="com.olbius.payroll.events.PayrollEvents"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="EditPartyFormulaInvoiceItemType">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="EditPartyFormulaInvoiceItemType"></response>
+		<response name="error" type="view" value="EditPartyFormulaInvoiceItemType"></response>
+	</request-map>
+	<request-map uri="deletePartyFormulaInvoiceItemType">
+		<security https="true" auth="true" />
+		<event type="service" invoke="deletePartyFormulaInvoiceItemType"></event>
+		<response name="success" type="view" value="EditPartyFormulaInvoiceItemType"></response>
+		<response name="error" type="view" value="EditPartyFormulaInvoiceItemType"></response>
+	</request-map>
+	<request-map uri="deletePartyFormulaInvoiceItemTypeJQ">
+		<security https="true" auth="true" />
+		<event type="java" invoke="deletePartyFormulaInvoiceItemType" path="com.olbius.payroll.events.PayrollEvents"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="createPartyFormulaInvoiceItemType">
+		<security https="true" auth="true" />
+		<event type="service" invoke="createPartyFormulaInvoiceItemType"></event>
+		<response name="success" type="view" value="EditPartyFormulaInvoiceItemType"></response>
+		<response name="error" type="view" value="EditPartyFormulaInvoiceItemType"></response>
+	</request-map>
+	<request-map uri="createPartyFormulaInvoiceItemTypeJQ">
+		<security https="true" auth="true" />
+		<event type="java" invoke="createPartyFormulaInvoiceItemType" path="com.olbius.payroll.events.PayrollEvents"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="updatePartyFormulaInvoiceItemType">
+		<security https="true" auth="true" />
+		<event type="java" invoke="updatePartyFormulaInvoiceItemType" path="com.olbius.payroll.events.PayrollEvents"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="EditFormula">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="EditFormula"></response>
+	</request-map>
+	<request-map uri="updateFormula">
+		<security https="true" auth="true" />
+		<event type="service" invoke="updatePayrollFormula" />
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="createFormula">
+		<security https="true" auth="true" />
+		<event type="service" invoke="createPayrollFormula" />
+		<response name="success" type="request" value="json"></response>
+	</request-map>
+
+	<request-map uri="parameters">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="parameters"></response>
+	</request-map>
+	<request-map uri="listEmplPayrollParameters">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="ListEmplPayrollParameters"></response>
+		<response name="error" type="view" value="ListEmplPayrollParameters"></response>
+	</request-map>
+	<request-map uri="PayrollPosTypeContactMechParam">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="PayrollPosTypeContactMechParam"></response>
+		<response name="error" type="view" value="PayrollPosTypeContactMechParam"></response>
+	</request-map>
+	<request-map uri="getListParameterEmpl">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="SetEmplPayrollParameter"></response>
+		<response name="error" type="view" value="SetEmplPayrollParameter"></response>
+	</request-map>
+	<request-map uri="EditParameter">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="EditParameter"></response>
+	</request-map>
+	<request-map uri="updateParameters">
+		<security https="true" auth="true" />
+		<event type="service" invoke="updatePayrollParameter" />
+		<response name="success" type="view" value="EditParameter"></response>
+	</request-map>
+	<request-map uri="createParameters">
+		<security https="true" auth="true" />
+		<event type="service" invoke="createPayrollParameter" />
+		<response name="success" type="view" value="EditParameter"></response>
+	</request-map>
+	<request-map uri="createEmplPayrollParameters">
+		<security https="true" auth="true" />
+		<event type="java" invoke="createEmplPayrollParameters" path="com.olbius.payroll.events.PayrollEvents"></event>
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	
+	
+	<request-map uri="PayrollInvAndPaym">
+		<security https="true" auth="true" />
+		<event type="service" invoke="PayrollInvoiceAndPayment" />
+		<response name="success" type="view" value="PayrollMain"></response>
+		<response name="error" type="view" value="PayrollMain"></response>
+	</request-map>
+	<request-map uri="PayrollHistory">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="PayrollHistory" />
+	</request-map>
+
+	<request-map uri="taxAuthority">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="taxAuthority" />
+	</request-map>
+	<request-map uri="createTaxAuthority">
+		<security https="true" auth="true" />
+		<event type="service" invoke="createTaxAuthority" />
+		<response name="success" type="view" value="editTaxAuthority" />
+		<response name="error" type="view" value="editTaxAuthority" />
+	</request-map>
+	<request-map uri="editTaxAuthority">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="editTaxAuthority" />
+	</request-map>
+	<request-map uri="updateTaxAuthority">
+		<security https="true" auth="true" />
+		<event type="service" invoke="updateTaxAuthority" />
+		<response name="success" type="view" value="editTaxAuthority" />
+		<response name="error" type="view" value="editTaxAuthority" />
+	</request-map>
+
+	<request-map uri="EditTaxAuthorityAssocs">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="EditTaxAuthorityAssocs" />
+	</request-map>
+	<request-map uri="createTaxAuthorityAssoc">
+		<security https="true" auth="true" />
+		<event type="service" invoke="createTaxAuthorityAssoc" />
+		<response name="success" type="view" value="EditTaxAuthorityAssocs" />
+		<response name="error" type="view" value="EditTaxAuthorityAssocs" />
+	</request-map>
+	<request-map uri="updateTaxAuthorityAssoc">
+		<security https="true" auth="true" />
+		<event type="service" invoke="updateTaxAuthorityAssoc" />
+		<response name="success" type="view" value="EditTaxAuthorityAssocs" />
+		<response name="error" type="view" value="EditTaxAuthorityAssocs" />
+	</request-map>
+	<request-map uri="deleteTaxAuthorityAssoc">
+		<security https="true" auth="true" />
+		<event type="service" invoke="deleteTaxAuthorityAssoc" />
+		<response name="success" type="view" value="EditTaxAuthorityAssocs" />
+		<response name="error" type="view" value="EditTaxAuthorityAssocs" />
+	</request-map>
+
+	<request-map uri="EditTaxAuthorityGlAccounts">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="EditTaxAuthorityGlAccounts" />
+	</request-map>
+	<request-map uri="createTaxAuthorityGlAccount">
+		<security https="true" auth="true" />
+		<event type="service" invoke="createTaxAuthorityGlAccount" />
+		<response name="success" type="view" value="EditTaxAuthorityGlAccounts" />
+		<response name="error" type="view" value="EditTaxAuthorityGlAccounts" />
+	</request-map>
+	<request-map uri="deleteTaxAuthorityGlAccount">
+		<security https="true" auth="true" />
+		<event type="service" invoke="deleteTaxAuthorityGlAccount" />
+		<response name="success" type="view" value="EditTaxAuthorityGlAccounts" />
+		<response name="error" type="view" value="EditTaxAuthorityGlAccounts" />
+	</request-map>
+
+	<request-map uri="ListTaxAuthorityRate">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="ListTaxAuthorityRate" />
+	</request-map>
+	<request-map uri="CreateTaxAuthorityRate">
+		<security https="true" auth="true" />
+		<event type="service" invoke="createTaxAuthorityRate"></event>
+		<response name="success" type="view" value="ListTaxAuthorityRate" />
+	</request-map>
+	<request-map uri="EditTaxAuthorityRate">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="EditTaxAuthorityRate" />
+	</request-map>
+
+	<request-map uri="ListTaxAuthorityParties">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="ListTaxAuthorityParties" />
+	</request-map>
+	<request-map uri="deleteTaxAuthorityPartyInfo">
+		<security https="true" auth="true" />
+		<event type="service" invoke="deletePartyTaxAuthInfo" />
+		<response name="success" type="view" value="ListTaxAuthorityParties" />
+		<response name="error" type="view" value="ListTaxAuthorityParties" />
+	</request-map>
+	<request-map uri="EditTaxAuthorityPartyInfo">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="EditTaxAuthorityPartyInfo" />
+	</request-map>
+	<request-map uri="createTaxAuthorityPartyInfo">
+		<security https="true" auth="true" />
+		<event type="service" invoke="createPartyTaxAuthInfo" />
+		<response name="success" type="view" value="EditTaxAuthorityPartyInfo" />
+		<response name="error" type="view" value="EditTaxAuthorityPartyInfo" />
+	</request-map>
+	<request-map uri="updateTaxAuthorityPartyInfo">
+		<security https="true" auth="true" />
+		<event type="service" invoke="updatePartyTaxAuthInfo" />
+		<response name="success" type="view" value="EditTaxAuthorityPartyInfo" />
+		<response name="error" type="view" value="EditTaxAuthorityPartyInfo" />
+	</request-map>
+
+	<request-map uri="payroll.pdf">
+		<security https="true" auth="true" />
+		<event type="service" invoke="getSalaryAmountList" />
+		<response name="success" type="view" value="PayrollPDF" />
+	</request-map>
+	
+	<request-map uri="ScheduleSalary">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="ScheduleSalary" />
+	</request-map>
+	
+	<request-map uri="scheduleSalary">
+		<security https="true" auth="true" />
+		<event type="service" invoke="activeSalaryPeriod"></event>
+		<response name="success" type="view" value="ScheduleSalary" />
+	</request-map>
+	
+	<request-map uri="ApprovePayroll">
+		<security https="true" auth="true"/>
+		<response name="success" type="view" value="ApprovePayroll"></response>
+	</request-map>
+	<!-- <request-map uri="ApprovalPayrollTable">
+		<security https="true" auth="true"/>
+		<response name="success" type="view" value="ApprovalPayrollTable"></response>
+		<response name="error" type="view" value="ApprovalPayrollTable"></response>
+	</request-map> -->
+	
+	<!-- <request-map uri="approvePayroll">
+		<security https="true" auth="true"/>
+		<event type="service-multi" invoke="updatePayrollTable"></event>
+		<response name="success" type="view" value="ApprovePayroll"></response>
+	</request-map> -->
+	<request-map uri="approvePayroll">
+		<security https="true" auth="true"/>
+		<!-- <event type="service-multi" invoke="updatePayrollTable"></event> -->
+		<response name="success" type="view" value="ApprovalPayrollTable"></response>
+		<response name="error" type="view" value="ApprovalPayrollTable"></response>
+	</request-map>
+	<request-map uri="CreatePayrollInvoiceAndPayment">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="activeCreatePayrollInvoiceAndPayment"></event>
+		<response name="success" type="view" value="ApprovalPayrollTable"></response>
+	</request-map>
+	<request-map uri="getPartyPayrollFormulaDetail">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="getPartyPayrollFormulaDetail"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="PayrollTablePartyHistory">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="updateNtfIfExists"></event>
+		<response name="success" type="view" value="PayrollTablePartyHistory"></response>
+		<response name="error" type="view" value="PayrollTablePartyHistory"></response>
+	</request-map>
+	<request-map uri="PayrollTablePartyHistoryDir">
+		<security auth="true" https="true"/>
+		<response name="success" type="view" value="PayrollTablePartyHistoryDir"></response>
+		<response name="error" type="view" value="PayrollTablePartyHistoryDir"></response>
+	</request-map>
+	<request-map uri="ListEmplSalary">
+		<security auth="true" https="true"/>
+		<response name="success" type="view" value="ListEmplSalary"></response>
+		<response name="error" type="view" value="ListEmplSalary"></response>
+	</request-map>
+	
+	<!-- ============ timekeeping request ========================= -->
+	<request-map uri="EmplTimekeepingReport">
+		<security auth="true" https="true"/>
+		<response name="success" type="view" value="EmplTimekeepingReport"></response>
+		<response name="error" type="view" value="EmplTimekeepingReport"></response>
+	</request-map>
+	<request-map uri="EmplTimekeepingReportOverview">
+		<security auth="true" https="true"/>
+		<response name="success" type="view" value="EmplTimekeepingReportOverview"></response>
+		<response name="error" type="view" value="EmplTimekeepingReportOverview"></response>
+	</request-map>
+	<request-map uri="getEmplTimekeepingOverview">
+		<security auth="true" https="true"/>
+		<response name="success" type="view" value="EmplTimekeepingOverviewInfo"></response>
+		<response name="error" type="view" value="EmplTimekeepingOverviewInfo"></response>
+	</request-map>
+	<request-map uri="getEmplTimesheetGeneral">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="getEmplTimesheetGeneral"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="EmplTimesheetList">
+		<security auth="true" https="true"/>
+		<response name="success" type="view" value="EmplTimesheetList"></response>
+		<response name="error" type="view" value="EmplTimesheetList"></response>
+	</request-map>
+	<request-map uri="getEmplTimesheetStatus">
+		<security auth="true" https="true"/>
+		<event type="java" invoke="getEmplTimesheetStatus" path="com.olbius.payroll.events.TimekeepingEvents"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="getEmplTimesheetAttendance">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="JQEmplTimesheetAttendance"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="getEmplTimesheetWorkingLate">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="getEmplTimesheetWorkingLate"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="updateEmplTimesheetAttendance">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="updateEmplTimesheetAttendance"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="reimportTimesheetDataFromTimeRecord">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="reCalcEmplTimesheet"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="proposalApprovalTimesheets">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="proposalApprovalTimesheets"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="ProposalTimesheet">
+		<security auth="true" https="true"/>
+		<response name="success" type="view" value="ProposalTimesheet"></response>
+		<response name="error" type="view" value="ProposalTimesheet"></response>
+	</request-map>
+	<request-map uri="approvalTimesheet">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="approvalTimesheet"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="requestUpdateWorkOvertimeStt">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="requestUpdateWorkOvertimeStt"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="ApprovalWorkingOvertimeEmpl">
+		<security auth="true" https="true"/>
+		<response name="success" type="view" value="ApprovalWorkingOvertimeEmpl"></response>
+		<response name="error" type="view" value="ApprovalWorkingOvertimeEmpl"></response>
+	</request-map>
+	<request-map uri="approvalAllWorkOvertimeInPeriod">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="approvalAllWorkOvertimeInPeriod"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<!-- ======================== ./end timekeeping requets =========================-->
+	
+	<request-map uri="EmplSalaryBaseFlatList">
+		<security auth="true" https="true"/>
+		<response name="success" type="view" value="EmplSalaryBaseFlatList"></response>
+		<response name="error" type="view" value="EmplSalaryBaseFlatList"></response>
+	</request-map>
+	<request-map uri="ViewHistoryPartyPayroll">
+		<security auth="true" https="true"/>
+		<response name="success" type="view" value="ViewHistoryPartyPayroll"></response>
+		<response name="error" type="view" value="ViewHistoryPartyPayroll"></response>
+	</request-map>
+	<request-map uri="editPartyRateAmount">
+		<security auth="true" https="true"/>
+		<response name="success" type="view" value="EditPartyRateAmount"></response>
+		<response name="error" type="view" value="EditPartyRateAmount"></response>
+	</request-map>
+	<request-map uri="updatePartyRateAmount">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="updatePartyRateAmount"></event>
+		<response name="success" type="view" value="EmplSalaryBaseFlatList"></response>
+		<response name="error" type="view" value="EditPartyRateAmount"></response>
+	</request-map>
+	<!-- <request-map uri="createPartyRateAmount">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="createPartyRateAmount"></event>
+		<response name="success" type="view" value="EditPartyRateAmount"></response>
+		<response name="error" type="view" value="EditPartyRateAmount"></response>
+	</request-map> -->
+	<request-map uri="getPartyPayrollHistory">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="getPartyPayrollHistoryDetails"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>	
+	</request-map>
+	<request-map uri="createPartyRateAmount">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="createPartyRateAmountSalary"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="deletePartyRateAmount">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="deletePartyRateAmount"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="EditEmpPosTypeSalary">
+		<security auth="true" https="true"/>
+		<response name="success" type="view" value="EditEmpPosTypeSalary"></response>
+		<response name="error" type="view" value="EditEmpPosTypeSalary"></response>
+	</request-map>
+	<!-- <request-map uri="createEmpPosTypeSalary">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="createEmpPosTypeSalary"></event>
+		<response name="success" type="view" value="SettingEmpPosTypeSalary"></response>
+		<response name="error" type="view" value="EditEmpPosTypeSalary"></response>
+	</request-map> -->
+	<request-map uri="updateEmplPositionTypeRateGeoAppl">
+		<security auth="true" https="true"/>
+		<event type="java" invoke="updateEmplPositionTypeRateGeoAppl" path="com.olbius.payroll.events.PayrollEvents"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="createEmplPositionTypeRateAmount">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="createEmplPositionTypeRateAmount"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="createEmplPositionTypeRateDateConvert">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="createEmplPositionTypeRateConvertDate"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="updatePayrollParamPosTypeGeoAppl">
+		<security auth="true" https="true"/>
+		<event type="java" invoke="updatePayrollParamPosTypeGeoAppl" path="com.olbius.payroll.events.PayrollEvents"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="updateEmpPosTypeSalary">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="updateEmpPosTypeSalary"></event>
+		<response name="success" type="view" value="SettingEmpPosTypeSalary"></response>
+		<response name="error" type="view" value="EditEmpPosTypeSalary"></response>
+	</request-map>
+	<request-map uri="SettingEmpPosTypeSalary">
+		<security auth="true" https="true"/>
+		<response name="success" type="view" value="SettingEmpPosTypeSalary"></response>
+		<response name="error" type="view" value="SettingEmpPosTypeSalary"></response>
+	</request-map>
+	
+	<request-map uri="ConfirmBonusSalesEmployee">
+		<security auth="true" https="true"/>
+		<response name="success" type="view" value="ConfirmBonusSalesEmployee"></response>
+		<response name="error" type="view" value="ConfirmBonusSalesEmployee"></response>
+	</request-map>
+	<request-map uri="ListEmployeeBonus">
+		<security auth="true" https="true"/>		
+		<response name="success" type="view" value="ListEmployeeBonus"></response>
+		<response name="error" type="view" value="ListEmployeeBonus"></response>
+	</request-map>
+	<request-map uri="getSalesCommnissionAdj">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="getSalesCommnissionAdj"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="createBonusParamEmplSales">
+		<security auth="true" https="true"/>
+		<event type="java" invoke="createBonusParamEmplSales" path="com.olbius.payroll.events.PayrollEvents"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="getEmplParamCharacteristic">
+		<security auth="true" https="true"/>
+		<event type="java" invoke="getEmplParamCharacteristic" path="com.olbius.payroll.events.PayrollEvents"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<!-- <request-map uri="getEmplPositionTypeRateHistory">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="getEmplPositionTypeRateHistory"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map> -->
+	<request-map uri="getEmplPositionTypeRateGeoAppl">
+		<security auth="true" https="true"/>
+		<event type="java" invoke="getEmplPositionTypeRateGeoAppl" path="com.olbius.payroll.events.PayrollEvents"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	
+	<request-map uri="getpayrollParamPositionTypeGeoAppl">
+		<security auth="true" https="true"/>
+		<event type="java" invoke="getpayrollParamPositionTypeGeoAppl" path="com.olbius.payroll.events.PayrollEvents"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	
+	<request-map uri="deleteEmpPosTypeSalary">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="deleteEmpPosTypeSalary"></event>
+		<response name="success" type="view" value="SettingEmpPosTypeSalary"></response>
+		<response name="error" type="view" value="SettingEmpPosTypeSalary"></response>
+	</request-map>
+	<request-map uri="getEmplPostionTypeNotSetSalary">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="getEmplPostionTypeNotSetSalary"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>	
+	</request-map>
+	<request-map uri="updateEmplAttendanceTracker">
+		<security auth="true" https="true"/>
+		<event type="java" invoke="updateEmplAttendanceTracker" path="com.olbius.payroll.events.TimekeepingEvents"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+<!-- 	<request-map uri="updateEmplAttendanceTracker">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="updateEmplAttendanceTracker"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map> -->
+	<request-map uri="getWorkOvertimeRegistration">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="getWorkOvertimeRegistration"/>
+	    <response name="success" type="request" value="json"/>
+	    <response name="error" type="request" value="json"/>
+	</request-map>
+	<request-map uri="getWorkOvertimeInPeriod">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="getWorkOvertimeInPeriod"/>
+	    <response name="success" type="request" value="json"/>
+	    <response name="error" type="request" value="json"/>
+	</request-map>
+	<request-map uri="updateActualEmplOvertimeWorking">
+		<security auth="true" https="true"/>
+	    <event type="service" invoke="updateActualEmplOvertimeWorking"/>
+	    <response name="success" type="request" value="json"/>
+	    <response name="error" type="request" value="json"/>
+	</request-map>
+	<request-map uri="updateEmplWorkovertime">
+		<security auth="true" https="true"/>
+	    <event type="service" invoke="updateEmplWorkovertime"/>
+	    <response name="success" type="request" value="json"/>
+	    <response name="error" type="request" value="json"/>
+	</request-map>
+	<request-map uri="getDayLeaveApproved">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="getDayLeaveApproved"/>
+	    <response name="success" type="request" value="json"/>
+	    <response name="error" type="request" value="json"/>
+	</request-map>
+	<!-- View Map -->
+	<!-- <view-map name="ListWorkingOvertime" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#ListWorkingOvertime"></view-map> -->
+	<view-map name="ConfirmBonusSalesEmployee" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#ConfirmBonusSalesEmployee"></view-map>	
+	<view-map name="ListEmployeeBonus" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#ListEmployeeBonus"></view-map>	
+	<view-map name="SetEmplPayrollParameter" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#SetEmplPayrollParameter"></view-map>
+	<view-map name="ListEmplPayrollParameters" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#ListEmplPayrollParameters"></view-map>
+	<view-map name="PayrollPosTypeContactMechParam" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#PayrollPosTypeContactMechParam"></view-map>
+	<view-map name="PayrollTableRecord" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#PayrollTableRecord"></view-map>
+	<view-map name="ApprovalPayrollTable" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#ApprovalPayrollTable"></view-map>
+	<view-map name="EditPartyFormulaInvoiceItemType" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#EditPartyFormulaInvoiceItemType"></view-map>
+	<view-map name="PayrollTableList" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#PayrollTableList"></view-map>
+	<view-map name="EditPayrollTable" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#EditPayrollTable"></view-map>	
+	<view-map name="EditEmpPosTypeSalary" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#EditEmpPosTypeSalary"></view-map>
+	<view-map name="EditPartyRateAmount" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#EditPartyRateAmount"></view-map>
+	<view-map name="ViewHistoryPartyPayroll" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#ViewHistoryPartyPayroll"></view-map>
+	<view-map name="EmplSalaryBaseFlatList" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#EmplSalaryBaseFlatList"></view-map>
+	<view-map name="SettingEmpPosTypeSalary" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#SettingEmpPosTypeSalary"></view-map>
+	
+	<!-- =============== view timekeeping ===================== -->
+	<view-map name="EmplTimekeepingReport" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#EmplTimekeepingReport"></view-map>
+	<view-map name="EmplTimekeepingReportOverview" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#EmplTimekeepingReportOverview"></view-map>
+	<view-map name="EmplTimekeepingOverviewInfo" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#EmplTimekeepingOverviewInfo"></view-map>
+	<view-map name="EmplTimesheetList" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#EmplTimesheetList"></view-map>
+	<view-map name="ProposalTimesheet" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#ProposalTimesheet"></view-map>		
+	<view-map name="ApprovalWorkingOvertimeEmpl" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#ApprovalWorkingOvertimeEmpl"></view-map>
+		
+	<!-- =================./end view timekeeping ============= -->
+			
+	<view-map name="PayrollPDF" type="screenfop"
+		page="component://hrolbius/widget/PayrollReportScreens.xml#InvoicePDF"
+		content-type="application/pdf" encoding="none" />
+	<view-map name="PayrollMain" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#main" />
+
+	<view-map name="taxAuthority" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#taxAuthority" />
+	<view-map name="createTaxAuthority" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#createTaxAuthority" />
+	<view-map name="editTaxAuthority" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#editTaxAuthority" />
+	<view-map name="EditTaxAuthorityAssocs" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#EditTaxAuthorityAssocs" />
+	<view-map name="EditTaxAuthorityGlAccounts" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#EditTaxAuthorityGlAccounts" />
+	<view-map name="ListTaxAuthorityParties" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#ListTaxAuthorityParties" />
+	<view-map name="EditTaxAuthorityPartyInfo" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#EditTaxAuthorityPartyInfo" />
+	<view-map name="ListTaxAuthorityRate" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#ListTaxAuthorityRate" />
+	<view-map name="EditTaxAuthorityRate" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#EditTaxAuthorityRate" />
+
+	<view-map name="FormulaIncome" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#FormulaIncome" />
+	<view-map name="FormulaDeduction" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#FormulaDeduction"></view-map>	
+	<view-map name="FormulaOther" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#FormulaOther"></view-map>	
+		
+	<view-map name="EditFormula" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#EditFormula" />
+	<view-map name="updateFormula" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#updateFormula" />
+	<view-map name="createFormula" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#createFormula" />
+
+
+	<view-map name="parameters" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#parameters" />
+	<view-map name="EditParameter" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#EditParameter" />
+	<view-map name="updateParameters" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#updateParameters" />
+	<view-map name="createParameters" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#createParameters" />
+
+	<view-map name="PayrollHistory" type="screen"
+		page="component://hrolbius/widget/EmployeeScreens.xml#PayrollHistory" />
+		
+	<view-map name="ScheduleSalary" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#ScheduleSalary" />
+	<view-map name="ApprovePayroll" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#ApprovePayroll" />
+	<view-map name="PayrollTablePartyHistory" type="screen"
+		page="component://hrolbius/widget/PayrollReportScreens.xml#PayrollTablePartyHistory" />
+	<view-map name="PayrollTablePartyHistoryDir" type="screen"
+		page="component://hrolbius/widget/PayrollReportScreens.xml#PayrollTablePartyHistoryDir" />
+	<view-map name="ListEmplSalary" type="screen"
+		page="component://hrolbius/widget/PayrollScreens.xml#ListEmplSalary" />	
+</site-conf>

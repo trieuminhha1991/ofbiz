@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information regarding copyright ownership. The ASF licenses this file to you under
+    the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may
+    obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to
+    in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+    ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under
+    the License. -->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-screen.xsd">       
+	<screen name="ListPayments">
+        <section>
+	        <actions>
+				<entity-condition list="enumPartyTypeList" entity-name="Enumeration">
+	        		<condition-expr field-name="enumTypeId" value="PARTY_TYPE"/>
+	        		<order-by field-name="sequenceId"/>
+	        	</entity-condition>
+	        	<property-to-field field="defaultCountryGeoId" resource="general" property="country.geo.id.default" default="VNM"/>
+	        	<entity-condition list="countryGeoList" entity-name="Geo">
+	        		<condition-expr field-name="geoTypeId" value="COUNTRY"/>
+	        		<order-by field-name="geoName"/>
+	        	</entity-condition>   	        	
+	        </actions>
+	        <widgets>
+	            <decorator-screen name="BaseAccountingCommonDecorator" location="component://baseaccounting/widget/CommonScreens.xml">
+	                <decorator-section name="body">
+	                    <section>
+	                    	<actions>
+	                    	</actions>
+	                        <widgets>
+	                            <platform-specific>
+	                                <html>
+	                      				<html-template location="component://baseaccounting/webapp/baseaccounting/payment/paymentList.ftl"/>
+	                      			</html>
+	                            </platform-specific>
+	                        </widgets>
+	                    </section>
+	                </decorator-section>
+	            </decorator-screen>
+	        </widgets>
+	    </section>
+	</screen>
+	
+	<screen name="ViewPayment">
+        <section>
+	        <actions>
+	        	<entity-one value-field="payment" entity-name="Payment">
+	        		<field-map field-name="paymentId" from-field="parameters.paymentId"/>
+	        	</entity-one>
+	        	<entity-condition entity-name="StatusItem" list="listStatusItem">
+	        		<condition-expr field-name="statusTypeId" value="PMNT_STATUS"/>
+	        	</entity-condition>
+	        	<entity-condition entity-name="AcctgTrans" list="acctgTrans">
+	        		<condition-list combine="and">
+                    	<condition-expr field-name="paymentId" from-field="parameters.paymentId"/>
+                    	<condition-expr field-name="paymentId" operator="not-equals" from-field="nullField"/>
+                    </condition-list>
+                    <order-by field-name="acctgTransId"/>
+                </entity-condition>
+                <entity-condition entity-name="AcctgTransAndEntries" list="acctgTransAndEntries">
+	        		<condition-list combine="and">
+                    	<condition-expr field-name="paymentId" from-field="parameters.paymentId"/>
+                    	<condition-expr field-name="paymentId" operator="not-equals" from-field="nullField"/>
+                    </condition-list>                
+                    <order-by field-name="acctgTransId" />
+                    <order-by field-name="acctgTransEntrySeqId" />
+                </entity-condition>
+                
+                <!-- <entity-condition list="paymentApplicationsInv" entity-name="PaymentApplication">
+	        		<condition-list combine="and">
+	        			<condition-expr field-name="invoiceId" operator="not-equals" from-field="nullField"/>
+	        			<condition-expr field-name="paymentId" operator="equals" from-field="parameters.paymentId"/>
+	        		</condition-list>
+	        		<order-by field-name="invoiceId"/>
+	        	</entity-condition> -->
+	        	<entity-condition list="paymentApplicationsPay" entity-name="PaymentApplication">
+	        		<condition-list combine="and">
+	        			<condition-expr field-name="toPaymentId" operator="not-equals" from-field="nullField"/>
+	        			<condition-expr field-name="paymentId" operator="equals" from-field="parameters.paymentId"/>
+	        		</condition-list>
+	        		<order-by field-name="toPaymentId"/>
+	        	</entity-condition>
+	        	<entity-condition list="paymentApplicationsTax" entity-name="PaymentApplication">
+	        		<condition-list combine="and">
+	        			<condition-expr field-name="taxAuthGeoId" operator="not-equals" from-field="nullField"/>
+	        			<condition-expr field-name="paymentId" operator="equals" from-field="parameters.paymentId"/>
+	        		</condition-list>
+	        		<order-by field-name="taxAuthGeoId"/>
+	        	</entity-condition>
+	        	<entity-condition list="invNewStatusList" entity-name="StatusItem">
+          			<condition-expr field-name="statusTypeId" value="INVOICE_NEW_STATUS"/>
+          			<order-by field-name="sequenceId"/>
+          		</entity-condition> 
+          		<entity-condition list="enumPartyTypeList" entity-name="Enumeration">
+	        		<condition-expr field-name="enumTypeId" value="PARTY_TYPE"/>
+	        		<order-by field-name="sequenceId"/>
+	        	</entity-condition>      		
+	        </actions>
+	        <widgets>
+	            <decorator-screen name="BaseAccountingCommonDecorator" location="component://baseaccounting/widget/CommonScreens.xml">
+	                <decorator-section name="body">
+	                    <section>
+							<condition>
+								<not>
+									<if-empty field="payment" />
+								</not>
+							</condition>	                    
+	                        <widgets>
+	                            <platform-specific>
+	                                <html>
+	                      				<html-template location="component://baseaccounting/webapp/baseaccounting/payment/paymentView.ftl"/>
+	                      			</html>
+	                            </platform-specific>
+	                        </widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BACCPaymentNoPaymentFound}"></label>
+								</container>
+							</fail-widgets>	                        	                        
+	                    </section>
+	                </decorator-section>
+	            </decorator-screen>
+	        </widgets>
+	    </section>
+	</screen>
+	
+	<!-- <screen name="ListPaymentTrans">
+        <section>
+	        <actions>
+	        	<property-map resource="BaseAccountingUiLabels" map-name="uiLabelMap" global="true"/>
+	        	<property-map resource="WidgetUiLabels" map-name="uiLabelMap" global="true"/>
+	        	<entity-one entity-name="Payment" value-field="payment">
+	        		<field-map field-name="paymentId" from-field="parameters.paymentId"/>
+	        	</entity-one>
+	        	<entity-condition entity-name="AcctgTrans" list="acctgTrans">
+                    <condition-expr field-name="paymentId" from-field="parameters.paymentId"/>
+                    <order-by field-name="acctgTransId"/>
+                </entity-condition>
+                <entity-condition entity-name="AcctgTransAndEntries" list="acctgTransAndEntries">
+                    <condition-expr field-name="paymentId" operator="equals" from-field="parameters.paymentId" />
+                    <order-by field-name="acctgTransId" />
+                    <order-by field-name="acctgTransEntrySeqId" />
+                </entity-condition>
+	        </actions>
+	        <widgets>
+	            <platform-specific>
+	            	<html>
+	            		<html-template location="component://baseaccounting/webapp/baseaccounting/payment/paymentViewTrans.ftl"/>
+	            	</html>
+	            </platform-specific>
+	        </widgets>
+	    </section>
+	</screen>
+	
+	<screen name="ViewPaymentDetail">
+        <section>
+	        <actions>
+	        	<property-map resource="BaseAccountingUiLabels" map-name="uiLabelMap" global="true"/>
+	        	<property-map resource="WidgetUiLabels" map-name="uiLabelMap" global="true"/>
+	        	<entity-one value-field="payment" entity-name="Payment">
+	        		<field-map field-name="paymentId" from-field="parameters.paymentId"/>
+	        	</entity-one>
+	        </actions>
+	
+	        <widgets>
+              <platform-specific>
+                  <html>
+        				<html-template location="component://baseaccounting/webapp/baseaccounting/payment/paymentViewDetail.ftl"/>
+        			</html>
+              </platform-specific>
+	        </widgets>
+	    </section>
+	</screen>
+	
+	<screen name="ViewPaymentAppl">
+        <section>
+	        <actions>
+	        	<property-map resource="BaseAccountingUiLabels" map-name="uiLabelMap" global="true"/>
+	        	<property-map resource="WidgetUiLabels" map-name="uiLabelMap" global="true"/>
+	        	<entity-condition list="paymentApplicationsInv" entity-name="PaymentApplication">
+	        		<condition-list combine="and">
+	        			<condition-expr field-name="invoiceId" operator="not-equals" from-field="nullField"/>
+	        			<condition-expr field-name="paymentId" operator="equals" from-field="parameters.paymentId"/>
+	        		</condition-list>
+	        		<order-by field-name="invoiceId"/>
+	        	</entity-condition>
+	        	<entity-condition list="paymentApplicationsPay" entity-name="PaymentApplication">
+	        		<condition-list combine="and">
+	        			<condition-expr field-name="toPaymentId" operator="not-equals" from-field="nullField"/>
+	        			<condition-expr field-name="paymentId" operator="equals" from-field="parameters.paymentId"/>
+	        		</condition-list>
+	        		<order-by field-name="toPaymentId"/>
+	        	</entity-condition>
+	        	<entity-condition list="paymentApplicationsTax" entity-name="PaymentApplication">
+	        		<condition-list combine="and">
+	        			<condition-expr field-name="taxAuthGeoId" operator="not-equals" from-field="nullField"/>
+	        			<condition-expr field-name="paymentId" operator="equals" from-field="parameters.paymentId"/>
+	        		</condition-list>
+	        		<order-by field-name="taxAuthGeoId"/>
+	        	</entity-condition>
+	        </actions>	       
+	        <widgets>
+              <platform-specific>
+                  <html>
+        				<html-template location="component://baseaccounting/webapp/baseaccounting/payment/paymentViewAppl.ftl"/>
+        			</html>
+              </platform-specific>
+	        </widgets>
+	    </section>
+	</screen> -->
+	
+	<screen name="OrderPayment">
+    	<section>
+    		<actions>
+                <set field="enableQuickCreate" value="true"/>
+                <set field="activeTab" from-field="parameters.activeTab"/>
+                <set field="currencyUomId" from-field="defaultOrganizationPartyCurrencyUomId" />
+                <entity-one value-field="orderHeader" entity-name="OrderHeader">
+                    <field-map field-name="orderId" from-field="parameters.orderId"/>
+                </entity-one>
+                <script location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/payment/getRemainAmountOrderToPay.groovy"/>
+            </actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-has-permission permission="PMN_SOVER" action="_VIEW"/>
+					</condition>
+					<widgets>
+						<platform-specific>
+							<html>
+								<html-template location="component://baseaccounting/webapp/baseaccounting/payment/orderViewPayment.ftl"/>
+							</html>
+						</platform-specific>
+					</widgets>
+				</section>
+			</widgets>
+       </section>
+    </screen>
+</screens>

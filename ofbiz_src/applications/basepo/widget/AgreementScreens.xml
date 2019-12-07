@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-screen.xsd">
+
+	<screen name="AgreementTitle">
+		<section>
+			<condition>
+				<not>
+					<if-empty field="parameters.agreementId" />
+				</not>
+			</condition>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text=" ${uiLabelMap.AgreementId}: "></label>
+				<link url-mode="plain" target="editAgreement?agreementId=${parameters.agreementId}" text="${parameters.agreementId}"></link>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="ListAgreementSupplier">
+		<section>
+			<condition>
+				<if-olbius-has-permission />
+			</condition>
+			<actions>
+				<set field="selectedMenuItem" value="manageAgreement" />
+				<set field="selectedSubMenuItem" value="listAgreement" />
+				<set field="titleProperty" value="DmsListPOAgreement" global="true" />
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<platform-specific>
+							<html>
+								<html-template location="component://basepo/webapp/basepo/agreement/listAgreementPurchase.ftl" />
+							</html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<section>
+					<actions>
+						<set field="selectedMenuItem" value="manageAgreement" />
+						<set field="selectedSubMenuItem" value="listAgreement" />
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<label text="${uiLabelMap.DmsNotPermission}">
+								</label>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</fail-widgets>
+		</section>
+	</screen>
+
+	<screen name="EditAgreement">
+		<section>
+			<condition>
+				<if-olbius-has-permission />
+			</condition>
+			<widgets>
+				<section>
+					<widgets>
+						<section>
+							<condition>
+								<not>
+									<if-empty field="parameters.agreementId" />
+								</not>
+							</condition>
+							<actions>
+								<set field="selectedMenuItem" value="manageAgreement" />
+								<set field="selectedSubMenuItem" value="listAgreement" />
+								<!-- <set field="activeTab" from-field="parameters.activeTab" default-value=""/> -->
+								<set field="activeTab" value="agreementView-tab" />
+								<set field="titleHeaderValue" value="AgreementTitle" global="true" />
+								<set field="titleHeaderLocation" value="component://basepo/widget/AgreementScreens.xml" global="true" />
+								<set field="titleProperty" value="Agreement" global="true" />
+							</actions>
+							<widgets>
+								<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+									<decorator-section name="body">
+										<include-screen name="EditAgreementOpen" />
+										<platform-specific>
+											<html>
+												<html-template location="component://basepo/webapp/basepo/agreement/viewAgreementHeader.ftl" />
+											</html>
+										</platform-specific>
+									</decorator-section>
+								</decorator-screen>
+							</widgets>
+							<fail-widgets>
+								<include-screen name="ListAgreementSupplier" />
+							</fail-widgets>
+						</section>
+					</widgets>
+				</section>
+			</widgets>
+			<fail-widgets>
+				<section>
+					<actions>
+						<set field="selectedMenuItem" value="manageAgreement" />
+						<set field="selectedSubMenuItem" value="listAgreement" />
+						<set field="titleProperty" value="DmsListPOAgreement" global="true" />
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<label text="${uiLabelMap.DmsNotPermission}">
+								</label>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</fail-widgets>
+		</section>
+	</screen>
+
+	<screen name="EditAgreementTerm">
+		<section>
+			<condition>
+				<not>
+					<if-empty field="parameters.agreementId" />
+				</not>
+			</condition>
+			<actions>
+				<set field="selectedMenuItem" value="manageAgreement" />
+				<set field="selectedSubMenuItem" value="listAgreement" />
+				<set field="activeTab" value="agreementTerm-tab" />
+				<set field="titleHeaderValue" value="AgreementTitle" global="true" />
+				<set field="titleHeaderLocation" value="component://basepo/widget/AgreementScreens.xml" global="true" />
+				<set field="titleProperty" value="AccountingAgreementItemTerms" global="true" />
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<include-screen name="EditAgreementOpen" />
+						<platform-specific>
+							<html>
+								<html-template location="component://basepo/webapp/basepo/agreement/editAgreementTerm.ftl" />
+							</html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<include-screen name="ListAgreementSupplier" />
+			</fail-widgets>
+		</section>
+	</screen>
+
+	<screen name="EditAgreementItem">
+		<section>
+			<condition>
+				<if-has-permission permission="AGREEMENTSUPPLIER" action="_ADMIN" />
+			</condition>
+			<widgets>
+				<section>
+					<widgets>
+						<section>
+							<condition>
+								<not>
+									<if-empty field="parameters.agreementId" />
+								</not>
+							</condition>
+							<actions>
+								<set field="selectedMenuItem" value="manageAgreement" />
+								<set field="selectedSubMenuItem" value="listAgreement" />
+								<set field="activeTab" value="agreementItem-tab" />
+								<set field="titleHeaderValue" value="AgreementTitle" global="true" />
+								<set field="titleHeaderLocation" value="component://basepo/widget/AgreementScreens.xml" global="true" />
+								<set field="titleProperty" value="AccountingAgreementItems" global="true" />
+							</actions>
+							<widgets>
+								<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+									<decorator-section name="body">
+										<include-screen name="EditAgreementOpen" />
+										<platform-specific>
+											<html>
+												<html-template location="component://basepo/webapp/basepo/agreement/editAgreementItem.ftl" />
+											</html>
+										</platform-specific>
+									</decorator-section>
+								</decorator-screen>
+							</widgets>
+							<fail-widgets>
+								<include-screen name="ListAgreementSupplier" />
+							</fail-widgets>
+						</section>
+					</widgets>
+				</section>
+			</widgets>
+			<fail-widgets>
+				<section>
+					<actions>
+						<set field="selectedMenuItem" value="manageAgreement" />
+						<set field="selectedSubMenuItem" value="listAgreement" />
+						<set field="titleProperty" value="DmsListPOAgreement" global="true" />
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<label text="${uiLabelMap.DmsNotPermission}">
+								</label>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</fail-widgets>
+		</section>
+	</screen>
+
+	<screen name="EditAgreementRoles">
+		<section>
+			<condition>
+				<if-has-permission permission="AGREEMENTSUPPLIER" action="_ADMIN" />
+			</condition>
+			<widgets>
+				<section>
+					<widgets>
+						<section>
+							<condition>
+								<not>
+									<if-empty field="parameters.agreementId" />
+								</not>
+							</condition>
+							<actions>
+								<set field="selectedMenuItem" value="manageAgreement" />
+								<set field="selectedSubMenuItem" value="listAgreement" />
+								<set field="activeTab" value="agreementRoles-tab" />
+								<set field="titleHeaderValue" value="AgreementTitle" global="true" />
+								<set field="titleHeaderLocation" value="component://basepo/widget/AgreementScreens.xml" global="true" />
+								<set field="titleProperty" value="AccountingAgreementRoles" global="true" />
+							</actions>
+							<widgets>
+								<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+									<decorator-section name="body">
+										<include-screen name="EditAgreementOpen" />
+										<platform-specific>
+											<html>
+												<html-template location="component://basepo/webapp/basepo/agreement/editAgreementRoles.ftl" />
+											</html>
+										</platform-specific>
+									</decorator-section>
+								</decorator-screen>
+							</widgets>
+							<fail-widgets>
+								<include-screen name="ListAgreementSupplier" />
+							</fail-widgets>
+						</section>
+					</widgets>
+				</section>
+			</widgets>
+			<fail-widgets>
+				<section>
+					<actions>
+						<set field="selectedMenuItem" value="manageAgreement" />
+						<set field="selectedSubMenuItem" value="listAgreement" />
+						<set field="titleProperty" value="DmsListPOAgreement" global="true" />
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<label text="${uiLabelMap.DmsNotPermission}">
+								</label>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</fail-widgets>
+		</section>
+	</screen>
+
+	<screen name="AddAgreement">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="manageAgreement" />
+				<set field="selectedSubMenuItem" value="listAgreement" />
+				<set field="titleProperty" value="DmsListPOAgreement" global="true" />
+				<script location="component://basepo/webapp/basepo/WEB-INF/actions/agreement/getCurrentOrganization.groovy" />
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://basepo/webapp/basepo/agreement/popupAddAgreement.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="EditAgreementOpen">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="manageAgreement" />
+				<set field="selectedSubMenuItem" value="listAgreement" />
+				<!-- <set field="activeTab" from-field="parameters.activeTab" default-value=""/> -->
+				<set field="titleHeaderValue" value="ReturnHeaderTitle" global="true" />
+				<set field="titleProperty" value="DmsListPOAgreement" global="true" />
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://basepo/webapp/basepo/agreement/agreementTabOpen.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+</screens>

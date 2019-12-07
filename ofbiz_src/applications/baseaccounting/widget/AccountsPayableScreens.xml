@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information regarding copyright ownership. The ASF licenses this file to you under
+    the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may
+    obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to
+    in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+    ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under
+    the License. -->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	<screen name="AccountsPayableDecorator">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="AP" global="true"/>
+            	<set field="businessType" value="AP" global="true"/>
+            </actions>
+            <widgets>
+                <decorator-section-include name="body"/>
+            </widgets>
+        </section>
+    </screen>
+	
+	<screen name="ListInvoices">
+        <section>
+	        <actions>
+	        	<set field="titleProperty" value="BACCInvoiceList"/>
+	        	<set field="selectedSubMenuItem" value="APInvoiceList"/>
+	        	<set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+	        	<entity-condition list="listInvoiceType" entity-name="InvoiceType">
+	        		<condition-expr field-name="parentTypeId" value="PURCHASE_INVOICE"/>
+	        	</entity-condition>
+	        	<entity-condition list="listStatusItem" entity-name="StatusItem">
+	        		<condition-expr field-name="statusTypeId" value="INVOICE_STATUS"/>
+	        	</entity-condition>
+	        </actions>
+	        <widgets>
+	        	<decorator-screen name="AccountsPayableDecorator" >
+	        		<decorator-section name="body">
+						<section>
+	        			   	<condition>
+								<!-- <if-has-permission permission="VIEW_PINV" action="_VIEW"/> -->
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<include-screen location="component://baseaccounting/widget/InvoiceScreens.xml" name="ListInvoices"/>
+							</widgets>	        		
+							<fail-widgets>
+								<include-screen location="component://baseaccounting/widget/CommonScreens.xml" name="ErrorPermissionAccountingCommonDecorator"/>
+							</fail-widgets>	
+						</section>   	    	        			
+	        		</decorator-section>
+	        	</decorator-screen>
+	        </widgets>
+	    </section>
+	</screen>
+	
+	<screen name="NewInvoice">
+        <section>
+	        <actions>
+	        	<set field="titleProperty" value="BACCNewInvoice"/>
+	        	<set field="selectedSubMenuItem" value="NewAPInvoice"/>
+	        	<entity-condition entity-name="InvoiceType" list="listInvoiceTypes">
+	        		<condition-list combine="and">
+	        			<condition-expr field-name="parentTypeId" value="PURCHASE_INVOICE"/>
+	        		</condition-list>
+	        		<order-by field-name="invoiceTypeId"/>
+	        	</entity-condition>
+	        </actions>
+	        <widgets>
+	        	<decorator-screen name="AccountsPayableDecorator">
+	        		<decorator-section name="body">
+	        			<section>
+	        			   	<condition>
+								<!-- <if-has-permission permission="CREATE_PINV" action="_VIEW"/> -->
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<include-screen location="component://baseaccounting/widget/InvoiceScreens.xml" name="NewInvoice"/>                            
+							</widgets>
+							<fail-widgets>
+								<include-screen location="component://baseaccounting/widget/CommonScreens.xml" name="ErrorPermissionAccountingCommonDecorator"/>
+							</fail-widgets>	        			
+	        			</section>
+	        		</decorator-section>
+	        	</decorator-screen>
+	        </widgets>
+	    </section>
+	</screen>
+
+    <screen name="APInvoiceTitle">
+        <section>
+            <condition>
+                <not><if-empty field="invoice"/></not>
+            </condition>
+            <widgets>
+                <label style="ibefore-icon-angle-right" text="${uiLabelMap.BACCInvoiceId}: "></label>
+                <link url-mode="plain" target="ViewAPInvoice?invoiceId=${invoice.invoiceId}" text="${invoice.invoiceId}"></link>
+            </widgets>
+        </section>
+    </screen>
+	
+	<screen name="ViewInvoice">
+        <section>
+	        <actions>
+	        	<set field="titleProperty" value="BACCInvoiceView"/>
+                <set field="selectedSubMenuItem" from-field="parameters.selectedItemMenu" default-value="APInvoiceList"/>
+                <set field="titleHeaderValue" value="APInvoiceTitle" global="true"/>
+                <set field="titleHeaderLocation" value="component://baseaccounting/widget/AccountsPayableScreens.xml" global="true"/>
+	        </actions>
+			<widgets>
+	        	<decorator-screen name="AccountsPayableDecorator">
+	        		<decorator-section name="body">
+						<section>
+	        			   	<condition>
+								<!-- <if-has-permission permission="PAYABLE_INV" action="_VIEW"/> -->
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<include-screen location="component://baseaccounting/widget/InvoiceScreens.xml" name="ViewInvoice"/>
+							</widgets>	        		
+							<fail-widgets>
+								<include-screen location="component://baseaccounting/widget/CommonScreens.xml" name="ErrorPermissionAccountingCommonDecorator"/>
+							</fail-widgets>	
+						</section>   	    		        		
+	        		</decorator-section>
+	        	</decorator-screen>
+	        </widgets>
+	    </section>
+	</screen>
+	
+	<!-- <screen name="ListInvoiceTrans">
+        <section>
+	        <actions>
+	        	<set field="titleProperty" value="BACCListTrans"/>
+	        	<set field="selectedSubMenuItem" value="APInvoiceList"/>
+	        </actions>
+			<widgets>
+	        	<decorator-screen name="AccountsPayableDecorator">
+	        		<decorator-section name="body">
+	        			<include-screen location="component://baseaccounting/widget/InvoiceScreens.xml" name="ListInvoiceTrans"/>
+	        		</decorator-section>
+	        	</decorator-screen>
+	        </widgets>
+	    </section>
+	</screen>
+	
+	<screen name="ListInvoiceAppls">
+        <section>
+	        <actions>
+	        	<set field="titleProperty" value="BACCListAppl"/>
+	        	<set field="selectedSubMenuItem" value="APInvoiceList"/>
+	        	<property-map resource="BaseAccountingUiLabels" map-name="uiLabelMap" global="true"/>
+	        </actions>
+			<widgets>
+	        	<decorator-screen name="AccountsPayableDecorator">
+	        		<decorator-section name="body">
+	        			<include-screen location="component://baseaccounting/widget/InvoiceScreens.xml" name="ListInvoiceAppls"/>
+	        		</decorator-section>
+	        	</decorator-screen>
+	        </widgets>
+	    </section>
+	</screen> -->
+	
+	<!-- <screen name="ViewInvoiceDetail">
+        <section>
+	        <actions>
+	        	<set field="titleProperty" value="BACCInvoiceView"/>
+	        	<set field="selectedSubMenuItem" value="APInvoiceList"/>
+	        </actions>
+			<widgets>
+	        	<decorator-screen name="AccountsPayableDecorator">
+	        		<decorator-section name="body">
+	        			<include-screen location="component://baseaccounting/widget/InvoiceScreens.xml" name="ViewInvoiceDetail"/>
+	        		</decorator-section>
+	        	</decorator-screen>
+	        </widgets>
+	    </section>
+	</screen> -->
+
+    <screen name="APPaymentTitle">
+        <section>
+            <condition>
+                <not><if-empty field="payment"/></not>
+            </condition>
+            <widgets>
+                <label style="ibefore-icon-angle-right" text="${uiLabelMap.BACCPaymentId}: "></label>
+                <link url-mode="plain" target="ViewAPPayment?paymentId=${payment.paymentId}" text="${payment.paymentCode}"></link>
+            </widgets>
+        </section>
+    </screen>
+
+	<screen name="ViewPayment">
+        <section>
+	        <actions>
+	        	<set field="titleProperty" value="BACCPaymentView"/>
+	        	<set field="selectedSubMenuItem" value="APPaymentList"/>
+                <set field="titleHeaderValue" value="APPaymentTitle" global="true"/>
+                <set field="titleHeaderLocation" value="component://baseaccounting/widget/AccountsPayableScreens.xml" global="true"/>
+<!-- 	        	<entity-condition entity-name="PaymentType" list="listPaymentType"> -->
+<!-- 	        		<condition-expr field-name="parentTypeId" value="RECEIPT"/> -->
+<!-- 	        	</entity-condition> -->
+<!-- 	        	<entity-condition entity-name="PaymentMethodType" list="listPaymentMethodType"> -->
+<!-- 	        	</entity-condition> -->
+	        	<entity-condition entity-name="StatusItem" list="listStatusItem">
+	        		<condition-expr field-name="statusTypeId" value="PMNT_STATUS"/>
+	        	</entity-condition>
+	        </actions>
+			<widgets>
+	        	<decorator-screen name="AccountsPayableDecorator">
+	        		<decorator-section name="body">
+		        		<section>
+							<condition>
+								<!-- <if-has-permission permission="PAYABLE_PMN" action="_VIEW"/> -->
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<include-screen location="component://baseaccounting/widget/PaymentScreens.xml" name="ViewPayment"/>                           
+							</widgets>
+							<fail-widgets>
+								<include-screen location="component://baseaccounting/widget/CommonScreens.xml" name="ErrorPermissionAccountingCommonDecorator"/>
+							</fail-widgets>	 									        		
+						</section>	     	        		
+	        		</decorator-section>
+	        	</decorator-screen>
+	        </widgets>
+	    </section>
+	</screen>
+	
+	<screen name="ListPayments">
+        <section>
+	        <actions>
+	        	<set field="titleProperty" value="BACCPaymentList"/>
+	        	<set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+	        	<set field="selectedSubMenuItem" value="APPaymentList"/>
+	        </actions>
+			<widgets>
+	        	<decorator-screen name="AccountsPayableDecorator">
+	        		<decorator-section name="body">
+						<section>
+							<condition>
+								<!-- <if-has-permission permission="ACC_PPAYMENT" action="_VIEW"/> -->
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<include-screen location="component://baseaccounting/widget/PaymentScreens.xml" name="ListPayments"/>                           
+							</widgets>
+							<fail-widgets>
+								<include-screen location="component://baseaccounting/widget/CommonScreens.xml" name="ErrorPermissionAccountingCommonDecorator"/>
+							</fail-widgets>	 									        		
+						</section>		 	        		
+	        		</decorator-section>
+	        	</decorator-screen>
+	        </widgets>
+	    </section>
+	</screen>
+	
+	<!-- <screen name="ListPaymentTrans">
+        <section>
+	        <actions>
+	        	<set field="titleProperty" value="BACCListTrans"/>
+	        	<set field="selectedSubMenuItem" value="APPaymentList"/>
+	        </actions>
+			<widgets>
+	        	<decorator-screen name="AccountsPayableDecorator">
+	        		<decorator-section name="body">
+	        			<include-screen location="component://baseaccounting/widget/PaymentScreens.xml" name="ListPaymentTrans"/>
+	        		</decorator-section>
+	        	</decorator-screen>
+	        </widgets>
+	    </section>
+	</screen>
+	
+	<screen name="ViewPaymentDetail">
+        <section>
+	        <actions>
+	        	<set field="titleProperty" value="BACCPaymentView"/>
+	        	<set field="selectedSubMenuItem" value="APPaymentList"/>
+	        	<entity-condition list="listPaymentType" entity-name="PaymentType">
+	        		<condition-expr field-name="paymentTypeId" value="CUSTOMER_PAYMENT"/>
+	        	</entity-condition>
+	        	<entity-condition list="listStatusItem" entity-name="StatusItem">
+	        		<condition-expr field-name="statusTypeId" value="PMNT_STATUS"/>
+	        	</entity-condition>
+	        </actions>
+			<widgets>
+	        	<decorator-screen name="AccountsPayableDecorator">
+	        		<decorator-section name="body">
+	        			<include-screen location="component://baseaccounting/widget/PaymentScreens.xml" name="ViewPaymentDetail"/>
+	        		</decorator-section>
+	        	</decorator-screen>
+	        </widgets>
+	    </section>
+	</screen>
+	
+	<screen name="ViewPaymentAppl">
+        <section>
+	        <actions>
+	        	<set field="titleProperty" value="BACCPaymentAppl"/>
+	        	<set field="selectedSubMenuItem" value="APPaymentList"/>
+	        </actions>
+			<widgets>
+	        	<decorator-screen name="AccountsPayableDecorator">
+	        		<decorator-section name="body">
+	        			<include-screen location="component://baseaccounting/widget/PaymentScreens.xml" name="ViewPaymentAppl"/>
+	        		</decorator-section>
+	        	</decorator-screen>
+	        </widgets>
+	    </section>
+	</screen> -->
+	
+ <screen name="ListOrder">
+		<section>
+			<condition>
+				<!-- <or>
+					<if-has-permission permission="SALESORDER" action="_VIEW"/>
+					<if-has-permission permission="ACC_SOAPPROVED" action="_VIEW"/>
+				</or> -->
+				<if-olbius-has-permission/>
+			</condition>
+			<widgets>
+				<section>
+					<actions>
+						<set field="selectedMenuItem" value="AP"/>
+		                <set field="selectedSubMenuItem" value="purchaseOrderList"/>
+						<set field="titleProperty" value="BSListOrder" global="true"/>
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<platform-specific>
+									<html><html-template location="component://basepo/webapp/basepo/order/listPO.ftl" /></html>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</widgets>
+			<fail-widgets>
+				<container style="alert alert-info">
+					<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+				</container>
+			</fail-widgets>
+		</section>
+    </screen>
+    <screen name="ListApInvoiceDuePayable">
+        <section>
+            <actions>
+                <set field="selectedMenuItem" value="AP" global="true"/>
+                <set field="businessType" value="AP" global="true"/>
+                <set field="titleProperty" value="BACCListInvoiceDuePayable"/>
+                <set field="selectedSubMenuItem" value="APInvoiceListDuePayable"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <entity-condition list="listInvoiceType" entity-name="InvoiceType">
+                    <condition-expr field-name="invoiceTypeId" value="PURCHASE_INVOICE"/>
+                </entity-condition>
+                <entity-condition list="listStatusItem" entity-name="StatusItem">
+                    <condition-expr field-name="statusTypeId" value="INVOICE_STATUS"/>
+                </entity-condition>
+                <entity-condition list="newStatusList" entity-name="StatusItem">
+                    <condition-expr field-name="statusTypeId" value="INVOICE_NEW_STATUS"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="BaseAccountingCommonDecorator" location="component://baseaccounting/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <!-- <if-has-permission permission="VIEW_SINV" action="_VIEW"/> -->
+                                <if-olbius-has-permission/>
+                            </condition>
+                            <widgets>
+                                <platform-specific>
+                                    <html>
+                                        <html-template location="component://baseaccounting/webapp/baseaccounting/invoice/invoiceListDuePayable.ftl"/>
+                                    </html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+                                <include-screen location="component://baseaccounting/widget/CommonScreens.xml" name="ErrorPermissionAccountingCommonDecorator"/>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+</screens>

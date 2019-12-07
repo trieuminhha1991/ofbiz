@@ -1,0 +1,555 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-screen.xsd">
+
+	<screen name="FoReportDecorator">
+		<section>
+			<actions>
+				<property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true" />
+				<set field="logoImageUrl" value="/images/ofbiz_logo.gif" />
+				<set field="defaultFontFamily" value="Arial" />
+			</actions>
+			<widgets>
+				<platform-specific>
+					<xsl-fo>
+						<html-template location="component://basepo/webapp/basepo/report/reportTemplate.fo.ftl" />
+					</xsl-fo>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="PurchaseOrderTitle">
+		<section>
+			<condition>
+				<not>
+					<if-empty field="parameters.orderId" />
+				</not>
+			</condition>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text=" ${uiLabelMap.DAOrderId}: "></label>
+				<link url-mode="plain" target="viewDetailPO?orderId=${parameters.orderId}" text="${parameters.orderId}"></link>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="NewPurchaseOrder">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="managePO" />
+				<set field="selectedSubMenuItem" value="createPO" />
+				<set field="titleProperty" value="DmsCreatePO" />
+				<set field="copyOrderId" from-field="parameters.copyOrderId"/>
+				<script location="component://basepo/webapp/basepo/WEB-INF/actions/order/orderInfoPurchase.groovy" />
+				<script location="component://basepo/webapp/basepo/WEB-INF/actions/order/CheckInits.groovy" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission />
+					</condition>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<platform-specific>
+									<html>
+										<html-template location="component://basepo/webapp/basepo/order/orderNewPurchaseTotal.ftl" />
+									</html>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-danger">
+									<label text="${uiLabelMap.DmsNotPermission}" />
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="EditPurchaseOrder">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="managePO" />
+				<set field="selectedSubMenuItem" value="listPO" />
+				<set field="titleProperty" value="DAEditOrderFormTitle" />
+				<set field="orderId" from-field="parameters.orderId"/>
+				<entity-one value-field="orderHeader" entity-name="OrderHeader"/>
+				<script location="component://basepo/webapp/basepo/WEB-INF/actions/order/orderInfoPurchase.groovy" />
+				<script location="component://basepo/webapp/basepo/WEB-INF/actions/order/editOrderInfoPurchase.groovy" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission />
+					</condition>
+					<widgets>
+						<section>
+							<condition>
+								<not>
+									<if-empty field="orderHeader"/>
+								</not>
+							</condition>
+							<widgets>
+								<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+									<decorator-section name="body">
+										<platform-specific>
+											<html>
+												<html-template location="component://basepo/webapp/basepo/order/orderNewPurchaseTotal.ftl" />
+											</html>
+										</platform-specific>
+									</decorator-section>
+								</decorator-screen>
+							</widgets>
+							<fail-widgets>
+								<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+									<decorator-section name="body">
+										<container style="alert alert-danger">
+											<label text="${uiLabelMap.ReportCheckNotData}" />
+										</container>
+									</decorator-section>
+								</decorator-screen>
+							</fail-widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-danger">
+									<label text="${uiLabelMap.DmsNotPermission}" />
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="POScreensContainer">
+		<section>
+			<actions>
+				<script location="component://basepo/webapp/basepo/WEB-INF/actions/order/getStatusOrder.groovy" />
+			</actions>
+			<widgets>
+				<include-screen location="component://appbase/widget/logistics/DeliveryScreens.xml" name="PurchaseDelivery" />
+				<include-screen name="OrderViewDetailContainer" />
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="viewDetailPO">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="managePO" />
+				<set field="selectedSubMenuItem" value="listPO" />
+				<set field="titleProperty" value="DmsDetailPO" global="true" />
+				<property-map resource="BasePOErrorUiLabels" map-name="uiLabelMap" global="true" />
+				<script location="component://basepo/webapp/basepo/WEB-INF/actions/order/checkRolePO.groovy" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission />
+					</condition>
+					<widgets>
+						<section>
+							<condition>
+								<if-compare operator="equals" value="Y" field="org" />
+							</condition>
+							<widgets>
+								<section>
+									<condition>
+										<not>
+											<if-empty field="parameters.orderId" />
+										</not>
+									</condition>
+									<actions>
+										<set field="selectedMenuItem" default-value="managePO" global="true" from-field="selectedMenuItem" />
+										<set field="selectedSubMenuItem" default-value="listPO" global="true" from-field="selectedSubMenuItem" />
+										<set field="titleProperty" value="DmsDetailPO" global="true" />
+										<set field="titleHeaderValue" value="PurchaseOrderTitle" global="true" />
+										<set field="titleHeaderLocation" value="component://basepo/widget/OrderScreens.xml" global="true" />
+										<script location="component://basepo/webapp/basepo/WEB-INF/actions/navigator/nav_purchaseOrderList.groovy" />
+										<script location="component://basepo/webapp/basepo/WEB-INF/actions/order/OrderViewSimple.groovy" />
+										<script location="component://basepo/webapp/basepo/WEB-INF/actions/order/OrderViewGeneral.groovy" />
+										<script location="component://basepo/webapp/basepo/WEB-INF/actions/order/getViewDetailPO.groovy" />
+										<set field="layoutSettings.javaScripts[+0]" value="/salesresources/js/order/order.view.js" global="true" />
+										<set field="activeTab" from-field="parameters.activeTab" default-value="" />
+									</actions>
+									<widgets>
+										<section>
+											<condition>
+												<if-has-permission permission="LOGISTICS" action="_VIEW" />
+											</condition>
+											<widgets>
+												<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+													<decorator-section name="body">
+														<platform-specific>
+															<html>
+																<html-template location="component://basepo/webapp/basepo/order/viewOrderDetailOpen.ftl" />
+															</html>
+														</platform-specific>
+														<include-screen name="POScreensContainer" />
+														<decorator-section-include name="container" />
+													</decorator-section>
+												</decorator-screen>
+											</widgets>
+											<fail-widgets>
+												<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+													<decorator-section name="body">
+														<platform-specific>
+															<html>
+																<html-template location="component://basepo/webapp/basepo/order/viewOrderDetailOpen.ftl" />
+															</html>
+														</platform-specific>
+														<include-screen name="OrderViewDetailContainer" />
+													</decorator-section>
+												</decorator-screen>
+											</fail-widgets>
+										</section>
+									</widgets>
+									<fail-widgets>
+										<include-screen name="viewListPO" />
+									</fail-widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<section>
+									<widgets>
+										<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+											<decorator-section name="body">
+												<container style="alert alert-danger">
+													<label text="${uiLabelMap.DmsNotPermission}" />
+												</container>
+											</decorator-section>
+										</decorator-screen>
+									</widgets>
+								</section>
+							</fail-widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-danger">
+									<label text="${uiLabelMap.DmsNotPermission}" />
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="OrderViewDetailContainer">
+		<section>
+			<actions>
+				<script location="component://basepo/webapp/basepo/WEB-INF/actions/order/getSupplierOfOrder.groovy" />
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://basepo/webapp/basepo/order/viewOrderGeneral.ftl" />
+					</html>
+				</platform-specific>
+				<include-screen name="OrderInfo" />
+				<include-screen name="OrderPaymentInfo" />
+				<include-screen name="OrderItem" />
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="OrderInfo">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://basepo/webapp/basepo/order/viewOrderInfo.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="OrderPaymentInfo">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://basepo/webapp/basepo/order/orderPaymentInfo.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="OrderItem">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="applications/basesales/webapp/basesales/order/orderViewItems.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="viewListPO">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="managePO" />
+				<set field="selectedSubMenuItem" value="listPO" />
+				<set field="titleProperty" value="DmsListPO" global="true" />
+				<script location="component://basepo/webapp/basepo/WEB-INF/actions/navigator/nav_purchaseOrderList.groovy" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission />
+					</condition>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<platform-specific>
+									<html>
+										<html-template location="component://basepo/webapp/basepo/order/listPO.ftl" />
+									</html>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-danger">
+									<label text="${uiLabelMap.DmsNotPermission}" />
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="ListExportPurchaseOrderToPDF">
+		<section>
+			<actions>
+				<property-map resource="BasePOUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="BaseLogisticsUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="BaseSalesUiLabels" map-name="uiLabelMap" global="true" />
+<!-- 				<property-map resource="BaseLogisticsSGCUiLabels" map-name="uiLabelMap" global="true" /> -->
+				<set field="orderId" from-field="parameters.orderId" />
+				<!-- <script location="component://basepo/webapp/basepo/WEB-INF/actions/order/getPurchaseOrderPDF.groovy" /> -->
+				<script location="component://basepo/webapp/basepo/WEB-INF/actions/order/OrderViewSimple.groovy" />
+				<script location="component://basepo/webapp/basepo/WEB-INF/actions/order/OrderViewGeneral.groovy" />
+				<script location="component://basepo/webapp/basepo/WEB-INF/actions/order/Ours.groovy" />
+			</actions>
+			<widgets>
+				<decorator-screen name="FoReportDecorator">
+					<decorator-section name="headerLogo">
+					</decorator-section>
+					<decorator-section name="body">
+						<platform-specific>
+							<xsl-fo>
+								<html-template location="component://basepo/webapp/basepo/report/printPurchaseOrderDetailToPdf.fo.ftl" />
+							</xsl-fo>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="EditPOOrder">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="managePO" />
+				<set field="selectedSubMenuItem" value="listPO" />
+				<script location="component://basepo/webapp/basepo/WEB-INF/actions/order/nav_orderList.groovy" />
+				<script location="component://basepo/webapp/basepo/WEB-INF/actions/order/getSupplierPartyOrder.groovy" />
+				<set field="titleProperty" value="DAEditOrderFormTitle" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission />
+					</condition>
+					<actions>
+						<entity-one value-field="orderHeader" entity-name="OrderHeader">
+							<field-map field-name="orderId" from-field="parameters.orderId" />
+						</entity-one>
+					</actions>
+					<widgets>
+						<section>
+							<condition>
+								<not>
+									<if-empty field="orderHeader" />
+								</not>
+							</condition>
+							<actions>
+								<set field="titleHeaderValue" value="PurchaseOrderTitle" global="true" />
+								<set field="titleHeaderLocation" value="component://basepo/widget/OrderScreens.xml" global="true" />
+							</actions>
+							<widgets>
+								<section>
+									<condition>
+										<not>
+											<or>
+												<if-compare operator="equals" value="ORDER_COMPLETED" field="orderHeader.statusId" />
+												<if-compare operator="equals" value="ORDER_CANCELLED" field="orderHeader.statusId" />
+											</or>
+										</not>
+									</condition>
+									<widgets>
+										<section>
+											<actions>
+												<script location="component://basepo/webapp/basepo/WEB-INF/actions/order/OrderViewSimple.groovy" />
+											</actions>
+											<widgets>
+												<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+													<decorator-section name="body">
+														<platform-specific>
+															<html>
+																<html-template location="component://basepo/webapp/basepo/order/orderEditPurchaseOrder.ftl" />
+															</html>
+														</platform-specific>
+													</decorator-section>
+												</decorator-screen>
+											</widgets>
+										</section>
+									</widgets>
+									<fail-widgets>
+										<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+											<decorator-section name="body">
+												<platform-specific>
+													<html>
+														<html-template location="component://basesales/webapp/basesales/order/orderEditSalesOrderNotify.ftl" />
+													</html>
+												</platform-specific>
+											</decorator-section>
+										</decorator-screen>
+									</fail-widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+									<decorator-section name="body">
+										<container style="alert alert-info">
+											<label text="${uiLabelMap.OrderNoOrderFound}"></label>
+										</container>
+									</decorator-section>
+								</decorator-screen>
+							</fail-widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.DAYouHavenotUpdatePermission}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="OrderNoteAjax">
+		<section>
+			<condition>
+				<if-has-permission permission="PURCHASEORDER" action="_VIEW" />
+			</condition>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="BaseSalesUiLabels" global="true" />
+				<property-map map-name="uiLabelMap" resource="OrderUiLabels" global="true" />
+				<set field="requestNameScreen" from-field="requestNameScreen" default-value="" global="true" />
+				<set field="titleProperty" value="OrderAddNote" />
+				<set field="headerItem" value="findorders" />
+				<script location="component://basepo/webapp/basepo/WEB-INF/actions/order/GetOrderNotes.groovy" />
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://basepo/webapp/basepo/order/orderViewNotes.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+			<fail-widgets>
+				<container style="alert alert-info">
+					<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+				</container>
+			</fail-widgets>
+		</section>
+	</screen>
+
+	<screen name="ViewFileScanOrder">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="managePO" />
+				<set field="selectedSubMenuItem" value="fileScanOrder" />
+				<set field="titleProperty" value="fileScanOrder" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission />
+					</condition>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<platform-specific>
+									<html>
+										<html-template location="component://basepo/webapp/basepo/order/viewFileScanOrder.ftl" />
+									</html>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<label text="${uiLabelMap.DmsNotPermission}" style="h4">
+								</label>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="NewPurchaseOrderConfirmAjax">
+		<section>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="WidgetUiLabels" global="true" />
+				<property-map map-name="uiLabelMap" resource="CommonUiLabels" global="true" />
+				<property-map map-name="uiLabelMap" resource="OrderUiLabels" global="true" />
+				<property-map map-name="uiLabelMap" resource="BaseSalesUiLabels" global="true" />
+				<property-map map-name="uiLabelMap" resource="BaseLogisticsUiLabels" global="true" />
+				<property-map map-name="uiLabelMap" resource="BasePOUiLabels" global="true" />
+				<script location="component://basepo/webapp/basepo/WEB-INF/actions/order/CheckoutReviewCart.groovy" />
+				<script location="component://basepo/webapp/basepo/WEB-INF/actions/order/ConfirmOrderCart.groovy" />
+				<script location="component://basepo/webapp/basepo/WEB-INF/actions/order/ConfirmOrderPromo.groovy" />
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://basepo/webapp/basepo/order/orderNewConfirmOrder.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+</screens>

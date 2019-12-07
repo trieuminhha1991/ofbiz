@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service-eca xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/service-eca.xsd">
+        
+     <eca service="createDelivery" event="commit">
+     	<condition operator="equals" field-name="deliveryTypeId" value="DELIVERY_SALES"/>
+     	<action mode="sync" service="createShipmentFromDelivery"/>
+     </eca>
+     
+     <eca service="createDelivery" event="commit">
+     	<condition operator="equals" field-name="deliveryTypeId" value="DELIVERY_TRANSFER"/>
+     	<action mode="sync" service="createShipmentFromDelivery"/>
+     </eca>
+     
+     <eca service="updateShipment" event="commit">
+     	<condition operator="equals" field-name="shipmentTypeId" value="SALES_SHIPMENT"/>
+     	<condition operator="equals" field-name="shipmentTypeId" value="TRANSFER"/>
+     	<action mode="sync" service="updateDeliveryByShipment"/>
+     </eca>
+     
+     <eca service="createTransferDelivery" event="commit">
+     	<action mode="sync" service="createShipmentFromDelivery"/>
+     </eca>
+     
+     <eca service="createTransferDelivery" event="commit">
+     	<action mode="sync" service="sendNotificationToStorekeeper"/>
+     </eca>
+     
+     <eca service="changeTransferItemStatus" event="commit">
+     	<action mode="sync" service="checkTransferItemStatus"/>
+     </eca>
+     
+     <eca service="updateDeliveryItem" event="commit">
+     	<condition operator="equals" field-name="deliveryTypeId" value="DELIVERY_TRANSFER"/>
+     	<condition operator="equals" field-name="deliveryStatusId" value="DLV_EXPORTED"/>
+     	<condition operator="is-not-empty" field-name="transferId"/>
+     	<action mode="sync" service="checkDeliveryTransferStatus"/>
+     </eca>
+     
+     <eca service="updateDeliveryItem" event="commit">
+     	<condition operator="equals" field-name="deliveryTypeId" value="DELIVERY_TRANSFER"/>
+     	<condition operator="equals" field-name="deliveryStatusId" value="DLV_DELIVERED"/>
+     	<condition operator="is-not-empty" field-name="transferId"/>
+     	<action mode="sync" service="checkDeliveryTransferStatus"/>
+     </eca>
+     
+     <eca service="updateDeliveryItem" event="commit">
+<!--      	<condition operator="equals" field-name="deliveryTypeId" value="DELIVERY_TRANSFER"/> -->
+     	<condition operator="is-not-empty" field-name="deliveryId"/>
+     	<action mode="sync" service="updateShipmentByDelivery"/>
+     </eca>
+     
+     <eca service="updateShipment" event="commit">
+     	<condition operator="equals" field-name="shipmentTypeId" value="TRANSFER"/>
+     	<condition operator="is-not-empty" field-name="shipmentId"/>
+     	<action mode="sync" service="updateDeliveryByShipment"/>
+     </eca>
+     
+     <eca service="updateShipment" event="commit">
+     	<condition operator="equals" field-name="shipmentTypeId" value="SALES_SHIPMENT"/>
+     	<condition operator="is-not-empty" field-name="shipmentId"/>
+     	<action mode="sync" service="updateDeliveryByShipment"/>
+     </eca>
+     
+     <eca service="updateShipment" event="commit">
+        <condition-field field-name="statusId" operator="not-equals" to-field-name="oldStatusId"/>
+        <condition field-name="statusId" operator="equals" value="SHIPMENT_PICKED"/>
+        <condition field-name="shipmentTypeId" operator="equals" value="SALES_SHIPMENT"/>
+        <action service="createInvoicesFromShipment" mode="sync" run-as-user="system"/>
+    </eca>
+
+    <eca service="updateShipment" event="commit">
+        <condition-field field-name="statusId" operator="not-equals" to-field-name="oldStatusId"/>
+        <condition field-name="statusId" operator="equals" value="SHIPMENT_PACKED"/>
+        <condition field-name="shipmentTypeId" operator="equals" value="SALES_SHIPMENT"/>
+        <action service="createInvoicesFromShipment" mode="sync" run-as-user="system"/>
+        <action service="setInvoicesToReadyFromShipment" mode="sync" run-as-user="system"/>
+    </eca>
+    
+    <eca service="createDelivery" event="commit">
+        <condition field-name="deliveryTypeId" operator="equals" value="DELIVERY_PURCHASE"/>
+        <set field-name="inventoryStatusId" value="INV_NS_GOOD"/>
+        <action service="receiveInventoryFromDelivery" mode="sync"/>
+    </eca>
+    
+    <eca service="receiveInventoryFromDelivery" event="commit">
+        <condition field-name="deliveryTypeId" operator="equals" value="DELIVERY_PURCHASE"/>
+        <set field-name="statusId" value="REQ_COMPLETED"/>
+        <action service="updateRequirementFromDelivery" mode="sync"/>
+    </eca>
+    
+    <eca service="updateReturnHeader" event="commit">
+        <action service="sendNotifyToLogspecialist" mode="sync"/>
+    </eca>
+    <!-- <eca service="reserveTransferItemInventory" event="commit">
+        <condition field-name="quantity" value="0" operator="greater" type="BigDecimal"/>
+        <action service="checkCreateStockRequirementAtp" mode="sync" run-as-user="system"/>
+    </eca> -->
+</service-eca>

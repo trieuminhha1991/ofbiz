@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+    <!-- ========================================================= -->
+    <!-- ======================== Defaults ======================= -->
+    <!-- ========================================================= -->
+    <title>Entity of BaseAccounting Component</title>
+    <description>None</description>
+    <copyright></copyright>
+    <version></version>
+	<entity entity-name="FixedAssetDepreciation" package-name="com.olbius.bacc.fixedasset"
+            title="Fixed Asset Depreciation Entity">
+		<field name="fixedAssetDepId" type="id-ne"></field>
+		<field name="fixedAssetId" type="id-ne"></field>
+		<field name="depGlAccountId" type="id-ne"></field>
+		<field name="accDepGlAccountId" type="id-ne"></field>
+		<field name="costGlAccountId" type="id-ne"></field>
+		<field name="preDepDate" type="date"></field>
+		<field name="usefulLives" type="numeric"></field>
+		<field name="monthlyDepRate" type="fixed-point"></field>
+		<field name="yearlyDepRate" type="fixed-point"></field>
+		<field name="lifeDepAmount" type="fixed-point"></field>
+		<field name="remainingValue" type="fixed-point"></field>
+		<field name="monthlyDepAmount" type="fixed-point"></field>
+		<field name="yearlyDepAmount" type="fixed-point"></field>
+		<field name="accumulatedDep" type="fixed-point"></field>
+		<prim-key field="fixedAssetDepId"/>
+		<relation type="one" fk-name="FX_ASSETDEP" rel-entity-name="FixedAsset">
+		  	<key-map field-name="fixedAssetId"/>
+		</relation>
+		<relation type="one" fk-name="FIXED_ASSETDEP_GLACC" title="dep" rel-entity-name="GlAccount">
+			<key-map rel-field-name="glAccountId" field-name="depGlAccountId"/>
+		</relation>
+		<relation type="one" fk-name="FIXED_ASSETCOST_GLACC" title="cost" rel-entity-name="GlAccount">
+			<key-map rel-field-name="glAccountId" field-name="costGlAccountId"/>
+		</relation>
+		<relation type="one" fk-name="FIXED_ASSETACCDEP_GLACC" title="accDep" rel-entity-name="GlAccount">
+			<key-map rel-field-name="glAccountId" field-name="accDepGlAccountId"/>
+		</relation>		
+    </entity>
+    <entity entity-name="FixedAssetAccompany" package-name="com.olbius.bacc.fixedasset">
+    	<field name="fixedAssetId" type="id-ne"></field>
+    	<field name="accompanySeqId" type="id-ne"></field>
+    	<field name="componentName" type="long-varchar"></field>
+    	<field name="unit" type="long-varchar"></field>
+    	<field name="quantity" type="numeric"></field>
+    	<field name="value" type="currency-amount"></field>
+    	<prim-key field="fixedAssetId"/>
+    	<prim-key field="accompanySeqId"/>
+    	<relation rel-entity-name="FixedAsset" type="one" fk-name="FIX_ASST_COMPONENT">
+    		<key-map field-name="fixedAssetId"/>
+    	</relation>
+    </entity>
+    
+    <entity entity-name="FixedAssetAlloc"
+            package-name="com.olbius.bacc.fixedasset"
+            title="Fixed Asset Allocation Entity">
+      <field name="fixedAssetId" type="id-ne"></field>
+      <field name="seqId" type="id-ne"></field>
+      <field name="allocPartyId" type="id-ne"></field>
+      <field name="allocRate" type="fixed-point"></field>
+      <field name="allocGlAccountId" type="id-ne"></field>
+      <prim-key field="fixedAssetId"/>
+      <prim-key field="seqId"/>
+      <relation rel-entity-name="GlAccount" type="one" fk-name="FIXEDASSETALLOC_GLACCOUNT">
+      	<key-map field-name="allocGlAccountId" rel-field-name="glAccountId"/>
+      </relation>
+      <relation rel-entity-name="Party" type="one" fk-name="FIXEDASSETALLOC_PARTY">
+      	<key-map field-name="allocPartyId" rel-field-name="partyId"/>
+      </relation>
+    </entity>
+    
+    <!-- maybe deleted -->
+    <entity entity-name="Decrement" package-name="com.olbius.bacc.fixedasset"
+      		title="Decrement Entity">
+      <field name="decrementId" type="id-ne"></field>
+      <field name="decreasedDate" type="date"></field>
+      <field name="decrementTypeId" type="id-ne"></field>
+      <field name="enumId" type="id-ne"></field>
+      <field name="description" type="description"></field>
+      <field name="isClosed" type="id-ne"></field>
+      <prim-key field="decrementId"/>
+      <relation type="one" fk-name="FIXED_ASSET_DEC_TYPE" rel-entity-name="DecrementType">
+        <key-map field-name="decrementTypeId"/>
+      </relation>
+      <relation type="one" fk-name="DECREMENT_ENUM" rel-entity-name="Enumeration">
+        <key-map field-name="enumId"/>
+      </relation>
+    </entity>
+    
+    <!-- maybe deleted -->
+    <entity entity-name="DecrementType" package-name="com.olbius.bacc.fixedasset"
+      		title="Decrement Type Entity">
+      <field name="decrementTypeId" type="id-ne"></field>
+      <field name="parentTypeId" type="id-ne"></field>
+      <field name="hasTable" type="id-ne"></field>
+      <field name="description" type="description"></field>
+      <prim-key field="decrementTypeId"/>
+      <relation type="one" fk-name="DEC_TYPE_PARENT" rel-entity-name="DecrementType">
+        <key-map field-name="parentTypeId" rel-field-name="decrementTypeId"/>
+      </relation>
+    </entity>
+    
+    <!-- maybe deleted -->
+    <entity entity-name="FixedAssetDecrementItem" package-name="com.olbius.bacc.fixedasset"
+      		title="Fixed Asset Decrement Entity">
+      	<field name="decrementId" type="id-ne"></field>
+      	<field name="fixedAssetId" type="id-ne"></field>
+      	<field name="amount" type="fixed-point"></field>
+      	<prim-key field="decrementId"/>
+      	<prim-key field="fixedAssetId"/>
+      	<relation type="one" fk-name="FIXED_ASSET_ITEM" rel-entity-name="FixedAsset">
+        	<key-map field-name="fixedAssetId"/>
+      	</relation>
+      	<relation type="one" fk-name="FX_ASSET_DEC_ITEM" rel-entity-name="Decrement">
+        	<key-map field-name="decrementId"/>
+      	</relation>
+    </entity>
+    
+    <entity entity-name="FixedAssetPartyGlAccount" package-name="com.olbius.bacc.fixedasset"
+      		title="Fixed Asset Party GlAccount Entity">
+      	<field name="partyId" type="id-ne"></field>
+      	<field name="glAccountId" type="id-ne"></field>
+      	<prim-key field="partyId"/>
+      	<prim-key field="glAccountId"/>
+      	<relation type="one" fk-name="FAPG_PARTY" rel-entity-name="Party">
+      		<key-map field-name="partyId"/>
+      	</relation>
+      	<relation type="one" fk-name="FAPG_GlAccount" rel-entity-name="GlAccount">
+      		<key-map field-name="glAccountId"/>
+      	</relation>
+    </entity>
+    
+    <!-- maybe delete -->
+    <entity entity-name="FixedAssetCustomTimePeriod" package-name="com.olbius.bacc.fixedasset"
+            title="Fixed Asset Depreciation Entity">
+      	<field name="fixedAssetId" type="id-ne"></field>
+      	<field name="customTimePeriodId" type="id-ne"></field>
+      	<field name="amount" type="fixed-point"></field>
+      	<prim-key field="fixedAssetId"/>
+      	<prim-key field="customTimePeriodId"/>
+      	<relation type="one" fk-name="FIXED_ASSETDEP" rel-entity-name="FixedAsset">
+        	<key-map field-name="fixedAssetId"/>
+      	</relation>
+      	<relation type="one" fk-name="FX_CUSTOM_TIME_PERIOD" rel-entity-name="CustomTimePeriod">
+        	<key-map field-name="customTimePeriodId"/>
+		</relation>
+	</entity>
+	
+	<entity entity-name="FixedAssetIncrease" package-name="com.olbius.bacc.fixedasset">
+		<field name="fixedAssetIncreaseId" type="id-ne"></field>
+		<field name="paymentMethodTypeEnumId" type="id-ne"></field>
+		<field name="dateArising" type="date-time">
+			<description>ngay phat sinh</description>
+		</field>
+		<field name="isReceiveInvoice" type="boolean"></field>
+		<field name="supplierId" type="id-ne"></field>
+		<field name="address" type="long-varchar"></field>
+		<field name="contactPerson" type="long-varchar"></field>
+		<field name="description" type="long-varchar"></field>
+		<field name="employeeBuyerId" type="id-ne">
+			<description>nhan vien mua hang</description>
+		</field>
+		<field name="moneyReceiver" type="long-varchar"></field>
+		<field name="accountPayer" type="id-ne"></field>
+		<field name="accountReceiver" type="long-varchar"></field>
+		<field name="currencyUomId" type="id-ne"></field>
+		<field name="dueDate" type="date-time">
+			<description>han thanh toan</description>
+		</field>
+		<field name="paymentVoucherNbr" type="short-varchar">
+			<description>So PC/UNC</description>
+		</field>
+		<field name="isPosted" type="boolean"></field>
+		<field name="acctgTransId" type="id-ne"></field>
+        <prim-key field="fixedAssetIncreaseId"/>
+	<relation rel-entity-name="AcctgTrans" type="one" fk-name="FA_INC_ACCTG">
+    		<key-map field-name="acctgTransId"/>
+    	</relation>
+		<relation rel-entity-name="Enumeration" type="one" fk-name="FA_INC_ENUM">
+			<key-map field-name="paymentMethodTypeEnumId" rel-field-name="enumId"/>
+		</relation>
+		<relation rel-entity-name="Party" type="one" title="supplier" fk-name="FA_INC_SUP">
+			<key-map field-name="supplierId" rel-field-name="partyId"/>
+		</relation>
+		<relation rel-entity-name="Party" type="one" title="employee" fk-name="FA_INC_EMPL">
+			<key-map field-name="employeeBuyerId" rel-field-name="partyId"/>
+		</relation>
+		<relation rel-entity-name="Uom" type="one" fk-name="FA_INC_UOM">
+			<key-map field-name="currencyUomId" rel-field-name="uomId"/>
+		</relation>
+	</entity>
+	
+	<entity entity-name="FixedAssetIncreaseItem" package-name="com.olbius.bacc.fixedasset">
+		<field name="fixedAssetIncreaseId" type="id-ne"></field>
+		<field name="fixedAssetId" type="id-ne"></field>
+		<field name="debitGlAccountId" type="id-ne"></field>
+		<field name="creditGlAccountId" type="id-ne"></field>
+		<prim-key field="fixedAssetIncreaseId"/>
+		<prim-key field="fixedAssetId"/>
+		<relation rel-entity-name="FixedAssetIncrease" type="one" fk-name="FA_INC_ITEM_FA_INC">
+			<key-map field-name="fixedAssetIncreaseId"/>
+		</relation>
+		<relation rel-entity-name="FixedAsset" type="one" fk-name="FA_INC_ITEM_FA">
+			<key-map field-name="fixedAssetId"/>
+		</relation>
+		<relation rel-entity-name="GlAccount" type="one" title="debit" fk-name="FA_INC_ITEM_DEBIT_GLA">
+			<key-map field-name="debitGlAccountId" rel-field-name="glAccountId"/>
+		</relation>
+		<relation rel-entity-name="GlAccount" type="one" title="credit" fk-name="FA_INC_ITEM_CREDIT_GLA">
+			<key-map field-name="creditGlAccountId" rel-field-name="glAccountId"/>
+		</relation>
+	</entity>
+	
+	<entity entity-name="FixedAssetDecrReasonType" package-name="com.olbius.bacc.fixedasset">
+		<field name="decreaseReasonTypeId" type="id-ne"></field>
+		<field name="description" type="description"></field>
+		<field name="parentTypeId" type="id-ne"></field>
+		<prim-key field="decreaseReasonTypeId"/>
+		<relation rel-entity-name="FixedAssetDecrReasonType" type="one" fk-name="FA_DECR_REASON_PAR_TYP">
+			<key-map field-name="parentTypeId" rel-field-name="decreaseReasonTypeId"/>
+		</relation>
+	</entity>
+	<entity entity-name="FixedAssetDecrease" package-name="com.olbius.bacc.fixedasset">
+		<field name="fixedAssetDecreaseId" type="id-ne"></field>
+		<field name="decreaseReasonTypeId" type="id-ne"></field>
+		<field name="voucherDate" type="date-time"></field>
+		<field name="voucherNumber" type="name"></field>
+		<field name="description" type="description"></field>
+		<field name="isPosted" type="boolean"></field>
+		<field name="acctgTransId" type="id-ne"></field>
+        <prim-key field="fixedAssetDecreaseId"/>
+	<relation rel-entity-name="AcctgTrans" type="one" fk-name="FA_DECR_ACCTG_TRANS">
+    		<key-map field-name="acctgTransId"/>
+    	</relation>
+		<relation rel-entity-name="FixedAssetDecrReasonType" type="one" fk-name="FA_DECR_FA_DECR_RT">
+			<key-map field-name="decreaseReasonTypeId"/>
+		</relation>
+	</entity>
+	
+	<entity entity-name="FixedAssetDecreaseItem" package-name="com.olbius.bacc.fixedasset">
+		<field name="fixedAssetDecreaseId" type="id-ne"></field>
+		<field name="fixedAssetId" type="id-ne"></field>
+		<field name="depreciationGlAccount" type="id-ne"></field>
+		<field name="remainValueGlAccount" type="id-ne"></field>
+		<field name="accumulatedDepreciation" type="currency-amount"></field>
+		<field name="remainValue" type="currency-amount"></field>
+		<prim-key field="fixedAssetDecreaseId"/>
+		<prim-key field="fixedAssetId"/>
+		<relation rel-entity-name="FixedAssetDecrease" type="one" fk-name="FA_DECR_ITEM_FA_DECR">
+			<key-map field-name="fixedAssetDecreaseId"/>
+		</relation>
+		<relation rel-entity-name="FixedAsset" type="one" fk-name="FA_DECR_ITEM_FA">
+			<key-map field-name="fixedAssetId"/>
+		</relation>
+		<relation rel-entity-name="GlAccount" type="one" title="deprecia" fk-name="FA_DECR_ITEM_DEP_GLA">
+			<key-map field-name="depreciationGlAccount" rel-field-name="glAccountId"/>
+		</relation>
+		<relation rel-entity-name="GlAccount" type="one" title="remainValue" fk-name="FA_DECR_ITEM_REM_GLA">
+			<key-map field-name="remainValueGlAccount" rel-field-name="glAccountId"/>
+		</relation>
+	</entity>
+	
+	<entity entity-name="FixedAssetDepreciationCalc" package-name="com.olbius.bacc.fixedasset">
+		<field name="depreciationCalcId" type="id-ne"></field>
+		<field name="month" type="int"></field>
+		<field name="year" type="int"></field>
+		<field name="voucherDate" type="date-time"></field>
+		<field name="voucherNumber" type="name"></field>
+		<field name="description" type="description"></field>
+		<field name="isPosted" type="boolean"></field>
+		<field name="acctgTransId" type="id-ne"></field>
+        <prim-key field="depreciationCalcId"/>
+	<relation rel-entity-name="AcctgTrans" type="one" fk-name="FA_DEP_CAL_ACCTG">
+    		<key-map field-name="acctgTransId"/>
+    	</relation>
+	</entity>
+	
+	<entity entity-name="FixedAssetDepreCalcItem" package-name="com.olbius.bacc.fixedasset">
+		<field name="depreciationCalcId" type="id-ne"></field>
+		<field name="fixedAssetId" type="id-ne"></field>
+		<field name="debitGlAccountId" type="id-ne"></field>
+		<field name="creditGlAccountId" type="id-ne"></field>
+		<field name="depreciationAmount" type="currency-amount"></field>
+		<prim-key field="depreciationCalcId"/>
+		<prim-key field="fixedAssetId"/>
+		<relation rel-entity-name="FixedAssetDepreciationCalc" type="one" fk-name="FA_DEPRE_CALC_ITEM_DEPRE_CALC">
+			<key-map field-name="depreciationCalcId"/>		
+		</relation>
+		<relation rel-entity-name="FixedAsset" type="one" fk-name="FA_DEPRE_CALC_ITEM_FA">
+			<key-map field-name="fixedAssetId"/>
+		</relation>
+		<relation rel-entity-name="GlAccount" type="one" title="debit" fk-name="FADEPRECALCITEM_DEBACC">
+			<key-map field-name="debitGlAccountId" rel-field-name="glAccountId"/>
+		</relation>
+		<relation rel-entity-name="GlAccount" type="one" title="credit" fk-name="FADEPRECALCITEM_CREBACC">
+			<key-map field-name="creditGlAccountId" rel-field-name="glAccountId"/>
+		</relation>
+	</entity>
+    
+    <view-entity entity-name="FixedAssetCustomTimePeriodView" package-name="com.olbius.bacc.fixedasset">
+		<member-entity entity-alias="FACT" entity-name="FixedAssetCustomTimePeriod"/>
+		<member-entity entity-alias="CTP" entity-name="CustomTimePeriod"/>
+		<member-entity entity-alias="FA" entity-name="FixedAsset"/>
+		<alias-all entity-alias="CTP"/>
+		<alias-all entity-alias="FA"/>
+		<alias-all entity-alias="FACT"/>
+		<view-link entity-alias="CTP" rel-entity-alias="FACT">
+			<key-map field-name="customTimePeriodId"/>
+		</view-link>
+		<view-link entity-alias="FACT" rel-entity-alias="FA">
+			<key-map field-name="fixedAssetId"/>
+		</view-link>
+    </view-entity>
+    
+    <view-entity entity-name="FixedAssetDecrementView" package-name="com.olbius.bacc.fixedasset">
+		<member-entity entity-alias="FADI" entity-name="FixedAssetDecrementItem"/>
+		<member-entity entity-alias="FAD" entity-name="Decrement"/>
+		<member-entity entity-alias="FA" entity-name="FixedAsset"/>
+		<alias-all entity-alias="FADI"/>
+		<alias-all entity-alias="FAD"/>
+		<alias-all entity-alias="FA"/>
+		<view-link entity-alias="FADI" rel-entity-alias="FAD">
+			<key-map field-name="decrementId"/>
+		</view-link>
+		<view-link entity-alias="FADI" rel-entity-alias="FA">
+			<key-map field-name="fixedAssetId"/>
+		</view-link>
+    </view-entity>
+    
+    <view-entity entity-name="FAPartyGlAccountView" package-name="com.olbius.bacc.fixedasset">
+		<member-entity entity-alias="FAPG" entity-name="FixedAssetPartyGlAccount"/>
+		<member-entity entity-alias="GLA" entity-name="GlAccount"/>
+		<alias-all entity-alias="FAPG"/>
+		<alias-all entity-alias="GLA"/>
+		<view-link entity-alias="FAPG" rel-entity-alias="GLA">
+			<key-map field-name="glAccountId"/>
+		</view-link>
+    </view-entity>
+</entitymodel>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>Web Pos Return Services</description>
+    <vendor>OFBiz</vendor>
+    <version>1.0</version>
+    <service name="createReturnItemDirectly" engine="simple"
+            location="component://basepos/script/com/olbius/webpos/return/ReturnServices.xml" invoke="createReturnItem">
+        <description>Return item directly in pos</description>
+        <auto-attributes entity-name="ReturnItem" include="all" mode="IN" optional="true">
+            <exclude field-name="returnItemSeqId"/>
+        </auto-attributes>
+        <attribute name="includeAdjustments" type="String" mode="IN" optional="true"/> <!-- The default is "Y": the adjustments associated with the item are included in the return -->
+        <attribute name="returnItemSeqId" type="String" mode="OUT" optional="false"/>
+        <override name="returnId" optional="false"/>
+        <override name="returnTypeId" optional="false"/>
+        <override name="returnItemTypeId" optional="false"/>
+        <override name="returnQuantity" optional="false"/>
+        <override name="returnAmount" optional="true"/>
+    </service>
+    <service name="createReturnItemDirectlyBySalesman" engine="simple"
+             location="component://basepos/script/com/olbius/webpos/return/ReturnServices.xml" invoke="createReturnItemBySalesman">
+        <description>Return item directly By Salesman in ReturnItem Without Order</description>
+        <auto-attributes entity-name="ReturnItem" include="all" mode="IN" optional="true">
+            <exclude field-name="returnItemSeqId"/>
+        </auto-attributes>
+        <attribute name="includeAdjustments" type="String" mode="IN" optional="true"/> <!-- The default is "Y": the adjustments associated with the item are included in the return -->
+        <attribute name="returnItemSeqId" type="String" mode="OUT" optional="false"/>
+        <override name="returnId" optional="false"/>
+        <override name="returnTypeId" optional="false"/>
+        <override name="returnItemTypeId" optional="false"/>
+        <override name="returnQuantity" optional="false"/>
+        <override name="returnAmount" optional="true"/>
+    </service>
+    
+    <service name="updateReturnHeaderDirectly" default-entity-name="ReturnHeader" engine="simple"
+            location="component://order/script/org/ofbiz/order/order/OrderReturnServices.xml" invoke="updateReturnHeader">
+        <description>Update a ReturnHeader</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <attribute name="oldStatusId" type="String" mode="OUT" optional="false"/>
+        <attribute name="returnId" type="String" mode="OUT" optional="true"/>
+    </service>
+    <service name="quickReceiveReturnDirectly" engine="simple"
+            location="component://basepos/script/com/olbius/webpos/return/ReturnServices.xml" invoke="quickReceiveReturnDirectly" auth="true">
+        <permission-service service-name="facilityGenericPermission" main-action="CREATE"/>
+        <attribute name="returnId" type="String" mode="IN" optional="false"/>
+        <attribute name="inventoryItemTypeId" type="String" mode="IN" optional="true"/>
+        <attribute name="statusId" type="String" mode="IN" optional="true"/>
+    </service>
+    <service name="processRefundImmediatelyReturnDirectly" engine="simple"  auth="true"
+            location="component://basepos/script/com/olbius/webpos/return/ReturnServices.xml" invoke="processRefundImmediatelyReturn">
+        <description>Process the Immediate Refund in a return</description>    
+        <attribute name="returnId" type="String" mode="IN" optional="false"/>
+    </service>
+    <service name="processRefundReturnDirectly" engine="java" auth="true"
+            location="com.olbius.basepos.returnOrder.ReturnServices" invoke="processRefundReturn">
+        <description>Process the refunds in a return</description>
+        <attribute name="returnId" type="String" mode="IN" optional="false"/>
+        <attribute name="returnTypeId" type="String" mode="IN" optional="false"/>
+    </service>
+    <service name="processRefundOnlyReturnDirectly" engine="simple"  auth="true"
+            location="component://basepos/script/com/olbius/webpos/return/ReturnServices.xml" invoke="processRefundOnlyReturn">
+        <description>Process the Refund in a return</description>    
+        <attribute name="returnId" type="String" mode="IN" optional="false"/>
+    </service>
+    <service name="getOrderAdjustment" engine="java"  auth="true"
+            location="com.olbius.basepos.order.WebPosReturnOrder" invoke="getOrderAdjustment">
+        <description>Process the Refund in a return</description>    
+        <attribute name="orderItems" type="String" mode="IN" optional="false"/>
+        <attribute name="listOrderItemsPromo" type="List" mode="OUT" optional="false"/>
+        <attribute name="listOrderAdjustmentsPromo" type="List" mode="OUT" optional="false"/>
+    </service>
+    <!-- <service name="checkReturnCompleteDirectly" engine="java"
+            location="com.olbius.basepos.returnOrder.ReturnServices" invoke="checkReturnComplete">
+        <description>Checks if all items on a return are complete/cancelled and updates the header status</description>
+        <attribute name="returnId" type="String" mode="IN" optional="false"/>
+        <attribute name="statusId" type="String" mode="OUT" optional="true"/>
+    </service> -->
+    
+    <!-- <service name="updateProductFacilityByReturn" engine="java" auth="true" location="com.olbius.basepos.order.PosOrderServices" invoke="updateProductFacilityByReturn">
+    	<description>update product_facility_sale_order entity from order</description>
+    	<attribute name="returnId" mode="IN" type="String"></attribute>
+    	<attribute name="returnItemSeqId" mode="IN" type="String"></attribute>
+    </service> -->
+</services>    
+            

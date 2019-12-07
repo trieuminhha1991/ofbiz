@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service-eca xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/service-eca.xsd">
+
+	<eca service="changeOrderStatusCompletePOCustom" event="commit" run-on-error="false">
+		<action service="quickReceivePurchaseOrder" mode="sync" />
+	</eca>
+
+	<eca service="changeOrderStatusPOCustom" event="commit" run-on-error="false">
+		<condition field-name="userLogin" operator="is-not-empty" />
+		<action service="changeOrderStatus" mode="sync" />
+	</eca>
+
+	<eca service="appendOrderItemCustomPO" event="commit">
+		<action service="resetGrandTotal" mode="sync" />
+	</eca>
+
+	<eca service="appendOrderItemCustomPO" event="return">
+		<action service="processOrderPayments" mode="sync" />
+	</eca>
+
+	<eca service="changeOrderStatusPOCustom" event="commit" run-on-error="false">
+		<condition field-name="statusId" operator="equals" value="ORDER_APPROVED" />
+		<action service="sendNotifyToLog" mode="sync" />
+		<action service="sendNotifyToAcc" mode="sync" />
+	</eca>
+
+	<!-- order status changes -->
+	<eca service="changeOrderStatusPO" event="commit" run-on-error="false">
+		<condition field-name="statusId" operator="equals" value="ORDER_CANCELLED" />
+		<action service="releaseOrderPayments" mode="sync" />
+		<action service="processRefundReturnForReplacement" mode="sync" />
+	</eca>
+
+	<eca service="createNewPurchaseOrder" event="commit" run-on-error="false">
+		<set field-name="isEdit" value="N" />
+		<action service="sendNotifyToAcc" mode="sync" />
+	</eca>
+
+	<eca service="changeOrderStatusPO" event="global-commit" run-on-error="false">
+		<condition field-name="statusId" operator="equals" value="ORDER_COMPLETED" />
+		<condition-field field-name="statusId" operator="not-equals" to-field-name="oldStatusId" />
+		<action service="createInvoiceFromOrder" mode="sync" />
+		<action service="resetGrandTotal" mode="sync" />
+		<action service="sendOrderCompleteNotification" mode="async" persist="true" />
+		<action service="createReturnItemForRental" mode="sync" />
+	</eca>
+
+	<!-- create payment from purchase order when approved (can be disabled by 
+		accountingConfig) -->
+	<eca service="changeOrderStatusPO" event="commit" run-on-error="false">
+		<condition field-name="orderTypeId" operator="equals" value="PURCHASE_ORDER" />
+		<condition field-name="statusId" operator="equals" value="ORDER_APPROVED" />
+		<condition field-name="oldStatusId" operator="equals" value="ORDER_CREATED" />
+		<condition-field field-name="statusId" operator="not-equals" to-field-name="oldStatusId" />
+		<action service="updateOrderItemShipGroupPO" mode="sync" />
+		<action service="createPaymentFromOrder" mode="sync" persist="true" />
+	</eca>
+
+	<!-- <eca service="updateOrderItemsCustom" event="return">
+		<action service="checkUpdateDropShipPurchaseOrdersItemPO" mode="sync" run-as-user="system" />
+	</eca>
+
+	<eca service="appendOrderItemsCustom" event="return">
+		<action service="checkAppendDropShipPurchaseOrdersItemPO" mode="sync" run-as-user="system" />
+	</eca> -->
+	<eca service="updateOrderItemsSaveToOrder" event="commit" run-on-error="false">
+        <action service="checkUpdateDropShipPurchaseOrdersItemPO" mode="sync" run-as-user="system"/>
+    </eca>
+    
+    <!-- <eca service="updateOrderItemsPOToSO" event="commit">
+        <condition field-name="orderTypeId" operator="equals" value="PURCHASE_ORDER"/>
+        <condition operator="equals" field-name="changeLastPrice" value="Y"/>
+        <action service="setUnitPriceAsLastPrice" mode="sync"/>
+    </eca> -->
+	
+	<eca service="changeOrderStatus" event="commit" run-on-error="false">
+		<condition field-name="statusId" operator="equals" value="ORDER_CANCELLED"/>
+		<condition field-name="orderTypeId" operator="equals" value="PURCHASE_ORDER"/>
+		<set field-name="deliveryStatusId" value="DLV_CANCELLED"/>
+		<action service="changeAllDeliveryStatusByOrder" mode="sync"/>
+	</eca>
+    
+    <eca service="updateSalesProductPrice" event="commit" run-on-error="false">
+        <action service="createProductAdvIntegration" mode="async"/>
+    </eca>
+</service-eca>

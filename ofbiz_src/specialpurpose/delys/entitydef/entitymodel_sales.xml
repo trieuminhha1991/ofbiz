@@ -1,0 +1,1686 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+    <!-- ========================================================= -->
+    <!-- ======================== Defaults ======================= -->
+    <!-- ========================================================= -->
+    <title>View Entity of Delys Component Sales</title>
+    <description>View Entity of Delys Component Sales</description>
+    <copyright></copyright>
+    <version>1.0</version>
+    
+    <entity entity-name="ProductQuotation" package-name="org.ofbiz.product.price" title="Product Quotation">
+    	<field name="productQuotationId" type="id-ne"></field>
+    	<field name="quotationName" type="name"></field>
+    	<field name="description" type="description"></field>
+    	<field name="currencyUomId" type="id"></field>
+    	<field name="fromDate" type="date-time"></field>
+    	<field name="thruDate" type="date-time"></field>
+    	<field name="statusId" type="id"></field>
+    	<field name="salesChannel" type="id"></field>
+    	<field name="createDate" type="date-time"></field>
+    	<field name="createdByUserLogin" type="id-vlong"></field>
+    	<prim-key field="productQuotationId"/>
+    	<relation type="one" fk-name="QUOTATION_STTS" rel-entity-name="StatusItem">
+	        <key-map field-name="statusId"/>
+      	</relation>
+      	<relation type="one" fk-name="QUOTATION_ULGN" title="CreatedBy" rel-entity-name="UserLogin">
+        	<key-map field-name="createdByUserLogin" rel-field-name="userLoginId"/>
+      	</relation>
+    </entity>
+    <entity entity-name="ProductQuotationRoleType" package-name="org.ofbiz.product.price">
+    	<field name="productQuotationId" type="id-ne"></field>
+    	<field name="roleTypeId" type="id-ne"></field>
+    	<prim-key field="productQuotationId"/>
+    	<prim-key field="roleTypeId"/>
+    	<relation rel-entity-name="ProductQuotation" type="one" fk-name="PROD_QROLETYPE_QUOTATION">
+    		<key-map field-name="productQuotationId"/>
+    	</relation>
+    	<relation rel-entity-name="RoleType" type="one" fk-name="PROD_QROLETYPE_ROLETYPE">
+    		<key-map field-name="roleTypeId"/>
+    	</relation>
+    </entity>
+    <entity entity-name="ProductQuotationStatus" package-name="org.ofbiz.product.price" never-cache="true" title="Product Quotation Status Entity">
+		<field name="quotationStatusId" type="id-ne"></field>
+		<field name="statusId" type="id"></field>
+		<field name="productQuotationId" type="id"></field>
+		<field name="statusDatetime" type="date-time"></field>
+		<field name="statusUserLogin" type="id-vlong"></field>
+		<field name="changeReason" type="description"></field>
+		<prim-key field="quotationStatusId"/>
+		<relation type="one" fk-name="QUOTATION_STTS_STTS" rel-entity-name="StatusItem">
+        	<key-map field-name="statusId"/>
+		</relation>
+      	<relation type="one" fk-name="QUOTATION_STTS_OHDR" rel-entity-name="ProductQuotation">
+        	<key-map field-name="productQuotationId"/>
+      	</relation>
+      	<relation type="one" fk-name="QUOTATION_STTS_USER" rel-entity-name="UserLogin">
+        	<key-map field-name="statusUserLogin" rel-field-name="userLoginId"/>
+      	</relation>
+    </entity>
+    <entity entity-name="OrderRequirementDelivery"
+            package-name="org.ofbiz.order.requirement"
+            title="Order Requirement Delivery Entity">
+      <field name="orderId" type="id-ne"></field>
+      <field name="requirementId" type="id-ne"></field>
+      <field name="description" type="description"></field>
+      <prim-key field="orderId"/>
+      <prim-key field="requirementId"/>
+      <relation type="one" fk-name="ORDREQ_DIY_ORD" rel-entity-name="OrderHeader">
+        <key-map field-name="orderId"/>
+      </relation>
+      <relation type="one" fk-name="ORDREQ_DIY_REQ" rel-entity-name="Requirement">
+        <key-map field-name="requirementId"/>
+      </relation>
+    </entity>
+    <entity entity-name="SalesStatementType" package-name="com.olbius" 
+    		title="Sales Statement Type Entity" default-resource-name="DelysEntityLabels">
+    	<field name="salesTypeId" type="id-ne"></field>
+    	<field name="parentTypeId" type="id-ne"></field>
+    	<field name="hasTable" type="indicator"></field>
+    	<field name="description" type="description"></field>
+    	<prim-key field="salesTypeId"/>
+    	<relation type="one" fk-name="SALES_TYPE_PARENT" title="Parent" rel-entity-name="SalesStatementType">
+	        <key-map field-name="parentTypeId" rel-field-name="salesTypeId"/>
+      	</relation>
+    </entity>
+    <entity entity-name="SalesStatementHeader" package-name="com.olbius" never-cache="true" 
+    		title="Sales In, Sales Out header entity">
+    	<field name="salesId" type="id-ne"></field>
+    	<field name="salesTypeId" type="id"></field>
+    	<field name="parentSalesId" type="id"></field>
+    	<field name="salesName" type="name"></field>
+    	<field name="statusId" type="id"></field>
+    	<field name="currencyUomId" type="id"></field>
+    	<field name="salesForecastId" type="id"></field>
+    	<field name="organizationPartyId" type="id"><description>Party From. Example: NPP party</description></field>
+    	<field name="internalPartyId" type="id"><description>Party To. Example: salesman_1, salesman_2 party</description></field>
+        <field name="createdBy" type="id-vlong"></field>
+        <field name="modifiedBy" type="id-vlong"></field>
+        <field name="fromDate" type="date-time"></field>
+        <field name="thruDate" type="date-time"></field>
+        <field name="customTimePeriodId" type="id"></field>
+        <field name="quotaAmount" type="currency-amount"></field>
+        <field name="forecastAmount" type="currency-amount"></field>
+        <field name="bestCaseAmount" type="currency-amount"></field>
+        <field name="closedAmount" type="currency-amount"></field>
+    	<prim-key field="salesId"/>
+    	<relation type="one" fk-name="SALES_HDR_PARENT" title="Parent" rel-entity-name="SalesStatementHeader">
+            <key-map field-name="parentSalesId" rel-field-name="salesId"/>
+        </relation>
+    	<relation type="one" fk-name="SALES_HDR_TYPE" rel-entity-name="SalesStatementType">
+    		<key-map field-name="salesTypeId"/>
+    	</relation>
+    	<relation type="one" fk-name="SALES_HDR_CBUL" rel-entity-name="UserLogin">
+    		<key-map field-name="createdBy" rel-field-name="userLoginId"/>
+    	</relation>
+    	<relation type="one" fk-name="SALES_HDR_MBUL" rel-entity-name="UserLogin">
+    		<key-map field-name="modifiedBy" rel-field-name="userLoginId"/>
+    	</relation>
+    	<relation type="one" fk-name="SALES_HDR_STTS" rel-entity-name="StatusItem">
+    		<key-map field-name="statusId"/>
+    	</relation>
+    	<relation type="one" fk-name="SALES_HDR_CUOM" rel-entity-name="Uom">
+    		<key-map field-name="currencyUomId" rel-field-name="uomId"/>
+    	</relation>
+    	<relation type="one" fk-name="SALES_HDR_SALES4C" rel-entity-name="SalesForecast">
+    		<key-map field-name="salesForecastId"/>
+    	</relation>
+    	<relation type="one" fk-name="SALES_HDR_ORG_PARTY" title="Organization" rel-entity-name="Party">
+            <key-map field-name="organizationPartyId" rel-field-name="partyId"/>
+        </relation>
+        <relation type="one" fk-name="SALES_HDR_INT_PARTY" title="Internal" rel-entity-name="Party">
+            <key-map field-name="internalPartyId" rel-field-name="partyId"/>
+        </relation>
+        <relation type="one" fk-name="SALES_HDR_TIME_PER" rel-entity-name="CustomTimePeriod">
+            <key-map field-name="customTimePeriodId"/>
+        </relation>
+    </entity>
+    <entity entity-name="SalesStatementItem" package-name="com.olbius" never-cache="true" 
+    		title="Sales Statement Item Entity">
+    	<field name="salesId" type="id-ne"></field>
+    	<field name="salesItemSeqId" type="id-ne"></field>
+    	<field name="productId" type="id"></field>
+    	<field name="productCategoryId" type="id"></field>
+    	<field name="quantity" type="fixed-point"><description>Quantity target</description></field>
+    	<field name="quantityUomId" type="id"></field>
+    	<field name="amount" type="currency-amount"><description>Amount target</description></field>
+    	<field name="unitPrice" type="currency-precise"></field>
+      	<field name="unitListPrice" type="currency-precise"></field>
+      	<field name="quantityActual" type="fixed-point"></field>
+      	<field name="amountActual" type="fixed-point"></field>
+    	<field name="changeByUserLoginId" type="id-vlong" enable-audit-log="true"></field>
+    	<prim-key field="salesId"/>
+    	<prim-key field="salesItemSeqId"/>
+    	<relation type="one" fk-name="SALES_ITEM_HDR" rel-entity-name="SalesStatementHeader">
+    		<key-map field-name="salesId"/>
+    	</relation>
+    	<relation type="one" fk-name="SALES_PROD" rel-entity-name="Product">
+    		<key-map field-name="productId"/>
+    	</relation>
+    	<relation type="one" fk-name="SALES_PCTGRY" rel-entity-name="ProductCategory">
+    		<key-map field-name="productCategoryId"/>
+    	</relation>
+    	<relation type="one" fk-name="SALES_QTY_UOM" rel-entity-name="Uom">
+    		<key-map field-name="quantityUomId" rel-field-name="uomId"/>
+    	</relation>
+    	<relation type="one" fk-name="SALES_ITEM_USRLGN" title="ChangeBy" rel-entity-name="UserLogin">
+            <key-map field-name="changeByUserLoginId" rel-field-name="userLoginId"/>
+        </relation>
+    </entity>
+    <entity entity-name="SalesStatementItemAssoc" package-name="com.olbius" never-cache="true"
+    		title="Sales statement item association entity">
+    	<field name="salesId" type="id-ne"><description>Sales id of Parent item</description></field>
+    	<field name="salesItemSeqId" type="id-ne"></field>
+    	<field name="toSalesId" type="id-ne"><description>Sales id of Child item</description></field>
+    	<field name="toSalesItemSeqId" type="id-ne"></field>
+    	<field name="salesItemAssocTypeId" type="id-ne"></field>
+    	<prim-key field="salesId"/>
+    	<prim-key field="salesItemSeqId"/>
+    	<prim-key field="toSalesId"/>
+    	<prim-key field="toSalesItemSeqId"/>
+    	<prim-key field="salesItemAssocTypeId"/>
+    	<relation type="one" fk-name="SALES_ITASS_FRHD" title="From" rel-entity-name="SalesStatementHeader">
+    		<key-map field-name="salesId"/>
+    	</relation>
+    	<relation type="one-nofk" title="From" rel-entity-name="SalesStatementItem">
+    		<key-map field-name="salesId"/>
+    		<key-map field-name="salesItemSeqId"/>
+    	</relation>
+    	<relation type="one" fk-name="SALES_ITASS_TOHD" title="To" rel-entity-name="SalesStatementHeader">
+    		<key-map field-name="toSalesId" rel-field-name="salesId"/>
+    	</relation>
+    	<relation type="one-nofk" title="To" rel-entity-name="SalesStatementItem">
+    		<key-map field-name="toSalesId" rel-field-name="salesId"/>
+    		<key-map field-name="toSalesItemSeqId" rel-field-name="salesItemSeqId"/>
+    	</relation>
+    	<relation type="one" fk-name="SALES_ITASS_TYPE" rel-entity-name="SalesStatementItemAssocType">
+    		<key-map field-name="salesItemAssocTypeId"/>
+    	</relation>
+    </entity>
+    <entity entity-name="SalesStatementItemAssocType" package-name="com.olbius" never-cache="true" 
+    		title="Sales statement item association type entity">
+    	<field name="salesItemAssocTypeId" type="id-ne"></field>
+    	<field name="parentTypeId" type="id-ne"></field>
+    	<field name="hasTable" type="indicator"></field>
+    	<field name="description" type="description"></field>
+    	<prim-key field="salesItemAssocTypeId"/>
+    	<relation type="one" fk-name="SALES_ITAS_TYPPAR" rel-entity-name="SalesStatementItemAssocType">
+    		<key-map field-name="parentTypeId" rel-field-name="salesItemAssocTypeId"/>
+    	</relation>
+    </entity>
+   	
+  <!-- ========================================================= -->
+  <!-- com.olbius -->
+  <!-- ========================================================= -->
+
+    <entity entity-name="SalesPolicy" package-name="com.olbius"
+            title="Sales policy award Entity">
+      	<field name="salesPolicyId" type="id-ne"></field>
+      	<field name="policyName" type="name"></field>
+      	<field name="policyText" type="description"></field>
+      	<field name="showToCustomer" type="indicator"></field>
+      	<field name="overrideOrgPartyId" type="id"></field>
+      	<field name="createdDate" type="date-time"></field>
+      	<field name="createdByUserLogin" type="id-vlong"></field>
+      	<field name="fromDate" type="date-time"></field>
+      	<field name="thruDate" type="date-time"></field>
+      	<field name="statusId" type="id"></field>
+      	<field name="salesStatementId" type="id"></field>
+      	<prim-key field="salesPolicyId"/>
+      	<relation type="one" fk-name="SALES_POCY_OPA" rel-entity-name="Party">
+        	<key-map field-name="overrideOrgPartyId" rel-field-name="partyId"/>
+      	</relation>
+      	<relation type="one" fk-name="SALES_POCY_CUL" title="CreatedBy" rel-entity-name="UserLogin">
+        	<key-map field-name="createdByUserLogin" rel-field-name="userLoginId"/>
+      	</relation>
+      	<relation type="one" fk-name="SALES_POCY_STTS" rel-entity-name="StatusItem">
+    		<key-map field-name="statusId"/>
+    	</relation>
+    	<relation type="one" fk-name="SALES_POCY_HDR" rel-entity-name="SalesStatementHeader">
+    		<key-map field-name="salesStatementId" rel-field-name="salesId"/>
+    	</relation>
+    </entity>
+    <entity entity-name="SalesPolicyGeoAppl" package-name="com.olbius" title="Sales policy award and geo regions Entity">
+    	<field name="salesPolicyId" type="id-ne"></field>
+    	<field name="geoId" type="id-ne"></field>
+    	<field name="geoTypeId" type="id"></field>
+    	<field name="fromDate" type="date-time"></field>
+      	<field name="thruDate" type="date-time"></field>
+    	<field name="salesPolicyGeoApplEnumId" type="id"></field>
+    	<prim-key field="salesPolicyId"/>
+    	<prim-key field="geoId"/>
+    	<!-- <prim-key field="geoTypeId"/> -->
+    	<relation type="one" fk-name="SALES_PYGE_SPO" rel-entity-name="SalesPolicy">
+    		<key-map field-name="salesPolicyId" rel-field-name="salesPolicyId"/>
+    	</relation>
+    	<relation type="one" fk-name="SALES_PYGE_GEO" rel-entity-name="Geo">
+    		<key-map field-name="geoId" rel-field-name="geoId"/>
+    	</relation>
+    	<relation type="one" fk-name="SALES_PYGE_ENUM" rel-entity-name="Enumeration">
+        <key-map field-name="salesPolicyGeoApplEnumId" rel-field-name="enumId"/>
+      </relation>
+    </entity>
+    <entity entity-name="SalesPolicyRule" package-name="com.olbius"
+            title="Sales Policy Rule Entity">
+      	<field name="salesPolicyId" type="id-ne"></field>
+      	<field name="salesPolicyRuleId" type="id-ne"></field>
+      	<field name="ruleName" type="name"></field>
+      	<field name="paymentParty" type="id"><description>Party payment the Policy</description></field>
+      	<field name="salesStatementTypeId" type="id"></field>
+      	<prim-key field="salesPolicyId"/>
+      	<prim-key field="salesPolicyRuleId"/>
+      	<relation type="one" fk-name="SALES_PLRLE_PROMO" rel-entity-name="SalesPolicy">
+        	<key-map field-name="salesPolicyId"/>
+      	</relation>
+      	<!-- <relation type="one" fk-name="SALES_PLRLE_PMPA" rel-entity-name="Party">
+        	<key-map field-name="paymentPartyId" rel-field-name="partyId"/>
+      	</relation> -->
+      	<relation type="one" fk-name="SALES_PLRLE_SMTYPE" rel-entity-name="SalesStatementType">
+    		<key-map field-name="salesStatementTypeId" rel-field-name="salesTypeId"/>
+    	</relation>
+    </entity>
+    <entity entity-name="SalesPolicyCond" package-name="com.olbius"
+            title="Sales Policy Condition Entity">
+      	<field name="salesPolicyId" type="id-ne"></field>
+      	<field name="salesPolicyRuleId" type="id-ne"></field>
+      	<field name="salesPolicyCondSeqId" type="id-ne"></field>
+      	<field name="inputParamEnumId" type="id"></field>
+      	<field name="operatorEnumId" type="id"></field>
+      	<field name="condValue" type="long-varchar"></field>
+      	<field name="otherValue" type="long-varchar"></field>
+      	<prim-key field="salesPolicyId"/>
+      	<prim-key field="salesPolicyRuleId"/>
+      	<prim-key field="salesPolicyCondSeqId"/>
+      	<relation type="one" fk-name="SALES_PLCOND_POCY" rel-entity-name="SalesPolicy">
+        	<key-map field-name="salesPolicyId"/>
+      	</relation>
+      	<relation type="one" fk-name="SALES_PLCOND_RULE" rel-entity-name="SalesPolicyRule">
+        	<key-map field-name="salesPolicyId"/>
+        	<key-map field-name="salesPolicyRuleId"/>
+      	</relation>
+      	<relation type="one" fk-name="SALES_PLCOND_INENUM" title="InputParam" rel-entity-name="Enumeration">
+        	<key-map field-name="inputParamEnumId" rel-field-name="enumId"/>
+      	</relation>
+      	<relation type="one" fk-name="SALES_PLCOND_OPENUM" title="Operator" rel-entity-name="Enumeration">
+        	<key-map field-name="operatorEnumId" rel-field-name="enumId"/>
+      	</relation>
+      	<relation type="many" rel-entity-name="SalesPolicyCategory">
+        	<key-map field-name="salesPolicyId"/>
+        	<key-map field-name="salesPolicyRuleId"/>
+        	<key-map field-name="salesPolicyCondSeqId"/>
+      	</relation>
+      	<relation type="many" rel-entity-name="SalesPolicyProduct">
+        	<key-map field-name="salesPolicyId"/>
+        	<key-map field-name="salesPolicyRuleId"/>
+        	<key-map field-name="salesPolicyCondSeqId"/>
+      	</relation>
+    </entity>
+    <entity entity-name="SalesPolicyAction" package-name="com.olbius"
+            title="Sales Policy Action Entity">
+      	<field name="salesPolicyId" type="id-ne"></field>
+      	<field name="salesPolicyRuleId" type="id-ne"></field>
+      	<field name="salesPolicyActionSeqId" type="id-ne"></field>
+      	<field name="salesPolicyActionEnumId" type="id-ne"></field>
+      	<field name="quantity" type="fixed-point"></field>
+      	<field name="amount" type="fixed-point"></field>
+      	<prim-key field="salesPolicyId"/>
+      	<prim-key field="salesPolicyRuleId"/>
+      	<prim-key field="salesPolicyActionSeqId"/>
+      	<relation type="one" fk-name="SALES_PLACT_ENUM" title="Action" rel-entity-name="Enumeration">
+        	<key-map field-name="salesPolicyActionEnumId" rel-field-name="enumId"/>
+      	</relation>
+      	<relation type="one" fk-name="SALES_PLACT_POCY" rel-entity-name="SalesPolicy">
+        	<key-map field-name="salesPolicyId"/>
+      	</relation>
+      	<relation type="one" fk-name="SALES_PLACT_RL" rel-entity-name="SalesPolicyRule">
+        	<key-map field-name="salesPolicyId"/>
+        	<key-map field-name="salesPolicyRuleId"/>
+      	</relation>
+      	<relation type="many" rel-entity-name="SalesPolicyCategory">
+        	<key-map field-name="salesPolicyId"/>
+        	<key-map field-name="salesPolicyRuleId"/>
+        	<key-map field-name="salesPolicyActionSeqId"/>
+      	</relation>
+      	<relation type="many" rel-entity-name="SalesPolicyProduct">
+        	<key-map field-name="salesPolicyId"/>
+        	<key-map field-name="salesPolicyRuleId"/>
+        	<key-map field-name="salesPolicyActionSeqId"/>
+      	</relation>
+    </entity>
+    <entity entity-name="SalesPolicyCategory" package-name="com.olbius"
+            title="Sales Policy Category Entity">
+      	<field name="salesPolicyId" type="id-ne"></field>
+      	<field name="salesPolicyRuleId" type="id-ne"></field>
+      	<field name="salesPolicyActionSeqId" type="id-ne"></field>
+      	<field name="salesPolicyCondSeqId" type="id-ne"></field>
+      	<field name="productCategoryId" type="id-ne"></field>
+      	<field name="includeSubCategories" type="indicator"></field>
+      	<field name="andGroupId" type="id"></field>
+      	<field name="salesPolicyApplEnumId" type="id-ne"></field>
+      	<!-- <prim-key field="andGroupId"/> -->
+      	<prim-key field="salesPolicyId"/>
+      	<prim-key field="salesPolicyRuleId"/>
+      	<prim-key field="salesPolicyActionSeqId"/>
+      	<prim-key field="salesPolicyCondSeqId"/>
+      	<prim-key field="productCategoryId"/>
+      	<relation type="one" fk-name="SALES_PLCAT_POCY" rel-entity-name="SalesPolicy">
+        	<key-map field-name="salesPolicyId"/>
+      	</relation>
+      	<relation type="one" fk-name="SALES_PLCAT_PRCAT" rel-entity-name="ProductCategory">
+        	<key-map field-name="productCategoryId"/>
+      	</relation>
+      	<relation type="one" fk-name="SALES_PLCAT_ENUM" title="Appl" rel-entity-name="Enumeration">
+        	<key-map field-name="salesPolicyApplEnumId" rel-field-name="enumId"/>
+      	</relation>
+    </entity>
+    <entity entity-name="SalesPolicyProduct" package-name="com.olbius"
+            title="Sales Policy Product Entity">
+      	<field name="salesPolicyId" type="id-ne"></field>
+      	<field name="salesPolicyRuleId" type="id-ne"></field>
+      	<field name="salesPolicyActionSeqId" type="id-ne"></field>
+      	<field name="salesPolicyCondSeqId" type="id-ne"></field>
+      	<field name="productId" type="id-ne"></field>
+      	<field name="salesPolicyApplEnumId" type="id-ne"></field>
+      	<prim-key field="salesPolicyId"/>
+      	<prim-key field="salesPolicyRuleId"/>
+      	<prim-key field="salesPolicyActionSeqId"/>
+      	<prim-key field="salesPolicyCondSeqId"/>
+      	<prim-key field="productId"/>
+      	<relation type="one" fk-name="SALES_PLPRD_POCY" rel-entity-name="SalesPolicy">
+        	<key-map field-name="salesPolicyId"/>
+      	</relation>
+      	<relation type="one" fk-name="SALES_PLPRD_PROD" rel-entity-name="Product">
+        	<key-map field-name="productId"/>
+      	</relation>
+      	<relation type="one" fk-name="SALES_PLPRD_ENUM" title="Appl" rel-entity-name="Enumeration">
+        	<key-map field-name="salesPolicyApplEnumId" rel-field-name="enumId"/>
+      	</relation>
+    </entity>
+    <entity entity-name="SalesPolicyRoleTypeApply" package-name="com.olbius">
+    	<field name="salesPolicyId" type="id-ne"></field>
+    	<field name="roleTypeId" type="id-ne"></field>
+    	<field name="fromDate" type="date-time"></field>
+    	<field name="thruDate" type="date-time"></field>
+    	<prim-key field="salesPolicyId"/>
+    	<prim-key field="roleTypeId"/>
+    	<relation type="one" fk-name="SALES_PLRT_APPL" rel-entity-name="SalesPolicy">
+    		<key-map field-name="salesPolicyId"/>
+    	</relation>
+    	<relation type="one" fk-name="SALES_PLRT_RT" rel-entity-name="RoleType">
+    		<key-map field-name="roleTypeId"/>
+    	</relation>
+    </entity>
+    <!-- TODO deleted -->
+    <entity entity-name="ProductStoreSalesPolicyAppl"
+            package-name="com.olbius"
+            title="Product Store Policy Applicability Entity">
+      	<field name="productStoreId" type="id-ne"></field>
+      	<field name="salesPolicyId" type="id-ne"></field>
+      	<field name="fromDate" type="date-time"></field>
+      	<field name="thruDate" type="date-time"></field>
+      	<field name="sequenceNum" type="numeric"></field>
+      	<prim-key field="productStoreId"/>
+      	<prim-key field="salesPolicyId"/>
+      	<relation type="one" fk-name="PRDSTR_SPCY_PRDS" rel-entity-name="ProductStore">
+        	<key-map field-name="productStoreId"/>
+      	</relation>
+      	<relation type="one" fk-name="PRDSTR_SPCY_PRMO" rel-entity-name="SalesPolicy">
+        	<key-map field-name="salesPolicyId"/>
+      	</relation>
+    </entity>
+    <entity entity-name="SalesCommissionLogRun" package-name="com.olbius.commission" 
+    	title="Sales Commission Log run Entity">
+    	<field name="commissionLogId" type="id-ne"></field>
+    	<field name="roleTypeId" type="id"></field>
+    	<field name="fromDate" type="date-time"></field>
+    	<field name="thruDate" type="date-time"></field>
+    	<field name="countRowAction" type="fixed-point"></field>
+    	<field name="createdDate" type="date-time"></field>
+      	<field name="createdBy" type="id"></field>
+    	<prim-key field="commissionLogId"/>
+    	<relation type="one" fk-name="SALES_COMSLOG_ROLE" rel-entity-name="RoleType">
+    		<key-map field-name="roleTypeId"/>
+    	</relation>
+    	<relation type="one" fk-name="SALES_COMSLOG_USER" rel-entity-name="UserLogin">
+    		<key-map field-name="createdBy" rel-field-name="userLoginId"/>
+    	</relation>
+    </entity>
+    <entity entity-name="SalesCommissionLogRunDetail" package-name="com.olbius.commission" 
+    	title="Sales Commission Log run detail Entity">
+    	<field name="commissionLogId" type="id-ne"></field>
+    	<field name="salesCommissionId" type="id-ne"></field>
+    	<prim-key field="commissionLogId"/>
+    	<prim-key field="salesCommissionId"/>
+    	<relation type="one" fk-name="COMSLOG_DETAIL_COMS" rel-entity-name="SalesCommissionLogRun">
+    		<key-map field-name="commissionLogId"/>
+    	</relation>
+    	<relation type="one" fk-name="COMSLOG_DETAIL_DATA" rel-entity-name="SalesCommissionData">
+    		<key-map field-name="salesCommissionId"/>
+    	</relation>
+    </entity>
+    <entity entity-name="SalesCommissionData" package-name="com.olbius.commission" 
+    	title="Sales Commission Data Entity">
+    	<field name="salesCommissionId" type="id-ne"></field>
+    	<field name="partyId" type="id"></field>
+    	<field name="salesStatementId" type="id"></field>
+    	<field name="amount" type="currency-amount"></field>
+    	<field name="fromDate" type="date-time"></field>
+      	<field name="thruDate" type="date-time"></field>
+    	<field name="hasQuantity" type="indicator"><description>is true if commission give product or product in category</description></field>
+    	<field name="statusId" type="id-ne"></field>
+    	<prim-key field="salesCommissionId"/>
+    	<relation type="one" fk-name="SALES_COMSDA_PRTY" rel-entity-name="Party">
+    		<key-map field-name="partyId"/>
+    	</relation>
+    	<relation type="one" fk-name="SALES_COMSDA_HDR" rel-entity-name="SalesStatementHeader">
+    		<key-map field-name="salesStatementId" rel-field-name="salesId"/>
+    	</relation>
+    	<relation type="one" fk-name="SALES_COMSDA_STTS" rel-entity-name="StatusItem">
+			<key-map field-name="statusId"/>
+		</relation>
+    </entity>
+    <entity entity-name="SalesCommissionAdjustment" package-name="com.olbius.commission" 
+    	title="Sales Commisstion Data Adjustment Entity">
+    	<field name="salesCommissionId" type="id-ne"></field>
+    	<field name="salesPolicyId" type="id-ne"></field>
+    	<field name="salesPolicyRuleId" type="id-ne"></field>
+		<field name="salesPolicyActionSeqId" type="id-ne"></field>
+		<field name="amount" type="currency-amount"></field>
+		<field name="quantity" type="numeric"></field>
+		<field name="productId" type="id"></field>
+		<field name="productCategoryId" type="id"></field>
+		<field name="description" type="description"></field>
+		<prim-key field="salesCommissionId"/>
+		<prim-key field="salesPolicyId"/>
+		<prim-key field="salesPolicyRuleId"/>
+		<prim-key field="salesPolicyActionSeqId"/>
+		<relation type="one" fk-name="SALES_COMSAJ_COMSDA" rel-entity-name="SalesCommissionData">
+			<key-map field-name="salesCommissionId"/>
+		</relation>
+		<relation type="one" fk-name="SALES_COMSADJ_POCY" rel-entity-name="SalesPolicy">
+			<key-map field-name="salesPolicyId"/>
+		</relation>
+		<relation type="one" fk-name="SALES_COMSADJ_RULE" rel-entity-name="SalesPolicyRule">
+			<key-map field-name="salesPolicyId"/>
+			<key-map field-name="salesPolicyRuleId"/>
+		</relation>
+		<relation type="one" fk-name="SALES_COMSADJ_ACT" rel-entity-name="SalesPolicyAction">
+			<key-map field-name="salesPolicyId"/>
+			<key-map field-name="salesPolicyRuleId"/>
+			<key-map field-name="salesPolicyActionSeqId"/>
+		</relation>
+		<relation type="one" fk-name="SALES_COMSADJ_PROD" rel-entity-name="Product">
+    		<key-map field-name="productId"/>
+    	</relation>
+    	<relation type="one" fk-name="SALES_COMSADJ_CATE" rel-entity-name="ProductCategory">
+    		<key-map field-name="productCategoryId"/>
+    	</relation>
+    </entity>
+    <entity entity-name="OrderContentPaymentOrder" package-name="org.ofbiz.order.order" title="Order Data Object Entity Payment Order">
+        <field name="orderId" type="id-ne"></field>
+        <field name="contentId" type="id-ne"></field>
+        <field name="orderContentTypeId" type="id-ne"></field>
+        <field name="fromDate" type="date-time"/>
+        <field name="thruDate" type="date-time"/>
+        <prim-key field="orderId"/>
+        <prim-key field="contentId"/>
+        <prim-key field="orderContentTypeId"/>
+        <relation type="one" fk-name="ORD_CNT_PROD_SALES" rel-entity-name="OrderHeader">
+            <key-map field-name="orderId"/>
+        </relation>
+        <relation type="one" fk-name="ORD_CNT_CNT_SALES" rel-entity-name="Content">
+            <key-map field-name="contentId"/>
+        </relation>
+        <relation type="one" fk-name="ORD_CNT_TYPE_SALES" rel-entity-name="OrderContentType">
+            <key-map field-name="orderContentTypeId"/>
+        </relation>
+    </entity>
+    <entity entity-name="ReturnRequirementCommitment"
+            package-name="com.olbius.order.requirement"
+            title="Return Requirement Commitment Entity">
+      	<field name="returnId" type="id-ne"></field>
+      	<field name="returnItemSeqId" type="id-ne"></field>
+      	<field name="requirementId" type="id-ne"></field>
+      	<field name="quantity" type="fixed-point"></field>
+      	<prim-key field="returnId"/>
+      	<prim-key field="returnItemSeqId"/>
+      	<prim-key field="requirementId"/>
+      	<relation type="one" fk-name="RETREQ_CMT_ORD" rel-entity-name="ReturnHeader">
+        	<key-map field-name="returnId"/>
+      	</relation>
+      	<relation type="one" fk-name="RETREQ_CMT_OITM" rel-entity-name="ReturnItem">
+        	<key-map field-name="returnId"/>
+        	<key-map field-name="returnItemSeqId"/>
+      	</relation>
+      	<relation type="one" fk-name="RETREQ_CMT_REQ" rel-entity-name="Requirement">
+			<key-map field-name="requirementId"/>
+      	</relation>
+    </entity>
+    
+    <!-- RoleType group -->
+    <entity entity-name="RoleTypeGroup"
+            package-name="org.ofbiz.party.party"
+            title="Role Type Group Entity">
+      	<field name="roleTypeGroupId" type="id-ne"></field>
+      	<field name="roleTypeGroupTypeId" type="id"></field>
+      	<field name="primaryParentGroupId" type="id"></field>
+      	<field name="description" type="description"></field>
+      	<prim-key field="roleTypeGroupId"/>
+      	<relation type="one" fk-name="RTYPE_GP_TYPE" rel-entity-name="RoleTypeGroupType">
+	        <key-map field-name="roleTypeGroupTypeId"/>
+      	</relation>
+      	<relation type="one" fk-name="RTYPE_GP_PGRP" title="PrimaryParent" rel-entity-name="RoleTypeGroup">
+	        <key-map field-name="primaryParentGroupId" rel-field-name="roleTypeGroupId"/>
+      	</relation>
+    </entity>
+    <entity entity-name="RoleTypeGroupMember"
+            package-name="org.ofbiz.party.party"
+            title="Role Type Group Member Entity">
+      	<field name="roleTypeGroupId" type="id-ne"></field>
+      	<field name="roleTypeId" type="id-ne"></field>
+      	<field name="fromDate" type="date-time"></field>
+      	<field name="thruDate" type="date-time"></field>
+      	<field name="sequenceNum" type="numeric"></field>
+   	 	<prim-key field="roleTypeGroupId"/>
+      	<prim-key field="roleTypeId"/>
+      	<prim-key field="fromDate"/>
+      	<relation type="one" fk-name="RTYPE_MEM_RTYPEGRP" rel-entity-name="RoleTypeGroup">
+        	<key-map field-name="roleTypeGroupId"/>
+      	</relation>
+  	 	<relation type="one" fk-name="RTYPE_MEM_RTYPE" rel-entity-name="RoleType">
+        	<key-map field-name="roleTypeId"/>
+      	</relation>
+    </entity>
+    <entity entity-name="RoleTypeGroupType"
+            package-name="org.ofbiz.party.party"
+            title="RoleType Group Type Entity">
+      	<field name="roleTypeGroupTypeId" type="id-ne"></field>
+      	<field name="description" type="description"></field>
+      	<prim-key field="roleTypeGroupTypeId"/>
+    </entity>
+<!-- ______________ EXTEND ENTITY ____________________________________________________________________________________ -->
+    
+    <extend-entity entity-name="ProductPriceRule">
+    	<field name="productQuotationId" type="id"></field>
+    	<field name="isExtra" type="id"><description>Generated when created by product price rule another, default is N</description></field>
+    	<relation rel-entity-name="ProductQuotation" type="one" fk-name="PROD_PCRULE_QUOTATION">
+    		<key-map field-name="productQuotationId"/>
+    	</relation>
+    </extend-entity>
+    <extend-entity entity-name="Product">
+    	<field name="productUomId" type="id"></field>
+    	<field name="productPackingUomId" type="id"></field>
+    	<relation rel-entity-name="Uom" type="one" fk-name="PROD_UOM">
+    		<key-map field-name="productUomId" rel-field-name="uomId"/>
+    	</relation>
+    	<relation rel-entity-name="Uom" type="one" fk-name="PROD_PACK_UOM">
+    		<key-map field-name="productPackingUomId" rel-field-name="uomId"/>
+    	</relation>
+    </extend-entity>
+    <extend-entity entity-name="Agreement">
+	    <field name="isAuto" type="indicator" not-null="false"/>
+	</extend-entity>
+    <extend-entity entity-name="RequirementItem">
+		<field name="quantityAccepted" type="fixed-point"></field>
+	</extend-entity>
+	<extend-entity entity-name="RequirementStatus">
+		<field name="statusUserLogin" type="id"/>
+	</extend-entity>
+	<extend-entity entity-name="ReturnItem">
+		<field name="datetimeManufactured" type="date-time"></field>
+    	<field name="expireDate" type="date-time"></field>
+    	<field name="quantityUomId" type="id"></field>
+    	<field name="alterQuantity" type="fixed-point"></field>
+    	<field name="alterQuantityUomId" type="id"></field>
+    	<relation type="one" fk-name="RTN_ITEM_QTT_UOM" title="QuantityUom" rel-entity-name="Uom">
+          	<key-map field-name="quantityUomId" rel-field-name="uomId"/>
+      	</relation>
+      	<relation type="one" fk-name="RTN_ITEM_QTT_ALT_UOM" title="QuantityAlternativeUom" rel-entity-name="Uom">
+          	<key-map field-name="alternativeQuantityUomId" rel-field-name="uomId"/>
+      	</relation> 
+	</extend-entity>
+	<extend-entity entity-name="ProductStore">
+    	<field name="salesMethodChannelEnumId" type="id"></field>
+    	<relation type="one" fk-name="PROD_STR_SMCENUM" title="SalesMethodChannel" rel-entity-name="Enumeration">
+	        <key-map field-name="salesMethodChannelEnumId" rel-field-name="enumId"/>
+      	</relation>
+    </extend-entity>
+<!-- ______________ VIEW ENTITY ____________________________________________________________________________________ -->
+
+    <view-entity entity-name="ProductQuotationRoleTypeAndRoleType" package-name="org.ofbiz.product.price">
+    	<member-entity entity-alias="PQRT" entity-name="ProductQuotationRoleType" />
+    	<member-entity entity-alias="RT" entity-name="RoleType" />
+    	<alias-all entity-alias="PQRT" />
+    	<alias name="description" entity-alias="RT" field="description"/>
+    	<view-link rel-entity-alias="PQRT" entity-alias="RT">
+    		<key-map field-name="roleTypeId"/>
+    	</view-link>
+    </view-entity>
+    
+	<!-- parameters: productQuotationId productId inputCategory priceToDist priceToMarket priceToConsumer -->
+	<!-- product Quotation: productQuotationId *, quotationName, description, currencyUomId, fromDate Timestamp -->
+	<!-- product price rule: productPriceRuleId	*, ruleName, description, isSale, fromDate, thruDate, productQuotationId -->
+	<!-- Create product price cond: productPriceRuleId *, productPriceCondSeqId *, inputParamEnumId, operatorEnumId, condValue -->
+	<!-- Create product price action: productPriceRuleId *, productPriceActionSeqId *, productPriceActionTypeId, amount, rateCode -->
+    <view-entity entity-name="ProductQuotationAndPriceRCA" package-name="com.olbius">
+    	<member-entity entity-alias="PQ" entity-name="ProductQuotation"/>
+    	<member-entity entity-alias="PPR" entity-name="ProductPriceRule"/>
+    	<member-entity entity-alias="PPC" entity-name="ProductPriceCond"/>
+    	<member-entity entity-alias="PPA" entity-name="ProductPriceAction"/><!-- price to customer -->
+    	<member-entity entity-alias="PPAM" entity-name="ProductPriceAction"/><!-- price to market -->
+    	<member-entity entity-alias="PPAC" entity-name="ProductPriceAction"/><!-- price to consumer -->
+    	<member-entity entity-alias="PROD" entity-name="Product"/>
+    	<alias-all entity-alias="PQ" prefix="pq_" />
+    	<alias name="inputParamEnumId" entity-alias="PPC" field="inputParamEnumId"/>
+    	<alias name="productId" entity-alias="PPC" field="condValue"/>
+		<alias name="productPriceRuleId" entity-alias="PPR" field="productPriceRuleId"/>
+    	<alias name="priceToDist" entity-alias="PPA" field="amount"/>
+    	<alias name="productPriceActionTypeId" entity-alias="PPA" field="productPriceActionTypeId"/>
+    	<alias name="ppa_productPriceActionSeqId" entity-alias="PPA" field="productPriceActionSeqId" />
+    	<alias name="priceToMarket" entity-alias="PPAM" field="amount"/>
+    	<alias name="ppam_productPriceActionSeqId" entity-alias="PPAM" field="productPriceActionSeqId" />
+    	<alias name="ppam_productPriceActionTypeId" entity-alias="PPAM" field="productPriceActionTypeId"/>
+    	<alias name="priceToConsumer" entity-alias="PPAC" field="amount"/>
+    	<alias name="ppac_productPriceActionSeqId" entity-alias="PPAC" field="productPriceActionSeqId" />
+    	<alias name="ppac_productPriceActionTypeId" entity-alias="PPAC" field="productPriceActionTypeId"/>
+    	<alias name="productName" entity-alias="PROD"/>
+    	<view-link entity-alias="PQ" rel-entity-alias="PPR" rel-optional="true">
+    		<key-map field-name="productQuotationId"/>
+    		<entity-condition>
+    			<condition-list combine="or">
+    				<condition-expr field-name="isExtra" entity-alias="PPR" value=""/>
+    				<condition-expr field-name="isExtra" entity-alias="PPR" value="N"/>
+    			</condition-list>
+    		</entity-condition>
+    	</view-link>
+    	<view-link entity-alias="PPR" rel-entity-alias="PPC" rel-optional="true">
+    		<key-map field-name="productPriceRuleId"/>
+    	</view-link>
+    	<view-link entity-alias="PPR" rel-entity-alias="PPA" rel-optional="true">
+    		<key-map field-name="productPriceRuleId"/>
+    		<entity-condition>
+    			<condition-expr field-name="productPriceActionTypeId" entity-alias="PPA" value="PRICE_FLAT"/>
+    		</entity-condition>
+    	</view-link>
+    	<view-link entity-alias="PPR" rel-entity-alias="PPAM" rel-optional="true">
+    		<key-map field-name="productPriceRuleId"/>
+    		<entity-condition>
+    			<condition-expr field-name="productPriceActionTypeId" entity-alias="PPAM" value="PRICE_MARKET"/>
+    		</entity-condition>
+    	</view-link>
+    	<view-link entity-alias="PPR" rel-entity-alias="PPAC" rel-optional="true">
+    		<key-map field-name="productPriceRuleId"/>
+    		<entity-condition>
+    			<condition-expr field-name="productPriceActionTypeId" entity-alias="PPAC" value="PRICE_CONSUMER"/>
+    		</entity-condition>
+    	</view-link>
+    	<view-link entity-alias="PPC" rel-entity-alias="PROD" rel-optional="true">
+    		<key-map field-name="condValue" rel-field-name="productId"/>
+    	</view-link>
+    </view-entity>
+    
+    <view-entity entity-name="ProductQuotationAndPriceRCAIsExtra" package-name="com.olbius">
+    	<member-entity entity-alias="PQ" entity-name="ProductQuotation"/>
+    	<member-entity entity-alias="PPR" entity-name="ProductPriceRule"/>
+    	<member-entity entity-alias="PPCPROD" entity-name="ProductPriceCond"/><!-- condition productId -->
+    	<member-entity entity-alias="PPCROLE" entity-name="ProductPriceCond"/><!-- condition roleTypeId -->
+    	<!-- <member-entity entity-alias="PPCPARTY" entity-name="ProductPriceCond"/> --><!-- condition partyId -->
+    	<member-entity entity-alias="PPA" entity-name="ProductPriceAction"/><!-- price to customer -->
+    	<member-entity entity-alias="PROD" entity-name="Product"/>
+    	<alias-all entity-alias="PQ"/>
+    	<alias name="productPriceRuleId" entity-alias="PPR"/>
+    	<alias name="condProductId" entity-alias="PPCPROD" field="condValue"/>
+    	<alias name="condRoleTypeId" entity-alias="PPCROLE" field="condValue"/>
+    	<!-- <alias name="condPartyId" entity-alias="PPCPARTY" field="condValue"/> -->
+    	<alias name="productPriceActionTypeId" entity-alias="PPA"/>
+    	<alias name="productPriceActionSeqId" entity-alias="PPA"/>
+    	<alias name="price" entity-alias="PPA" field="amount"/>
+    	<alias name="productName" entity-alias="PROD"/>
+    	<view-link entity-alias="PQ" rel-entity-alias="PPR" rel-optional="true">
+    		<key-map field-name="productQuotationId"/>
+    		<entity-condition>
+    			<condition-expr field-name="isExtra" entity-alias="PPR" value="Y"/>
+    		</entity-condition>
+    	</view-link>
+    	<view-link entity-alias="PPR" rel-entity-alias="PPCPROD" rel-optional="true">
+    		<key-map field-name="productPriceRuleId"/>
+    		<entity-condition>
+    			<condition-expr field-name="inputParamEnumId" entity-alias="PPCPROD" value="PRIP_PRODUCT_ID"/>
+    		</entity-condition>
+    	</view-link>
+    	<view-link entity-alias="PPR" rel-entity-alias="PPCROLE" rel-optional="true">
+    		<key-map field-name="productPriceRuleId"/>
+    		<entity-condition>
+    			<condition-expr field-name="inputParamEnumId" entity-alias="PPCROLE" value="PRIP_ROLE_TYPE"/>
+    		</entity-condition>
+    	</view-link>
+    	<!-- <view-link entity-alias="PPR" rel-entity-alias="PPCPARTY" rel-optional="true">
+    		<key-map field-name="productPriceRuleId"/>
+    		<entity-condition>
+    			<condition-expr field-name="inputParamEnumId" entity-alias="PPCPARTY" value="PRIP_PARTY_ID"/>
+    		</entity-condition>
+    	</view-link> -->
+    	<view-link entity-alias="PPR" rel-entity-alias="PPA" rel-optional="true">
+    		<key-map field-name="productPriceRuleId"/>
+    		<entity-condition>
+    			<condition-expr field-name="productPriceActionTypeId" entity-alias="PPA" value="PRICE_FLAT"/>
+    		</entity-condition>
+    	</view-link>
+    	<view-link entity-alias="PPCPROD" rel-entity-alias="PROD" rel-optional="true">
+    		<key-map field-name="condValue" rel-field-name="productId"/>
+    	</view-link>
+    </view-entity>
+    
+    <view-entity entity-name="ProductQuotationRules" package-name="org.ofbiz.product.price">
+    	<description>Display list rules in product quotation</description>
+    	<member-entity entity-alias="PQUO" entity-name="ProductQuotation"/>
+    	<member-entity entity-alias="PPR" entity-name="ProductPriceRule"/>
+    	<member-entity entity-alias="PPC" entity-name="ProductPriceCond"/>
+    	<member-entity entity-alias="PPCP" entity-name="ProductPriceCond"/>
+    	<member-entity entity-alias="PPA" entity-name="ProductPriceAction"/><!-- price to customer -->
+    	<member-entity entity-alias="PPAM" entity-name="ProductPriceAction"/><!-- price to market -->
+    	<member-entity entity-alias="PPAC" entity-name="ProductPriceAction"/><!-- price to consumer -->
+    	<member-entity entity-alias="PROD" entity-name="Product"/>
+    	<alias name="productQuotationId" entity-alias="PQUO"/>
+    	<alias name="productId" entity-alias="PROD"/>
+    	<alias name="productName" entity-alias="PROD"/>
+    	<alias name="productPackingUomId" entity-alias="PPCP" field="condValue"/>
+    	<alias name="priceToDist" entity-alias="PPA" field="amount"/>
+    	<alias name="priceToMarket" entity-alias="PPAM" field="amount"/>
+    	<alias name="priceToConsumer" entity-alias="PPAC" field="amount"/>
+    	<view-link entity-alias="PQUO" rel-entity-alias="PPR" rel-optional="true">
+    		<key-map field-name="productQuotationId"/>
+    		<entity-condition>
+    			<condition-list combine="or">
+    				<condition-expr field-name="isExtra" entity-alias="PPR" value=""/>
+    				<condition-expr field-name="isExtra" entity-alias="PPR" value="N"/>
+    			</condition-list>
+    		</entity-condition>
+    	</view-link>
+    	<view-link entity-alias="PPR" rel-entity-alias="PPC" rel-optional="true">
+    		<key-map field-name="productPriceRuleId"/>
+    		<entity-condition>
+    			<condition-expr field-name="inputParamEnumId" entity-alias="PPC" value="PRIP_PRODUCT_ID"/>
+    		</entity-condition>
+    	</view-link>
+    	<view-link entity-alias="PPR" rel-entity-alias="PPCP" rel-optional="true">
+    		<key-map field-name="productPriceRuleId"/>
+    		<entity-condition>
+    			<condition-expr field-name="inputParamEnumId" entity-alias="PPCP" value="PRIP_QUANTITY_UOMID"/>
+    		</entity-condition>
+    	</view-link>
+    	<view-link entity-alias="PPR" rel-entity-alias="PPA" rel-optional="true">
+    		<key-map field-name="productPriceRuleId"/>
+    		<entity-condition>
+    			<condition-expr field-name="productPriceActionTypeId" entity-alias="PPA" value="PRICE_FLAT"/>
+    		</entity-condition>
+    	</view-link>
+    	<view-link entity-alias="PPR" rel-entity-alias="PPAM" rel-optional="true">
+    		<key-map field-name="productPriceRuleId"/>
+    		<entity-condition>
+    			<condition-expr field-name="productPriceActionTypeId" entity-alias="PPAM" value="PRICE_MARKET"/>
+    		</entity-condition>
+    	</view-link>
+    	<view-link entity-alias="PPR" rel-entity-alias="PPAC" rel-optional="true">
+    		<key-map field-name="productPriceRuleId"/>
+    		<entity-condition>
+    			<condition-expr field-name="productPriceActionTypeId" entity-alias="PPAC" value="PRICE_CONSUMER"/>
+    		</entity-condition>
+    	</view-link>
+    	<view-link entity-alias="PPC" rel-entity-alias="PROD" rel-optional="true">
+    		<key-map field-name="condValue" rel-field-name="productId"/>
+    	</view-link>
+    </view-entity>
+    
+    <view-entity entity-name="ProductQuotationRulesAndTax" package-name="org.ofbiz.product.price">
+    	<description>Display list rules in product quotation and tax percentage</description>
+    	<member-entity entity-alias="PQUO" entity-name="ProductQuotation"/>
+    	<member-entity entity-alias="PPR" entity-name="ProductPriceRule"/>
+    	<member-entity entity-alias="PPC" entity-name="ProductPriceCond"/>
+    	<member-entity entity-alias="PPCP" entity-name="ProductPriceCond"/>
+    	<member-entity entity-alias="PPA" entity-name="ProductPriceAction"/><!-- price to customer -->
+    	<member-entity entity-alias="PPAM" entity-name="ProductPriceAction"/><!-- price to market -->
+    	<member-entity entity-alias="PPAC" entity-name="ProductPriceAction"/><!-- price to consumer -->
+    	<member-entity entity-alias="PRODTAX" entity-name="ProductAndTaxAuthorityRate"/>
+    	<member-entity entity-alias="PROD" entity-name="Product"/>
+    	<alias name="productQuotationId" entity-alias="PQUO"/>
+    	<alias name="productId" entity-alias="PROD"/>
+    	<alias name="productName" entity-alias="PROD"/>
+    	<alias name="productPackingUomId" entity-alias="PPCP" field="condValue"/>
+    	<alias name="priceToDist" entity-alias="PPA" field="amount"/>
+    	<alias name="priceToMarket" entity-alias="PPAM" field="amount"/>
+    	<alias name="priceToConsumer" entity-alias="PPAC" field="amount"/>
+    	<alias name="taxPercentage" entity-alias="PRODTAX"/>
+    	<alias name="taxAuthPartyId" entity-alias="PRODTAX"/>
+    	<alias name="taxAuthGeoId" entity-alias="PRODTAX"/>
+    	<view-link entity-alias="PQUO" rel-entity-alias="PPR" rel-optional="true">
+    		<key-map field-name="productQuotationId"/>
+    		<entity-condition>
+    			<condition-list combine="or">
+    				<condition-expr field-name="isExtra" entity-alias="PPR" value=""/>
+    				<condition-expr field-name="isExtra" entity-alias="PPR" value="N"/>
+    			</condition-list>
+    		</entity-condition>
+    	</view-link>
+    	<view-link entity-alias="PPR" rel-entity-alias="PPCP" rel-optional="true">
+    		<key-map field-name="productPriceRuleId"/>
+    		<entity-condition>
+    			<condition-expr field-name="inputParamEnumId" entity-alias="PPCP" value="PRIP_QUANTITY_UOMID"/>
+    		</entity-condition>
+    	</view-link>
+    	<view-link entity-alias="PPR" rel-entity-alias="PPC" rel-optional="true">
+    		<key-map field-name="productPriceRuleId"/>
+    		<entity-condition>
+    			<condition-expr field-name="inputParamEnumId" entity-alias="PPC" value="PRIP_PRODUCT_ID"/>
+    		</entity-condition>
+    	</view-link>
+    	<view-link entity-alias="PPR" rel-entity-alias="PPA" rel-optional="true">
+    		<key-map field-name="productPriceRuleId"/>
+    		<entity-condition>
+    			<condition-expr field-name="productPriceActionTypeId" entity-alias="PPA" value="PRICE_FLAT"/>
+    		</entity-condition>
+    	</view-link>
+    	<view-link entity-alias="PPR" rel-entity-alias="PPAM" rel-optional="true">
+    		<key-map field-name="productPriceRuleId"/>
+    		<entity-condition>
+    			<condition-expr field-name="productPriceActionTypeId" entity-alias="PPAM" value="PRICE_MARKET"/>
+    		</entity-condition>
+    	</view-link>
+    	<view-link entity-alias="PPR" rel-entity-alias="PPAC" rel-optional="true">
+    		<key-map field-name="productPriceRuleId"/>
+    		<entity-condition>
+    			<condition-expr field-name="productPriceActionTypeId" entity-alias="PPAC" value="PRICE_CONSUMER"/>
+    		</entity-condition>
+    	</view-link>
+    	<view-link entity-alias="PPC" rel-entity-alias="PROD" rel-optional="true">
+    		<key-map field-name="condValue" rel-field-name="productId"/>
+    	</view-link>
+    	<view-link entity-alias="PROD" rel-entity-alias="PRODTAX" rel-optional="true">
+    		<key-map field-name="productId"/>
+    	</view-link>
+    </view-entity>
+    
+    <view-entity entity-name="ProdCatalogCategoryAndProduct" package-name="org.ofbiz.product.price">
+    	<member-entity entity-alias="PCC" entity-name="ProdCatalogCategory" />
+    	<member-entity entity-alias="PCR" entity-name="ProductCategoryRollupAndChild"/>
+    	<member-entity entity-alias="PCM" entity-name="ProductCategoryMember" />
+    	<member-entity entity-alias="PROD" entity-name="Product" />
+    	<alias-all entity-alias="PROD" />
+    	<alias name="prodCatalogId" entity-alias="PCC"/>
+    	<alias name="productCategoryId" entity-alias="PCM"/>
+    	<alias name="sequenceNumCategory" field="sequenceNum" entity-alias="PCC"/>
+    	<alias name="sequenceNumRollup" field="sequenceNum" entity-alias="PCR"/>
+    	<alias name="sequenceNumProduct" field="sequenceNum" entity-alias="PCM"/>
+        <view-link entity-alias="PROD" rel-entity-alias="PCM">
+            <key-map field-name="productId"/>
+            <entity-condition filter-by-date="true" distinct="true"/>
+        </view-link>
+        <view-link entity-alias="PCM" rel-entity-alias="PCR">
+            <key-map field-name="productCategoryId"/>
+            <entity-condition filter-by-date="true" distinct="true" />
+        </view-link>
+        <view-link entity-alias="PCR" rel-entity-alias="PCC">
+        	<key-map field-name="parentProductCategoryId" rel-field-name="productCategoryId"/>
+        	<entity-condition filter-by-date="true" distinct="true"/>
+        </view-link>
+        <relation type="one-nofk" rel-entity-name="ProductCategoryMember">
+            <key-map field-name="productCategoryId"/>
+            <key-map field-name="productId"/>
+            <key-map field-name="fromDate"/>
+        </relation>
+        <relation type="one-nofk" rel-entity-name="Product">
+            <key-map field-name="productId"/>
+        </relation>
+    </view-entity>
+    <view-entity entity-name="ProdCatalogCategoryAndTaxAuthorityRate" package-name="org.ofbiz.product.price">
+    	<member-entity entity-alias="PCC" entity-name="ProdCatalogCategory" />
+    	<member-entity entity-alias="PCR" entity-name="ProductCategoryRollupAndChild"/>
+    	<member-entity entity-alias="PCM" entity-name="ProductCategoryMember" />
+    	<member-entity entity-alias="PRODTAX" entity-name="ProductAndTaxAuthorityRate"/>
+    	<member-entity entity-alias="PROD" entity-name="Product" />
+    	<alias-all entity-alias="PROD" />
+    	<alias name="prodCatalogId" entity-alias="PCC"/>
+    	<alias name="productCategoryId" entity-alias="PCM"/>
+    	<alias name="sequenceNumCategory" field="sequenceNum" entity-alias="PCC"/>
+    	<alias name="sequenceNumRollup" field="sequenceNum" entity-alias="PCR"/>
+    	<alias name="sequenceNumProduct" field="sequenceNum" entity-alias="PCM"/>
+    	<alias name="taxPercentage" entity-alias="PRODTAX"/>
+    	<alias name="taxAuthPartyId" entity-alias="PRODTAX"/>
+    	<alias name="taxAuthGeoId" entity-alias="PRODTAX"/>
+        <view-link entity-alias="PROD" rel-entity-alias="PCM">
+            <key-map field-name="productId"/>
+            <entity-condition filter-by-date="true" distinct="true"/>
+        </view-link>
+        <view-link entity-alias="PCM" rel-entity-alias="PCR">
+            <key-map field-name="productCategoryId"/>
+            <entity-condition filter-by-date="true" distinct="true" />
+        </view-link>
+        <view-link entity-alias="PCR" rel-entity-alias="PCC">
+        	<key-map field-name="parentProductCategoryId" rel-field-name="productCategoryId"/>
+        	<entity-condition filter-by-date="true" distinct="true"/>
+        </view-link>
+    	<view-link entity-alias="PROD" rel-entity-alias="PRODTAX" rel-optional="true">
+    		<key-map field-name="productId"/>
+    	</view-link>
+        <relation type="one-nofk" rel-entity-name="ProductCategoryMember">
+            <key-map field-name="productCategoryId"/>
+            <key-map field-name="productId"/>
+            <key-map field-name="fromDate"/>
+        </relation>
+        <relation type="one-nofk" rel-entity-name="Product">
+            <key-map field-name="productId"/>
+        </relation>
+    </view-entity>
+    <view-entity entity-name="InventoryItemFilterAtpQoh" package-name="org.ofbiz.product">
+    	<member-entity entity-alias="INV" entity-name="InventoryItem" />
+    	<member-entity entity-alias="INVIT" entity-name="InventoryItemType" />
+    	<alias-all entity-alias="INV" />
+    	<alias name="curInventoryItemTypeId" entity-alias="INVIT" field="inventoryItemTypeId" />
+    	<view-link rel-entity-alias="INVIT" entity-alias="INV">
+    		<key-map field-name="inventoryItemTypeId"/>
+    	</view-link>
+    	<entity-condition>
+    		<condition-list>
+    			<condition-expr field-name="availableToPromiseTotal" entity-alias="INV" operator="greater" value="0"/>
+    			<condition-expr field-name="quantityOnHandTotal" entity-alias="INV" operator="greater" value="0"/>
+    		</condition-list>
+    		<!-- <order-by field-name="facilityId"/>
+    		<order-by field-name="-datetimeReceived"/>
+    		<order-by field-name="-inventoryItemId"/> -->
+    	</entity-condition>
+    </view-entity>
+    
+    <view-entity entity-name="ProductStoreFacilityInventorySumAtpqoh" package-name="com.olbius.product">
+    	<member-entity entity-alias="PSF" entity-name="ProductStoreFacility"/>
+    	<member-entity entity-alias="INV" entity-name="InventoryItem"/>
+    	<alias name="productStoreId" entity-alias="PSF" group-by="true"/>
+    	<!-- <alias name="facilityId" entity-alias="PSF" group-by="true"/> -->
+    	<alias name="fromDate" entity-alias="PSF" group-by="true"/>
+    	<alias name="thruDate" entity-alias="PSF" group-by="true"/>
+    	<alias name="productId" entity-alias="INV" group-by="true"/>
+    	<alias name="statusId" entity-alias="INV" group-by="true"/>
+    	<alias name="expireDate" entity-alias="INV" group-by="true"/>
+    	<alias name="uomId" entity-alias="INV" group-by="true"/>
+    	<alias name="quantityOnHandTotal" entity-alias="INV" function="sum"/>
+    	<alias name="availableToPromiseTotal" entity-alias="INV" function="sum"/>
+    	<!-- Find by productStore, productId, QOH > 0 -->
+    	<view-link entity-alias="PSF" rel-entity-alias="INV">
+    		<key-map field-name="facilityId"/>
+    	</view-link>
+    </view-entity>
+    <view-entity entity-name="OrderHeaderAndShipGroupsByUserLoginManager"
+            package-name="org.ofbiz.order.order"
+            never-cache="true"
+            title="Order Header And Ship Groups">
+      <member-entity entity-alias="OHASG" entity-name="OrderHeaderAndShipGroups"/>
+      <member-entity entity-alias="PSRD" entity-name="ProductStoreRoleDetail"/>
+      <alias-all entity-alias="OHASG"/>
+      <alias name="partyId" entity-alias="PSRD"/>
+      <alias name="roleTypeId" entity-alias="PSRD"/>
+      <alias name="storeName" entity-alias="PSRD"/>
+      <view-link entity-alias="OHASG" rel-entity-alias="PSRD">
+        <key-map field-name="productStoreId"/>
+      </view-link>
+      <entity-condition filter-by-date="true" distinct="true">
+      	<condition-expr field-name="roleTypeId" entity-alias="PSRD" value="SALES_ADMIN"/>
+      </entity-condition>
+    </view-entity>
+    <view-entity entity-name="OrderItemAndFacilityAndProduct" package-name="org.ofbiz.order.order"
+            never-cache="true"
+            title="Order Item and Facility and Product">
+    	<member-entity entity-alias="ORDI" entity-name="OrderItem"/>
+    	<member-entity entity-alias="INVI" entity-name="InventoryItem"/>
+    	<member-entity entity-alias="PROD" entity-name="Product"/>
+    	<member-entity entity-alias="UOM" entity-name="Uom"/>
+    	<member-entity entity-alias="GODIFY" entity-name="GoodIdentification"/>
+    	<member-entity entity-alias="COFPCK" entity-name="ConfigPacking"/>
+    	<member-entity entity-alias="COFPCK2" entity-name="ConfigPacking"/>
+    	<alias-all entity-alias="ORDI"/>
+    	<alias name="productName" entity-alias="PROD" field="productName"/>
+    	<alias name="weightUomId" entity-alias="PROD" field="weightUomId"/>
+    	<alias name="weight" entity-alias="PROD" field="weight"/>
+    	<alias name="productWeight" entity-alias="PROD" field="productWeight"/>
+    	<alias name="heightUomId" entity-alias="PROD" field="heightUomId"/>
+    	<alias name="productHeight" entity-alias="PROD" field="productHeight"/>
+    	<alias name="shippingHeight" entity-alias="PROD" field="shippingHeight"/>
+    	<alias name="widthUomId" entity-alias="PROD" field="widthUomId"/>
+    	<alias name="productWidth" entity-alias="PROD" field="productWidth"/>
+    	<alias name="shippingWidth" entity-alias="PROD" field="shippingWidth"/>
+    	<alias name="depthUomId" entity-alias="PROD" field="depthUomId"/>
+    	<alias name="shippingDepth" entity-alias="PROD" field="shippingDepth"/>
+    	<alias name="diameterUomId" entity-alias="PROD" field="diameterUomId"/>
+    	<alias name="productDiameter" entity-alias="PROD" field="productDiameter"/>
+    	<alias name="productUomId" entity-alias="PROD" field="productUomId"/>
+    	<alias name="productUomIdProd" entity-alias="PROD" field="quantityUomId"/>
+    	<alias name="productPackingUomId" entity-alias="PROD" field="productPackingUomId"/>
+    	<alias name="facilityId" entity-alias="INVI" field="facilityId"/>
+    	<alias name="expireDate" entity-alias="INVI" field="expireDate"/>
+    	<alias name="productPackingUomDescription" entity-alias="UOM" field="description"/>
+    	<alias name="barcode" entity-alias="GODIFY" field="idValue"/>
+    	<alias name="quantityProductPackingPerTray" entity-alias="COFPCK" field="quantityConvert"/>
+    	<alias name="quantityProductPacking" entity-alias="COFPCK2" field="quantityConvert"/>
+    	<view-link entity-alias="ORDI" rel-entity-alias="INVI" rel-optional="true">
+    		<key-map field-name="fromInventoryItemId" rel-field-name="inventoryItemId"/>
+    	</view-link>
+    	<view-link entity-alias="ORDI" rel-entity-alias="PROD" rel-optional="true">
+    		<key-map field-name="productId"/>
+    	</view-link>
+    	<view-link entity-alias="PROD" rel-entity-alias="UOM" rel-optional="true">
+    		<key-map field-name="productPackingUomId" rel-field-name="uomId"/>
+    	</view-link>
+    	<view-link entity-alias="PROD" rel-entity-alias="GODIFY" rel-optional="true">
+    		<key-map field-name="productId"/>
+    		<entity-condition>
+    			<condition-expr field-name="goodIdentificationTypeId" entity-alias="GODIFY" value="SKU"/>
+    		</entity-condition>
+    	</view-link>
+    	<view-link entity-alias="PROD" rel-entity-alias="COFPCK" rel-optional="true">
+    		<key-map field-name="productId"/>
+    		<entity-condition>
+    			<condition-list>
+    				<condition-expr entity-alias="COFPCK" field-name="uomFromId" value="DELYS_KHAY"/>
+    				<condition-expr field-name="uomToId" entity-alias="COFPCK" rel-field-name="productPackingUomId" rel-entity-alias="PROD" />
+    			</condition-list>
+    		</entity-condition>
+    	</view-link>
+    	<view-link entity-alias="PROD" rel-entity-alias="COFPCK2" rel-optional="true">
+    		<key-map field-name="productId"/>
+    		<entity-condition>
+    			<condition-list>
+    				<condition-expr field-name="uomFromId" entity-alias="COFPCK2" rel-field-name="productPackingUomId" rel-entity-alias="PROD"/>
+    				<condition-expr field-name="uomToId" entity-alias="COFPCK" rel-field-name="productPackingUomId" rel-entity-alias="PROD" />
+    			</condition-list>
+    		</entity-condition>
+    	</view-link>
+    </view-entity>
+    <view-entity entity-name="OrderHeaderItemsPromosAndRoleAndSettle" package-name="org.ofbiz.order.order"
+            never-cache="true" title="Order Header And Order Items Promo And Product Promotion And Order Role And Settle View Entity">
+   		<member-entity entity-alias="OH" entity-name="OrderHeader"/>
+      	<member-entity entity-alias="OI" entity-name="OrderItem"/>
+   		<member-entity entity-alias="OAP" entity-name="OrderAdjustmentAndPromo"/>
+   		<member-entity entity-alias="ORDROCUST" entity-name="OrderRole"/>
+      	<member-entity entity-alias="ORDROSELL" entity-name="OrderRole"/>
+      	<member-entity entity-alias="PRTROLE" entity-name="PartyRole"/>
+      	<member-entity entity-alias="SETTLE" entity-name="PromoSettleItem"/>
+      	<alias entity-alias="OH" name="orderId"/>
+      	<alias entity-alias="OH" name="orderDate"/>
+      	<alias entity-alias="OH" name="orderStatusId" field="statusId"/>
+      	<alias entity-alias="OH" name="grandTotal"/>
+      	<alias entity-alias="OH" name="productStoreId"/>
+      	<alias entity-alias="OH" name="orderTypeId"/>
+      	<alias entity-alias="OI" name="orderItemSeqId"/>
+      	<alias entity-alias="OI" name="productId"/>
+      	<alias entity-alias="OI" name="quantity"/>
+      	<alias entity-alias="OI" name="cancelQuantity"/>
+      	<alias entity-alias="OI" name="unitPrice"/>
+      	<alias entity-alias="OI" name="unitListPrice"/>
+      	<alias entity-alias="OI" name="itemDescription"/>
+      	<alias entity-alias="OI" name="itemStatusId" field="statusId"/>
+      	<alias entity-alias="OI" name="estimatedShipDate"/>
+      	<alias entity-alias="OI" name="estimatedDeliveryDate"/>
+      	<alias entity-alias="OI" name="shipBeforeDate"/>
+      	<alias entity-alias="OI" name="shipAfterDate"/>
+      	<alias entity-alias="OI" name="orderItemTypeId"/>
+      	<alias entity-alias="OI" name="isPromo"/>
+   		<alias entity-alias="OAP" name="orderAdjustmentId"/>
+   		<alias entity-alias="OAP" name="productPromoId"/>
+   		<alias entity-alias="OAP" name="promoName"/>
+   		<alias entity-alias="OAP" name="productPromoStatusId"/>
+   		<alias entity-alias="OAP" name="fromDate"/>
+   		<alias entity-alias="OAP" name="thruDate"/>
+   		<alias entity-alias="OAP" name="useLimitPerCustomer"/>
+   		<alias entity-alias="OAP" name="useLimitPerPromotion"/>
+   		<alias entity-alias="OAP" name="promoSalesTargets"/>
+   		<alias entity-alias="OAP" name="createdDate"/>
+   		<alias entity-alias="OAP" name="promoText"/>
+   		<alias entity-alias="OAP" name="userEntered"/>
+   		<alias entity-alias="OAP" name="requireCode"/>
+   		<alias entity-alias="OAP" name="useLimitPerOrder"/>
+   		<alias entity-alias="OAP" name="overrideOrgPartyId"/>
+   		<alias entity-alias="OAP" name="showToCustomer"/>
+   		<alias entity-alias="OAP" name="productPromoTypeId"/>
+   		<alias entity-alias="OAP" name="billbackFactor"/>
+   		<alias entity-alias="OAP" name="paymentMethod"/>
+   		<alias entity-alias="OAP" name="shipGroupSeqId"/>
+   		<alias entity-alias="OAP" name="orderAdjustmentTypeId"/>
+   		<alias entity-alias="ORDROCUST" name="customerId" field="partyId"/>
+   		<alias entity-alias="ORDROSELL" name="sellerId" field="partyId"/>
+   		<alias entity-alias="PRTROLE" name="sellerRoleTypeId" field="roleTypeId"/>
+   		<alias entity-alias="SETTLE" name="promoSettleRecordId"/>
+      	<view-link entity-alias="OH" rel-entity-alias="OI">
+	        <key-map field-name="orderId"/>
+	        <entity-condition>
+	        	<condition-expr field-name="isPromo" value="Y" entity-alias="OI"/>
+	        	<!-- <condition-expr field-name="quantity" operator="greater" value="0" entity-alias="OI"/> -->
+	        </entity-condition>
+      	</view-link>
+   		<view-link entity-alias="OI" rel-entity-alias="OAP" rel-optional="true">
+   			<key-map field-name="orderId"/>
+   			<key-map field-name="orderItemSeqId"/>
+   			<entity-condition>
+   				<condition-expr field-name="orderAdjustmentTypeId" value="PROMOTION_ADJUSTMENT" entity-alias="OAP"/>
+   			</entity-condition>
+   		</view-link>
+   		<view-link entity-alias="OH" rel-entity-alias="ORDROCUST" rel-optional="true">
+   			<key-map field-name="orderId"/>
+   			<entity-condition>
+   				<condition-expr field-name="roleTypeId" value="PLACING_CUSTOMER" entity-alias="ORDROCUST"/>
+   			</entity-condition>
+   		</view-link>
+   		<view-link entity-alias="OH" rel-entity-alias="ORDROSELL" rel-optional="true">
+   			<key-map field-name="orderId"/>
+   			<entity-condition>
+   				<condition-expr field-name="roleTypeId" value="BILL_FROM_VENDOR" entity-alias="ORDROSELL"/>
+   			</entity-condition>
+   		</view-link>
+   		<view-link entity-alias="ORDROSELL" rel-entity-alias="PRTROLE" rel-optional="true">
+   			<key-map field-name="partyId"/>
+   		</view-link>
+   		<view-link entity-alias="OI" rel-entity-alias="SETTLE" rel-optional="true">
+   			<key-map field-name="orderId"/>
+   			<key-map field-name="orderItemSeqId"/>
+   		</view-link>
+   	</view-entity>
+   	<view-entity entity-name="OrderHeaderItemsPromosAndItemIssuance" package-name="org.ofbiz.order.order"
+            never-cache="true" title="Order Header And Order Items Promo And Product Promo And Item Issuance View Entity">
+   		<member-entity entity-alias="OH" entity-name="OrderHeader"/>
+      	<member-entity entity-alias="OI" entity-name="OrderItem"/>
+      	<member-entity entity-alias="ORDRO" entity-name="OrderRole"/>
+   		<member-entity entity-alias="OAP" entity-name="OrderAdjustmentAndPromo"/>
+   		<member-entity entity-alias="IISS" entity-name="ItemIssuance"/>
+      	<alias entity-alias="OH" name="orderId" group-by="true"/>
+      	<alias entity-alias="OH" name="orderDate" group-by="true"/>
+      	<alias entity-alias="OH" name="orderStatusId" field="statusId" group-by="true"/>
+      	<alias entity-alias="OH" name="grandTotal" group-by="true"/>
+      	<alias entity-alias="OH" name="productStoreId" group-by="true"/>
+      	<alias entity-alias="OH" name="orderTypeId" group-by="true"/>
+      	<alias entity-alias="OI" name="orderItemSeqId" group-by="true"/>
+      	<alias entity-alias="OI" name="productId" group-by="true"/>
+      	<alias entity-alias="OI" name="quantity" group-by="true"/>
+      	<alias entity-alias="OI" name="cancelQuantity" group-by="true"/>
+      	<alias entity-alias="OI" name="unitPrice" group-by="true"/>
+      	<alias entity-alias="OI" name="unitListPrice" group-by="true"/>
+      	<alias entity-alias="OI" name="itemDescription" group-by="true"/>
+      	<alias entity-alias="OI" name="itemStatusId" field="statusId" group-by="true"/>
+      	<alias entity-alias="OI" name="estimatedShipDate" group-by="true"/>
+      	<alias entity-alias="OI" name="estimatedDeliveryDate" group-by="true"/>
+      	<alias entity-alias="OI" name="shipBeforeDate" group-by="true"/>
+      	<alias entity-alias="OI" name="shipAfterDate" group-by="true"/>
+      	<alias entity-alias="OI" name="orderItemTypeId" group-by="true"/>
+      	<alias entity-alias="OI" name="isPromo" group-by="true"/>
+   		<alias entity-alias="OAP" name="orderAdjustmentId" group-by="true"/>
+   		<alias entity-alias="OAP" name="productPromoId" group-by="true"/>
+   		<alias entity-alias="OAP" name="promoName" group-by="true"/>
+   		<alias entity-alias="OAP" name="productPromoStatusId" group-by="true"/>
+   		<alias entity-alias="OAP" name="fromDate" group-by="true"/>
+   		<alias entity-alias="OAP" name="thruDate" group-by="true"/>
+   		<alias entity-alias="OAP" name="useLimitPerCustomer" group-by="true"/>
+   		<alias entity-alias="OAP" name="useLimitPerPromotion" group-by="true"/>
+   		<alias entity-alias="OAP" name="promoSalesTargets" group-by="true"/>
+   		<alias entity-alias="OAP" name="createdDate" group-by="true"/>
+   		<alias entity-alias="OAP" name="promoText" group-by="true"/>
+   		<alias entity-alias="OAP" name="userEntered" group-by="true"/>
+   		<alias entity-alias="OAP" name="requireCode" group-by="true"/>
+   		<alias entity-alias="OAP" name="useLimitPerOrder" group-by="true"/>
+   		<alias entity-alias="OAP" name="overrideOrgPartyId" group-by="true"/>
+   		<alias entity-alias="OAP" name="showToCustomer" group-by="true"/>
+   		<alias entity-alias="OAP" name="productPromoTypeId" group-by="true"/>
+   		<alias entity-alias="OAP" name="billbackFactor" group-by="true"/>
+   		<alias entity-alias="OAP" name="paymentMethod" group-by="true"/>
+   		<alias entity-alias="OAP" name="shipGroupSeqId" group-by="true"/>
+   		<alias entity-alias="OAP" name="orderAdjustmentTypeId" group-by="true"/>
+   		<!-- 
+   		<alias name="orderId" entity-alias="OAP"/>
+		<alias name="orderItemSeqId" entity-alias="OAP"/>
+		<alias name="quantityIiss" field="quantity" entity-alias="IISS" function="sum"/>
+		<alias name="cancelQuantityIiss" field="cancelQuantity" entity-alias="IISS" function="sum"/> 
+		-->
+   		<alias entity-alias="ORDRO" name="customerId" field="partyId" group-by="true"/>
+   		<alias entity-alias="IISS" name="shippedQuantity" function="sum">
+   			<complex-alias operator="-">
+				<complex-alias-field field="quantity" entity-alias="IISS" default-value="0"/>
+				<complex-alias-field field="cancelQuantity" entity-alias="IISS" default-value="0"/>
+   			</complex-alias>
+   		</alias>
+   		
+      	<view-link entity-alias="OH" rel-entity-alias="OI">
+	        <key-map field-name="orderId"/>
+      	</view-link>
+   		<view-link entity-alias="OI" rel-entity-alias="OAP" rel-optional="true">
+   			<key-map field-name="orderId"/>
+   			<key-map field-name="orderItemSeqId"/>
+   		</view-link>
+   		<view-link rel-entity-alias="ORDRO" entity-alias="OH" rel-optional="true">
+   			<key-map field-name="orderId"/>
+   		</view-link>
+   		<view-link rel-entity-alias="IISS" entity-alias="OI" rel-optional="true">
+   			<key-map field-name="orderId"/>
+   			<key-map field-name="orderItemSeqId"/>
+   		</view-link>
+   		<entity-condition>
+   			<condition-list>
+   				<condition-expr field-name="isPromo" value="Y" entity-alias="OI"/>
+   				<condition-expr field-name="orderAdjustmentTypeId" value="PROMOTION_ADJUSTMENT" entity-alias="OAP"/>
+   				<condition-expr field-name="roleTypeId" value="PLACING_CUSTOMER" entity-alias="ORDRO"/>
+   				<condition-expr field-name="quantity" operator="greater" value="0" entity-alias="OI"/>
+   			</condition-list>
+   			<order-by field-name="-orderDate"/>
+   		</entity-condition>
+   	</view-entity>
+   	<view-entity entity-name="OrderItemAssocAndOrderItemFromTo" package-name="org.ofbiz.order.order"
+            never-cache="true" title="Order Item Associate And Order Item From And Order Item To">
+    	<member-entity entity-alias="OIA" entity-name="OrderItemAssoc"/>
+    	<member-entity entity-alias="OIF" entity-name="OrderItem"/>
+    	<member-entity entity-alias="OIT" entity-name="OrderItem"/>
+    	<alias-all entity-alias="OIA"/>
+    	<alias name="statusId" entity-alias="OIF"/>
+    	<alias name="toStatusId" entity-alias="OIT" field="statusId"/>
+    	<view-link rel-entity-alias="OIF" entity-alias="OIA">
+    		<key-map field-name="orderId"/>
+    		<key-map field-name="orderItemSeqId"/>
+    	</view-link>
+    	<view-link rel-entity-alias="OIT" entity-alias="OIA">
+    		<key-map field-name="toOrderId" rel-field-name="orderId"/>
+    		<key-map field-name="toOrderItemSeqId" rel-field-name="orderItemSeqId"/>
+    	</view-link>
+    </view-entity>
+    <view-entity entity-name="OrderHeaderAndItemsDetail"
+            package-name="org.ofbiz.order.order"
+            never-cache="true"
+            title="Order Header And Order Items View Entity">
+      	<member-entity entity-alias="OH" entity-name="OrderHeader"/>
+      	<member-entity entity-alias="OI" entity-name="OrderItem"/>
+      	<member-entity entity-alias="ORDRO" entity-name="OrderRole"/>
+      	<alias entity-alias="OH" name="orderId"/>
+      	<alias entity-alias="OH" name="orderDate"/>
+      	<alias entity-alias="OH" name="orderStatusId" field="statusId"/>
+      	<alias entity-alias="OH" name="grandTotal"/>
+      	<alias entity-alias="OH" name="productStoreId"/>
+      	<alias entity-alias="OH" name="orderTypeId"/>
+      	<alias entity-alias="OI" name="orderItemSeqId"/>
+      	<alias entity-alias="OI" name="productId"/>
+      	<alias entity-alias="OI" name="quantity"/>
+      	<alias entity-alias="OI" name="cancelQuantity"/>
+      	<alias entity-alias="OI" name="unitPrice"/>
+      	<alias entity-alias="OI" name="unitListPrice"/>
+      	<alias entity-alias="OI" name="itemDescription"/>
+      	<alias entity-alias="OI" name="itemStatusId" field="statusId"/>
+      	<alias entity-alias="OI" name="estimatedShipDate"/>
+      	<alias entity-alias="OI" name="estimatedDeliveryDate"/>
+      	<alias entity-alias="OI" name="shipBeforeDate"/>
+      	<alias entity-alias="OI" name="shipAfterDate"/>
+      	<alias entity-alias="OI" name="orderItemTypeId"/>
+      	<alias entity-alias="OI" name="isPromo"/>
+      	<alias entity-alias="ORDRO" name="customerId" field="partyId"/>
+      	<view-link entity-alias="OH" rel-entity-alias="OI">
+        	<key-map field-name="orderId"/>
+      	</view-link>
+      	<view-link entity-alias="OI" rel-entity-alias="ORDRO" rel-optional="true">
+      		<key-map field-name="orderId"/>
+      	</view-link>
+      	<entity-condition>
+   			<condition-list>
+   				<condition-expr field-name="roleTypeId" value="PLACING_CUSTOMER" entity-alias="ORDRO"/>
+   			</condition-list>
+   		</entity-condition>
+    </view-entity>
+    <view-entity entity-name="SalesStatementAndTimePeriod" package-name="com.olbius" 
+    	title="Sales Statement Header and Custom Time Period">
+    	<member-entity entity-alias="SSHD" entity-name="SalesStatementHeader"/>
+    	<member-entity entity-alias="CUST" entity-name="CustomTimePeriod"/>
+    	<alias-all entity-alias="CUST">
+    		<exclude field="customTimePeriodId"/>
+    	</alias-all>
+    	<alias name="customTimePeriodId" entity-alias="SSHD"/>
+    	<alias name="statusId" entity-alias="SSHD"/>
+    	<alias name="salesName" entity-alias="SSHD"/>
+    	<alias name="salesTypeId" entity-alias="SSHD"/>
+    	<view-link entity-alias="SSHD" rel-entity-alias="CUST">
+    		<key-map field-name="customTimePeriodId"/>
+    	</view-link>
+    </view-entity>
+    <view-entity entity-name="SalesForecastAndCustomTimePeriod"
+            package-name="org.ofbiz.order.order"
+            never-cache="true"
+            title="Sales Forecast And Custom Time Period Entity">
+      	<member-entity entity-alias="SFC" entity-name="SalesForecast"/>
+      	<member-entity entity-alias="CTP" entity-name="CustomTimePeriod"/>
+      	<alias-all entity-alias="SFC"/>
+      	<!-- <alias name="customTimePeriodIdParent" entity-alias="CTP"/> -->
+      	<alias name="periodTypeId" entity-alias="CTP"/>
+      	<alias name="periodName" entity-alias="CTP"/>
+      	<alias name="parentPeriodId" entity-alias="CTP"/>
+      	<view-link entity-alias="SFC" rel-entity-alias="CTP">
+        	<key-map field-name="customTimePeriodId"/>
+      	</view-link>
+    </view-entity>
+    <view-entity entity-name="PartyRoleNameDetailPartyRelTo" package-name="com.olbius.party"
+        title="Party Relationship (PartyIdTo) and Party Role and Party Detail (Person, PartyGroup, etc.) View Entity">
+        <member-entity entity-alias="PRSP" entity-name="PartyRelationship"><description>Role of partyFrom to partyTo. Ex: department - employee</description></member-entity>
+        <member-entity entity-alias="PTY" entity-name="Party"/>
+        <member-entity entity-alias="PR" entity-name="PartyRole"/>
+        <member-entity entity-alias="PERSON" entity-name="Person"/>
+        <member-entity entity-alias="PTYGRP" entity-name="PartyGroup"/>
+        <member-entity entity-alias="PRSPRE" entity-name="PartyRelationship"><description>Role reverse of this partyTo in partyFrom. Ex: employee is assistant in department</description></member-entity>
+        <alias-all entity-alias="PTY"/>
+        <alias-all entity-alias="PR"/>
+        <alias-all entity-alias="PERSON">
+            <exclude field="comments"/>
+        </alias-all>
+        <alias-all entity-alias="PTYGRP">
+            <exclude field="comments"/>
+        </alias-all>
+        <alias name="fullName">
+        	<complex-alias operator="||' '||">
+        		<complex-alias-field field="lastName" entity-alias="PERSON" default-value="''"/>
+        		<complex-alias-field field="middleName" entity-alias="PERSON" default-value="''"/>
+        		<complex-alias-field field="firstName" entity-alias="PERSON" default-value="''"/>
+        	</complex-alias>
+        </alias>
+        <alias name="partyIdFrom" entity-alias="PRSP"/>
+        <alias name="partyRelationshipTypeId" entity-alias="PRSP"/>
+        <alias name="fromDate" entity-alias="PRSP"/>
+        <alias name="thruDate" entity-alias="PRSP"/>
+        <alias name="roleTypeIdFrom" entity-alias="PRSP"/>
+        <alias name="roleTypeIdTo" entity-alias="PRSP"/>
+        <alias name="roleTypeIdReverse" entity-alias="PRSPRE" field="roleTypeIdFrom"/>
+        <alias name="partyRelationshipTypeIdReverse" entity-alias="PRSPRE" field="partyRelationshipTypeId"/>
+        <view-link entity-alias="PRSP" rel-entity-alias="PTY">
+        	<key-map field-name="partyIdTo" rel-field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PTY" rel-entity-alias="PR">
+            <key-map field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PTY" rel-entity-alias="PERSON" rel-optional="true">
+            <key-map field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PTY" rel-entity-alias="PTYGRP" rel-optional="true">
+            <key-map field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PRSP" rel-entity-alias="PRSPRE" rel-optional="true">
+        	<key-map field-name="partyIdTo" rel-field-name="partyIdFrom"/>
+        	<key-map field-name="partyIdFrom" rel-field-name="partyIdTo"/>
+        </view-link>
+        <entity-condition>
+        	<condition-expr field-name="roleTypeIdTo" entity-alias="PRSP" operator="equals" rel-field-name="roleTypeId" rel-entity-alias="PR"/>
+        </entity-condition>
+    </view-entity>
+    
+    <!-- <view-entity entity-name="PartyRoleNameDetailPartyRelFrom" package-name="com.olbius.party"
+        title="Party Relationship (PartyIdFrom) and Party Role and Party Detail (Person, PartyGroup, etc.) View Entity">
+        <member-entity entity-alias="PRSP" entity-name="PartyRelationship"/>
+        <member-entity entity-alias="PTY" entity-name="Party"/>
+        <member-entity entity-alias="PR" entity-name="PartyRole"/>
+        <member-entity entity-alias="PERSON" entity-name="Person"/>
+        <member-entity entity-alias="PTYGRP" entity-name="PartyGroup"/>
+        <alias-all entity-alias="PTY"/>
+        <alias-all entity-alias="PR"/>
+        <alias-all entity-alias="PERSON">
+            <exclude field="comments"/>
+        </alias-all>
+        <alias-all entity-alias="PTYGRP">
+            <exclude field="comments"/>
+        </alias-all>
+        <alias name="partyIdTo" entity-alias="PRSP"/>
+        <alias name="partyRelationshipTypeId" entity-alias="PRSP"/>
+        <alias name="fromDate" entity-alias="PRSP"/>
+        <alias name="thruDate" entity-alias="PRSP"/>
+        <alias name="roleTypeIdFrom" entity-alias="PRSP"/>
+        <alias name="roleTypeIdTo" entity-alias="PRSP"/>
+        <view-link entity-alias="PRSP" rel-entity-alias="PTY">
+        	<key-map field-name="partyIdFrom" rel-field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PTY" rel-entity-alias="PR">
+            <key-map field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PTY" rel-entity-alias="PERSON" rel-optional="true">
+            <key-map field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PTY" rel-entity-alias="PTYGRP" rel-optional="true">
+            <key-map field-name="partyId"/>
+        </view-link>
+        <entity-condition>
+        	<condition-expr field-name="roleTypeIdFrom" entity-alias="PRSP" operator="equals" rel-field-name="roleTypeId" rel-entity-alias="PR"/>
+        </entity-condition>
+    </view-entity> -->
+    <view-entity entity-name="PartyFullNameDetail" package-name="com.olbius.party">
+    	<member-entity entity-alias="PTY" entity-name="Party"/>
+        <member-entity entity-alias="PERSON" entity-name="Person"/>
+        <member-entity entity-alias="PTYGRP" entity-name="PartyGroup"/>
+        <alias-all entity-alias="PTY"/>
+        <alias-all entity-alias="PERSON">
+            <exclude field="comments"/>
+        </alias-all>
+        <alias-all entity-alias="PTYGRP">
+            <exclude field="comments"/>
+        </alias-all>
+        <alias name="fullName">
+        	<complex-alias operator="||' '||">
+        		<complex-alias-field field="lastName" entity-alias="PERSON" default-value="''"/>
+        		<complex-alias-field field="middleName" entity-alias="PERSON" default-value="''"/>
+        		<complex-alias-field field="firstName" entity-alias="PERSON" default-value="''"/>
+        		<complex-alias-field field="groupName" entity-alias="PTYGRP" default-value="''"/>
+        	</complex-alias>
+        </alias>
+        <view-link entity-alias="PTY" rel-entity-alias="PERSON" rel-optional="true">
+            <key-map field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PTY" rel-entity-alias="PTYGRP" rel-optional="true">
+            <key-map field-name="partyId"/>
+        </view-link>
+    </view-entity>
+    <view-entity entity-name="PartyFromAndPartyNameDetail" package-name="com.olbius.party"
+        title="Get info of partyIdFrom. Party Relationship (PartyIdFrom) and Party Detail (Person, PartyGroup, etc.) View Entity">
+        <member-entity entity-alias="PRSP" entity-name="PartyRelationship"/>
+        <member-entity entity-alias="PTYF" entity-name="PartyFullNameDetail"/>
+        <alias-all entity-alias="PTYF"/>
+        <alias name="partyIdTo" entity-alias="PRSP"/>
+        <alias name="partyRelationshipTypeId" entity-alias="PRSP"/>
+        <alias name="fromDate" entity-alias="PRSP"/>
+        <alias name="thruDate" entity-alias="PRSP"/>
+        <alias name="roleTypeIdFrom" entity-alias="PRSP"/>
+        <alias name="roleTypeIdTo" entity-alias="PRSP"/>
+        <view-link entity-alias="PRSP" rel-entity-alias="PTYF">
+        	<key-map field-name="partyIdFrom" rel-field-name="partyId"/>
+        </view-link>
+    </view-entity>
+    <view-entity entity-name="PartyToAndPartyNameDetail" package-name="com.olbius.party"
+        title="Get info of partyIdTo. Party Relationship (PartyIdTo) and Party Detail (Person, PartyGroup, etc.) View Entity">
+        <member-entity entity-alias="PRSP" entity-name="PartyRelationship"/>
+        <member-entity entity-alias="PTYF" entity-name="PartyFullNameDetail"/>
+        <alias-all entity-alias="PTYF"/>
+        <alias name="partyIdFrom" entity-alias="PRSP"/>
+        <alias name="partyRelationshipTypeId" entity-alias="PRSP"/>
+        <alias name="fromDate" entity-alias="PRSP"/>
+        <alias name="thruDate" entity-alias="PRSP"/>
+        <alias name="roleTypeIdFrom" entity-alias="PRSP"/>
+        <alias name="roleTypeIdTo" entity-alias="PRSP"/>
+        <alias name="relStatusId" field="statusId" entity-alias="PRSP"/>
+        <view-link entity-alias="PRSP" rel-entity-alias="PTYF">
+<!--         <view-link entity-alias="PRSP" rel-entity-alias="PTY"> -->
+        	<key-map field-name="partyIdTo" rel-field-name="partyId"/>
+        </view-link>
+    </view-entity>
+    
+    <view-entity entity-name="ProductAndTaxAuthorityRate" package-name="com.olbius.product">
+    	<description>Product and tax of product by taxAuthPartyId, taxAuthGeoId</description>
+    	<member-entity entity-alias="PROD" entity-name="Product"/>
+    	<member-entity entity-alias="PCMEM" entity-name="ProductCategoryMember"/>
+    	<member-entity entity-alias="PCATE" entity-name="ProductCategory"/>
+    	<member-entity entity-alias="TAXRP" entity-name="TaxAuthorityRateProduct"/>
+    	<alias-all entity-alias="PROD"/>
+    	<alias name="taxPercentage" entity-alias="TAXRP"/>
+    	<alias name="taxAuthPartyId" entity-alias="TAXRP"/>
+    	<alias name="taxAuthGeoId" entity-alias="TAXRP"/>
+    	<view-link entity-alias="PROD" rel-entity-alias="PCMEM">
+    		<key-map field-name="productId"/>
+    	</view-link>
+    	<view-link entity-alias="PCMEM" rel-entity-alias="PCATE">
+    		<key-map field-name="productCategoryId"/>
+    		<entity-condition>
+    			<condition-expr field-name="productCategoryTypeId" entity-alias="PCATE" value="TAX_CATEGORY"/>
+    		</entity-condition>
+    	</view-link>
+    	<view-link entity-alias="PCMEM" rel-entity-alias="TAXRP" rel-optional="true">
+    		<key-map field-name="productCategoryId"/>
+    	</view-link>
+    </view-entity>
+    <view-entity entity-name="ProductStoreRoleDetailPartyStatus" package-name="com.olbius.product">
+    	<member-entity entity-alias="PSRD" entity-name="ProductStoreRoleDetail"></member-entity>
+    	<member-entity entity-alias="PTY" entity-name="Party"></member-entity>
+    	<member-entity entity-alias="PERSON" entity-name="Person"/>
+        <member-entity entity-alias="PTYGRP" entity-name="PartyGroup"/>
+        <alias-all entity-alias="PTY"/>
+        <alias-all entity-alias="PERSON">
+            <exclude field="comments"/>
+        </alias-all>
+        <alias-all entity-alias="PTYGRP">
+            <exclude field="comments"/>
+        </alias-all>
+        <alias name="fullName">
+        	<complex-alias operator="||' '||">
+        		<complex-alias-field field="groupName" entity-alias="PTYGRP" default-value="''"/>
+        		<complex-alias-field field="lastName" entity-alias="PERSON" default-value="''"/>
+        		<complex-alias-field field="middleName" entity-alias="PERSON" default-value="''"/>
+        		<complex-alias-field field="firstName" entity-alias="PERSON" default-value="''"/>
+        	</complex-alias>
+        </alias>
+        <alias name="productStoreId" entity-alias="PSRD"/>
+        <alias name="roleTypeId" entity-alias="PSRD"/>
+        <alias name="fromDate" entity-alias="PSRD"/>
+        <alias name="thruDate" entity-alias="PSRD"/>
+    	<view-link entity-alias="PSRD" rel-entity-alias="PTY">
+        	<key-map field-name="partyId"/>
+      	</view-link>
+      	<view-link entity-alias="PTY" rel-entity-alias="PERSON" rel-optional="true">
+            <key-map field-name="partyId"/>
+        </view-link>
+        <view-link entity-alias="PTY" rel-entity-alias="PTYGRP" rel-optional="true">
+            <key-map field-name="partyId"/>
+        </view-link>
+    </view-entity>
+    <view-entity entity-name="ConfigPackingAndUom" package-name="com.olbius.product">
+    	<member-entity entity-alias="CPACK" entity-name="ConfigPacking"/>
+    	<member-entity entity-alias="UOMFR" entity-name="Uom"/>
+    	<member-entity entity-alias="UOMTO" entity-name="Uom"/>
+    	<alias-all entity-alias="CPACK"/>
+    	<alias name="descriptionFrom" field="description" entity-alias="UOMFR"/>
+    	<alias name="descriptionTo" field="description" entity-alias="UOMTO"/>
+    	<view-link entity-alias="CPACK" rel-entity-alias="UOMFR">
+    		<key-map field-name="uomFromId" rel-field-name="uomId"/>
+    	</view-link>
+    	<view-link entity-alias="CPACK" rel-entity-alias="UOMTO">
+    		<key-map field-name="uomToId" rel-field-name="uomId"/>
+    	</view-link>
+    </view-entity>
+    <view-entity entity-name="AgreementAndProductPromoRegister" package-name="com.olbius.product">
+    	<member-entity entity-alias="AGRE" entity-name="Agreement"/>
+    	<member-entity entity-alias="PPRE" entity-name="ProductPromoRegister"/>
+    	<alias-all entity-alias="AGRE"/>
+    	<alias name="productPromoRegisterId" entity-alias="PPRE"/>
+    	<view-link entity-alias="AGRE" rel-entity-alias="PPRE" rel-optional="true">
+    		<key-map field-name="agreementId"/>
+    	</view-link>
+    </view-entity>
+	<view-entity entity-name="OrderHeaderAndOrderRoleFromTo" package-name="org.ofbiz.order.order" never-cache="true"
+            title="Order Header And Roles View Entity from Customer Id to Seller Id And Salesman, Sup, ...">
+      	<member-entity entity-alias="OH" entity-name="OrderHeader"/>
+      	<member-entity entity-alias="ORLCUST" entity-name="OrderRole"><description>Placing customer</description></member-entity>
+      	<member-entity entity-alias="ORLVEND" entity-name="OrderRole"><description>Bill from vendor</description></member-entity>
+      	<alias-all entity-alias="OH"/>
+      	<alias name="customerId" entity-alias="ORLCUST" field="partyId"/>
+      	<alias name="sellerId" entity-alias="ORLVEND" field="partyId"/>
+      	<view-link entity-alias="OH" rel-entity-alias="ORLCUST" rel-optional="true">
+        	<key-map field-name="orderId"/>
+      	</view-link>
+      	<view-link entity-alias="OH" rel-entity-alias="ORLVEND" rel-optional="true">
+        	<key-map field-name="orderId"/>
+      	</view-link>
+      	<entity-condition>
+      		<condition-list>
+      			<condition-expr field-name="roleTypeId" entity-alias="ORLCUST" value="PLACING_CUSTOMER"/>
+      			<condition-expr field-name="roleTypeId" entity-alias="ORLVEND" value="BILL_FROM_VENDOR"/>
+      		</condition-list>
+      	</entity-condition>
+  	</view-entity>
+  	<view-entity entity-name="OrderHeaderAnd4OrderRoleFromTo" package-name="org.ofbiz.order.order" never-cache="true"
+            title="Order Header And Roles View Entity from Customer Id to Seller Id And Salesman, Sup, ...">
+      	<member-entity entity-alias="OH" entity-name="OrderHeader"/>
+      	<member-entity entity-alias="ORLCUST" entity-name="OrderRole"><description>Placing customer</description></member-entity>
+      	<member-entity entity-alias="ORLVEND" entity-name="OrderRole"><description>Bill from vendor</description></member-entity>
+      	<member-entity entity-alias="ORLSMAN" entity-name="OrderRole"><description>Salesman</description></member-entity>
+      	<member-entity entity-alias="ORLSUP" entity-name="OrderRole"><description>Supervisor</description></member-entity>
+      	<alias-all entity-alias="OH"/>
+      	<alias name="customerId" entity-alias="ORLCUST" field="partyId"/>
+      	<alias name="sellerId" entity-alias="ORLVEND" field="partyId"/>
+      	<alias name="salesmanId" entity-alias="ORLSMAN" field="partyId"/>
+      	<alias name="supId" entity-alias="ORLSUP" field="partyId"/>
+      	<alias name="roleTypeIdSalesman" entity-alias="ORLSMAN" field="roleTypeId"/>
+      	<alias name="roleTypeIdSup" entity-alias="ORLSUP" field="roleTypeId"/>
+      	<view-link entity-alias="OH" rel-entity-alias="ORLCUST" rel-optional="true">
+        	<key-map field-name="orderId"/>
+      	</view-link>
+      	<view-link entity-alias="OH" rel-entity-alias="ORLVEND" rel-optional="true">
+        	<key-map field-name="orderId"/>
+      	</view-link>
+      	<view-link entity-alias="OH" rel-entity-alias="ORLSMAN" rel-optional="true">
+        	<key-map field-name="orderId"/>
+      	</view-link>
+      	<view-link entity-alias="OH" rel-entity-alias="ORLSUP" rel-optional="true">
+        	<key-map field-name="orderId"/>
+      	</view-link>
+      	<entity-condition>
+      		<condition-list>
+      			<condition-expr field-name="roleTypeId" entity-alias="ORLCUST" value="PLACING_CUSTOMER"/>
+      			<condition-expr field-name="roleTypeId" entity-alias="ORLVEND" value="BILL_FROM_VENDOR"/>
+      		</condition-list>
+      	</entity-condition>
+  	</view-entity>
+    <view-entity entity-name="RouteDetail" package-name="org.ofbiz.sales.sup" never-cache="true">
+        <member-entity entity-alias="RS" entity-name="RouteSchedule"></member-entity>
+        <member-entity entity-alias="RI" entity-name="RouteInformation"></member-entity>
+        <alias name="routeId" entity-alias="RI" ></alias>
+        <alias name="description" entity-alias="RI"></alias>
+        <alias name="scheduleRoute" entity-alias="RS"></alias>
+        <view-link rel-entity-alias="RS" entity-alias="RI" rel-optional="false">
+            <key-map field-name="routeId"/>
+        </view-link>
+    </view-entity>
+    <view-entity entity-name="ProductStoreCatalogDetail" package-name="">
+    	<member-entity entity-alias="PS" entity-name="ProductStore"></member-entity>
+    	<member-entity entity-alias="PSR" entity-name="ProductStoreCatalog"></member-entity>
+    	<member-entity entity-alias="PC" entity-name="ProdCatalog"></member-entity>
+    	<alias-all entity-alias="PS"></alias-all>
+    	<alias-all entity-alias="PSR"></alias-all>
+    	<alias-all entity-alias="PC"></alias-all>
+    	<view-link entity-alias="PS" rel-entity-alias="PSR">
+        	<key-map field-name="productStoreId"/>
+      	</view-link>
+      	<view-link entity-alias="PSR" rel-entity-alias="PC">
+        	<key-map field-name="prodCatalogId"/>
+      	</view-link>
+    </view-entity>
+    <view-entity entity-name="ProductCategoryMemberDetail"
+            package-name="org.ofbiz.product.category"
+            title="ProductCategoryMember And Product View Entity">
+      <member-entity entity-alias="PCM" entity-name="ProductCategoryMember"/>
+      <member-entity entity-alias="PROD" entity-name="Product"/>
+      <alias-all entity-alias="PCM"/>
+      <alias-all entity-alias="PROD"/>
+      <view-link entity-alias="PCM" rel-entity-alias="PROD">
+        <key-map field-name="productId"/>
+      </view-link>
+      <relation type="one-nofk" rel-entity-name="ProductCategoryMember">
+        <key-map field-name="productCategoryId"/>
+        <key-map field-name="productId"/>
+        <key-map field-name="fromDate"/>
+      </relation>
+      <relation type="one-nofk" rel-entity-name="ProductCategory">
+        <key-map field-name="productCategoryId"/>
+      </relation>
+      <relation type="one-nofk" rel-entity-name="Product">
+        <key-map field-name="productId"/>
+      </relation>
+    </view-entity>
+</entitymodel>

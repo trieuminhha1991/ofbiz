@@ -1,0 +1,704 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<menus xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-menu.xsd">
+    <menu name="MainAppBar" selected-menuitem-context-field-name="selectedMenuItem" title="${uiLabelMap.aaa}" extends="CommonAppBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="main" title="${uiLabelMap.CommonMain}"><link target="main"/></menu-item>
+    </menu>
+    
+    <menu name="BaseLogisticsAppBar" selected-menuitem-context-field-name="selectedMenuItem" modelMenu="olbius" iconStyle="fa fa-plane" style="dropdown-toggle" title="${uiLabelMap.BaseLogisticsApplication}" extends="CommonAppBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="ListFacility" title="${uiLabelMap.InternalFacility}">
+			<condition>
+				<if-has-permission permission="FACILITY" action="_VIEW"/>
+			</condition>
+        	<link target="getAllFacilities"/>
+        </menu-item>
+        
+        <menu-item name="ListAllInventory" title="${uiLabelMap.ListInventoryItemSum}">
+        	<link target="getAllInventoryItems"/>
+        </menu-item>
+        
+		<menu-item name="ListDeliveryEntry" title="${uiLabelMap.DeliveryEntry}">
+			<condition>
+				<if-has-permission permission="DELIVERY_ENTRY" action="_VIEW"/>
+			</condition>
+        	<link target="getDeliveryEntry"/>
+        </menu-item>
+    </menu>
+    
+    <menu name="FacilityTabBar" modelMenu="olbiustab" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="Facility" title="${uiLabelMap.GeneralInfo}">
+        	<condition>
+        		<if-olbius-has-permission/>
+        	</condition>
+            <link target="detailFacility">
+                <parameter param-name="facilityId" from-field="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="Inventory" title="${uiLabelMap.Inventory}">
+        	<condition>
+	        	<if-olbius-has-permission/>
+        	</condition>
+            <link target="getInventory">
+            	<parameter param-name="facilityId" from-field="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="Location" title="${uiLabelMap.Location}">
+        	<condition>
+	        	<if-olbius-has-permission/>
+        	</condition>
+        	<link target="getLocations">
+                <parameter param-name="facilityId" from-field="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ContactMech" title="${uiLabelMap.PartyContactMechs}">
+        	<condition>
+        		<if-olbius-has-permission/>
+        	</condition>
+            <link target="getFacilityContactMech">
+                <parameter param-name="facilityId" from-field="facilityId"/>
+             </link>
+        </menu-item> 
+        <menu-item name="Role" title="${uiLabelMap.BLRoles}">
+        	<condition>
+        		<if-olbius-has-permission/>
+        	</condition>
+            <link target="getFacilityPartyRole">
+                <parameter param-name="facilityId" from-field="facilityId"/>
+             </link>
+        </menu-item> 
+    </menu>
+    
+    
+    <menu name="DepositFacilityTabBar" modelMenu="olbiustab" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="Facility" title="${uiLabelMap.GeneralInfo}">
+        	<condition>
+        		<if-olbius-has-permission/>
+        	</condition>
+            <link target="detailDepositFacility">
+                <parameter param-name="facilityId" from-field="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="Inventory" title="${uiLabelMap.Inventory}">
+        	<condition>
+	        	<if-olbius-has-permission/>
+        	</condition>
+            <link target="getDepositInventory">
+            	<parameter param-name="facilityId" from-field="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="Location" title="${uiLabelMap.Location}">
+        	<condition>
+	        	<if-olbius-has-permission/>
+        	</condition>
+        	<link target="getLocations">
+                <parameter param-name="facilityId" from-field="facilityId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ContactMech" title="${uiLabelMap.PartyContactMechs}">
+        	<condition>
+        		<if-olbius-has-permission/>
+        	</condition>
+            <link target="getFacilityContactMechDeposit">
+                <parameter param-name="facilityId" from-field="facilityId"/>
+             </link>
+        </menu-item> 
+        <menu-item name="Role" title="${uiLabelMap.BLRoles}">
+        	<condition>
+        		<if-olbius-has-permission/>
+        	</condition>
+            <link target="getLogFacilityPartyRoleDeposit">
+                <parameter param-name="facilityId" from-field="facilityId"/>
+             </link>
+        </menu-item> 
+    </menu>
+    
+     <menu name="FacilityGeneralMenu" modelMenu="olbiustab" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml" selected-menuitem-context-field-name="tabButtonItem">
+          <menu-item name="EditFacilityId" tooltip="${uiLabelMap.Edit}" widget-style="fa-edit open-sans">
+          		<condition>
+          			<and>
+          				<if-olbius-has-permission permission="CREATE"/>
+          				<if-compare operator="equals" value="FACILITY_INTERNAL" field="facility.primaryFacilityGroupId"/>
+          			</and>
+          		</condition>
+          		<link target="javascript:FacilityObj.getFacility(facilityId,true)" url-mode="plain"></link>
+          </menu-item>
+          <menu-item name="ListFacilities" tooltip="${uiLabelMap.CommonList}" widget-style="fa-tasks open-sans">
+          		<condition>
+          			<if-compare operator="equals" value="FACILITY_INTERNAL" field="facility.primaryFacilityGroupId"/>
+          		</condition>
+          		<link target="getAllFacilities"></link>
+          </menu-item>
+          <menu-item name="ListDepositFacilities" tooltip="${uiLabelMap.CommonList}" widget-style="fa-tasks open-sans">
+          		<condition>
+          			<if-compare operator="equals" value="FACILITY_CONSIGN" field="facility.primaryFacilityGroupId"/>
+          		</condition>
+          		<link target="DepositFacilities"></link>
+          </menu-item>
+    </menu>
+    
+     <menu name="LocationSubTabBar" modelMenu="olbiusScreenletMenu" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+		<menu-item name="CreateNewFacilityLocation" title="${uiLabelMap.CreateNew}" widget-style="icon-plus-sign open-sans">
+			<link target="javascript:LocationFacilityObj.addFacilityLocationArea()" url-mode="plain"></link>
+		</menu-item>
+		<menu-item name="PhysicalInventory" title="${uiLabelMap.WarehouseInventory}" widget-style="icon-check open-sans">
+			<link target="javascript:physicalInventory()" url-mode="plain"></link>
+		</menu-item>
+<!-- 		<menu-item name="searchProducts" title="${uiLabelMap.SearchProduct}" widget-style="icon-search open-sans" > -->
+<!-- 			<link target="javascript:searchProducts()" url-mode="plain"></link> -->
+<!-- 		</menu-item> -->
+	</menu>
+	<menu name="CustomerReturnDetailSubTabBar" modelMenu="olbiusScreenletMenu" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+		<menu-item name="AcceptReturn" tooltip="${uiLabelMap.OK}" widget-style="fa-check-circle-o fontStyleNormal">
+			<condition>
+				<and>
+					<if-compare operator="equals" value="RETURN_REQUESTED" field="statusId"/>
+					<if-has-permission permission="CUS_RETURN" action="_ADMIN"/>				
+				</and>
+			</condition>
+			<link target="javascript:DetailReturnObj.changeReturnStatus('${returnId}', 'RETURN_ACCEPTED')" url-mode="plain"></link>
+		</menu-item>
+		<menu-item name="ReceiveReturn" tooltip="${uiLabelMap.ReceiveProduct}" widget-style="fa-download fontStyleNormal button-action button-size">
+			<condition>
+				<and>
+					<if-compare operator="equals" value="RETURN_ACCEPTED" field="statusId"/>
+					<if-has-permission permission="CUS_RETURN" action="_UPDATE"/>				
+				</and>
+			</condition>
+			<link target="javascript:DetailReturnObj.changeReturnStatus('${returnId}', 'RETURN_RECEIVED')" url-mode="plain"></link>
+		</menu-item>
+	</menu>
+	
+	<menu name="TransferDetailSubTabBar" modelMenu="olbiusScreenletMenu" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+		<menu-item name="ApproveTransfer" title="${uiLabelMap.Approve}" widget-style="fa-check fontStyleNormal">
+			<condition>
+				<if-compare operator="equals" value="TRANSFER_CREATED" field="statusId"/>
+			</condition>
+			<link target="javascript:DetailTransferObj.changeTransferStatus('${transferId}', 'TRANSFER_APPROVED')" url-mode="plain"></link>
+		</menu-item>
+	</menu>
+	
+	<menu name="VendorReturnDetailSubTabBar" modelMenu="olbiusScreenletMenu" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+		<menu-item name="ExportReturn" tooltip="${uiLabelMap.ExportProduct}" widget-style="fa-upload fontStyleNormal button-action button-size">
+			<condition>
+				<if-compare operator="equals" value="SUP_RETURN_ACCEPTED" field="statusId"/>
+			</condition>
+			<link target="javascript:DetailReturnObj.changeReturnStatus('${returnId}', 'SUP_RETURN_SHIPPED')" url-mode="plain"></link>
+		</menu-item>
+		<menu-item name="ExportPDFReturn" tooltip="${uiLabelMap.PDF}" widget-style="fa-file-pdf-o fontStyleNormal button-action button-size">
+			<link target="javascript:DetailReturnObj.exportPDFReturn('${returnId}')" url-mode="plain"></link>
+		</menu-item>
+	</menu>
+	
+	<menu name="LocationTypeSubTabbar" modelMenu="olbiustab" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+		<menu-item name="CreateNew" title="${uiLabelMap.CreateNew}" widget-style="icon-plus-sign open-sans">
+			<link target="javascript:LocationType.addLocationFacilityType()" url-mode="plain"></link>
+		</menu-item>
+	</menu>
+	
+	<!-- sub item can implement to any component -->
+ 	<menu name="facility" modelMenu="businessSubMenu" selected-menuitem-context-field-name="selectedSubMenuItem">
+		<menu-item name="AddNew" title="${uiLabelMap.AddNew}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="prepareCreateFacility"/>
+        </menu-item>
+		<menu-item name="ListFacility" title="${uiLabelMap.List}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getAllFacilities"/>
+        </menu-item>
+		<menu-item name="DepositFacilities" title="${uiLabelMap.ListDepositFacilitiesSum}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="DepositFacilities"/>
+        </menu-item>
+		<menu-item name="FacilityRole" title="${uiLabelMap.BLRoles}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getFacilityParties"/>
+        </menu-item>
+	</menu>
+	
+	<menu name="inventory" modelMenu="businessSubMenu" selected-menuitem-context-field-name="selectedSubMenuItem">
+		<menu-item name="ListAllInventory" title="${uiLabelMap.ListInventoryItemSum}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getAllInventoryItems"/>
+        </menu-item>
+        
+		<!--Huyendt ListInventoryStocking -->
+		<menu-item name="ListInventoryStocking" title="${uiLabelMap.ListPhysInv}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+			<link target="ListInventoryStocking" />
+		</menu-item>
+<!--         <menu-item name="PhysicalInventory" title="${uiLabelMap.ListPhysInv}"> -->
+<!--         	<condition> -->
+<!-- 				<if-olbius-has-permission/> -->
+<!-- 			</condition> -->
+<!--         	<link target="getPhysicalInventory"/> -->
+<!--         </menu-item> -->
+<!--         <menu-item name="NewPhysicalInventory" title="${uiLabelMap.PhysicalInventory}"> -->
+<!--         	<condition> -->
+<!-- 				<if-olbius-has-permission permission="CREATE"/> -->
+<!-- 			</condition> -->
+<!--         	<link target="prepareCreatePhysicalInventory"/> -->
+<!--         </menu-item> -->
+        <!--/End Huyendt -->
+        
+<!--         <menu-item name="Label" title="${uiLabelMap.InventoryAndLabel}"> -->
+<!--         	<condition> -->
+<!-- 				<if-olbius-has-permission/> -->
+<!-- 			</condition> -->
+<!--         	<link target="getInventoryItemAndLabel"/> -->
+<!--         </menu-item> -->
+        <menu-item name="AssignLabel" title="${uiLabelMap.AssignLabel}">
+        	<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="prepareAssignLabelInventory"/>
+        </menu-item>
+<!--         <menu-item name="ListInventoryNearExpiryDate" title="${uiLabelMap.LogListInventoryDateReach}"> -->
+<!--         	<condition> -->
+<!-- 				<if-olbius-has-permission/> -->
+<!-- 			</condition> -->
+<!--         	<link target="getListInventoryNearExpiryDate"> -->
+<!--         		<parameter param-name="producId" value="NULL"/> -->
+<!--         	</link> -->
+<!--         </menu-item> -->
+<!--         <menu-item name="ListInventoryExpiryDate" title="${uiLabelMap.BLListInventoryExpired}"> -->
+<!--         	<condition> -->
+<!-- 				<if-olbius-has-permission/> -->
+<!-- 			</condition> -->
+<!--         	<link target="getListInventoryExpiryDate"> -->
+<!--         		<parameter param-name="producId" value="NULL"/> -->
+<!--         	</link> -->
+<!--         </menu-item> -->
+        <menu-item name="WarningDate" title="${uiLabelMap.BLWarningDate}">
+        	<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getWarningDate">
+        	</link>
+        </menu-item>
+        <menu-item name="ListInventoryQuantityWarning" title="${uiLabelMap.BLInventorySafetyWarning}">
+        	<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getListInventoryQuantityWarning">
+        	</link>
+        </menu-item>
+        <!-- <menu-item name="InventoryForecast" title="${uiLabelMap.InventoryForecast}">
+        	<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getInventoryForecast">
+        	</link>
+        </menu-item> -->
+	</menu>
+	
+	<!--Huyendt them menu soan hang -->
+	<menu name="Picklist" modelMenu="businessSubMenu" selected-menuitem-context-field-name="selectedSubMenuItem">
+		<menu-item name="CreatePicklist" title="${uiLabelMap.AddNew}">
+			<condition>
+				<if-olbius-has-permission />
+			</condition>
+			<link target="CreatePicklist"></link>
+		</menu-item>
+		<menu-item name="Picklist" title="${uiLabelMap.BLDmsDSDotSoan}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+			<link target="Picklist"/>
+		</menu-item>
+		<menu-item name="PicklistBin" title="${uiLabelMap.BLDmsDSPhieuSoan}">
+<!-- 			<condition> -->
+<!-- 				<if-olbius-has-permission/> -->
+<!-- 			</condition> -->
+			<link target="PicklistBin"/>
+		</menu-item>
+	</menu>
+	<!--/End Huyendt -->
+	
+	<menu name="stockIn" modelMenu="businessSubMenu" selected-menuitem-context-field-name="selectedSubMenuItem">
+		<menu-item name="listPO" title="${uiLabelMap.PurchasingOrder}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+			<link target="logGetPurchaseOrders"/>
+		</menu-item>
+		<menu-item name="ListPurchaseDelivery" title="${uiLabelMap.ReceiveNote}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getListPurchaseDeliveries"/>
+        </menu-item>
+<!--  		<menu-item name="ReceiveRequirement" title="${uiLabelMap.RequirementImport}"> -->
+<!-- 			<condition> -->
+<!-- 				<if-olbius-has-permission/> -->
+<!-- 			</condition> -->
+<!--         	<link target="getReceiveRequirements"> -->
+<!--          		<parameter param-name="requirementTypeId" value="RECEIVE_REQUIREMENT"/> -->
+<!--          		<parameter param-name="statusId" value="REQ_APPROVED"/> -->
+<!--         	</link> -->
+<!--         </menu-item> -->
+        <menu-item name="ReturnSO" title="${uiLabelMap.ReturnImport}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getCustomerReturns">
+        		<parameter param-name="returnHeaderTypeId" value="CUSTOMER_RETURN"/>
+        	</link>
+        </menu-item>
+	</menu>
+	<menu name="stockOut" modelMenu="businessSubMenu" selected-menuitem-context-field-name="selectedSubMenuItem">
+        <menu-item name="salesOrderList" title="${uiLabelMap.SalesOrder}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="listOrder"/>
+        </menu-item>
+        <menu-item name="ListSalesDelivery" title="${uiLabelMap.DeliveryNote}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getListSalesDeliveries"/>
+        </menu-item>
+<!--         <menu-item name="ExportRequirement" title="${uiLabelMap.RequirementExport}"> -->
+<!-- 			<condition> -->
+<!-- 				<if-olbius-has-permission/> -->
+<!-- 			</condition> -->
+<!--         	<link target="getExportRequirements"> -->
+<!--          		<parameter param-name="requirementTypeId" value="EXPORT_REQUIREMENT"/> -->
+<!--          		<parameter param-name="statusId" value="REQ_APPROVED"/> -->
+<!--         	</link> -->
+<!--         </menu-item> -->
+        <menu-item name="ReturnPO" title="${uiLabelMap.ReturnExport}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getVendorReturns">
+        		<parameter param-name="returnHeaderTypeId" value="VENDOR_RETURN"/>
+        	</link>
+        </menu-item>
+	</menu>
+	<menu name="return" modelMenu="businessSubMenu" selected-menuitem-context-field-name="selectedSubMenuItem">
+		<menu-item name="ListCusReturn" title="${uiLabelMap.CusReturn}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getListReturns">
+        		<parameter param-name="returnHeaderTypeId" value="CUSTOMER_RETURN"/>
+        	</link>
+        </menu-item>
+        <menu-item name="ListSupReturn" title="${uiLabelMap.SupReturn}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getListReturns">
+        		<parameter param-name="returnHeaderTypeId" value="VENDOR_RETURN"/>
+        	</link>
+        </menu-item>
+	</menu>
+	<menu name="transfer" modelMenu="businessSubMenu" selected-menuitem-context-field-name="selectedSubMenuItem">
+		<menu-item name="NewTransfer" title="${uiLabelMap.AddNew}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="prepareCreateNewTransfer">
+        	</link>
+        </menu-item>
+		<menu-item name="ListTransfer" title="${uiLabelMap.List}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getTransfers"/>
+        </menu-item>
+		<menu-item name="ListTransferDelivery" title="${uiLabelMap.DeliveryTransferNote}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getListTransferDeliveries"/>
+        </menu-item>
+        <menu-item name="Requirement" title="${uiLabelMap.Requirement}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getTransferRequirements">
+        		<parameter param-name="requirementTypeId" value="TRANSFER_REQUIREMENT"/>
+        	</link>
+        </menu-item>
+	</menu>
+	
+	<menu name="logRequirement" modelMenu="businessSubMenu" selected-menuitem-context-field-name="selectedSubMenuItem">
+		<menu-item name="NewRequirement" title="${uiLabelMap.AddNew}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="prepareCreateRequirement">
+        	</link>
+        </menu-item>
+		<menu-item name="ListRequirement" title="${uiLabelMap.List}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getRequirements">
+        	</link>
+        </menu-item>
+	</menu>
+	
+	<menu name="deliveryEntry" modelMenu="businessSubMenu" selected-menuitem-context-field-name="selectedSubMenuItem">
+		<menu-item name="CreateNew" title="${uiLabelMap.AddNew}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="prepareCreateDeliveryEntry"/>
+        </menu-item>
+		<menu-item name="ListDeliveryEntry" title="${uiLabelMap.List}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getDeliveryEntry"/>
+        </menu-item>
+        <menu-item name="reqDeliveryOrderList" title="${uiLabelMap.BSReqDelivery}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getDeliveryRequirements">
+        		<parameter param-name="requirementTypeId" value="DELIVERY_ORDER_REQ"/>
+        	</link>
+        </menu-item>
+        <menu-item name="ListFixedAssetVehicles" title="${uiLabelMap.Vehicles}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getListFixedAssetVehicles">
+        	</link>
+        </menu-item>
+        <menu-item name="ListShiper" title="${uiLabelMap.BLShiper}"> 
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getListShiper"/>
+        </menu-item>
+		<menu-item name="ListGeneralSaleOrder" title="${uiLabelMap.LogGeneralInformation}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getListDeliveryPartyRole"/>
+        </menu-item>
+	</menu>
+
+    <menu name="deliveryCluster" modelMenu="businessSubMenu" selected-menuitem-context-field-name="selectedSubMenuItem">
+        <menu-item name="CreateNewCluster" title="${uiLabelMap.AddNew}">
+            <condition>
+                <if-olbius-has-permission/>
+            </condition>
+            <link target="createNewCluster"/>
+        </menu-item>
+        <menu-item name="ListCluster" title="${uiLabelMap.List}">
+            <condition>
+                <if-olbius-has-permission/>
+            </condition>
+            <link target="listDeliveryCluster"/>
+        </menu-item>
+    </menu>
+
+	<menu name="shippingMT" modelMenu="businessSubMenu" selected-menuitem-context-field-name="selectedSubMenuItem">
+		<!--Begin: Create new Trip  made by NamND-->
+		<menu-item name="CreateNewTrip" title="${uiLabelMap.AddNewTrip}">
+			<condition>
+				<if-olbius-has-permission />
+			</condition>
+			<link target="prepareCreateTrip"/>
+		</menu-item>
+
+		<menu-item name="CreateNewShippingTripByOrder" title="${uiLabelMap.AddNewShippingTripByOrder}">
+			<condition>
+				<if-olbius-has-permission />
+			</condition>
+			<link target="prepareCreateShippingTripByOrder"/>
+		</menu-item>
+
+		<menu-item name="ListShippingTrip" title="${uiLabelMap.BLDListTrip}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+			<link target="listShippingTrip"/>
+		</menu-item>
+
+		<menu-item name="ListOrderByCluster" title="${uiLabelMap.ListOrderByCluster}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+			<link target="listOrderByCluster"/>
+		</menu-item>
+
+		<menu-item name="ListDeliveryStatus" title="${uiLabelMap.BLListDeliveryStatus}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+			<link target="listDeliveryStatus"/>
+		</menu-item>
+
+		<menu-item name="ListShiper" title="${uiLabelMap.BLShiper}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+			<link target="getListShiper"/>
+		</menu-item>
+		<menu-item name="ListGeneralSaleOrder" title="${uiLabelMap.LogGeneralInformation}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+			<link target="getListDeliveryPartyRole"/>
+		</menu-item>
+	</menu>
+	
+	<menu name="logAsset" modelMenu="businessSubMenu" selected-menuitem-context-field-name="selectedSubMenuItem">
+		<menu-item name="ListAsset" title="${uiLabelMap.BLListAsset}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getFixedAsset">
+        	</link>
+        </menu-item>
+	</menu>
+	
+	<menu name="logCost" modelMenu="businessSubMenu" selected-menuitem-context-field-name="selectedSubMenuItem">
+		<menu-item name="ListCostsGeneral" title="${uiLabelMap.CostsGeneral}">
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getListCostsGeneral" />
+        </menu-item>
+	</menu>
+	
+	<menu name="reportSubMenu" modelMenu="businessSubMenu" selected-menuitem-context-field-name="selectedSubMenuItem">
+        <menu-item name="ReportExportWarehouse" title="${uiLabelMap.LogReportExportWarehouse}">
+        	<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getReportExportWarehouse"/>
+        </menu-item>
+        <menu-item name="ReportExportWarehouseByOrder" title="${uiLabelMap.WarehousingExportReportExpected}">
+        	<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getReportExportWarehouseByOrder"/>
+        </menu-item>
+        <menu-item name="ReportReceiveWarehouse" title="${uiLabelMap.LogReportWareHourse}">
+        	<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getReportReceiveWarehouse"/> 
+        </menu-item>
+        <menu-item name="ReportReceiveWarehouseByOrder" title="${uiLabelMap.WarehousingReceiveReportExpected}">
+       	 	<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getReportReceiveWarehouseByOrder"/>
+        </menu-item>
+        <menu-item name="InventoryReportWarehouse" title="${uiLabelMap.LogInventoryReport}">
+        	<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getInventoryReportWarehouse"/>
+        </menu-item>
+        <menu-item name="ReturnProductReport" title="${uiLabelMap.LogReturnProductReport}">
+        	<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getReturnProductReport"/>
+        </menu-item>
+        <menu-item name="TransferItemReport" title="${uiLabelMap.ReportTransfer}">
+        	<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getTransferItemReport"/>
+        </menu-item>
+        <menu-item name="PhysicalInventoryReport" title="${uiLabelMap.HistoryPhysicalInventory}">
+       		<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="getPhysicalInventoryReport"/>
+        </menu-item>
+	</menu>
+	
+	<menu name="productSub" modelMenu="businessSubMenu" selected-menuitem-context-field-name="selectedSubMenuItem">
+		<menu-item name="ListProducts" title="${uiLabelMap.List}">
+			<condition>
+				<if-olbius-has-permission />
+			</condition>
+			<link target="logisticsGetListProducts" />
+		</menu-item>
+		<menu-item name="PrintBarCode" title="${uiLabelMap.PrintBarCode}">
+			<condition>
+				<if-olbius-has-permission />
+			</condition>
+			<link target="preparePrintBarcodeProducts" />
+		</menu-item>
+	</menu>
+	
+	<!-- <menu name="configSubMenu" modelMenu="businessSubMenu" selected-menuitem-context-field-name="selectedSubMenuItem">
+        <menu-item name="ConfigInventoryWarning" title="${uiLabelMap.ConfigInventoryWarning}">
+        	<condition>
+        		<if-olbius-has-permission/>
+        	</condition>
+        	<link target="getProductFacilityInventoryWarning"/>
+        </menu-item>
+        <menu-item name="ConfigFacilityExpiryDate" title="${uiLabelMap.ConfigFacilityExpiryDate}">
+        	<condition>
+        		<if-olbius-has-permission/>
+        	</condition>
+        	<link target="getConfigFacilityExpiryDate"/>
+        </menu-item>
+        <menu-item name="ReturnReason" title="${uiLabelMap.LogRejectReasonReturnProduct}">
+        	<condition>
+        		<if-olbius-has-permission/>
+        	</condition>
+        	<link target="getReturnReason"/>
+        </menu-item>
+        <menu-item name="ReasonsOfWarehousesSetting" title="${uiLabelMap.LogSettingReasonsOfWarehouses}">
+        	<condition>
+        		<if-olbius-has-permission/>
+        	</condition>
+        	<link target="getSettingReasonsOfWarehouses"/>
+        </menu-item>
+        <menu-item name="InventoryItemLabel" title="${uiLabelMap.ProductLabel}">
+			<condition>
+        		<if-olbius-has-permission/>
+        	</condition>
+        	<link target="getInventoryItemLabel"/>
+        </menu-item>
+        <menu-item name="ProductAndLabel" title="${uiLabelMap.ProductAndLabel}">
+			<condition>
+        		<if-olbius-has-permission/>
+        	</condition>
+        	<link target="getConfigLabels"/>
+        </menu-item>
+        <menu-item name="ProductRelationship" title="${uiLabelMap.AttachmentProduct}">
+			<condition>
+        		<if-olbius-has-permission/>
+        	</condition>
+        	<link target="getProductRelationships"/>
+        </menu-item>
+        <menu-item name="VarianceReason" title="${uiLabelMap.VarianceReason}">
+			<condition>
+        		<if-olbius-has-permission/>
+        	</condition>
+        	<link target="getVarianceReasons"/>
+        </menu-item>
+        <menu-item name="ProductAttributeConfig" title="${uiLabelMap.ProductAttributeConfig}">
+			<condition>
+        		<if-olbius-has-permission/>
+        	</condition>
+        	<link target="viewProductRequiredDates"/>
+        </menu-item>
+	</menu> -->
+</menus>

@@ -1,0 +1,2194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+   	<screen name="CommonSalesForecastDecorator">
+        <section>
+            <actions>
+                <set field="selectedMenuItem" value="statementAndForecast" global="true" />
+            </actions>
+            <widgets>
+            	<section>
+            		<condition><not><if-empty field="salesForecastId"/></not></condition>
+            		<actions>
+		            	<set field="tabBarName" value="SalesForecastTabBar" global="true" />
+						<set field="tabBarLocation" value="component://delys/widget/sales/SalesMenus.xml" global="true" />
+						<set field="printTabBar" value="true" />
+			    	</actions>
+			    	<widgets></widgets>
+            	</section>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<decorator-section-include name="body"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+	<screen name="FindSalesForecast">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindSalesForecast"/>
+                <set field="headerItem" value="Forecast"/>
+				<set field="selectedSubMenuItem" value="salesForecastList" />
+				<set field="navMenuName" value="SearchSalesForecastSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/sales/SalesMenus.xml" />
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonSalesForecastDecorator">
+                    <decorator-section name="body">
+                        <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="search-options">
+                                <include-form name="FindSalesForecast" location="component://delys/widget/sales/SalesForms.xml"/>
+                            </decorator-section>
+                            <decorator-section name="search-results">
+                                <include-form name="SalesForecastSearchResults" location="component://delys/widget/sales/SalesForms.xml"/>
+                            </decorator-section>
+                        </decorator-screen>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="EditSalesForecast">
+        <section>
+            <actions>
+            	<set field="navMenuName" value="statementAndPolicy"/>
+            	<set field="selectedSubMenuItem" value="salesForecastList" />
+                <set field="titleProperty" value="PageTitleEditSalesForecast"/>
+                <set field="tabButtonItem" value="EditSalesForecast"/>
+                <set field="salesForecastId" from-field="parameters.salesForecastId"/>
+                <entity-one entity-name="SalesForecast" value-field="salesForecast"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonSalesForecastDecorator">
+                    <decorator-section name="body">
+                    	<section>
+                    		<condition><not><if-empty field="salesForecastId"/></not></condition>
+                    		<widgets>
+                    			<screenlet title="${uiLabelMap.DAEditSalesForecast}" navigation-menu-name="SalesForecastSubTabBar">
+		                    		<include-menu name="SalesForecastSubTabBar" location="component://delys/widget/sales/SalesMenus.xml"/>
+		                    		<include-form name="EditSalesForecast" location="component://delys/widget/sales/SalesForms.xml"/>
+		                    	</screenlet>
+                    		</widgets>
+                    		<fail-widgets>
+                    			<screenlet title="${uiLabelMap.DACreateNewSalesForecast}" navigation-menu-name="SalesForecastSubTabBar">
+		                    		<include-menu name="SalesForecastSubTabBar" location="component://delys/widget/sales/SalesMenus.xml"/>
+		                    		<include-form name="EditSalesForecast" location="component://delys/widget/sales/SalesForms.xml"/>
+		                    	</screenlet>
+                    		</fail-widgets>
+                    	</section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditSalesForecastDetail">
+        <section>
+            <actions>
+            	<set field="selectedSubMenuItem" value="salesForecastList" />
+                <set field="titleProperty" value="PageTitleEditSalesForecastDetail"/>
+                <set field="tabButtonItem" value="EditSalesForecastDetail"/>
+                <set field="salesForecastId" from-field="parameters.salesForecastId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonSalesForecastDecorator">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.SfaAddSalesForecastDetail} ${uiLabelMap.CommonFor} [${salesForecastId}]" navigation-menu-name="SalesForecastSubTabBar">
+                            <include-menu name="SalesForecastSubTabBar" location="component://delys/widget/sales/SalesMenus.xml"/>
+                            <include-form name="AddSalesForecastDetail" location="component://delys/widget/sales/SalesForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.SfaListSalesForecastDetail}">
+                            <include-form name="ListSalesForecastDetails" location="component://delys/widget/sales/SalesForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="FindCustomTimePeriod">
+        <section>
+        	<condition>
+        		<if-has-permission permission="PERIOD_MAINT"/>
+        	</condition>
+            <actions>
+                <set field="titleProperty" value="DAListCustomTimePeriod"/>
+                <set field="selectedMenuItem" value="statementAndPolicy" />
+                <set field="selectedSubMenuItem" value="customTimePeriodList" />
+                <set field="navMenuName" value="SearchCustomTimePeriodSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/sales/SalesMenus.xml" />
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/period/EditCustomTimePeriod.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                        	<html><html-template location="component://delys/webapp/delys/sales/period/listCustomTimePeriodJQ.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+            <fail-widgets>
+            	<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+            		<decorator-section name="body">
+            			<container style="alert alert-info">
+            				<label text="${uiLabelMap.DAYouHavenotViewPermission}"/>
+            			</container>
+            		</decorator-section>
+            	</decorator-screen>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="EditCustomTimePeriod">
+        <section>
+            <actions>
+                <set field="headerItem" value="main"/>
+                <set field="titleProperty" value="AccountingEditCustomTimePeriods"/>
+                <set field="tabButtonItem" value="EditCustomTimePeriod"/>
+                <set field="selectedMenuItem" value="statementAndPolicy" />
+                <set field="selectedSubMenuItem" value="customTimePeriodList" />
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/period/EditCustomTimePeriod.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="GlobalGLSettingsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+<!--                     	<container id="custom-header" style="smaller lighter blue"> -->
+<!--                     		<label text="${uiLabelMap.AccountingEditCustomTimePeriods}" style="h3"> -->
+<!--                     		</label> -->
+<!--                     	</container> -->
+                        <platform-specific>
+                        <html><html-template location="component://delys/webapp/delys/sales/period/editCustomTimePeriod.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="ViewCustomTimePeriod">
+       <section>
+       		<condition>
+        		<if-has-permission permission="PERIOD_MAINT"/>
+        	</condition>
+           <actions>
+                <set field="headerItem" value="main"/>
+                <set field="titleProperty" value="AccountingEditCustomTimePeriods"/>
+                <set field="tabButtonItem" value="EditCustomTimePeriod"/>
+                <set field="selectedMenuItem" value="statementAndPolicy" />
+                <set field="selectedSubMenuItem" value="customTimePeriodList" />
+                
+                <set field="customTimePeriodId" from-field="parameters.customTimePeriodId"/>
+                <entity-one entity-name="CustomTimePeriod" value-field="customTimePeriod" auto-field-map="true"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/period/EditCustomTimePeriod.groovy"/>
+            </actions>
+            <widgets>
+            	<decorator-screen name="GlobalGLSettingsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.ProductProductStore}">
+                            <!-- <include-form name="EditProductStore" location="component://delys/widget/sales/StoreForms.xml"/> -->
+                            <platform-specific>
+                            	<html><html-template location="component://delys/webapp/delys/sales/period/viewCustomTimePeriod.ftl"/></html>
+                            </platform-specific>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+       </section>
+    </screen>
+    
+    <screen name="NewCustomTimePeriod">
+        <section>
+            <actions>
+                <set field="headerItem" value="main"/>
+                <set field="titleProperty" value="AccountingEditCustomTimePeriods"/>
+                <set field="tabButtonItem" value="EditCustomTimePeriod"/>
+                <set field="selectedMenuItem" value="statementAndPolicy" />
+                <set field="selectedSubMenuItem" value="newCustomTimePeriod" />
+                <set field="displaySubTabBarHeader" value="Y"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/period/EditCustomTimePeriod.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="GlobalGLSettingsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                        	<html><html-template location="component://delys/webapp/delys/sales/period/newCustomTimePeriod.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="FindSalesIn">
+    	<section>
+    		<actions>
+                <set field="titleProperty" value="DAEditSalesIn"/>
+                <set field="selectedMenuItem" value="statementAndPolicy" />
+                <set field="selectedSubMenuItem" value="salesInList" />
+                <set field="navMenuName" value="SearchSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/sales/SalesMenus.xml" />
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+    				<decorator-section name="body">
+    					<decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="search-options">
+                                <include-form name="FindSalesIn" location="component://delys/widget/sales/SalesForms.xml"/>
+                            </decorator-section>
+                            <decorator-section name="search-results">
+                                <include-form name="SalesInSearchResults" location="component://delys/widget/sales/SalesForms.xml"/>
+                            </decorator-section>
+                        </decorator-screen>
+    				</decorator-section>
+    			</decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="FindSalesStatement"><!-- TODO deleted -->
+    	<section>
+    		<actions>
+                <set field="titleProperty" value="DAEditSalesStatement"/>
+                <set field="selectedMenuItem" value="statementAndForecast" />
+                <set field="selectedSubMenuItem" value="salesStatementList" />
+                <set field="navMenuName" value="SalesStatementSubTabBar" />
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+				<set field="navMenuLocation" value="component://delys/widget/sales/SalesMenus.xml" />
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+    				<decorator-section name="body">
+    					<decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="search-options">
+                                <include-form name="FindSalesStatement" location="component://delys/widget/sales/SalesForms.xml"/>
+                            </decorator-section>
+                            <decorator-section name="search-results">
+                                <include-form name="SalesStatementSearchResults" location="component://delys/widget/sales/SalesForms.xml"/>
+                            </decorator-section>
+                        </decorator-screen>
+    				</decorator-section>
+    			</decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="SalesStatementList">
+    	<section>
+    		<actions>
+                <set field="selectedMenuItem" value="statementAndForecast"/>
+                <set field="selectedSubMenuItem" value="salesStatementList"/>
+                <set field="titleProperty" value="DAListSalesStatement"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+    				<decorator-section name="body">
+    					<platform-specific>
+    						<html>
+    							<!-- <html-template location="component://delys/webapp/delys/sales/forecast/listSalesStatementJQ.ftl"/> -->
+    							<html-template location="component://delys/webapp/delys/sales/forecast/listSalesStatementGroupJQ.ftl"/>
+    						</html>
+    					</platform-specific>
+    				</decorator-section>
+    			</decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="TargetSalesStatementList">
+    	<section>
+    		<actions>
+                <set field="selectedMenuItem" value="statementAndForecast"/>
+                <set field="selectedSubMenuItem" value="targetSalesStatementList"/>
+                <set field="titleProperty" value="DAListTargetSalesStatement"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+    				<decorator-section name="body">
+    					<platform-specific>
+    						<html>
+    							<!-- <html-template location="component://delys/webapp/delys/sales/forecast/listSalesStatementJQ.ftl"/> -->
+    							<html-template location="component://delys/webapp/delys/sales/forecast/listTargetSalesStatementGroupJQ.ftl"/>
+    						</html>
+    					</platform-specific>
+    				</decorator-section>
+    			</decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="SalesInList">
+    	<section>
+    		<actions>
+                <set field="selectedMenuItem" value="statementAndForecast"/>
+                <set field="selectedSubMenuItem" value="salesInList"/>
+                <set field="titleProperty" value="DAListSalesIn"/>
+                <set field="salesTypeId" value="SALES_IN"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+    				<decorator-section name="body">
+    					<platform-specific>
+    						<html><html-template location="component://delys/webapp/delys/sales/forecast/listSalesStatementJQ.ftl"/></html>
+    					</platform-specific>
+    				</decorator-section>
+    			</decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="SalesOutList">
+    	<section>
+    		<actions>
+                <set field="selectedMenuItem" value="statementAndForecast"/>
+                <set field="selectedSubMenuItem" value="salesOutList"/>
+                <set field="titleProperty" value="DAListSalesOut"/>
+                <set field="salesTypeId" value="SALES_OUT"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+    				<decorator-section name="body">
+    					<platform-specific>
+    						<html><html-template location="component://delys/webapp/delys/sales/forecast/listSalesStatementJQ.ftl"/></html>
+    					</platform-specific>
+    				</decorator-section>
+    			</decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="CommonSalesStatementDecorator">
+        <section>
+            <actions>
+                <set field="selectedMenuItem" value="statementAndPolicy" global="true" />
+            </actions>
+            <widgets>
+            	<section>
+            		<condition><not><if-empty field="salesId"/></not></condition>
+            		<actions>
+		            	<set field="tabBarName" value="SalesStatementTabBar" global="true" />
+						<set field="tabBarLocation" value="component://delys/widget/sales/SalesMenus.xml" global="true" />
+						<set field="printTabBar" value="true" />
+			    	</actions>
+			    	<widgets></widgets>
+            	</section>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<decorator-section-include name="body"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="NewSalesStatement">
+    	<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="statementAndForecast"/>
+            	<set field="selectedSubMenuItem" value="targetSalesStatementList" />
+                <set field="titleProperty" value="DACreateNewTargetSalesStatement"/>
+                <service service-name="getListCustomTimePeriod" result-map="result">
+                	<field-map field-name="periodTypeModule" value="sales"/>
+                	<field-map field-name="periodTypeId" value="SALES_YEAR"/>
+                </service>
+                <set field="listCustomTimePeriodRoot" from-field="result.listCustomTimePeriod"/>
+                <!-- <service service-name="getCatalogAndCategoryForSalesJSTree" result-map="result2"></service>
+                <set field="listCategoryProductRoot" from-field="result2.results"/> -->
+                <!-- <service service-name="getCatalogAndCategoryForSalesJSTree" result-map="resultProduct"></service>
+                <set field="listCatalogAndCategory" from-field="resultProduct.results"/> -->
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<platform-specific>
+    						<html><html-template location="component://delys/webapp/delys/sales/forecast/newSalesStatementJQ.ftl"/></html>
+    					</platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="NewSalesStatementDetail">
+    	<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="statementAndForecast"/>
+            	<set field="selectedSubMenuItem" value="targetSalesStatementList" />
+                <set field="titleProperty" value="DACreateNewTargetSalesStatementDetail"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/sales/forecast/GetDataCreateNewSalesStatement.groovy"/>
+    		</actions>
+    		<widgets>
+            	<platform-specific>
+ 					<html><html-template location="component://delys/webapp/delys/sales/forecast/newSalesStatementDetailJQ.ftl"/></html>
+ 				</platform-specific>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="EditSalesStatement">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="statementAndPolicy"/>
+            	<set field="selectedSubMenuItem" value="salesStatementList" />
+                <set field="titleProperty" value="DASalesStatement"/>
+                <set field="tabButtonItem" value="EditSalesStatement"/>
+                <set field="salesId" from-field="parameters.salesId"/>
+                <entity-one entity-name="SalesStatementHeader" value-field="salesStatement"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonSalesStatementDecorator">
+                    <decorator-section name="body">
+                    	<section>
+                    		<condition><not><if-empty field="salesId"/></not></condition>
+                    		<widgets>
+                    			<screenlet title="${uiLabelMap.DAEditSalesStatement}" navigation-menu-name="SalesStatementSubTabBar">
+		                    		<include-menu name="SalesStatementSubTabBar" location="component://delys/widget/sales/SalesMenus.xml"/>
+		                    		<include-form name="EditSalesStatement" location="component://delys/widget/sales/SalesForms.xml"/>
+		                    	</screenlet>
+                    		</widgets>
+                    		<fail-widgets>
+                    			<screenlet title="${uiLabelMap.DACreateNewSalesStatement}" navigation-menu-name="SalesStatementSubTabBar">
+		                    		<include-menu name="SalesStatementSubTabBar" location="component://delys/widget/sales/SalesMenus.xml"/>
+		                    		<include-form name="EditSalesStatement" location="component://delys/widget/sales/SalesForms.xml"/>
+		                    	</screenlet>
+                    		</fail-widgets>
+                    	</section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditSalesStatementDetail">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="statementAndPolicy"/>
+            	<set field="selectedSubMenuItem" value="salesStatementList" />
+                <set field="titleProperty" value="PageTitleEditSalesForecastDetail"/>
+                <set field="tabButtonItem" value="EditSalesStatementDetail"/>
+                <set field="salesForecastId" from-field="parameters.salesForecastId"/>
+                <set field="salesId" from-field="parameters.salesId"/>
+                
+                <set field="parameters.productId" value=""/>
+                <set field="parameters.productCategoryId" value=""/>
+                <set field="parameters.salesItemSeqId" value=""/>
+                <set field="parameters.quantity" value=""/>
+                <set field="parameters.quantityUomId" value=""/>
+                <set field="parameters.amount" value=""/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonSalesStatementDecorator">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.DAAddSalesStatementDetail} ${uiLabelMap.CommonFor} [${salesId}]" navigation-menu-name="SalesStatementSubTabBar">
+                            <include-menu name="SalesStatementSubTabBar" location="component://delys/widget/sales/SalesMenus.xml"/>
+                            <platform-specific>
+                            	<html>
+                            		<html-template location="component://delys/webapp/delys/sales/includes/loadFromElementJs.ftl"/>
+                            	</html>
+                            </platform-specific>
+                            <include-form name="AddSalesStatementDetail" location="component://delys/widget/sales/SalesForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.DAListSalesForecastDetail}">
+                            <include-form name="ListSalesStatementDetails" location="component://delys/widget/sales/SalesForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <!-- REPORTS -->
+    <!-- generates report of open order items -->
+    <screen name="OpenOrderItemsReport">
+        <section>
+            <actions>
+                <set field="titleProperty" value="OrderReportOpenOrderItems"/>
+                <set field="headerItem" value="reports"/>
+                <set field="viewSize" value="${parameters.VIEW_SIZE}" default-value="20" type="Integer"/>
+                <set field="viewIndex" value="${parameters.VIEW_INDEX}" default-value="0" type="Integer"/>
+                <set field="fromOrderDate" from-field="parameters.fromOrderDate" type="Timestamp"/>
+                <set field="thruOrderDate" from-field="parameters.thruOrderDate" type="Timestamp"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/reports/OpenOrderItemsReport.groovy"/>
+            </actions>
+            <widgets>
+                <screenlet title="${uiLabelMap.OrderReportOpenOrderItems} - ${productStore.storeName}">
+                    <include-form name="OpenOrderItemsList" location="component://delys/widget/sales/SalesForms.xml"/>
+                </screenlet>
+                <screenlet title="${uiLabelMap.OrderReportOpenOrderItems}">
+                    <include-form name="OpenOrderItemsTotal" location="component://delys/widget/sales/SalesForms.xml"/>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="OrderReportOpenOrderItems">
+        <section>
+            <actions>
+                <!-- <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/> -->
+                <set field="titleProperty" value="OrderReportOpenOrderItems"/>
+                <set field="selectedMenuItem" value="statisticsAndReport" />
+                <set field="selectedSubMenuItem" value="orderItems" />
+                <set field="navMenuName" value="SearchSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/sales/SalesMenus.xml" />
+            </actions>
+            <widgets>
+            	<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+    				<decorator-section name="body">
+    					<decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="search-options">
+                                <include-form name="OpenOrderItemsReport" location="component://delys/widget/sales/SalesForms.xml"/>
+                            </decorator-section>
+                            <decorator-section name="search-results">
+                            	<include-screen name="OpenOrderItemsReport"/>
+                            </decorator-section>
+                        </decorator-screen>
+                	</decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <!-- SALES POLICY AWARD -->
+    <screen name="CommonEditSalesPolicyDecoratorOld"><!-- TODO deleted -->
+		<section>
+			<widgets>
+            	<section>
+					<condition>
+						<or>
+							<if-has-permission permission="SALES_POLICY" action="_ADMIN"/>
+							<if-has-permission permission="SALES_POLICY" action="_VIEW"/>
+						</or>
+					</condition>
+					<actions>
+						<!-- <set field="layoutSettings.javaScripts[]" value="/delys/images/js/chosen.jquery.min.js" global="true"/>
+		                <set field="layoutSettings.styleSheets[]" value="/delys/images/css/chosen.css" global="true"/> -->
+						<set field="tabBarName" value="EditSalesPolicyTabBar" global="true" />
+						<set field="tabBarLocation" value="component://delys/widget/sales/SalesMenus.xml" global="true" />
+						<set field="titleHeaderValue" value="policyTitle" global="true" />
+						<set field="titleHeaderLocation" value="component://delys/widget/sales/SalesScreens.xml" global="true" />
+						<set field="salesPolicyId" from-field="parameters.salesPolicyId"/>
+					</actions>
+              		<widgets>
+                  		<section>
+                      		<condition><not><if-empty field="salesPolicyId"/></not></condition>
+                      		<actions>
+								<set field="printTabBar" value="true" />
+							</actions>
+                      		<widgets></widgets>
+                  		</section>
+                  		<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">                     
+		                    <decorator-section name="body">
+		                        <section>
+		                            <widgets>
+		                                 <decorator-section-include name="body"/>
+		                            </widgets>
+		                        </section>
+		                    </decorator-section>
+		                </decorator-screen>
+              		</widgets>
+              		<fail-widgets>
+              			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                			<decorator-section name="body">
+                 				<container style="alert alert-info">
+		              				<label text="${uiLabelMap.DAYouHavenotCreatePermission}"></label>
+		              			</container>
+                 			</decorator-section>
+                		</decorator-screen>
+                	</fail-widgets>
+          		</section>
+            </widgets>
+		</section>
+	</screen>
+    <screen name="CommonEditSalesPolicyDecorator">
+		<section>
+			<widgets>
+            	<section>
+					<condition>
+						<or>
+							<if-has-permission permission="SALES_POLICY" action="_ADMIN"/>
+							<if-has-permission permission="SALES_POLICY" action="_VIEW"/>
+						</or>
+					</condition>
+					<actions>
+						<!-- <set field="layoutSettings.javaScripts[]" value="/delys/images/js/chosen.jquery.min.js" global="true"/>
+		                <set field="layoutSettings.styleSheets[]" value="/delys/images/css/chosen.css" global="true"/> -->
+						<set field="tabBarName" value="EditSalesPolicyTabBar" global="true" />
+						<set field="tabBarLocation" value="component://delys/widget/sales/SalesMenus.xml" global="true" />
+						<set field="titleHeaderValue" value="policyTitle" global="true" />
+						<set field="titleHeaderLocation" value="component://delys/widget/sales/SalesScreens.xml" global="true" />
+					</actions>
+              		<widgets>
+                  		<!-- <section>
+                      		<condition><not><if-empty field="salesPolicyId"/></not></condition>
+                      		<actions>
+								<set field="printTabBar" value="true" />
+							</actions>
+                      		<widgets></widgets>
+                  		</section> -->
+                  		<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">                     
+		                    <decorator-section name="body">
+		                        <section>
+		                            <widgets>
+		                                 <decorator-section-include name="body"/>
+		                            </widgets>
+		                        </section>
+		                    </decorator-section>
+		                </decorator-screen>
+              		</widgets>
+              		<fail-widgets>
+              			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                			<decorator-section name="body">
+                 				<container style="alert alert-info">
+		              				<label text="${uiLabelMap.DAYouHavenotCreatePermission}"></label>
+		              			</container>
+                 			</decorator-section>
+                		</decorator-screen>
+                	</fail-widgets>
+          		</section>
+            </widgets>
+		</section>
+	</screen>
+	<screen name="policyTitle">
+    	<section>
+    		<condition>
+    			<not>
+    				<if-empty field="salesPolicy"/>
+    			</not>
+    		</condition>
+    		<widgets>
+    			<platform-specific>
+    				<html><html-template location="component://delys/webapp/delys/sales/policy/policyTitle.ftl"/></html>
+   				</platform-specific>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="EditSalesPolicyOld"><!-- TODO deleted -->
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="statementAndPolicy" />
+				<set field="selectedSubMenuItem" value="newSalesPolicy" />
+				<set field="tabButtonItem" value="EditSalesPolicy"/>
+				<set field="titleProperty" value="DAEditSalesPolicy"/>
+				<set field="layoutSettings.javaScripts[]" value="/aceadmin/assets/js/jquery.autosize-min.js" global="true"/>
+				<set field="layoutSettings.javaScripts[]" value="/aceadmin/assets/js/jquery.inputlimiter.1.3.1.min.js" global="true"/>
+				<set field="layoutSettings.javaScripts[]" value="/aceadmin/assets/js/jquery.maskedinput.min.js" global="true"/>
+				<set field="layoutSettings.javaScripts[]" value="/aceadmin/assets/js/bootstrap-tag.min.js" global="true"/>
+				<set field="layoutSettings.styleSheets[]" value="/delys/images/css/sales/bootstrap-tag-cloud.css" global="true"/>	
+				<set field="salesPolicyId" from-field="parameters.salesPolicyId"/>							
+				<entity-condition list="promoTypes" entity-name="ProductPromoType"></entity-condition>
+				<entity-condition list="productStores" entity-name="ProductStore"></entity-condition>
+				<entity-condition list="roleTypeList" entity-name="RoleType"></entity-condition>
+				<entity-one value-field="salesPolicy" entity-name="SalesPolicy">
+					<field-map field-name="salesPolicyId" from-field="parameters.salesPolicyId"/>
+				</entity-one>
+				<entity-condition list="productStoreSalesPolicyAppl" entity-name="ProductStoreSalesPolicyAppl">
+					<condition-expr field-name="salesPolicyId" from-field="parameters.salesPolicyId"/>
+				</entity-condition>
+				<entity-condition list="policyRoleTypeApply" entity-name="SalesPolicyRoleTypeApply">
+					<condition-expr field-name="salesPolicyId" from-field="parameters.salesPolicyId"/>
+				</entity-condition>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonEditSalesPolicyDecoratorOld">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<and>
+									<not><if-empty field="salesPolicyId" /></not>
+									<not><if-empty field="salesPolicy" /></not>
+								</and>
+							</condition>
+							<widgets>
+								<screenlet title="${uiLabelMap.DAEditSalesPolicy}: ${salesPolicy.policyName} (${salesPolicy.salesPolicyId})" navigation-menu-name="EditSalesPolicy">
+									<include-menu name="EditSalesPolicy" location="component://delys/widget/sales/SalesMenus.xml" />
+									<platform-specific>
+										<html><html-template location="component://delys/webapp/delys/sales/policy/editSalesPolicy.ftl"/></html>
+									</platform-specific>
+								</screenlet>
+							</widgets>
+							<fail-widgets>
+								<screenlet title="${uiLabelMap.DACreateSalesPolicy}: ${uiLabelMap.DelysStep} 1: ${uiLabelMap.DelysInitInformation}">
+									<platform-specific>
+										<html><html-template location="component://delys/webapp/delys/sales/policy/editSalesPolicy.ftl"/></html>
+									</platform-specific>
+								</screenlet>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EditSalesPolicy">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="statementAndPolicy" />
+				<set field="selectedSubMenuItem" value="newSalesPolicy" />
+				<set field="tabButtonItem" value="EditSalesPolicy"/>
+				<set field="titleProperty" value="DAEditSalesPolicy"/>
+				<set field="salesPolicyId" from-field="parameters.salesPolicyId"/>
+				<entity-condition list="satementTypeList" entity-name="SalesStatementType"></entity-condition>
+				<entity-condition list="productList" entity-name="Product"></entity-condition>
+				<entity-condition list="productCategoryList" entity-name="ProductCategory">
+					<condition-expr field-name="productCategoryTypeId" value="CATALOG_CATEGORY"/>
+				</entity-condition>
+				<entity-condition entity-name="Enumeration" list="inputParamEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="SALES_PL_IN_PARAM"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+                <entity-condition entity-name="Enumeration" list="condOperEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="SALES_PL_COND"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+				<entity-condition entity-name="Enumeration" list="salesPolicyActionEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="SALES_PL_ACTION"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+				
+				<entity-condition list="promoTypes" entity-name="ProductPromoType"></entity-condition>
+				<entity-condition list="productStores" entity-name="ProductStore"></entity-condition>
+				<entity-condition list="roleTypeList" entity-name="RoleType"></entity-condition>
+				<entity-one value-field="salesPolicy" entity-name="SalesPolicy">
+					<field-map field-name="salesPolicyId" from-field="parameters.salesPolicyId"/>
+				</entity-one>
+				<entity-condition list="productStoreSalesPolicyAppl" entity-name="ProductStoreSalesPolicyAppl">
+					<condition-expr field-name="salesPolicyId" from-field="parameters.salesPolicyId"/>
+				</entity-condition>
+				<entity-condition list="policyRoleTypeApply" entity-name="SalesPolicyRoleTypeApply">
+					<condition-expr field-name="salesPolicyId" from-field="parameters.salesPolicyId"/>
+				</entity-condition>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/sales/policy/EditSalesPolicyAdvance.groovy"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition><not><if-empty field="parameters.salesPolicyId"/></not></condition>
+					<actions><set field="selectedSubMenuItem" value="salesPolicyList"/></actions>
+					<widgets></widgets>
+				</section>
+				<decorator-screen name="CommonEditSalesPolicyDecorator">
+					<decorator-section name="body">
+						<platform-specific>
+							<html><html-template location="component://delys/webapp/delys/sales/policy/editSalesPolicyJQ.ftl"/></html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="FindSalesPolicy"><!-- TODO deleted -->
+		<section>
+			<actions>
+                <set field="titleProperty" value="DAListSalesPolicy"/>
+                <set field="selectedMenuItem" value="statementAndPolicy" />
+                <set field="selectedSubMenuItem" value="salesPolicyList" />
+                <set field="navMenuName" value="SalesPolicySubTabBar" />
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+				<set field="navMenuLocation" value="component://delys/widget/sales/SalesMenus.xml" />
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+    				<decorator-section name="body">
+    					<decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="search-options">
+                                <include-form name="FindSalesPolicy" location="component://delys/widget/sales/SalesForms.xml"/>
+                            </decorator-section>
+                            <decorator-section name="search-results">
+                                <include-form name="SalesPolicySearchResults" location="component://delys/widget/sales/SalesForms.xml"/>
+                            </decorator-section>
+                        </decorator-screen>
+    				</decorator-section>
+    			</decorator-screen>
+    		</widgets>
+		</section>
+	</screen>
+	<screen name="SalesPolicyList">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="statementAndPolicy"/>
+				<set field="selectedSubMenuItem" value="salesPolicyList"/>
+				<set field="titleProperty" value="DAListSalesPolicy" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<widgets>
+								<platform-specific>
+									<html><html-template location="component://delys/webapp/delys/sales/policy/listSalesPolicyJQ.ftl"/></html>
+								</platform-specific>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EditSalesPolicyRules"><!-- TODO deleted -->
+		<section>
+			<condition>
+				<if-has-permission permission="SALES_POLICY" action="_VIEW"/>
+			</condition>
+			<actions>
+				<set field="selectedMenuItem" value="statementAndPolicy" />
+				<set field="selectedSubMenuItem" value="newSalesPolicy" />
+				<set field="titleProperty" value="PageTitleEditSalesPolicyRules"/>
+                <set field="headerItem" value="promos"/>
+                <set field="tabButtonItem" value="EditSalesPolicyRules"/>
+                <set field="labelTitleProperty" value="ProductRules"/>
+                <set field="salesPolicyId" from-field="parameters.salesPolicyId" type="String"/>
+                <set field="salesPolicyRuleId" from-field="parameters.salesPolicyRuleId" type="String"/>
+                <set field="salesPolicyCondSeqId" from-field="parameters.salesPolicyCondSeqId"/>
+                <set field="salesPolicyActionSeqId" from-field="parameters.salesPolicyActionSeqId"/>
+                <set field="salesPolicy" value=""/>
+                
+                <entity-one entity-name="SalesPolicy" value-field="salesPolicy" auto-field-map="true"/>
+				<entity-one value-field="salesPolicyRule" entity-name="SalesPolicyRule" auto-field-map="true"/>
+				
+                <!-- Data Related to the Promo -->
+                <entity-condition list="productList" entity-name="Product"></entity-condition>
+                <entity-condition list="productCategoryList" entity-name="ProductCategory"></entity-condition>
+                
+                <entity-condition entity-name="ProductStoreSalesPolicyAppl" list="productStoreSalesPolicyAppls">
+                    <condition-expr field-name="salesPolicyId" from-field="salesPolicyId"/>
+                    <order-by field-name="sequenceNum"/>
+                    <order-by field-name="salesPolicyId"/>
+                </entity-condition>
+                <entity-condition list="salesPolicyRoleTypeList" entity-name="SalesPolicyRoleTypeApply">
+                	<condition-list combine="and">
+                		<condition-expr field-name="salesPolicyId" from-field="salesPolicyId"/>
+                	</condition-list>
+                </entity-condition>
+                <entity-condition entity-name="SalesPolicyRule" list="salesPolicyRules">
+                    <condition-expr field-name="salesPolicyId" from-field="salesPolicyId"/>
+                    <order-by field-name="ruleName"/>
+                </entity-condition>
+                <entity-condition entity-name="SalesPolicyCategory" list="salesPolicyCategories">
+                    <condition-list>
+                        <condition-expr field-name="salesPolicyId" from-field="salesPolicyId"/>
+                        <condition-expr field-name="salesPolicyRuleId" value="_NA_"/>
+                        <condition-expr field-name="salesPolicyActionSeqId" value="_NA_"/>
+                        <condition-expr field-name="salesPolicyCondSeqId" value="_NA_"/>
+                    </condition-list>
+                </entity-condition>
+                <entity-condition entity-name="SalesPolicyProduct" list="salesPolicyProducts">
+                    <condition-list>
+                        <condition-expr field-name="salesPolicyId" from-field="salesPolicyId"/>
+                        <condition-expr field-name="salesPolicyRuleId" value="_NA_"/>
+                        <condition-expr field-name="salesPolicyActionSeqId" value="_NA_"/>
+                        <condition-expr field-name="salesPolicyCondSeqId" value="_NA_"/>
+                    </condition-list>
+                </entity-condition>
+               	
+                <!-- General Data for Drop-downs, etc -->
+                <entity-condition entity-name="Enumeration" list="inputParamEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="SALES_PL_IN_PARAM"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+                <entity-condition entity-name="Enumeration" list="condOperEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="SALES_PL_COND"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+                <entity-condition entity-name="Enumeration" list="salesPolicyActionEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="SALES_PL_ACTION"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+                <entity-condition entity-name="Enumeration" list="salesPolicyApplEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="SALES_PL_PCAPPL"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+
+                <entity-condition entity-name="OrderAdjustmentType" list="orderAdjustmentTypes" use-cache="true">
+                    <order-by field-name="description"/>
+                </entity-condition>
+                <entity-condition entity-name="ProductCategory" list="productCategories">
+                    <condition-expr field-name="showInSelect" operator="not-equals" value="N"/>
+                    <order-by field-name="description"/>
+                </entity-condition>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonEditSalesPolicyDecoratorOld">
+					<decorator-section name="body">
+						<platform-specific>
+							<html><html-template location="component://delys/webapp/delys/sales/policy/editSalesPolicyRules.ftl"/></html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<decorator-screen name="DelysCommonDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<label style="h3" text="${uiLabelMap.DelysViewPermissionError}"/>						
+					</decorator-section>
+				</decorator-screen>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="AjaxGlobalDecorator">
+		<section>
+			<actions>
+				<property-map resource="DelysUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="CommonUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+				<property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>	
+			</actions>
+			<widgets>
+				<decorator-section-include name="body"/>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="CreateUpdateRuleCond">
+		<section>
+			<condition>
+				<or>
+					<if-has-permission permission="SALES_POLICY" action="_CREATE"/>
+					<if-has-permission permission="SALES_POLICY" action="_UPDATE"/>
+				</or>
+			</condition>
+			<actions>
+				<set field="salesPolicyId" from-field="parameters.salesPolicyId" type="String"/>
+                <set field="salesPolicyRuleId" from-field="parameters.salesPolicyRuleId" type="String"/>
+                <set field="salesPolicyCondSeqId" from-field="parameters.salesPolicyCondSeqId"/>
+                <set field="salesPolicyActionSeqId" from-field="parameters.salesPolicyActionSeqId"/>
+				<property-map map-name="uiLabelMap" resource="DelysPromoUiLabels" global="true"/>
+				<entity-one value-field="policyCond" entity-name="SalesPolicyCond" auto-field-map="true"></entity-one>
+				<!-- General Data for Drop-downs, etc -->               
+                <entity-condition entity-name="Enumeration" list="inputParamEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="SALES_PL_IN_PARAM"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+                <entity-one value-field="salesPolicy" entity-name="SalesPolicy" auto-field-map="true"></entity-one>
+                <entity-one value-field="salesPolicyRule" entity-name="SalesPolicyRule" auto-field-map="true"/>
+                <entity-condition entity-name="CarrierShipmentMethod" list="carrierShipmentMethods" use-cache="true">
+                    <order-by field-name="shipmentMethodTypeId"/>
+                </entity-condition>
+                <entity-condition entity-name="Enumeration" list="condOperEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="SALES_PL_COND"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+                <entity-condition entity-name="Enumeration" list="salesPolicyActionEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="SALES_PL_ACTION"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+                <entity-condition entity-name="Enumeration" list="salesPolicyApplEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="SALES_PL_PCAPPL"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+                <entity-condition entity-name="OrderAdjustmentType" list="orderAdjustmentTypes" use-cache="true">
+                    <order-by field-name="description"/>
+                </entity-condition>
+                <entity-condition entity-name="ProductCategory" list="productCategories">
+                    <condition-expr field-name="showInSelect" operator="not-equals" value="N"/>
+                    <order-by field-name="description"/>
+                </entity-condition>
+                <entity-condition list="productList" entity-name="Product"></entity-condition>
+			</actions>
+			<widgets>
+				<decorator-screen name="AjaxGlobalDecorator">
+					<decorator-section name="body">
+						<platform-specific>
+							<html>
+								<html-template location="component://delys/webapp/delys/sales/policy/createUpdateRuleCond.ftl"/>
+							</html>
+						</platform-specific>	
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<decorator-screen name="DelysCommonDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<label style="h3" text="${uiLabelMap.DelysViewPermissionError}"/>											
+					</decorator-section>
+				</decorator-screen>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="CreateUpdateRuleAction">
+		<section>
+			<condition>
+				<or>
+					<if-has-permission permission="DELYS_PROMOS" action="_CREATE"/>
+					<if-has-permission permission="DELYS_PROMOS" action="_UPDATE"/>
+				</or>
+			</condition>
+			<actions>
+				<set field="salesPolicyId" from-field="parameters.salesPolicyId" type="String"/>
+                <set field="salesPolicyRuleId" from-field="parameters.salesPolicyRuleId" type="String"/>
+                <set field="salesPolicyCondSeqId" from-field="parameters.salesPolicyCondSeqId"/>
+                <set field="salesPolicyActionSeqId" from-field="parameters.salesPolicyActionSeqId"/>
+                <property-map map-name="uiLabelMap" resource="DelysPromoUiLabels" global="true"/>
+				<entity-one value-field="policyAction" entity-name="SalesPolicyAction" auto-field-map="true"></entity-one>
+				<!-- General Data for Drop-downs, etc -->				              
+                <entity-condition entity-name="Enumeration" list="inputParamEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="SALES_PL_IN_PARAM"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+                <entity-one value-field="salesPolicy" entity-name="SalesPolicy" auto-field-map="true"></entity-one>
+                <entity-one value-field="salesPolicyRule" entity-name="SalesPolicyRule" auto-field-map="true"/>
+                <entity-condition entity-name="CarrierShipmentMethod" list="carrierShipmentMethods" use-cache="true">
+                    <order-by field-name="shipmentMethodTypeId"/>
+                </entity-condition>
+                <entity-condition entity-name="Enumeration" list="condOperEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="SALES_PL_COND"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+                <entity-condition entity-name="Enumeration" list="salesPolicyActionEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="SALES_PL_ACTION"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+                <entity-condition entity-name="Enumeration" list="salesPolicyApplEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="SALES_PL_PCAPPL"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+
+                <entity-condition entity-name="OrderAdjustmentType" list="orderAdjustmentTypes" use-cache="true">
+                    <order-by field-name="description"/>
+                </entity-condition>
+                <entity-condition entity-name="ProductCategory" list="productCategories">
+                    <condition-expr field-name="showInSelect" operator="not-equals" value="N"/>
+                    <order-by field-name="description"/>
+                </entity-condition>
+                <entity-condition list="productList" entity-name="Product"></entity-condition>
+			</actions>
+			<widgets>
+				<decorator-screen name="AjaxGlobalDecorator">
+					<decorator-section name="body">
+						<platform-specific>
+							<html>
+								<html-template location="component://delys/webapp/delys/sales/policy/createUpdateRuleAction.ftl"/>
+							</html>
+						</platform-specific>	
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<decorator-screen name="DelysCommonDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<label style="h3" text="${uiLabelMap.DelysViewPermissionError}"/>											
+					</decorator-section>
+				</decorator-screen>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="EditSalesPolicyStores">
+		<section>
+			<condition>
+				<if-has-permission permission="SALES_POLICY" action="_VIEW"/>
+			</condition>
+			<actions>
+				<set field="selectedMenuItem" value="statementAndPolicy" />
+				<set field="selectedSubMenuItem" value="newSalesPolicy" />
+				<set field="titleProperty" value="PageTitleEditSalesPolicyStores"/>
+                <set field="headerItem" value="promos"/>
+                <set field="tabButtonItem" value="EditSalesPolicyStores"/>
+                <set field="labelTitleProperty" value="ProductStores"/>
+
+                <set field="salesPolicyId" from-field="parameters.salesPolicyId"/>
+                <entity-one entity-name="SalesPolicy" value-field="salesPolicy" auto-field-map="true"/>
+                <entity-condition entity-name="ProductStoreSalesPolicyAppl" list="productStoreSalesPolicyAppls">
+                    <condition-expr field-name="salesPolicyId" from-field="salesPolicyId"/>
+                    <order-by field-name="sequenceNum"/>
+                    <order-by field-name="salesPolicyId"/>
+                </entity-condition>
+                <entity-condition list="productStores" entity-name="ProductStoreRoleDetail" filter-by-date="true">
+                	<condition-list>
+                		<condition-expr field-name="partyId" from-field="userLogin.partyId"/>
+                		<condition-expr field-name="roleTypeId" value="MANAGER"/>
+                	</condition-list>
+                	<select-field field-name="productStoreId"/>
+                	<select-field field-name="storeName"/>
+                </entity-condition>
+                <!-- <entity-condition entity-name="ProductStore" list="productStores">
+                    <order-by field-name="storeName"/>
+                </entity-condition> -->
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonEditSalesPolicyDecoratorOld">
+					<decorator-section name="body">
+						<platform-specific>
+                            <html><html-template location="component://delys/webapp/delys/sales/policy/editSalesPolicyStores.ftl"/></html>
+                        </platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<decorator-screen name="DelysCommonDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<label style="h3" text="${uiLabelMap.DelysViewPermissionError}"/>
+					</decorator-section>
+				</decorator-screen>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="SalesPolicyOverview">
+		<section>
+			<condition>
+				<if-has-permission permission="SALES_POLICY" action="_VIEW"/>
+			</condition>
+			<actions>
+				<set field="selectedMenuItem" value="statementAndPolicy" />
+				<set field="selectedSubMenuItem" value="newSalesPolicy" />
+				<set field="headerItem" value="promos"/>
+                <set field="tabButtonItem" value="SalesPolicyOverview"/>
+				<set field="salesPolicyId" from-field="parameters.salesPolicyId"/>				
+				<entity-condition list="salesPolicyStatus" entity-name="StatusItem">
+					<condition-list combine="and">
+						<condition-expr field-name="statusTypeId" operator="equals" value="SALES_PL_STATUS"/>						
+					</condition-list>
+					<order-by field-name="sequenceId"/>
+				</entity-condition>
+				<entity-one value-field="salesPolicy" entity-name="SalesPolicy" auto-field-map="true"></entity-one>				
+				<entity-condition list="salesPolicyStores" entity-name="ProductStoreSalesPolicyAppl">
+					<condition-list combine="and">
+						<condition-expr field-name="salesPolicyId" operator="equals" from-field="parameters.salesPolicyId"/>
+					</condition-list>
+					<order-by field-name="-fromDate"/>
+				</entity-condition>
+				<entity-condition list="policyRoleTypeApply" entity-name="SalesPolicyRoleTypeApply">
+					<condition-expr field-name="salesPolicyId" from-field="parameters.salesPolicyId"/>
+				</entity-condition>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonEditSalesPolicyDecorator">
+					<decorator-section name="body">
+						<platform-specific>
+							<html>
+								<html-template location="component://delys/webapp/delys/sales/policy/salesPolicyOverview.ftl"/>
+							</html>
+						</platform-specific>											
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<decorator-screen name="CommonEditSalesPolicyDecorator">
+					<decorator-section name="body">
+						<label style="h3" text="${uiLabelMap.DelysViewPermissionError}"/>											
+					</decorator-section>
+				</decorator-screen>
+				
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="EditSalesPolicyRoleApply">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="statementAndPolicy" />
+				<set field="selectedSubMenuItem" value="newSalesPolicy" />
+				<set field="tabButtonItem" value="EditSalesPolicyRoleApply"/>
+				<set field="headerItem" value="promos"/>
+				<set field="salesPolicyId" from-field="parameters.salesPolicyId"/>
+				<entity-one entity-name="SalesPolicy" value-field="salesPolicy" auto-field-map="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonEditSalesPolicyDecoratorOld">
+					<decorator-section name="body">
+						<screenlet title="${uiLabelMap.DelysSalesPolicyRoleList}">
+							<include-form name="EditSalesPolicyRole" location="component://delys/widget/sales/SalesForms.xml" />
+						</screenlet>
+						<screenlet title="${uiLabelMap.DelysAddSalesPolicyRole}">
+							<include-form name="AddSalesPolicyRole" location="component://delys/widget/sales/SalesForms.xml"/>
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="SalesStatementReportList">
+		<section>
+			<actions>
+                <set field="titleProperty" value="DAEditSalesStatement"/>
+                <set field="selectedMenuItem" value="statementAndForecast" />
+                <set field="selectedSubMenuItem" value="salesStatementReportList" />
+                <set field="navMenuName" value="SalesStatementSubTabBar" />
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+				<set field="navMenuLocation" value="component://delys/widget/sales/SalesMenus.xml" />
+    		</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+    				<decorator-section name="body">
+    					<decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="search-options">
+                                <include-form name="FindSalesStatementReportList" location="component://delys/widget/sales/SalesForms.xml"/>
+                            </decorator-section>
+                            <decorator-section name="search-results">
+                                <include-form name="SalesStatementReportListSearchResults" location="component://delys/widget/sales/SalesForms.xml"/>
+                            </decorator-section>
+                        </decorator-screen>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="salesStatementTitle">
+		<section>
+			<actions>
+				<entity-one value-field="salesStatementSelected" entity-name="SalesStatementHeader">
+                	<field-map field-name="salesId" from-field="parameters.salesId"/>
+                </entity-one>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not><if-empty field="salesStatementSelected"/></not>
+					</condition>
+					<widgets>
+						<label style="ibefore-icon-angle-right" text="${uiLabelMap.DAId}: "></label>
+						<link url-mode="plain" target="viewSalesStatement?salesId=${salesStatementSelected.salesId}" text="${salesStatementSelected.salesId}"></link>
+					</widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewSalesStatementGroup">
+		<section>
+			<actions>
+				<set field="titleProperty" value="DAViewTargetSalesStatement"/>
+                <set field="selectedMenuItem" value="statementAndForecast"/>
+            	<set field="selectedSubMenuItem" value="salesStatementList" />
+                <script location="component://delys/webapp/delys/WEB-INF/actions/sales/forecast/GetDataViewSalesStatement.groovy"/>
+           	</actions>
+           	<widgets>
+           		<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+         			<decorator-section name="body">
+						<screenlet title="${uiLabelMap.DAViewSalesStatement}">
+							<!--  navigation-menu-name="SalesSatementSubTabBar" 
+							<include-menu location="component://delys/widget/sales/SalesMenus.xml" name="SalesSatementSubTabBar"/> -->
+							<platform-specific>
+								<html><html-template location="component://delys/webapp/delys/sales/forecast/viewSalesStatementGroup.ftl"/></html>
+							</platform-specific>
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+           	</widgets>
+		</section>
+	</screen>
+	<screen name="ViewTargetSalesStatementGroup">
+		<section>
+			<actions>
+				<set field="titleProperty" value="DAViewTargetSalesStatement"/>
+                <set field="selectedMenuItem" value="statementAndForecast"/>
+            	<set field="selectedSubMenuItem" value="targetSalesStatementList" />
+                <script location="component://delys/webapp/delys/WEB-INF/actions/sales/forecast/GetDataViewTargetSalesStatement.groovy"/>
+           	</actions>
+           	<widgets>
+           		<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+         			<decorator-section name="body">
+						<screenlet title="${uiLabelMap.DAViewTargetSalesStatement}" navigation-menu-name="SalesSatementSubTabBar">
+							<include-menu location="component://delys/widget/sales/SalesMenus.xml" name="SalesSatementSubTabBar"/>
+							<platform-specific>
+								<html><html-template location="component://delys/webapp/delys/sales/forecast/viewTargetSalesStatementGroup.ftl"/></html>
+							</platform-specific>
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+           	</widgets>
+		</section>
+	</screen>
+	<screen name="ViewSalesStatement">
+		<section>
+			<actions>
+				<set field="titleProperty" value="DAViewSalesStatement"/>
+                <set field="selectedMenuItem" value="statementAndForecast"/>
+                <set field="selectedSubMenuItem" value="salesStatementReportList"/>
+                <entity-one value-field="salesStatementSelected" entity-name="SalesStatementHeader">
+                	<field-map field-name="salesId" from-field="parameters.salesId"/>
+                </entity-one>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not><if-empty field="salesStatementSelected"/></not>
+					</condition>
+					<actions>
+						<set field="navMenuName" value="SalesStatementSubTabBar"/>
+						<set field="titleHeaderValue" value="salesStatementTitle" global="true"/>
+						<set field="titleHeaderLocation" value="component://delys/widget/sales/SalesScreens.xml" global="true"/>
+						<entity-condition list="salesStatementItems" entity-name="SalesStatementItem">
+		                	<condition-expr field-name="salesId" from-field="parameters.salesId"/>
+		                </entity-condition>
+					</actions>
+					<widgets>
+						<section>
+							<condition><if-compare operator="equals" value="SALES_IN" field="salesStatementSelected.salesTypeId"/></condition>
+							<actions><set field="selectedSubMenuItem" value="salesInList"/></actions>
+							<widgets></widgets>
+							<fail-widgets>
+								<section>
+									<condition><if-compare operator="equals" value="SALES_OUT" field="salesStatementSelected.salesTypeId"/></condition>
+									<actions><set field="selectedSubMenuItem" value="salesOutList"/></actions>
+									<widgets></widgets>
+								</section>
+							</fail-widgets>
+						</section>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+            				<decorator-section name="body">
+								<screenlet title="${uiLabelMap.DAViewSalesStatement}" navigation-menu-name="SalesSatementSubTabBar">
+									<include-menu location="component://delys/widget/sales/SalesMenus.xml" name="SalesSatementSubTabBar"/>
+									<platform-specific>
+										<html><html-template location="component://delys/webapp/delys/sales/policy/salesStatementOverview.ftl"/></html>
+									</platform-specific>
+								</screenlet>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+            				<decorator-section name="body">
+								<container style="alert alert-info">
+			           				<label text="${uiLabelMap.DAIdNoDataSourceFound}."/>
+			           			</container>
+			           		</decorator-section>
+			           	</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="SalesCommissionMain">
+		<section>
+			<actions>
+                <set field="titleProperty" value="DAEditSalesStatement"/>
+                <set field="selectedMenuItem" value="statementAndPolicy" />
+                <set field="selectedSubMenuItem" value="salesCommissionData" />
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <set field="navMenuName" value="SalesStatementSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/sales/SalesMenus.xml" />
+    		</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+    				<decorator-section name="body">
+    					<decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="search-options">
+                            	<platform-specific>
+	                            	<html>
+	                            		<html-template location="component://delys/webapp/delys/sales/includes/loadFromElementJs.ftl"/>
+	                            	</html>
+	                            </platform-specific>
+                                <include-form name="SalesCommissionRun" location="component://delys/widget/sales/SalesForms.xml"/>
+                            </decorator-section>
+                            <decorator-section name="search-results">
+                                <include-form name="SalesCommissionDataList" location="component://delys/widget/sales/SalesForms.xml"/>
+                            </decorator-section>
+                        </decorator-screen>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<!-- TODO: deleted -->
+	<screen name="FindSalesForecastByYear">
+        <section>
+            <actions>
+            	<!-- <set field="selectedMenuItem" value="statementAndPolicy"/>
+            	<set field="selectedSubMenuItem" value="salesForecastListAdvance" /> -->
+            	<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/nav_salesForecastView.groovy"/>
+                <set field="titleProperty" value="PageTitleFindSalesForecast"/>
+                <set field="headerItem" value="Forecast"/>
+				<!-- <set field="selectedSubMenuItem" value="salesForecastList" />
+				<set field="navMenuName" value="SearchSalesForecastSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/sales/SalesMenus.xml" /> -->
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/GetListCustomTimePeriodByForecast.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonSalesForecastDecorator">
+                    <decorator-section name="body">
+                        <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="search-options">
+                                <include-form name="FindChooseCustomTimePeriod" location="component://delys/widget/sales/SalesForms.xml"/>
+                            </decorator-section>
+                            <decorator-section name="search-results">
+                                <include-form name="FindCustomTimePeriodInForecast" location="component://delys/widget/sales/SalesForms.xml"/>
+                            </decorator-section>
+                        </decorator-screen>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="ViewSalesForecastByYear">
+        <section>
+            <actions>
+            	<!-- <set field="selectedMenuItem" value="statementAndPolicy"/>
+            	<set field="selectedSubMenuItem" value="salesForecastListAdvance" /> -->
+            	<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/nav_salesForecastView.groovy"/>
+                <set field="titleProperty" value="PageTitleEditSalesForecast"/>
+                <set field="tabButtonItem" value="EditSalesForecast"/>
+                <set field="salesForecastId" from-field="parameters.salesForecastId"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/GetListSalesForecastByYear.groovy"/>
+                <set field="layoutSettings.styleSheets[]" value="/delys/images/css/sales/custom-actors.css" global="true"/>
+                <set field="layoutSettings.styleSheets[]" value="/delys/images/css/sales/salesforecast.css" global="true"/>
+                <!--custom actors styles-->
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonSalesForecastDecorator">
+                    <decorator-section name="body">
+                    	<section>
+                    		<widgets>
+                    			<platform-specific>
+	                            	<html><html-template location="component://delys/webapp/delys/sales/forecast/viewSalesForecastByYear.ftl"/></html>
+	                            </platform-specific>
+                    		</widgets>
+                    	</section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="InitForecastAdvance">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="statementAndForecast"/>
+            	<set field="selectedSubMenuItem" value="createForecastAdvance" />
+                <set field="titleProperty" value="PageTitleEditSalesForecast"/>
+                <set field="tabButtonItem" value="EditSalesForecast"/>
+                <set field="salesForecastId" from-field="parameters.salesForecastId"/>
+                
+                <entity-condition entity-name="CustomTimePeriod" list="listCustomTimePeriod">
+	    			<condition-expr field-name="periodTypeId" value="SALES_YEAR"/>
+	    		</entity-condition>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonSalesForecastDecorator">
+                    <decorator-section name="body">
+                    	<section>
+                    		<widgets>
+                    			<platform-specific>
+	                            	<html><html-template location="component://delys/webapp/delys/sales/forecast/initForecastAdvance.ftl"/></html>
+	                            </platform-specific>
+                    		</widgets>
+                    	</section>
+                    </decorator-section>
+                </decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="CreateForecastAdvance">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="statementAndForecast"/>
+            	<set field="selectedSubMenuItem" value="createForecastAdvance" />
+                <set field="titleProperty" value="PageTitleEditSalesForecast"/>
+                <set field="tabButtonItem" value="EditSalesForecast"/>
+                <set field="salesForecastId" from-field="parameters.salesForecastId"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/GetListSalesForecastByYearAdvance.groovy"/>
+                <set field="layoutSettings.styleSheets[]" value="/delys/images/css/sales/custom-actors.css" global="true"/>
+                <set field="layoutSettings.styleSheets[]" value="/delys/images/css/sales/salesforecast.css" global="true"/>
+                <!--custom actors styles-->
+                <entity-condition list="currencies" entity-name="Uom" use-cache="true"></entity-condition>
+                <entity-condition list="customTimePeriods" entity-name="CustomTimePeriod">
+                	<condition-expr field-name="periodTypeId" value="SALES_YEAR"/>
+                </entity-condition>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonSalesForecastDecorator">
+                    <decorator-section name="body">
+                    	<section>
+                    		<widgets>
+                    			<platform-specific>
+	                            	<html><html-template location="component://delys/webapp/delys/sales/forecast/createForecastAdvance.ftl"/></html>
+	                            </platform-specific>
+                    		</widgets>
+                    	</section>
+                    </decorator-section>
+                </decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+    <screen name="ListReturnProductRequirement">
+    	<section>
+			<actions>
+				<set field="selectedMenuItem" value="returnProduct"/>
+            	<set field="selectedSubMenuItem" value="returnFromMarket" />
+                <set field="titleProperty" value="DASynthesisRequirementReturnFromMarket"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<section>
+                    		<condition>
+                    			<if-has-permission permission="RETURNREQ_ROLE" action="_VIEW"/>
+                    		</condition>
+                    		<widgets>
+                    			<platform-specific>
+	                            	<html><html-template location="component://delys/webapp/delys/sales/requirement/listReturnProductReqJQ.ftl"/></html>
+	                            </platform-specific>
+                    		</widgets>
+                    		<fail-widgets>
+                    			<container style="alert alert-info">
+                    				<label text="${uiLabelMap.DAYouHavenotViewPermission}"/>
+                    			</container>
+                    		</fail-widgets>
+                    	</section>
+                    </decorator-section>
+                </decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    <screen name="viewReturnRequirementTitle">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://delys/webapp/delys/sales/title/viewReturnRequirementTitle.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+    <screen name="UpdateReturnProductRequirement">
+    	<section>
+			<actions>
+				<set field="selectedMenuItem" value="returnProduct"/>
+            	<set field="selectedSubMenuItem" value="returnFromMarket" />
+                <set field="titleProperty" value="DASynthesisRequirementReturnFromMarket"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/checkRolePermissionPerson.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<section>
+                    		<widgets>
+                    			<platform-specific>
+	                            	<html><html-template location="component://delys/webapp/delys/sales/requirement/updateReturnProductReqJQ.ftl"/></html>
+	                            </platform-specific>
+                    		</widgets>
+                    	</section>
+                    </decorator-section>
+                </decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    <screen name="viewReturnOrderTitle">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://delys/webapp/delys/sales/title/viewReturnOrderTitle.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+    <screen name="ViewReturnOrderGeneral">
+    	<section>
+    		<actions>
+				<set field="selectedMenuItem" value="returnProduct"/>
+            	<set field="selectedSubMenuItem" value="listReturnOrder" />
+                <set field="titleProperty" value="DAViewRequirementReturnFromMarket"/>
+                <entity-one value-field="returnHeader" entity-name="ReturnHeader">
+                	<field-map field-name="returnId" from-field="parameters.returnId"/>
+                </entity-one>
+			</actions>
+			<widgets>
+            	<section>
+               		<condition>
+                		<not><if-empty field="returnHeader"/></not>
+             		</condition>
+                	<actions>
+                   		<set field="titleHeaderValue" value="viewReturnOrderTitle" global="true"/>
+						<set field="titleHeaderLocation" value="component://delys/widget/sales/SalesScreens.xml" global="true"/>
+						<set field="companyId" value="${groovy: org.ofbiz.entity.util.EntityUtilProperties.getPropertyValue('general.properties', 'ORGANIZATION_PARTY', delegator)}"/>
+                  	</actions>
+                 	<widgets>
+                 		<section>
+                 			<condition>
+				    			<and>
+				    				<not><if-empty field="returnHeader"/></not>
+				    				<not><if-empty field="companyId"/></not>
+				   					<if-compare field="returnHeader.toPartyId" operator="equals" value="${companyId}"/>
+				    			</and>
+				    		</condition>
+				    		<actions>
+				    			<set field="selectedMenuItem" value="returnProductTC"/>
+            					<set field="selectedSubMenuItem" value="listReturnOrderCom" />
+				    		</actions>
+				    		<widgets></widgets>
+                 		</section>
+                   		<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                  	 		<decorator-section name="body">
+                  	 			<screenlet title="${uiLabelMap.DAViewReturnOrder}: ${returnHeader.returnId}" navigation-menu-name="ViewReturnOrderSubTabBar">
+									<include-menu name="ViewReturnOrderSubTabBar" location="component://delys/widget/sales/SalesMenus.xml" />
+									<platform-specific>
+			                 			<html><html-template location="component://delys/webapp/delys/sales/return/viewReturnOrderGeneralJQ.ftl"/></html>
+			               			</platform-specific>
+								</screenlet>
+		           			</decorator-section>
+            			</decorator-screen>
+                 	</widgets>
+                   	<fail-widgets>
+                   		<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                  	 		<decorator-section name="body">
+		                   		<container style="alert alert-info">
+		                   			<label text="${uiLabelMap.DAThisReturnOrderNotAvaiable}"/>
+		                   		</container>
+		                   	</decorator-section>
+            			</decorator-screen>
+                	</fail-widgets>
+              	</section>
+			</widgets>
+    	</section>
+    </screen>
+    <screen name="ListReturnOrder">
+    	<section>
+			<actions>
+				<set field="selectedMenuItem" value="returnProduct"/>
+            	<set field="selectedSubMenuItem" value="listReturnOrder" />
+                <set field="titleProperty" value="DAAbbListReturnOrder"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<section>
+                    		<!-- <condition>
+                    			<if-has-permission permission="RETURNREQ_ROLE" action="_VIEW"/>
+                    		</condition> -->
+                    		<widgets>
+                    			<platform-specific>
+	                            	<html><html-template location="component://delys/webapp/delys/sales/return/listReturnOrderJQ.ftl"/></html>
+	                            </platform-specific>
+                    		</widgets>
+                    		<!-- <fail-widgets>
+                    			<container style="alert alert-info">
+                    				<label text="${uiLabelMap.DAYouHavenotViewPermission}"/>
+                    			</container>
+                    		</fail-widgets> -->
+                    	</section>
+                    </decorator-section>
+                </decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    <screen name="ReceiveReturnAjax">
+        <section>
+            <actions>
+            	<property-map resource="DelysAdminUiLabels" map-name="uiLabelMap" global="true"/>
+            	<property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+            	<property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="ProductReceiveReturn"/>
+                <set field="headerItem" value="facility"/>
+                <set field="tabButtonItem" value="ReceiveReturn"/>
+                <!-- <entity-condition list="listFacilityManager" entity-name="FacilityParty" filter-by-date="true">
+                	<condition-list>
+                		<condition-expr field-name="partyId" from-field="userLogin.partyId"/>
+                		<condition-expr field-name="roleTypeId" value="MANAGER"/>
+                	</condition-list>
+                </entity-condition> -->
+                <set field="companyId" value="${groovy: org.ofbiz.entity.util.EntityUtilProperties.getPropertyValue('general.properties', 'ORGANIZATION_PARTY', delegator)}"/>
+                <!-- <entity-condition list="listFacilityManager" entity-name="FacilityParty" filter-by-date="true" distinct="true">
+                	<condition-list>
+                		<condition-expr field-name="partyId" from-field="companyId"/>
+                		<condition-expr field-name="roleTypeId" value="OWNER"/>
+                	</condition-list>
+                	<select-field field-name="facilityId"/>
+                </entity-condition> -->
+                <entity-condition list="listFacilityManager" entity-name="Facility" distinct="true">
+                	<condition-list>
+                		<condition-expr field-name="ownerPartyId" from-field="companyId"/>
+                	</condition-list>
+                	<select-field field-name="facilityId"/>
+                </entity-condition>
+                <entity-one value-field="returnHeader" entity-name="ReturnHeader">
+                	<field-map field-name="returnId" from-field="parameters.returnId"/>
+                </entity-one>
+            </actions>
+            <widgets>
+            	<section>
+            		<condition>
+            			<not><if-empty field="listFacilityManager"/></not>
+            		</condition>
+            		<actions>
+            			<script location="component://product/webapp/facility/WEB-INF/actions/returns/ReceiveReturn.groovy"/>
+            		</actions>
+            		<widgets>
+            			<platform-specific>
+			                <html><html-template location="component://delys/webapp/delys/sales/return/receiveReturn.ftl"/></html>
+			            </platform-specific>
+            		</widgets>
+            		<fail-widgets>
+            			<platform-specific>
+			                <html><html-template location="component://delys/webapp/delys/sales/return/receiveReturn.ftl"/></html>
+			            </platform-specific>
+            		</fail-widgets>
+            	</section>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ReceiveReturnDisAjax">
+        <section>
+            <actions>
+            	<property-map resource="DelysAdminUiLabels" map-name="uiLabelMap" global="true"/>
+            	<property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+            	<property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="ProductReceiveReturn"/>
+                <set field="headerItem" value="facility"/>
+                <set field="tabButtonItem" value="ReceiveReturn"/>
+                <entity-condition list="listFacilityManager" entity-name="FacilityParty" filter-by-date="true">
+                	<condition-list>
+                		<condition-expr field-name="partyId" from-field="userLogin.partyId"/>
+                		<condition-expr field-name="roleTypeId" value="MANAGER"/>
+                	</condition-list>
+                </entity-condition>
+                <entity-one value-field="returnHeader" entity-name="ReturnHeader">
+                	<field-map field-name="returnId" from-field="parameters.returnId"/>
+                </entity-one>
+            </actions>
+            <widgets>
+            	<section>
+            		<condition>
+            			<not><if-empty field="listFacilityManager"/></not>
+            		</condition>
+            		<actions>
+            			<script location="component://product/webapp/facility/WEB-INF/actions/returns/ReceiveReturn.groovy"/>
+            		</actions>
+            		<widgets>
+            			<platform-specific>
+			                <html><html-template location="component://delys/webapp/delys/sales/return/receiveReturnDis.ftl"/></html>
+			            </platform-specific>
+            		</widgets>
+            		<fail-widgets>
+            			<platform-specific>
+			                <html><html-template location="component://delys/webapp/delys/sales/return/receiveReturnDis.ftl"/></html>
+			            </platform-specific>
+            		</fail-widgets>
+            	</section>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ProposeReturnProductRequirementCompany">
+    	<section>
+			<actions>
+				<set field="selectedMenuItem" value="returnProductTC"/>
+            	<set field="selectedSubMenuItem" value="returnReqToCompany"/>
+                <set field="titleProperty" value="DAListRequirementReturnToCompany"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/checkRolePermissionPerson.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<section>
+                    		<widgets>
+                    			<platform-specific>
+	                            	<html><html-template location="component://delys/webapp/delys/sales/requirement/proposeReturnProductReqComJQ.ftl"/></html>
+	                            </platform-specific>
+                    		</widgets>
+                    	</section>
+                    </decorator-section>
+                </decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    <screen name="ListReturnOrderCom">
+    	<section>
+			<actions>
+				<set field="selectedMenuItem" value="returnProductTC"/>
+            	<set field="selectedSubMenuItem" value="listReturnOrderCom" />
+                <set field="titleProperty" value="DAAbbListReturnOrder"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<section>
+                    		<!-- <condition>
+                    			<if-has-permission permission="RETURNREQ_ROLE" action="_VIEW"/>
+                    		</condition> -->
+                    		<widgets>
+                    			<platform-specific>
+	                            	<html><html-template location="component://delys/webapp/delys/sales/return/listReturnOrderComJQ.ftl"/></html>
+	                            </platform-specific>
+                    		</widgets>
+                    		<!-- <fail-widgets>
+                    			<container style="alert alert-info">
+                    				<label text="${uiLabelMap.DAYouHavenotViewPermission}"/>
+                    			</container>
+                    		</fail-widgets> -->
+                    	</section>
+                    </decorator-section>
+                </decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    <screen name="ListDistributor">
+    	<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="distributorDSA"/>
+    			<set field="selectedSubMenuItem" value="distributorList"/>
+    			<set field="titleProperty" value="DAListDistributor"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<section>
+                    		<condition>
+                    			<if-has-permission permission="PARTYDIST" action="_VIEW"/>
+                    		</condition>
+                    		<widgets>
+                    			<platform-specific>
+	                            	<html><html-template location="component://delys/webapp/delys/sales/party/listDistributorJQ.ftl"/></html>
+	                            </platform-specific>
+                    		</widgets>
+                    		<fail-widgets>
+                    			<container style="alert alert-info">
+                    				<label text="${uiLabelMap.DAYouHavenotViewPermission}"/>
+                    			</container>
+                    		</fail-widgets>
+                    	</section>
+                    </decorator-section>
+                </decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <!-- <screen name="CreatePartyGroupDistributorAjax">
+		<section>
+			<actions>
+				<set field="titleProperty" value="DACreateNewDistributor" />
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://common/webcommon/includes/setDependentDropdownValuesJs.ftl" />
+						<html-template location="component://hrolbius/webapp/hrolbius/ftl/editOrganizationalUnit.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen> -->
+	<screen name="CommonSalesPartyRole">
+		<section>
+            <actions>
+                <set field="selectedMenuItem" value="statementAndForecast" global="true" />
+            </actions>
+            <widgets>
+            	<section>
+            		<actions>
+		            	<set field="tabBarName" value="SalesPartyRoleTabBar" global="true" />
+						<set field="tabBarLocation" value="component://delys/widget/sales/SalesMenus.xml" global="true" />
+						<set field="printTabBar" value="true" />
+			    	</actions>
+			    	<widgets></widgets>
+            	</section>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<decorator-section-include name="body"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+	</screen>
+	<screen name="ListSalesman">
+    	<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="salesmanDSA"/>
+    			<set field="selectedSubMenuItem" value="salesmanList"/>
+    			<set field="titleProperty" value="DAListSalesman"/>
+    			<set field="tabButtonItem" value="listSalesman"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="CommonSalesPartyRole">
+                    <decorator-section name="body">
+                    	<section>
+                    		<condition>
+                    			<or>
+                    				<if-has-permission permission="PARTYSALESMAN" action="_VIEW"/>
+                    				<if-has-permission permission="PARTYSALESMAN_ROLE" action="_VIEW"/>
+                    			</or>
+                    		</condition>
+                    		<widgets>
+                    			<platform-specific>
+	                            	<html><html-template location="component://delys/webapp/delys/sales/party/listSalesmanJQ.ftl"/></html>
+	                            </platform-specific>
+                    		</widgets>
+                    		<fail-widgets>
+                    			<container style="alert alert-info">
+                    				<label text="${uiLabelMap.DAYouHavenotViewPermission}"/>
+                    			</container>
+                    		</fail-widgets>
+                    	</section>
+                    </decorator-section>
+                </decorator-screen>
+    		</widgets>
+    	</section>
+	</screen>
+	<screen name="SalesmanDetails">
+		<section>
+			<actions>
+    			<set field="titleProperty" value="DASalesmanDetails"/>
+    			<set field="tabButtonItem" value="salesmanDetails"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="CommonSalesPartyRole">
+                    <decorator-section name="body">
+                    	<section>
+                    		<widgets>
+                    			<platform-specific>
+	                            	<html><html-template location="component://delys/webapp/delys/sales/party/salesmanDetailsJQ.ftl"/></html>
+	                            </platform-specific>
+                    		</widgets>
+                    		<fail-widgets>
+                    			<container style="alert alert-info">
+                    				<label text="${uiLabelMap.DAYouHavenotViewPermission}"/>
+                    			</container>
+                    		</fail-widgets>
+                    	</section>
+                    </decorator-section>
+                </decorator-screen>
+    		</widgets>
+		</section>
+	</screen>
+	<screen name="ListEmployee">
+		<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="salesmanDSA"/>
+    			<set field="selectedSubMenuItem" value="listEmployeeDSA"/>
+    			<set field="titleProperty" value="DAListEmployee"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<section>
+                    		<!-- <condition>
+                    			<or>
+                    				<if-has-permission permission="PARTYSALESMAN" action="_VIEW"/>
+                    				<if-has-permission permission="PARTYSALESMAN_ROLE" action="_VIEW"/>
+                    			</or>
+                    		</condition> -->
+                    		<widgets>
+                    			<platform-specific>
+	                            	<html><html-template location="component://delys/webapp/delys/sales/party/listEmployeeJQ.ftl"/></html>
+	                            </platform-specific>
+                    		</widgets>
+                    		<!-- <fail-widgets>
+                    			<container style="alert alert-info">
+                    				<label text="${uiLabelMap.DAYouHavenotViewPermission}"/>
+                    			</container>
+                    		</fail-widgets> -->
+                    	</section>
+                    </decorator-section>
+                </decorator-screen>
+    		</widgets>
+    	</section>
+	</screen>
+	<screen name="JQListSupervisors">
+		<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="Supervisors"/>
+    			<set field="selectedSubMenuItem" value="listSupervisors"/>
+    			<set field="titleProperty" value="DAListSups"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<section>
+                    		<!-- <condition>
+                    			<or>
+                    				<if-has-permission permission="PARTYSALESMAN" action="_VIEW"/>
+                    				<if-has-permission permission="PARTYSALESMAN_ROLE" action="_VIEW"/>
+                    			</or>
+                    		</condition> -->
+                    		<widgets>
+                    			<platform-specific>
+	                            	<html><html-template location="component://delys/webapp/delys/sales/party/listSupervisorJQ.ftl"/></html>
+	                            </platform-specific>
+                    		</widgets>
+                    		<!-- <fail-widgets>
+                    			<container style="alert alert-info">
+                    				<label text="${uiLabelMap.DAYouHavenotViewPermission}"/>
+                    			</container>
+                    		</fail-widgets> -->
+                    	</section>
+                    </decorator-section>
+                </decorator-screen>
+    		</widgets>
+    	</section>
+	</screen>
+	<screen name="CommonSalesGrowthDecorator">
+        <section>
+            <actions>
+                <set field="selectedMenuItem" value="adminReport" global="true" />
+            </actions>
+            <widgets>
+            	<section>
+            		<actions>
+		            	<set field="tabBarName" value="SalesGrowthTabBar" global="true" />
+						<set field="tabBarLocation" value="component://delys/widget/sales/SalesMenus.xml" global="true" />
+						<set field="printTabBar" value="true" />
+			    	</actions>
+			    	<widgets></widgets>
+            	</section>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<decorator-section-include name="body"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+	
+	<screen name="ReportSalesGrowth">
+        <section>
+            <actions>
+    			<set field="tabButtonItem" value="ReportSalesGrowthOfProduct" />
+                <set field="titleProperty" value="PageTitleFindSalesForecast"/>
+                <set field="headerItem" value="Forecast"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonSalesGrowthDecorator">
+                    <decorator-section name="body">
+                      	<include-screen name="CommonReportSalesGrowth" location="component://bi-x/widget/ReportStatics/CommonSalesOrerItemStaticsScreens.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="ReportSalesGrowthOfDistributor">
+        <section>
+            <actions>
+    			<set field="tabButtonItem" value="ReportSalesOfDistributor" />
+                <set field="titleProperty" value="PageTitleFindSalesForecast"/>
+                <set field="headerItem" value="Forecast"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonSalesGrowthDecorator">
+                    <decorator-section name="body">
+                      	<include-screen name="CommonReportSalesGrowthOfDistributor" location="component://bi-x/widget/ReportStatics/CommonSalesOrerItemStaticsScreens.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="ViewInfoContactMechDetailAjax">
+    	<section>
+    		<actions>
+    			<property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+    			<property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
+    			<property-map resource="DelysAdminErrorUiLabels" map-name="uiLabelMap" global="true"/>
+    			<property-map resource="DelysAdminUiLabels" map-name="uiLabelMap" global="true"/>
+    			<script location="component://party/webapp/partymgr/WEB-INF/actions/party/EditContactMech.groovy"/>
+
+                <!-- <set field="dependentForm" value="editcontactmechformUpdate"/>
+                <set field="paramKey" value="countryGeoId"/>
+                <set field="mainId" value="countryGeoId"/>
+                <set field="dependentId" value="stateProvinceGeoId"/>
+                <set field="requestName" value="getAssociatedStateList"/>
+                <set field="responseName" value="stateList"/>
+                <set field="dependentKeyName" value="geoId"/>
+                <set field="descName" value="geoName"/>
+                <set field="selectedDependentOption" from-field="mechMap.postalAddress.stateProvinceGeoId" default-value="_none_"/> -->
+                <set field="dependentForm" value="editcontactmechform" />
+				
+				<set field="paramKey" value="countryGeoId" />
+				<set field="paramKey_district" value="provinceGeoId"/>
+				<set field="paramKey_ward" value="districtGeoId"/>
+				
+				<set field="mainId" value="countryGeoId2"/>
+				<set field="stateProvinceGeoId" value="stateProvinceGeoId2"/>
+				<set field="distGeoId" value="districtGeoId2"/>
+				<set field="wardGeoId" value="wardGeoId2"/>
+				
+				<set field="requestName" value="getAssociatedStateList" />
+				<set field="requestName_district" value="getAssociatedDistList"/>
+				<set field="requestName_ward" value="getAssociatedWardList"/>
+				
+				<set field="responseName" value="stateList" />
+				<set field="responseName_district" value="districtList" />
+				<set field="responseName_ward" value="wardList" />
+				
+				<set field="dependentKeyName" value="geoId" />
+				<set field="descName" value="geoName" />
+				<set field="selectedDependentOption" from-field="mechMap.postalAddress.stateProvinceGeoId" default-value="_none_" />
+    		</actions>
+    		<widgets>
+               	<platform-specific>
+                   	<html>
+                    	<!-- <html-template location="component://common/webcommon/includes/setDependentDropdownValuesJs.ftl"/> -->
+                    	<html-template location="component://delys/webapp/delys/sales/includes/setDependentDropdownValuesJs.ftl"/>
+                    	<html-template location="component://delys/webapp/delys/sales/party/editContactMechAjax.ftl"/>
+                	</html>
+               	</platform-specific>
+    		</widgets>
+    	</section>
+    </screen>
+    
+    <screen name="ListCustomerAdmGt">
+        <section>
+            <actions>
+                <set field="selectedMenuItem" value="salessupCustomer"/>
+    			<set field="selectedSubMenuItem" value="salessupCustomerList"/>
+    			<set field="titleProperty" value="DAListCustomer"/>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="DelysAdminUiLabels" map-name="uiLabelMap" global="true"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                               	    <platform-specific>
+                              	        <html>
+		                  					<html-template location="component://delys/webapp/delys/sales/party/listCustomerOfSalesAdmGT.ftl"/>
+		               					</html>
+                               	    </platform-specific>
+                            </widgets>
+                        </section>
+                         	
+                    </decorator-section>
+                </decorator-screen>    
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="ListSalesChannel">
+    	<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="salesChannel"/>
+    			<set field="selectedSubMenuItem" value="salesChannelList"/>
+    			<set field="titleProperty" value="DAListSalesChannel"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<section>
+                    		<condition>
+                    			<if-has-permission permission="PARTYDIST" action="_VIEW"/>
+                    		</condition>
+                    		<widgets>
+                    			<platform-specific>
+	                            	<html><html-template location="component://delys/webapp/delys/sales/party/listSalesChannelJQ.ftl"/></html>
+	                            </platform-specific>
+                    		</widgets>
+                    		<fail-widgets>
+                    			<container style="alert alert-info">
+                    				<label text="${uiLabelMap.DAYouHavenotViewPermission}"/>
+                    			</container>
+                    		</fail-widgets>
+                    	</section>
+                    </decorator-section>
+                </decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    
+    <screen name="ListSalesChannelGroup">
+    	<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="salesChannelGroup"/>
+    			<set field="selectedSubMenuItem" value="salesChannelGroupList"/>
+    			<set field="titleProperty" value="DAListSalesChannelGroup"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<section>
+                    		<condition>
+                    			<if-has-permission permission="PARTYDIST" action="_VIEW"/>
+                    		</condition>
+                    		<widgets>
+                    			<platform-specific>
+	                            	<html><html-template location="component://delys/webapp/delys/sales/party/listSalesChannelGroupJQ.ftl"/></html>
+	                            </platform-specific>
+                    		</widgets>
+                    		<fail-widgets>
+                    			<container style="alert alert-info">
+                    				<label text="${uiLabelMap.DAYouHavenotViewPermission}"/>
+                    			</container>
+                    		</fail-widgets>
+                    	</section>
+                    </decorator-section>
+                </decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+</screens>

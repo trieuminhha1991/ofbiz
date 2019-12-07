@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service-eca xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/service-eca.xsd">
+	<eca service="changeOrderStatus" event="global-commit" run-on-error="false">
+        <condition field-name="statusId" operator="equals" value="ORDER_CANCELLED"/>
+        <condition-field field-name="statusId" operator="not-equals" to-field-name="oldStatusId"/>
+        <condition field-name="changeReason" operator="is-not-empty"/>
+        <action service="createOrderNoteChangeStatus" mode="sync"/>
+        <action service="sendNotiChangeOrderStatus" mode="sync"/>
+    </eca>
+    <eca service="storeOrder" event="return">
+    	<condition operator="equals" field-name="isFavorDelivery" value="Y" type="String"/>
+        <!-- <action service="createRequirementFromSO" mode="sync"/> -->
+        <action service="createOrderNoteRequireFavorDelivery" mode="sync"/>
+        <action service="createNotifyOrderRequiredFavorDelivery" mode="sync"/>
+    </eca>
+    <eca service="storeOrder" event="return">
+    	<condition operator="is-not-empty" field-name="salesExecutiveId"/>
+    	<action service="checkAndAddRelSalesExecutive" mode="sync"/>
+    </eca>
+    <eca service="storeOrder" event="commit">
+    	<condition operator="is-not-empty" field-name="partyId"/>
+    	<action service="checkAndConvertRelCustomer" mode="sync"/>
+    </eca>
+    
+    <!-- store order without accounting transaction -->
+    <!-- remove
+    <action service="balanceOrderItemsWithNegativeReservations" mode="sync"/>
+    <action service="checkCreateDropShipPurchaseOrders" mode="sync" run-as-user="system"/>
+    <action service="setUnitPriceAsLastPrice" mode="sync"/>
+    
+    <action service="createOrderNoteRequireFavorDelivery" mode="sync"/>
+    <action service="createNotifyOrderRequiredFavorDelivery" mode="sync"/>
+    <action service="checkAndAddRelSalesExecutive" mode="sync"/>
+    <action service="checkAndConvertRelCustomer" mode="sync"/>
+     -->
+    <eca service="storeOrderNoAcc" event="return">
+        <action service="resetGrandTotal" mode="sync"/>
+        <action service="addSuggestionsToShoppingList" mode="async" persist="true"/>
+    </eca>
+    <eca service="storeOrderNoAcc" event="return">
+        <action service="setOrderReservationPriority" mode="sync"/>
+    </eca>
+    <!-- end store order no accounting transaction -->
+    
+    <!-- <eca service="checkCreateDropShipPurchaseOrders" event="return" run-on-error="true">
+    	<condition operator="equals" field-name="fromAction" value="storeOrder" type="String"/>
+    	<action service="createNotifyOrderRequiredFavorDelivery" mode="sync"/>
+    </eca> -->
+    
+<!--     <eca service="updateOrderItemsCustom" event="commit"> -->
+<!--         <condition field-name="orderTypeId" operator="equals" value="PURCHASE_ORDER"/> -->
+<!--         <action service="setUnitPriceAsLastPrice" mode="sync"/> -->
+<!--     </eca> -->
+    
+    <!-- edit/add order items -->
+    <eca service="updateOrderItemsCustom" event="commit">
+        <action service="resetGrandTotal" mode="sync"/>
+        <action service="sendOrderChangeNotification" mode="async" persist="true"/>
+    </eca>
+    
+    <!-- order grand total -->
+    <!--
+    TODO: jacopoc: this is disabled for now, because it was causing problems during
+          order checkout under some special circumstances.
+          Now the processOrderPayments service is triggered only when updateOrderItems
+          and appendOrderItem are run (as it was before rev. 540479); this is a temp fix.
+    <eca service="resetGrandTotal" event="return">
+        <action service="processOrderPayments" mode="sync"/>
+    </eca>
+    -->
+    <eca service="updateOrderItemsCustom" event="return">
+        <action service="processOrderPayments" mode="sync"/>
+    </eca>
+    
+    <!-- eca for loyalty point -->
+    <eca service="changeOrderStatus" event="commit">
+    	<condition operator="equals" field-name="orderStatusId" value="ORDER_COMPLETED"/>
+    	<condition operator="equals" field-name="orderTypeId" value="SALES_ORDER"/>
+    	<set field-name="isReturnOrder" value="N"/>
+    	<action mode="sync" service="processLoyaltyPoint"/>
+    </eca>
+    
+    <eca service="quickReturnOrder" event="commit">
+    	<condition operator="is-not-empty" field-name="returnId"/>
+    	<set field-name="isReturnOrder" value="Y"/>
+    	<action mode="sync" service="processLoyaltyPoint"/>
+    </eca>
+    
+    <eca service="changePromoStatus" event="commit">
+    	<action mode="sync" service="sendNotiChangePromoStatus"/>
+    </eca>
+    <eca service="updateProductPromoExtStatus" event="commit">
+    	<action mode="sync" service="sendNotiChangePromoExtStatus"/>
+    </eca>
+    <eca service="createProductPromoCustom" event="commit">
+    	<action mode="sync" service="sendNotiChangePromoStatus"/>
+    </eca>
+    <eca service="createProductPromoExt" event="commit">
+    	<action mode="sync" service="sendNotiChangePromoExtStatus"/>
+    </eca>
+    
+<!--     <eca service="updateOrderItemsSaveToOrder" event="commit"> -->
+<!--         <condition field-name="orderTypeId" operator="equals" value="PURCHASE_ORDER"/> -->
+<!--         <action service="setUnitPriceAsLastPrice" mode="sync"/> -->
+<!--     </eca> -->
+    <eca service="updateOrderItemsSaveToOrder" event="commit">
+        <action service="resetGrandTotal" mode="sync"/>
+        <!-- <action service="sendOrderChangeNotification" mode="async" persist="true"/> TODOCHANGE disable send -->
+    </eca>
+    <eca service="updateOrderItemsSaveToOrder" event="return">
+        <action service="processOrderPayments" mode="sync"/>
+    </eca>
+    
+    <!-- cancel order items -->
+    <eca service="cancelOrderItemLoadToCart" event="commit">
+        <action service="recreateOrderAdjustmentsLoadToCart" mode="sync"/>
+    </eca>
+    <!-- <eca service="cancelOrderItemSaveToCart" event="commit">
+        <action service="processOrderPayments" mode="sync"/>TODOCHANGE change status item promo
+        <action service="resetGrandTotal" mode="sync"/>
+        <action service="sendOrderChangeNotification" mode="async" persist="true"/>
+    </eca> -->
+    
+    <eca service="updateOrderItemsCustom" event="commit" run-on-error="false">
+    	<condition operator="is-not-empty" field-name="orderId"/>
+        <condition field-name="orderTypeId" operator="equals" value="PURCHASE_ORDER"/>
+        <action service="checkAndUpdateSalesOrderWhenPurchOrderModified" mode="sync"/>
+    </eca>
+    <eca service="appendOrderItemCustomPO" event="commit" run-on-error="false">
+    	<condition operator="is-not-empty" field-name="orderId"/>
+        <action service="checkAndUpdateSalesOrderWhenPurchOrderModified" mode="sync"/>
+    </eca>
+    <eca service="cancelOrderItem" event="commit" run-on-error="false">
+    	<condition operator="is-not-empty" field-name="orderId"/>
+        <action service="checkAndUpdateSalesOrderWhenPurchOrderModified" mode="sync"/>
+    </eca>
+    <eca service="checkAndUpdateSalesOrderWhenPurchOrderModified" event="commit" run-on-error="false">
+    	<condition operator="is-not-empty" field-name="salesOrderId"/>
+        <action service="sendNotifySOUpdateAfterPOModified" mode="sync"/>
+    </eca>
+    
+    <eca service="updateOrderItemsNoActions" event="commit">
+        <action service="resetGrandTotal" mode="sync"/>
+        <!-- <action service="sendOrderChangeNotification" mode="async" persist="true"/> -->
+    </eca>
+    <eca service="updateOrderItemsNoActions" event="return">
+        <action service="processOrderPayments" mode="sync"/>
+    </eca>
+    
+    <!-- product quotation -->
+    <eca service="changeQuotationStatus" event="return">
+    	<condition operator="equals" field-name="statusId" value="QUOTATION_ACCEPTED"/>
+    	<set field-name="infoUpdate" value="ProductQuotation"/>
+    	<action service="updateProductSalesPriceLog" mode="sync"/>
+    </eca>
+    <eca service="updateQuotationThruDate" event="return">
+    	<set field-name="infoUpdate" value="ProductQuotation"/>
+    	<action service="updateProductSalesPriceLog" mode="sync"/>
+    </eca>
+    
+    
+</service-eca>

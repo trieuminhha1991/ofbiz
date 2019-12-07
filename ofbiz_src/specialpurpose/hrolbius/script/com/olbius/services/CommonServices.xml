@@ -1,0 +1,2445 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+	<simple-method method-name="getAssociatedDistList">
+		<set field="provinceGeoId" from-field="parameters.provinceGeoId"/>
+		<entity-and list="geoList" entity-name="GeoAssocAndGeoTo">
+			<field-map field-name="geoIdFrom" from-field="provinceGeoId"/>
+			<field-map field-name="geoAssocTypeId" value="REGIONS"/>
+			<field-map field-name="geoTypeId" value="DISTRICT"/>
+		</entity-and>
+		<iterate entry="districtGeo" list="geoList">
+			<set field="districtName" value="${districtGeo.geoName}: ${districtGeo.geoId}"/>
+            <field-to-list list="districtList" field="districtName"/>
+		</iterate>	
+		<if-empty field="districtList">
+            <property-to-field resource="HrCommonUiLabels" property="NoDistrict" field="noOptions"/>
+            <field-to-list list="districtList" field="noOptions"/>
+        </if-empty>
+        <field-to-result field="districtList"/>
+	</simple-method>
+	
+	<simple-method method-name="getAssociatedWardList">
+		<set field="districtGeoId" from-field="parameters.districtGeoId"/>
+		<entity-and list="geoList" entity-name="GeoAssocAndGeoTo">
+			<field-map field-name="geoIdFrom" from-field="districtGeoId"/>
+			<field-map field-name="geoAssocTypeId" value="REGIONS"/>
+			<field-map field-name="geoTypeId" value="WARD"/>
+		</entity-and>
+		<iterate entry="wardGeo" list="geoList">
+			<set field="wardName" value="${wardGeo.geoName}: ${wardGeo.geoId}"/>
+            <field-to-list list="wardList" field="wardName"/>
+		</iterate>	
+		<if-empty field="wardList">
+            <property-to-field resource="HrCommonUiLabels" property="NoWard" field="noOptions"/>
+            <field-to-list list="wardList" field="noOptions"/>
+        </if-empty>
+        <field-to-result field="wardList"/>
+	</simple-method>
+	<simple-method method-name="updateNtfIfExists">
+		<if-not-empty field="parameters.ntfId">
+			<call-service service-name="updateNotification" in-map-name="parameters"></call-service>
+		</if-not-empty>
+	</simple-method>
+	
+
+	<!-- ===============================Training=================================== -->
+	<simple-method method-name="updateApprovalStatus"
+		short-description="Update Approval Status">
+		<entity-one entity-name="EmploymentApp" value-field="lookedUpValue"/>
+		<set-nonpk-fields value-field="lookedUpValue" map="parameters" />
+		<store-value value-field="lookedUpValue" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="updateTrainingStatus"
+		short-description="Update Training Status">
+		<entity-one entity-name="PersonTraining" value-field="lookedUpValue" />
+		<set-nonpk-fields value-field="lookedUpValue" map="parameters" />
+		<store-value value-field="lookedUpValue" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+	
+	<simple-method method-name="updateTrainingClass"
+		short-description="Update Training class">
+		<log message="ABCD: ${parameters}" level="info"/>
+		<entity-one entity-name="TrainingClass" value-field="lookedUpValue" />
+		<set-nonpk-fields value-field="lookedUpValue" map="parameters" />
+		<store-value value-field="lookedUpValue" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="applyTraining"
+		short-description="Apply Training">
+		<make-value entity-name="TrainingRequest" value-field="trainingRequest" />
+		<make-next-seq-id value-field="trainingRequest"
+			seq-field-name="trainingRequestId" />
+		<create-value value-field="trainingRequest" />
+		<make-value entity-name="PersonTraining" value-field="personTraining" />
+		<set-pk-fields map="parameters" value-field="personTraining" />
+		<set-nonpk-fields map="parameters" value-field="personTraining" />
+		<set from-field="trainingRequest.trainingRequestId" field="personTraining.trainingRequestId" />
+		<set field="personTraining.fromDate" from-field="parameters.fromDate" />
+		<set field="personTraining.thruDate" from-field="parameters.thruDate" />
+		<set field="personTraining.trainingClassTypeId" from-field="parameters.workEffortName" />
+		<create-value value-field="personTraining" />
+		<check-errors />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"applySuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+	<simple-method method-name="assignTraining"
+		short-description="Assign Training">
+		<make-value entity-name="TrainingRequest" value-field="trainingRequest" />
+		<make-next-seq-id value-field="trainingRequest"
+			seq-field-name="trainingRequestId" />
+		<create-value value-field="trainingRequest" />
+		<make-value entity-name="PersonTraining" value-field="personTraining" />
+		<set-pk-fields map="parameters" value-field="personTraining" />
+		<set-nonpk-fields map="parameters" value-field="personTraining" />
+		<set from-field="trainingRequest.trainingRequestId" field="personTraining.trainingRequestId" />
+		<set field="personTraining.fromDate" from-field="parameters.fromDate" />
+		<set field="personTraining.thruDate" from-field="parameters.thruDate" />
+		<create-value value-field="personTraining" />
+		<check-errors />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"assignSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="createTrainingTypes"
+		short-description="Create Training Types">
+		<make-value entity-name="TrainingClassType" value-field="newEntity" />
+		<set-pk-fields value-field="newEntity" map="parameters" />
+		<set-nonpk-fields map="parameters" value-field="newEntity" />
+		<create-value value-field="newEntity" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"createSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="updateTrainingTypes"
+		short-description="Update Training Types">
+		<entity-one entity-name="TrainingClassType" value-field="lookedUpValue" />
+		<set-nonpk-fields value-field="lookedUpValue" map="parameters" />
+		<store-value value-field="lookedUpValue" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="deleteTrainingTypes"
+		short-description="Delete Training Types">
+		<entity-one entity-name="TrainingClassType" value-field="lookedUpValue" />
+		<remove-value value-field="lookedUpValue" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"removeSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<!-- ===============================End of training============================ -->
+	<!-- ===============================PerfReview================================= -->
+
+	<simple-method method-name="createPerfReview"
+		short-description="Create a Performance Review">
+		<make-value entity-name="PerfReview" value-field="newEntity" />
+		<set-pk-fields map="parameters" value-field="newEntity" />
+		<set-nonpk-fields map="parameters" value-field="newEntity" />
+		<sequenced-id sequence-name="PerfReview" field="newEntity.perfReviewId" />
+		<create-value value-field="newEntity" />
+		<field-to-result field="newEntity.perfReviewId"
+			result-name="perfReviewId" />
+		<field-to-result field="newEntity.employeePartyId"
+			result-name="employeePartyId" />
+		<field-to-result field="newEntity.employeeRoleTypeId"
+			result-name="employeeRoleTypeId" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"createSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="updatePerfReview"
+		short-description="Update Performance Review">
+		<entity-one entity-name="PerfReview" value-field="lookedUpValue" />
+		<set-nonpk-fields value-field="lookedUpValue" map="parameters" />
+		<store-value value-field="lookedUpValue" />
+		<field-to-result field="lookedUpValue.perfReviewId"
+			result-name="perfReviewId" />
+		<field-to-result field="lookedUpValue.employeePartyId"
+			result-name="employeePartyId" />
+		<field-to-result field="lookedUpValue.employeeRoleTypeId"
+			result-name="employeeRoleTypeId" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="deletePerfReview"
+		short-description="Delete Performance Review">
+		<entity-one entity-name="PerfReview" value-field="lookedUpValue" />
+		<remove-value value-field="lookedUpValue" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"removeSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="createPerfReviewItem"
+		short-description="Create Performance Review Items">
+		<make-value entity-name="PerfReviewItem" value-field="newEntity" />
+		<set-pk-fields map="parameters" value-field="newEntity" />
+		<set-nonpk-fields map="parameters" value-field="newEntity" />
+		<make-next-seq-id value-field="newEntity"
+			seq-field-name="perfReviewItemSeqId" />
+		<field-to-result field="perfReviewItemSeqId"
+			result-name="perfReviewItemSeqId" />
+		<create-value value-field="newEntity" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"createSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="updatePerfReviewItem"
+		short-description="Update Performance Review Items">
+		<entity-one entity-name="PerfReviewItem" value-field="lookedUpValue" />
+		<set-nonpk-fields value-field="lookedUpValue" map="parameters" />
+		<store-value value-field="lookedUpValue" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="deletePerfReviewItem"
+		short-description="Delete Performance Review Items">
+		<entity-one entity-name="PerfReviewItem" value-field="lookedUpValue" />
+		<remove-value value-field="lookedUpValue" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"removeSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="createPerformanceNote"
+		short-description="Create Performance Note">
+		<make-value entity-name="PerformanceNote" value-field="newEntity" />
+		<set-pk-fields value-field="newEntity" map="parameters" />
+		<set-nonpk-fields map="parameters" value-field="newEntity" />
+		<if-empty field="newEntity.fromDate">
+			<now-timestamp field="nowTimeStamp" />
+			<set field="newEntity.fromDate" from-field="nowTimeStamp" />
+		</if-empty>
+		<create-value value-field="newEntity" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"createSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="deleteJobRating"
+		short-description="Delete Job Rating">
+		<entity-one entity-name="ListJobRating" value-field="lookedUpValue" />
+		<remove-value value-field="lookedUpValue" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"removeSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+	
+	<simple-method method-name="deleteKPI"
+		short-description="Delete KPI">
+		<entity-one entity-name="PerfReviewKPI" value-field="lookedUpValue" />
+		<remove-value value-field="lookedUpValue" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"removeSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="checkKPI"
+		short-description="Update Performance Review Items">
+		<entity-one entity-name="PerfReviewKPI" value-field="lookedUpValue" />
+		<set-nonpk-fields value-field="lookedUpValue" map="parameters" />
+		<store-value value-field="lookedUpValue" />
+		<set field="map.ntfId" value="${parameters.ntfId}" />
+		<call-service service-name="updateNotification"
+			in-map-name="map"></call-service>
+
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"approveSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<!-- ===============================End of PerfReview========================== -->
+	<!-- ===============================Job Request Service======================== -->
+	<simple-method method-name="createPartySkill"
+		short-description="Create Party Skills">
+		<make-value entity-name="PartySkill" value-field="newEntity" />
+		<set-pk-fields map="parameters" value-field="newEntity" />
+		<set-nonpk-fields map="parameters" value-field="newEntity" />
+		<entity-one entity-name="PartySkill" value-field="partySkill"
+			auto-field-map="true" />
+		<if>
+			<condition>
+				<and>
+					<if-compare-field field="partySkill.partyId"
+						to-field="parameters.partyId" operator="equals" />
+					<if-compare-field field="partySkill.skillTypeId"
+						to-field="parameters.skillTypeId" operator="equals" />
+				</and>
+			</condition>
+			<then>
+				<add-error>
+					<fail-property resource="hrolbiusUiLabels"
+						property="HROlbiusPartySkillsAlreadyExists" />
+				</add-error>
+				<check-errors />
+			</then>
+			<else>
+				<create-value value-field="newEntity" />
+			</else>
+		</if>
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"createSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="updatePartySkill"
+		short-description="Update Party Skills">
+		<entity-one entity-name="PartySkill" value-field="lookedUpValue" />
+		<set-nonpk-fields value-field="lookedUpValue" map="parameters" />
+		<store-value value-field="lookedUpValue" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="deletePartySkill"
+		short-description="Delete a Skill of Party">
+		<entity-one entity-name="PartySkill" value-field="lookedUpValue" />
+		<remove-value value-field="lookedUpValue" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"removeSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="createPartyQual"
+		short-description="Create a Party Qualification">
+		<make-value entity-name="PartyQual" value-field="newEntity" />
+		<set-pk-fields map="parameters" value-field="newEntity" />
+		<if-empty field="newEntity.fromDate">
+			<now-timestamp field="nowTimeStamp" />
+			<set field="newEntity.fromDate" from-field="nowTimeStamp" />
+		</if-empty>
+		<set-nonpk-fields map="parameters" value-field="newEntity" />
+		<field-to-result field="newEntity.partyId"
+			result-name="partyId" />
+		<field-to-result field="newEntity.partyQualTypeId"
+			result-name="partyQualTypeId" />
+		<field-to-result field="newEntity.fromDate"
+			result-name="fromDate" />
+		<create-value value-field="newEntity" />
+
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"createSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="updatePartyQual"
+		short-description="Update Qualification of a Party">
+		<entity-one entity-name="PartyQual" value-field="lookedUpValue" />
+		<set-nonpk-fields value-field="lookedUpValue" map="parameters" />
+		<store-value value-field="lookedUpValue" />
+
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="deletePartyQual"
+		short-description="Delete Qualification of a Party">
+		<entity-one entity-name="PartyQual" value-field="lookedUpValue" />
+		<remove-value value-field="lookedUpValue" />
+
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"removeSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="createPartyResume"
+		short-description="Create Resume for Party">
+		<make-value entity-name="PartyResume" value-field="newEntity" />
+		<set-nonpk-fields map="parameters" value-field="newEntity" />
+		<sequenced-id sequence-name="PartyResume" field="newEntity.resumeId" />
+		<field-to-result field="resumeId" result-name="newEntity.resumeId" />
+		<create-value value-field="newEntity" />
+
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"createSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="updatePartyResume"
+		short-description="Update a Resume of a Party">
+		<entity-one entity-name="PartyResume" value-field="lookedUpValue" />
+		<set-nonpk-fields value-field="lookedUpValue" map="parameters" />
+		<store-value value-field="lookedUpValue" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="deletePartyResume"
+		short-description="Delete a Resume of a Party">
+		<entity-one entity-name="PartyResume" value-field="lookedUpValue" />
+		<remove-value value-field="lookedUpValue" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"removeSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<!-- <simple-method method-name="createEmplLeave"
+		short-description="Create Employee Leave">
+		<make-value entity-name="EmplLeave" value-field="newEntity" />
+		<set-pk-fields value-field="newEntity" map="parameters" />
+		<set-nonpk-fields value-field="newEntity" map="parameters" />
+		<now-timestamp field="nowTimestamp"/>
+		<set field="newEntity.dateApplication" from-field="nowTimestamp"/>
+		Need to check 2 days
+		<set field="partyId" from-field="newEntity.partyId" />
+		<set field="fromDate" from-field="parameters.fromDate" />
+		<set field="thruDate" from-field="parameters.thruDate" />
+		<if-compare-field to-field="thruDate" operator="greater" field="fromDate" type="java.sql.Timestamp">
+			<add-error>
+				<fail-property resource="EmployeeUiLabels" property="EmplLeaveTimeInvalid"/>
+			</add-error>
+			<check-errors/>
+		</if-compare-field>
+		
+		<call-class-method method-name="getIntervalInDays"
+			class-name="org.ofbiz.base.util.UtilDateTime" ret-field="dayLeave">
+			<field field="fromDate" type="java.sql.Timestamp" />
+			<field field="thruDate" type="java.sql.Timestamp" />
+		</call-class-method>
+		<if-compare operator="less" value="2" field="dayLeave" type="Integer">
+			<set field="departmentId" from-field="department.partyIdFrom" />
+			<call-class-method method-name="getManagerOfEmpl"
+				class-name="com.olbius.util.PartyUtil" ret-field="managerId">
+				<field field="delegator" type="org.ofbiz.entity.Delegator" />
+				<field field="partyId" type="String" />
+			</call-class-method>
+			<set field="newEntity.approverPartyId" from-field="managerId" />
+			<else>
+				<call-class-method method-name="getCEO"
+					class-name="com.olbius.util.PartyUtil" ret-field="partyCeoId">
+					<field field="delegator" type="org.ofbiz.entity.Delegator" />
+				</call-class-method>
+				<set field="newEntity.approverPartyId" from-field="partyCeoId" />
+			</else>
+		</if-compare>
+		<create-value value-field="newEntity" />
+		<check-errors />
+		<call-class-method method-name="getPartyName"
+			class-name="org.ofbiz.party.party.PartyHelper" ret-field="partyName">
+			<field field="delegator" type="org.ofbiz.entity.Delegator" />
+			<field field="partyId" type="String" />
+			<field field="false" type="boolean" />
+		</call-class-method>
+		notify to approver
+		<if-not-empty field="parameters.userLogin">
+			<set field="partyId" from-field="newEntity.partyId" />
+			<set field="fromDate" from-field="newEntity.fromDate" />
+			<set field="leaveTypeId" from-field="newEntity.leaveTypeId" />
+			<set field="createNotificationCtx.partyId" from-field="newEntity.approverPartyId" />
+			<set field="createNotificationCtx.header" value="${partyName} xin nghỉ phép" />
+			<set field="createNotificationCtx.state" value="open" />
+			<set field="createNotificationCtx.action" value="LeaveApproval" />
+			<set field="createNotificationCtx.targetLink"
+				value="partyId=${partyId};leaveTypeId=${leaveTypeId};fromDate=${fromDate}" />
+			<now field="createNotificationCtx.dateTime" type="java.sql.Timestamp" />
+			<call-service service-name="createNotification"
+				in-map-name="createNotificationCtx" />
+		</if-not-empty>
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resource = "EmployeeUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resource,
+			"createEmplLeaveSuccessfully", locale));
+		</call-bsh>
+	</simple-method> -->
+
+	<!-- <simple-method method-name="updateApproval"
+		short-description="Update Employee Leave Approval">
+		<set field="pId" from-field="parameters.partyId" />
+		<entity-one entity-name="EmplLeave" value-field="lookedUpValue" />
+		<set-nonpk-fields value-field="lookedUpValue" map="parameters" />
+		<set field="approverPartyId" from-field="lookedUpValue.approverPartyId" />
+		<set field="currPartyId" from-field="userLogin.partyId" />
+		
+		<if-compare-field to-field="approverPartyId"
+			operator="equals" field="currPartyId">
+			<store-value value-field="lookedUpValue" />
+			<call-bsh>
+				import org.ofbiz.base.util.UtilProperties;
+				import
+				org.ofbiz.service.ServiceUtil;
+				import org.ofbiz.base.util.UtilMisc;
+				resource = "EmployeeUiLabels";
+				ServiceUtil.returnSuccess(UtilProperties.getMessage(resource,
+				"processEmplLeave", UtilMisc.toMap("partyId", pId), locale));
+			</call-bsh>
+			<else>
+				<call-bsh>
+					import org.ofbiz.base.util.UtilProperties;
+					import org.ofbiz.service.ServiceUtil;
+					resourceError = "EmployeeUiLabels";
+					ServiceUtil.returnError(UtilProperties.getMessage(resourceError,
+					"userLoginNotAllowedUpdateLeaveStatus", locale));
+				</call-bsh>
+			</else>
+		</if-compare-field>
+	</simple-method> -->
+
+	<simple-method method-name="updateEmplLeave"
+		short-description="Update Employee Leave">
+		<entity-one entity-name="EmplLeave" value-field="lookedUpValue" />
+		<set-nonpk-fields value-field="lookedUpValue" map="parameters" />
+		<store-value value-field="lookedUpValue" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="deleteEmplLeave"
+		short-description="Delete Employee Leave">
+		<entity-one entity-name="EmplLeave" value-field="emplLeave" />
+		<remove-value value-field="emplLeave" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"removeSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="updateEmplLeaveStatus"
+		short-description="Update Leave Approval Status">
+		<entity-one entity-name="EmplLeave" value-field="lookedUpValue" />
+		<set-nonpk-fields value-field="lookedUpValue" map="parameters" />
+		<store-value value-field="lookedUpValue" />
+
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="createEmplLeaveType"
+		short-description="Create a LeaveType">
+		<entity-one value-field="emplLeaveType" entity-name="EmplLeaveType"></entity-one>
+		<if-not-empty field="emplLeaveType">
+			<add-error>
+				<fail-property resource="HrCommonUiLabels" property="CommonIdExists"/>
+			</add-error>
+		</if-not-empty>
+		<check-errors/>
+		<make-value entity-name="EmplLeaveType" value-field="newEntity" />
+		<set-pk-fields map="parameters" value-field="newEntity" />
+		<set-nonpk-fields map="parameters" value-field="newEntity" />
+		<if-empty field="newEntity.leaveTypeId">
+			<sequenced-id sequence-name="EmplLeaveType" field="newEntity.leaveTypeId" />
+		</if-empty>
+		<field-to-result field="newEntity.leaveTypeId"
+			result-name="leaveTypeId" />
+		<create-value value-field="newEntity" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"createSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="updateEmplLeaveType"
+		short-description="Update leaveType">
+		<entity-one entity-name="EmplLeaveType" value-field="lookedUpValue" />
+		<set-nonpk-fields value-field="lookedUpValue" map="parameters" />
+		<store-value value-field="lookedUpValue" />
+
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="deleteEmplLeaveType"
+		short-description="Delete leaveType">
+		<entity-one entity-name="EmplLeaveType" value-field="lookedUpValue" />
+		<remove-value value-field="lookedUpValue" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"removeSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="createEmplLeaveReasonType"
+		short-description="Create a Leave Reason Type">
+		<make-value entity-name="EmplLeaveReasonType" value-field="newEntity" />
+		<set-pk-fields map="parameters" value-field="newEntity" />
+		<set-nonpk-fields map="parameters" value-field="newEntity" />
+		<if-empty field="newEntity.emplLeaveReasonTypeId">
+			<sequenced-id sequence-name="EmplLeaveReasonType"
+				field="newEntity.emplLeaveReasonTypeId" />
+		</if-empty>
+		<field-to-result field="newEntity.emplLeaveReasonTypeId"
+			result-name="emplLeaveReasonTypeId" />
+		<create-value value-field="newEntity" />
+
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"createSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="updateEmplLeaveReasonType"
+		short-description="Update leave Reason Type">
+		<entity-one entity-name="EmplLeaveReasonType" value-field="lookedUpValue" />
+		<set-nonpk-fields value-field="lookedUpValue" map="parameters" />
+		<store-value value-field="lookedUpValue" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="deleteEmplLeaveReasonType"
+		short-description="Delete leave Reason Type">
+		<entity-one entity-name="EmplLeaveReasonType" value-field="lookedUpValue" />
+		<remove-value value-field="lookedUpValue" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"removeSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+
+	<simple-method method-name="createEmplPositionType"
+		short-description="Create a PositionType">
+		<make-value entity-name="EmplPositionType" value-field="newEntity" />
+		<set-nonpk-fields map="parameters" value-field="newEntity" />
+		<if-empty field="newEntity.emplPositionTypeId">
+			<sequenced-id sequence-name="EmplPositionType"
+				field="newEntity.emplPositionTypeId" />
+		</if-empty>
+		<field-to-result field="newEntity.emplPositionTypeId"
+			result-name="emplPositionTypeId" />
+		<create-value value-field="newEntity" />
+
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"createSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="updateEmplPositionType"
+		short-description="Update PositionType">
+		<entity-one entity-name="EmplPositionType" value-field="lookedUpValue" />
+		<set-nonpk-fields value-field="lookedUpValue" map="parameters" />
+		<store-value value-field="lookedUpValue" />
+
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<!-- <simple-method method-name="deleteEmplPositionType"
+		short-description="Delete EmplPositionType">
+		<entity-one entity-name="EmplPositionType" value-field="lookedUpValue" />
+		<remove-value value-field="lookedUpValue" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"removeSuccessfully", locale));
+		</call-bsh>
+	</simple-method> -->
+
+	<simple-method method-name="updateEmplPositionTypeRate"
+		short-description="Update/create EmplPositionTypeRate">
+		<entity-one entity-name="EmplPositionTypeRate" value-field="lookedUpValue" />
+		<!-- check if already exist is so expire current record -->
+		<entity-and entity-name="EmplPositionTypeRate" list="emplPositionTypeRates"
+			filter-by-date="true">
+			<field-map field-name="emplPositionTypeId" from-field="parameters.emplPositionTypeId" />
+			<field-map field-name="rateTypeId" from-field="parameters.rateTypeId" />
+		</entity-and>
+		<if-not-empty field="emplPositionTypeRates">
+			<first-from-list entry="emplPositionTypeRate" list="emplPositionTypeRates" />
+			<now-timestamp field="emplPositionTypeRate.thruDate" />
+			<store-value value-field="emplPositionTypeRate" />
+		</if-not-empty>
+
+		<make-value value-field="newEntity" entity-name="EmplPositionTypeRate" />
+		<set-pk-fields map="parameters" value-field="newEntity" />
+		<if-empty field="newEntity.fromDate">
+			<now-timestamp field="newEntity.fromDate" />
+		</if-empty>
+		<set-nonpk-fields map="parameters" value-field="newEntity" />
+		<create-value value-field="newEntity" />
+
+		<if-not-empty field="parameters.rateAmount">
+			<set-service-fields service-name="updateRateAmount"
+				map="parameters" to-map="updRate" />
+			<call-service service-name="updateRateAmount"
+				in-map-name="updRate" />
+		</if-not-empty>
+
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="deleteEmplPositionTypeRate"
+		short-description="Delete EmplPositionTypeRate">
+		<entity-one entity-name="EmplPositionTypeRate" value-field="lookedUpValue" />
+		<now-timestamp field="lookedUpValue.thruDate" />
+		<store-value value-field="lookedUpValue" />
+
+		<set-service-fields service-name="deleteRateAmount"
+			map="parameters" to-map="delRateAmount" />
+		<set field="delRateAmount.fromDate" from-field="parameters.rateAmountFromDate" />
+		<call-service service-name="deleteRateAmount"
+			in-map-name="delRateAmount" />
+
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"removeSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="createPayGrade"
+		short-description="Create a Pay Grade">
+		<make-value entity-name="PayGrade" value-field="newEntity" />
+		<set-nonpk-fields map="parameters" value-field="newEntity" />
+		<if-not-empty field="parameters.payGradeId">
+			<set field="newEntity.payGradeId" from-field="parameters.payGradeId" />
+			<else>
+				<sequenced-id sequence-name="PayGrade" field="newEntity.payGradeId" />
+			</else>
+		</if-not-empty>
+		<field-to-result field="newEntity.payGradeId"
+			result-name="payGradeId" />
+		<create-value value-field="newEntity" />
+
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"createSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="updatePayGrade"
+		short-description="Update Pay Grade">
+		<entity-one entity-name="PayGrade" value-field="lookedUpValue" />
+		<set-nonpk-fields value-field="lookedUpValue" map="parameters" />
+		<store-value value-field="lookedUpValue" />
+
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="deletePayGrade"
+		short-description="Delete Pay Grade">
+		<entity-one entity-name="PayGrade" value-field="lookedUpValue" />
+		<remove-value value-field="lookedUpValue" />
+
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"removeSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="createSalaryStep"
+		short-description="Create a Salary Step">
+		<make-value entity-name="SalaryStep" value-field="newEntity" />
+		<set-pk-fields map="parameters" value-field="newEntity" />
+		<set-nonpk-fields map="parameters" value-field="newEntity" />
+		<!-- <sequenced-id sequence-name="SalaryStep" field="newEntity.salaryStepSeqId" /> -->
+		<make-next-seq-id seq-field-name="salaryStepSeqId" value-field="newEntity" numeric-padding="2"/>
+		<field-to-result field="salaryStepSeqId" result-name="salaryStepSeqId" />
+		<create-value value-field="newEntity" />
+
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"createSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="updateSalaryStep"
+		short-description="Update Salary Step">
+		<entity-one entity-name="SalaryStep" value-field="lookedUpValue" />
+		<set-nonpk-fields value-field="lookedUpValue" map="parameters" />
+		<store-value value-field="lookedUpValue" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="deleteSalaryStep"
+		short-description="Delete Salary Step">
+		<entity-one entity-name="SalaryStep" value-field="lookedUpValue" />
+		<remove-value value-field="lookedUpValue" />
+
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"removeSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="approveEmplLeave"
+		short-description="Approve a Employee Leave">
+		<entity-one value-field="lookedUpValue" entity-name="EmplLeave"></entity-one>
+		<set-nonpk-fields value-field="lookedUpValue" map="parameters" />
+		<store-value value-field="lookedUpValue" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="approveJobRequisition"
+		short-description="Approve a Job Requisition">
+		<entity-one value-field="lookedUpValue" entity-name="JobRequisition"></entity-one>
+		<set-nonpk-fields value-field="lookedUpValue" map="parameters" />
+		<store-value value-field="lookedUpValue" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"approveSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="createPerfReviewItemType"
+		short-description="Create a PerfReview Item Type">
+		<entity-one value-field="perfReviewItemType" entity-name="PerfReviewItemType"></entity-one>
+		<if-not-empty field="perfReviewItemType">
+			<add-error>
+				<fail-property resource="HrCommonUiLabels" property="CommonIdExists"/>
+			</add-error>
+		</if-not-empty>
+		<check-errors/>
+		<make-value entity-name="PerfReviewItemType" value-field="newEntity" />
+		<set-pk-fields map="parameters" value-field="newEntity" />
+		<set-nonpk-fields map="parameters" value-field="newEntity" />
+		<create-value value-field="newEntity" />
+
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"createSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+	
+	<simple-method method-name="updatePerfReviewItemType"
+		short-description="Update PerfReview Item Type">
+		<entity-one entity-name="PerfReviewItemType" value-field="perfReviewItemType"
+			auto-field-map="true" />
+		<set-nonpk-fields value-field="perfReviewItemType" map="parameters" />
+		<store-value value-field="perfReviewItemType" />
+		<field-to-result field="perfReviewItemType.perfReviewItemTypeId"
+			result-name="perfReviewItemTypeId" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+	
+	<simple-method method-name="deletePerfReviewItemType"
+		short-description="Delete a PerfReviewItemType">
+		<entity-one value-field="perfReviewItemType" entity-name="PerfReviewItemType"></entity-one>
+		<remove-value value-field="perfReviewItemType" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"deteleSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="updatePerfReviewRating"
+		short-description="Update PerfReview Rating">
+		<entity-one entity-name="PerfReviewItem" value-field="lookedUpValue"
+			auto-field-map="true" />
+		<set-nonpk-fields value-field="lookedUpValue" map="parameters" />
+		<store-value value-field="lookedUpValue" />
+		<field-to-result field="lookedUpValue.employeePartyId"
+			result-name="employeePartyId" />
+		<field-to-result field="lookedUpValue.employeeRoleTypeId"
+			result-name="employeeRoleTypeId" />
+		<field-to-result field="lookedUpValue.perfReviewId"
+			result-name="perfReviewId" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="createInterviewee"
+		short-description="Create a Interviewee">
+		<make-value entity-name="Interviewee" value-field="newEntity" />
+		<set-pk-fields map="parameters" value-field="newEntity" />
+		<set-nonpk-fields map="parameters" value-field="newEntity" />
+		<create-value value-field="newEntity" />
+		<field-to-result field="newEntity.partyId"
+			result-name="partyId" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"createSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="createInterviewer"
+		short-description="Create a Interviewer">
+		<make-value entity-name="Interviewer" value-field="newEntity" />
+		<set-pk-fields map="parameters" value-field="newEntity" />
+		<set-nonpk-fields map="parameters" value-field="newEntity" />
+		<create-value value-field="newEntity" />
+
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"createSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="deleteInterviewee"
+		short-description="Delete a Interviewee">
+		<entity-one value-field="lookedUpInterviewee" entity-name="Interviewee"></entity-one>
+		<remove-value value-field="lookedUpInterviewee" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"deteleSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="deleteInterviewer"
+		short-description="Delete a Interviewer">
+		<entity-one value-field="lookedUpInterviewer" entity-name="Interviewer"></entity-one>
+		<remove-value value-field="lookedUpInterviewer" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"deteleSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="updateInterviewee"
+		short-description="Rate a Interviewee">
+		<entity-one value-field="lookedUpInterviewee" entity-name="Interviewee"></entity-one>
+		<set-pk-fields value-field="lookedUpInterviewee" map="parameters" />
+		<set-nonpk-fields value-field="lookedUpInterviewee"
+			map="parameters" />
+		<store-value value-field="lookedUpInterviewee" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="updatePeriodType"
+		short-description="Update a Period Type">
+		<entity-one value-field="lookedUpPeriodType" entity-name="PeriodType"></entity-one>
+		<set-pk-fields value-field="lookedUpPeriodType" map="parameters" />
+		<set-nonpk-fields value-field="lookedUpPeriodType"
+			map="parameters" />
+		<store-value value-field="lookedUpPeriodType" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="deletePeriodType"
+		short-description="Delete a Period Type]">
+		<entity-one value-field="lookedUpPeriodType" entity-name="PeriodType"></entity-one>
+		<remove-value value-field="lookedUpPeriodType" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"deleteSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="createPeriodType"
+		short-description="Create a Period Type">
+		<entity-one value-field="periodType" entity-name="PeriodType"></entity-one>
+		<if-not-empty field="periodType">
+			<add-error>
+				<fail-property resource="HrCommonUiLabels" property="CommonIdExists"/>
+			</add-error>
+		</if-not-empty>
+		<check-errors/>
+		<make-value entity-name="PeriodType" value-field="newEntity" />
+		<set-pk-fields map="parameters" value-field="newEntity" />
+		<set-nonpk-fields map="parameters" value-field="newEntity" />
+		<create-value value-field="newEntity" />
+
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"createSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="updateRecruitmentPlan" short-description="Update a Recruitment Plan">
+		<entity-one value-field="lookedUpRecruitmentPlan" entity-name="RecruitmentPlan"></entity-one>
+		<set-pk-fields value-field="lookedUpRecruitmentPlan" map="parameters" />
+		<set-nonpk-fields value-field="lookedUpRecruitmentPlan" map="parameters" />
+		<store-value value-field="lookedUpRecruitmentPlan" />
+		<field-to-result field="lookedUpRecruitmentPlan.partyId" result-name="partyId"/>
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+	
+	<simple-method method-name="proposeRecruitmentPlan" short-description="Update a Recruitment Plan">
+		<entity-one value-field="lookedUpRecruitmentPlan" entity-name="RecruitmentPlan"></entity-one>
+		<set field="lookedUpRecruitmentPlan.statusId" value="PRP_PROPOSED" />
+		<store-value value-field="lookedUpRecruitmentPlan" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"proposeSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+	
+	<simple-method method-name="checkJobRequest"
+		short-description="Check JobRequest">
+		<entity-one value-field="lookedUpJobRequest" entity-name="JobRequest"></entity-one>
+		<set-pk-fields value-field="lookedUpJobRequest" map="parameters" />
+		<set-nonpk-fields value-field="lookedUpJobRequest"
+			map="parameters" />
+		<store-value value-field="lookedUpJobRequest" />
+		<now field="dateTime" type="java.sql.Timestamp" />
+
+		<set field="targetLink" from-field="parameters.targetLink" />
+		<set field="header" from-field="parameters.header" />
+		<set field="ntfId" from-field="parameters.ntfId" />
+		<set field="state" value="open" />
+		<set field="action" value="ApproveJobRequest" />
+		<set field="notiToId" from-field="parameters.notiToId" />
+		<set field="statusId" from-field="lookedUpJobRequest.statusId" />
+
+		<field-to-result field="targetLink" result-name="targetLink" />
+		<field-to-result field="header" result-name="header" />
+		<field-to-result field="ntfId" result-name="ntfId" />
+		<field-to-result field="state" result-name="state" />
+		<field-to-result field="action" result-name="action" />
+		<field-to-result field="dateTime" result-name="dateTime" />
+		<field-to-result field="notiToId" result-name="notiToId" />
+		<field-to-result field="statusId" result-name="statusId" />
+
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="approveJobRequest"
+		short-description="Approve JobRequest">
+		<entity-one value-field="lookedUpJobRequest" entity-name="JobRequest"></entity-one>
+		<set-pk-fields value-field="lookedUpJobRequest" map="parameters" />
+		<set-nonpk-fields value-field="lookedUpJobRequest"
+			map="parameters" />
+		<store-value value-field="lookedUpJobRequest" />
+		<now field="dateTime" type="java.sql.Timestamp" />
+
+		<set field="targetLink" from-field="parameters.targetLink" />
+		<set field="header" from-field="parameters.header" />
+		<set field="ntfId" from-field="parameters.ntfId" />
+		<set field="state" value="open" />
+		<set field="action" value="JobRequestApprovalResult" />
+		<set field="notiToId1" from-field="parameters.notiToId1" />
+		<set field="notiToId2" from-field="parameters.notiToId2" />
+		<field-to-result field="targetLink" result-name="targetLink" />
+		<field-to-result field="header" result-name="header" />
+		<field-to-result field="ntfId" result-name="ntfId" />
+		<field-to-result field="state" result-name="state" />
+		<field-to-result field="action" result-name="action" />
+		<field-to-result field="dateTime" result-name="dateTime" />
+		<field-to-result field="notiToId1" result-name="notiToId1" />
+		<field-to-result field="notiToId2" result-name="notiToId2" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="updateTrainingPlan"
+		short-description="update trainging plan">
+		<entity-one value-field="lookUpValue" entity-name="TrainingPlan" />
+		<set-pk-fields value-field="lookUpValue" map="parameters" />
+		<set-nonpk-fields value-field="lookUpValue" map="parameters" />
+		<store-value value-field="lookUpValue" />
+
+		<if-compare operator="equals" value="REJECT_TP" field="lookUpValue.statusId">
+			<set field="header" value="Kế hoạch không được đồng ý" />
+			<set field="notiToId" from-field="parameters.HdID" />
+			<set field="action" value="resultsAppr" />
+			<set field="targetLink" value="" />
+			<now field="dateTime" type="java.sql.Timestamp" />
+			<set field="state" value="open" />
+
+			<field-to-result field="header" result-name="header" />
+			<field-to-result field="action" result-name="action" />
+			<field-to-result field="state" result-name="state" />
+			<field-to-result field="targetLink" result-name="targetLink" />
+			<field-to-result field="dateTime" result-name="dateTime" />
+			<field-to-result field="notiToId" result-name="notiToId" />
+
+		</if-compare>
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="apprTrainingPlan"
+		short-description="appr trainging plan">
+		<entity-one value-field="lookUpValue" entity-name="TrainingPlan" />
+		<set-pk-fields value-field="lookUpValue" map="parameters" />
+		<set-nonpk-fields value-field="lookUpValue" map="parameters" />
+		<store-value value-field="lookUpValue" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="checkTrainingPlan"
+		short-description="check trainging plan">
+		<entity-one value-field="lookUpValue" entity-name="TrainingPlan" />
+		<set-pk-fields value-field="lookUpValue" map="parameters" />
+		<set-nonpk-fields value-field="lookUpValue" map="parameters" />
+		<store-value value-field="lookUpValue" />
+		<set-service-fields service-name="updateNtfIfExists" to-map="updateNotify" map="parameters"/>
+		<call-service service-name="updateNtfIfExists" in-map-name="updateNotify">
+			
+		</call-service>
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="checkProposeTraining"
+		short-description="check propose training">
+		<entity-one value-field="lookUpProposeTraining"
+			entity-name="TrainingProposal" />
+		<set-pk-fields value-field="lookUpProposeTraining" map="parameters" />
+		<set-nonpk-fields value-field="lookUpProposeTraining"
+			map="parameters" />
+		<store-value value-field="lookUpProposeTraining" />
+		<set field="ppId" from-field="lookUpProposeTraining.trainingProposalId" />
+		<if-compare operator="equals" value="AGRE_PT"
+			field="lookUpProposeTraining.statusId">
+			<now field="dateTime" type="java.sql.Timestamp" />
+			<set field="ntfId" from-field="parameters.ntfId" />
+			<set field="targetLink" from-field="parameters.targetLink" />
+			<set field="header" from-field="parameters.header" />
+			<set field="notiToId" from-field="parameters.notiToId" />
+			<set field="returnId" value=" " />
+			<set field="state" value="open" />
+			<set field="action" value="apprProTraining" />
+
+			<field-to-result field="dateTime" result-name="dateTime" />
+			<field-to-result field="ntfId" result-name="ntfId" />
+			<field-to-result field="targetLink" result-name="targetLink" />
+			<field-to-result field="header" result-name="header" />
+			<field-to-result field="notiToId" result-name="notiToId" />
+			<field-to-result field="returnId" result-name="returnId" />
+			<field-to-result field="state" result-name="state" />
+			<field-to-result field="action" result-name="action" />
+
+		</if-compare>
+		<if-compare operator="equals" value="REJECT_PT"
+			field="lookUpProposeTraining.statusId">
+			<now field="dateTime" type="java.sql.Timestamp" />
+			<set field="ntfId" from-field="parameters.ntfId" />
+			<set field="targetLink" value="ppId=${ppId}" />
+			<set field="header" value="Kết quả kiểm tra đề xuất đã có trong kế hoạch" />
+			<set field="notiToId" value=" " />
+			<set field="returnId" from-field="parameters.returnId" />
+			<set field="state" value="open" />
+			<set field="action" value="viewProposeTraining" />
+			<field-to-result field="dateTime" result-name="dateTime" />
+			<field-to-result field="ntfId" result-name="ntfId" />
+			<field-to-result field="targetLink" result-name="targetLink" />
+			<field-to-result field="header" result-name="header" />
+			<field-to-result field="returnId" result-name="returnId" />
+			<field-to-result field="notiToId" result-name="notiToId" />
+			<field-to-result field="state" result-name="state" />
+			<field-to-result field="action" result-name="action" />
+		</if-compare>
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="approveTrainingProposal"
+		short-description="Approve training proposal">
+		<log level="info" message="hello ${parameters}"/>		
+		<entity-one value-field="lookUpProposeTraining"
+			entity-name="TrainingProposal" />
+		<set-pk-fields value-field="lookUpProposeTraining" map="parameters" />
+		<set-nonpk-fields value-field="lookUpProposeTraining"
+			map="parameters" />
+		<store-value value-field="lookUpProposeTraining" />
+		<set field="ntfId" from-field="parameters.ntfId" />
+		<set field="header" value="${parameters.header}" />
+		<set field="targetLink" value="${parameters.targetLink};ppId=${parameters.ppId}" />
+		<set field="state" value="open" />
+		<set field="action" value="viewProposeTraining" />
+		<now field="dateTime" type="java.sql.Timestamp" />
+		<set field="notiToId1" from-field="parameters.notiToId1" />
+		<set field="notiToId2" from-field="parameters.notiToId2" />
+		<field-to-result field="ntfId" result-name="ntfId" />
+		<field-to-result field="header" result-name="header" />
+		<field-to-result field="targetLink" result-name="targetLink" />
+		<field-to-result field="notiToId1" result-name="notiToId1" />
+		<field-to-result field="notiToId2" result-name="notiToId2" />
+		<field-to-result field="state" result-name="state" />
+		<field-to-result field="action" result-name="action" />
+		<field-to-result field="dateTime" result-name="dateTime" />
+
+		<call-service service-name="createNotification"
+			in-map-name="context"></call-service>
+		<set field="map.ntfId" from-field="parameters.ntfId" />
+		<call-service service-name="updateNotification"
+			in-map-name="map"></call-service>
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="updateTrainingResults"
+		short-description="update  training result">
+		<entity-one value-field="lookUpTrainingResults"
+			entity-name="TrainingTracker" />
+		<set-pk-fields value-field="lookUpTrainingResults" map="parameters" />
+		<set-nonpk-fields value-field="lookUpTrainingResults"
+			map="parameters" />
+		<store-value value-field="lookUpTrainingResults" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="ratingTrainingResults"
+		short-description="rating training result">
+		<entity-one value-field="lookUpTrainingResults"
+			entity-name="TrainingTracker" />
+		<set-pk-fields value-field="lookUpTrainingResults" map="parameters" />
+		<set-nonpk-fields value-field="lookUpTrainingResults"
+			map="parameters" />
+		<store-value value-field="lookUpTrainingResults" />
+		<now field="context.dateTime" type="java.sql.Timestamp" />
+
+		<set field="context.partyId" from-field="parameters.partyId" />
+		<set field="context.action" value="ResultsRating" />
+		<set field="context.state" value="open" />
+		<set field="context.header" value="Kết quả đào tạo [ ${parameters.fullName} ]" />
+		<set field="context.targetLink" value="emplId=${parameters.partyId}" />
+		<call-service service-name="createNotification"
+			in-map-name="context"></call-service>
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+	<simple-method method-name="addTrainingHarvestReport"
+		short-description="add Training Harvest Report">
+		<make-value value-field="lookUpTrainingReport" entity-name="TrainingHarvestReport" />
+		<sequenced-id sequence-name="TrainingHarvestReport"
+			field="lookUpTrainingReport.trainingHarvestReportId" />
+		<set-pk-fields value-field="lookUpTrainingReport" map="parameters" />
+		<set-nonpk-fields value-field="lookUpTrainingReport"
+			map="parameters" />
+		<create-value value-field="lookUpTrainingReport" />
+
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"addSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+
+	<simple-method method-name="removeInternalPerson"
+		short-description="remove a person">
+		<entity-one entity-name="Employment" value-field="lookedUpValue" />
+		<remove-value value-field="lookedUpValue" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="updatePayrollTable"
+		short-description="Update Payroll Table">
+		<entity-one value-field="lookUpValue" entity-name="PayrollTable" />
+		<set-pk-fields value-field="lookUpValue" map="parameters" />
+		<set-nonpk-fields value-field="lookUpValue" map="parameters" />
+		<store-value value-field="lookUpValue" />
+		<field-to-result field="statusId" result-name="statusId" />
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import
+			org.ofbiz.service.ServiceUtil;
+			resourceNoti = "NotificationUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti,
+			"updateSuccessfully", locale));
+		</call-bsh>
+	</simple-method>
+
+	<simple-method method-name="createPartyBenefitAndEmplPara"
+		short-description="Create Party Benefit And Payroll Employee Parameters">
+		<!-- Create Party Benefit -->
+		<make-value entity-name="PartyBenefit" value-field="newEntity" />
+		<set-pk-fields value-field="newEntity" map="parameters" />
+		<set-nonpk-fields map="parameters" value-field="newEntity" />
+		<if-empty field="newEntity.fromDate">
+			<now-timestamp field="nowTimeStamp" />
+			<set field="newEntity.fromDate" from-field="nowTimeStamp" />
+		</if-empty>
+		<create-value value-field="newEntity" />
+		<!-- Map to Payroll Employee Parameters -->
+		<make-value value-field="payrollEmplParameters"
+			entity-name="PayrollEmplParameters" />
+		<set field="payrollEmplParameters.partyId" from-field="parameters.partyIdTo" />
+		<set field="payrollEmplParameters.code" from-field="parameters.code" />
+		<set field="payrollEmplParameters.fromDate" from-field="parameters.fromDate" />
+		<set field="payrollEmplParameters.periodTypeId" from-field="parameters.periodTypeId" />
+		<set field="payrollEmplParameters.type" value="CONSTPERCENT" />
+		<to-string field="parameters.cost" />
+		<to-string field="parameters.actualEmployerPaidPercent" />
+		<set field="payrollEmplParameters.value" from-field="parameters.cost" />
+		<set field="payrollEmplParameters.actualPercent" from-field="parameters.actualEmployerPaidPercent" />
+		<create-value value-field="payrollEmplParameters" />
+	</simple-method>
+
+	<simple-method method-name="createEmplAgreement"
+		short-description="Create an Employment Agreement">
+		<!-- create new entity and create all the fields -->
+		<make-value value-field="newEntity" entity-name="Agreement" />
+		<set-nonpk-fields map="parameters" value-field="newEntity" />
+		<!-- create a non existing ID -->
+		<set from-field="parameters.agreementId" field="newEntity.agreementId" />
+		<field-to-result field="newEntity.agreementId"
+			result-name="agreementId" />
+
+		<if-empty field="newEntity.fromDate">
+			<now-timestamp field="nowTimestamp" />
+			<set from-field="nowTimestamp" field="newEntity.fromDate" />
+		</if-empty>
+
+		<!-- finally create the record (should not exist already) -->
+		<create-value value-field="newEntity" />
+		<check-errors />
+	</simple-method>
+
+	<simple-method method-name="createRecruitmentTestPlan"
+		short-description="Create a Recruitment Test Plan">
+		<set field="skipCreateExam" from-field="parameters.skipCreateExam" />
+		<set field="skipCreateFirstIntv" from-field="parameters.skipCreateFirstIntv" />
+		<set field="skipCreateSecondIntv" from-field="parameters.skipCreateSecondIntv" />
+		<set field="sequenceNum" value="1" type="Long" />
+		<if>
+			<condition>
+				<or>
+					<if-empty field="skipCreateExam"></if-empty>
+					<if-compare operator="not-equals" value="on" field="skipCreateExam"></if-compare>
+				</or>
+			</condition>
+			<then>
+				<set field="createExam" value="true" type="Boolean" />
+			</then>
+			<else>
+				<set field="createExam" value="false" type="Boolean" />
+			</else>
+		</if>
+		<if>
+			<condition>
+				<or>
+					<if-empty field="skipCreateFirstIntv"></if-empty>
+					<if-compare operator="not-equals" value="on"
+						field="skipCreateFirstIntv"></if-compare>
+				</or>
+			</condition>
+			<then>
+				<set field="createFirstIntv" value="true" type="Boolean" />
+			</then>
+			<else>
+				<set field="createFirstIntv" value="false" type="Boolean" />
+			</else>
+		</if>
+		<if>
+			<condition>
+				<or>
+					<if-empty field="skipCreateSecondIntv"></if-empty>
+					<if-compare operator="not-equals" value="on"
+						field="skipCreateSecondIntv"></if-compare>
+				</or>
+			</condition>
+			<then>
+				<set field="createSecondIntv" value="true" type="Boolean" />
+			</then>
+			<else>
+				<set field="createSecondIntv" value="false" type="Boolean" />
+			</else>
+		</if>
+		<!-- Create Recruitment Test Plan -->
+		<sequenced-id sequence-name="WorkEffort" field="workEffortParentId" />
+		<set field="weffCtx.userLogin" from-field="parameters.userLogin" />
+		<set field="weffCtx.locale" from-field="parameters.locale" />
+		<set field="weffCtx.description" from-field="parameters.description" />
+		<set field="weffCtx.estimatedStartDate" from-field="parameters.fromDate" />
+		<set field="weffCtx.estimatedCompletionDate" from-field="parameters.thruDate" />
+		<set field="weffCtx.workEffortId" value="${workEffortParentId}" />
+		<set field="weffCtx.workEffortName" from-field="parameters.name" />
+		<set field="weffCtx.workEffortTypeId" value="RECR_TEST_PLAN" />
+		<set field="weffCtx.currentStatusId" value="RTP_IN_PROGRESS" />
+		<call-service service-name="createWorkEffort"
+			in-map-name="weffCtx">
+		</call-service>
+
+
+		<set field="applicantIdList" from-field="parameters.applicantIdList" />
+		<!-- Assign Applicant To Recruitment Plan -->
+		<iterate entry="applicantId" list="applicantIdList">
+			<set field="partyWeffCtx.userLogin" from-field="parameters.userLogin" />
+			<set field="partyWeffCtx.locale" from-field="parameters.locale" />
+			<set field="partyWeffCtx.partyId" value="${applicantId}" />
+			<set field="partyWeffCtx.workEffortId" value="${workEffortParentId}" />
+			<set field="partyWeffCtx.roleTypeId" value="APPLICANT" />
+			<now field="partyWeffCtx.fromDate" />
+			<set field="partyWeffCtx.assignedByUserLoginId" from-field="parameters.userLogin.partyId" />
+			<set field="partyWeffCtx.statusId" value="PA_ASSIGNED" />
+			<call-service-asynch service-name="assignPartyToWorkEffort"
+				in-map-name="partyWeffCtx" />
+		</iterate>
+
+		<!-- Map Job Request To Recruitment Plan -->
+		<make-value value-field="workEffortReqFul" entity-name="WorkEffortRequestFulfillment" />
+		<set field="workEffortReqFul.jobRequestId" from-field="parameters.jobRequestId" />
+		<set field="workEffortReqFul.workEffortId" value="${workEffortParentId}" />
+		<create-value value-field="workEffortReqFul" />
+		
+		<if-compare operator="equals" value="true" field="createExam"
+			type="Boolean">
+			<!-- Set up Context For Create Exam -->
+			<if-empty field="parameters.examName">
+				<add-error>
+					<fail-property resource="RecruitmentUiLabels"
+						property="ExamNameIsEmpty" />
+				</add-error>
+			</if-empty>
+			<if-empty field="parameters.examFromDate">
+				<add-error>
+					<fail-property resource="RecruitmentUiLabels"
+						property="ExamFromDateIsEmpty" />
+				</add-error>
+			</if-empty>
+			<if-empty field="parameters.examThruDate">
+				<add-error>
+					<fail-property resource="RecruitmentUiLabels"
+						property="ExamThruDateIsEmpty" />
+				</add-error>
+			</if-empty>
+			<if-empty field="parameters.examTesterIdList">
+				<add-error>
+					<fail-property resource="RecruitmentUiLabels"
+						property="ExamTesterIdListIsEmpty" />
+				</add-error>
+			</if-empty>
+			<if-empty field="parameters.examLocation">
+				<add-error>
+					<fail-property resource="RecruitmentUiLabels"
+						property="ExamLocationIsEmpty" />
+				</add-error>
+			</if-empty>
+			<check-errors />
+			<set field="examCtx.recruitmentTestPlanId" value="${workEffortParentId}" />
+			<set field="examCtx.userLogin" from-field="parameters.userLogin" />
+			<set field="examCtx.locale" from-field="parameters.locale" />
+			<set field="examCtx.description" from-field="parameters.examDescription" />
+			<set field="examCtx.estimatedStartDate" from-field="parameters.examFromDate" />
+			<set field="examCtx.estimatedCompletionDate" from-field="parameters.examThruDate" />
+			<set field="examCtx.applicantIdList" from-field="parameters.applicantIdList" />
+			<set field="examCtx.testerIdList" from-field="parameters.examTesterIdList" />
+			<set field="examCtx.jobRequestId" from-field="parameters.jobRequestId" />
+			<set field="examCtx.name" from-field="parameters.examName" />
+			<set field="examCtx.contactMechId" from-field="parameters.examLocation" />
+			<set field="examCtx.createWorkeffReqFul" from-field="createWorkeffReqFul" />
+			<set field="examCtx.sequenceNum" value="${sequenceNum}" />
+			<call-service service-name="createRecruitmentExam"
+				in-map-name="examCtx"></call-service>
+		</if-compare>
+		<!-- Set up Context For Create First Interview -->
+		<if-compare operator="equals" value="true" field="createFirstIntv"
+			type="Boolean">
+			<if-empty field="parameters.firstIntvName">
+				<add-error>
+					<fail-property resource="RecruitmentUiLabels"
+						property="FirstIntvNameIsEmpty" />
+				</add-error>
+			</if-empty>
+			<if-empty field="parameters.firstIntvThruDate">
+				<add-error>
+					<fail-property resource="RecruitmentUiLabels"
+						property="FirstIntvThruDateIsEmpty" />
+				</add-error>
+			</if-empty>
+			<if-empty field="parameters.firstIntvFromDate">
+				<add-error>
+					<fail-property resource="RecruitmentUiLabels"
+						property="FirstIntvFromDateIsEmpty" />
+				</add-error>
+			</if-empty>
+			<if-empty field="parameters.firstIntvTesterIdList">
+				<add-error>
+					<fail-property resource="RecruitmentUiLabels"
+						property="FirstIntvTesterIdListIsEmpty" />
+				</add-error>
+			</if-empty>
+			<if-empty field="parameters.firstIntvLocation">
+				<add-error>
+					<fail-property resource="RecruitmentUiLabels"
+						property="FirstIntvLocationIsEmpty" />
+				</add-error>
+			</if-empty>
+			<check-errors />
+			<set field="firstIntvCtx.recruitmentTestPlanId" value="${workEffortParentId}" />
+			<set field="firstIntvCtx.userLogin" from-field="parameters.userLogin" />
+			<set field="firstIntvCtx.locale" from-field="parameters.locale" />
+			<set field="firstIntvCtx.description" from-field="parameters.firstIntvDescription" />
+			<set field="firstIntvCtx.estimatedStartDate" from-field="parameters.firstIntvFromDate" />
+			<set field="firstIntvCtx.estimatedCompletionDate" from-field="parameters.firstIntvThruDate" />
+			<set field="firstIntvCtx.testerIdList" from-field="parameters.firstIntvTesterIdList" />
+			<set field="firstIntvCtx.applicantIdList" from-field="parameters.applicantIdList" />
+			<set field="firstIntvCtx.name" from-field="parameters.firstIntvName" />
+			<set field="firstIntvCtx.jobRequestId" from-field="parameters.jobRequestId" />
+			<set field="firstIntvCtx.contactMechId" from-field="parameters.firstIntvLocation" />
+			<set field="firstIntvCtx.createExam" value="${createExam}" />
+			<set field="firstIntvCtx.createWorkeffReqFul" from-field="createWorkeffReqFul" />
+			<calculate field="sequenceNum" type="Long">
+				<calcop operator="add" field="sequenceNum">
+					<number value="1" />
+				</calcop>
+			</calculate>
+			<set field="firstIntvCtx.sequenceNum" value="${sequenceNum}" />
+			<call-service service-name="createRecruitmentFirstInterview"
+				in-map-name="firstIntvCtx"></call-service>
+		</if-compare>
+
+		<!-- Set up Context For Create Second Interview -->
+		<if-compare operator="equals" value="true" field="createSecondIntv"
+			type="Boolean">
+			<if-empty field="parameters.secondIntvName">
+				<add-error>
+					<fail-property resource="RecruitmentUiLabels"
+						property="SecondIntvNameIsEmpty" />
+				</add-error>
+			</if-empty>
+			<if-empty field="parameters.secondIntvThruDate">
+				<add-error>
+					<fail-property resource="RecruitmentUiLabels"
+						property="SecondIntvThruDateIsEmpty" />
+				</add-error>
+			</if-empty>
+			<if-empty field="parameters.secondIntvFromDate">
+				<add-error>
+					<fail-property resource="RecruitmentUiLabels"
+						property="SecondIntvFromDateIsEmpty" />
+				</add-error>
+			</if-empty>
+			<if-empty field="parameters.secondIntvTesterIdList">
+				<add-error>
+					<fail-property resource="RecruitmentUiLabels"
+						property="SecondIntvTesterIdListIsEmpty" />
+				</add-error>
+			</if-empty>
+			<if-empty field="parameters.secondIntvLocation">
+				<add-error>
+					<fail-property resource="RecruitmentUiLabels"
+						property="SecondIntvLocationIsEmpty" />
+				</add-error>
+			</if-empty>
+			<check-errors />
+			<set field="secondIntvCtx.recruitmentTestPlanId" value="${workEffortParentId}" />
+			<set field="secondIntvCtx.userLogin" from-field="parameters.userLogin" />
+			<set field="secondIntvCtx.locale" from-field="parameters.locale" />
+			<set field="secondIntvCtx.description" from-field="parameters.secondIntvDescription" />
+			<set field="secondIntvCtx.estimatedStartDate" from-field="parameters.secondIntvFromDate" />
+			<set field="secondIntvCtx.estimatedCompletionDate" from-field="parameters.secondIntvThruDate" />
+			<set field="secondIntvCtx.testerIdList" from-field="parameters.secondIntvTesterIdList" />
+			<set field="secondIntvCtx.applicantIdList" from-field="parameters.applicantIdList" />
+			<set field="secondIntvCtx.name" from-field="parameters.secondIntvName" />
+			<set field="secondIntvCtx.jobRequestId" from-field="parameters.jobRequestId" />
+			<set field="secondIntvCtx.contactMechId" from-field="parameters.secondIntvLocation" />
+			<set field="secondIntvCtx.createExam" value="${createExam}" />
+			<set field="secondIntvCtx.createFirstIntv" value="${createFirstIntv}" />
+			<set field="secondIntvCtx.createWorkeffReqFul" from-field="createWorkeffReqFul" />
+			<calculate field="sequenceNum" type="Long">
+				<calcop operator="add" field="sequenceNum">
+					<number value="1" />
+				</calcop>
+			</calculate>
+			<set field="secondIntvCtx.sequenceNum" value="${sequenceNum}" />
+			<call-service service-name="createRecruitmentSecondInterview"
+				in-map-name="secondIntvCtx"></call-service>
+		</if-compare>
+	</simple-method>
+
+	<simple-method method-name="createRecruitmentExam"
+		short-description="Create a Recruitment Exam">
+		<!-- Create Exam -->
+		<sequenced-id sequence-name="WorkEffort" field="workEffortId" />
+		<set field="weffCtx.userLogin" from-field="parameters.userLogin" />
+		<set field="weffCtx.locale" from-field="parameters.locale" />
+		<set field="weffCtx.description" from-field="parameters.description" />
+		<set field="weffCtx.estimatedStartDate" from-field="parameters.estimatedStartDate" />
+		<set field="weffCtx.estimatedCompletionDate" from-field="parameters.estimatedCompletionDate" />
+		<set field="weffCtx.workEffortId" value="${workEffortId}" />
+		<set field="weffCtx.workEffortName" from-field="parameters.name" />
+		<set field="weffCtx.workEffortTypeId" value="RECR_EXAM" />
+		<set field="weffCtx.currentStatusId" value="RTP_IN_PROGRESS" />
+		<set field="weffCtx.workEffortAssocTypeId" value="WORK_EFF_BREAKDOWN" />
+		<set field="weffCtx.workEffortIdFrom" from-field="parameters.recruitmentTestPlanId" />
+		<set field="weffCtx.workEffortParentId" from-field="parameters.recruitmentTestPlanId" />
+		<set field="weffCtx.sequenceNum" from-field="parameters.sequenceNum"
+			type="Long" />
+		<call-service service-name="createWorkEffortAndAssoc"
+			in-map-name="weffCtx">
+		</call-service>
+
+		<!-- Create Work Effort Contact -->
+		<set field="weffContCtx.userLogin" from-field="parameters.userLogin" />
+		<set field="weffContCtx.locale" from-field="parameters.locale" />
+		<set field="weffContCtx.fromDate" from-field="parameters.estimatedStartDate" />
+		<set field="weffContCtx.thruDate" from-field="parameters.estimatedCompletionDate" />
+		<set field="weffContCtx.workEffortId" value="${workEffortId}" />
+		<set field="weffContCtx.contactMechId" from-field="parameters.contactMechId" />
+		<call-service service-name="createWorkEffortContactMech"
+			in-map-name="weffContCtx" />
+
+		<!-- Map Job Request To Recruitment Plan -->
+		<make-value value-field="workEffortReqFul" entity-name="WorkEffortRequestFulfillment" />
+		<set field="workEffortReqFul.jobRequestId" from-field="parameters.jobRequestId" />
+		<set field="workEffortReqFul.workEffortId" value="${workEffortId}" />
+		<create-value value-field="workEffortReqFul" />
+
+		<!-- Assign Applicant To Recruitment Plan -->
+		<set field="applicantIdList" from-field="parameters.applicantIdList" />
+		<iterate entry="applicantId" list="applicantIdList">
+			<set field="partyWeffCtx.userLogin" from-field="parameters.userLogin" />
+			<set field="partyWeffCtx.locale" from-field="parameters.locale" />
+			<set field="partyWeffCtx.partyId" value="${applicantId}" />
+			<set field="partyWeffCtx.workEffortId" value="${workEffortId}" />
+			<set field="partyWeffCtx.roleTypeId" value="APPLICANT" />
+			<set field="partyWeffCtx.fromDate" from-field="weffCtx.estimatedStartDate" />
+			<set field="partyWeffCtx.thruDate" from-field="weffCtx.estimatedCompletionDate" />
+			<set field="partyWeffCtx.assignedByUserLoginId" from-field="parameters.userLogin.partyId" />
+			<set field="partyWeffCtx.statusId" value="PA_ASSIGNED" />
+			<call-service-asynch service-name="assignApplicantToRecruitmentTest"
+				in-map-name="partyWeffCtx" />
+		</iterate>
+
+		<!-- Assign Tester To Recruitment Plan -->
+		<set field="testerIdList" from-field="parameters.testerIdList" />
+		<iterate entry="testerId" list="testerIdList">
+			<set field="partyWeffCtx.userLogin" from-field="parameters.userLogin" />
+			<set field="partyWeffCtx.locale" from-field="parameters.locale" />
+			<set field="partyWeffCtx.partyId" value="${testerId}" />
+			<set field="partyWeffCtx.workEffortId" value="${workEffortId}" />
+			<set field="partyWeffCtx.roleTypeId" value="TESTER" />
+			<set field="partyWeffCtx.fromDate" from-field="partyWeffCtx.estimatedStartDate" />
+			<set field="partyWeffCtx.thruDate" from-field="partyWeffCtx.estimatedCompletionDate" />
+			<set field="partyWeffCtx.assignedByUserLoginId" from-field="parameters.userLogin.partyId" />
+			<set field="partyWeffCtx.statusId" value="PA_ASSIGNED" />
+			<call-service-asynch service-name="assignTesterToRecruitmentTest"
+				in-map-name="partyWeffCtx" />
+		</iterate>
+	</simple-method>
+
+	<simple-method method-name="createRecruitmentFirstInterview"
+		short-description="Create a Recruitment First Interview">
+		<!-- Create First Interview -->
+		<sequenced-id sequence-name="WorkEffort" field="workEffortId" />
+		<set field="weffCtx.userLogin" from-field="parameters.userLogin" />
+		<set field="weffCtx.locale" from-field="parameters.locale" />
+		<set field="weffCtx.description" from-field="parameters.description" />
+		<set field="weffCtx.estimatedStartDate" from-field="parameters.estimatedStartDate" />
+		<set field="weffCtx.estimatedCompletionDate" from-field="parameters.estimatedCompletionDate" />
+		<set field="weffCtx.workEffortId" value="${workEffortId}" />
+		<set field="weffCtx.workEffortName" from-field="parameters.name" />
+		<set field="weffCtx.workEffortTypeId" value="RECR_REVIEW1" />
+		<set field="weffCtx.currentStatusId" value="RTP_IN_PROGRESS" />
+		<set field="weffCtx.workEffortAssocTypeId" value="WORK_EFF_BREAKDOWN" />
+		<set field="weffCtx.workEffortIdFrom" from-field="parameters.recruitmentTestPlanId" />
+		<set field="weffCtx.workEffortParentId" from-field="parameters.recruitmentTestPlanId" />
+		<set field="weffCtx.sequenceNum" from-field="parameters.sequenceNum"
+			type="Long" />
+		<call-service service-name="createWorkEffortAndAssoc"
+			in-map-name="weffCtx">
+		</call-service>
+
+		<!-- Create Work Effort Contact -->
+		<set field="weffContCtx.userLogin" from-field="parameters.userLogin" />
+		<set field="weffContCtx.locale" from-field="parameters.locale" />
+		<set field="weffContCtx.fromDateDate" from-field="parameters.estimatedStartDate" />
+		<set field="weffContCtx.thruDate" from-field="parameters.estimatedCompletionDate" />
+		<set field="weffContCtx.workEffortId" value="${workEffortId}" />
+		<set field="weffContCtx.contactMechId" from-field="parameters.contactMechId" />
+		<call-service service-name="createWorkEffortContactMech"
+			in-map-name="weffContCtx" />
+		<set field="createExam" from-field="parameters.createExam" />
+		<if-compare operator="equals" value="false" field="createExam">
+			<!-- Assign Applicant To Recruitment Plan -->
+			<set field="applicantIdList" from-field="parameters.applicantIdList" />
+			<iterate entry="applicantId" list="applicantIdList">
+				<set field="partyWeffCtx.userLogin" from-field="parameters.userLogin" />
+				<set field="partyWeffCtx.locale" from-field="parameters.locale" />
+				<set field="partyWeffCtx.partyId" value="${applicantId}" />
+				<set field="partyWeffCtx.workEffortId" value="${workEffortId}" />
+				<set field="partyWeffCtx.roleTypeId" value="APPLICANT" />
+				<set field="partyWeffCtx.fromDate" from-field="weffCtx.estimatedStartDate" />
+				<set field="partyWeffCtx.thruDate" from-field="weffCtx.estimatedCompletionDate" />
+				<set field="partyWeffCtx.assignedByUserLoginId" from-field="parameters.userLogin.partyId" />
+				<set field="partyWeffCtx.statusId" value="PA_ASSIGNED" />
+				<call-service-asynch service-name="assignApplicantToRecruitmentTest"
+					in-map-name="partyWeffCtx" />
+			</iterate>
+		</if-compare>
+		<!-- Assign Tester To Recruitment Plan -->
+		<set field="testerIdList" from-field="parameters.testerIdList" />
+		<iterate entry="testerId" list="testerIdList">
+			<set field="partyWeffCtx.userLogin" from-field="parameters.userLogin" />
+			<set field="partyWeffCtx.locale" from-field="parameters.locale" />
+			<set field="partyWeffCtx.partyId" value="${testerId}" />
+			<set field="partyWeffCtx.workEffortId" value="${workEffortId}" />
+			<set field="partyWeffCtx.roleTypeId" value="TESTER" />
+			<set field="partyWeffCtx.fromDate" from-field="weffCtx.estimatedStartDate" />
+			<set field="partyWeffCtx.thruDate" from-field="weffCtx.estimatedCompletionDate" />
+			<set field="partyWeffCtx.assignedByUserLoginId" from-field="parameters.userLogin.partyId" />
+			<set field="partyWeffCtx.statusId" value="PA_ASSIGNED" />
+			<call-service-asynch service-name="assignTesterToRecruitmentTest"
+				in-map-name="partyWeffCtx" />
+		</iterate>
+
+		<!-- Map Job Request To Recruitment Plan -->
+		<make-value value-field="workEffortReqFul" entity-name="WorkEffortRequestFulfillment" />
+		<set field="workEffortReqFul.jobRequestId" from-field="parameters.jobRequestId" />
+		<set field="workEffortReqFul.workEffortId" value="${workEffortId}" />
+		<create-value value-field="workEffortReqFul" />
+
+	</simple-method>
+
+	<simple-method method-name="createRecruitmentSecondInterview"
+		short-description="Create a Recruitment Second Interview">
+		<!-- Create Second Interview -->
+		<sequenced-id sequence-name="WorkEffort" field="workEffortId" />
+		<set field="weffCtx.userLogin" from-field="parameters.userLogin" />
+		<set field="weffCtx.locale" from-field="parameters.locale" />
+		<set field="weffCtx.description" from-field="parameters.description" />
+		<set field="weffCtx.estimatedStartDate" from-field="parameters.estimatedStartDate" />
+		<set field="weffCtx.estimatedCompletionDate" from-field="parameters.estimatedCompletionDate" />
+		<set field="weffCtx.workEffortId" value="${workEffortId}" />
+		<set field="weffCtx.workEffortName" from-field="parameters.name" />
+		<set field="weffCtx.workEffortTypeId" value="RECR_REVIEW2" />
+		<set field="weffCtx.currentStatusId" value="RTP_IN_PROGRESS" />
+		<set field="weffCtx.workEffortAssocTypeId" value="WORK_EFF_BREAKDOWN" />
+		<set field="weffCtx.workEffortIdFrom" from-field="parameters.recruitmentTestPlanId" />
+		<set field="weffCtx.workEffortParentId" from-field="parameters.recruitmentTestPlanId" />
+		<set field="weffCtx.sequenceNum" from-field="parameters.sequenceNum"
+			type="Long" />
+		<call-service service-name="createWorkEffortAndAssoc"
+			in-map-name="weffCtx">
+		</call-service>
+
+		<!-- Create Work Effort Contact -->
+		<set field="weffContCtx.userLogin" from-field="parameters.userLogin" />
+		<set field="weffContCtx.locale" from-field="parameters.locale" />
+		<set field="weffContCtx.fromDate" from-field="parameters.estimatedStartDate" />
+		<set field="weffContCtx.thruDate" from-field="parameters.estimatedCompletionDate" />
+		<set field="weffContCtx.workEffortId" value="${workEffortId}" />
+		<set field="weffContCtx.contactMechId" from-field="parameters.contactMechId" />
+		<call-service service-name="createWorkEffortContactMech"
+			in-map-name="weffContCtx" />
+
+		<set field="createExam" from-field="parameters.createExam" />
+		<set field="createFirstIntv" from-field="parameters.createFirstIntv" />
+		<if>
+			<condition>
+				<and>
+					<if-compare operator="equals" value="false" field="createExam" />
+					<if-compare operator="equals" value="false" field="createFirstIntv" />
+				</and>
+			</condition>
+			<then>
+				<!-- Assign Applicant To Recruitment Plan -->
+				<set field="applicantIdList" from-field="parameters.applicantIdList" />
+				<iterate entry="applicantId" list="applicantIdList">
+					<set field="partyWeffCtx.userLogin" from-field="parameters.userLogin" />
+					<set field="partyWeffCtx.locale" from-field="parameters.locale" />
+					<set field="partyWeffCtx.partyId" value="${applicantId}" />
+					<set field="partyWeffCtx.workEffortId" value="${workEffortId}" />
+					<set field="partyWeffCtx.roleTypeId" value="APPLICANT" />
+					<set field="partyWeffCtx.fromDate" from-field="weffCtx.estimatedStartDate" />
+					<set field="partyWeffCtx.thruDate" from-field="weffCtx.estimatedCompletionDate" />
+					<set field="partyWeffCtx.assignedByUserLoginId" from-field="parameters.userLogin.partyId" />
+					<set field="partyWeffCtx.statusId" value="PA_ASSIGNED" />
+					<call-service-asynch service-name="assignApplicantToRecruitmentTest"
+						in-map-name="partyWeffCtx" />
+				</iterate>
+			</then>
+		</if>
+		<!-- Assign Tester To Recruitment Plan -->
+		<set field="testerIdList" from-field="parameters.testerIdList" />
+		<iterate entry="testerId" list="testerIdList">
+			<set field="partyWeffCtx.userLogin" from-field="parameters.userLogin" />
+			<set field="partyWeffCtx.locale" from-field="parameters.locale" />
+			<set field="partyWeffCtx.partyId" value="${testerId}" />
+			<set field="partyWeffCtx.workEffortId" value="${workEffortId}" />
+			<set field="partyWeffCtx.roleTypeId" value="TESTER" />
+			<set field="partyWeffCtx.fromDate" from-field="weffCtx.estimatedStartDate" />
+			<set field="partyWeffCtx.thruDate" from-field="weffCtx.estimatedCompletionDate" />
+			<set field="partyWeffCtx.assignedByUserLoginId" from-field="parameters.userLogin.partyId" />
+			<set field="partyWeffCtx.statusId" value="PA_ASSIGNED" />
+			<call-service-asynch service-name="assignTesterToRecruitmentTest"
+				in-map-name="partyWeffCtx" />
+		</iterate>
+
+		<!-- Map Job Request To Recruitment Plan -->
+
+		<make-value value-field="workEffortReqFul" entity-name="WorkEffortRequestFulfillment" />
+		<set field="workEffortReqFul.jobRequestId" from-field="parameters.jobRequestId" />
+		<set field="workEffortReqFul.workEffortId" value="${workEffortId}" />
+		<create-value value-field="workEffortReqFul" />
+
+	</simple-method>
+
+	<simple-method method-name="assignTesterToRecruitmentTest"
+		short-description="Assign Party To Recruitment Test">
+		<call-service service-name="assignPartyToWorkEffort"
+			in-map-name="parameters">
+		</call-service>
+		<set field="partyId" from-field="parameters.partyId" />
+		<set field="workEffortId" from-field="parameters.workEffortId" />
+		<set field="authUser" value="thiep.levan@olbius.vn" />
+		<set field="authPass" value="thieplv1211" />
+		<set field="sendFrom" value="thiep.levan@olbius.vn" />
+		<entity-one value-field="workEffort" entity-name="WorkEffort">
+			<field-map field-name="workEffortId" />
+		</entity-one>
+		<set field="description" from-field="workEffort.description" />
+		<call-object-method obj-field="description"
+			method-name="toLowerCase" ret-field="description" />
+		<set field="subject" value="Mời tham gia ${description}" />
+
+		<entity-condition list="contactMechList" entity-name="PartyContactMechPurposeView">
+			<condition-list combine="and">
+				<condition-expr field-name="partyId" operator="equals"
+					value="${partyId}" />
+				<condition-expr field-name="contactMechPurposeTypeId"
+					operator="equals" value="PRIMARY_EMAIL" />
+			</condition-list>
+		</entity-condition>
+		<iterate entry="contactMech" list="contactMechList">
+			<set field="sendTo" from-field="contactMech.infoString" />
+		</iterate>
+		<entity-condition list="postalAddressList"
+			entity-name="WorkEffortPostalAddressView">
+			<condition-list combine="and">
+				<condition-expr field-name="workEffortId" operator="equals"
+					value="${workEffortId}" />
+			</condition-list>
+		</entity-condition>
+		<iterate entry="postalAddress" list="postalAddressList">
+			<set field="address" from-field="postalAddress.address1" />
+		</iterate>
+		<entity-condition list="emplPositionTypeList"
+			entity-name="WorkEffortEmplPositionTypeView">
+			<condition-list combine="and">
+				<condition-expr field-name="workEffortId" operator="equals"
+					value="${workEffortId}" />
+			</condition-list>
+		</entity-condition>
+		<iterate entry="emplPositionType" list="emplPositionTypeList">
+			<set field="emplPositionTypeDes" from-field="emplPositionType.description" />
+		</iterate>
+		<set field="noteInfo" value="Đánh giá ${description}" />
+		<field-to-result field="sendTo" />
+		<field-to-result field="partyId" />
+		<field-to-result field="description" />
+		<field-to-result field="workEffort.estimatedStartDate"
+			result-name="fromDate" />
+		<field-to-result field="workEffort.estimatedCompletionDate"
+			result-name="thruDate" />
+		<field-to-result field="authUser" />
+		<field-to-result field="authPass" />
+		<field-to-result field="sendFrom" />
+		<field-to-result field="address" />
+		<field-to-result field="subject" />
+		<field-to-result field="noteInfo"></field-to-result>
+		<field-to-result field="emplPositionTypeDes"
+			result-name="emplPositionType" />
+		<field-to-result field="workEffortId" />
+	</simple-method>
+
+	<simple-method method-name="assignApplicantToRecruitmentTest"
+		short-description="Assign Party To Recruitment Test">
+		<call-service service-name="assignPartyToWorkEffort"
+			in-map-name="parameters">
+		</call-service>
+		<set field="partyId" from-field="parameters.partyId" />
+		<set field="workEffortId" from-field="parameters.workEffortId" />
+		<set field="authUser" value="thiep.levan@olbius.vn" />
+		<set field="authPass" value="thieplv1211" />
+		<set field="sendFrom" value="thiep.levan@olbius.vn" />
+		<entity-one value-field="workEffort" entity-name="WorkEffort">
+			<field-map field-name="workEffortId" />
+		</entity-one>
+		<set field="description" from-field="workEffort.description" />
+		<call-object-method obj-field="description"
+			method-name="toLowerCase" ret-field="description" />
+		<set field="subject" value="Mời tham gia ${description}" />
+
+		<entity-condition list="contactMechList" entity-name="PartyContactMechPurposeView">
+			<condition-list combine="and">
+				<condition-expr field-name="partyId" operator="equals"
+					value="${partyId}" />
+				<condition-expr field-name="contactMechPurposeTypeId"
+					operator="equals" value="PRIMARY_EMAIL" />
+			</condition-list>
+		</entity-condition>
+		<iterate entry="contactMech" list="contactMechList">
+			<set field="sendTo" from-field="contactMech.infoString" />
+		</iterate>
+		<entity-condition list="postalAddressList"
+			entity-name="WorkEffortPostalAddressView">
+			<condition-list combine="and">
+				<condition-expr field-name="workEffortId" operator="equals"
+					value="${workEffortId}" />
+			</condition-list>
+		</entity-condition>
+		<iterate entry="postalAddress" list="postalAddressList">
+			<set field="address" from-field="postalAddress.address1" />
+		</iterate>
+		<entity-condition list="emplPositionTypeList"
+			entity-name="WorkEffortEmplPositionTypeView">
+			<condition-list combine="and">
+				<condition-expr field-name="workEffortId" operator="equals"
+					value="${workEffortId}" />
+			</condition-list>
+		</entity-condition>
+		<iterate entry="emplPositionType" list="emplPositionTypeList">
+			<set field="emplPositionTypeDes" from-field="emplPositionType.description" />
+		</iterate>
+		<field-to-result field="sendTo" />
+		<field-to-result field="partyId" />
+		<field-to-result field="description" />
+		<field-to-result field="workEffort.estimatedStartDate"
+			result-name="fromDate" />
+		<field-to-result field="workEffort.estimatedCompletionDate"
+			result-name="thruDate" />
+		<field-to-result field="authUser" />
+		<field-to-result field="authPass" />
+		<field-to-result field="sendFrom" />
+		<field-to-result field="address" />
+		<field-to-result field="subject" />
+		<field-to-result field="emplPositionTypeDes"
+			result-name="emplPositionType" />
+		<field-to-result field="workEffortId" />
+	</simple-method>
+
+	<simple-method method-name="createHrmUserLogin">
+		<set field="partyId" from-field="parameters.partyId"/>
+		<call-service service-name="createUserLogin" in-map-name="parameters" />
+		<now-timestamp field="now" />
+		<field-to-result field="now" result-name="fromDate" />
+		
+		<entity-condition list="contactMechList" entity-name="PartyContactMechPurposeView">
+			<condition-list combine="and">
+				<condition-expr field-name="partyId" operator="equals"
+					value="${partyId}" />
+				<condition-expr field-name="contactMechPurposeTypeId"
+					operator="equals" value="PRIMARY_EMAIL" />
+			</condition-list>
+		</entity-condition>
+		
+		<iterate entry="contactMech" list="contactMechList">
+			<set field="sendTo" from-field="contactMech.infoString" />
+		</iterate>
+
+		<property-to-field resource="general" property="mail.smtp.auth.user"
+			field="sendFrom" />
+		<property-to-field resource="general"
+			property="mail.smtp.auth.password" field="authPass" />
+		<set field="url" value="https://192.168.0.11:28443/hrolbius/control/main"/>
+		<set field="emailCtx.sendTo" value="${sendTo}" />
+		<set field="emailCtx.sendFrom" value="${authUser}" />
+		<set field="emailCtx.authPass" value="${authPass}" />
+		<set field="emailCtx.authUser" value="${authUser}" />
+		<set field="emailCtx.emailTemplateSettingId" value="USERLOGIN_NOTI" />
+		<set field="emailCtx.partyId" from-field="parameters.partyId" />
+		<set field="emailCtx.subject" value="[HRM-OLBIUS]Thông báo tài khoản đăng nhập hệ thống" />
+		<set field="emailCtx.bodyParameters.url" from-field="url" />
+		<set field="emailCtx.bodyParameters.partyId" from-field="parameters.partyId" />
+		<set field="emailCtx.bodyParameters.userName" from-field="parameters.userLoginId" />
+		<set field="emailCtx.bodyParameters.password" from-field="parameters.currentPassword" />
+		<call-service service-name="sendMailFromTemplateSetting" in-map-name="emailCtx"></call-service>
+	</simple-method>
+	
+	<simple-method method-name="createFullEmployment" short-description="Create Employment, Create EmplPosition, Create EmplPositionFulfillment, Create PartyRelationship">
+		<set field="emplmtCtx.fromDate" from-field="parameters.fromDate"/>
+		<set field="emplmtCtx.thruDate" from-field="parameters.thruDate"/>
+		<set field="emplmtCtx.partyIdFrom" from-field="parameters.partyIdFrom"/>
+		<set field="emplmtCtx.partyIdTo" from-field="parameters.partyIdTo"/>
+		<set field="emplmtCtx.roleTypeIdFrom" value="INTERNAL_ORGANIZATIO"/>
+		<set field="emplmtCtx.roleTypeIdTo" value="EMPLOYEE"/>
+		<call-service service-name="createEmployment" in-map-name="emplmtCtx"/>
+	</simple-method>
+	
+	<simple-method method-name="setNotifiForRecruiment" short-description="close service and create new for prosal person">
+		<set field="imap.ntfId" from-field="parameters.ntfId"/>
+		<log message="1111${parameters.ntfId}" level="info"/>
+		<call-service service-name="updateNotification" in-map-name="imap"></call-service>
+		<clear-field field="imap"/>
+		<set field="delegator" from-field="parameters.delegator"/>
+		<set field="deptId" from-field="parameters.partyId"/>
+		<call-class-method method-name="getManagerbyOrg" class-name="com.olbius.util.PartyUtil" ret-field="managerOrg">
+			<field field="deptId"/>
+			<field field="delegator" type="org.ofbiz.entity.Delegator"  />
+		</call-class-method>
+		<if-not-empty field="managerOrg">
+			<set field="imap.header" value="Kết quả phê duyệt kế hoạch tuyển dụng"/>
+			<set field="imap.partyId" from-field="managerOrg"></set>
+			<set field="imap.action" value="FindRecruitmentPlan" />
+			<now-timestamp field="imap.dateTime"/>
+ 			<call-service service-name="createNotification" in-map-name="imap"></call-service>
+ 			<clear-field field="imap"/>
+		</if-not-empty>
+	</simple-method>
+	
+	<simple-method method-name="createNotificationForPersonResquest" short-description=" create Notification For Person Resquest">
+		<entity-one value-field="requestJob" entity-name="JobRequest">
+			<field-map field-name="jobRequestId" from-field="parameters.jobRequestId"/>
+		</entity-one>
+		
+		<set field="orgId" from-field="requestJob.partyId"/>
+		<set field="delegator" from-field="parameters.delegator"/>
+		<call-class-method method-name="getManagerbyOrg" class-name="com.olbius.util.PartyUtil" ret-field="managerOrg">
+			<field field="orgId"/>
+			<field field="delegator" type="org.ofbiz.entity.Delegator"  />
+		</call-class-method>
+		
+		<if-not-empty field="managerOrg">
+			<set field="inmap.partyId" from-field="managerOrg"/>
+			<set field="inmap.action" from-field="parameters.action"/>
+			<set field="inmap.targetLink" from-field="parameters.targetLink"/>
+			<set field="inmap.header" value="Kết quả phê duyệt yêu cầu [${parameters.jobRequestId}]"/>
+			<set field="inmap.dateTime" from-field="parameters.dateTime" />
+			<call-service service-name="createNotification" in-map-name="inmap"></call-service>
+			<clear-field field="inmap"/>
+		</if-not-empty>
+	</simple-method>
+	
+	<simple-method method-name="createEmploymentDirect" short-description="Create person in jstree">
+		<set field="imap.roleTypeIdFrom" from-field="parameters.roleTypeIdFrom"/>
+		<set field="imap.roleTypeIdTo" from-field="parameters.roleTypeIdTo"/>
+		<set field="imap.partyIdTo" from-field="parameters.partyIdTo"/>
+		<if-not-empty field="parameters.fromDate">
+			<set field="pFromDate" from-field="parameters.fromDate"/>
+			<else>
+				<now-timestamp field="pFromDate"/>
+			</else>
+		</if-not-empty>
+		<find-by-and list="emplList" map="imap" entity-name="Employment"/>
+		<if-not-empty field="emplList">
+			<iterate entry="empl" list="emplList">
+				<if>
+					<condition>
+						<or>
+							<if-empty field="empl.thruDate"></if-empty>
+							<if-compare-field to-field="pFromDate" operator="greater-equals" field="empl.thruDate"></if-compare-field>
+						</or>
+					</condition>
+					<then>
+						<set field="empl.thruDate" from-field="pFromDate"/>
+						<store-value value-field="empl"/>
+						<entity-one value-field="payEntity" entity-name="PayHistory">
+							<field-map field-name="roleTypeIdFrom" from-field="empl.roleTypeIdFrom"/>
+							<field-map field-name="roleTypeIdTo" from-field="empl.roleTypeIdTo"/>
+							<field-map field-name="partyIdTo" from-field="empl.partyIdTo"/>
+							<field-map field-name="partyIdFrom" from-field="empl.partyIdFrom"/>
+							<field-map field-name="fromDate" from-field="empl.fromDate"/>
+						</entity-one>
+						<if-not-empty field="payEntity">
+							<set field="payEntity.thruDate" from-field="pFromDate"/>
+							<store-value value-field="payEntity"/>
+						</if-not-empty>
+					</then>
+				</if>
+			</iterate>
+		</if-not-empty>
+		<clear-field field="imap"/>
+		<make-value entity-name="Employment" value-field="newEntity"/>
+        <set-pk-fields value-field="newEntity" map="parameters"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <if-empty field="newEntity.fromDate">
+            <now-timestamp field="nowTimeStamp"/>
+            <set field="newEntity.fromDate" from-field="nowTimeStamp"/>
+        </if-empty>
+        <create-value value-field="newEntity"/>
+        <set-service-fields service-name="createPayHistory" map="newEntity" to-map="createPayHistoryMap"/>
+        <call-service service-name="createPayHistory" in-map-name="createPayHistoryMap"/>
+	</simple-method>
+	
+	<simple-method method-name="createTPNotification" short-description="Create Notification training" >
+		<if-not-empty field="parameters.flad">
+			<set field="imap.header" from-field="parameters.header"/>
+			<set field="imap.action" from-field="parameters.action" />
+			<set field="imap.dateTime" from-field="parameters.dateTime"/>
+			<set field="imap.state" from-field="parameters.state" />
+			<set field="imap.partyId" from-field="parameters.partyId" />
+			<set field="imap.targetLink" from-field="parameters.targetLink"/>
+			<call-service service-name="createNotification" in-map-name="imap" ></call-service>
+			<clear-field field="imap"/>
+		</if-not-empty>
+	</simple-method>
+	
+	<simple-method method-name="updateWorkEffortPartyAssignment" short-description="Update WorkEffortPartyAssignment">
+		<entity-one entity-name="WorkEffortPartyAssignment" value-field="lookedUpValue" />
+		<set-nonpk-fields value-field="lookedUpValue" map="parameters" />
+		<store-value value-field="lookedUpValue" />
+	</simple-method>
+</simple-methods>	

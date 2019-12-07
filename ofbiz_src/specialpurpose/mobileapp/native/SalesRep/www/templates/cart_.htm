@@ -1,0 +1,109 @@
+<ion-view view-title="{{header}}">
+	<ion-nav-buttons side="left">
+		<button class="button button-clear" ng-click="showDeleteCartItem()" ng-if="products.length && !orderId">
+            <i class='icon ion-ios-minus-outline'>&nbsp;</i>
+        </button>
+        <button class="button button-clear" ng-click="undoCartItem()" ng-if="deleted.length">
+            <i class='icon ion-reply'>&nbsp;</i>
+        </button>
+	</ion-nav-buttons>
+	<ion-nav-buttons side="right">
+		<button class="button buttons" ng-click="viewCurrentOrder()" ng-if="isOrderExist">
+			<i class="icon fa fa-eye"></i>
+		</button>
+		<button ng-click="changeState('tab.createorder')" class="button"><i class="icon fa fa-cart-plus"></i></button>
+		<button class="button" ng-click="checkoutOrder()" ng-if="!isOrderExist && products.length"><i class="icon ion-checkmark"></i></button>
+	</ion-nav-buttons>
+	<ion-content padding="true" scroll="false">
+		<ion-scroll direction="y" class="full-container">
+			<ion-list can-swipe="enableSwipe" class='cart' show-delete="showDeleteButton"  ng-if="products.length">
+				<ion-item class='item-divider'>
+					<i class='fa fa-shopping-cart assertive'></i> {{getLabel('Cart')}}
+				</ion-item>
+				<ion-item ng-repeat="product in products | filter:search track by $index "
+				class='item-thumbnail-left item-icon-right cart-item' ng-if="product.priceVAT != 0"
+				ng-class="{'product-not-available' : !product.available}">
+					<div
+					ng-click="setQuantity(product, 'quantity', true)"
+					ng-swipe-left="setQuantity(product, 'quantity', false, 0)"
+					ng-swipe-right="setQuantity(product, 'quantity', true)"
+					on-hold="handleHoldQuantity(product, 'quantity', true)"
+					on-release="handleReleaseQuantity(product, 'quantity', true)"  class='product-content cart-content'>
+						<div class='cart-content-img'>
+							<img src="assets/images/default.jpg" ng-if="!product.image && !product.image_small">
+							<img ng-src="{{imageUrl}}{{product.image}}" ng-if="product.image">
+							<img ng-src="{{imageUrl}}{{product.image_small}}" ng-if="!product.image && product.image_small">
+						</div>
+						<div class='product-content-text'>
+							<h3>{{product.productName}}</h3>
+							<p>
+								<i class='fa fa-money'></i>&nbsp;{{formatNumberDecimal(product.priceVAT)}}<sup>đ</sup>
+							</p>
+						</div>
+
+					</div>
+					<div class="cartquantity">
+						<input type="number" name="input" class="number" ng-keyup="changeQuantity(product, 'quantity')"  placeholder="0" ng-model="product.quantity" min="0" required>
+						<div class='regulator'>
+							<div class="rexsub" ng-class="{'disabled': product.quantity==0}"
+							ng-click="setQuantity(product, 'quantity', false, 0)"
+							on-hold="handleHoldQuantity(product, 'quantity', false, 0)"
+							on-release="handleReleaseQuantity(product, 'quantity', false)">
+								<i class="ion-ios-minus-outline"></i>
+							</div>
+							<div class="rexadd" ng-click="setQuantity(product, 'quantity', true)"
+							on-hold="handleHoldQuantity(product, 'quantity', true)"
+							on-release="handleReleaseQuantity(product, 'quantity', true)">
+								<i class="ion-ios-plus-outline"></i>
+							</div>
+						</div>
+					</div>
+					<ion-delete-button class="ion-minus-circled" ng-click="removeCartItem($index)">
+					</ion-delete-button>
+				</ion-item>
+			</ion-list>
+			<ion-list class='cart'  ng-if="cart.promotions.length">
+				<ion-item class='item-divider'>
+					<i class='fa fa-tag green'></i> {{getLabel('Promotion')}}
+				</ion-item>
+				<ion-item ng-repeat="product in cart.promotions track by $index "
+				class='item-thumbnail-left item-icon-right cart-item promotion-item'>
+					<div class='product-content cart-content'>
+						<div class='cart-content-img'>
+							<img src="assets/images/default.jpg" ng-if="!product.image && !product.image_small">
+							<img ng-src="{{imageUrl}}{{product.image}}" ng-if="product.image">
+							<img ng-src="{{imageUrl}}{{product.image_small}}" ng-if="!product.image && product.image_small">
+						</div>
+						<div class='product-content-text'>
+							<h3>{{product.productCode}} - {{product.productName}}</h3>
+						</div>
+					</div>
+					<div class="cartquantity">
+						<div class='middle-wrapper'>
+							<div class='middle-content'>
+								{{product.productQuantity}}
+							</div>
+						</div>
+					</div>
+				</ion-item>
+			</ion-list>
+			<ion-list ng-if="products.length">
+				<ion-item>
+					<i class="icon fa fa-shopping-cart"></i> {{getLabel('CartSubTotal')}} <span class="item-note order-item">{{formatNumberDecimal(cart.totalAmount)}}<sup>đ</sup></span>
+				</ion-item>
+				<ion-item>
+					<i class="icon fa fa-tag"></i> {{getLabel('Discount')}} <span class="item-note order-item">{{formatNumberDecimal(cart.discountAmount)}}<sup>đ</sup></span>
+				</ion-item>
+				<ion-item>
+					<i class="icon fa fa-percent"></i> {{getLabel('TaxTotal')}} <span class="item-note order-item">{{formatNumberDecimal(cart.taxAmount)}}<sup>đ</sup></span>
+				</ion-item>
+				<ion-item>
+					<i class="icon fa fa-money"></i> {{getLabel('TotalPayment')}} <span class="item-note order-item">{{formatNumberDecimal(cart.grandTotal)}}<sup>đ</sup></span>
+				</ion-item>
+			</ion-list>
+			<p class='text-center' ng-if="!products.length">
+				{{getLabel('CartEmpty')}}
+			</p>
+		</ion-scroll>
+	</ion-content>
+</ion-view>

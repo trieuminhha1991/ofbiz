@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-screen.xsd">
+
+    <screen name="main">
+        <section>
+            <actions>
+                <set field="headerItem" value="main"/><!-- this highlights the selected menu-item with name "main" -->
+            </actions>
+            <widgets>
+                <decorator-screen name="BaseSalesMtlCommonDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<label>WELCOME!</label>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+	
+	<screen name="ViewRetailOutletMap">
+	    <section>
+			<actions>
+			    <set field="titleProperty" value="BSViewRetailOutletMap"/>
+			    <set field="selectedMenuItem" value="retailOutlet" />
+				<set field="selectedSubMenuItem" value="ViewRetailOutletMap"/>
+				
+				<set field="layoutSettings.javaScripts[+0]" value="/crmresources/js/generalUtils.js" global="true"/>
+				<script location="component://basesalesmtl/webapp/basesalesmtl/WEB-INF/actions/sup/coverage.groovy"></script>
+				<set field="sync" value="Y"/>
+			</actions>
+	        <widgets>
+	            <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-olbius-has-permission/>
+                            </condition>
+                            <actions>
+                                <service service-name="getListPartyCustomers" result-map="agents"></service>
+                            </actions>
+                            <widgets>
+                                <platform-specific>
+                                    <html>
+                                        <html-template location="component://basesalesmtl/webapp/basesalesmtl/customer/ViewRetailOutletMap.ftl"/>
+                                    </html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+                                <container style="alert alert-info">
+                                    <label text="${uiLabelMap.BSYouHavenotViewPermission}"/>
+                                </container>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+	            </decorator-screen>
+	        </widgets>
+	    </section>
+	</screen>
+	
+	<screen name="EmployeeDSA">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="employee" />
+				<set field="selectedSubMenuItem" value="EmployeeDSA"/>
+				<set field="titleProperty" value="EmployeeDSAList"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonDirectoryDecorator"
+					location="component://basehr/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<widgets>
+								<section>
+									<actions>
+										<entity-condition list="genderList" entity-name="Gender"></entity-condition>
+										<entity-condition list="statusWorkingList" entity-name="StatusItem">
+											<condition-expr field-name="statusTypeId" operator="equals" value="EMPL_WORK_STT"/>
+											<order-by field-name="sequenceId"/>
+										</entity-condition>
+										<entity-condition list="listStateProvinceGeoVN" entity-name="GeoAssocAndGeoTo">
+									         <condition-list>
+										          <condition-expr field-name="geoIdFrom" value="VNM"/>
+										          <condition-expr field-name="geoAssocTypeId" value="REGIONS"/>
+										          <condition-expr field-name="geoTypeId" value="PROVINCE"/>
+									         </condition-list>
+									         <order-by field-name="geoName"/>
+								        </entity-condition>
+										<entity-condition list="terminationReasonList" entity-name="TerminationReason"></entity-condition>
+									</actions>
+									<widgets>
+										<platform-specific>
+											<html>
+												<html-template location="component://basehr/webapp/basehr/generalMgr/ViewEmplList.ftl"/>
+											</html>
+										</platform-specific>
+									</widgets>
+								</section>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="SalesDepartment">
+    	<section>
+   			<actions>
+   				<set field="selectedMenuItem" value="organizationUnit" />
+				<set field="selectedSubMenuItem" value="salesDepartment"/>
+				<set field="titleProperty" value="CommonDepartment"/>
+   			</actions>
+   			<widgets>
+   				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<section>
+		    				<condition>
+								<if-has-permission permission="BASEHR" action="_VIEW"/>
+							</condition>
+		    				<widgets>
+		    					<screenlet title="${uiLabelMap.CommonDepartment}">
+			    					<platform-specific>
+					                   	<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/common/salesDepartment.ftl"/></html>
+					                </platform-specific>
+		    					</screenlet>
+			                </widgets>
+		    				<fail-widgets>
+		    					<container style="alert alert-info">
+		               				<label text="${uiLabelMap.BSYouHavenotViewPermission}"/>
+		               			</container>
+		    				</fail-widgets>
+	    				</section>
+		           	</decorator-section>
+		       	</decorator-screen>
+   			</widgets>
+   		</section>
+    </screen>
+	
+	<screen name="SalesmanApplication">
+    	<section>
+   			<actions>
+   				<set field="selectedMenuItem" value="settingSales" />
+				<set field="selectedSubMenuItem" value="SalesmanApplication"/>
+				<set field="titleProperty" value="BSSalesmanApplication"/>
+   			</actions>
+   			<widgets>
+   				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<section>
+		    				<condition>
+								<if-olbius-has-permission/>
+							</condition>
+		    				<widgets>
+		    					<screenlet title="${uiLabelMap.BSSalesmanApplication}">
+			    					<platform-specific>
+					                   	<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/common/salesmanApplication.ftl"/></html>
+					                </platform-specific>
+		    					</screenlet>
+			                </widgets>
+		    				<fail-widgets>
+		    					<container style="alert alert-info">
+		               				<label text="${uiLabelMap.BSYouHavenotViewPermission}"/>
+		               			</container>
+		    				</fail-widgets>
+	    				</section>
+		           	</decorator-section>
+		       	</decorator-screen>
+   			</widgets>
+   		</section>
+    </screen>
+	
+	<screen name="CheckInHistory">
+	<section>
+		<actions>
+			<set field="selectedMenuItem" value="employee" />
+			<set field="selectedSubMenuItem" value="CheckInHistory" />
+			<set field="titleProperty" value="CheckInHistory" />
+		</actions>
+		<widgets>
+			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+				<decorator-section name="body">
+					<section>
+						<condition>
+							<if-olbius-has-permission />
+						</condition>
+						<widgets>
+							<platform-specific>
+								<html>
+									<html-template location="component://basesalesmtl/webapp/basesalesmtl/employee/CheckInHistory.ftl" />
+								</html>
+							</platform-specific>
+						</widgets>
+						<fail-widgets>
+							<container style="alert alert-info">
+								<label text="${uiLabelMap.BSYouHavenotViewPermission}" />
+							</container>
+						</fail-widgets>
+					</section>
+				</decorator-section>
+			</decorator-screen>
+		</widgets>
+	</section>
+</screen>
+	
+</screens>

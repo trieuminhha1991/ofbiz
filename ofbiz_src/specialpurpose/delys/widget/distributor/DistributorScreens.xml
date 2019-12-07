@@ -1,0 +1,1090 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	<screen name="AgreementList">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="otherDistributor" />
+				<set field="selectedSubMenuItem" value="agreementList" />
+				<set field="navMenuName" value="SearchDelysSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/DelysMenus.xml" />
+				<set field="titleProperty" value="PageTitleListOrderItems" />
+				<set field="tabButtonItem" value="OrderMangement"/>
+				<service service-name="getAgreementByUserLogin" auto-field-map="true" result-map="resultAgreement"/>
+				<!-- <condition-list combine="or">
+						<condition-expr field-name="partyIdFrom" from-field="userLogin.partyId"/>
+						<condition-expr field-name="partyIdTo" from-field="userLogin.partyId"/>
+					</condition-list> -->
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<screenlet title="${uiLabelMap.DAAgreementList}">
+                    		<platform-specific>
+	                        	<html><html-template location="component://delys/webapp/delys/distributor/agreementList.ftl"/></html>
+	                        </platform-specific>
+                    	</screenlet>
+                        <!-- <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                            <decorator-section name="search-options">
+                                <include-form name="FindAgreements" location="component://delys/widget/distributor/DistributorForms.xml"/>
+                            </decorator-section>
+                            <decorator-section name="search-results">
+                                <include-form name="ListAgreements" location="component://delys/widget/distributor/DistributorForms.xml"/>
+                            </decorator-section>
+                        </decorator-screen> -->
+                    </decorator-section>
+                </decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="AgreementOverview">
+		<section>
+			<condition>
+				<not><if-empty field="parameters.agreementId"/></not>
+			</condition>
+			<actions>
+				<set field="selectedMenuItem" value="otherDistributor" />
+				<set field="selectedSubMenuItem" value="agreementList" />
+				<set field="navMenuName" value="SearchDelysSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/DelysMenus.xml" />
+				<set field="titleProperty" value="PageTitleListOrderItems" />
+				<set field="tabButtonItem" value="OrderMangement"/>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/distributor/GetAgreementOverview.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<screenlet title="${uiLabelMap.DAAgreementInformation}">
+                    		<platform-specific>
+	                        	<html><html-template location="component://delys/webapp/delys/distributor/agreementOverview.ftl"/></html>
+	                        </platform-specific>
+                    	</screenlet>
+                    </decorator-section>
+                </decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<screenlet title="${uiLabelMap.DAAgreementInformation}">
+                    		<container style="alert alert-info">
+								<label text="${uiLabelMap.DAAgreementNotAvailable}" />
+							</container>
+                    	</screenlet>
+                    </decorator-section>
+                </decorator-screen>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="FindInvoiceAggregate">
+        <section>
+            <actions>            	
+            	<set field="navMenuName" value="InvoiceSubTabBarLib"/>
+    			<set field="navMenuLocation" value="component://accounting/widget/AccountingMenus.xml"/>            	
+                <set field="headerItem" value="invoices"/>
+                <set field="tabButtonItem" value="find"/>
+                <set field="titleProperty" value="accFindDistributors"/>
+                <set field="selectedMenuItem" value="distributorBalance"/>
+                <set field="selectedSubMenuItem" value=""/>
+                <entity-condition list="listInvoiceType" entity-name="InvoiceType">
+                	<condition-expr field-name="parentTypeId" operator="equals" value="PURCHASE_INVOICE"/>
+                </entity-condition>
+                <entity-condition list="listStatusItem" entity-name="StatusItem">
+                	<condition-expr field-name="statusTypeId" operator="equals" value="INVOICE_STATUS"/>
+                </entity-condition>                
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                        	<actions>
+                        		<set field="partyIdTemp" from-field="parameters.partyIdFrom"/>
+                        		<set field="parameters.roleTypeId" value="DELYS_DISTRIBUTOR"/>
+                        	</actions>
+                            <widgets>
+                              <section>
+								<actions>
+									<set field="parameters.sortField" from-field="parameters.sortField" default-value="-invoiceDate"/>
+									<set field="PartyId" value="company"/>	
+									<set field="partyIdFrom" from-field="parameters.partyIdFrom"/>
+									<set field="partyIdTemp" from-field="parameters.partyIdFrom"/>
+									<set field="parameters.parentTypeId" value="PURCHASE_INVOICE"/>																															
+									<set field="parameters.statusId" value="INVOICE_IN_PROCESS"/>
+								</actions>
+								<widgets>											
+									<screenlet id="apInvoices" title="${uiLabelMap.accReceivable}">
+			                            <platform-specific>
+		                                    <html>
+				                        		<html-template location="component://delys/webapp/delys/distributor/listCDArInvoicesJQ.ftl"/>
+				                        	</html>
+		                                </platform-specific>
+			                            <!-- <section>
+			                            	<actions>
+			                            		<service service-name="performFind" result-map="result">
+			                            			<field-map field-name="inputFields" from-field="parameters"/>
+	                								<field-map field-name="entityName" value="InvoiceAndTypeAndRole"/>
+			                            		</service>
+			                            		<script location="component://delys/webapp/delys/WEB-INF/actions/accounting/sumupResultListIt.groovy"/>
+			                            	</actions>
+			                            	<widgets>					                            					                            							                        					                            	 	
+			                            		 <label>${uiLabelMap.accTotalInvoicesValue}: </label> <label style="color : red">${totalValue}</label> 
+			                            		 <label>${uiLabelMap.accReceivableToApplyTotal}: </label> <label style="color : red">${totalToApply}</label>					                            		 
+			                            	</widgets>
+			                            </section> -->
+			                        </screenlet>
+		                        </widgets>
+	                        </section>
+	                        <section>
+								<actions>
+									<set field="parameters.sortField" from-field="parameters.sortField" default-value="-invoiceDate"/>
+									<set field="parameters.parentTypeId" value="SALES_INVOICE"/>											
+									<set field="toPartyId" from-field="${partyIdTemp}"/>																						 
+									<set field="partyIdFrom" value="company"/>
+									<set field="parameters.statusId" value="INVOICE_IN_PROCESS"/>
+								</actions>
+								<widgets>
+									<screenlet id="arInvoices" title="${uiLabelMap.accPayable}">
+			                            <platform-specific>
+		                                    <html>
+				                        		<html-template location="component://delys/webapp/delys/distributor/listCDApInvoicesJQ.ftl"/>
+				                        	</html>
+		                                </platform-specific>
+			                            <!-- <section>
+			                            	<actions>
+			                            		<service service-name="performFind" result-map="result">
+			                            			<field-map field-name="inputFields" from-field="parameters"/>
+	                								<field-map field-name="entityName" value="InvoiceAndTypeAndRole"/>
+			                            		</service>
+			                            		<script location="component://delys/webapp/delys/WEB-INF/actions/accounting/sumupResultListIt.groovy"/>
+			                            	</actions>
+			                            	<widgets>
+			                            		 <label>${uiLabelMap.accTotalInvoicesValue}: </label> <label style="color : red">${totalValue}</label> 
+			                            		 <label>${uiLabelMap.accPayableToApplyTotal}: </label> <label style="color : red">${totalToApply}</label>					                            		 
+			                            	</widgets>
+			                            </section> -->
+			                        </screenlet>
+		                        </widgets>
+	                        </section>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="FindProductDis">
+    	<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="findProductDis"/>
+                <set field="selectedSubMenuItem" value=""/>
+               	<set field="layoutSettings.javaScripts[+0]" value="/images/jquery/ui/development-bundle/external/jquery.cookie.js" global="true"/>
+                <set field="layoutSettings.javaScripts[+0]" value="/images/jquery/plugins/jsTree/jquery.jstree.js" global="true"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/distributor/CategoryTree.groovy" />
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<screenlet title="${uiLabelMap.DAListCategoryAndProduct}">
+<!--                     		<platform-specific> -->
+<!-- 			                   	<html><html-template location="component://delys/webapp/delys/distributor/CategoryTree.ftl"/></html> -->
+<!-- 			                </platform-specific> -->
+			    			<platform-specific>
+			                   	<html><html-template location="component://delys/webapp/delys/distributor/productList.ftl"/></html>
+			                </platform-specific>
+		                </screenlet>
+		           	</decorator-section>
+		       	</decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="ProductCategoryMembersAjax">
+    	<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="findProductDis"/>
+                <set field="selectedSubMenuItem" value=""/>
+                <property-map resource="DelysAdminUiLabels" map-name="uiLabelMap" global="true"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/distributor/ProductCategoryMembersAjax.groovy"/>
+    		</actions>
+    		<widgets>
+            	<platform-specific>
+                   	<html><html-template location="component://delys/webapp/delys/distributor/productCategoryMembersAjax.ftl"/></html>
+                </platform-specific>
+  			</widgets>
+    	</section>
+    </screen>
+    <screen name="FindSalesmanDis">
+    	<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="findSalesmanDis"/>
+                <set field="selectedSubMenuItem" value=""/>
+                <entity-condition list="listSalesman" entity-name="PartyRelationshipAndDetail" filter-by-date="true" distinct="true">
+                	<condition-list>
+                		<condition-expr field-name="partyIdFrom" from-field="userLogin.partyId" />
+                		<condition-expr field-name="roleTypeIdFrom" value="DELYS_DISTRIBUTOR"/>
+                		<condition-expr field-name="roleTypeIdTo" value="DELYS_SALESMAN_GT"/>
+                	</condition-list>
+                </entity-condition>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<screenlet title="${uiLabelMap.DAListSalesman}">
+			    			<platform-specific>
+			                   	<html><html-template location="component://delys/webapp/delys/distributor/listSalesmanJQ.ftl"/></html>
+			                </platform-specific>
+		                </screenlet>
+		           	</decorator-section>
+		       	</decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="FindCustomerDis">
+    	<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="findCustomerDis"/>
+                <set field="selectedSubMenuItem" value=""/>
+                <set field="titleProperty" value="DAListCustomer"/>
+<!--                 <script location="component://delys/webapp/delys/WEB-INF/actions/distributor/GetCustomersMember.groovy"/> -->
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+			    			<platform-specific>
+			                   	<html><html-template location="component://delys/webapp/delys/distributor/customerList.ftl"/></html>
+			                </platform-specific>
+		           	</decorator-section>
+		       	</decorator-screen>
+    		</widgets>
+    	</section>
+   	</screen>
+   	<screen name="FindProductStoreDis">
+   		<section>
+   			<actions>
+   				<set field="selectedMenuItem" value="findProductStoreDis"/>
+                <set field="selectedSubMenuItem" value=""/>
+                <set field="titleProperty" value="DAListProductStore"/>
+   				<entity-condition list="listProductStore" entity-name="ProductStoreRoleDetail" filter-by-date="true">
+   					<condition-list>
+   						<condition-expr field-name="partyId" from-field="userLogin.partyId"/>
+   						<condition-expr field-name="roleTypeId" value="OWNER"/>
+   					</condition-list>
+   				</entity-condition>
+   			</actions>
+   			<widgets>
+   				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+			    			<platform-specific>
+			                   	<html><html-template location="component://delys/webapp/delys/distributor/productStoreList.ftl"/></html>
+			                </platform-specific>
+		           	</decorator-section>
+		       	</decorator-screen>
+   			</widgets>
+   		</section>
+   	</screen>
+   	<screen name="ViewProductStoreDis">
+   		<section>
+   			<actions>
+   				<set field="selectedMenuItem" value="findProductStoreDis"/>
+                <set field="selectedSubMenuItem" value=""/>
+                <set field="productStoreId" from-field="parameters.productStoreId"/>
+                <entity-one value-field="productStoreSelected" entity-name="ProductStore">
+                	<field-map field-name="productStoreId" from-field="productStoreId"/>
+                </entity-one>
+                <!-- <entity-condition list="productStoreRoles" entity-name="ProductStoreRole">
+                	<condition-expr field-name="productStoreId" from-field="productStoreId"/>
+                </entity-condition> -->
+                <entity-condition entity-name="ProductStorePromoApplFilter" list="productStorePromoAndAppls">
+                    <condition-list combine="and">
+                        <condition-expr field-name="productStoreId" from-field="productStoreId"/>
+                    </condition-list>
+                    <order-by field-name="sequenceNum"/>
+                    <order-by field-name="productPromoId"/>
+                </entity-condition>
+                <entity-and entity-name="ProductStoreFacility" list="productStoreFacilities">
+	                <field-map field-name="productStoreId" from-field="productStoreId"/>
+	                <order-by field-name="sequenceNum"/>
+	                <order-by field-name="fromDate"/>
+	            </entity-and>
+   			</actions>
+   			<widgets>
+   				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<screenlet title="${uiLabelMap.DAInformationProductStore}">
+			    			<platform-specific>
+			                   	<html><html-template location="component://delys/webapp/delys/distributor/productStoreOverView.ftl"/></html>
+			                </platform-specific>
+		                </screenlet>
+		           	</decorator-section>
+		       	</decorator-screen>
+   			</widgets>
+   		</section>
+   	</screen>
+    <screen name="FindFacilityDis">
+    	<section>
+   			<actions>
+   				<set field="selectedMenuItem" value="findFacilityDis"/>
+                <set field="selectedSubMenuItem" value=""/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/distributor/GetFacilities.groovy"/>
+                <set field="titleProperty" value="DAListProductStoreFacility"/>
+   			</actions>
+   			<widgets>
+   				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<screenlet>
+			    			<platform-specific>
+			                   	<html><html-template location="component://delys/webapp/delys/distributor/facilityList.ftl"/></html>
+			                </platform-specific>
+		                </screenlet>
+		           	</decorator-section>
+		       	</decorator-screen>
+   			</widgets>
+   		</section>
+    </screen>
+    <screen name="CommonFacilityDecorator">
+    	<section>
+    		<condition>
+    			<not>
+    				<if-empty field="parameters.facilityId"/>
+    			</not>
+    		</condition>
+    		<actions>
+    			<set field="tabBarName" value="FacilityTabBar" global="true" />
+				<set field="tabBarLocation" value="component://delys/widget/distributor/DistributorMenus.xml" global="true" />
+				<!-- <set field="subTabBarName" value="FacilityTabBarAdvance" global="true" />
+				<set field="subTabBarLocation" value="component://delys/widget/distributor/DistributorMenus.xml" global="true" /> -->
+				<!-- <set field="extraFunctionNamePage" value="${${extraFunctionName}}" />
+				<set field="titleHeaderLocation" value="" /> -->
+				<set field="facilityId" from-field="parameters.facilityId"/>
+				<entity-one value-field="facilitySelected" entity-name="Facility">
+                	<field-map field-name="facilityId" from-field="parameters.facilityId"/>
+                </entity-one>
+				<set field="titleHeaderContent" value="${facilitySelected.facilityName} [${parameters.facilityId}]" />
+    			<set field="printTabBar" value="true"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+    					<decorator-section-include name="body"/>
+   					</decorator-section>
+				</decorator-screen>
+    		</widgets>
+    		<fail-widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+    					<decorator-section-include name="body"/>
+   					</decorator-section>
+				</decorator-screen>
+    		</fail-widgets>
+    	</section>
+    </screen>
+    <screen name="EditFacilityDis">
+    	<section>
+    		<actions>
+    			<set field="tabButtonItem" value="editFacility"/>
+    			<set field="selectedMenuItem" value="findFacilityDis"/>
+                <set field="selectedSubMenuItem" value=""/>
+                <set field="facilityId" from-field="parameters.facilityId"/>
+                <entity-one value-field="facilitySelected" entity-name="Facility">
+                	<field-map field-name="facilityId" from-field="parameters.facilityId"/>
+                </entity-one>
+    		</actions>
+    		<widgets>
+    			<section>
+    				<condition><not><if-empty field="facilitySelected"/></not></condition>
+    				<widgets>
+    					<decorator-screen name="CommonFacilityDecorator">
+		    				<decorator-section name="body">
+		    					<screenlet title="${uiLabelMap.DAInformation}">
+		    						<platform-specific>
+					                   	<html><html-template location="component://delys/webapp/delys/distributor/facilityOverview.ftl"/></html>
+					                </platform-specific>
+		    					</screenlet>
+		    				</decorator-section>
+		    			</decorator-screen>
+    				</widgets>
+    				<fail-widgets>
+    					<container style="alert alert-info">
+    						<label>${uiLabelMap.DANoDataToDisplay}</label>
+    					</container>
+    				</fail-widgets>
+    			</section>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="ViewContactMechsDis">
+    	<section>
+    		<actions>
+    			<set field="tabButtonItem" value="viewContactMechs"/>
+    			<set field="selectedMenuItem" value="findFacilityDis"/>
+                <set field="selectedSubMenuItem" value=""/>
+                <set field="facilityId" from-field="parameters.facilityId"/>
+                <script location="component://product/webapp/facility/WEB-INF/actions/facility/ViewContactMechs.groovy"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="CommonFacilityDecorator">
+    				<decorator-section name="body">
+    					<screenlet title="${uiLabelMap.PartyContactMechs}" navigation-menu-name="ViewContactMechsSubTabBar">
+                        	<include-menu location="component://delys/widget/distributor/DistributorMenus.xml" name="ViewContactMechsSubTabBar"/>
+                            <platform-specific>
+                            	<html><html-template location="component://delys/webapp/delys/distributor/viewContactMechs.ftl"/></html>
+                           	</platform-specific>
+    					</screenlet>
+    				</decorator-section>
+    			</decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="EditContactMechDis">
+    	<section>
+    		<actions>
+    			<set field="tabButtonItem" value="viewContactMechs"/>
+    			<set field="selectedMenuItem" value="findFacilityDis"/>
+                <set field="selectedSubMenuItem" value=""/>
+    			<script location="component://delys/webapp/delys/WEB-INF/actions/distributor/EditContactMech.groovy"/>
+    			<set field="dependentForm" value="editcontactmechform"/>
+                <set field="paramKey" value="countryGeoId"/>
+                <set field="mainId" value="countryGeoId"/>
+                <set field="dependentId" value="stateProvinceGeoId"/>
+                <set field="requestName" value="getAssociatedStateList"/>
+                <set field="responseName" value="stateList"/>
+                <set field="dependentKeyName" value="geoId"/>
+                <set field="descName" value="geoName"/>
+                <set field="selectedDependentOption" from-field="mechMap.postalAddress.stateProvinceGeoId" default-value="_none_"/>
+                <set field="facilityId" from-field="parameters.facilityId"/>
+                <entity-one entity-name="Facility" value-field="facility"/>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="CommonFacilityDecorator">
+    				<decorator-section name="body">
+		    			<section>
+		    				<condition><if-empty field="parameters.contactMechId"/></condition>
+		    				<widgets>
+		    					<screenlet title="${uiLabelMap.DANewContactMech}" navigation-menu-name="ViewContactMechsSubTabBar">
+		                        	<include-menu location="component://delys/widget/distributor/DistributorMenus.xml" name="ViewContactMechsSubTabBar"/>
+		                            <platform-specific>
+		                            	<html>
+		                            		<html-template location="component://common/webcommon/includes/setDependentDropdownValuesJs.ftl"/>
+		                            		<html-template location="component://delys/webapp/delys/distributor/editContactMech.ftl"/>
+		                           		</html>
+		                           	</platform-specific>
+		    					</screenlet>
+    						</widgets>
+    						<fail-widgets>
+		    					<screenlet title="${uiLabelMap.DAEditContactMech}" navigation-menu-name="ViewContactMechsSubTabBar">
+		                        	<include-menu location="component://delys/widget/distributor/DistributorMenus.xml" name="ViewContactMechsSubTabBar"/>
+		                            <platform-specific>
+		                            	<html>
+		                            		<html-template location="component://common/webcommon/includes/setDependentDropdownValuesJs.ftl"/>
+		                            		<html-template location="component://delys/webapp/delys/distributor/editContactMech.ftl"/>
+		                           		</html>
+		                           	</platform-specific>
+		    					</screenlet>
+		    				</fail-widgets>
+		    			</section>
+    				</decorator-section>
+    			</decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="ReceiveInventoryDis">
+    	<section>
+    		<actions>
+    			<set field="tabButtonItem" value="receiveInventory"/>
+    			<set field="selectedMenuItem" value="findFacilityDis"/>
+                <set field="selectedSubMenuItem" value=""/>
+    			<script location="component://delys/webapp/delys/WEB-INF/actions/distributor/ReceiveInventory.groovy"/>
+                <set field="facilityId" from-field="parameters.facilityId"/>
+                <entity-one entity-name="Facility" value-field="facility"/>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap"/>
+                <set field="title" value="${uiLabelMap.ProductReceiveInventory}"/>
+                <set field="layoutSettings.javaScripts[+0]" value="/ordermgr/images/js/ConvertUom.js" global="true"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="CommonFacilityDecorator">
+    				<decorator-section name="body">
+    					<screenlet title="${uiLabelMap.DAReceiveInventory}">
+    						<platform-specific>
+    							<html><html-template location="component://delys/webapp/delys/distributor/receiveInventory.ftl"/></html>
+    						</platform-specific>
+    					</screenlet>
+    				</decorator-section>
+    			</decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="EditInventoryItemDis">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditInventoryItem"/>
+                <set field="tabButtonItem" value="EditFacilityInventoryItems"/>
+                <set field="subTabButtonItem" value="EditInventoryItem"/>
+                <set field="selectedMenuItem" value="findFacilityDis"/>
+                <set field="selectedSubMenuItem" value=""/>
+                
+                <set field="displayWithNoFacility" value="Y"/>
+                <set field="facilityId" from-field="parameters.facilityId"/>
+                <set field="inventoryItemId" from-field="parameters.inventoryItemId"/>
+                <entity-one entity-name="Facility" value-field="facility" auto-field-map="true"/>
+                <entity-one entity-name="InventoryItem" value-field="inventoryItem" auto-field-map="true"/>
+                <entity-condition entity-name="OrderItemShipGrpInvRes" list="inventoryItemReservations">
+                    <condition-list combine="and">
+                        <condition-expr field-name="inventoryItemId" operator="equals" from-field="inventoryItemId"/>
+                    </condition-list>
+                    <order-by field-name="reservedDatetime"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <section>
+                    <condition>
+                        <and>
+                            <not><if-empty field="inventoryItem"/></not>
+                            <if-empty field="facility"/>
+                        </and>
+                    </condition>
+                    <actions>
+                        <set field="parameters.facilityId" from-field="inventoryItem.facilityId"/>
+                        <set field="facilityId" from-field="inventoryItem.facilityId"/>
+                        <entity-one entity-name="Facility" value-field="facility"/>
+                    </actions>
+            		<widgets/>
+                </section>
+                <decorator-screen name="CommonFacilityDecorator">
+                    <decorator-section name="body">
+                        <!-- <section>
+                            <condition>
+                                <not><if-empty field="inventoryItem"/></not>
+                            </condition>
+                            <widgets>
+                                <container>
+                                    <link target="EditInventoryItem" text="${uiLabelMap.ProductNewInventoryItem}" style="btn btn-info btn-small">
+                                        <parameter param-name="facilityId" from-field="facilityId"/>
+                                    </link>
+                                    <link target="TransferInventoryItem" text="${uiLabelMap.ProductTransferItem}" style="btn btn-info btn-small">
+                                        <parameter param-name="inventoryItemId" from-field="inventoryItemId"/>
+                                        <parameter param-name="facilityId" from-field="facilityId"/>
+                                    </link>
+                                </container>
+                            </widgets>
+                            <fail-widgets>
+                                <container style="header smaller lighter blue">
+                                    <label text="${uiLabelMap.ProductNewInventoryItem}" style="h3"/>
+                                </container>
+                            </fail-widgets>
+                        </section>
+                        <screenlet title="${uiLabelMap.PageTitleEditInventoryItem}" navigation-menu-name="InventoryItemTabBar">
+                        	<include-menu name="InventoryItemTabBar" location="component://product/widget/facility/FacilityMenus.xml"/>
+                        	<include-form name="EditInventoryItem" location="component://product/widget/facility/InventoryForms.xml"/>
+                        </screenlet> -->
+                        
+                        <screenlet title="${uiLabelMap.PageTitleEditInventoryItem}" navigation-menu-name="InventoryItemTabBar">
+                        	<include-menu location="component://delys/widget/distributor/DistributorMenus.xml" name="InventoryItemTabBar"/>
+                        	<container style="margin-top11"></container>
+                        	<include-form name="EditInventoryItem" location="component://delys/widget/distributor/InventoryForms.xml"/>
+                        </screenlet>
+                        
+                        <!-- <section>
+                            <condition>
+                                <not><if-empty field="inventoryItemId"/></not>
+                            </condition>
+                            <widgets>
+                            	<container id="table-container">
+                            		<screenlet id="inventory-item-reservations" title="${uiLabelMap.ProductInventoryItemReservations}" initially-collapsed="true">
+	                                    <include-form name="InventoryItemReservations" location="component://product/widget/facility/InventoryForms.xml"/>
+	                                </screenlet>
+                            	</container>
+                            </widgets>
+                        </section> -->
+                        <section>
+                            <condition>
+                                <if-compare field="inventoryItem.inventoryItemTypeId" operator="equals" value="NON_SERIAL_INV_ITEM"/>
+                            </condition>
+                            <actions>
+                                <script location="component://product/webapp/facility/WEB-INF/actions/inventory/PhysicalInventoryVariance.groovy"/>
+                            </actions>
+                            <widgets>
+                            	<container style="margin-top20"></container>
+                                <screenlet title="${uiLabelMap.DAPhysicalInventoryVariances}" initially-collapsed="false">
+                                    <container style="margin-top11"></container>
+                                    <include-form name="CreatePhysicalInventoryAndVariance" location="component://delys/widget/distributor/InventoryForms.xml"/>
+                                    <container style="margin-top11"></container>
+                                    <include-form name="ViewPhysicalInventoryAndVariance" location="component://delys/widget/distributor/InventoryForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditFacilityInventoryItemsDis">
+        <section>
+            <actions>
+            	<set field="titleProperty" value="DAPageTitleEditFacilityInventoryItems"/>
+                <set field="tabButtonItem" value="EditFacilityInventoryItems"/>
+                <set field="subTabButtonItem" value="EditInventoryItem"/>
+                <set field="selectedMenuItem" value="findFacilityDis"/>
+                <set field="selectedSubMenuItem" value=""/>
+                
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap"/>
+            	<set field="navMenuName" value="EditFacilityInventoryItemsSubTabBar"/>
+				<set field="navMenuLocation" value="component://delys/widget/distributor/DistributorMenus.xml"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="50"/>
+                <set field="facilityId" from-field="parameters.facilityId"/>
+                <entity-one entity-name="Facility" value-field="facility"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonFacilityDecorator">
+                    <decorator-section name="body">
+                    	<screenlet>
+                    		<platform-specific>
+	                        	<html><html-template location="component://delys/webapp/delys/distributor/facilityInventoryItem.ftl"/></html>
+	                        </platform-specific>
+                    	</screenlet>
+<!--                         <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml"> -->
+<!--                             <decorator-section name="search-options"> -->
+<!--                                 <include-form name="SearchInventoryItemsParams" location="component://delys/widget/distributor/DistributorForms.xml"/> -->
+<!--                             </decorator-section> -->
+<!--                             <decorator-section name="search-results"> -->
+<!--                                	<include-form name="ListFacilityInventoryItems" location="component://delys/widget/distributor/DistributorForms.xml"/> -->
+<!--                             </decorator-section> -->
+<!--                         </decorator-screen> -->
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ViewFacilityInventoryItemsDetailsDis">
+        <section>
+            <actions>
+            	<set field="titleProperty" value="DAPageTitleViewFacilityInventoryItemsDetails"/>
+                <set field="tabButtonItem" value="ViewFacilityInventoryItemsDetails"/>
+                <set field="subTabButtonItem" value="EditInventoryItem"/>
+                <set field="selectedMenuItem" value="findFacilityDis"/>
+                <set field="selectedSubMenuItem" value=""/>
+                
+                <property-map resource="WorkEffortUiLabels" map-name="uiLabelMap"/>
+                <set field="navMenuName" value="SearchSubTabBar"/>
+				<set field="navMenuLocation" value="component://delys/widget/sales/SalesMenus.xml"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="50"/>
+                <set field="facilityId" from-field="parameters.facilityId"/>
+                <entity-one entity-name="Facility" value-field="facility"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonFacilityDecorator">
+                    <decorator-section name="body">
+						<decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+							<decorator-section name="search-options">
+								<include-form name="SearchInventoryItemsDetailsParams" location="component://delys/widget/distributor/DistributorForms.xml"/>
+							</decorator-section>
+							<decorator-section name="search-results">
+								 <section>
+		                            <condition><!-- default search by item -->
+		                                <or>
+		                                	<if-compare field="parameters.reportType" operator="equals" value="BY_ITEM"/>
+		                                	<and>
+		                                		<if-compare field="parameters.reportType" operator="not-equals" value="BY_PRODUCT"/>
+		                                		<if-compare field="parameters.reportType" operator="not-equals" value="BY_DATE"/>
+		                                	</and>
+		                                </or>
+		                            </condition>
+		                            <widgets>
+		                                <screenlet >
+		                                    <include-form name="ListFacilityInventoryItemsDetailsByItem" location="component://delys/widget/distributor/DistributorForms.xml"/>
+		                                </screenlet>
+		                            </widgets>
+		                        </section>
+		                        <section>
+		                            <condition>
+		                                <if-compare field="parameters.reportType" operator="equals" value="BY_PRODUCT"/>
+		                            </condition>
+		                            <widgets>
+		                                <screenlet >
+		                                    <include-form name="ListFacilityInventoryItemsDetailsByProduct" location="component://delys/widget/distributor/DistributorForms.xml"/>
+		                                </screenlet>
+		                            </widgets>
+		                        </section>
+		                        <section>
+		                            <condition>
+		                                <if-compare field="parameters.reportType" operator="equals" value="BY_DATE"/>
+		                            </condition>
+		                            <widgets>
+		                                <screenlet >
+		                                    <include-form name="ListFacilityInventoryItemsDetailsByDate" location="component://delys/widget/distributor/DistributorForms.xml"/>
+		                                </screenlet>
+		                            </widgets>
+		                        </section>
+							</decorator-section>
+						</decorator-screen>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="FindFacilityPhysicalInventoryDis">
+        <section>
+            <actions>
+            	<set field="titleProperty" value="PhysicalInventory"/><!-- PageTitleFindFacilityPhysicalInventory -->
+                <set field="tabButtonItem" value="PhysicalInventory"/>
+                <set field="subTabButtonItem" value="EditInventoryItem"/>
+                <set field="selectedMenuItem" value="findFacilityDis"/>
+                <set field="selectedSubMenuItem" value=""/>
+                
+                <script location="component://product/webapp/facility/WEB-INF/actions/inventory/FindFacilityPhysicalInventory.groovy"/>
+				<set field="navMenuName" value="SearchSubTabBar"/>
+				<set field="navMenuLocation" value="component://delys/widget/sales/SalesMenus.xml"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonFacilityDecorator">
+                    <decorator-section name="body">
+						<decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+							<decorator-section name="search-options">
+								<include-form name="FindPhysicalInventory" location="component://delys/widget/distributor/DistributorForms.xml"/>
+							</decorator-section>
+							<decorator-section name="search-results">
+								<container id="table-container">
+									<include-form name="ListPhysicalInventory" location="component://delys/widget/distributor/DistributorForms.xml"/>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="FindFacilityLocationDis">
+        <section>
+            <actions>
+            	<set field="titleProperty" value="PageTitleFindFacilityPhysicalInventory"/>
+                <set field="tabButtonItem" value="FindFacilityLocation"/>
+                <set field="subTabButtonItem" value="EditInventoryItem"/>
+                <set field="selectedMenuItem" value="findFacilityDis"/>
+                <set field="selectedSubMenuItem" value=""/>
+                
+                <script location="component://product/webapp/facility/WEB-INF/actions/facility/FindFacilityLocation.groovy"/>
+                <entity-one entity-name="Facility" value-field="facility"/>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap"/>
+                <set field="title" value="${uiLabelMap.PageTitleFindFacilityLocation}"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonFacilityDecorator">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleFindFacilityLocation}" navigation-menu-name="FacilityLocationTabBar">
+                        	<include-menu location="component://delys/widget/distributor/DistributorMenus.xml" name="FacilityLocationTabBar"/>
+                            <platform-specific>
+                                <html><html-template location="component://delys/webapp/delys/distributor/findFacilityLocation.ftl"/></html>
+                            </platform-specific>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="CommonPromoFindOptionsDecorator">
+		<section>
+			<condition>
+				<if-has-permission permission="DELYS_PROMOS" action="_VIEW"/>
+			</condition>
+			<!-- <actions>
+				<set field="tabBarName" value="PromoTabBar" global="true" />
+				<set field="tabBarLocation" value="component://delys/widget/sales/promotions/PromotionMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+			</actions> -->
+			<widgets>
+				<decorator-screen name="DelysCommonDecorator" location="${parameters.mainDecoratorLocation}">                     
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                               	<decorator-screen name="FindOptionsScreenDecorator" location="component://delys/widget/sales/CommonScreens.xml">
+							 		<decorator-section name="search-options">
+							 			<decorator-section-include name="search-options"/>
+		                            </decorator-section>
+		                            <decorator-section name="search-results">
+		                            	<decorator-section-include name="search-results"/>
+		                            </decorator-section>
+								</decorator-screen>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<container style="alert alert-danger">
+							<label text="${uiLabelMap.DelysListPromoViewPermissionError}"/>
+						</container>
+                    </decorator-section>
+               	</decorator-screen>
+			</fail-widgets>
+		</section>
+	</screen>
+    <!-- <screen name="FindPromoDis">
+    	<section>
+    		<actions>
+    			<set field="titleProperty" value="ProductProductPromotionsList"/>
+                <set field="selectedMenuItem" value="findPromoDis"/>
+                <set field="selectedSubMenuItem" value=""/>
+                
+                <set field="navMenuName" value="SearchSubTabBar"/>
+				<set field="navMenuLocation" value="component://delys/widget/sales/SalesMenus.xml"/>
+				<set field="productPromoId" from-field="parameters.productPromoId"/>
+				<set field="promoName" from-field="parameters.promoName"/>
+				<set field="productPromoStatusId" from-field="parameters.productPromoStatusId" />
+				<set field="productPromoTypeId" from-field="parameters.productPromoTypeId"/>
+				<entity-condition list="listProductPromoTypeGT" entity-name="ProductPromoType">
+					<condition-list combine="and">
+						<condition-expr field-name="productPromoTypeGroupId" value="SALES_GT_CHANNEL"/>
+						<condition-list combine="or">
+							<condition-expr field-name="productPromoTypeId" value="EXHIBITED"/>
+							<condition-expr field-name="productPromoTypeId" value="ACCUMULATE"/>
+							<condition-expr field-name="productPromoTypeId" value="PROMOTION"/>
+							<condition-expr field-name="productPromoTypeId" value="OTHER"/>
+						</condition-list>
+					</condition-list>
+					<select-field field-name="productPromoTypeId"/>
+				</entity-condition>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/distributor/GetListPromoIdApplyDis.groovy"/>
+    		</actions>
+    		<widgets>
+    			<section>
+                 	<condition>
+						<if-empty field="productPromoTypeId"/>
+					</condition>
+					<actions>
+						<set field="parameters.promoStatus" value="PROMO_ACCEPTED"/>
+						<set field="parameters.productPromoTypeId" value=""/>
+						<set field="parameters.productPromoTypeId" value=""/>
+			      		<set field="parameters.productPromoTypeId_op" value="in"/>
+			      		<set field="parameters.productPromoTypeId_value" value="${groovy: return com.olbius.format.FormatList.formatListGenericValueToListString(listProductPromoTypeGT, 'productPromoTypeId')}" />
+						<set field="parameters.productPromoId" value=""/>
+			      		<set field="parameters.productPromoId_op" value="in"/>
+			      		<set field="parameters.productPromoId_value" value="${listPromoId}" />
+					</actions>
+					<widgets>
+						<decorator-screen name="CommonPromoFindOptionsDecorator">
+							<decorator-section name="search-options">						
+								<include-form name="FindProductPromoSearch" location="component://delys/widget/distributor/DistributorForms.xml"/>
+							</decorator-section>
+							<decorator-section name="search-results">
+								<include-form name="FindProductPromo" location="component://delys/widget/distributor/DistributorForms.xml" />
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="CommonPromoFindOptionsDecorator">
+							<decorator-section name="search-options">						
+								<include-form name="FindProductPromoSearch" location="component://delys/widget/distributor/DistributorForms.xml"/>
+							</decorator-section>
+							<decorator-section name="search-results">
+								<include-form name="FindProductPromo" location="component://delys/widget/distributor/DistributorForms.xml" />
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+    		</widgets>
+    	</section>
+    </screen> -->
+    <screen name="FindPromoCustDis">
+    	<section>
+    		<actions>
+    			<set field="titleProperty" value="ProductProductPromotionsList"/>
+                <set field="selectedMenuItem" value="findPromoCustDis"/>
+                <set field="selectedSubMenuItem" value=""/>
+                
+                <set field="navMenuName" value="SearchSubTabBar"/>
+				<set field="navMenuLocation" value="component://delys/widget/sales/SalesMenus.xml"/>
+				<set field="productPromoId" from-field="parameters.productPromoId"/>
+				<set field="promoName" from-field="parameters.promoName"/>
+				<set field="productPromoStatusId" from-field="parameters.productPromoStatusId" />
+				<set field="productPromoTypeId" from-field="parameters.productPromoTypeId"/>
+				<entity-condition list="listProductPromoTypeGT" entity-name="ProductPromoType">
+					<condition-list combine="and">
+						<condition-expr field-name="productPromoTypeGroupId" value="SALES_GT_CHANNEL"/>
+						<condition-list combine="or">
+							<condition-expr field-name="productPromoTypeId" value="EXHIBITED"/>
+							<condition-expr field-name="productPromoTypeId" value="ACCUMULATE"/>
+							<condition-expr field-name="productPromoTypeId" value="PROMOTION"/>
+							<condition-expr field-name="productPromoTypeId" value="OTHER"/>
+						</condition-list>
+					</condition-list>
+					<select-field field-name="productPromoTypeId"/>
+				</entity-condition>
+				<!-- <entity-condition list="promoStatus" entity-name="StatusItem">
+					<condition-list combine="and">
+						<condition-expr field-name="statusTypeId" value="PROMO_STATUS"/>
+					</condition-list>
+					<order-by field-name="sequenceId"/>
+				</entity-condition> -->
+				<script location="component://delys/webapp/delys/WEB-INF/actions/distributor/GetListPromoIdApplyCustDis.groovy"/>
+    		</actions>
+    		<widgets>
+    			<section>
+                 	<condition>
+						<if-empty field="productPromoTypeId"/>
+					</condition>
+					<actions>
+						<set field="parameters.promoStatus" value="PROMO_ACCEPTED"/>
+						<set field="parameters.productPromoTypeId" value=""/>
+			      		<set field="parameters.productPromoTypeId_op" value="in"/>
+			      		<set field="parameters.productPromoTypeId_value" value="${groovy: return com.olbius.format.FormatList.formatListGenericValueToListString(listProductPromoTypeGT, 'productPromoTypeId')}" />
+						<set field="parameters.productPromoId" value=""/>
+			      		<set field="parameters.productPromoId_op" value="in"/>
+			      		<set field="parameters.productPromoId_value" value="${listPromoId}" />
+					</actions>
+					<widgets>
+<!-- 						<decorator-screen name="CommonPromoFindOptionsDecorator"> -->
+<!-- 							<decorator-section name="search-options">						 -->
+<!-- 								<include-form name="FindProductPromoSearch" location="component://delys/widget/distributor/DistributorForms.xml"/> -->
+<!-- 							</decorator-section> -->
+<!-- 							<decorator-section name="search-results"> -->
+<!-- 								<include-form name="FindProductPromo" location="component://delys/widget/distributor/DistributorForms.xml" /> -->
+<!-- 							</decorator-section> -->
+<!-- 						</decorator-screen> -->
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+		                    <decorator-section name="body">
+		                    	<platform-specific>
+									<html>
+										<html-template location="component://delys/webapp/delys/distributor/promo/listPromotionsForStore.ftl"/>
+									</html>
+								</platform-specific>
+		                    </decorator-section>
+		                </decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="CommonPromoFindOptionsDecorator">
+							<decorator-section name="search-options">						
+								<include-form name="FindProductPromoSearchCust" location="component://delys/widget/distributor/DistributorForms.xml"/>
+							</decorator-section>
+							<decorator-section name="search-results">
+								<include-form name="FindProductPromoCust" location="component://delys/widget/distributor/DistributorForms.xml" />
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="FindCustomerRegisterPromoDis">
+    	<section>
+    		<actions>
+    			<set field="titleProperty" value="DAFindCustomerRegisterPromo"/>
+                <set field="selectedMenuItem" value="findCustomerRegisterPromoDis"/>
+                <set field="selectedSubMenuItem" value=""/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	
+                    </decorator-section>
+                </decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="TimekeepingReportNPP">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="timekeeping" />
+				<set field="selectedSubMenuItem" value="timekeepingNPP"/>
+				<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/payroll/EmplTimekeepingReport.groovy"/>
+				<set field="titleProperty" value="DetailEmplTimekeepingReportTiltle" />
+				<set field="navMenuName" value="noneMenu"/>
+				<set field="navMenuLocation" value="component://hrolbius/widget/menus/hrolbiusMenus.xml" />
+				<set field="currentDateTime" value="${groovy: java.util.Calendar.getInstance()}" type="Object"/>
+				<set field="layoutSettings.javaScripts[]" value="/aceadmin/assets/js/fuelux/fuelux.spinner.min.js" global="true"/>	
+			</actions>
+			<widgets>
+				<decorator-screen  name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+<!-- 							<actions> -->
+<!-- 								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/Training/getPartyGroupTree2.groovy"/> -->
+<!-- 							</actions> -->
+							<widgets>
+									<platform-specific>
+										<html>
+											<html-template location="component://delys/webapp/delys/distributor/getTimekeepingJQ.ftl"/>
+										</html>
+									</platform-specific>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="SalesmanTimesheetList">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="timekeeping" />
+				<set field="selectedSubMenuItem" value="timekeepingTable"/>
+				<set field="titleProperty" value="EmplTimesheetList"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<entity-condition list="statusList" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="EMPL_TIME_SHEET_STT"/>
+								</entity-condition>
+								<entity-condition list="listEmplTimekeepingSign" entity-name="EmplTimekeepingSign"></entity-condition>
+								<entity-condition list="statusListWorkOvertime" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="WOT_REGISTER"/>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>
+								<entity-condition list="statusListWorkingLate" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="EMPL_LATE_APPR"/>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>
+								<entity-condition list="emplPosType" entity-name="EmplPositionType">
+									<condition-expr field-name="emplPositionTypeId" operator="not-equals" value="_NA_"/>
+									<order-by field-name="emplPositionTypeId"/>
+								</entity-condition>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/Training/getPartyGroupTree.groovy"/>
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://delys/webapp/delys/distributor/salesmanTimesheetTable.ftl"/>
+									</html>
+								</platform-specific>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="CreateNewStoreContactMech">
+	    <section>
+	        <actions>
+	            <set field="tabButtonItem" value="viewContactMechs"/>
+    			<set field="selectedMenuItem" value="findFacilityDis"/>
+                <set field="selectedSubMenuItem" value=""/>
+    			<script location="component://delys/webapp/delys/WEB-INF/actions/distributor/EditContactMech.groovy"/>
+    			<set field="dependentForm" value="editcontactmechform"/>
+                <set field="paramKey" value="countryGeoId"/>
+                <set field="mainId" value="countryGeoId"/>
+                <set field="dependentId" value="stateProvinceGeoId"/>
+                <set field="requestName" value="getAssociatedStateList"/>
+                <set field="responseName" value="stateList"/>
+                <set field="dependentKeyName" value="geoId"/>
+                <set field="descName" value="geoName"/>
+                <set field="selectedDependentOption" from-field="mechMap.postalAddress.stateProvinceGeoId" default-value="_none_"/>
+                <set field="facilityId" from-field="parameters.facilityId"/>
+                <entity-one entity-name="Facility" value-field="facility"/>
+	            <script location="component://delys/webapp/delys/WEB-INF/actions/distributor/CreateNewStoreContactMech.groovy"/>
+	            <set field="contactMechTypeId" from-field="parameters.contactMechTypeId"/>
+	            <property-map resource="ProductUiLabels" map-name="uiLabelMap"/>
+                <property-map resource="DelysSalesUiLabels" map-name="uiLabelMap"/>
+                <property-map resource="PartyUiLabels" map-name="uiLabelMap"/>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap"/>
+                <property-map resource="DelysAdminUiLabels" map-name="uiLabelMap"/>
+	        </actions>
+	        <widgets>
+	            <platform-specific><html><html-template location="component://delys/webapp/delys/distributor/CreateNewStoreContactMech.ftl"/></html></platform-specific>
+	        </widgets>
+	    </section>
+	</screen>
+</screens>

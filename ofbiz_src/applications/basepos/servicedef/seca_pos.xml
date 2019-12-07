@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<service-eca xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/service-eca.xsd">
+        
+    <!--  <eca service="storeOrderPos" event="commit">
+        <action service="updateProductFacilitySaleOrderFromOrder" mode="sync"/>
+    </eca> -->
+    
+    <eca service="createItemIssuancePos" event="commit">
+        <condition field-name="orderId" operator="is-not-empty"/>
+        <condition field-name="inventoryItemId" operator="is-not-empty"/>
+        <condition field-name="affectAccounting" operator="equals" value="true" type="Boolean"/>
+        <action service="createAcctgTransForSalesShipmentIssuance" mode="sync"/>
+    </eca>
+    
+    <eca service="changeOrderStatusPos" event="commit">
+    	<condition operator="equals" field-name="orderStatusId" value="ORDER_COMPLETED"/>
+    	<condition operator="equals" field-name="orderTypeId" value="SALES_ORDER"/>
+    	<set field-name="isReturnOrder" value="N"/>
+    	<action mode="sync" service="processLoyaltyPoint"/>
+    </eca>
+    
+    <eca service="quickReturnOrderPos" event="commit">
+    	<condition operator="is-not-empty" field-name="returnId"/>
+    	<set field-name="isReturnOrder" value="Y"/>
+    	<action mode="sync" service="processLoyaltyPoint"/>
+    </eca>
+    
+    <eca service="updateDefaultUom" event="global-commit">
+  		<condition field-name="purchaseUomId" operator="is-not-empty"/>
+  		<action mode="sync" service="updateUomForSupplierProduct"/>
+  	</eca>
+  	
+    <eca service="updateReturnHeaderDirectly" event="return">
+        <condition field-name="statusId" operator="equals" value="RETURN_ACCEPTED"/>
+        <!-- The quickReceiveReturn service checks this, and some status update calls may not pass it in, so don't
+             check it here or the option may be ignored. -->
+      <!--   <condition field-name="needsInventoryReceive" operator="equals" value="Y"/> -->
+      	<action service="processRefundImmediatelyReturnDirectly" mode="sync"/>
+        
+    </eca>
+    <eca service="updateReturnHeaderDirectly" event="commit">
+        <condition field-name="statusId" operator="equals" value="RETURN_ACCEPTED"/>
+        <condition field-name="oldStatusId" operator="not-equals" value="RETURN_ACCEPTED"/>
+        <!-- <action service="createShipmentAndItemsForReturn" mode="sync"/> -->
+        <action service="quickReceiveReturnDirectly" mode="sync"/>
+        <action service="createReturnStatus" mode="sync"/>
+    </eca>
+    <eca service="updateReturnHeaderDirectly" event="commit">
+        <condition field-name="statusId" operator="equals" value="RETURN_COMPLETED"/>
+        <condition field-name="oldStatusId" operator="not-equals" value="RETURN_COMPLETED"/>
+        <action service="createReturnStatus" mode="sync"/>
+    </eca>
+<!--     <eca service="updateShipment" event="commit"> -->
+<!--     	<condition operator="equals" field-name="shipmentTypeId" value="TRANSFER"/> -->
+<!--     	<condition operator="equals" field-name="statusId" value="SHIPMENT_SHIPPED"/> -->
+<!--     	<action mode="sync" service="createItemIssuanceForTransferShipment"/> -->
+<!--     </eca> -->
+    <eca service="createShipmentReceiptTransfer" event="commit">
+        <!-- Ignore the inventory shipment if affectAccounting set as false -->
+        <condition field-name="affectAccounting" operator="equals" value="true" type="Boolean"/>
+        <action service="createAcctgTransForTransferShipmentReceipt" mode="sync"/>
+    </eca>
+    
+</service-eca>

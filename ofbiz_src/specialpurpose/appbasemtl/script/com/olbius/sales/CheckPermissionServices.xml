@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+    
+	<simple-method method-name="checkPermissionApproveOrderDms">
+		<set field="orderId" from-field="parameters.orderId"/>
+		<set field="hasPermission" value="false" type="Boolean"/>
+		<field-to-result result-name="hasPermission" field="hasPermission"/>
+		
+		<if-has-permission permission="SALESORDER_ACTION" action="_APPROVE">
+			<!-- processing -->
+			<else>
+				<return/>
+			</else>
+		</if-has-permission>
+		
+		<entity-one value-field="orderHeader" entity-name="OrderHeader">
+			<field-map field-name="orderId" from-field="orderId"/>
+		</entity-one>
+		<if-empty field="orderHeader">
+			<return/>
+		</if-empty>
+		
+		<set field="statusId" from-field="orderHeader.statusId"/>
+		<set field="nextStatusId" value=""/>
+		<entity-condition list="productStoreRoles" entity-name="ProductStoreRole" filter-by-date="true">
+			<condition-list>
+				<condition-expr field-name="productStoreId" from-field="orderHeader.productStoreId"/>
+				<condition-expr field-name="partyId" from-field="userLogin.partyId"/>
+				<condition-list combine="or">
+					<condition-expr field-name="roleTypeId" value="SELLER"/>
+					<condition-expr field-name="roleTypeId" value="MANAGER"/>
+				</condition-list>
+			</condition-list>
+		</entity-condition>
+		<if-not-empty field="productStoreRoles">
+			<if>
+				<condition>
+					<if-compare operator="equals" value="ORDER_CREATED" field="statusId"></if-compare>
+				</condition>
+				<then>
+					<!-- change to ORDER_SADAPPROVED -->
+					<set field="nextStatusId" value="ORDER_SADAPPROVED"/>
+					<set field="hasPermission" value="true" type="Boolean"/>
+				</then>
+			<!-- <else-if>
+				<condition>
+					<if-compare operator="equals" value="ORDER_SADAPPROVED" field="statusId"></if-compare>
+				</condition>
+				<then>
+					change to ORDER_APPROVED, call to processPayment
+					<set field="nextStatusId" value="ORDER_APPROVED"/>
+				</then>
+			</else-if> -->
+			</if>
+		</if-not-empty>
+		
+		<field-to-result result-name="nextStatusId" field="nextStatusId"/>
+		<field-to-result result-name="hasPermission" field="hasPermission"/>
+	</simple-method>
+	
+	
+</simple-methods>

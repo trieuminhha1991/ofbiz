@@ -1,0 +1,619 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Licensed to the Apache Software Foundation (ASF) under one or more contributor 
+	license agreements. See the NOTICE file distributed with this work for additional 
+	information regarding copyright ownership. The ASF licenses this file to 
+	you under the Apache License, Version 2.0 (the "License"); you may not use 
+	this file except in compliance with the License. You may obtain a copy of 
+	the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required 
+	by applicable law or agreed to in writing, software distributed under the 
+	License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS 
+	OF ANY KIND, either express or implied. See the License for the specific 
+	language governing permissions and limitations under the License. -->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
+	<form name="FindEmplLeaves" type="single" target="FindEmplLeaves"
+		odd-row-style="header-row" default-table-style="basic-table">
+		<actions>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/findApproverEmplLeave.groovy"/>
+		</actions>
+		<!-- <auto-fields-entity entity-name="EmplLeave"
+			default-field-type="find" >
+				
+		</auto-fields-entity> -->
+		<field name="partyId" title="${uiLabelMap.HRolbiusEmployeeID}"
+			use-when="${parameters.partyId==null}">
+			<lookup target-form-name="LookupEmployeeNew"/>
+		</field>
+		<field name="partyId" title="${uiLabelMap.PartyPartyId}"
+			use-when="${parameters.partyId != null}">
+			<display></display>
+		</field>
+		<field name="leaveTypeId">
+			<drop-down allow-empty="true">
+				<entity-options description="${description}"
+					key-field-name="leaveTypeId" entity-name="EmplLeaveType" />
+			</drop-down>
+		</field>
+		<field name="emplLeaveReasonTypeId">
+			<drop-down allow-empty="true">
+				<entity-options description="${description}"
+					key-field-name="emplLeaveReasonTypeId" entity-name="EmplLeaveReasonType" />
+			</drop-down>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.CommonFromDate}">
+			<date-find/>
+		</field>
+		<field name="thruDate" title="${uiLabelMap.CommonThruDate}">
+			<date-find/>
+		</field>
+		<field name="leaveStatus">
+			<drop-down allow-empty="true">
+				<entity-options description="${description}"
+					key-field-name="statusId" entity-name="StatusItem">
+					<entity-constraint name="statusTypeId" operator="equals"
+						value="LEAVE_STATUS" />
+					<entity-order-by field-name="description" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<!-- <field name="approverPartyId" title="${uiLabelMap.HRolbiusApproverEmployeeID}">
+			<drop-down allow-empty="true">
+				<option key="${ceoPartyId}" description="${ceoName}"/>
+				<option key="${userLogin.partyId}" description="${departMgrName}"/>				
+			</drop-down>
+		</field> -->
+		<field name="description">
+			<hidden />
+		</field>
+		<field name="noConditionFind">
+			<hidden value="Y" /><!-- if this isn't there then with all fields 
+				empty no query will be done -->
+		</field>
+		<field name="searchButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-small btn-success">
+			<submit button-type="button" image-location="icon-search" />
+		</field>
+	</form>
+	<form name="EmplLeaveSummary" type="list" list-name="emplList" odd-row-style="alternate-row" header-row-style="header-row-2"
+		paginate-target="EmplLeaveSummary"
+		default-table-style="table table-striped table-hover table-bordered dataTable">
+		<actions>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getListEmplOfMgr.groovy"/>
+		</actions>
+		<row-actions>
+			<set field="emplId" from-field="partyId"/>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrPositionEmpl.groovy"/>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrDeptEmpl.groovy"/>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getEmplLeaveInInfo.groovy"/>
+			<!-- <service service-name="getNbrDayLeaveEmplInfo" result-map="emplLeaveDayInfo">
+				<field-map field-name="partyId" from-field="partyId"/>
+			</service> -->
+		</row-actions>
+		<field name="partyId" title="${uiLabelMap.EmployeeName}">
+			<display-entity entity-name="PartyNameView"
+				description="${firstName} ${lastName}">
+				<sub-hyperlink target="EmployeeProfile"
+					target-type="inter-app" description="${partyId}" link-style="">
+					<parameter param-name="partyId" from-field="partyId" />
+				</sub-hyperlink>
+			</display-entity>
+		</field>
+		<field name="currPositionsStr" title="${uiLabelMap.HREmployeePosition}" map-name="context">
+        	<display></display>
+        </field>
+		<field name="currDept" title="${uiLabelMap.EmployeeCurrentDept}" map-name="context">
+        	<display></display>
+        </field>
+		<!-- <field name="nbrDayLeaveInMonth" map-name="emplLeaveDayInfo" title="${uiLabelMap.NbrDayLeaveInMonth}">
+        	<display></display>
+        </field>
+        <field name="nbrDayLeaveInYear" map-name="emplLeaveDayInfo" title="${uiLabelMap.NbrDayLeaveInYear}">
+        	<display></display>
+        </field> -->
+        	
+        <field name="dayLeaveJan" title="${uiLabelMap.January}" map-name="context">
+        	<display></display>
+        </field>
+        <field name="dayLeaveFer" title="${uiLabelMap.February}" map-name="context">
+        	<display></display>
+        </field>
+        <field name="dayLeaveMar" title="${uiLabelMap.March}" map-name="context">
+        	<display></display>
+        </field>
+        <field name="dayLeaveApr" title="${uiLabelMap.April}" map-name="context">
+        	<display></display>
+        </field>
+        <field name="dayLeaveMay" title="${uiLabelMap.May}" map-name="context">
+        	<display></display>
+        </field>
+        <field name="dayLeaveJune" title="${uiLabelMap.June}" map-name="context">
+        	<display></display>
+        </field>
+        <field name="dayLeaveJuly" title="${uiLabelMap.July}" map-name="context">
+        	<display></display>
+        </field>
+        <field name="dayLeaveAug" title="${uiLabelMap.August}" map-name="context">
+        	<display></display>
+        </field>
+        <field name="dayLeaveSep" title="${uiLabelMap.September}" map-name="context">
+        	<display></display>
+        </field>
+        <field name="dayLeaveOct" title="${uiLabelMap.October}" map-name="context">
+        	<display></display>
+        </field>
+        <field name="dayLeaveNov" title="${uiLabelMap.November}" map-name="context">
+        	<display></display>
+        </field>
+        <field name="dayLeaveDec" title="${uiLabelMap.December}" map-name="context">
+        	<display></display>
+        </field>
+        <field name="dayLeaveRegulation" map-name="context" title="${uiLabelMap.DayLeaveRegulation}">
+        	<display></display>
+        </field>
+        <field name="numberDayLeave" title="${uiLabelMap.numberDayLeave}" map-name="context">
+        	<display></display>
+        </field>
+        <field name="dayLeaveRemain" title="${uiLabelMap.dayLeaveRemain}" map-name="context">
+        	<display></display>
+        </field>
+        <field name="numberDayLeaveUnpaid" title="${uiLabelMap.numberDayLeaveUnpaid}" map-name="context">
+        	<display></display>
+        </field>
+	</form>
+	<form name="ListEmplLeaves" list-name="listIt" type="list"
+		odd-row-style="alternate-row" header-row-style="header-row-2"
+		paginate-target="FindEmplLeaves"
+		default-table-style="table table-striped table-hover table-bordered dataTable">
+		<actions>
+			<set field="entityName" value="EmplLeave" />			
+			<!-- <service service-name="performFind" result-map="result" result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="parameters" />
+				<field-map field-name="entityName" from-field="entityName" />
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+			</service> -->			
+		</actions>
+		<auto-fields-entity entity-name="EmplLeave"
+			default-field-type="display" />
+		<field name="partyId" title="${uiLabelMap.EmployeeName}">
+			<display-entity entity-name="PartyNameView"
+				description="${firstName} ${lastName}">
+				<sub-hyperlink target="EmployeeProfile"
+					target-type="inter-app" description="${partyId}" link-style="">
+					<parameter param-name="partyId" from-field="partyId" />
+				</sub-hyperlink>
+			</display-entity>
+		</field>
+		<field name="thruDate" red-when="never"></field>
+		<field name="leaveTypeId">
+			<display-entity entity-name="EmplLeaveType" />
+		</field>
+		<field name="emplLeaveReasonTypeId">
+			<display-entity entity-name="EmplLeaveReasonType" />
+		</field>
+		<field name="approverPartyId">
+			<hidden />
+		</field>
+		<field name="leaveStatus">
+			<display-entity entity-name="StatusItem"
+				key-field-name="statusId" />
+		</field>
+		<field name="dateApplication" title="${uiLabelMap.DateApplication}">
+			<display type="date"></display>
+		</field>
+		<field name="description">
+			<ignored></ignored>
+		</field>
+	</form>
+	
+	<!-- <form name="EditEmplLeave" type="single" target="createEmplLeaveExt" default-map-name="leaveApp"
+        header-row-style="header-row" default-table-style="basic-table">
+        <actions>
+        	<set field="parameters.partyId" from-field="partyId"/>
+        	need check
+        	<set field="emplId" from-field="parameters.partyId"/>
+        	
+        	<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrPositionEmpl.groovy"/>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrDeptEmpl.groovy"/>
+			<service service-name="getNbrDayLeaveEmplInfo" result-map="emplLeaveDayInfo">
+				<field-map field-name="partyId" from-field="partyId"/>
+			</service>
+			<set field="totalDayLeaveInMonth" value="${groovy: emplLeaveDayInfo.nbrDayLeavePaidInMonth + emplLeaveDayInfo.nbrDayLeaveUnPaidInMonth}"/>
+			<set field="totalDayLeaveInYear" value="${groovy: emplLeaveDayInfo.nbrDayLeavePaidInYear + emplLeaveDayInfo.nbrDayLeaveUnPaidInYear}"/>
+			<set field="dateApplication" value="${groovy: org.ofbiz.base.util.UtilDateTime.nowTimestamp()}" type="Timestamp"/>
+			<set field="partyName" value="${groovy: com.olbius.util.PartyUtil.getPersonName(delegator, partyId) }"/>
+        </actions>
+        <alt-target use-when="leaveApp!=null" target="updateEmplLeaveExt"/>
+        <auto-fields-service service-name="updateEmplLeave" map-name="leaveApp"/>
+        <field name="partyId" title-style="asterisk" title="${uiLabelMap.HRolbiusEmployeeID}">
+        	<display></display>
+       	</field>
+       	<field name="partyName" title="${uiLabelMap.EmployeeName}">
+       		<display></display>
+       	</field>
+        <field name="currDept" title="${uiLabelMap.EmployeeCurrentDept}" map-name="context">
+        	<display></display>
+        </field>
+        <field name="currPositionsStr" title="${uiLabelMap.HREmployeePosition}" map-name="context">
+        	<display></display>
+        </field>
+        <field name="totalDayLeaveInMonth" title="${uiLabelMap.NbrDayLeaveInMonth}">
+        	<display></display>
+        </field>
+        <field name="nbrDayLeaveUnPaidInMonth" map-name="emplLeaveDayInfo" title="${uiLabelMap.NbrDayLeaveUnPaid}">
+        	<display></display>
+        </field>
+        <field name="totalDayLeaveInYear" title="${uiLabelMap.NbrDayLeaveInYear}">
+        	<display></display>
+        </field>
+        <field name="nbrDayLeaveUnPaidInYear" map-name="emplLeaveDayInfo" title="${uiLabelMap.NbrDayLeaveUnPaid}">
+        	<display></display>
+        </field>
+        <field name="dayLeaveRegulation" map-name="emplLeaveDayInfo" title="${uiLabelMap.DayLeaveRegulation}">
+        	<display></display>
+        </field>
+        <field name="approverPartyId" tooltip="${uiLabelMap.CommonRequired}"><hidden /></field>
+        <field name="leaveTypeId" title-style="asterisk">
+            <drop-down allow-empty="true">
+                <entity-options description="${description}" key-field-name="leaveTypeId" entity-name="EmplLeaveType"/>
+            </drop-down>
+        </field>
+        <field name="emplLeaveReasonTypeId">
+            <drop-down allow-empty="true">
+                <entity-options description="${description}" key-field-name="emplLeaveReasonTypeId" entity-name="EmplLeaveReasonType" cache="false"/>
+            </drop-down>
+        </field>
+        <field name="fromDate" title-style="asterisk" required-field="true">
+        	<date-time type="date"/>
+        </field>
+        <field name="dateApplication" title="${uiLabelMap.DateApplication}" id-name="dateApplication">
+        	<display also-hidden="true" type="date"></display>
+        </field>
+        <field name="thruDate" title-style="asterisk" required-field="true"><date-time type="date"/></field>
+        <field name="leaveUnpaid" title="${uiLabelMap.LeaveUnpaid}">
+        	<check></check>
+        </field>
+        <field name="leaveStatus"><hidden value="LEAVE_CREATED"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonCreate}" widget-style="btn btn-small btn-primary">
+        	<submit button-type="button" image-location="icon-ok"/>
+       	</field>
+        <field name="submitButton" use-when="leaveApp!=null" title="${uiLabelMap.CommonUpdate}" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-ok"/></field>
+        <sort-order>
+        	<field-group style="no-widget-header no-left-margin span6">
+        		<sort-field name="partyId"/>
+        		<sort-field name="currDept"/>
+        		<sort-field name="totalDayLeaveInMonth"/>
+        		<sort-field name="nbrDayLeaveUnPaidInMonth"/>
+        		<sort-field name="dayLeaveRegulation"/>
+        		
+        		<sort-field name="leaveTypeId"/>
+        		<sort-field name="emplLeaveReasonTypeId"/>
+        		<sort-field name="fromDate"/>
+        		<sort-field name="thruDate"/>
+        		<sort-field name="leaveUnpaid"/>
+        		<sort-field name="description"/>
+        		<sort-field name="submitButton"/>
+        	</field-group>
+        	<field-group style="no-widget-header no-left-margin span6">
+        		<sort-field name="partyName"/>
+        		<sort-field name="currPositionsStr"/>
+        		<sort-field name="totalDayLeaveInYear"/>
+        		<sort-field name="nbrDayLeaveUnPaidInYear"/>
+        		<sort-field name="dateApplication"/>
+        	</field-group>
+        </sort-order>
+    </form> -->
+    
+   <!--  <form name="LeaveApproval" type="single" target="updateApproval"
+        header-row-style="header-row" default-table-style="basic-table" >
+    	<actions>
+    		<set field="useLoginPartyId" from-field="userLogin.partyId"/>
+			<set field="ntfId" from-field="parameters.ntfId"/>
+			<entity-one entity-name="EmplLeave">
+				<field-map field-name="partyId" from-field="parameters.partyId"/>
+				<field-map field-name="fromDate" from-field="parameters.fromDate"/>
+				<field-map field-name="leaveTypeId" from-field="parameters.leaveTypeId"/>
+			</entity-one>
+			
+			<set field="emplId" from-field="parameters.partyId"/>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrPositionEmpl.groovy"/>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrDeptEmpl.groovy"/>
+			<service service-name="getNbrDayLeaveEmplInfo" result-map="emplLeaveDayInfo">
+				<field-map field-name="partyId" from-field="partyId"/>
+			</service>
+		</actions>
+		<auto-fields-entity entity-name="EmplLeave"/>
+		<field name="partyId" title="${uiLabelMap.EmployeeName}">
+			<display-entity entity-name="Person" description="${firstName} ${middleName} ${lastName}">
+				<sub-hyperlink target="EmployeeProfile" description="[${partyId}]">
+					<parameter param-name="partyId"/>
+				</sub-hyperlink>
+			</display-entity>
+		</field>
+		<field name="currDept" title="${uiLabelMap.EmployeeCurrentDept}">
+			<display></display>
+		</field>
+		<field name="currPositionsStr" title="${uiLabelMap.HREmployeePosition}">
+			<display></display>
+		</field>
+		<field name="nbrDayLeaveInMonth" map-name="emplLeaveDayInfo" title="${uiLabelMap.NbrDayLeaveInMonth}">
+        	<display></display>
+        </field>
+        <field name="nbrDayLeaveInYear" map-name="emplLeaveDayInfo" title="${uiLabelMap.NbrDayLeaveInYear}">
+        	<display></display>
+        </field>
+        <field name="dayLeaveRegulation" map-name="emplLeaveDayInfo" title="${uiLabelMap.DayLeaveRegulation}">
+        	<display></display>
+        </field>
+        <field name="dateApplication" title="${uiLabelMap.DateApplication}">
+			<display type="date"></display>
+		</field>
+		<field name="ntfId" >
+			<hidden/>
+		</field>
+		<field name="leaveTypeId">
+            <display-entity entity-name="EmplLeaveType" description="${description}"></display-entity>
+        </field>
+        <field name="emplLeaveReasonTypeId">
+            <display-entity entity-name="EmplLeaveReasonType" description="${description}"></display-entity>
+        </field>
+        <field name="fromDate" red-when="never">
+			<display type="date"></display>
+		</field>
+		<field name="thruDate" red-when="never">
+			<display type="date"></display>
+		</field>
+        <field name="approverPartyId"><ignored/></field>
+        
+		
+		<field name="description"><display/></field>
+        <field name="leaveStatus">
+			<drop-down current="selected" >
+				<option key="LEAVE_APPROVED" description="${uiLabelMap.LEAVE_APPROVED}"/>
+				<option key="LEAVE_REJECTED" description="${uiLabelMap.LEAVE_REJECTED}"/>
+			</drop-down>
+		</field>
+		<field name="submit" widget-style="btn btn-success btn-small" title="${uiLabelMap.CommonSubmit}">
+			<submit button-type="button" image-location="icon-ok"/>
+		</field>
+    </form> -->
+    
+    <!-- <form name="ViewLeaveApproval" type="single" target="updateApproval"
+        header-row-style="header-row" default-table-style="basic-table">
+    	<actions>
+			<set field="ntfId" from-field="parameters.ntfId"/>
+			<entity-one entity-name="EmplLeave">
+				<field-map field-name="partyId" from-field="parameters.partyId"/>
+				<field-map field-name="fromDate" from-field="parameters.fromDate"/>
+				<field-map field-name="leaveTypeId" from-field="parameters.leaveTypeId"/>
+			</entity-one>
+			need check
+			<set field="emplId" from-field="parameters.partyId"/>
+			
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrPositionEmpl.groovy"/>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrDeptEmpl.groovy"/>
+			<service service-name="getNbrDayLeaveEmplInfo" result-map="emplLeaveDayInfo">
+				<field-map field-name="partyId" from-field="partyId"/>
+			</service>
+		</actions>
+		<auto-fields-entity entity-name="EmplLeave" default-field-type="hidden"/>
+		<field name="partyId" title="${uiLabelMap.EmployeeName}">
+			<display-entity entity-name="Person" description="${firstName} ${middleName} ${lastName}"></display-entity>
+		</field>
+		<field name="currDept" title="${uiLabelMap.EmployeeCurrentDept}">
+			<display></display>
+		</field>
+		<field name="currPositionsStr" title="${uiLabelMap.HREmployeePosition}">
+			<display></display>
+		</field>
+		<field name="nbrDayLeaveInMonth" map-name="emplLeaveDayInfo" title="${uiLabelMap.NbrDayLeaveInMonth}">
+        	<display></display>
+        </field>
+        <field name="nbrDayLeaveInYear" map-name="emplLeaveDayInfo" title="${uiLabelMap.NbrDayLeaveInYear}">
+        	<display></display>
+        </field>
+        <field name="dayLeaveRegulation" map-name="emplLeaveDayInfo" title="${uiLabelMap.DayLeaveRegulation}">
+        	<display></display>
+        </field>
+        <field name="dateApplication" title="${uiLabelMap.DateApplication}">
+			<display type="date"></display>
+		</field>
+		<field name="ntfId" >
+			<hidden/>
+		</field>
+		<field name="leaveTypeId">
+            <display-entity entity-name="EmplLeaveType" description="${description}"></display-entity>
+        </field>
+        <field name="emplLeaveReasonTypeId">
+        	<display-entity entity-name="EmplLeaveReasonType" description="${description}"></display-entity>
+        </field>
+        <field name="fromDate" red-when="never">
+			<display type="date"></display>
+		</field>
+		<field name="thruDate" red-when="never">
+			<display type="date"></display>
+		</field>
+        <field name="approverPartyId"><ignored/></field>
+        <field name="leaveStatus">
+			<display-entity entity-name="StatusItem" key-field-name="statusId" description="${description}"></display-entity>
+		</field>
+        <field name="description"><display/></field>
+        <sort-order>
+        	<field-group style="no-widget-header no-left-margin">
+        		<sort-field name="partyId"/>
+        		<sort-field name="currDept"/>
+        		<sort-field name="currPositionsStr"/>
+        		<sort-field name="nbrDayLeaveInMonth"/>
+        		<sort-field name="nbrDayLeaveInYear"/>
+        		<sort-field name="dayLeaveRegulation"/>
+        		<sort-field name="dateApplication"/>
+        		<sort-field name="leaveTypeId"/>
+        		<sort-field name="emplLeaveReasonTypeId"/>
+        		<sort-field name="fromDate"/>
+        		<sort-field name="thruDate"/>
+        		<sort-field name="description"/>
+        	</field-group>
+        </sort-order>
+    </form> -->
+    
+	<form name="ListLeaveApprovals" type="multi" title=""
+		target="approveEmplLeave" odd-row-style="alternate-row"
+		header-row-style="header-row-2"
+		default-table-style="table table-striped table-hover table-bordered dataTable" group-columns="false">
+		<actions>
+			<entity-condition entity-name="EmplLeave">
+				<condition-list combine="and">
+					<condition-expr field-name="leaveStatus" operator="equals" value="LEAVE_CREATED"/>
+					<condition-expr field-name="approverPartyId" operator="equals" from-field="userLogin.partyId"/>				
+				</condition-list>
+			</entity-condition>
+		</actions>
+		<auto-fields-service service-name="approveEmplLeave"
+			default-field-type="hidden" />
+		<field name="partyId" field-name="partyId" title="${uiLabelMap.HRolbiusEmployeeID}">
+			<display-entity entity-name="PartyNameView"
+				description="${firstName} ${lastName}">
+				<sub-hyperlink target="/partymgr/control/viewprofile"
+					target-type="inter-app" description="${partyId}" link-style="btn btn-mini btn-primary">
+					<parameter param-name="partyId" from-field="partyId" />
+				</sub-hyperlink>
+			</display-entity>
+		</field>
+		<field name="leaveTypeId">
+			<display-entity entity-name="EmplLeaveType" />
+		</field>
+		<field name="emplLeaveReasonTypeId">
+			<display-entity entity-name="EmplLeaveReasonType" />
+		</field>
+		<field name="approverPartyId" field-name="approverPartyId">
+			<hidden />
+		</field>
+		<field name="description">
+			<display></display>
+		</field>
+		<field name="fromDate">
+			<display></display>
+		</field>
+		<field name="thruDate">
+			<display></display>
+		</field>
+		<field name="leaveStatus">
+			<drop-down>
+				<entity-options description="${description}" entity-name="StatusItem"
+					key-field-name="statusId">
+					<entity-constraint name="statusTypeId" operator="equals" value="LEAVE_STATUS"/>
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="_rowSubmit" title="${uiLabelMap.CommonSelect}">
+			<hidden value="Y" />
+		</field>
+		<field name="submit" widget-style="btn btn-success btn-small" >
+			<submit button-type="button" image-location="icon-ok"/>
+		</field>
+	</form>
+	<form name="listEmplListHistory" list-name="listIt" type="list"
+		odd-row-style="alternate-row" header-row-style="header-row-2"
+		paginate-target="FindEmplLeaves"
+		default-table-style="table table-striped table-hover table-bordered dataTable">
+		<actions>
+			<set field="entityName" value="EmplLeave" />			
+			<service service-name="performFind" result-map="result" result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="parameters" />
+				<field-map field-name="entityName" from-field="entityName" />
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+			</service>			
+		</actions>
+		<auto-fields-entity entity-name="EmplLeave"
+			default-field-type="display" />
+		<field name="partyId" title="${uiLabelMap.EmployeeName}">
+			<display-entity entity-name="PartyNameView"
+				description="${firstName} ${lastName}">
+				<sub-hyperlink target="/hrolbius/control/EmployeeProfile"
+					target-type="inter-app" description="${partyId}" link-style="">
+					<parameter param-name="partyId" from-field="partyId" />
+				</sub-hyperlink>
+			</display-entity>
+		</field>
+		<field name="leaveTypeId">
+			<display-entity entity-name="EmplLeaveType" />
+		</field>
+		<field name="emplLeaveReasonTypeId">
+			<display-entity entity-name="EmplLeaveReasonType" />
+		</field>
+		<field name="approverPartyId">
+			<hidden />
+		</field>
+		<field name="leaveStatus">
+			<display-entity entity-name="StatusItem"
+				key-field-name="statusId" />
+		</field>
+		<field name="description">
+			<hidden />
+		</field>	
+	</form>
+	<form name="EmplLeaveGeneralInfo" type="single" target="ViewEmplLeaveHistory"
+        header-row-style="header-row" default-table-style="basic-table">
+    	<actions>
+    		<service service-name="getNbrDayLeaveEmplInfo" result-map="emplLeaveDayInfo">
+				<field-map field-name="partyId" from-field="partyId"/>
+			</service>
+    	</actions>
+    	<field name="nbrDayLeavePaidInMonth" map-name="emplLeaveDayInfo" title="${uiLabelMap.NbrDayLeaveInMonth}">
+        	<display></display>
+        </field>
+        <field name="nbrDayLeavePaidInYear" map-name="emplLeaveDayInfo" title="${uiLabelMap.NbrDayLeaveInYear}">
+        	<display></display>
+        </field>
+        <field name="dayLeaveRegulation" map-name="emplLeaveDayInfo" title="${uiLabelMap.DayLeaveRegulation}">
+        	<display></display>
+        </field>    
+    </form>
+	<form name="ViewListEmplListHistory" type="list"
+		odd-row-style="alternate-row" header-row-style="header-row-2"
+		paginate-target="ViewEmplLeaveHistory"
+		default-table-style="table table-striped table-hover table-bordered dataTable">
+		<actions>
+			<set field="parameters.partyId" from-field="userLogin.partyId"/>
+			<entity-condition entity-name="EmplLeave">
+				<condition-expr field-name="partyId" operator="equals" from-field="parameters.partyId"/>
+			</entity-condition>
+		</actions>
+		<!-- <auto-fields-entity entity-name="EmplLeave"
+			default-field-type="display" /> -->
+		<!-- <field name="partyId" title="${uiLabelMap.EmployeeName}">
+			<display-entity entity-name="PartyNameView"
+				description="${firstName} ${lastName}">
+				<sub-hyperlink target="/hrolbius/control/EmployeeProfile"
+					target-type="inter-app" description="${partyId}" link-style="">
+					<parameter param-name="partyId" from-field="partyId" />
+				</sub-hyperlink>
+			</display-entity>
+		</field> -->
+		<field name="leaveTypeId">
+			<display-entity entity-name="EmplLeaveType" />
+		</field>
+		<field name="emplLeaveReasonTypeId">
+			<display-entity entity-name="EmplLeaveReasonType" />
+		</field>
+		<field name="fromDate">
+			<display type="date"></display>
+		</field>
+		<field name="thruDate">
+			<display type="date"></display>
+		</field>
+		
+		<field name="approverPartyId">
+			<hidden />
+		</field>
+		<field name="leaveStatus">
+			<display-entity entity-name="StatusItem"
+				key-field-name="statusId" />
+		</field>
+		<field name="description">
+			<hidden />
+		</field>	
+	</form>
+</forms>

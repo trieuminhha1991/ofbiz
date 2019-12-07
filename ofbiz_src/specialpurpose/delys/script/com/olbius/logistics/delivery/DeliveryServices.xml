@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+        
+    <simple-method method-name="createShipmentForPurchaseDelivery" short-description="Sub-method used by quickShip methods to create a shipment">
+		
+        <entity-one entity-name="Delivery" value-field="delivery"/>
+        <entity-one entity-name="OrderHeader" value-field="orderHeader">
+        	<field-map field-name="orderId" from-field="delivery.orderId"/>
+        </entity-one>
+        <entity-one entity-name="Facility" value-field="facility">
+        	<field-map field-name="facilityId" from-field="delivery.destFacilityId"/>
+        </entity-one>
+		<entity-and entity-name="OrderItemAndShipGroupAssoc" list="orderItemAndShipGroupAssocList">
+            <field-map field-name="orderId" from-field="orderHeader.orderId"/>
+            <field-map field-name="statusId" value="ITEM_APPROVED"/>
+        </entity-and>
+
+        <!-- make sure we have something to ship -->
+        <if-empty field="orderItemAndShipGroupAssocList">
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="FacilityNoItemsAvailableToShip"/>
+            </add-error>
+            <check-errors/>
+        </if-empty>
+
+        <get-related relation-name="OrderItemShipGroup" value-field="orderHeader" list="orderItemShipGroupList"/>
+
+        <!-- group orderItems (actually OrderItemAndShipGroupAssocs) by shipGroupSeqId in a Map with List values
+             This Map is actually used only for sales orders' shipments right now.  -->
+        <iterate list="orderItemAndShipGroupAssocList" entry="orderItemAndShipGroupAssoc">
+            <field-to-list field="orderItemAndShipGroupAssoc" list="orderItemListByShGrpMap[orderItemAndShipGroupAssoc.shipGroupSeqId]"/>
+        </iterate>
+        <!-- for OrderItemShipGroup need to split all OISGIRs into their ship groups and create a shipment for each -->
+        <iterate list="orderItemShipGroupList" entry="orderItemShipGroup">
+            <!-- lookup all the approved items -->
+            <entity-and entity-name="OrderItemAndShipGroupAssoc" list="orderItems">
+                <field-map field-name="orderId" from-field="orderHeader.orderId"/>
+                <field-map field-name="shipGroupSeqId" from-field="orderItemShipGroup.shipGroupSeqId"/>
+                <field-map field-name="statusId" value="ITEM_APPROVED"/>
+            </entity-and>
+            <set from-field="orderItemListByShGrpMap[orderItemShipGroup.shipGroupSeqId]" field="perShipGroupItemList"/>
+
+            <!-- make sure we have something to ship -->
+            <if-empty field="perShipGroupItemList">
+                <set field="argListNames[]" from-field="orderItemShipGroup.shipGroupSeqId"/>
+                <property-to-field property="FacilityShipmentNoItemsAvailableToShip" resource="ProductUiLabels" field="successMessage" arg-list-name="argListNames"/>
+            <else>
+                <!-- create the shipment for this facility and ship group combination -->
+                <set from-field="orderHeader.orderId" field="shipmentContext.primaryOrderId"/>
+                <set from-field="orderItemShipGroup.shipGroupSeqId" field="shipmentContext.primaryShipGroupSeqId"/>
+                <!-- for Sales Shipment, order items' reservation facilityId is the originFacilityId, and the initial status is "INPUT"
+                     for Purchase Shipment, the facilityId parameter is the destinationFacilityId, and the initial status is "CREATED" -->
+                <set from-field="facility.facilityId" field="shipmentContext.destinationFacilityId"/>
+                <set value="PURCH_SHIP_CREATED" field="shipmentContext.statusId"/>
+                <call-service service-name="createShipment" in-map-name="shipmentContext">
+                    <result-to-field result-name="shipmentId" field="shipmentLookupMap.shipmentId"/>
+                </call-service>
+                <find-by-primary-key entity-name="Shipment" map="shipmentLookupMap" value-field="shipment"/>
+				
+                <clear-field field="itemResFindMap"/>
+                <set from-field="facilityId" field="itemResFindMap.facilityId"/>
+                <iterate list="orderItemAndShipGroupAssocList" entry="item">
+                  <set from-field="shipment.shipmentId" field="issueContext.shipmentId"/>
+                  <set from-field="item.orderId" field="issueContext.orderId"/>
+                  <set from-field="item.orderItemSeqId" field="issueContext.orderItemSeqId"/>
+                  <set from-field="item.shipGroupSeqId" field="issueContext.shipGroupSeqId"/>
+                  
+                  <entity-condition list="listDeliveryItemByOrderItem" entity-name="DeliveryItem">
+                  	<condition-list>
+                  		<condition-expr field-name="fromOrderId" from-field="item.orderId"/>
+                  		<condition-expr field-name="fromOrderItemSeqId" from-field="item.orderItemSeqId"/>
+                  	</condition-list>
+                  </entity-condition>
+                  <if>
+                  	<condition><if-empty field="listDeliveryItemByOrderItem"/></condition>
+                  <then>
+                 		<set from-field="item.quantity" field="issueContext.quantity"/>
+                  </then>
+                  <else>
+                  		<entity-one value-field="orderItem" entity-name="OrderItem">
+                  			<field-map field-name="orderId" from-field="item.orderId"/>
+                  			<field-map field-name="orderItemSeqId" from-field="item.orderItemSeqId"/>
+                  		</entity-one>
+                  		<clear-field field="findSupplierQtyUomMap"/>
+                  		<set field="findSupplierQtyUomMap.orderId" from-field="item.orderId"/>
+                  		<set field="findSupplierQtyUomMap.productId" from-field="orderItem.productId"/>
+                  		<call-service service-name="getQuantityUomBySupplier" in-map-name="findSupplierQtyUomMap">
+               				<result-to-field result-name="quantityUomId" field="quantityUomId"/>
+               			</call-service>
+               			<entity-one value-field="product" entity-name="Product">
+                  			<field-map field-name="productId" from-field="orderItem.productId"/>
+                  		</entity-one>
+               			<clear-field field="getConvertNumberMap"/>
+                  		<set field="getConvertNumberMap.quantityUomId" from-field="quantityUomId"/>
+                  		<set field="getConvertNumberMap.productId" from-field="orderItem.productId"/>
+                  		<set field="getConvertNumberMap.baseQuantityUomId" from-field="product.quantityUomId"/>
+                  		<call-service service-name="getProductConvertNumber" in-map-name="getConvertNumberMap">
+               				<result-to-field result-name="convertNumber" field="convertNumber"/>
+               			</call-service>
+                  		<set field="totalQuantity" type="BigDecimal" value="0"/>
+                  		<iterate entry="dlvItem" list="listDeliveryItemByOrderItem">
+                  			<calculate field="totalQuantity">
+                  				<calcop operator="add">
+                  					<calcop operator="multiply" field="quantityConvert">
+                  						<calcop operator="get" field="dlvItem.actualDeliveredQuantity"/>
+                  						<calcop operator="get" field="convertNumber"/>
+                  					</calcop>
+                  					<calcop operator="get" field="totalQuantity"/>
+                  				</calcop>
+                  			</calculate>
+                  			<set from-field="totalQuantity" field="issueContext.quantity"/>
+                  		</iterate>
+                  </else>
+                  </if>
+                  <call-service service-name="issueOrderItemToShipment" in-map-name="issueContext"/>
+                </iterate>
+				
+                <!-- place all issued items into a single package -->
+                <entity-and entity-name="ItemIssuance" list="itemIssuances">
+                    <field-map field-name="orderId" from-field="orderHeader.orderId"/>
+                    <field-map field-name="shipGroupSeqId" from-field="orderItemShipGroup.shipGroupSeqId"/>
+                    <field-map field-name="shipmentId" from-field="shipment.shipmentId"/>
+                </entity-and>
+
+                <set value="New" field="shipmentPackageSeqId"/>
+                <iterate list="itemIssuances" entry="itemIssuance">
+                    <log level="verbose" message="In quick ship adding item to package: ${shipmentPackageSeqId}"/>
+                    <clear-field field="shipItemContext"/>
+                    <set from-field="itemIssuance.shipmentId" field="shipItemContext.shipmentId"/>
+                    <set from-field="itemIssuance.shipmentItemSeqId" field="shipItemContext.shipmentItemSeqId"/>
+                    <set from-field="itemIssuance.quantity" field="shipItemContext.quantity"/>
+                    <set from-field="shipmentPackageSeqId" field="shipItemContext.shipmentPackageSeqId"/>
+                    <call-service service-name="addShipmentContentToPackage" in-map-name="shipItemContext">
+                        <result-to-field result-name="shipmentPackageSeqId" field="shipmentPackageSeqId"/>
+                    </call-service>
+                </iterate>
+
+               <!-- update the shipment status to shipped -->
+               <set from-field="shipment.shipmentId" field="packedContext.shipmentId"/>
+               <set value="PURCH_SHIP_SHIPPED" field="packedContext.statusId"/>
+               <call-service service-name="updateShipment" in-map-name="packedContext"/>
+
+               <field-to-result result-name="shipmentId" field="shipment.shipmentId"/>
+            </else>
+            </if-empty>
+        </iterate>
+    </simple-method>
+</simple-methods>

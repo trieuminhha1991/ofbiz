@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+    
+    <entity entity-name="AddressDimension" package-name="org.ofbiz.bi.dimension" 
+            title="Address Dimension">
+        <field name="dimensionId" type="numeric"/>
+        <field name="address1" type="value"/>
+        <field name="roadGeoId" type="id"/>
+        <field name="roadName" type="value"/>
+        <field name="wardGeoId" type="id"/>
+        <field name="wardName" type="value"/>
+        <field name="districtGeoId" type="id"/>
+        <field name="districtName" type="value"/>
+        <field name="stateProvinceGeoId" type="id"/>
+        <field name="stateProvinceName" type="value"/>
+        <field name="countryGeoId" type="id"/>
+        <field name="countryName" type="value"/>
+        <field name="subRegionGeoId" type="id"/>
+        <field name="subRegionName" type="value"/>
+        <field name="regionGeoId" type="id"/>
+        <field name="regionName" type="value"/>
+        <prim-key field="dimensionId"/>
+    </entity>
+    
+    <entity entity-name="SalesOrderNewFact" package-name="org.ofbiz.bi.fact">
+        <field name="orderId" type="id-ne"><description>The natural key. From OrderItem.orderId</description></field>
+        <field name="orderItemSeqId" type="id-ne"><description>The natural key. From OrderItem.orderItemSeqId</description></field>
+        <field name="currencyDimId" type="numeric"><description>CurrencyDimension</description></field>
+        <field name="customerDimId" type="numeric"><description>Is customer (BILL_TO_CUSTOMER). PartyDimension</description></field>
+        <field name="vendorDimId" type="numeric"><description>Is vendor, internal organization (BILL_FROM_VENDOR). PartyDimension</description></field>
+        <field name="productDimId" type="numeric"><description>ProductDimension</description></field>
+        <field name="salesEmplDimId" type="numeric"><description>As callCenter, salesAdmin. PartyDimension</description></field>
+        <field name="salesExecDimId" type="numeric"><description>As sales executive, sales representative. PartyDimension</description></field>
+        
+        <field name="productStoreDimId" type="numeric"><description>ProductStoreDimension</description></field>
+        <field name="salesMethodChannelDimId" type="numeric"><description>EnumerationDimension</description></field>
+        <field name="salesChannelDimId" type="numeric"><description>EnumerationDimension</description></field>
+        
+        <field name="orderName" type="name"/>
+        <field name="sgcCustomerId" type="id"/>
+        <field name="quantityUomId" type="id"/>
+        <field name="isPromo" type="indicator"/>
+        
+        <field name="quantity" type="fixed-point"/>
+        <field name="cancelQuantity" type="fixed-point"/>
+        <field name="returnQuantity" type="fixed-point"/>
+        <field name="totalQuantity" type="fixed-point"><description>Equal (quantity - cancelQuantity)</description></field>
+        <field name="totalSelectedAmount" type="fixed-point"><description>Equal (quantity * selectedAmount)</description></field>
+        
+        <field name="unitPrice" type="currency-amount"/>
+        
+        <field name="taxAmount" type="currency-amount"/>
+        <field name="discountAmount" type="currency-amount"/>
+        <field name="subTotalAmount" type="currency-amount"/>
+        <field name="totalAmount" type="currency-amount"/>
+        
+        <field name="orderDateDimId" type="numeric"><description>DateDimention</description></field>
+        <field name="orderDate" type="date-time"/>
+        <field name="entryDateDimId" type="numeric"><description>Last status date. DateDimention</description></field>
+        <field name="entryDate" type="date-time"/>
+        <field name="orderStatusId" type="id"/>
+        <field name="orderItemStatusId" type="id"/>
+        
+        <field name="addressDimId" type="numeric"><description>AddressDimension</description></field>
+        <field name="creatorDimId" type="numeric"><description>Party was created the order. PartyDimension</description></field>
+        
+        <prim-key field="orderId"/>
+        <prim-key field="orderItemSeqId"/>
+        
+        <!--
+        <field name="orderCompletedDate" type="date-time"/>
+        <field name="actualArrivalDateDimId" type="numeric"/> 	
+        <field name="actualArrivalDate" type="date-time"/> 	
+        <field name="aDeliveryDateDimId" type="numeric"/> 	
+        <field name="aDeliveryDate" type="date-time"/>
+        <field name="shipAfterDateDimId" type="numeric"/> 	
+        <field name="shipAfterDate" type="date-time"/> 	
+        <field name="shipBeforeDateDimId" type="numeric"/> 	
+        <field name="shipBeforeDate" type="date-time"/>
+        
+        <field name="countryDimId" type="numeric"/>
+        <field name="stateDimId" type="numeric"/>
+        <field name="districtDimId" type="numeric"/>
+        <field name="wardDimId" type="numeric"/>
+        <field name="roadDimId" type="numeric"/>
+        
+        <field name="promoDimId" type="numeric"><description>ProductPromoDimension</description></field>
+        <field name="discountDimId" type="numeric"><description>ProductPromoDimension</description></field>
+        
+        <field name="quantityUom" type="name"/>
+        <field name="returnId" type="id"/>
+        <field name="orderPhone" type="name"/>
+        <field name="orderAddr" type="value"/>
+        <prim-key field="discountDimId"/>
+        The order type. From Table.description -->
+    </entity>
+    
+    <entity entity-name="SalesOrderRollStoreAndProductFact" package-name="org.ofbiz.bi.fact">
+    	<description>Entity roll up from SalesOrderNewFact entity by Product store and Product and date.</description>
+        <field name="productStoreDimId" type="numeric"><description>Group by in SalesOrderNewFact. ProductStoreDimension</description></field>
+        <field name="productDimId" type="numeric"><description>Group by in SalesOrderNewFact. ProductDimension</description></field>
+        <field name="dateDimId" type="numeric"><description>Group by in SalesOrderNewFact. DateDimention</description></field>
+        
+        <field name="vendorDimId" type="numeric"><description>PartyDimension</description></field>
+        <field name="salesMethodChannelDimId" type="numeric"><description>EnumerationDimension</description></field>
+        <field name="salesChannelDimId" type="numeric"><description>EnumerationDimension</description></field>
+        
+        <field name="quantity" type="fixed-point"/>
+        <field name="cancelQuantity" type="fixed-point"/>
+        <field name="returnQuantity" type="fixed-point"/>
+        <field name="totalQuantity" type="fixed-point"><description>Equal (quantity - cancelQuantity)</description></field>
+        <field name="totalSelectedAmount" type="fixed-point"><description>Equal (quantity * selectedAmount)</description></field>
+        
+        <field name="taxAmount" type="currency-amount"/>
+        <field name="discountAmount" type="currency-amount"/>
+        <field name="subTotalAmount" type="currency-amount"/>
+        <field name="totalAmount" type="currency-amount"/>
+        
+        <field name="numOrder" type="numeric"><description>Count number order</description></field>
+        <field name="numOrderKhtt" type="numeric"><description>Count number order has sgc_customer_id info</description></field>
+        
+        <prim-key field="productStoreDimId"/>
+        <prim-key field="productDimId"/>
+        <prim-key field="dateDimId"/>
+    </entity>
+    
+    <entity entity-name="SalesOrderRollStoreFact" package-name="org.ofbiz.bi.fact">
+    	<description>Entity roll up from SalesOrderNewFact entity by Product store and date.</description>
+        <field name="productStoreDimId" type="numeric"><description>Group by in SalesOrderNewFact. ProductStoreDimension</description></field>
+        <field name="dateDimId" type="numeric"><description>Group by in SalesOrderNewFact. DateDimention</description></field>
+        
+        <field name="vendorDimId" type="numeric"><description>PartyDimension</description></field>
+        <field name="salesMethodChannelDimId" type="numeric"><description>EnumerationDimension</description></field>
+        <field name="salesChannelDimId" type="numeric"><description>EnumerationDimension</description></field>
+        
+        <field name="quantity" type="fixed-point"/>
+        <field name="cancelQuantity" type="fixed-point"/>
+        <field name="returnQuantity" type="fixed-point"/>
+        <field name="totalQuantity" type="fixed-point"><description>Equal (quantity - cancelQuantity)</description></field>
+        <field name="totalSelectedAmount" type="fixed-point"><description>Equal (quantity * selectedAmount)</description></field>
+        
+        <field name="taxAmount" type="currency-amount"/>
+        <field name="discountAmount" type="currency-amount"/>
+        <field name="subTotalAmount" type="currency-amount"/>
+        <field name="totalAmount" type="currency-amount"/>
+        
+        <field name="numOrder" type="numeric"><description>Count number order</description></field>
+        <field name="numOrderKhtt" type="numeric"><description>Count number order has sgc_customer_id info</description></field>
+        
+        <prim-key field="productStoreDimId"/>
+        <prim-key field="dateDimId"/>
+    </entity>
+    
+    <!-- 
+    TODO
+    <entity entity-name="SalesOrderPromoFact" package-name="org.ofbiz.bi.fact">
+        <field name="orderId" type="id-ne"/>
+        <field name="orderItemSeqId" type="id-ne"/>
+        <field name="promoDimId" type="id-ne"/>
+        <field name="discountAmount" type="currency-amount"/>
+        <prim-key field="orderId"/>
+        <prim-key field="orderItemSeqId"/>
+        <prim-key field="promoDimId"/>
+    </entity> -->
+    
+    <entity entity-name="SalesOrderPromoCodeFact" package-name="org.ofbiz.bi.fact">
+    	<field name="orderId" type="id-ne"><description>The natural key. From OrderHeader</description></field>
+    	<field name="productPromoCodeId" type="id-ne"><description>The natural key. From ProductPromoCode</description></field>
+		<field name="productPromoDimId" type="numeric"><description>ProductPromoDimension</description></field>
+		<field name="partyDimId" type="numeric"><description>PartyDimension</description></field>
+		<field name="totalDiscountAmount" type="currency-amount"/>
+		<field name="entryDateDimId" type="numeric"><description>Last update date. DateDimention</description></field>
+        <field name="entryDate" type="date-time"/>
+		<prim-key field="orderId"/>
+		<prim-key field="productPromoCodeId"/>
+    </entity>
+    
+    <entity entity-name="PartyEmplOrgRelationship" package-name="org.ofbiz.bi.dimension">
+        <field name="dimensionId" type="numeric"/>
+        <field name="parentDimId" type="numeric"/>
+        <field name="fromDateDimId" type="numeric"/>
+        <field name="thruDateDimId" type="numeric"/>
+        <field name="depth" type="numeric"/>
+        <prim-key field="dimensionId"/>
+        <prim-key field="parentDimId"/>
+        <prim-key field="fromDateDimId"/>
+    </entity>
+    
+    <entity entity-name="PartyEmplOrgEeeRelationship" package-name="org.ofbiz.bi.dimension" title="Relationship type Employee">
+        <field name="dimensionId" type="numeric"/>
+        <field name="parentDimId" type="numeric"/>
+        <field name="roleTypeId" type="id-ne"/>
+        <field name="fromDateDimId" type="numeric"/>
+        <field name="thruDateDimId" type="numeric"/>
+        <field name="depth" type="numeric"/>
+        <prim-key field="dimensionId"/>
+        <prim-key field="parentDimId"/>
+        <prim-key field="roleTypeId"/>
+        <prim-key field="fromDateDimId"/>
+    </entity>
+    
+    <entity entity-name="ProductCategoryMemberRel" package-name="org.ofbiz.bi.dimension.product" title="Relationship between Product Category and Product Dimension">
+        <field name="categoryDimId" type="numeric"/>
+        <field name="productDimId" type="numeric"/>
+        <field name="fromDateDimId" type="numeric"/>
+        <field name="thruDateDimId" type="numeric"/>
+        <field name="depth" type="numeric"/>
+        <prim-key field="categoryDimId"/>
+        <prim-key field="productDimId"/>
+        <prim-key field="fromDateDimId"/>
+    </entity>
+    
+    <entity entity-name="ReturnSalesOrderNewFact" package-name="org.ofbiz.bi.fact">
+		<description>Fact entity for show report about return order</description>
+		<field name="returnId" type="id-ne"><description>The natural key. From ReturnItem.returnId</description></field>
+		<field name="returnItemSeqId" type="id-ne"><description>The natural key. From ReturnItem.returnItemSeqId</description></field>
+		<field name="currencyDimId" type="numeric"><description>CurrencyDimension</description></field>
+		<field name="customerDimId" type="numeric"><description>Is customer (fromPartyId). PartyDimension</description></field>
+        <field name="vendorDimId" type="numeric"><description>Is vendor, internal organization (toPartyId). PartyDimension</description></field>
+		
+		<field name="facilityDimId" type="numeric"><description>From ReturnHeader.destinationFacilityId. FacilityDimension</description></field>
+		<field name="addressDimId" type="numeric"><description>From ReturnHeader.originContactMechId. AddressDimension</description></field>
+		<field name="creatorDimId" type="numeric"><description>Party was created the order. PartyDimension</description></field>
+		
+		<field name="returnDateDimId" type="numeric"><description>DateDimention</description></field>
+        <field name="returnDate" type="date-time"/>
+		<field name="entryDateDimId" type="numeric"><description>Last status date. DateDimention</description></field>
+        <field name="entryDate" type="date-time"/>
+		<field name="returnStatusId" type="id"/>
+        <field name="returnItemStatusId" type="id"/>
+        
+        <field name="productStoreDimId" type="numeric"><description>ProductStoreDimension</description></field>
+        <field name="salesMethodChannelDimId" type="numeric"><description>EnumerationDimension. From OrderHeader.salesMethodChannelId</description></field>
+        <field name="salesChannelDimId" type="numeric"><description>EnumerationDimension. From OrderHeader.salesChannelDimId</description></field>
+        <field name="orderId" type="id-ne"><description>From OrderItem.orderId</description></field>
+        <field name="orderItemSeqId" type="id-ne"><description>From OrderItem.orderItemSeqId</description></field>
+        <field name="isPromo" type="indicator"/>
+		<field name="productDimId" type="numeric"><description>ProductDimension</description></field>
+		<field name="returnQuantity" type="fixed-point"/>
+		<field name="receivedQuantity" type="fixed-point"/>
+		<field name="returnAmount" type="fixed-point"><description>Is selectedAmount</description></field>
+		<field name="receivedAmount" type="fixed-point"><description>Is selectedAmount</description></field>
+        <field name="returnPrice" type="currency-amount"/>
+        
+        <field name="returnTaxAmount" type="currency-amount"/>
+        <field name="returnDiscountAmount" type="currency-amount"/>
+        <field name="returnSubTotalAmount" type="currency-amount"/>
+        <field name="returnTotalAmount" type="currency-amount"/>
+        
+		<prim-key field="returnId"/>
+		<prim-key field="returnItemSeqId"/>
+	</entity>
+	
+	<entity entity-name="SalesOrderExportData" package-name="org.ofbiz.bi.fact">
+		<field name="orderId" type="id-ne"/>
+		<field name="orderItemSeqId" type="id-ne"/>
+		<field name="orderName" type="name"/>
+		<field name="orderDate" type="date-time"/>
+		<field name="currencyUom" type="id"/>
+		<field name="productStoreId" type="id"/>
+		<field name="productStoreName" type="name"/>
+		<field name="taxAmount" type="currency-amount"/>
+		<field name="discountAmount" type="currency-amount"/>
+		<field name="subTotalAmount" type="currency-amount"/>
+		<field name="totalAmount" type="currency-amount"/>
+		<field name="productId" type="id"/>
+		<field name="productName" type="long-varchar"/>
+		<field name="primaryProductCategoryId" type="id"/>
+		<field name="quantity" type="fixed-point"/>
+		<field name="cancelQuantity" type="fixed-point"/>
+		<field name="returnQuantity" type="fixed-point"/>
+		<field name="totalQuantity" type="fixed-point"/>
+		<field name="totalSelectedAmount" type="fixed-point"/>
+		<field name="unitPrice" type="currency-amount"/>
+		<field name="quantityUomId" type="id"/>
+		<field name="returnId" type="id"/>
+		<field name="returnPrice" type="currency-amount"/>
+		<field name="productAvgCost" type="currency-amount"/>
+		<field name="salesMethodChannelEnumId" type="id"/>
+		<field name="salesChannelEnumId" type="id"/>
+		<field name="orderStatusId" type="id"/>
+		<field name="orderItemStatusId" type="id"/>
+		<field name="creatorId" type="id"/>
+		<field name="sgcCustomerId" type="id"/>
+        
+        <prim-key field="orderId"/>
+        <prim-key field="orderItemSeqId"/>
+	</entity>
+	
+	<entity entity-name="SalesForecastFact" package-name="org.ofbiz.bi.fact">
+		<field name="salesForecastId" type="id-ne"/>
+		<field name="salesForecastDetailSeqId" type="id-ne"/>
+		<field name="parentSalesForecastId" type="id"/>
+		<field name="organizationPartyDimId" type="id"/>
+		<field name="executePartyDimId" type="id"/>
+		<field name="customTimePeriodDimId" type="id"><description>CustomTimePeriodDimension</description></field>
+		<field name="fromDateDimId" type="numeric"/>
+		<field name="thruDateDimId" type="numeric"/>
+		<field name="numDay" type="numeric"/>
+		<field name="currencyUomId" type="id"/>
+		<field name="productDimId" type="numeric"><description>ProductDimension</description></field>
+		<field name="productCategoryDimId" type="numeric"><description>CategoryDimension</description></field>
+		<field name="quantityUomId" type="id"/>
+		<field name="quantity" type="fixed-point"/>
+		<field name="amount" type="currency-amount"/>
+		<field name="actualQuantity" type="fixed-point"/>
+		<field name="actualAmount" type="currency-amount"/>
+		<field name="reportQuantity" type="fixed-point"/>
+		<field name="reportAmount" type="currency-amount"/>
+		
+        <prim-key field="salesForecastId"/>
+        <prim-key field="salesForecastDetailSeqId"/>
+	</entity>
+	
+</entitymodel>

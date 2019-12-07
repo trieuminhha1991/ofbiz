@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-screen.xsd">
+
+	<screen name="PromotionCommonDecorator">
+		<section>
+			<actions>
+				<set field="tabBarName" value="ProductPromoTabBar" global="true" />
+				<set field="tabBarLocation" value="component://basepo/widget/BasePOMenus.xml" global="true" />
+			</actions>
+			<widgets>
+				<section>
+					<widgets>
+						<section>
+							<condition>
+								<and>
+									<not>
+										<if-empty field="productPromoId" />
+									</not>
+									<if-olbius-has-permission />
+								</and>
+							</condition>
+							<actions>
+								<set field="printTabBar" value="true" />
+							</actions>
+							<widgets></widgets>
+						</section>
+					</widgets>
+				</section>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<decorator-section-include name="body" />
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="PromotionViewCommonDecorator">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="promotionPO" />
+				<set field="selectedSubMenuItem" value="listPromotion" />
+				<set field="productPromoId" from-field="parameters.productPromoId" global="true" />
+				<set field="tabButtonItem" from-field="tabButtonItem" default-value="" global="true" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission />
+					</condition>
+					<actions>
+						<entity-one value-field="promotionPO" entity-name="ProductPromo">
+							<field-map field-name="productPromoId" value="${productPromoId}" />
+						</entity-one>
+						<set field="promotionPO" from-field="promotionPO" global="true" />
+					</actions>
+					<widgets>
+						<section>
+							<condition>
+								<not>
+									<if-empty field="promotionPO" />
+								</not>
+							</condition>
+							<actions>
+								<set field="titleHeaderValue" value="promotionTitle" global="true" />
+								<set field="titleHeaderLocation" value="component://basepo/widget/PromotionScreens.xml" global="true" />
+								<set field="currentStatusId" from-field="promotionPO.statusId" global="true" />
+							</actions>
+							<widgets>
+								<decorator-screen name="PromotionCommonDecorator">
+									<decorator-section name="body">
+										<decorator-section-include name="body" />
+									</decorator-section>
+								</decorator-screen>
+							</widgets>
+							<fail-widgets>
+								<decorator-screen name="PromotionCommonDecorator">
+									<decorator-section name="body">
+										<container style="alert alert-info">
+											<label text="${uiLabelMap.BSProductPromoHasIdIsNotFound}"></label>
+										</container>
+									</decorator-section>
+								</decorator-screen>
+							</fail-widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="NewPromotionPO">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="promotionPO" />
+				<set field="selectedSubMenuItem" value="createNewPromotion" />
+				<set field="titleProperty" value="BSCreateNewProductPromotion" global="true" />
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission />
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://basepo/webapp/basepo/promotion/promotionNewTotal.ftl" />
+									</html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotCreatePermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="NewPromotionInfo">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://basepo/webapp/basepo/promotion/promotionNewInfo.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="NewPromotionRules">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://basepo/webapp/basepo/promotion/promotionNewRules.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="ListPromotionPO">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="promotionPO" />
+				<set field="selectedSubMenuItem" value="listPromotion" />
+				<set field="titleProperty" value="BSListProductPromotion" />
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission />
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://basepo/webapp/basepo/promotion/promotionList.ftl" />
+									</html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="ViewPromotionPO">
+		<section>
+			<actions>
+				<set field="titleProperty" value="BSViewProductPromotion" global="true" />
+				<set field="tabButtonItem" value="ViewPromotion" />
+			</actions>
+			<widgets>
+				<decorator-screen name="PromotionViewCommonDecorator">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<script location="component://basepo/webapp/basepo/WEB-INF/actions/promotion/ViewProductPromo.groovy" />
+							</actions>
+							<widgets>
+								<screenlet title="${uiLabelMap.BSProductPromo}: ${promotionPO.promoName} (${promotionPO.productPromoId})" navigation-menu-name="ViewPromoSubTabBar">
+									<include-menu name="ViewPromoSubTabBar" location="component://basepo/widget/BasePOMenus.xml" />
+									<platform-specific>
+										<html>
+											<html-template location="component://basepo/webapp/basepo/promotion/promotionView.ftl" />
+										</html>
+									</platform-specific>
+								</screenlet>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="EditPromotionPO">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="promotionPO" />
+				<set field="selectedSubMenuItem" value="createNewPromotion" />
+				<set field="titleProperty" value="BSEditProductPromotion" />
+				<set field="productPromoId" from-field="parameters.productPromoId" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission />
+					</condition>
+					<actions>
+						<entity-one value-field="promotionPO" entity-name="ProductPromo">
+							<field-map field-name="productPromoId" value="${productPromoId}" />
+						</entity-one>
+					</actions>
+					<widgets>
+						<section>
+							<condition>
+								<not>
+									<if-empty field="promotionPO" />
+								</not>
+							</condition>
+							<actions>
+								<set field="titleHeaderValue" value="promotionTitle" global="true" />
+								<set field="titleHeaderLocation" value="component://basepo/widget/PromotionScreens.xml" global="true" />
+								<set field="currentStatusId" from-field="promotionPO.statusId" />
+								<script location="component://basepo/webapp/basepo/WEB-INF/actions/promotion/EditProductPromo.groovy" />
+							</actions>
+							<widgets>
+								<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+									<decorator-section name="body">
+										<platform-specific>
+											<html>
+												<html-template location="component://basepo/webapp/basepo/promotion/promotionNewTotal.ftl" />
+											</html>
+										</platform-specific>
+									</decorator-section>
+								</decorator-screen>
+							</widgets>
+							<fail-widgets>
+								<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+									<decorator-section name="body">
+										<container style="alert alert-info">
+											<label text="${uiLabelMap.BSProductPromoHasIdIsNotFound}"></label>
+										</container>
+									</decorator-section>
+								</decorator-screen>
+							</fail-widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotUpdatePermission}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="promotionTitle">
+		<section>
+			<condition>
+				<not>
+					<if-empty field="promotionPO" />
+				</not>
+			</condition>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text="${uiLabelMap.BSId}: "></label>
+				<link url-mode="plain" target="viewPromotionPO?productPromoId=${promotionPO.productPromoId}" text="${promotionPO.productPromoId}"></link>
+			</widgets>
+		</section>
+	</screen>
+
+</screens>

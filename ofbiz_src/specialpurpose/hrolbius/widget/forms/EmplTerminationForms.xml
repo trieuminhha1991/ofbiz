@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
+	<!-- retire proposal -->	
+	<!-- <form name="EmplRetireProposal" type="single" odd-row-style="header-row"
+		 default-table-style="basic-table" target="createEmplRetireProposal">
+		<actions>
+			<set field="partyId" from-field="userLogin.partyId"/>
+		</actions>
+		<field name="partyId">
+			<hidden/>
+		</field>
+		<field name="terminationTypeId">
+			<hidden value="RETIRE"/>
+		</field>
+		<field name="statusId">
+			<hidden value="TER_PPSL_CREATED"/>
+		</field>
+		<field name="dateTermination" title="${uiLabelMap.HREmplDateRetire}">
+			<date-time/>
+		</field>
+		<field name="terminationReasonId" title="${uiLabelMap.HREmplReasonRetire}">
+			<drop-down>
+				<entity-options description="${description}" entity-name="TerminationReason"></entity-options>
+			</drop-down>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonSubmit}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form> -->
+	<form name="ApprovalRetireProposal" type="single" odd-row-style="header-row" default-map-name="emplTerminationProposal"
+		 default-table-style="basic-table" target="updateApprovalRetireProposal">
+		<actions>
+			<set field="emplTerminationProposalId" from-field="parameters.emplTerminationProposalId"/>
+			<entity-one entity-name="EmplTerminationProposal" value-field="emplTerminationProposal"></entity-one>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getStatusIdRetireProposal.groovy"/>
+		</actions>
+		<field name="emplTerminationProposalId">
+			<hidden/>
+		</field>
+		<field name="partyId" title="${uiLabelMap.EmployeeName}">
+			<display-entity entity-name="Person" description="${lastName} ${firstName}" key-field-name="partyId"></display-entity>
+		</field>
+		<field name="terminationTypeId" title="${uiLabelMap.HREmplTerminalTypeId}">
+			<display-entity entity-name="TerminationType" description="${description}"></display-entity>
+		</field>
+		
+		<field name="dateTermination" title="${uiLabelMap.HREmplDateRetire}">
+			<display type="date"></display>
+		</field>
+		<field name="terminationReasonId" title="${uiLabelMap.HREmplReasonRetire}">
+			<display-entity entity-name="TerminationReason" description="${description}"></display-entity>
+		</field>
+		<field name="currStatusId" title="${uiLabelMap.HREmplApprovalCurrStatus}" map-name="context">
+			<display-entity entity-name="StatusItem" description="${description}" key-field-name="statusId"></display-entity>
+		</field>
+		<field name="statusId" title="${uiLabelMap.EmplProposalCheck}" use-when="${statusEdit}">
+			<drop-down current="selected">
+				<list-options key-name="statusId" list-name="statusIdList" description="${statusCode}"/>
+			</drop-down>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonSubmit}"
+			widget-style="btn btn-small btn-primary" use-when="${statusEdit}">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>     
+	
+	<!-- sacking employee -->
+	<form name="EditSackingProposal" type="single" odd-row-style="header-row"
+		 default-table-style="basic-table" target="createSackingProposal" >		
+		<actions>
+			<set field="partyId" from-field="parameters.proposedId"/>
+			<set field="emplId" from-field="parameters.proposedId"/>
+		 	<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrPositionEmpl.groovy"/>
+		 	<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrDeptEmpl.groovy"/>
+		 	<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getListEmplOfMgr.groovy"/>
+		 	<entity-one entity-name="PartyPunishmentLevel">
+				<field-map field-name="partyId"/>	
+			</entity-one>
+			<entity-one entity-name="PartyPunishmentRemindCount" auto-field-map="true"></entity-one>
+			<set field="nowTimestamp" value="${groovy: org.ofbiz.base.util.UtilDateTime.nowTimestamp();}"/>
+		</actions>	
+		
+		<field name="proposedId" title="${uiLabelMap.EmployeeName}" use-when="proposedId!=null">
+			<display-entity entity-name="Person" description="${lastName} ${middleName} ${firstName}" key-field-name="partyId"></display-entity>
+		</field>
+		<field name="proposedId" title="${uiLabelMap.EmployeeName}" use-when="proposedId==null" widget-style="chzn-select" title-style="asterisk">
+			<drop-down>
+				<option key=""/>
+				<list-options key-name="partyId" list-name="emplList" description="${lastName} ${firstName}"/>
+			</drop-down>
+		</field>		 
+		<field name="currPositionsStr" title="${uiLabelMap.HREmplFromPositionType}" widget-style="currPosition">
+			<display description="${currPositionsStr}" also-hidden="false"></display>
+		</field>
+		<field name="currDept" title="${uiLabelMap.EmployeeCurrentDept}" id-name="currDept" widget-style="currDept">
+			<display description="${currDept}" also-hidden="false"></display>
+		</field>
+		<field name="punishmentCountSum" title="${uiLabelMap.HREmplWarningLevel}" widget-style="punishmentCountSum">
+			<display default-value="0" also-hidden="false"></display>
+		</field>
+		<field name="punishmentLevel" title="${uiLabelMap.HREmplPunishmentLevel}" widget-style="punishmentLevel">
+			<display default-value="0" also-hidden="false"></display>
+		</field>
+		<field name="terminationReasonId" title="${uiLabelMap.HREmplSackingReason}">
+			<drop-down>
+				<entity-options description="${description}" entity-name="TerminationReason">
+					<entity-constraint name="parentTypeId" value="SACKING"/>
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="dateTermination" title="${uiLabelMap.HREmplDateSacking}">
+			<date-time type="date" default-value="${nowTimestamp}"/>
+		</field>
+		<field name="comment" title="${uiLabelMap.HRNotes}">
+			<text></text>
+		</field>			
+		<field name="submitButton" title="${uiLabelMap.CommonSend}" widget-style="btn btn-small btn-primary" >
+			<submit image-location="icon-ok" button-type="button" request-confirmation="true"  confirmation-message="${uiLabelMap.AreYouSure}"/>
+		</field>	
+	 </form>
+	 
+	 <!-- <form name="ApprovalSackingProposal" type="single" header-row-style="header-row" default-table-style="basic-table"
+		target="updateApprovalSackingProposal">
+		<actions>			  
+			<set field="emplTerminationProposalId" from-field="parameters.emplTerminationProposalId"/>						
+			<entity-one entity-name="EmplTerminationProposal" value-field="emplTerminationProposal"></entity-one>
+			<entity-one entity-name="SackingProposal" value-field="sackingProposal"></entity-one>
+		 	<set field="parameters.partyId" from-field="emplTerminationProposal.partyId"/>
+		 	need check
+			<set field="emplId" from-field="parameters.partyId"/>
+			
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrPositionEmpl.groovy"/>
+		 	<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrDeptEmpl.groovy"/>
+		 	<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getSackingStatus.groovy"/>
+		 	<entity-one entity-name="PartyPunishmentLevel" auto-field-map="true"></entity-one>
+			<entity-one entity-name="PartyPunishmentRemindCount" auto-field-map="true"></entity-one>
+		</actions>
+		<field name="ntfId">
+			<hidden value="${parameters.ntfId}"/>
+		</field>
+		<field name="emplTerminationProposalId"><hidden/></field>
+		<field name="partyId" title="${uiLabelMap.EmployeeName}" map-name="emplTerminationProposal">
+			<display-entity entity-name="Person" description="${lastName} ${firstName}" key-field-name="partyId"></display-entity>
+		</field>		 
+		<field name="proposerId" title="${uiLabelMap.HREmplProposer}" map-name="sackingProposal">
+			<display-entity entity-name="Person" description="${lastName} ${firstName}" key-field-name="partyId"></display-entity>
+		</field>
+		<field name="terminationTypeId" title="${uiLabelMap.HREmplTerminalTypeId}" map-name="emplTerminationProposal">
+			<display-entity entity-name="TerminationType" description="${description}"></display-entity>
+		</field>
+		
+		<field name="currPositionsStr" title="${uiLabelMap.HREmplFromPositionType}">
+			<display description="${currPositionsStr}"></display>
+		</field>
+		<field name="currDept" title="${uiLabelMap.EmployeeCurrentDept}" map-name="context">
+			<display></display>
+		</field>
+		<field name="punishmentCountSum" title="${uiLabelMap.HREmplWarningLevel}">
+			<display default-value="0"></display>
+		</field>
+		<field name="punishmentLevel" title="${uiLabelMap.HREmplPunishmentLevel}">
+			<display default-value="0"></display>
+		</field>
+		<field name="dateTermination" title="${uiLabelMap.HREmplDateSacking}" map-name="sackingProposal">
+			<display type="date"/>
+		</field>
+		<field name="currStatusId" title="${uiLabelMap.HREmplApprovalCurrStatus}"  map-name="context">
+			<display-entity entity-name="StatusItem" description="${description}" key-field-name="statusId"></display-entity>
+		</field>		
+		<field name="statusId" title="${uiLabelMap.EmplProposalCheck}" use-when="${statusEdit}">
+			<drop-down current="selected">
+				<list-options key-name="statusId" list-name="statusIdList" description="${statusCode}"/>
+			</drop-down>
+		</field>
+		
+		<field name="submitButton" title="${uiLabelMap.CommonUpdate}" use-when="${statusEdit}" 
+			widget-style="btn btn-small btn-primary">
+			<submit image-location="icon-save" button-type="button"/>
+		</field>
+	</form>	 --> 
+	
+	<!-- resignation employee -->
+	 <form name="EmplResignationProposal" type="single" header-row-style="header-row" default-table-style="basic-table"
+		target="createWorkOffProposal">		
+		<field name="partyId">
+			<hidden/>
+		</field>
+		<field name="terminationTypeId" title="${uiLabelMap.TerminationType}">
+			<drop-down allow-empty="false">
+				<entity-options description="${description}" entity-name="TerminationType">
+					<entity-constraint name="parentTypeId" operator="equals" value="OFFWORK"/>
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="statusId">
+			<hidden value="TER_PPSL_CREATED"/>
+		</field>
+		<field name="dateTermination" title="${uiLabelMap.HREmplResignDate}">
+			<date-time type="date"/>
+		</field>
+		<field name="terminationReasonId" title="${uiLabelMap.HREmplReasonResign}">
+			<drop-down>
+				<entity-options description="${description}" entity-name="TerminationReason">					
+					<entity-constraint name="parentTypeId" operator="not-equals" value="SACKING"/>
+					<entity-constraint name="terminationReasonId" operator="not-equals" value="SACKING"/>
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="comment" title="${uiLabelMap.HRNotes}">
+			<textarea/>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonSubmit}" 
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+	<!-- 
+	 <form name="ApprovalResignationProposal" type="single" header-row-style="header-row" default-map-name="emplTerminationProposal" 
+	 	default-table-style="basic-table" target="updateResignationProposal">
+		<actions>
+			<set field="emplTerminationProposalId" from-field="parameters.emplTerminationProposalId"/>
+			<entity-one entity-name="EmplTerminationProposal" value-field="emplTerminationProposal"></entity-one>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getStatusIdResignProposal.groovy"/>
+		</actions>
+		<field name="emplTerminationProposalId" >
+			<hidden/>
+		</field>
+		<field name="terminationTypeId" title="${uiLabelMap.HREmplTerminalTypeId}">
+			<display-entity entity-name="TerminationType" description="${description}"></display-entity>
+		</field>
+		
+		<field name="dateTermination" title="${uiLabelMap.HREmplDateResign}">
+			<display type="date"></display>
+		</field>
+		<field name="terminationReasonId" title="${uiLabelMap.HREmplReasonResign}">
+			<display-entity entity-name="TerminationReason" description="${description}"></display-entity>
+		</field>
+		<field name="currStatusId" title="${uiLabelMap.EmplProposalCheck}" map-name="context">
+			<display-entity entity-name="StatusItem" description="${description}" key-field-name="statusId"></display-entity>
+		</field>
+		<field name="statusId" title="${uiLabelMap.HRApprovalResignProposal}" use-when="${statusEdit}">
+			<drop-down current="selected">
+				<list-options key-name="statusId" list-name="statusIdList" description="${statusCode}"/>
+			</drop-down>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonSubmit}"
+			widget-style="btn btn-small btn-primary" use-when="${statusEdit}">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form> 	 -->
+</forms>        

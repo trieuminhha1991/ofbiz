@@ -1,0 +1,413 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+	<!-- ========================================================= -->
+	<!-- ======================== Defaults ======================= -->
+	<!-- ========================================================= -->
+	<title>Entity of BaseImEx Component</title>
+	<description>None</description>
+	<copyright></copyright>
+	<version></version>
+
+	<entity entity-name="BillOfLading" package-name="org.ofbiz.product.facility" title="Bill Of Lading Entity">
+		<field name="billId" type="id-ne"></field>
+		<field name="billNumber" type="name"></field>
+		<field name="billTypeId" type="id"></field>
+		<field name="partyIdFrom" type="id"></field>
+		<field name="partyIdTo" type="id"></field>
+		<field name="description" type="description"></field>
+		<field name="departureDate" type="date-time"></field>
+		<field name="arrivalDate" type="date-time"></field>
+		<field name="fromDate" type="date-time" />
+		<field name="thruDate" type="date-time" />
+		<prim-key field="billId" />
+		<relation type="one" fk-name="FK_BILL_PARTY_FROM" rel-entity-name="Party" title="partyFrom">
+			<key-map field-name="partyIdFrom" rel-field-name="partyId" />
+		</relation>
+		<relation type="one" fk-name="FK_BILL_PARTY_TO" rel-entity-name="Party" title="partyTo">
+			<key-map field-name="partyIdTo" rel-field-name="partyId" />
+		</relation>
+		<relation type="one" fk-name="FK_BILL_TYPE" rel-entity-name="BillOfLadingType">
+			<key-map field-name="billTypeId" rel-field-name="billTypeId" />
+		</relation>
+	</entity>
+
+	<entity entity-name="BillOfLadingType" package-name="com.olbius.po" title="Bill Of Lading Type Entity">
+		<field name="billTypeId" type="id-ne"></field>
+		<field name="fromDate" type="date-time" />
+		<field name="thruDate" type="date-time" />
+		<prim-key field="billTypeId" />
+	</entity>
+
+	<entity entity-name="OrderAndContainer" package-name="com.olbius.po">
+		<field name="orderId" type="id-ne"></field>
+		<field name="containerId" type="id-ne"></field>
+		<field name="billId" type="id-ne"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<prim-key field="orderId" />
+		<prim-key field="billId" />
+		<relation rel-entity-name="OrderHeader" type="one" fk-name="FK_ORDER_CONTAINER">
+			<key-map field-name="orderId" rel-field-name="orderId" />
+		</relation>
+		<relation rel-entity-name="BillOfLading" type="one" fk-name="FK_BILL_OF_LADING">
+			<key-map field-name="billId" rel-field-name="billId" />
+		</relation>
+		<relation rel-entity-name="Container" type="one" fk-name="FK_CONTAINER_ORDER">
+			<key-map field-name="containerId" rel-field-name="containerId" />
+		</relation>
+	</entity>
+
+	<entity entity-name="ContainerItem" package-name="com.olbius.po" never-cache="true">
+		<field name="containerId" type="id-ne"></field>
+		<field name="containerItemSeqId" type="id-ne"></field>
+		<field name="productId" type="id"></field>
+		<field name="fromOrderId" type="id"></field>
+		<field name="fromOrderItemSeqId" type="id"></field>
+		<field name="expireDate" type="date-time"></field>
+		<field name="quantity" type="fixed-point"></field>
+		<prim-key field="containerId"></prim-key>
+		<prim-key field="containerItemSeqId"></prim-key>
+		<relation rel-entity-name="Container" type="one" fk-name="FK_CT_ITEM_CONTAINER">
+			<key-map field-name="containerId" rel-field-name="containerId" />
+		</relation>
+		<relation rel-entity-name="Product" type="one" fk-name="FK_CT_ITEM_PRODUCT">
+			<key-map field-name="productId" rel-field-name="productId" />
+		</relation>
+		<relation rel-entity-name="OrderItem" type="one" fk-name="FK_CT_ITEM_ORDER">
+			<key-map field-name="fromOrderId" rel-field-name="orderId" />
+			<key-map field-name="fromOrderItemSeqId" rel-field-name="orderItemSeqId" />
+		</relation>
+	</entity>
+
+	<entity entity-name="AgreementAndOrder" package-name="org.ofbiz.order.order">
+		<description>map between orders and Agreement</description>
+		<field name="agreementId" type="id-ne"></field>
+		<field name="orderId" type="id-ne"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<prim-key field="agreementId" />
+		<prim-key field="orderId" />
+		<relation rel-entity-name="Agreement" type="one" fk-name="FK_AGREEMENT_NEW">
+			<key-map field-name="agreementId" />
+		</relation>
+		<relation rel-entity-name="OrderHeader" type="one" fk-name="FK_ORDER_HEADER_NEW">
+			<key-map field-name="orderId" rel-field-name="orderId" />
+		</relation>
+		<index name="IND_AGREEMENT">
+			<index-field name="agreementId" />
+		</index>
+		<index name="IND_ORDER">
+			<index-field name="orderId" />
+		</index>
+	</entity>
+
+	<entity entity-name="QualityPublication" package-name="org.ofbiz.po">
+		<description>Product quality publication</description>
+		<field name="productId" type="id-ne"></field>
+		<field name="qualityPublicationName" type="id-long"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<field name="expireDate" type="numeric"></field>
+		<field name="contentId" type="id-ne"></field>
+		<prim-key field="productId" />
+		<prim-key field="fromDate" />
+		<prim-key field="expireDate" />
+		<relation rel-entity-name="Product" type="one" fk-name="PRO_QUA_PUB">
+			<key-map field-name="productId" />
+		</relation>
+		<relation rel-entity-name="Content" type="one" fk-name="QUA_PUB_CONTENT">
+			<key-map field-name="contentId" />
+		</relation>
+	</entity>
+
+	<!--<entity entity-name="ExternalOrderType" package-name="com.olbius.logistics.delivery">-->
+		<!--<description>External order type</description>-->
+		<!--<field name="externalOrderTypeId" type="id-ne"></field>-->
+		<!--<field name="externalOrderTypeName" type="id"></field>-->
+		<!--<field name="description" type="name"></field>-->
+		<!--<prim-key field="externalOrderTypeId" />-->
+	<!--</entity>-->
+
+	<entity entity-name="AgreementPartyCTMPurpose" package-name="org.ofbiz.party.agreement" default-resource-name="DelysEntityLabels">
+		<description>Managed detail information of party in an agreement</description>
+		<field name="agreementId" type="id-ne"></field>
+		<field name="partyId" type="id-ne"></field>
+		<field name="contactMechId" type="id-ne"></field>
+		<field name="contactMechPurposeTypeId" type="id-ne"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<prim-key field="agreementId" />
+		<prim-key field="partyId" />
+		<prim-key field="contactMechId" />
+		<prim-key field="contactMechPurposeTypeId" />
+		<prim-key field="fromDate" />
+		<relation rel-entity-name="Agreement" type="one" fk-name="FK_AGR_PTY_CTM_PP_AGREEMENT">
+			<key-map field-name="agreementId" rel-field-name="agreementId" />
+		</relation>
+		<relation rel-entity-name="PartyContactMechPurpose" type="many" fk-name="FK_AGR_PTY_CTM_PP_CTM_PP">
+			<key-map field-name="partyId" rel-field-name="partyId" />
+			<key-map field-name="contactMechId" rel-field-name="contactMechId" />
+			<key-map field-name="contactMechPurposeTypeId" rel-field-name="contactMechPurposeTypeId" />
+		</relation>
+	</entity>
+
+	<entity entity-name="AgreementPartyContactMech" package-name="org.ofbiz.party.agreement" default-resource-name="DelysEntityLabels">
+		<description>Managed detail information of party in an agreement</description>
+		<field name="agreementId" type="id-ne"></field>
+		<field name="partyId" type="id-ne"></field>
+		<field name="contactMechId" type="id-ne"></field>
+		<field name="contactMechTypeId" type="id-ne"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<prim-key field="agreementId" />
+		<prim-key field="partyId" />
+		<prim-key field="contactMechId" />
+		<prim-key field="contactMechTypeId" />
+		<prim-key field="fromDate" />
+		<relation rel-entity-name="Agreement" type="one" fk-name="FK_AGREEMENT_PARTY_AGREEMENT">
+			<key-map field-name="agreementId" rel-field-name="agreementId" />
+		</relation>
+		<relation rel-entity-name="PartyContactMech" type="many" fk-name="FK_AGREEMENT_PARTY_CONTACT_MECH">
+			<key-map field-name="partyId" rel-field-name="partyId" />
+			<key-map field-name="contactMechId" rel-field-name="contactMechId" />
+		</relation>
+	</entity>
+
+	<!--<extend-entity entity-name="OrderHeader">-->
+		<!--<field name="salesMethodChannelEnumId" type="id"></field>-->
+		<!--<relation type="one" fk-name="ORDER_HDR_SMCENUM" title="SalesMethodChannel" rel-entity-name="Enumeration">-->
+			<!--<key-map field-name="salesMethodChannelEnumId" rel-field-name="enumId" />-->
+		<!--</relation>-->
+	<!--</extend-entity>-->
+
+	<extend-entity entity-name="OrderItem">
+		<field name="datetimeManufactured" type="date-time"></field>
+		<!--<field name="expireDate" type="date-time"></field>-->
+		<!--<field name="quantityUomId" type="id"></field>-->
+		<!--<field name="alternativeQuantity" type="fixed-point"></field>-->
+		<!--<field name="alternativeUnitPrice" type="currency-precise"></field>-->
+		<!--<relation type="one" fk-name="ORD_ITEM_QTT_UOM_RL" title="QuantityUom" rel-entity-name="Uom">-->
+			<!--<key-map field-name="quantityUomId" rel-field-name="uomId" />-->
+		<!--</relation>-->
+	</extend-entity>
+	
+	<entity entity-name="PartyPeriodType" package-name="org.ofbiz.party">
+		<field name="partyId" type="id-ne"></field>
+		<field name="periodTypeId" type="id-ne"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<prim-key field="partyId" />
+		<prim-key field="periodTypeId" />
+		<prim-key field="fromDate" />
+		<relation rel-entity-name="Party" type="one" fk-name="FK_PARTY_PERIOD">
+			<key-map field-name="partyId" rel-field-name="partyId" />
+		</relation>
+		<relation rel-entity-name="PeriodType" type="one" fk-name="FK_PERIOD_PARTY">
+			<key-map field-name="periodTypeId" rel-field-name="periodTypeId" />
+		</relation>
+	</entity>
+	
+	<extend-entity entity-name="Agreement">
+		<field name="hasOrdered" type="indicator"></field>
+		<field name="productPlanId" type="id"></field>
+		<field name="originFacilityId" type="id"></field>
+		<field name="destFacilityId" type="id"></field>
+		<relation type="one" fk-name="AGR_PR_PLAN" rel-entity-name="ProductPlanHeader">
+			<key-map field-name="productPlanId" rel-field-name="productPlanId" />
+		</relation>
+		<relation type="one" fk-name="AGR_ORG_FACILITY" title="originFacility" rel-entity-name="Facility">
+			<key-map field-name="originFacilityId" rel-field-name="facilityId" />
+		</relation>
+		<relation type="one" fk-name="AGR_DEST_FACILITY" title="descFacility" rel-entity-name="Facility">
+			<key-map field-name="destFacilityId" rel-field-name="facilityId" />
+		</relation>
+	</extend-entity>
+	
+	<extend-entity entity-name="OrderHeader">
+		<field name="primaryAgreementId" type="id"></field>
+		<relation type="one" fk-name="OH_AGR_REL" title="primaryAgreement" rel-entity-name="Agreement">
+			<key-map field-name="primaryAgreementId" rel-field-name="agreementId" />
+		</relation>
+	</extend-entity>
+	<!-- 
+	<extend-entity entity-name="OrderHeaderPass">
+		<field name="primaryAgreementId" type="id"></field>
+		<relation type="one" fk-name="OH_AGR_REL_PASS" rel-entity-name="Agreement">
+			<key-map field-name="primaryAgreementId" rel-field-name="agreementId" />
+		</relation>
+	</extend-entity>
+	 -->
+	
+	<entity entity-name="QuotaType" package-name="org.ofbiz.order.order" default-resource-name="CommonEntityLabels">
+    	<description>Managed type of quota</description>
+    	<field name="quotaTypeId" type="id-ne"></field>
+    	<field name="parentTypeId" type="id-ne"></field>
+    	<field name="description" type="description"></field>
+    	<prim-key field="quotaTypeId"/>
+    	<relation rel-entity-name="QuotaType" type="one" fk-name="FK_QUO_TYPE_PARENT">
+			<key-map field-name="parentTypeId" rel-field-name="quotaTypeId"/>
+		</relation>
+    </entity>
+    
+    <entity entity-name="QuotaHeader" package-name="org.ofbiz.order.order">
+    	<description>Managed quota of national</description>
+    	<field name="quotaId" type="id-ne"/>
+    	<field name="quotaCode" type="id-ne"/>
+    	<field name="statusId" type="id-ne"/>
+    	<field name="quotaName" type="description"/>
+    	<field name="quotaTypeId" type="id-ne"/>
+    	<field name="supplierPartyId" type="id-ne"/>
+    	<field name="currencyUomId" type="id-ne"/>
+		<field name="organizationPartyId" type="id-ne"/>
+    	<field name="description" type="description"/>
+    	<field name="createdDate" type="date-time"/>
+    	<field name="createdByUserLogin" type="id-ne"/>
+    	<prim-key field="quotaId"/>
+    	<relation rel-entity-name="QuotaType" type="one" fk-name="FK_QUOTA_TYPE">
+    		<key-map field-name="quotaTypeId" rel-field-name="quotaTypeId"/>
+    	</relation>
+    	<relation rel-entity-name="Party" type="one" title="supplier" fk-name="FK_PARTY_SUP_IQ_HD">
+			<key-map field-name="supplierPartyId" rel-field-name="partyId"/>
+		</relation>
+		<relation rel-entity-name="Party" type="one" title="organization" fk-name="FK_PARTY_INTERNAL_IQ_HD">
+			<key-map field-name="organizationPartyId" rel-field-name="partyId"/>
+		</relation>
+		<relation rel-entity-name="StatusItem" type="one" fk-name="FK_STATUS_IQ_HD">
+			<key-map field-name="statusId"/>
+		</relation>
+	 	<relation type="one" rel-entity-name="UserLogin" title="createdBy" fk-name="FK_QUOTA_CRUSER">
+            <key-map field-name="createdByUserLogin" rel-field-name="userLoginId"/>
+      	</relation>
+	 	<relation type="one" rel-entity-name="Uom" title="currency" fk-name="FK_QUOTA_CURRENCY">
+            <key-map field-name="currencyUomId" rel-field-name="uomId"/>
+      	</relation>
+    </entity>
+    
+    <entity entity-name="QuotaItem" package-name="org.ofbiz.order.order" >
+    	<description>Managed quota of specific product</description>
+    	<field name="quotaId" type="id-ne"/>
+    	<field name="quotaItemSeqId" type="id-ne"/>
+    	<field name="statusId" type="id-ne"/>
+    	<field name="productId" type="id-ne"/>
+    	<field name="quotaQuantity" type="fixed-point"/>
+    	<field name="availableQuantity" type="fixed-point"/>
+    	<field name="uomId" type="id-ne"/>
+    	<field name="fromDate" type="date-time"/>
+    	<field name="thruDate" type="date-time"/>
+    	<prim-key field="quotaId"/>
+    	<prim-key field="quotaItemSeqId"/>
+    	<relation rel-entity-name="QuotaHeader" type="one" fk-name="FK_QUOTA_HEADER">
+    		<key-map field-name="quotaId" rel-field-name="quotaId"/>
+    	</relation>
+    	<relation rel-entity-name="Product" type="one" fk-name="FK_QUOTA_PRODUCT">
+    		<key-map field-name="productId" rel-field-name="productId"/>
+    	</relation>
+    	<relation rel-entity-name="Uom" type="one" fk-name="FK_QUOTA_UOM">
+    		<key-map field-name="uomId" rel-field-name="uomId"/>
+    	</relation>
+    	<relation rel-entity-name="StatusItem" type="one" fk-name="FK_STATUS_IQ">
+			<key-map field-name="statusId"/>
+		</relation>
+    </entity>
+    
+    <!-- test and quarantine -->
+    
+   	<entity entity-name="ProductEventType" package-name="org.ofbiz.order.order" default-resource-name="CommonEntityLabels">
+    	<description>Managed type of quota</description>
+    	<field name="eventTypeId" type="id-ne"></field>
+    	<field name="parentTypeId" type="id-ne"></field>
+    	<field name="description" type="description"></field>
+    	<prim-key field="eventTypeId"/>
+    	<relation rel-entity-name="ProductEventType" type="one" fk-name="FK_QALTEST_TYPE_PARENT">
+			<key-map field-name="parentTypeId" rel-field-name="eventTypeId"/>
+		</relation>
+    </entity>
+    
+    <entity entity-name="ProductEvent" package-name="org.ofbiz.order.order">
+    	<description>Managed event testing and quarantine product</description>
+    	<field name="eventId" type="id-ne"/>
+    	<field name="eventCode" type="id-ne"/>
+    	<field name="statusId" type="id-ne"/>
+    	<field name="eventName" type="description"/>
+    	<field name="eventTypeId" type="id-ne"/>
+		<field name="organizationPartyId" type="id-ne"/>
+		<field name="agreementId" type="id-ne"/>
+		<field name="packingListId" type="id-ne"/>
+    	<field name="description" type="description"/>
+    	<field name="createdDate" type="date-time"/>
+    	<field name="executedDate" type="date-time"/>
+    	<field name="completedDate" type="date-time"/>
+    	<field name="createdByUserLogin" type="id-ne"/>
+    	<prim-key field="eventId"/>
+    	<relation rel-entity-name="ProductEventType" type="one" fk-name="FK_QLT_TEST_TYPE">
+    		<key-map field-name="eventTypeId" rel-field-name="eventTypeId"/>
+    	</relation>
+		<relation rel-entity-name="Party" type="one" fk-name="FK_PARTY_INTERNAL_QTL_TEST">
+			<key-map field-name="organizationPartyId" rel-field-name="partyId"/>
+		</relation>
+		<relation rel-entity-name="StatusItem" type="one" fk-name="FK_STATUS_QTL_TEST">
+			<key-map field-name="statusId"/>
+		</relation>
+	 	<relation type="one" rel-entity-name="UserLogin" fk-name="FK_QTL_TEST_CRUSER">
+            <key-map field-name="createdByUserLogin" rel-field-name="userLoginId"/>
+      	</relation>
+	 	<relation type="one" rel-entity-name="PackingListHeader" fk-name="FK_QLT_TEST_PKL">
+            <key-map field-name="packingListId"/>
+      	</relation>
+	 	<relation type="one" rel-entity-name="Agreement" fk-name="FK_QLT_TEST_AGREE">
+            <key-map field-name="agreementId"/>
+      	</relation>
+    </entity>
+    
+    <entity entity-name="ProductEventItem" package-name="org.ofbiz.order.order" >
+    	<field name="eventId" type="id-ne"/>
+    	<field name="eventItemSeqId" type="id-ne"/>
+    	<field name="statusId" type="id-ne"/>
+    	<field name="productId" type="id-ne"/>
+    	<field name="registeredQuantity" type="fixed-point"/>
+    	<field name="quantity" type="fixed-point"/>
+    	<field name="uomId" type="id-ne"/>
+    	<field name="fromDate" type="date-time"/>
+    	<field name="thruDate" type="date-time"/>
+    	<prim-key field="eventId"/>
+    	<prim-key field="eventItemSeqId"/>
+    	<relation rel-entity-name="ProductEvent" type="one" fk-name="FK_QLT_TEST_HEADER">
+    		<key-map field-name="eventId" rel-field-name="eventId"/>
+    	</relation>
+    	<relation rel-entity-name="Product" type="one" fk-name="FK_QLT_TEST_PRODUCT">
+    		<key-map field-name="productId" rel-field-name="productId"/>
+    	</relation>
+    	<relation rel-entity-name="Uom" type="one" fk-name="FK_QLT_TEST_UOM">
+    		<key-map field-name="uomId" rel-field-name="uomId"/>
+    	</relation>
+    	<relation rel-entity-name="StatusItem" type="one" fk-name="FK_STATUS_QLT_TEST">
+			<key-map field-name="statusId"/>
+		</relation>
+    </entity>
+    	
+	<extend-entity entity-name="Requirement">
+		<field name="eventId" type="id"></field>
+		<relation type="one" fk-name="REQ_PR_EVENT_REL" rel-entity-name="ProductEvent">
+			<key-map field-name="eventId" rel-field-name="eventId" />
+		</relation>
+	</extend-entity>
+    	
+	<extend-entity entity-name="AgreementProductAppl">
+		<field name="orderId" type="id"></field>
+		<field name="orderItemSeqId" type="id"></field>
+		<relation rel-entity-name="OrderItem" type="one" fk-name="FK_APA_ITEM_ORDER">
+			<key-map field-name="orderId" />
+			<key-map field-name="orderItemSeqId" />
+		</relation>
+	</extend-entity>
+    <entity entity-name="CostProductInOrder" package-name="com.olbius.importsrc">
+        <field name="costProductInOrderId" type="id-ne"></field>
+        <field name="orderId" type="id-ne"></field>
+        <field name="costAccountingId" type="id-ne"></field>
+        <field name="productId" type="id-ne"></field>
+        <field name="totalCost" type="currency-amount"></field>
+        <field name="currencyUomId" type="id"/>
+        <prim-key field="costProductInOrderId"/>
+    </entity>
+</entitymodel>

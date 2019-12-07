@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../../framework/minilang/dtd/simple-methods-v2.xsd">
+	<simple-method method-name="deleteProductQuotation">
+        <olbius-check-permission type="MODULE" app="PRODQUOTATION_DELETE">
+        	<fail-property resource="BaseSalesErrorUiLabels" property="BSYouHavenotDeletePermission"/>
+        </olbius-check-permission>
+        <check-errors/>
+        
+        <if-empty field="parameters.productQuotationId">
+        	<add-error>
+        		<fail-property resource="BaseSalesErrorUiLabels" property="BSProductQuotationIdIsEmpty"/>
+        	</add-error>
+        	<check-errors/>
+        </if-empty>
+        <entity-one value-field="productQuotation" entity-name="ProductQuotation">
+        	<field-map field-name="productQuotationId" from-field="parameters.productQuotationId"/>
+        </entity-one>
+        <if-empty field="productQuotation">
+        	<set field="productQuotationId" from-field="parameters.productQuotationId"/>
+        	<add-error>
+        		<fail-property resource="BaseSalesErrorUiLabels" property="BSNotFoundProductQuotationHasProductQuotationIdIs"/>
+        	</add-error>
+        	<check-errors/>
+        </if-empty>
+        <if-compare operator="not-equals" value="QUOTATION_CREATED" field="productQuotation.statusId">
+        	<set field="statusId" from-field="productQuotation.statusId"/>
+        	<add-error>
+        		<fail-property resource="BaseSalesErrorUiLabels" property="BSJustOnlyDeleteProductQuotationWithStatusIsCreated"/>
+        	</add-error>
+        	<check-errors/>
+        </if-compare>
+        <now-timestamp field="nowTimestamp"/>
+        
+        <entity-condition list="productPriceRules" entity-name="ProductPriceRule" use-cache="false" distinct="true">
+			<condition-expr field-name="productQuotationId" value="${parameters.productQuotationId}"/>
+		</entity-condition>
+        <if-not-empty field="productPriceRules">
+        	<iterate entry="productPriceRule" list="productPriceRules">
+        		<set field="productPriceRule.thruDate" from-field="nowTimestamp"/>
+	        </iterate>
+	        <store-list list="productPriceRules"/>
+        </if-not-empty>
+    	
+    	<set field="productQuotation.statusId" value="QUOTATION_CANCELLED"/>
+    	<set field="productQuotation.thruDate" from-field="nowTimestamp"/>
+    	<store-value value-field="productQuotation"/>
+    	
+    	<make-value value-field="newQuotationStatus" entity-name="ProductQuotationStatus"/>
+    	<sequenced-id sequence-name="ProductQuotationStatus" field="newQuotationStatus.quotationStatusId"/>
+    	<set field="newQuotationStatus.statusId" value="QUOTATION_CANCELLED"/>
+    	<set field="newQuotationStatus.productQuotationId" from-field="productQuotation.productQuotationId"/>
+    	<set field="newQuotationStatus.statusDatetime" from-field="nowTimestamp"/>
+    	<set field="newQuotationStatus.statusUserLogin" from-field="userLogin.userLoginId"/>
+    	<create-value value-field="newQuotationStatus"/>
+    </simple-method>
+    <simple-method method-name="updateQuotationThruDate">
+        <!-- <olbius-check-permission type="MODULE" app="PRODQUOTATION_EDIT">
+        	<fail-property resource="BaseSalesErrorUiLabels" property="BSYouHavenotUpdatePermission"/>
+        </olbius-check-permission>
+        <check-errors/> -->
+        
+        <field-to-result field="parameters.productQuotationId" result-name="productQuotationId"/>
+        <now-timestamp field="nowTimestamp"/>
+        <if-empty field="parameters.thruDate">
+        	<add-error>
+        		<fail-property resource="BaseSalesErrorUiLabels" property="BSThruDateIsEmpty"/>
+        	</add-error>
+        <else>
+        	<set-calendar field="compareDate" from-field="nowTimestamp" seconds="-30" />
+        	<if-compare-field field="parameters.thruDate" operator="less" to-field="compareDate" type="Timestamp">
+        		<add-error>
+        			<fail-property resource="BaseSalesErrorUiLabels" property="BSRequiredValueGreatherOrEqualDateTimeToDay"/>
+        		</add-error>
+        	</if-compare-field>
+        </else>
+        </if-empty>
+        
+        <entity-one value-field="dummyQuotation" entity-name="ProductQuotation">
+        	<field-map field-name="productQuotationId" from-field="parameters.productQuotationId"/>
+        </entity-one>
+        <if-empty field="dummyQuotation">
+        	<set field="productQuotationId" from-field="parameters.productQuotationId"/>
+   			<add-error>
+   				<fail-property resource="BaseSalesErrorUiLabels" property="BSProductQuotationHasIdIsNotFound"/>
+   			</add-error>
+   			<check-errors/>
+   		</if-empty>
+        <set field="dummyQuotation.thruDate" from-field="parameters.thruDate"/>
+        <store-value value-field="dummyQuotation"/>
+        
+        <entity-condition list="quotationPriceRules" entity-name="ProductPriceRule">
+        	<condition-expr field-name="productQuotationId" from-field="parameters.productQuotationId"/>
+        </entity-condition>
+        <if-not-empty field="quotationPriceRules">
+        	<!-- update all price rule in quotation -->
+        	<iterate entry="quotationPriceRule" list="quotationPriceRules">
+        		<set field="quotationPriceRule.thruDate" from-field="parameters.thruDate" />
+        	</iterate>
+        	<store-list list="quotationPriceRules"/>
+        </if-not-empty>
+    </simple-method>
+</simple-methods>

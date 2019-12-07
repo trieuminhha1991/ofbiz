@@ -1,0 +1,508 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+	<!-- ========================================================= -->
+	<!-- ======================== Defaults ======================= -->
+	<!-- ========================================================= -->
+	<title>Entity of BaseImEx Component</title>
+	<description>None</description>
+	<copyright></copyright>
+	<version></version>
+
+	<view-entity entity-name="AgreementAndOrderDetail" package-name="org.ofbiz.order.order">
+		<member-entity entity-alias="AGR" entity-name="Agreement"></member-entity>
+		<member-entity entity-alias="OH" entity-name="OrderHeader"></member-entity>
+		<member-entity entity-alias="AO" entity-name="AgreementAndOrder"></member-entity>
+		<alias-all entity-alias="AGR"></alias-all>
+		<alias-all entity-alias="OH">
+			<exclude field="statusId" />
+		</alias-all>
+		<alias-all entity-alias="AO"></alias-all>
+		<view-link rel-entity-alias="AGR" entity-alias="AO">
+			<key-map field-name="agreementId" rel-field-name="agreementId" />
+		</view-link>
+		<view-link rel-entity-alias="OH" entity-alias="AO">
+			<key-map field-name="orderId" rel-field-name="orderId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="OrderAndContainerDetail" package-name="org.ofbiz.order.order">
+		<member-entity entity-alias="ONC" entity-name="OrderAndContainer"></member-entity>
+		<member-entity entity-alias="OH" entity-name="OrderHeader"></member-entity>
+		<member-entity entity-alias="CTN" entity-name="Container"></member-entity>
+		<member-entity entity-alias="BOL" entity-name="BillOfLading"></member-entity>
+		<alias-all entity-alias="ONC"></alias-all>
+		<alias-all entity-alias="OH">
+			<exclude field="statusId" />
+		</alias-all>
+		<alias-all entity-alias="BOL"></alias-all>
+		<alias-all entity-alias="CTN"></alias-all>
+		<view-link rel-entity-alias="OH" entity-alias="ONC">
+			<key-map field-name="orderId" rel-field-name="orderId" />
+		</view-link>
+		<view-link rel-entity-alias="CTN" entity-alias="ONC">
+			<key-map field-name="containerId" rel-field-name="containerId" />
+		</view-link>
+		<view-link rel-entity-alias="BOL" entity-alias="ONC">
+			<key-map field-name="billId" rel-field-name="billId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="OrderAndContainerAndAgreementAndOrderDetailAll" package-name="org.ofbiz.po">
+		<member-entity entity-alias="OAC" entity-name="OrderAndContainer" />
+		<member-entity entity-alias="OAOD" entity-name="AgreementAndOrderDetail" />
+		<alias-all entity-alias="OAOD"></alias-all>
+		<alias name="containerId" entity-alias="OAC"></alias>
+		<alias name="billId" entity-alias="OAC"></alias>
+		<alias name="fromDate" entity-alias="OAC"></alias>
+		<alias name="thruDate" entity-alias="OAC"></alias>
+		<view-link entity-alias="OAOD" rel-entity-alias="OAC" rel-optional="true">
+			<key-map field-name="orderId" rel-field-name="orderId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="OrderAndContainerAndAgreementAndOrderDetail" package-name="org.ofbiz.po">
+		<member-entity entity-alias="OAC" entity-name="OrderAndContainer" />
+		<member-entity entity-alias="OAOD" entity-name="AgreementAndOrderDetail" />
+		<member-entity entity-alias="BOL" entity-name="BillOfLading" />
+		<alias-all entity-alias="OAOD"></alias-all>
+		<alias name="containerId" entity-alias="OAC"></alias>
+		<alias name="billId" entity-alias="OAC"></alias>
+		<alias name="billNumber" entity-alias="BOL"></alias>
+		<alias name="departureDate" entity-alias="BOL"></alias>
+		<alias name="arrivalDate" entity-alias="BOL"></alias>
+		<alias name="fromDate" entity-alias="OAC"></alias>
+		<alias name="thruDate" entity-alias="OAC"></alias>
+		<view-link entity-alias="OAC" rel-entity-alias="BOL">
+			<key-map field-name="billId" rel-field-name="billId" />
+		</view-link>
+		<view-link entity-alias="OAC" rel-entity-alias="OAOD">
+			<key-map field-name="orderId" rel-field-name="orderId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="OrderItemTotalExcel" package-name="org.ofbiz.order.order">
+		<member-entity entity-alias="OI" entity-name="OrderItem"></member-entity>
+		<member-entity entity-alias="PR" entity-name="Product"></member-entity>
+		<member-entity entity-alias="OH" entity-name="OrderHeader"></member-entity>
+		<alias name="quantity" function="sum" entity-alias="OI"></alias>
+		<alias name="cancelQuantity" function="sum" entity-alias="OI"></alias>
+		<alias name="unitPrice" function="sum" entity-alias="OI"></alias>
+		<alias name="productId" entity-alias="PR" group-by="true"></alias>
+		<alias name="description" entity-alias="PR"></alias>
+		<alias name="purchaseUomId" entity-alias="PR"></alias>
+		<alias name="quantityUomId" entity-alias="PR"></alias>
+		<alias name="orderId" entity-alias="OH" group-by="true"></alias>
+		<alias name="orderTypeId" entity-alias="OH" group-by="true"></alias>
+		<alias name="originFacilityId" entity-alias="OH"></alias>
+		<alias name="productStoreId" entity-alias="OH"></alias>
+		<view-link rel-entity-alias="OI" entity-alias="PR">
+			<key-map field-name="productId" rel-field-name="productId" />
+		</view-link>
+		<view-link rel-entity-alias="OH" entity-alias="OI">
+			<key-map field-name="orderId" rel-field-name="orderId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="OrderItemTotalInBill" package-name="org.ofbiz.order.order">
+		<member-entity entity-alias="OIT" entity-name="OrderItemTotalExcel"></member-entity>
+		<member-entity entity-alias="OAC" entity-name="OrderAndContainer"></member-entity>
+		<alias name="quantity" function="sum" entity-alias="OIT"></alias>
+		<alias name="unitPrice" function="sum" entity-alias="OIT"></alias>
+		<alias name="productId" entity-alias="OIT" group-by="true"></alias>
+		<alias name="description" entity-alias="OIT" group-by="true"></alias>
+		<alias name="purchaseUomId" entity-alias="OIT" group-by="true"></alias>
+		<alias name="quantityUomId" entity-alias="OIT" group-by="true"></alias>
+		<alias name="orderId" entity-alias="OIT" group-by="true"></alias>
+		<alias name="containerId" entity-alias="OAC" group-by="true"></alias>
+		<alias name="billId" entity-alias="OAC" group-by="true"></alias>
+		<view-link rel-entity-alias="OIT" entity-alias="OAC">
+			<key-map field-name="orderId" rel-field-name="orderId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="CostAccBaseAndType" package-name="org.ofbiz.product.facility">
+		<description>join CostAccBase and InvoiceItemType</description>
+		<member-entity entity-alias="INV" entity-name="InvoiceItemType"></member-entity>
+		<member-entity entity-alias="CACCB" entity-name="CostAccBase"></member-entity>
+		<alias-all entity-alias="CACCB"></alias-all>
+		<alias name="description" entity-alias="INV"></alias>
+		<view-link rel-entity-alias="INV" entity-alias="CACCB">
+			<key-map field-name="invoiceItemTypeId" rel-field-name="invoiceItemTypeId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="SupplierProductAndOrderItem" package-name="org.ofbiz.product.plan">
+		<member-entity entity-alias="PRD" entity-name="SupplierProduct"></member-entity>
+		<member-entity entity-alias="ODI" entity-name="OrderItem"></member-entity>
+		<alias-all entity-alias="ODI"></alias-all>
+		<alias-all entity-alias="PRD"></alias-all>
+		<view-link rel-entity-alias="ODI" entity-alias="PRD">
+			<key-map field-name="productId" rel-field-name="productId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="AgreementAndOrderHeader" package-name="org.ofbiz.order.order">
+		<member-entity entity-name="AgreementAndOrder" entity-alias="ANO"></member-entity>
+		<member-entity entity-alias="OH" entity-name="OrderHeader"></member-entity>
+		<alias-all entity-alias="ANO"></alias-all>
+		<alias-all entity-alias="OH"></alias-all>
+		<view-link entity-alias="ANO" rel-entity-alias="OH">
+			<key-map field-name="orderId" rel-field-name="orderId"></key-map>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PartyPeriodTypeDetail" package-name="com.olbius.party">
+		<member-entity entity-alias="PC" entity-name="PartyPeriodType"/>
+		<member-entity entity-alias="PG" entity-name="PartyGroup"/>
+		<member-entity entity-alias="PS" entity-name="Person"/>
+		<member-entity entity-alias="PT" entity-name="Party"/>
+		<member-entity entity-alias="PER" entity-name="PeriodType"/>
+		<alias-all entity-alias="PC"/>
+		<alias-all entity-alias="PG"/>
+		<alias-all entity-alias="PT">
+			<exclude field="description"/>
+		</alias-all>
+		<alias-all entity-alias="PER"/>
+		<view-link entity-alias="PC" rel-entity-alias="PT">
+			<key-map field-name="partyId"/>
+		</view-link>
+		<view-link entity-alias="PT" rel-entity-alias="PG" rel-optional="true">
+			<key-map field-name="partyId"/>
+		</view-link>
+		<view-link entity-alias="PT" rel-entity-alias="PS" rel-optional="true">
+			<key-map field-name="partyId"/>
+		</view-link>
+		<view-link entity-alias="PC" rel-entity-alias="PER">
+			<key-map field-name="periodTypeId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="AgreementProductApplView" package-name="com.olbius.product">
+		<member-entity entity-alias="AP" entity-name="AgreementProductAppl"/>
+		<member-entity entity-alias="PR" entity-name="Product"/>
+		<alias-all entity-alias="AP">
+			<exclude field="price"/>
+		</alias-all>
+		<alias-all entity-alias="PR"/>
+		<alias name="unitPrice" entity-alias="AP" field="price"/>
+		<view-link entity-alias="AP" rel-entity-alias="PR">
+			<key-map field-name="productId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ContainerAndBillLading" package-name="org.ofbiz.order.order">
+		<member-entity entity-alias="CTN" entity-name="Container"/>
+		<member-entity entity-alias="BOL" entity-name="BillOfLading"/>
+		<alias-all entity-alias="CTN"/>
+		<alias-all entity-alias="BOL"/>
+		<view-link rel-entity-alias="BOL" entity-alias="CTN">
+			<key-map field-name="billId" rel-field-name="billId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="PackingListHeaderDetail" package-name="org.ofbiz.order.order">
+		<member-entity entity-alias="CTN" entity-name="ContainerAndBillLading"/>
+<!-- 		<member-entity entity-alias="OH" entity-name="OrderHeader"/> -->
+		<member-entity entity-alias="PK" entity-name="PackingListHeader"/>
+		<member-entity entity-alias="ARG" entity-name="Agreement"/>
+		<alias-all entity-alias="PK">
+			<exclude field="sealNumber"/>
+		</alias-all>
+		<alias-all entity-alias="CTN"/>
+		<alias name="agreementCode" entity-alias="ARG"/>
+		<view-link rel-entity-alias="CTN" entity-alias="PK" rel-optional="true">
+			<key-map field-name="containerId" rel-field-name="containerId" />
+		</view-link>
+		<view-link rel-entity-alias="ARG" entity-alias="PK" rel-optional="true">
+			<key-map field-name="agreementId" rel-field-name="agreementId" />
+		</view-link>
+<!-- 		<view-link rel-entity-alias="OH" entity-alias="PK"> -->
+<!-- 			<key-map field-name="purchaseOrderId" rel-field-name="orderId" /> -->
+<!-- 		</view-link> -->
+	</view-entity>
+	
+	<view-entity entity-name="PackingListDetailAndOrderAndProduct" package-name="com.olbius.party">
+		<member-entity entity-alias="PKL" entity-name="PackingListHeader"/>
+		<member-entity entity-alias="PLD" entity-name="PackingListDetail"/>
+        <member-entity entity-alias="OI" entity-name="OrderItem"/>
+        <member-entity entity-alias="OH" entity-name="OrderHeader"/>
+		<member-entity entity-alias="PR" entity-name="Product"/>
+		<!--<alias-all entity-alias="PLD"/>-->
+		<!--<alias-all entity-alias="OI"/>-->
+		<!--<alias-all entity-alias="PR"/>-->
+		<!--<alias-all entity-alias="PKL"/>-->
+        <alias name="packingListId" entity-alias="PLD"/>
+        <alias name="quantityUomId" entity-alias="OI"/>
+        <alias name="orderId" entity-alias="OI"/>
+        <alias name="productCode" entity-alias="PR"/>
+        <alias name="productName" entity-alias="PR"/>
+        <alias name="productId" entity-alias="PR"/>
+        <alias name="weightUomId" entity-alias="OI"/>
+        <alias name="quantity" entity-alias="OI"/>
+        <alias name="requireAmount" entity-alias="PR"/>
+        <alias name="orderUnit" entity-alias="PLD"/>
+        <alias name="unitPrice" entity-alias="OI"/>
+        <alias name="currencyUom" entity-alias="OH"/>
+		<view-link entity-alias="PLD" rel-entity-alias="OI" rel-optional="true">
+			<key-map field-name="orderId"/>
+			<key-map field-name="orderItemSeqId"/>
+		</view-link>
+        <view-link entity-alias="OI" rel-entity-alias="OH" rel-optional="true">
+            <key-map field-name="orderId"/>
+        </view-link>
+		<view-link entity-alias="PLD" rel-entity-alias="PKL">
+			<key-map field-name="packingListId"/>
+		</view-link>
+		<view-link entity-alias="PLD" rel-entity-alias="PR" rel-optional="true">
+			<key-map field-name="productId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="CostBillAccountingDetail" package-name="com.olbius.party">
+		<member-entity entity-alias="CBA" entity-name="CostBillAccounting"/>
+		<member-entity entity-alias="ACC" entity-name="CostAccBase"/>
+		<member-entity entity-alias="IVT" entity-name="InvoiceItemType"/>
+		<member-entity entity-alias="BOL" entity-name="BillOfLading"/>
+		<alias-all entity-alias="CBA"/>
+		<alias-all entity-alias="ACC"/>
+		<alias-all entity-alias="IVT"/>
+		<alias-all entity-alias="BOL"/>
+		<view-link entity-alias="CBA" rel-entity-alias="BOL" rel-optional="false">
+			<key-map field-name="billOfLadingId" rel-field-name="billId"/>
+		</view-link>
+		<view-link entity-alias="CBA" rel-entity-alias="ACC">
+			<key-map field-name="costAccBaseId"/>
+		</view-link>
+		<view-link entity-alias="ACC" rel-entity-alias="IVT" rel-optional="true">
+			<key-map field-name="invoiceItemTypeId"/>
+		</view-link>
+	</view-entity>
+	
+<!-- 	<view-entity entity-name="QuotaHeaderDetail" package-name="com.olbius.imex.quota"> -->
+<!-- 		<member-entity entity-alias="QH" entity-name="QuotaHeader"/> -->
+<!-- 		<member-entity entity-alias="SUP" entity-name="PartyGroup"/> -->
+<!-- 		<member-entity entity-alias="PAR" entity-name="Party"/> -->
+<!-- 		<alias-all entity-alias="QH"/> -->
+<!-- 		<alias name="fullName" field="groupName" entity-alias="SUP"/> -->
+<!-- 		<alias name="partyCode" entity-alias="PAR"/> -->
+<!-- 		<view-link entity-alias="QH" rel-entity-alias="SUP" rel-optional="false"> -->
+<!-- 			<key-map field-name="supplierPartyId" rel-field-name="partyId"/> -->
+<!-- 		</view-link> -->
+<!-- 		<view-link entity-alias="QH" rel-entity-alias="PAR" rel-optional="false"> -->
+<!-- 			<key-map field-name="supplierPartyId" rel-field-name="partyId"/> -->
+<!-- 		</view-link> -->
+<!-- 	</view-entity> -->
+	
+	<view-entity entity-name="QuotaItemAndProduct" package-name="com.olbius.imex.quota">
+		<member-entity entity-alias="QI" entity-name="QuotaItem"/>
+		<member-entity entity-alias="PR" entity-name="Product"/>
+		<alias-all entity-alias="QI"/>
+		<alias-all entity-alias="PR"/>
+		<view-link entity-alias="QI" rel-entity-alias="PR" rel-optional="false">
+			<key-map field-name="productId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ProductEventItemAndProduct" package-name="com.olbius.imex.product">
+		<member-entity entity-alias="QI" entity-name="ProductEventItem"/>
+		<member-entity entity-alias="PR" entity-name="Product"/>
+		<alias-all entity-alias="QI"/>
+		<alias-all entity-alias="PR"/>
+		<view-link entity-alias="QI" rel-entity-alias="PR" rel-optional="false">
+			<key-map field-name="productId"/>
+		</view-link>
+	</view-entity>
+	
+	
+	<view-entity entity-name="ProductEventItemDeclarationAvailable" package-name="com.olbius.imex.product">
+		<member-entity entity-alias="PEI" entity-name="ProductEventItem"/>
+		<member-entity entity-alias="PE" entity-name="ProductEvent"/>
+		<alias-all entity-alias="PEI"/>
+		<alias name="eventId" entity-alias="PE"/>
+		<alias name="eventStatusId" entity-alias="PE" field="statusId"></alias>
+		<view-link entity-alias="PEI" rel-entity-alias="PE" rel-optional="false">
+			<key-map field-name="eventId"/>
+		</view-link>
+		<entity-condition>
+			<condition-list combine="and">
+				<condition-expr field-name="statusId" entity-alias="PEI" operator="not-equals" value="PRODUCT_EVENT_ITEM_CANCELLED"/>
+				<condition-expr field-name="statusId" entity-alias="PE" operator="not-equals" value="PRODUCT_EVENT_CREATED"/>
+				<condition-expr field-name="eventTypeId" entity-alias="PE" operator="equals" value="QUALITY_DECLARATION"/>
+			</condition-list>
+		</entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="ProductAndProductEventItemDeclarationAvailable" package-name="com.olbius.imex.product">
+		<member-entity entity-alias="PEI" entity-name="ProductEventItemDeclarationAvailable"/>
+		<member-entity entity-alias="PR" entity-name="Product"/>
+		<alias-all entity-alias="PEI"/>
+		<alias-all entity-alias="PR"/>
+		<alias name="productId" entity-alias="PR"></alias>
+		<view-link entity-alias="PR" rel-entity-alias="PEI" rel-optional="true">
+			<key-map field-name="productId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ProductEventItemAndProductAvailable" package-name="com.olbius.imex.product">
+		<member-entity entity-alias="QI" entity-name="ProductEventItem"/>
+		<member-entity entity-alias="PR" entity-name="Product"/>
+		<alias-all entity-alias="QI"/>
+		<alias-all entity-alias="PR"/>
+		<view-link entity-alias="PR" rel-entity-alias="QI" rel-optional="true">
+			<key-map field-name="productId"/>
+		</view-link>
+		<entity-condition>
+			<condition-expr field-name="statusId" entity-alias="QI" operator="not-equals" value="PRODUCT_EVENT_ITEM_CANCELLED"/>
+		</entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="ProductEventDeclarationItemAndProductAvailable" package-name="com.olbius.imex.product">
+		<member-entity entity-alias="PEI" entity-name="ProductEventItemAndProductAvailable"/>
+		<member-entity entity-alias="PE" entity-name="ProductEvent"/>
+		<alias-all entity-alias="PEI"/>
+		<alias name="eventStatusId" entity-alias="PE" field="statusId"></alias>
+		<alias name="eventTypeId" entity-alias="PE" ></alias>
+		<alias name="eventId" entity-alias="PE" ></alias>
+		<view-link entity-alias="PEI" rel-entity-alias="PE" >
+			<key-map field-name="eventId"/>
+		</view-link>
+	</view-entity>
+	
+	
+	<view-entity entity-name="QuotaItemAndProductAvailable" package-name="com.olbius.imex.quota">
+		<member-entity entity-alias="QI" entity-name="QuotaItem"/>
+		<member-entity entity-alias="PR" entity-name="Product"/>
+		<alias-all entity-alias="QI"/>
+		<alias-all entity-alias="PR"/>
+		<view-link entity-alias="QI" rel-entity-alias="PR" rel-optional="false">
+			<key-map field-name="productId"/>
+		</view-link>
+		<entity-condition>
+			<condition-expr field-name="statusId" entity-alias="QI" operator="not-equals" value="QUOTA_ITEM_CANCELLED"/>
+		</entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="QuotaItemAvailable" package-name="com.olbius.imex.quota">
+		<member-entity entity-alias="QI" entity-name="QuotaItem"/>
+		<alias-all entity-alias="QI"/>
+		<entity-condition filter-by-date="true">
+			<condition-list>
+				<condition-expr field-name="availableQuantity" entity-alias="QI" operator="greater" value="0"/>
+				<condition-expr field-name="statusId" entity-alias="QI" operator="equals" value="QUOTA_ITEM_APPROVED"/>
+			</condition-list>
+		</entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="QuotaItemAvailableGroupByProduct" package-name="com.olbius.imex.quota">
+		<member-entity entity-alias="QI" entity-name="QuotaItemAvailable"/>
+		<member-entity entity-alias="QH" entity-name="QuotaHeader"/>
+		<member-entity entity-alias="PR" entity-name="Product"/>
+		<alias name="quotaQuantity" entity-alias="QI" function="sum"/>
+		<alias name="availableQuantity" entity-alias="QI" function="sum"/>
+<!-- 		<alias name="supplierPartyId" entity-alias="QH" group-by="true"/> -->
+		<alias name="organizationPartyId" entity-alias="QH" group-by="true"/>
+<!-- 		<alias name="currencyUomId" entity-alias="QH" group-by="true"/> -->
+<!-- 		<alias name="partyCode" entity-alias="QH" group-by="true"/> -->
+<!-- 		<alias name="fullName" entity-alias="QH" group-by="true"/> -->
+		<alias name="statusId" entity-alias="QI" group-by="true"/>
+		<alias name="uomId" entity-alias="QI" group-by="true"/>
+		<alias name="productId" entity-alias="QI" group-by="true"/>
+		<alias name="productCode" entity-alias="PR" group-by="true"/>
+		<alias name="productName" entity-alias="PR" group-by="true"/>
+		<view-link entity-alias="QI" rel-entity-alias="PR" rel-optional="false">
+			<key-map field-name="productId"/>
+		</view-link>
+		<view-link entity-alias="QI" rel-entity-alias="QH" rel-optional="false">
+			<key-map field-name="quotaId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="QuotaItemAvailableGroupByProductAlias" package-name="com.olbius.imex.quota">
+		<member-entity entity-alias="QI" entity-name="QuotaItemAvailableGroupByProduct"/>
+		<alias-all entity-alias="QI"/>
+	</view-entity>
+	
+	<view-entity entity-name="ProductEventDetail" package-name="com.olbius.imex.testing">
+		<member-entity entity-alias="QH" entity-name="ProductEvent"/>
+		<member-entity entity-alias="PET" entity-name="ProductEventType"/>
+		<member-entity entity-alias="AGR" entity-name="Agreement"/>
+		<member-entity entity-alias="PKL" entity-name="PackingListHeader"/>
+		<member-entity entity-alias="SUP" entity-name="PartyFullNameDetail"/>
+		<alias-all entity-alias="QH"/>
+		<alias-all entity-alias="PET"/>
+		<alias-all entity-alias="AGR"/>
+		<alias-all entity-alias="SUP"/>
+		<alias-all entity-alias="PKL"/>
+		<view-link entity-alias="QH" rel-entity-alias="AGR" rel-optional="true">
+			<key-map field-name="agreementId" rel-field-name="agreementId"/>
+		</view-link>
+		<view-link entity-alias="QH" rel-entity-alias="PKL" rel-optional="true">
+			<key-map field-name="packingListId" rel-field-name="packingListId"/>
+		</view-link>
+		<view-link entity-alias="AGR" rel-entity-alias="SUP" rel-optional="true">
+			<key-map field-name="partyIdTo" rel-field-name="partyId"/>
+		</view-link>
+		<view-link entity-alias="QH" rel-entity-alias="PET" rel-optional="true">
+			<key-map field-name="eventTypeId" rel-field-name="eventTypeId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="PurchaseAgreementDetail" package-name="org.ofbiz.party.party" title="Relation between Agreement and AgreementAttribute">
+		<member-entity entity-alias="AATR" entity-name="AgreementAttribute" />
+		<member-entity entity-alias="AG" entity-name="Agreement" />
+		<member-entity entity-alias="SUP" entity-name="PartyGroup"/>
+		<member-entity entity-alias="PTO" entity-name="Party"/>
+		<alias-all entity-alias="AATR"></alias-all>
+		<alias-all entity-alias="AG"></alias-all>
+		<alias name="partyToName" field="groupName" entity-alias="SUP"/>
+		<alias name="partyToCode" field="partyCode" entity-alias="PTO"/>
+		<view-link entity-alias="AG" rel-entity-alias="AATR" rel-optional="true">
+			<key-map field-name="agreementId" rel-field-name="agreementId" />
+		</view-link>
+		<view-link entity-alias="AG" rel-entity-alias="SUP" rel-optional="true">
+			<key-map field-name="partyIdTo" rel-field-name="partyId"/>
+		</view-link>
+		<view-link entity-alias="AG" rel-entity-alias="PTO" rel-optional="true">
+			<key-map field-name="partyIdTo" rel-field-name="partyId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ConfigPackingDetail" package-name="org.ofbiz.party.party" title="Relation between product and ConfigPacking">
+		<member-entity entity-alias="PR" entity-name="Product" />
+		<member-entity entity-alias="CP" entity-name="ConfigPacking" />
+		<member-entity entity-alias="UOMF" entity-name="Uom" />
+		<member-entity entity-alias="UOMT" entity-name="Uom" />
+		<alias-all entity-alias="PR"/>
+		<alias-all entity-alias="CP"/>
+		<alias name="uomTypeIdFrom" entity-alias="UOMF" field="uomTypeId"/>
+		<alias name="uomTypeIdTo" entity-alias="UOMT" field="uomTypeId"/>
+		<view-link entity-alias="CP" rel-entity-alias="PR">
+			<key-map field-name="productId" rel-field-name="productId" />
+		</view-link>
+		<view-link entity-alias="CP" rel-entity-alias="UOMF">
+			<key-map field-name="uomFromId" rel-field-name="uomId" />
+		</view-link>
+		<view-link entity-alias="CP" rel-entity-alias="UOMT">
+			<key-map field-name="uomToId" rel-field-name="uomId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ProductPlanItemAndProduct" package-name="org.ofbiz.party.party" title="">
+		<member-entity entity-alias="PR" entity-name="Product" />
+		<member-entity entity-alias="CP" entity-name="ProductPlanItem" />
+		<alias-all entity-alias="PR"/>
+		<alias-all entity-alias="CP"/>
+		<view-link entity-alias="CP" rel-entity-alias="PR">
+			<key-map field-name="productId" rel-field-name="productId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="OrderItemGroupProduct" package-name="com.olbius.logistics.delivery" never-cache="true">
+      <member-entity entity-alias="OI" entity-name="OrderItem"/>
+      <alias entity-alias="OI" name="orderId" group-by="true"/>
+      <alias entity-alias="OI" name="productId" group-by="true"/>
+      <alias name="quantity" entity-alias="OI" function="sum"/>
+      <alias name="cancelQuantity" entity-alias="OI" function="sum"/>
+    </view-entity>
+</entitymodel>

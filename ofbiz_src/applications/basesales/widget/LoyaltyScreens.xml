@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-screen.xsd">
+	<screen name="LoyaltyCommonDecorator">
+		<section>
+			<actions>
+				<set field="tabBarName" value="LoyaltyTabBar" global="true" />
+				<set field="tabBarLocation" value="component://basesales/widget/BaseSalesTabBarMenus.xml" global="true" />
+			</actions>
+			<widgets>
+				<section>
+					<widgets>
+						<section>
+							<condition><not><if-empty field="loyaltyId"/></not></condition>
+							<actions><set field="printTabBar" value="true"/></actions>
+	                     	<widgets></widgets>
+	                 	</section>
+	             	</widgets>
+				</section>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+                    	<decorator-section-include name="body"/>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="LoyaltyViewCommonDecorator">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="loyalty" global="true"/>
+				<set field="selectedSubMenuItem" value="loyaltyList" global="true"/>
+				<set field="loyaltyId" from-field="parameters.loyaltyId" global="true"/>
+				<set field="tabButtonItem" from-field="tabButtonItem" default-value="" global="true"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission/>
+					</condition>
+					<actions>
+						<entity-one value-field="loyalty" entity-name="Loyalty">
+							<field-map field-name="loyaltyId" value="${loyaltyId}"/>
+						</entity-one>
+						<set field="loyalty" from-field="loyalty" global="true"/>
+					</actions>
+					<widgets>
+						<section>
+							<condition><not><if-empty field="loyalty"/></not></condition>
+							<actions>
+								<set field="titleHeaderValue" value="loyaltyTitle" global="true"/>
+								<set field="titleHeaderLocation" value="component://basesales/widget/LoyaltyScreens.xml" global="true"/>
+								<set field="currentStatusId" from-field="loyalty.statusId" global="true"/>
+							</actions>
+							<widgets>
+								<decorator-screen name="LoyaltyCommonDecorator">
+									<decorator-section name="body">
+										<decorator-section-include name="body"/>
+									</decorator-section>
+								</decorator-screen>
+							</widgets>
+							<fail-widgets>
+								<decorator-screen name="LoyaltyCommonDecorator">
+									<decorator-section name="body">
+										<container style="alert alert-info">
+						               		<label text="${uiLabelMap.BSLoyaltyHasIdIsNotFound}"></label>
+						               	</container>
+						           	</decorator-section>
+						       	</decorator-screen>
+							</fail-widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ListLoyalty">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="loyalty"/>
+				<set field="selectedSubMenuItem" value="loyaltyList"/>
+				<set field="titleProperty" value="BSListLoyalty"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html><html-template location="component://basesales/webapp/basesales/loyalty/loyaltyList.ftl"/></html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="NewLoyaltyInfo">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html><html-template location="component://basesales/webapp/basesales/loyalty/loyaltyNewInfo.ftl"/></html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="NewLoyaltyRules">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html><html-template location="component://basesales/webapp/basesales/loyalty/loyaltyNewRules.ftl"/></html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="NewLoyalty">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="loyalty"/>
+				<set field="selectedSubMenuItem" value="newLoyalty"/>
+				<set field="titleProperty" value="BSCreateNewLoyalty"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html><html-template location="component://basesales/webapp/basesales/loyalty/loyaltyNewTotal.ftl"/></html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotCreatePermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="loyaltyTitle">
+		<section>
+			<condition>
+				<not><if-empty field="loyalty"/></not>
+			</condition>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text="${uiLabelMap.BSId}: "></label>
+				<link url-mode="plain" target="viewLoyalty?loyaltyId=${loyalty.loyaltyId}" text="${loyalty.loyaltyId}"></link>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewLoyalty">
+		<section>
+			<actions>
+				<set field="titleProperty" value="BSViewLoyalty" global="true"/>
+				<set field="tabButtonItem" value="ViewLoyalty"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="LoyaltyViewCommonDecorator">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<script location="component://basesales/webapp/basesales/WEB-INF/actions/loyalty/ViewLoyalty.groovy"/>
+							</actions>
+							<widgets>
+								<screenlet title="${uiLabelMap.BSLoyalty}: ${loyalty.loyaltyName} (${loyalty.loyaltyId})" navigation-menu-name="ViewLoyaltySubTabBar">
+									<include-menu name="ViewLoyaltySubTabBar" location="component://basesales/widget/BaseSalesTabBarMenus.xml" />
+									<platform-specific>
+										<html><html-template location="component://basesales/webapp/basesales/loyalty/loyaltyView.ftl"/></html>
+									</platform-specific>
+								</screenlet>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EditLoyalty">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="loyalty"/>
+				<set field="selectedSubMenuItem" value="newLoyalty"/>
+				<set field="titleProperty" value="BSEditLoyalty"/>
+				<set field="loyaltyId" from-field="parameters.loyaltyId"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission/>
+					</condition>
+					<actions>
+						<entity-one value-field="loyalty" entity-name="Loyalty">
+							<field-map field-name="loyaltyId" value="${loyaltyId}"/>
+						</entity-one>
+					</actions>
+					<widgets>
+						<section>
+							<condition><not><if-empty field="loyalty"/></not></condition>
+							<actions>
+								<set field="titleHeaderValue" value="loyaltyTitle" global="true"/>
+								<set field="titleHeaderLocation" value="component://basesales/widget/LoyaltyScreens.xml" global="true"/>
+								<set field="currentStatusId" from-field="loyalty.statusId"/>
+								<script location="component://basesales/webapp/basesales/WEB-INF/actions/loyalty/EditLoyalty.groovy"/>
+							</actions>
+							<widgets>
+								<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+									<decorator-section name="body">
+										<platform-specific>
+											<html><html-template location="component://basesales/webapp/basesales/loyalty/loyaltyNewTotal.ftl"/></html>
+										</platform-specific>
+									</decorator-section>
+								</decorator-screen>
+							</widgets>
+							<fail-widgets>
+								<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+									<decorator-section name="body">
+										<container style="alert alert-info">
+						               		<label text="${uiLabelMap.BSLoyaltyHasIdIsNotFound}"></label>
+						               	</container>
+						           	</decorator-section>
+						       	</decorator-screen>
+							</fail-widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotUpdatePermission}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+</screens>

@@ -1,0 +1,10 @@
+<script type="text/javascript" src="/obbresources/js/prototype/prototype.js"></script>
+<script type="text/javascript" src="/obbresources/js/prototype/debug.js"></script>
+<script type="text/javascript" src="/obbresources/js/prototype/effects.js"></script>
+<script type="text/javascript" src="/obbresources/js/prototype/extended_debug.js"></script>
+<script type="text/javascript" src="/obbresources/js/prototype/tooltip_manager.js"></script>
+<script type="text/javascript" src="/obbresources/js/prototype/tooltip.js"></script>
+<script type="text/javascript" src="/obbresources/js/prototype/validation.js"></script>
+<script type="text/javascript" src="/obbresources/js/prototype/window_effects.js"></script>
+<script type="text/javascript" src="/obbresources/js/prototype/window_ext.js"></script>
+<script type="text/javascript" src="/obbresources/js/prototype/window.js"></script>

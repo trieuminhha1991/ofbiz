@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+
+    <simple-method method-name="createDeliveryEntry" short-description="Create Delivery Entry">
+    	<set field="parameters.fromDate" type="Timestamp"/>
+     	<set field="parameters.thruDate" type="Timestamp"/>
+ 	    <call-map-processor in-map-name="parameters" out-map-name="parameters">
+   			<simple-map-processor name="convertTimeStamp">
+   				<process field="fromDate">
+   					<convert type="Timestamp">
+   						<fail-message message="OLBIUS: Cannot convert fromDate to timestamp"/>
+   					</convert>
+   				</process>
+   				<process field="thruDate">
+   					<convert type="Timestamp">
+   						<fail-message message="OLBIUS: Cannot convert thruDate to timestamp"/>
+   					</convert>
+   				</process>
+   			</simple-map-processor>
+   		</call-map-processor>
+        <make-value entity-name="DeliveryEntry" value-field="newDeliveryEntry"></make-value>
+        <sequenced-id sequence-name="DeliveryEntry" field="deliveryEntryId"/>
+        <set field="newDeliveryEntry.deliveryEntryId" from-field="deliveryEntryId"/>
+        <set-nonpk-fields map="parameters" value-field="newDeliveryEntry" />
+        <if-empty field="parameters.statusId">
+			<set field="newDeliveryEntry.statusId" value="DELI_ENTRY_CREATED"/>        
+        </if-empty>
+        <set field="newDeliveryEntry.weight" value="0" type="BigDecimal"/>
+        <create-value value-field="newDeliveryEntry"/>	
+        <field-to-result field="deliveryEntryId"/>
+        <set field="listShipments" type="List"/>
+        <if-not-empty field="parameters.listShipmentItems">
+        	<iterate entry="shipmentItem" list="parameters.listShipmentItems">
+        		<!-- Create item -->
+        		<set field="deliveryEntryItemMap.deliveryEntryId" from-field="deliveryEntryId"/>
+        		<set field="deliveryEntryItemMap.productId" from-field="shipmentItem.productId"/>
+        		<set field="deliveryEntryItemMap.quantity" from-field="shipmentItem.quantity" type="BigDecimal"/>
+        		<call-service service-name="createDeliveryEntryItem" in-map-name="deliveryEntryItemMap">
+        			<result-to-field result-name="deliveryEntryItemSeqId" field="deliveryEntryItemSeqId"/>
+        		</call-service>
+				<!-- Create relation with shipment -->
+				<set field="dlvEntryShipmentMap.shipmentId" from-field="shipmentItem.shipmentId"/>
+        		<set field="dlvEntryShipmentMap.shipmentItemSeqId" from-field="shipmentItem.shipmentItemSeqId"/>
+        		<set field="dlvEntryShipmentMap.shipmentId" from-field="shipmentItem.shipmentId"/>
+        		<set field="dlvEntryShipmentMap.deliveryEntryId" from-field="deliveryEntryId"/>
+        		<set field="dlvEntryShipmentMap.deliveryEntryItemSeqId" from-field="deliveryEntryItemSeqId"/>
+        		<set field="dlvEntryShipmentMap.quantity" from-field="shipmentItem.quantity" type="BigDecimal"/>
+			 	<call-service service-name="createDeliveryEntryShipment" in-map-name="dlvEntryShipmentMap" />   
+        		
+        		<set field="check" value="false" type="Boolean"/>
+        		<iterate entry="shipment" list="listShipments">
+        			<if-compare-field to-field="shipment.shipmentId" operator="equals" field="shipmentItem.shipmentId">
+        				<set field="check" value="true"/>
+        			</if-compare-field>
+        		</iterate>
+        		<if-compare operator="equals" value="false" field="check">
+        			<field-to-list list="listShipments" field="shipmentItem.shipmentId"/>
+        		</if-compare>
+    	    </iterate>
+        </if-not-empty>
+        <if-not-empty field="listShipments">
+        	<iterate entry="shipmentId" list="listShipments">
+        		<set field="shipmentMap.deliveryEntryId" from-field="deliveryEntryId"/>
+        		<set field="shipmentMap.shipmentId" from-field="shipmentId"/>
+        		<call-service service-name="assignShipmentToDE" in-map-name="shipmentMap"/>
+        	</iterate>
+        </if-not-empty>
+        <if-not-empty field="parameters.delivererPartyId">
+       		<set field="delivererRoleMap.deliveryEntryId" from-field="deliveryEntryId"/>
+       		<set field="delivererRoleMap.partyId" from-field="parameters.delivererPartyId"/>
+       		<set field="delivererRoleMap.roleTypeId" value="LOG_DELIVERER"/>
+       		<set field="delivererRoleMap.fromDate" from-field="parameters.fromDate"/>
+       		<set field="delivererRoleMap.thruDate" from-field="parameters.thruDate"/>
+       		<call-service service-name="assignPartyToDE" in-map-name="delivererRoleMap"/>
+        </if-not-empty>
+        <if-not-empty field="parameters.driverPartyId">
+       		<set field="driverRoleMap.deliveryEntryId" from-field="deliveryEntryId"/>
+       		<set field="driverRoleMap.partyId" from-field="parameters.driverPartyId"/>
+       		<set field="driverRoleMap.roleTypeId" value="LOG_DRIVER"/>
+       		<set field="driverRoleMap.fromDate" from-field="parameters.fromDate"/>
+       		<set field="driverRoleMap.thruDate" from-field="parameters.thruDate"/>
+       		<call-service service-name="assignPartyToDE" in-map-name="driverRoleMap"/>
+        </if-not-empty>
+        <if-not-empty field="parameters.carrierPartyId">
+       		<set field="carrierRoleMap.deliveryEntryId" from-field="deliveryEntryId"/>
+       		<set field="carrierRoleMap.partyId" from-field="parameters.carrierPartyId"/>
+       		<set field="carrierRoleMap.roleTypeId" value="CARRIER"/>
+       		<set field="carrierRoleMap.fromDate" from-field="parameters.fromDate"/>
+       		<set field="carrierRoleMap.thruDate" from-field="parameters.thruDate"/>
+       		<call-service service-name="assignPartyToDE" in-map-name="carrierRoleMap"/>
+        </if-not-empty>
+        <if-not-empty field="parameters.fixedAssetId">
+        	<set field="dlvEntryVehicle.deliveryEntryId" from-field="deliveryEntryId"/>
+       		<set field="dlvEntryVehicle.fixedAssetId" from-field="parameters.fixedAssetId"/>
+       		<set field="dlvEntryVehicle.fromDate" from-field="parameters.fromDate"/>
+       		<set field="dlvEntryVehicle.thruDate" from-field="parameters.thruDate"/>
+       		<call-service service-name="assignVehicleToDE" in-map-name="dlvEntryVehicle"/>
+        </if-not-empty>
+        
+    </simple-method>
+    
+    <simple-method method-name="assignVehicleToDE" short-description="Assign Vehicle To DE">
+   	 	<make-value value-field="newEntity" entity-name="DeliveryEntryFixedAsset"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    
+    <simple-method method-name="assignPartyToDE" short-description="Assign Party To DE">
+   	 	<make-value value-field="newEntity" entity-name="DeliveryEntryRole"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    
+    <simple-method method-name="assignShipmentToDE" short-description="Assign Shipment To DE">
+        <!-- Update Delivery Entry To Shipment -->
+        <entity-one entity-name="Shipment" value-field="shipment" />
+        <set field="shipment.deliveryEntryId" from-field="parameters.deliveryEntryId"/>
+    	<store-value value-field="shipment"/>
+    	 <check-errors/>
+    	 
+    	 <!-- Update Quantity For Delivery Entry -->
+    	 <entity-one entity-name="DeliveryEntry" value-field="deliveryEntry"></entity-one>
+    	 
+    </simple-method>
+    
+     <simple-method method-name="createDeliveryEntryItem" short-description="Create delivery entry item">
+    	<make-value value-field="deliveryEntryItem" entity-name="DeliveryEntryItem"/>
+   		<make-next-seq-id seq-field-name="deliveryEntryItemSeqId" value-field="deliveryEntryItem"/>
+   		<set field="deliveryEntryItem.deliveryEntryId" from-field="parameters.deliveryEntryId"/>
+   		<set field="deliveryEntryItem.productId" from-field="parameters.productId"/>
+   		<set field="deliveryEntryItem.quantity" from-field="parameters.quantity"/>
+   		<create-value value-field="deliveryEntryItem"/>
+   		<field-to-result field="deliveryEntryItem.deliveryEntryItemSeqId" result-name="deliveryEntryItemSeqId"/>
+    </simple-method>
+    
+    <simple-method method-name="createDeliveryEntryShipment" short-description="Create delivery entry and shipment item">
+    	<make-value value-field="deliveryEntryShipment" entity-name="DeliveryEntryShipment"/>
+    	<set field="deliveryEntryShipment.deliveryEntryId" from-field="parameters.deliveryEntryId"/>
+   		<set field="deliveryEntryShipment.deliveryEntryItemSeqId" from-field="parameters.deliveryEntryItemSeqId"/>
+   		<set field="deliveryEntryShipment.shipmentId" from-field="parameters.shipmentId"/>
+   		<set field="deliveryEntryShipment.shipmentItemSeqId" from-field="parameters.shipmentItemSeqId"/>
+   		<set field="deliveryEntryShipment.quantity" from-field="parameters.quantity"/>
+   		<create-value value-field="deliveryEntryShipment"/>
+    </simple-method>
+    
+     <simple-method method-name="createShipmentForPurchaseDelivery" short-description="Sub-method used by quickShip methods to create a shipment">
+		
+        <entity-one entity-name="Delivery" value-field="delivery"/>
+        <entity-one entity-name="OrderHeader" value-field="orderHeader">
+        	<field-map field-name="orderId" from-field="delivery.orderId"/>
+        </entity-one>
+        <entity-one entity-name="Facility" value-field="facility">
+        	<field-map field-name="facilityId" from-field="delivery.destFacilityId"/>
+        </entity-one>
+		<entity-and entity-name="OrderItemAndShipGroupAssoc" list="orderItemAndShipGroupAssocList">
+            <field-map field-name="orderId" from-field="orderHeader.orderId"/>
+            <field-map field-name="statusId" value="ITEM_APPROVED"/>
+        </entity-and>
+
+        <!-- make sure we have something to ship -->
+        <if-empty field="orderItemAndShipGroupAssocList">
+            <add-error>
+                <fail-property resource="ProductUiLabels" property="FacilityNoItemsAvailableToShip"/>
+            </add-error>
+            <check-errors/>
+        </if-empty>
+
+        <get-related relation-name="OrderItemShipGroup" value-field="orderHeader" list="orderItemShipGroupList"/>
+
+        <!-- group orderItems (actually OrderItemAndShipGroupAssocs) by shipGroupSeqId in a Map with List values
+             This Map is actually used only for sales orders' shipments right now.  -->
+        <iterate list="orderItemAndShipGroupAssocList" entry="orderItemAndShipGroupAssoc">
+            <field-to-list field="orderItemAndShipGroupAssoc" list="orderItemListByShGrpMap[orderItemAndShipGroupAssoc.shipGroupSeqId]"/>
+        </iterate>
+        <!-- for OrderItemShipGroup need to split all OISGIRs into their ship groups and create a shipment for each -->
+        <iterate list="orderItemShipGroupList" entry="orderItemShipGroup">
+            <!-- lookup all the approved items -->
+            <entity-and entity-name="OrderItemAndShipGroupAssoc" list="orderItems">
+                <field-map field-name="orderId" from-field="orderHeader.orderId"/>
+                <field-map field-name="shipGroupSeqId" from-field="orderItemShipGroup.shipGroupSeqId"/>
+                <field-map field-name="statusId" value="ITEM_APPROVED"/>
+            </entity-and>
+            <set from-field="orderItemListByShGrpMap[orderItemShipGroup.shipGroupSeqId]" field="perShipGroupItemList"/>
+
+            <!-- make sure we have something to ship -->
+            <if-empty field="perShipGroupItemList">
+                <set field="argListNames[]" from-field="orderItemShipGroup.shipGroupSeqId"/>
+                <property-to-field property="FacilityShipmentNoItemsAvailableToShip" resource="ProductUiLabels" field="successMessage" arg-list-name="argListNames"/>
+            <else>
+                <!-- create the shipment for this facility and ship group combination -->
+                <set from-field="orderHeader.orderId" field="shipmentContext.primaryOrderId"/>
+                <set from-field="orderItemShipGroup.shipGroupSeqId" field="shipmentContext.primaryShipGroupSeqId"/>
+                <!-- for Sales Shipment, order items' reservation facilityId is the originFacilityId, and the initial status is "INPUT"
+                     for Purchase Shipment, the facilityId parameter is the destinationFacilityId, and the initial status is "CREATED" -->
+                <set from-field="facility.facilityId" field="shipmentContext.destinationFacilityId"/>
+                <set value="PURCH_SHIP_CREATED" field="shipmentContext.statusId"/>
+                <call-service service-name="createShipment" in-map-name="shipmentContext">
+                    <result-to-field result-name="shipmentId" field="shipmentLookupMap.shipmentId"/>
+                </call-service>
+                <find-by-primary-key entity-name="Shipment" map="shipmentLookupMap" value-field="shipment"/>
+				
+                <clear-field field="itemResFindMap"/>
+                <set from-field="facilityId" field="itemResFindMap.facilityId"/>
+                <entity-condition list="listDeliveryItems" entity-name="DeliveryItem">
+                  	<condition-list>
+                  		<condition-expr field-name="deliveryId" from-field="delivery.deliveryId"/>
+                  	</condition-list>
+                  </entity-condition>
+                <iterate list="listDeliveryItems" entry="item">
+                  <set from-field="shipment.shipmentId" field="issueContext.shipmentId"/>
+                  <set from-field="item.fromOrderId" field="issueContext.orderId"/>
+                  <set from-field="item.fromOrderItemSeqId" field="issueContext.orderItemSeqId"/>
+                  <set from-field="orderItemShipGroup.shipGroupSeqId" field="issueContext.shipGroupSeqId"/>
+                  
+                  <if-compare field="delivery.statusId" operator="equals" value="DLV_EXPORTED">
+               			<set from-field="item.actualExportedQuantity" field="issueContext.quantity"/>
+               			<set from-field="item.actualExportedAmount" field="issueContext.weight"/>
+              			<else>
+	              			<if-compare field="delivery.statusId" operator="equals" value="DLV_DELIVERED">
+		                  		<set from-field="item.actualDeliveredQuantity" field="issueContext.quantity"/>
+		                  		<set from-field="item.actualDeliveredAmount" field="issueContext.weight"/>
+	                  			<else>
+			                  		<set from-field="item.quantity" field="issueContext.quantity"/>
+			                  		<set from-field="item.amount" field="issueContext.weight"/>
+	                  			</else>
+		                  </if-compare>
+              			</else>
+                  </if-compare>
+					<if-compare field="issueContext.quantity" operator="greater" value="0" type="BigDecimal">
+              			<call-service service-name="issueOrderItemToShipment" in-map-name="issueContext"/>
+            		</if-compare>
+                </iterate> 
+				
+                <!-- place all issued items into a single package -->
+                <entity-and entity-name="ItemIssuance" list="itemIssuances">
+                    <field-map field-name="orderId" from-field="orderHeader.orderId"/>
+                    <field-map field-name="shipGroupSeqId" from-field="orderItemShipGroup.shipGroupSeqId"/>
+                    <field-map field-name="shipmentId" from-field="shipment.shipmentId"/>
+                </entity-and>
+
+                <set value="New" field="shipmentPackageSeqId"/>
+                <iterate list="itemIssuances" entry="itemIssuance">
+                    <log level="verbose" message="In quick ship adding item to package: ${shipmentPackageSeqId}"/>
+                    <clear-field field="shipItemContext"/>
+                    <set from-field="itemIssuance.shipmentId" field="shipItemContext.shipmentId"/>
+                    <set from-field="itemIssuance.shipmentItemSeqId" field="shipItemContext.shipmentItemSeqId"/>
+                    <set from-field="itemIssuance.quantity" field="shipItemContext.quantity"/>
+                    <set from-field="shipmentPackageSeqId" field="shipItemContext.shipmentPackageSeqId"/>
+                    <call-service service-name="addShipmentContentToPackage" in-map-name="shipItemContext">
+                        <result-to-field result-name="shipmentPackageSeqId" field="shipmentPackageSeqId"/>
+                    </call-service>
+                </iterate>
+
+               <!-- update the shipment status to shipped -->
+               <set from-field="shipment.shipmentId" field="packedContext.shipmentId"/>
+               <set value="PURCH_SHIP_SHIPPED" field="packedContext.statusId"/>
+               <call-service service-name="updateShipment" in-map-name="packedContext"/>
+
+               <field-to-result result-name="shipmentId" field="shipment.shipmentId"/>
+            </else>
+            </if-empty>
+        </iterate>
+    </simple-method>
+    
+   	<simple-method method-name="updateDeliveryScanfile" short-description="">
+        <entity-one entity-name="Delivery" value-field="delivery" />
+        <set field="delivery.pathScanFile" from-field="parameters.pathScanFile"/>
+    	<store-value value-field="delivery"/>
+   	 	<check-errors/>
+   	 	<set field="deliveryId" from-field="parameters.deliveryId"/>
+   	 	<field-to-result field="deliveryId"/>
+    </simple-method>
+</simple-methods>

@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+    <!-- ========================================================= -->
+    <!-- ======================== Defaults ======================= -->
+    <!-- ========================================================= -->
+    <title>Entity of an Open For Business Project Component</title>
+    <description>None</description>
+    <version>1.0</version>
+	<!-- Start entity for organization setting -->
+    <view-entity entity-name="GlOrganizationClassAndParent" package-name="com.olbius.organization.base.accounting">
+        <member-entity entity-alias="GOL" entity-name="GlAccountOrganizationAndClass"/>
+        <member-entity entity-alias="GL" entity-name="GlAccount"/>
+        <alias-all entity-alias="GOL"/>
+        <alias entity-alias="GL" name="codeParent" field="accountCode"/>
+        <view-link entity-alias="GOL" rel-entity-alias="GL" rel-optional="true">
+            <key-map field-name="parentGlAccountId" rel-field-name="glAccountId"/>
+        </view-link>
+    </view-entity>
+
+    <view-entity entity-name="GlOrganizationClassAndChild" package-name="com.olbius.organization.base.accounting">
+        <member-entity entity-alias="GOL" entity-name="GlAccountOrganizationAndClass"/>
+        <member-entity entity-alias="GL" entity-name="GlAccount"/>
+        <alias-all entity-alias="GOL"/>
+        <alias entity-alias="GL" name="codeChild" field="accountCode"/>
+        <view-link entity-alias="GOL" rel-entity-alias="GL" rel-optional="true">
+            <key-map field-name="glAccountId" rel-field-name="parentGlAccountId"/>
+        </view-link>
+    </view-entity>
+    
+    <view-entity entity-name="GlAccountTypeDefaultAndDetail" package-name="com.olbius.organization.base.accounting">
+		<member-entity entity-alias="TG" entity-name="GlAccountTypeDefault"/>
+		<member-entity entity-alias="GL" entity-name="GlAccount"/>
+		<alias-all entity-alias="TG" />		
+		<alias entity-alias="GL" name="accountName" field="accountName" />
+		<alias entity-alias="GL" name="accountCode" field="accountCode" />
+		<view-link entity-alias="TG" rel-entity-alias="GL">
+			<key-map field-name="glAccountId" rel-field-name="glAccountId" />
+		</view-link>
+	</view-entity>	
+	
+	<view-entity entity-name="InvoicesItemTypesGlAccountDetail" package-name="com.olbius.organization.base.accounting">
+		<member-entity entity-alias="TG" entity-name="InvoiceItemTypeGlAccount"/>
+		<member-entity entity-alias="II" entity-name="InvoiceItemType"/>
+		<member-entity entity-alias="GL" entity-name="GlAccount"/>
+		<member-entity entity-alias="GLO" entity-name="GlAccount"/>
+		<alias-all entity-alias="TG" >
+			<exclude field="invoiceItemTypeId"/>			
+		</alias-all>
+		<alias-all entity-alias="II" />
+		<alias entity-alias="GL" name="accountNameOver" field="accountName" />
+		<alias entity-alias="GL" name="accountCodeOver" field="accountCode" />
+		<alias entity-alias="GLO" name="accountName" field="accountName" />
+		<alias entity-alias="GLO" name="accountCode" field="accountCode" />		
+		<view-link entity-alias="GLO" rel-entity-alias="II" rel-optional="true">
+			<key-map field-name="glAccountId" rel-field-name="defaultGlAccountId" />
+		</view-link>		
+		<view-link entity-alias="II" rel-entity-alias="TG" rel-optional="true">
+			<key-map field-name="invoiceItemTypeId"/>
+		</view-link>
+		<view-link entity-alias="TG" rel-entity-alias="GL" rel-optional="true">
+			<key-map field-name="glAccountId" rel-field-name="glAccountId" />
+		</view-link>		
+	</view-entity>
+	
+	<view-entity entity-name="PaymentMethodTypeNotGlAccount" package-name="com.olbius.organization.base.accounting">
+		<member-entity entity-alias="GT" entity-name="PaymentMethodType"/>
+		<member-entity entity-alias="GD" entity-name="PaymentMethodTypeGlAccountDetail"/>
+		<alias-all entity-alias="GD"/>		
+		<alias entity-alias="GT" name="description" field="description" />
+		<alias entity-alias="GT" name="paymentMethodTypeId" field="paymentMethodTypeId" />
+		<view-link entity-alias="GT" rel-entity-alias="GD" rel-optional="true">
+			<key-map field-name="paymentMethodTypeId" />
+		</view-link>
+	</view-entity>	
+	    
+    <view-entity entity-name="PaymentMethodTypeGlAccountDetail" package-name="com.olbius.organization.base.accounting">
+		<member-entity entity-alias="PMTGL" entity-name="PaymentMethodTypeGlAccount"/>
+		<member-entity entity-alias="PMT" entity-name="PaymentMethodType"/>
+		<member-entity entity-alias="GL" entity-name="GlAccount"/>
+		<member-entity entity-alias="GLD" entity-name="GlAccount"/>
+		<alias-all entity-alias="PMTGL" />
+		<alias entity-alias="GL" name="accountName" field="accountName" />
+		<alias entity-alias="GL" name="accountCode" field="accountCode" />
+		<alias entity-alias="GLD" name="accountNameDef" field="accountName" />
+		<alias entity-alias="GLD" name="accountCodeDef" field="accountCode" />
+		<view-link entity-alias="PMT" rel-entity-alias="GLD" rel-optional="true">
+			<key-map field-name="defaultGlAccountId" rel-field-name="glAccountId" />
+		</view-link>						
+		<view-link entity-alias="PMT" rel-entity-alias="PMTGL">
+			<key-map field-name="paymentMethodTypeId"/>
+		</view-link>
+		<view-link entity-alias="PMTGL" rel-entity-alias="GL" rel-optional="true" >
+			<key-map field-name="glAccountId" />
+		</view-link>									
+	</view-entity>
+	
+	<view-entity entity-name="VarianceReasonGlAccountDetail" package-name="com.olbius.organization.base.accounting">
+		<member-entity entity-alias="GT" entity-name="VarianceReasonGlAccount"/>
+		<member-entity entity-alias="GD" entity-name="GlAccount"/>
+		<alias-all entity-alias="GT"/>		
+		<alias entity-alias="GD" name="accountName" field="accountName" />
+		<alias entity-alias="GD" name="accountCode" field="accountCode" />
+		<view-link entity-alias="GT" rel-entity-alias="GD">
+			<key-map field-name="glAccountId" />
+		</view-link>
+	</view-entity>
+	
+    <view-entity entity-name="TaxAuthorityGlAccountAndGeo" package-name="com.olbius.organization.base.accounting">
+		<member-entity entity-alias="TG" entity-name="TaxAuthorityGlAccount"/>
+		<member-entity entity-alias="GO" entity-name="Geo"/>
+		<member-entity entity-alias="GL" entity-name="GlAccount"/>
+		<alias-all entity-alias="TG" />
+		<alias entity-alias="GO" name="geoName" field="geoName" />
+		<alias entity-alias="GL" name="accountName" field="accountName" />
+		<alias entity-alias="GL" name="accountCode" field="accountCode" />
+		<view-link entity-alias="TG" rel-entity-alias="GO" rel-optional="true">
+			<key-map field-name="taxAuthGeoId" rel-field-name="geoId"/>
+		</view-link>
+		<view-link entity-alias="TG" rel-entity-alias="GL" rel-optional="true">
+			<key-map field-name="glAccountId" rel-field-name="glAccountId" />
+		</view-link>
+	</view-entity>				
+	<!-- End entity for organization setting -->
+	
+	<!-- Start entity for global setting -->
+	<view-entity entity-name="GlacountAndParent" package-name="com.olbius.global.accounting">
+		<member-entity entity-alias="GLP" entity-name="GlAccount"/>
+		<member-entity entity-alias="GL" entity-name="GlAccount"/>
+		<alias-all entity-alias="GL"/>
+		<alias entity-alias="GLP" name="codeParent" field="accountCode"/>
+		<view-link entity-alias="GL" rel-entity-alias="GLP" rel-optional="true">
+			<key-map field-name="parentGlAccountId" rel-field-name="glAccountId"/>
+		</view-link>
+    </view-entity>
+	
+	<view-entity entity-name="PaymentMethodTypeAndGlAccountDetail" package-name="com.olbius.global.accounting">
+		<member-entity entity-alias="PM" entity-name="PaymentMethodType"/>
+		<member-entity entity-alias="GL" entity-name="GlAccount"/>
+		<alias-all entity-alias="PM"/>		
+		<alias entity-alias="GL" name="accountName" field="accountName" />
+		<alias entity-alias="GL" name="accountCode" field="accountCode" />		
+		<view-link entity-alias="PM" rel-entity-alias="GL" rel-optional="true">
+			<key-map field-name="defaultGlAccountId" rel-field-name="glAccountId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="InvoiceItemTypeAndGlAccountDetail" package-name="com.olbius.global.accounting">
+		<member-entity entity-alias="ITEMTYPE" entity-name="InvoiceItemType"/>
+		<member-entity entity-alias="PARENTTYPE" entity-name="InvoiceItemType"></member-entity>
+		<member-entity entity-alias="INVTYP" entity-name="InvoiceType"></member-entity>
+		<member-entity entity-alias="GL" entity-name="GlAccount"/>
+		<alias-all entity-alias="ITEMTYPE"/>
+		<alias name="parentTypeDesc" field="description" entity-alias="PARENTTYPE"></alias>
+		<alias entity-alias="GL" name="accountName" field="accountName" />
+		<alias entity-alias="GL" name="accountCode" field="accountCode" />
+		<alias name="invoiceTypeId" entity-alias="INVTYP"></alias>
+		<alias name="invoiceTypeDesc" field="description" entity-alias="INVTYP"></alias>
+		<view-link entity-alias="ITEMTYPE" rel-entity-alias="GL" rel-optional="true">
+			<key-map field-name="defaultGlAccountId" rel-field-name="glAccountId" />
+		</view-link>
+		<view-link rel-entity-alias="INVTYP" entity-alias="ITEMTYPE" rel-optional="true">
+			<key-map field-name="invoiceTypeId"/>
+		</view-link>
+		<view-link rel-entity-alias="PARENTTYPE" entity-alias="ITEMTYPE" rel-optional="true">
+			<key-map field-name="parentTypeId" rel-field-name="invoiceItemTypeId"/>
+		</view-link>
+	</view-entity>	
+	
+     <view-entity entity-name="UomConversionDatedView" package-name="com.olbius.global.accounting">
+		<member-entity entity-alias="UC" entity-name="UomConversionDated"/>
+		<member-entity entity-alias="UM" entity-name="Uom"/>
+		<member-entity entity-alias="UMT" entity-name="Uom"/>
+		<alias-all entity-alias="UC"/>
+		<alias entity-alias="UM" name="uomTypeId" field="uomTypeId"/>
+		<alias entity-alias="UMT" name="uomTypeToId" field="uomTypeId"/>
+		<view-link entity-alias="UC" rel-entity-alias="UM">
+			<key-map field-name="uomId"/>
+		</view-link>
+		<view-link entity-alias="UC" rel-entity-alias="UMT">
+			<key-map field-name="uomIdTo" rel-field-name="uomId"/>
+		</view-link>
+    </view-entity>
+    
+	<view-entity entity-name="GlAccountAndGlAccountCategoryMember"
+		package-name="com.olbius.global.accounting" title="GlAccount and GlAccountCategoryMember">
+		<member-entity entity-alias="GL" entity-name="GlAccount" />
+		<member-entity entity-alias="GLCM" entity-name="GlAccountCategoryMember" />
+		<alias-all entity-alias="GL" />
+		<alias-all entity-alias="GLCM" />
+		<view-link entity-alias="GL" rel-entity-alias="GLCM">
+			<key-map field-name="glAccountId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="CustomTimePeriodsWithOrgFullName" package-name="com.olbius.globale.accounting">
+		<member-entity entity-alias="CT" entity-name="CustomTimePeriod"></member-entity>
+		<member-entity entity-alias="PF" entity-name="PartyFullNameDetail"></member-entity>
+		<alias-all entity-alias="CT"></alias-all>
+		<alias name="fullName" entity-alias="PF" field="fullName"></alias>
+		<view-link rel-entity-alias="PF" entity-alias="CT">
+			<key-map field-name="organizationPartyId" rel-field-name="partyId"/>
+		</view-link>
+	</view-entity>
+	
+	<entity entity-name="VoucherBook" package-name="com.olbius.global.accounting" title="Voucher Book">
+		<field name="voucherBookId" type="id-ne"></field>
+		<field name="name" type="description"></field>
+		<field name="otherName" type="description"></field>
+		<field name="form" type="id-ne"></field>
+		<field name="organizationPartyId" type="id-ne"></field>
+		<field name="series" type="id-ne"></field>
+		<field name="startNumber" type="numeric"></field>
+		<field name="endNumber" type="numeric"></field>
+		<field name="currentNumber" type="numeric"></field>
+		<field name="issueDate" type="date-time"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<field name="statusId" type="id-ne"></field>
+		<prim-key field="voucherBookId"/>
+		<relation rel-entity-name="StatusItem" type="one" fk-name="VOUCHERBK_SSITEM">
+			<key-map field-name="statusId"/>
+		</relation>
+		<relation rel-entity-name="Party" type="one" fk-name="VOUCHERBK_PARTY">
+			<key-map  field-name="organizationPartyId" rel-field-name="partyId"/>
+		</relation>
+	</entity>
+	
+	<entity entity-name="GlAccountBalance" package-name="com.olbius.bacc.setting"
+      	title="GlAccountBalance Entity">
+      	<field name="glAccountId" type="id-ne"></field>
+      	<field name="organizationPartyId" type="id-ne"></field>
+      	<field name="openingCrBalance" type="currency-amount"></field>
+      	<field name="openingDrBalance" type="currency-amount"></field>
+      	<prim-key field="glAccountId"/>
+      	<prim-key field="organizationPartyId"/>
+      	<relation type="one" fk-name="GLACCOUNT_BALANCE" rel-entity-name="GlAccount">
+        	<key-map field-name="glAccountId"/>
+      	</relation>
+      	<relation type="one" fk-name="GLACCOUNT_PARTY" rel-entity-name="Party">
+        	<key-map field-name="organizationPartyId" rel-field-name="partyId"/>
+      	</relation>
+    </entity>
+    
+    <view-entity entity-name="UomConversionDatedView" package-name="com.olbius.bacc.setting">
+		<member-entity entity-alias="UC" entity-name="UomConversionDated"/>
+		<member-entity entity-alias="UM" entity-name="Uom"/>
+		<member-entity entity-alias="UMT" entity-name="Uom"/>
+		<alias-all entity-alias="UC"/>
+		<alias entity-alias="UM" name="uomTypeId" field="uomTypeId"/>
+		<alias entity-alias="UMT" name="uomTypeToId" field="uomTypeId"/>
+		<view-link entity-alias="UC" rel-entity-alias="UM">
+			<key-map field-name="uomId"/>
+		</view-link>
+		<view-link entity-alias="UC" rel-entity-alias="UMT">
+			<key-map field-name="uomIdTo" rel-field-name="uomId"/>
+		</view-link>
+    </view-entity>
+    
+    <extend-entity entity-name="UomConversionDated">
+    	<field name="purchaseExchangeRate" type="floating-point"></field>
+    	<field name="sellingExchangeRate" type="floating-point"></field>
+    	<field name="bankId" type="id-ne"></field>
+    </extend-entity>
+    
+    <entity entity-name="BankConversion" package-name="com.olbius.bacc.setting">
+    	<field name="bankId" type="id-ne"></field>
+        <field name="bankTypeId" type="id"></field> <!-- Kieu ngan hang -->
+        <field name="bankName" type="name"></field>
+        <field name="eName" type="name"></field>
+        <field name="shortName" type="name"></field>
+        <field name="authorizedCapital" type="fixed-point"></field> <!-- von dieu le (ty dong) -->
+    	<field name="bankAddress" type="name"></field>
+        <field name="website" type="name"></field>
+        <field name="currencyUomId" type="id"></field>
+    	<prim-key field="bankId" />
+    	<relation rel-entity-name="UomConversionDated" type="many" fk-name="fk_Bank_Conversion">
+    		 <key-map field-name="bankId"/>
+    	</relation>
+    </entity>
+    <entity entity-name="AllocationCostPeriod" package-name="com.olbius.acc">
+    	<field name="allocCostPeriodId" type="id-ne"></field>
+    	<field name="allocCostPeriodCode" type="id-long"></field>
+    	<field name="allocCostPeriodName" type="description"></field>
+    	<field name="fromDate" type="date-time"></field>
+    	<field name="thruDate" type="date-time"></field>
+	<field name="allocationCostTypeId" type="id"></field>
+    	<field name="createdDate" type="date-time"></field>
+    	<prim-key field="allocCostPeriodId"/>
+    	<relation rel-entity-name="AllocationCostType" type="one" fk-name="ALLOC_COST_PER_TYPE">
+    		<key-map field-name="allocationCostTypeId"/>
+    	</relation>
+    </entity>
+    <entity entity-name="AllocationCostPeriodItem" package-name="com.olbius.acc">
+    	<field name="allocCostPeriodId" type="id-ne"></field>
+    	<field name="allocCostPeriodSeqId" type="id-ne"></field>
+    	<field name="allocationCostTypeId" type="id-ne"></field>
+    	<field name="glAccountId" type="id-ne"></field>
+    	<field name="partyId" type="id-ne"></field>
+    	<field name="allocationRate" type="currency-amount"></field>
+    	<prim-key field="allocCostPeriodId"/>
+    	<prim-key field="allocCostPeriodSeqId"/>
+    	<relation rel-entity-name="AllocationCostPeriod" type="one" fk-name="ALLOC_COST_ITEM_ALLOC">
+    		<key-map field-name="allocCostPeriodId"/>
+    	</relation>
+    	<relation rel-entity-name="Party" type="one" fk-name="ALLOC_COST_ITEM_PTY">
+    		<key-map field-name="partyId"/>
+    	</relation>
+    	<relation rel-entity-name="GlAccount" type="one" fk-name="ALLOC_COST_ITEM_GLACC">
+    		<key-map field-name="glAccountId"/>
+    	</relation>
+    	<relation rel-entity-name="AllocationCostType" type="one" fk-name="ALLOC_COST_ITEM_COST_TYP">
+    		<key-map field-name="allocationCostTypeId"/>
+    	</relation>
+    </entity>
+    <entity entity-name="AllocationCostType" package-name="com.olbius.acc">
+    	<field name="allocationCostTypeId" type="id-ne"></field>
+    	<field name="parentTypeId" type="id-ne"></field>
+    	<field name="description" type="description"></field>
+    	<prim-key field="allocationCostTypeId"/>
+    	<relation rel-entity-name="AllocationCostType" type="one" fk-name="ALLOC_COST_TYP_PAR">
+    		<key-map field-name="parentTypeId" rel-field-name="allocationCostTypeId"/>
+    	</relation>
+    </entity>
+</entitymodel>

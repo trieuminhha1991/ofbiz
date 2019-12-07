@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+
+    <screen name="ListReports">
+        <section>
+            <actions>
+                <set field="headerItem" value="reports"/>
+                <set field="titleProperty" value="AccountingArPageTitleListReports"/>
+                <set field="invoiceTypeId" value="SALES_INVOICE"/>
+                <set field="organizationPartyId" from-field="userPreferences.ORGANIZATION_PARTY" default-value="${defaultOrganizationPartyId}"/>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/invoice/InvoiceReport.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="component://delys/widget/accounting/ar/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.AccountingPastDueInvoices}: (${PastDueInvoicestotalAmount})">
+                            <section>
+                                <actions>
+                                    <set field="invoices" from-field="PastDueInvoices"/>
+                                </actions>
+                                <widgets>
+                                    <include-form name="ListReports" location="component://delys/widget/accounting/ar/forms/InvoiceForms.xml"/>
+                                </widgets>
+                            </section>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.AccountingInvoicesDueSoon}: (${InvoicesDueSoonTotalAmount})">
+                            <section>
+                                <actions>
+                                    <set field="invoices" from-field="InvoicesDueSoon"/>
+                                </actions>
+                                <widgets>
+                                    <include-form name="ListReports"  location="component://delys/widget/accounting/ar/forms/InvoiceForms.xml"/>
+                                </widgets>
+                            </section>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="FindArInvoices">
+        <section>
+            <actions>
+            	<set field="navMenuName" value="SearchInvoicesTabBar"/>
+   				<set field="navMenuLocation" value="component://delys/widget/accounting/ar/ArMenus.xml"/>
+                <set field="titleProperty" value="AccountingFindArInvoices"/>
+                <service service-name="performFind" result-map="result">
+                    <field-map field-name="inputFields" from-field="parameters"/>
+                    <field-map field-name="entityName" value="InvoiceAndType"/>
+                    <field-map field-name="orderBy" value="invoiceDate DESC"/>
+                </service>
+                <set field="invoices" from-field="result.listIt"/>
+                <set field="selectedMenuItem" value="accReceivable"/>
+                <set field="selectedSubMenuItem" value="accArInvoiceList"/>  
+                <set field="parameters.parentTypeId" value="SALES_INVOICE"/>
+                <entity-condition list="listInvoiceType" entity-name="InvoiceType">
+                	<condition-expr field-name="parentTypeId" operator="equals" value="SALES_INVOICE"/>
+                </entity-condition>
+                <entity-condition list="listStatusItem" entity-name="StatusItem">
+                	<condition-expr field-name="statusTypeId" operator="equals" value="INVOICE_STATUS"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonInvoiceDecorator" location="component://delys/widget/accounting/ar/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <!-- <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                                    <decorator-section name="menu-bar">
+                                        <container style="button-bar padding-top8 padding-bottom8">
+                                            <link target="newInvoice" text="${uiLabelMap.CommonCreateNew}" style="btn btn-primary"/>
+                                        </container>
+                                    </decorator-section>
+                                    <decorator-section name="search-options">
+                                        <include-form name="FindArInvoices" location="component://delys/widget/accounting/ar/forms/InvoiceForms.xml"/>
+                                    </decorator-section>
+                                    <decorator-section name="search-results">
+                                        <platform-specific>
+                                            <html><html-template location="component://accounting/webapp/ar/invoice/ListInvoices.ftl"/></html>
+                                        </platform-specific>
+                                    </decorator-section>
+                                </decorator-screen>  -->
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://delys/webapp/delys/accounting/listArInvoicesJQ.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="NewSalesInvoice">
+        <section>
+            <actions>
+                <set field="titleProperty" value="AccountingCreateNewSalesInvoice"/>
+                <set field="selectedMenuItem" value="accReceivable"/>
+                <set field="selectedSubMenuItem" value="accArCreateInvoice"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="component://delys/widget/accounting/ar/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.AccountingCreateNewSalesInvoice}">
+<!--                                     <include-form name="NewSalesInvoice" location="component://delys/widget/accounting/ar/AccArInvoiceForms.xml"/> -->
+                                	<platform-specific>
+	                                	<html>
+	                                		<html-template location="component://delys/webapp/delys/accounting/formNewSalesInvoice.ftl"/>
+	                                	</html>
+	                                </platform-specific>
+                                </screenlet>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="CommissionRun">
+        <section>
+            <actions>
+                <set field="selectedSubMenuItem" value="accArCommissionRun"/>
+
+                <set field="titleProperty" value="AccountingFindSalesInvoicesForCommissionRun"/>
+
+                <set field="salesRepPartyList" type="List" from-field="parameters.partyIds"/>
+                <script location="component://accounting/webapp/ap/WEB-INF/actions/invoices/CommissionRun.groovy"/>
+
+                <!-- asmslect parameters, must be prefixed by asm_ for setMultipleSelectJs.ftl -->
+                <set field="asm_multipleSelectForm"  value="CommissionRun"/>
+                <set field="asm_multipleSelect"  value="CommissionRun_partyId"/>
+                <set field="asm_formSize" value="700"/>
+                <set field="asm_listItemPercentOfForm" value="95"/>
+                <set field="asm_sortable" value="false"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="asm_title" value="${uiLabelMap.AccountingSelectPartiesForCommissionInvoice}"/>
+				<entity-condition list="listPartyRoleAndPartyDetail" entity-name="PartyRoleAndPartyDetail">
+                	<condition-expr field-name="roleTypeId" value="SALES_REP"/>
+                </entity-condition>
+                <entity-condition list="listStatusItem" entity-name="StatusItem">
+                </entity-condition>                
+            </actions>
+            <widgets>
+            <decorator-screen name="main-decorator" location="component://delys/widget/accounting/ar/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <platform-specific><html><html-template location="component://common/webcommon/includes/setMultipleSelectJs.ftl"/></html></platform-specific>
+                        <section>
+                            <widgets>
+<!--                                 <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml"> -->
+<!--                                     <decorator-section name="search-options"> -->
+<!--                                         <include-form name="CommissionRun" location="component://delys/widget/accounting/ar/forms/InvoiceForms.xml"/> -->
+<!--                                     </decorator-section> -->
+<!--                                     <decorator-section name="search-results"> -->
+<!--                                         <platform-specific> -->
+<!--                                             <html><html-template location="component://accounting/webapp/ap/invoices/CommissionRun.ftl"/></html> -->
+<!--                                         </platform-specific> -->
+<!--                                     </decorator-section> -->
+<!--                                 </decorator-screen> -->
+                                <platform-specific> 
+                                     <html>                                 	 
+                                         <html-template location="component://delys/webapp/delys/accounting/listArCommissionRun.ftl"/> 
+                                     </html> 
+                               	</platform-specific> 
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="CommissionReport">
+        <section>
+            <actions>
+            	<set field="navMenuName" value="SearchCommissionTabBar"/>
+				<set field="navMenuLocation" value="component://accounting/widget/ap/ApMenus.xml"/>
+                <set field="titleProperty" value="AccountingCommissionReport"/>
+                <set field="tabButtonItem" value="commissionReport"/>
+                <script location="component://accounting/webapp/ap/WEB-INF/actions/invoices/CommissionReport.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonApReportDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                                    <decorator-section name="search-options">
+                                        <include-form name="CommissionReport" location="component://accounting/widget/ar/forms/InvoiceForms.xml"/>
+                                    </decorator-section>
+                                    <decorator-section name="search-results">
+                                        <platform-specific>
+                                            <html><html-template location="component://accounting/webapp/ap/invoices/CommissionReport.ftl"/></html>
+                                        </platform-specific>
+                                    </decorator-section>
+                                </decorator-screen>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>    
+</screens>

@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
+	<form name="EditWorkOvertimeRegis" type="single" odd-row-style="header-row"
+		 default-table-style="basic-table" target="createWorkOvertimeRegis">
+		<field name="partyId"><hidden/></field>
+		<field name="statusId">
+			<hidden value="WOTR_CREATED"/>
+		</field>
+		<field name="dateRegistration" title="${uiLabelMap.HREmplOvertimeDateRegis}" title-style="asterisk" required-field="true">
+			<date-time type="date" default-value="${nowTimestamp}"/>
+		</field>
+		<field name="overTimeFromDate" title="${uiLabelMap.HREmplOverTimeFromDate}" title-style="asterisk" required-field="true">
+			<date-time type="time" input-method="time-dropdown" clock="12" default-value="${nowTimestamp}"/>
+		</field>
+		<field name="overTimeThruDate" title="${uiLabelMap.HREmplOverTimeThruDate}" title-style="asterisk" required-field="true">
+			<date-time type="time" input-method="time-dropdown" clock="12" default-value="${nowTimestamp}"/>
+		</field>
+		<field name="reasonRegister" title="${uiLabelMap.HREmplReasonRegisOvertime}">
+			<textarea rows="3" cols="80"  default-value=" "/>
+		</field>
+		<field name="registerButton" title="${uiLabelMap.HREmplRegisterWorkOvertime}"
+			widget-style="btn btn-small btn-success">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>	
+	</form>
+	<form name="WorkOvertimeRegisApproval" type="single" odd-row-style="header-row"
+		 default-table-style="basic-table" target="updateWorkOvertimeApproval">
+		<actions>
+			<entity-one entity-name="WorkOvertimeRegistration"></entity-one>
+			<!-- need check -->
+			<set field="emplId" from-field="parameters.partyId"/>
+			
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrPositionEmpl.groovy"/>
+		 	<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrDeptEmpl.groovy"/>			
+		</actions>
+		<field name="workOvertimeRegisId">
+			<hidden/>
+		</field>	
+		<field name="partyId" title="${uiLabelMap.EmployeeName}">
+			<display-entity entity-name="Person" description="${lastName} ${firstName}"></display-entity>
+		</field>
+		<field name="currPositionsStr" title="${uiLabelMap.HREmplFromPositionType}">
+			<display description="${currPositionsStr}"></display>
+		</field>
+		<field name="currDept" title="${uiLabelMap.EmployeeCurrentDept}">
+			<display description="${currDept}"></display>
+		</field>
+		<field name="dateRegistration" title="${uiLabelMap.HREmplOvertimeDateRegis}">
+			<display type="date"></display>
+		</field>
+		<field name="overTimeFromDate" title="${uiLabelMap.HREmplOverTimeFromDate}">
+			<display type="date-time"></display>
+		</field>	
+		<field name="overTimeThruDate" title="${uiLabelMap.HREmplOverTimeThruDate}">
+			<display type="date-time"></display>
+		</field>
+		<field name="statusId" title="${uiLabelMap.EmplProposalCheck}" use-when="${groovy: statusId == 'WOTR_CREATED'}">
+			<drop-down current="selected">
+				<entity-options description="${statusCode}" entity-name="StatusItem">
+					<entity-constraint name="statusId" operator="not-equals" value="WOTR_CREATED"/>
+					<entity-constraint name="statusTypeId" operator="equals" value="WOT_REGISTER"/>
+					<entity-order-by field-name="sequenceId"/>
+				</entity-options>
+			</drop-down>
+		</field>	
+		<field name="statusId" title="${uiLabelMap.EmplProposalCheck}" use-when="${groovy: statusId != 'WOTR_CREATED'}">
+			<display-entity entity-name="StatusItem" also-hidden="false" description="${description}"></display-entity>
+		</field>
+		<field name="reasonRegister" title="${uiLabelMap.HREmplReasonRegisOvertime}">
+			<display></display>
+		</field>
+		<field name="reasonApproval" title="${uiLabelMap.HREmplReasonAcceptReject}" use-when="${groovy: statusId == 'WOTR_CREATED'}">
+			<textarea rows="3" cols="80"/>
+		</field>
+		<field name="reasonApproval" title="${uiLabelMap.HREmplReasonAcceptReject}" use-when="${groovy: statusId != 'WOTR_CREATED'}">
+			<display></display>
+		</field>		
+		<field name="ntfToHeadOfHR" title="${uiLabelMap.NotifyToHeadOfHr}" use-when="${groovy: statusId == 'WOTR_CREATED'}">
+			<check></check>
+		</field>
+		<field name="approvalButton" title="${uiLabelMap.HREmplApproval}"
+			widget-style="btn btn-small btn-success" use-when="${groovy: statusId == 'WOTR_CREATED'}">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>		 
+	</form>
+	<form name="EditEmplWorkingLate" type="single" odd-row-style="header-row"
+		 default-table-style="basic-table" target="createEmplWorkingLate">
+		<actions>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getOrgEmplManage.groovy"/>
+		</actions>
+		<field name="orgId">
+			<hidden/>
+		</field>
+		<field name="partyId" title="${uiLabelMap.EmployeeId}" title-style="asterisk" required-field="true">
+			<lookup target-form-name="LookupEmplInOrg" target-parameter="orgId"></lookup>
+		</field>	 
+		<field name="dateWorkingLate" title="${uiLabelMap.HRDateWorkingLate}" title-style="asterisk" required-field="true">
+			<date-time/>
+		</field>
+		<field name="delayTime" title="${uiLabelMap.HRDelayTime} (${uiLabelMap.HRMinute})" title-style="asterisk" required-field="true">
+			<text size="15"></text>
+		</field>
+		<field name="reason" title="${uiLabelMap.HRReasonLate}">
+			<textarea/>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonSubmit}"
+			widget-style="btn btn-small btn-success">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+	<form name="SearchEmplWorkingLate" type="single" odd-row-style="header-row"
+		 default-table-style="basic-table" target="MgrWorkingLate">
+		<field name="partyId" title="${uiLabelMap.EmployeeId}">
+		 	<lookup target-form-name="LookupEmployeeNew"></lookup>	
+		 </field>		 
+		 <field name="searchButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-small btn-success">
+			<submit button-type="button" image-location="icon-search" />
+		</field>		 
+	</form>
+	
+	<form name="SearchEmplWorkingLateDetails" type="single" odd-row-style="header-row"
+		 default-table-style="basic-table" target="MgrWorkingLate">
+		<field name="fromDate" title="${uiLabelMap.CommonFromDate}">
+		 	<date-find/>	
+		 </field>
+		 <field name="thruDate" title="${uiLabelMap.CommonThruDate}">
+		 	<date-find/>	
+		 </field>		 		 
+		 <field name="partyId">
+		 	<hidden value="${parameters.partyId}"/>
+		 </field>
+		 <field name="searchButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-small btn-success">
+			<submit button-type="button" image-location="icon-search" />
+		</field>		 
+	</form>
+	
+	<form name="MgrWorkingLate" type="list" odd-row-style="alternate-row" header-row-style="header-row-2"
+		paginate-target="MgrWorkingLate" list-name="listIt"
+		default-table-style="table table-striped table-hover table-bordered dataTable">
+		<actions>
+			<set field="fieldList" value="partyId" type="List"/>
+			<service service-name="performFind" result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="parameters" />
+				<field-map field-name="entityName" value="EmplWorkingLateSummary" />
+				<field-map field-name="noConditionFind" value="Y"/>
+				<field-map field-name="orderBy" value="partyId"/>
+				<field-map field-name="fieldList" from-field="fieldList"/>
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+			</service>
+		</actions>		
+		<row-actions>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getTimesWorkingLate.groovy"/>
+		</row-actions>
+		<field name="partyId" title="${uiLabelMap.EmployeeName}">
+			<display-entity entity-name="Person" description="${lastName} ${middleName} ${firstName}">
+				<sub-hyperlink target="EmployeeProfile" description="${partyId}">
+					<parameter param-name="partyId"/>
+				</sub-hyperlink>
+			</display-entity>
+		</field>	
+		<field name="workingLateTimesReason" title="${uiLabelMap.HREmplWorkingLateReason}">
+			<display default-value="0"></display>
+		</field>
+		<field name="workingLateTimesNoReason" title="${uiLabelMap.HREmplWorkingLateNoReason}">
+			<display default-value="0"></display>
+		</field>
+		<field name="_link" title=" ">
+			<hyperlink target="WorkingLateEmplDetails" description="${uiLabelMap.HREmplWorkingLateDetails}">
+				<parameter param-name="partyId"/>
+			</hyperlink>
+		</field>
+	</form>
+	
+	<form name="WorkingLateEmplDetails" type="list" list-name="listIt" odd-row-style="alternate-row" header-row-style="header-row-2"
+		paginate-target="WorkingLateEmplDetails" 
+		default-table-style="table table-striped table-hover table-bordered dataTable">
+		<actions>
+			<service service-name="performFind" result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="parameters" />
+				<field-map field-name="entityName" value="EmplWorkingLate" />
+				<field-map field-name="noConditionFind" value="Y"/>
+				<field-map field-name="orderBy" value="partyId"/>
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+			</service>
+		</actions>
+		<field name="emplWorkingLateId"><hidden/> </field>
+		<field name="partyId" title="${uiLabelMap.EmployeeName}">
+			<display-entity entity-name="Person" description="${lastName} ${firstName}" >
+				<sub-hyperlink target="EmployeeProfile" description="[${partyId}]">
+					<parameter param-name="partyId"/>
+				</sub-hyperlink>
+			</display-entity>
+		</field>
+		<field name="dateWorkingLate" title="${uiLabelMap.HRDateWorkingLate}">
+			<display type="date"></display>
+		</field>
+		<field name="delayTime" title="${uiLabelMap.HRDelayTime} (${uiLabelMap.HRMinute})">
+			<display></display>
+		</field>
+		<field name="reason" title="${uiLabelMap.HRReasonLate}">
+			<display default-value="${uiLabelMap.HRDateWorkingLateNoReason"></display>
+		</field>
+	</form>	      
+	<form name="EmplWorkLateINDLHistory" type="list" list-name="listIt" odd-row-style="alternate-row" header-row-style="header-row-2"
+		paginate-target="EmplWorkLateINDLHistory" 
+		default-table-style="table table-striped table-hover table-bordered dataTable">
+		<actions>
+			<service service-name="performFind" result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="parameters" />
+				<field-map field-name="entityName" value="EmplWorkingLate" />
+				<field-map field-name="noConditionFind" value="Y"/>
+				<field-map field-name="orderBy" value="-dateWorkingLate"/>
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+			</service>
+		</actions>
+		<field name="emplWorkingLateId">
+			<hidden/>
+		</field>
+		<field name="partyId" title="${uiLabelMap.EmployeeName}">
+			<display-entity entity-name="Person" description="${lastName} ${firstName}"></display-entity>
+		</field>
+		<field name="reason" title="${uiLabelMap.HRReasonLate}">
+			<display></display>
+		</field>
+		<field name="dateWorkingLate" title="${uiLabelMap.HRDateWorkingLate}">
+			<display type="date"></display>
+		</field>
+		<field name="delayTime" title="${uiLabelMap.HRDelayTime} (${uiLabelMap.HRMinute})">
+			<display></display>
+		</field>
+	</form>  
+	<form name="EmplWorkOvertimeINDLHistory" type="list" list-name="listIt" odd-row-style="alternate-row" header-row-style="header-row-2"
+		paginate-target="EmplWorkOvertimeINDLHistory" 
+		default-table-style="table table-striped table-hover table-bordered dataTable">
+		<actions>
+			<service service-name="performFind" result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="parameters" />
+				<field-map field-name="entityName" value="WorkOvertimeRegistration" />
+				<field-map field-name="noConditionFind" value="Y"/>
+				<field-map field-name="orderBy" value="-dateRegistration"/>
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+			</service>
+		</actions>
+		<field name="partyId" title="${uiLabelMap.EmployeeName}">
+			<display-entity entity-name="Person" description="${lastName} ${firstName}"></display-entity>
+		</field>
+		<field name="statusId" title="${uiLabelMap.EmplProposalCheck}">
+			<display-entity entity-name="StatusItem" description="${description}"></display-entity>
+		</field>
+		<field name="dateRegistration" title="${uiLabelMap.HRWorkOvertimeDateRegis}">
+			<display type="date"></display>
+		</field>
+		<field name="overTimeFromDate" title="${uiLabelMap.HREmplOverTimeFromDate}">
+			<display type="date-time"></display>
+		</field>
+		<field name="overTimeThruDate" title="${uiLabelMap.HREmplOverTimeThruDate}">
+			<display type="date-time"></display>
+		</field>
+		<field name="reasonRegister" title="${uiLabelMap.HREmplReasonRegisOvertime}">
+			<display></display>
+		</field>
+		<field name="reasonApproval" title="${uiLabelMap.HREmplReasonAcceptReject}">
+			<display></display>
+		</field>
+	</form>
+	<form name="SearchEmplWorkOvertime" type="single"  odd-row-style="header-row"
+		 default-table-style="basic-table" target="FindEmplWorkOvertime">
+		 <field name="partyId" title="${uiLabelMap.EmployeeName}">
+		 	<text-find></text-find>
+		 </field>
+		 <field name="statusId" title="${uiLabelMap.EmplProposalCheck}">
+		 	<text-find></text-find>
+		 </field>
+		 <field name="dateRegistration" title="${uiLabelMap.HRWorkOvertimeDateRegis}">
+		 	<date-find type="date"/>
+		 </field>
+		 <field name="overTimeFromDate" title="${uiLabelMap.HREmplOverTimeFromDate}">
+		 	<date-find type="time"/>
+		 </field>
+		 <field name="overTimeThruDate" title="${uiLabelMap.HREmplOverTimeThruDate}">
+		 	<date-find type="time"/>
+		 </field>
+		 <field name="submitButton" title="${uiLabelMap.CommonSubmit}"
+			widget-style="btn btn-small btn-success">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	 </form>
+	 <form name="ListEmplWorkOvertime" type="list" list-name="listIt" odd-row-style="alternate-row" header-row-style="header-row-2"
+		paginate-target="FindEmplWorkOvertime" 
+		default-table-style="table table-striped table-hover table-bordered dataTable">
+		<actions>
+			<service service-name="performFind" result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="parameters" />
+				<field-map field-name="entityName" value="WorkOvertimeRegistration" />
+				<field-map field-name="noConditionFind" value="Y"/>
+				<field-map field-name="orderBy" value="-dateRegistration"/>
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+			</service>
+		</actions>
+		<field name="partyId" title="${uiLabelMap.EmployeeName}">
+			<display-entity entity-name="Person" description="${lastName} ${firstName}"></display-entity>
+		</field>
+		<field name="dateRegistration" title="${uiLabelMap.HRWorkOvertimeDateRegis}">
+			<display type="date"></display>
+		</field>
+		<field name="statusId" title="${uiLabelMap.EmplProposalCheck}">
+			<display-entity entity-name="StatusItem" description="${description}"></display-entity>
+		</field>
+		<field name="dateRegistration" title="${uiLabelMap.HREmplOvertimeDateRegis}">
+			<display type="date"></display>
+		</field>
+		<field name="overTimeFromDate" title="${uiLabelMap.HREmplOverTimeFromDate}">
+			<display type="date-time"></display>
+		</field>
+		<field name="overTimeThruDate" title="${uiLabelMap.HREmplOverTimeThruDate}">
+			<display type="date-time"></display>
+		</field>
+		<field name="reasonRegister" title="${uiLabelMap.HREmplReasonRegisOvertime}">
+			<display></display>
+		</field>
+		<field name="reasonApproval" title="${uiLabelMap.HREmplReasonAcceptReject}">
+			<display></display>
+		</field>	
+	</form>
+</forms>        

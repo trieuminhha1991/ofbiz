@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+       xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
+	<form name="CreateJobTransferProposal" type="single" target="CreateIntOrgTransferProposal"  
+		header-row-style="header-row" default-table-style="basic-table">		
+		<actions>	
+			<set field="jobTransferProposalTypeId" from-field="parameters.jobTransferProposalTypeId"/>
+			<set field="proposerId" from-field="parameters.proposerId"/>
+			<!-- need check -->
+			<set field="emplId" from-field="partyId"/>
+			
+			<entity-one entity-name="Person" auto-field-map="false" >
+				<field-map field-name="partyId" from-field="proposerId"/>
+			</entity-one>					
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/party/getAllDepartment.groovy"/>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrPositionEmpl.groovy"/>
+		</actions>
+		<!-- <alt-target use-when="${jobTransferProposalTypeId=='TRANSFER_POSITION'}" target="createTransPositionProposal"/> -->				
+		<!-- <field name="statusId"><hidden value="JTP_CREATED"/> </field> -->
+		<field name="partyIdTransfer"><hidden value="${partyId}"/></field>
+		<field name="proposerId" use-when="proposerId != null" title="${uiLabelMap.HREmplProposer}">
+			<display description="${lastName} ${middleName} ${firstName}"></display>
+		</field>
+		<field name="jobTransferProposalTypeId" title="${uiLabelMap.EmplProposalType}">
+			<hidden/>
+		</field>
+		<field name="internalOrgUnitToId" title="${uiLabelMap.HREmplDepartmentTo}" use-when="${jobTransferProposalTypeId=='TRANSFER_DEPT'}"
+			 title-style="asterisk" required-field="true">
+			<drop-down>				
+				<list-options key-name="temp.partyId" list-name="directChildDepartment" description="${groovy: org.ofbiz.party.party.PartyHelper.getPartyName(delegator, temp.partyId, false)} [${temp.partyId}]" list-entry-name="temp"/>
+			</drop-down>
+		</field>
+		<field name="emplPositionTypeToId" title-style="asterisk" title="${uiLabelMap.HREmployeePositionTo}" required-field="true">
+			<drop-down>
+				<entity-options description="${description}" entity-name="EmplPositionType" key-field-name="emplPositionTypeId"></entity-options>
+			</drop-down>
+		</field>
+		<field name="emplPositionTypeFromId" title-style="asterisk" required-field="true" 
+			title="${uiLabelMap.HREmplFromPositionType}" use-when="${jobTransferProposalTypeId=='TRANSFER_DEPT' || jobTransferProposalTypeId=='TRANSFER_POSITION'}">
+			<drop-down>
+				<list-options key-name="tempEmplPosAndFF.emplPositionTypeId" list-name="currPositionTypeIds" 
+					description="${groovy: tempEmplPosAndFF.getRelatedOne(&quot;EmplPositionType&quot;, false).get(&quot;description&quot;)} [${tempEmplPosAndFF.emplPositionTypeId}]" 
+					list-entry-name="tempEmplPosAndFF"/>
+			</drop-down>
+		</field>
+		<field name="dateLeave" title="${uiLabelMap.HREmplDateLeave}">
+			<date-time type="date"/>
+		</field>
+		<field name="dateMoveTo" title-style="asterisk" title="${uiLabelMap.HREmplDateMoveTo}" required-field="true">
+			<date-time type="date"/>
+		</field>
+
+		<field name="reason" title="${uiLabelMap.EmployeeTransferReason}">
+			<text></text>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonCreate}" widget-style="btn btn-small btn-primary">
+			<submit image-location="icon-ok" button-type="button"/>
+		</field>			
+	</form>  
+	<form name="ApprovalJobTransferProposal" type="single" target="updateTransferDeptProposal" default-map-name="jobTransferProposal"
+		header-row-style="header-row" default-table-style="basic-table">
+		<actions>
+			<set field="proposerId" from-field="jobTransferProposal.proposerId"/>
+			<entity-one entity-name="Person" auto-field-map="false">
+				<field-map field-name="partyId" from-field="proposerId"/>
+			</entity-one>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getJobTransferProposal.groovy"/>
+		</actions>
+		<alt-target use-when="${jobTransferProposal.jobTransferProposalTypeId=='TRANSFER_POSITION'}" target="updateTransPositionProposal"/>							
+		<field name="jobTransferProposalId"><hidden/></field>
+		<field name="ntfId"><hidden value="${parameters.ntfId}"/> </field>
+		<field name="employeeName" title="${uiLabelMap.EmployeeName}">
+			<display description="${employeeName}"></display>
+		</field>
+		<field name="proposerId" use-when="proposerId != null" title="${uiLabelMap.HREmplProposer}">
+			<display description="${lastName} ${middleName} ${firstName}"></display>
+		</field>
+		<field name="jobTransferProposalTypeId" title="${uiLabelMap.HRTransferTypeId}">
+			<display-entity entity-name="JobTransferProposalType" description="${description}"></display-entity>
+		</field>
+		<field name="currDept" title="${uiLabelMap.EmployeeCurrentDept}">
+			<display description="${currDept}"></display>
+		</field>
+		<field name="emplPositionTypeFromId" title="${uiLabelMap.HREmplFromPositionType}">
+			<display-entity entity-name="EmplPositionType" description="${description}" key-field-name="emplPositionTypeId"></display-entity>
+		</field>
+		<field name="toDept" title="${uiLabelMap.HREmplDepartmentTo}" use-when="${jobTransferProposal.jobTransferProposalTypeId=='TRANSFER_DEPT'}">
+			<display description="${toDept}"></display>
+		</field>
+		
+		<field name="dateLeave" title="${uiLabelMap.HREmplDateLeave}" >
+			<display type="date"></display>
+		</field>
+		<field name="dateMoveTo" title="${uiLabelMap.HREmplDateMoveTo}">
+			<display type="date"></display>
+		</field>
+		<field name="emplPositionTypeToId" title="${uiLabelMap.HREmployeePositionTo}" 
+			use-when="${jobTransferProposal.jobTransferProposalTypeId=='TRANSFER_POSITION'}">
+			<display-entity entity-name="EmplPositionType" description="${description}" key-field-name="emplPositionTypeId"></display-entity>
+		</field>
+		<field name="reason" title="${uiLabelMap.EmployeeTransferReason}">
+			<display></display>
+		</field>
+		<field name="currStatusId" title="${uiLabelMap.HREmplApprovalCurrStatus}" map-name="context">
+			<display-entity entity-name="StatusItem" description="${description}" key-field-name="statusId"></display-entity>
+		</field>
+		<field name="actualThruDate" title="${uiLabelMap.EmplTrialTimeTo}" use-when="${jobTransferProposal.jobTransferProposalTypeId=='TRANSFER_POSITION'}">
+			<date-time/>
+		</field>
+		<field name="statusId" use-when="${statusEdit}" title="${uiLabelMap.EmplProposalCheck}" >
+			<drop-down current="selected">
+				<list-options key-name="statusId" list-name="statusList" description="${statusCode}"/>
+			</drop-down>
+		</field>		
+		<field name="notes" title="${uiLabelMap.HRApprovalNote}">
+			<textarea rows="2"/>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.HREmplApproval}" widget-style="btn btn-small btn-primary" use-when="${statusEdit}">
+			<submit image-location="icon-ok" button-type="button"/>
+		</field>
+	</form> 
+	
+	<!-- ViewApprovalProposal form may be deleted  -->
+	<form name="ViewApprovalProposal" type="single" header-row-style="header-row" default-table-style="basic-table" default-map-name="jobTransferProposal">
+		<actions>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/viewJobTransProposal.groovy"/>			
+			<set field="jobTransferProposalTypeId" from-field="jobTransferProposal.jobTransferProposalTypeId"/>
+		</actions>
+		<field name="jobTransferProposalId"><hidden/> </field>
+		<field name="partyIdTransfer" title="${uiLabelMap.EmployeeName}">
+			<display-entity entity-name="Person" description="${lastName} ${firstName}" key-field-name="partyId"></display-entity>
+		</field>
+		<field name="internalOrgUnitToId" title="${uiLabelMap.HREmplDepartmentTo}" use-when="${jobTransferProposalTypeId=='TRANSFER_DEPT'}">
+			<display></display>
+		</field>
+		<field name="dateLeave" title="${uiLabelMap.HREmplDateLeave}">
+			<display type="date"></display>
+		</field>
+		<field name="dateMoveTo" title="${uiLabelMap.HREmplDateMoveTo}">
+			<display type="date"></display>
+		</field>
+		<field name="emplPositionTypeFromId"  title="${uiLabelMap.HREmplFromPositionType}">
+			<display-entity entity-name="EmplPositionType" description="${description}" key-field-name="emplPositionTypeFromId"></display-entity>
+		</field>
+		<field name="emplPositionTypeToId" use-when="${jobTransferProposalTypeId=='TRANSFER_POSITION'}" title="${uiLabelMap.HREmployeePositionTo}">
+			<display-entity entity-name="EmplPositionType" description="${description}" key-field-name="emplPositionTypeId"></display-entity>
+		</field>
+		<field name="actualThruDate" title="${uiLabelMap.EmplTrialTimeTo}" use-when="${jobTransferProposalTypeId=='TRANSFER_POSITION' &amp;&amp; actualThruDate!=null}">
+			<display type="date-time"></display>
+		</field>
+		<field name="reason" title="${uiLabelMap.EmployeeTransferReason}">
+			<display></display>
+		</field>
+		<field name="notes" title="${uiLabelMap.HRApprovalNote}">
+			<display></display>
+		</field>
+		<field name="statusId" title="${uiLabelMap.EmplProposalCheck}">
+			<display-entity entity-name="StatusItem" description="${description}"></display-entity>
+		</field>
+	</form>   
+	<form name="FindProposalHistory" type="single" target="EmplTransJobProposalHistory"
+		odd-row-style="header-row" default-table-style="basic-table">
+		<field name="partyIdTransfer">
+			<hidden/>
+		</field>	
+		<field name="jobTransferProposalTypeId" title="${uiLabelMap.HREmplJobTransferProposalType}">
+			<drop-down allow-empty="false">
+				<option key="" description="-${uiLabelMap.CommonAny}-"></option>
+				<entity-options description="${description}" entity-name="JobTransferProposalType"></entity-options>
+			</drop-down>
+		</field>
+		<field name="searchButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-small btn-success">
+			<submit button-type="button" image-location="icon-search" />
+		</field>
+	</form> 	
+	<form name="ListProposalHistory" type="list" list-name="listIt" odd-row-style="alternate-row" header-row-style="header-row-2"
+		paginate-target="EmplTransJobProposalHistory"
+		default-table-style="table table-striped table-hover table-bordered dataTable">
+		<actions>
+			<set field="entityName" value="JobTransferProposal"/>
+			<service service-name="performFind" result-map="result" result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="parameters" />
+				<field-map field-name="entityName" from-field="entityName" />
+				<field-map field-name="noConditionFind" value="Y"/>
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+			</service>	
+		</actions>	
+		<field name="jobTransferProposalTypeId" title="${uiLabelMap.HREmplJobTransferProposalType}">
+			<display-entity entity-name="JobTransferProposalType" description="${description}"></display-entity>
+		</field>
+		<field name="statusId" title="${uiLabelMap.EmplProposalCheck}">
+			<display-entity entity-name="StatusItem" description="${description}"></display-entity>
+		</field>
+		<field name="emplPositionTypeFromId" title="${uiLabelMap.HREmplFromPositionType}">
+			<display-entity entity-name="EmplPositionType" description="${description}" key-field-name="emplPositionTypeId"></display-entity>
+		</field>
+		<field name="dateLeave" title="${uiLabelMap.HREmplDateLeave}">
+			<display type="date"></display>
+		</field>
+		<field name="reason" title="${uiLabelMap.EmployeeTransferReason}">
+			<display></display>
+		</field>
+		<field name="notes" title="${uiLabelMap.HRApprovalNote}">
+			<display></display>
+		</field>
+	</form>
+	
+	<form name="CreateJobTransferByMgrProposal" type="single" target="CreateIntOrgTransferProposal"  
+		header-row-style="header-row" default-table-style="basic-table">
+		<actions>	
+			<!-- <set field="jobTransferProposalTypeId" from-field="parameters.jobTransferProposalTypeId"/> -->
+			<set field="proposerId" from-field="userLogin.partyId"/>
+			<entity-one entity-name="Person" auto-field-map="false" >
+				<field-map field-name="partyId" from-field="proposerId"/>
+			</entity-one>					
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/party/getAllDepartment.groovy"/>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getListEmplOfMgr.groovy"/>
+		</actions>
+		<!-- <alt-target use-when="${jobTransferProposalTypeId=='TRANSFER_POSITION'}" target="createTransPositionProposal"/> -->				
+		<field name="statusId"><hidden value="JTP_CREATED"/> </field>
+		<field name="partyIdTransfer" title="${uiLabelMap.EmployeeName}" widget-style="chzn-select" >
+			<drop-down>
+				<option key=""/>
+				<list-options key-name="partyId" list-name="emplList" description="${lastName} ${firstName}"/>
+			</drop-down>
+		</field>
+		<field name="proposerId" use-when="proposerId != null" title="${uiLabelMap.HREmplProposer}">
+			<display description="${lastName} ${middleName} ${firstName}"></display>
+		</field>
+		<field name="jobTransferProposalTypeId" title="${uiLabelMap.EmplProposalType}">
+			<hidden/>
+		</field>
+		
+		<field name="emplPositionTypeFromId" title-style="asterisk" required-field="true"
+			title="${uiLabelMap.HREmplFromPositionType}" use-when="${jobTransferProposalTypeId=='TRANSFER_DEPT' || jobTransferProposalTypeId=='TRANSFER_POSITION'}">
+			<drop-down>
+				<list-options key-name="emplPositionTypeId" list-name="currPositionTypeIds" description="${description}"/>
+			</drop-down>
+		</field>
+		<field name="dateLeave" title="${uiLabelMap.HREmplDateLeave}">
+			<date-time/>
+		</field>
+		<field name="dateMoveTo" title-style="asterisk" title="${uiLabelMap.HREmplDateMoveTo}" required-field="true">
+			<date-time/>
+		</field>
+		<field name="internalOrgUnitToId" title="${uiLabelMap.HREmplDepartmentTo}" use-when="${jobTransferProposalTypeId=='TRANSFER_DEPT'}"
+			 title-style="asterisk">
+			<drop-down>				
+				<list-options key-name="temp.partyId" list-name="listDepartment" description="${groovy: org.ofbiz.party.party.PartyHelper.getPartyName(delegator, temp.partyId, false)} [${temp.partyId}]" list-entry-name="temp"/>
+			</drop-down>
+		</field>
+		<field name="emplPositionTypeToId" title-style="asterisk" title="${uiLabelMap.HREmployeePositionTo}" required-field="true">
+			<drop-down>
+				<entity-options description="${description}" entity-name="EmplPositionType" key-field-name="emplPositionTypeId"></entity-options>
+			</drop-down>
+		</field>
+		<field name="reason" title="${uiLabelMap.EmployeeTransferReason}">
+			<text></text>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonCreate}" widget-style="btn btn-small btn-primary">
+			<submit image-location="icon-ok" button-type="button"/>
+		</field>		
+	</form>
+</forms>

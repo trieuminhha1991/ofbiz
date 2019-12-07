@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <menus xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-menu.xsd">
+ 
+ 	<menu name="AccTransTabBar" modelMenu="olbiustab" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="accCreateAccTrans" title="${uiLabelMap.AccCreateAccTrans}">
+            <link target="accCreateAccTrans">
+            	<parameter param-name="organizationPartyId" value="company"/>
+            </link>
+        </menu-item>
+        <menu-item name="accQuickCreateAccTrans" title="${uiLabelMap.AccQuickCreateAccTrans}">
+            <link target="accQuickCreateAccTrans">
+            	<parameter param-name="organizationPartyId" value="company"/>
+            </link>
+        </menu-item>
+        <menu-item name="accListUnpostAccTrans" title="${uiLabelMap.AccListUnpostAccTrans}">
+            <link target="accListUnpostAccTrans">
+            	<parameter param-name="organizationPartyId" value="company"/>
+            </link>
+        </menu-item>
+    </menu>
+    
+    <menu name="AccEditTransTabBar" modelMenu="olbiustab" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="EditAccountingTransaction" title="${uiLabelMap.AccountingEditAccountingTransaction}">
+            <link target="EditAccountingTransaction">
+                <parameter param-name="acctgTransId" from-field="acctgTransId"/>
+                <parameter param-name="organizationPartyId" value="company"/>
+            </link>
+        </menu-item>
+        <menu-item name="DuplicateAccountingTransaction" title="${uiLabelMap.AccountingDuplicateAccountingTransaction}">
+            <link target="copyAcctgTransAndEntries">
+            	<parameter param-name="revert" value="N"/>
+                <parameter param-name="fromAcctgTransId" from-field="acctgTransId"/>
+                <parameter param-name="organizationPartyId" value="company"/>
+            </link>
+        </menu-item>
+        <menu-item name="RevertAccountingTransaction" title="${uiLabelMap.AccountingRevertAccountingTransaction}">
+            <link target="copyAcctgTransAndEntries">
+                <parameter param-name="revert" value="Y"/>
+                <parameter param-name="fromAcctgTransId" from-field="acctgTransId"/>
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="acctgTransDetailReportPdf" title="${uiLabelMap.CommonPdf}">
+            <link target="acctgTransDetailReportPdf.pdf" target-window="_BLANK">
+                <parameter param-name="acctgTransId"/>
+            </link>
+        </menu-item>
+        <menu-item name="Advance" title="${uiLabelMap.Advance}" widget-style="dropdown">
+        	<sub-menu location="component://delys/widget/accounting/accounting/AccAccountingMenus.xml" name="noneMenu" />
+        </menu-item>
+    </menu>
+    
+    <menu name="noneMenu" modelMenu="olbiusSubMenu" extends="CommonTabBarMenu"
+		extends-resource="component://common/widget/CommonMenus.xml" style="dropdown-menu dropdown-info none-menu">
+	</menu>
+	
+    <menu name="AccEditTransTabBarAdvance" modelMenu="olbiusSubMenu" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml" style="dropdown-menu dropdown-info submenu-tabbar-custom">
+		<menu-item name="PostTransaction" title="${uiLabelMap.AccountingPostTransaction}">
+            <condition>
+                <if-compare field="acctgTrans.isPosted" operator="equals" value="N"/>
+            </condition>
+            <link target="postAcctgTrans">
+                <parameter param-name="acctgTransId"/>
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        
+        <menu-item name="VerifyTransaction" title="${uiLabelMap.AccountingVerifyTransaction}">
+            <condition>
+                <if-compare field="acctgTrans.isPosted" operator="equals" value="N"/>
+            </condition>
+            <link target="postAcctgTrans" >
+                <parameter param-name="acctgTransId"/>
+                <parameter param-name="organizationPartyId"/>
+                <parameter param-name="verifyOnly" value="Y"/>
+            </link>
+        </menu-item>
+        
+        <menu-item name="CompleteAcctgTransFields" title="${uiLabelMap.AccountingCompleteAcctgTransFields}">
+            <condition>
+                <if-compare field="acctgTrans.isPosted" operator="equals" value="N"/>
+            </condition>
+            <link target="completeAcctgTransEntries">
+                <parameter param-name="acctgTransId"/>
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        
+       <menu-item name="EditAccTransEntries" title="${uiLabelMap.AccountingEditAccTransEntries}">
+            <condition>
+                <if-compare field="acctgTrans.isPosted" operator="equals" value="N"/>
+            </condition>            
+            <link target="EditAccTransEntries">
+                <parameter param-name="acctgTransId" from-field="acctgTransId"/>
+                <parameter param-name="organizationPartyId" value="company"/>
+            </link>
+        </menu-item>
+	</menu>
+	
+	<menu name="AccReconTabBar" modelMenu="olbiustab" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+		<menu-item name="AccountReconciliation" title="${uiLabelMap.AccountingAcctRecon}">
+            <link target="findGlAccountReconciliation">
+                <parameter param-name="organizationPartyId" value="company"/>
+            </link>
+        </menu-item>
+        <menu-item name="AccountReconciliations" title="${uiLabelMap.AccountingAcctRecons}">
+            <link target="findGlAccountReconciliations">
+                <parameter param-name="organizationPartyId" value="company"/>
+            </link>
+        </menu-item>
+    </menu>
+    <menu name="GlobalGLSettingMenus" modelMenu="olbiustab" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          default-menu-item-name="chartofaccounts">
+        <menu-item name="Chartofaccounts" title="${uiLabelMap.ChartOfAccounts}">
+            <link target="FindGlobalGlAccount">
+<!--             	<parameter param-name="organizationPartyId" value="company"></parameter> -->
+            </link>
+        </menu-item>
+        <menu-item name="CustomTimePeriod" title="${uiLabelMap.accTimePeriod}">
+            <condition><if-has-permission permission="PERIOD_MAINT"/></condition>
+            <link target="CustomTimePeriod">
+<!--             	<parameter param-name="organizationPartyId" value="company"></parameter>	 -->
+            </link>
+        </menu-item>
+        <menu-item name="Costs" title="${uiLabelMap.ManufacturingCostCalcs}">
+            <link target="CostCalcs">
+<!--             	<parameter param-name="organizationPartyId" value="company"></parameter> -->
+            </link>
+        </menu-item>
+        <menu-item name="PaymentMethodTypes" title="${uiLabelMap.PaymentMethodType}">
+            <link target="PaymentMethodType"/>
+        </menu-item>
+        <menu-item name="InvoiceItemTypes" title="${uiLabelMap.InvoiceItemType}">
+            <link target="InvoiceItemType"/>
+        </menu-item>
+         <menu-item name="Advance" title="${uiLabelMap.Advance}" widget-style="dropdown">
+        	<sub-menu location="component://accounting/widget/AccountingMenus.xml" name="noneMenu" />
+        </menu-item>
+    </menu>
+    <menu name="GlobalGLSettingTabBarAdvance" modelMenu="olbiusSubMenu" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml" style="dropdown-menu dropdown-info submenu-tabbar-custom">
+    	<menu-item name="RateAmounts" title="${uiLabelMap.Rates}">
+            <link target="RateAmounts">
+<!--             	<parameter param-name="organizationPartyId" value="company"></parameter> -->
+            </link>
+        </menu-item>
+        <menu-item name="FXConversions" title="${uiLabelMap.AccountingFX}">
+            <condition>
+                <if-service-permission service-name="acctgFxPermissionCheck" main-action="UPDATE"/>
+            </condition>
+            <link target="FXConversions">
+<!--                 <parameter param-name="organizationPartyId" value="company"></parameter> -->
+            </link>
+        </menu-item>
+        <menu-item name="GlAccountCategory" title="${uiLabelMap.GlAccountCategory}">
+            <link target="GlAccountCategory">
+<!--             	<parameter param-name="organizationPartyId" value="company"></parameter> -->
+            </link>
+        </menu-item>
+        <menu-item name="CostCenters" title="${uiLabelMap.CostCenters}">
+            <link target="CostCenters">
+<!--             	<parameter param-name="organizationPartyId" value="company"></parameter> -->
+            </link>
+        </menu-item>	
+    </menu>
+    <menu name="FinAccountTabBar" modelMenu="olbiustab" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          default-menu-item-name="EditFinAccount">
+        <menu-item name="EditFinAccountRoles" title="${uiLabelMap.PartyRoles}">
+            <link target="EditFinAccountRoles">
+                <parameter param-name="finAccountId"/>
+            </link>
+        </menu-item>
+        <menu-item name="FinAccountTrans" title="${uiLabelMap.AccountingFinAccountTransations}">
+            <link target="FindFinAccountTrans">
+                <parameter param-name="finAccountId"/>
+            </link>
+        </menu-item>
+        <menu-item name="FinAccountTransRecon" title="${uiLabelMap.AccountingFinAccountTransationReconciliation}">
+            <link target="FinAccountTransRecon">
+                <parameter param-name="finAccountId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditFinAccountAuths" title="${uiLabelMap.AccountingFinAccountAuth}">
+            <condition>
+                <if-compare field="finAccount.finAccountTypeId" operator="not-equals" value="BANK_ACCOUNT"/>
+            </condition>
+            <link target="EditFinAccountAuths">
+                <parameter param-name="finAccountId"/>
+            </link>
+        </menu-item>
+        <menu-item name="depositWithdraw" title="${uiLabelMap.AccountingDepositWithdraw}">
+            <link target="FindPaymentsForDepositOrWithdraw">
+                <parameter param-name="finAccountId"/>
+                <parameter param-name="organizationPartyId" from-field="finAccount.ownerPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="findDepositSlips" title="${uiLabelMap.AccountingDepositSlips}">
+            <link target="FindDepositSlips">
+                <parameter param-name="finAccountId"/>
+                <parameter param-name="organizationPartyId" from-field="finAccount.ownerPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="FindFinAccountReconciliations" title="${uiLabelMap.AccountingReconciliation}">
+            <link target="FindFinAccountReconciliations">
+                <parameter param-name="finAccountId"/>
+            </link>
+        </menu-item>
+    </menu>
+<!--     <menu name="PartyTopTabBar" modelMenu="olbiustab" extends="CommonTabBarMenu" -->
+<!-- 		extends-resource="component://common/widget/CommonMenus.xml" selected-menuitem-context-field-name="tabButtonItem" id="test"> -->
+<!--         <menu-item name="SetupTabBar" title="${uiLabelMap.SetUp}"  widget-style="dropdown"> -->
+<!--             <sub-menu  name="SetupSubTabBar"  location="component://delys/widget/accounting/accounting/AccAccountingMenus.xml"></sub-menu> -->
+<!--         </menu-item> -->
+       <!--  <menu-item name="PartyAccounts" title="${uiLabelMap.AccountingAccounting}" widget-style="dropdown">
+            <sub-menu name="OrganizationAccountingTabBar" location="component://webpos/widget/webposSetting/accounting/AccAccountingMenus.xml"></sub-menu>
+        </menu-item> -->
+<!--     </menu> -->
+    <menu name="SetupSubTabBar" extends="CommonTabBarMenu" modelMenu="olbiustab" extends-resource="component://common/widget/CommonMenus.xml">
+    	<menu-item name="VoucherBook" title="${uiLabelMap.VoucherBook}">    	
+            <link target="ListVoucherBooks">
+            	<parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="PartyAcctgPreference" title="${uiLabelMap.AccountingPreference}">    	
+            <link target="PartyAcctgPreference"> 
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ListGlAccountOrganizationJQ" title="${uiLabelMap.AccountingChartOfAcctsMenu}">
+            <link target="ListGlAccountOrganizationJQ">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="SetupGlJournalsJQ" title="${uiLabelMap.Journals}">
+            <link target="SetupGlJournalsJQ">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="GlAccountAssignment" title="${uiLabelMap.AccountingGlAccountDefault}">
+            <link target="GlAccountAssignment">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="TimePeriods" title="${uiLabelMap.accTimePeriod}">
+            <link target="TimePeriods">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+    
+    </menu>   
+    
+<!--     <menu name="SetupSubTabBar" modelMenu="olbiusSubMenu" -->
+<!-- 		extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml" -->
+<!-- 		style="dropdown-menu dropdown-info" id="subtab-advance" selected-menuitem-context-field-name="tabSubButtonItem"> -->
+<!--         <menu-item name="PartyAcctgPreference" title="${uiLabelMap.AccountingPreference}"> -->
+<!--             <link target="PartyAcctgPreference"> -->
+<!--                 <parameter param-name="organizationPartyId"/> -->
+<!--             </link> -->
+<!--         </menu-item> -->
+<!--         <menu-item name="ListGlAccountOrganizationJQ" title="${uiLabelMap.AccountingChartOfAcctsMenu}"> -->
+<!--             <link target="ListGlAccountOrganizationJQ"> -->
+<!--                 <parameter param-name="organizationPartyId"/> -->
+<!--             </link> -->
+<!--         </menu-item> -->
+<!--         <menu-item name="SetupGlJournalsJQ" title="${uiLabelMap.Journals}"> -->
+<!--             <link target="SetupGlJournalsJQ"> -->
+<!--                 <parameter param-name="organizationPartyId"/> -->
+<!--             </link> -->
+<!--         </menu-item> -->
+<!--         <menu-item name="GlAccountAssignment" title="${uiLabelMap.AccountingGlAccountDefault}"> -->
+<!--             <link target="GlAccountAssignment"> -->
+<!--                 <parameter param-name="organizationPartyId"/> -->
+<!--             </link> -->
+<!--         </menu-item> -->
+<!--         <menu-item name="TimePeriods" title="${uiLabelMap.accTimePeriod}"> -->
+<!--             <link target="TimePeriods"> -->
+<!--                 <parameter param-name="organizationPartyId"/> -->
+<!--             </link> -->
+<!--         </menu-item> -->
+<!--         <menu-item name="ConfigPartyPaymentMethod" title="${uiLabelMap.accConfigPartyPaymentMethod}"> -->
+<!--             <link target="ConfigPartyPaymentMethod"> -->
+<!--                 <parameter param-name="organizationPartyId"/> -->
+<!--             </link> -->
+<!--         </menu-item>         -->
+<!--     </menu> -->
+    <menu name="PartyAdminAssignTabBar" modelMenu="olbiustab" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          default-menu-item-name="GlAccountTypeDefaults" selected-menuitem-context-field-name="tabBarButtonItem2">
+        <menu-item name="GlAccountTypeDefaults" title="${uiLabelMap.AccountingGlAccountTypeDefaults}">
+            <link target="GlAccountTypeDefaults">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <!-- <menu-item name="ProductGlAccounts" title="${uiLabelMap.AccountingProductGlAccount}">
+            <link target="editProductGlAccounts">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ProductCategoryGlAccounts" title="${uiLabelMap.AccountingProductCategoryGlAccount}">
+            <link target="editProductCategoryGlAccounts">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item> -->
+        <menu-item name="FinAccountTypeGlAccounts" title="${uiLabelMap.AccountingFinAccountTypeGlAccount}">
+            <link target="FinAccountTypeGlAccount">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="GlAccountSalInvoice" title="${uiLabelMap.AccountingInvoiceSales}">
+            <link target="GlAccountSalInvoice">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="GlAccountPurInvoice" title="${uiLabelMap.AccountingInvoicePurchase}">
+            <link target="GlAccountPurInvoice">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="GlAccountNrPaymentMethod" title="${uiLabelMap.accAccountPaymentMethod}">
+            <link target="GlAccountNrPaymentMethod">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="GlAccountTypePaymentType" title="${uiLabelMap.accAccountPaymentType}">
+            <link target="GlAccountTypePaymentType">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        
+        <menu-item name="VarianceReasonGlAccounts" title="${uiLabelMap.VarianceReasonGlAccounts}">
+            <link target="VarianceReasonGlAccounts">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="CreditCardTypeGlAccount" title="${uiLabelMap.AccountingCreditCardTypeGlAccount}">
+            <link target="CreditCardTypeGlAccounts">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="TaxAuthorityGlAccounts" title="${uiLabelMap.AccountingTaxAuthorityGlAccounts}">
+            <link target="OrganizationTaxAuthorityGlAccount">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <!-- <menu-item name="PartyGlAccounts" title="${uiLabelMap.AccountingPartyGlAccounts}">
+            <link target="editPartyGlAccounts">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item> -->
+        <menu-item name="FixedAssetTypeGlAccounts" title="${uiLabelMap.AccountingFixedAssetTypeGlAccounts}">
+            <link target="FixedAssetTypeGlAccounts">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <!-- <menu-item name="Advance" title="Advance" widget-style="dropdown">
+        	<sub-menu location="component://accounting/widget/AccountingMenus.xml" name="noneMenu" />
+        </menu-item> -->
+    </menu>
+    <menu name="PartyAdminAssignTabBarAdvance" modelMenu="olbiusSubMenu" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml" style="dropdown-menu dropdown-info submenu-tabbar-custom"
+    	selected-menuitem-context-field-name="subTabBarButtonItem2">
+       
+        <menu-item name="GlAccountPurInvoice" title="${uiLabelMap.AccountingInvoicePurchase}">
+            <link target="GlAccountPurInvoice">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="GlAccountNrPaymentMethod" title="${uiLabelMap.AccountingPaymentMethodId}/${uiLabelMap.AccountingGlAccountId}">
+            <link target="GlAccountNrPaymentMethod">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="GlAccountTypePaymentType" title="${uiLabelMap.AccountingPaymentType}/${uiLabelMap.FormFieldTitle_glAccountTypeId}">
+            <link target="GlAccountTypePaymentType">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        
+        <menu-item name="VarianceReasonGlAccounts" title="${uiLabelMap.AccountingVarianceReasonGlAccounts}">
+            <link target="editVarianceReasonGlAccounts">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="CreditCardTypeGlAccount" title="${uiLabelMap.AccountingCreditCardTypeGlAccount}">
+            <link target="CreditCardTypeGlAccounts">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="TaxAuthorityGlAccounts" title="${uiLabelMap.AccountingTaxAuthorityGlAccounts}">
+            <link target="editOrganizationTaxAuthorityGlAccount">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="PartyGlAccounts" title="${uiLabelMap.AccountingPartyGlAccounts}">
+            <link target="editPartyGlAccounts">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="FixedAssetTypeGlAccounts" title="${uiLabelMap.AccountingFixedAssetTypeGlAccounts}">
+            <link target="FixedAssetTypeGlAccounts">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+    </menu>
+    
+    <menu name="OrganizationAccountingTabBar" modelMenu="olbiusSubMenu"
+		extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+		style="dropdown-menu dropdown-info" id="subtab-advance" selected-menuitem-context-field-name="tabSubButtonItem">
+        <menu-item name="PartyAccountsSummary" title="${uiLabelMap.AcctgPartyGlJournalSummary}">
+            <link target="PartyAccountsSummary">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="AccountReconciliation" title="${uiLabelMap.AccountingAcctRecon}">
+            <link target="findGlAccountReconciliation">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="AccountReconciliations" title="${uiLabelMap.AccountingAcctRecons}">
+            <link target="findGlAccountReconciliations">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="FindAcctgTrans" title="${uiLabelMap.AccountingAcctgTrans}">
+            <link target="FindAcctgTrans">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="FindAcctgTransEntries" title="${uiLabelMap.AccountingAcctgTransEntries}">
+            <link target="FindAcctgTransEntries">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="OrganizationAccountingReports" title="${uiLabelMap.AccountingReports}">
+            <link target="TrialBalance">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ChecksTabButton" title="${uiLabelMap.AccountingChecks}">
+            <link target="listChecksToPrint">
+                <parameter param-name="organizationPartyId"/>
+            </link>
+        </menu-item>
+    </menu>
+</menus>

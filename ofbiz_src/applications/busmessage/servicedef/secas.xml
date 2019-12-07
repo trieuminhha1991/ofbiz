@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<service-eca xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/service-eca.xsd">
+
+	<eca service="storeOrder" event="return">
+		<condition field-name="orderTypeId" operator="equals" value="PURCHASE_ORDER" />
+		<set field-name="partyFromId" env-name="billToCustomerPartyId"/>
+		<set field-name="partyToId" env-name="supplierPartyId"/>
+		<action service="purchaseOrderSupplier" mode="sync" />
+	</eca>
+	
+	<eca service="storeOrder" event="return">
+		<condition field-name="orderTypeId" operator="equals" value="SALES_ORDER" />
+		<set field-name="partyToId" env-name="placingCustomerPartyId"/>
+		<action service="salesOrderSupplier" mode="sync" />
+	</eca>
+
+	<eca service="storeOrderNoAcc" event="return">
+		<condition field-name="orderTypeId" operator="equals" value="SALES_ORDER" />
+		<set field-name="partyToId" env-name="placingCustomerPartyId"/>
+		<action service="salesOrderSupplier" mode="sync" />
+	</eca>
+
+	<eca service="updateOrderItemsCustom" event="return">
+		<action mode="async" service="updatePurchaseOrderSupplier"/>
+	</eca>
+	
+	<eca service="appendOrderItemsCustomAdvance" event="return">
+		<action mode="async" service="updatePurchaseOrderSupplier"/>
+	</eca>
+	
+	<eca service="changeOrderStatus" event="return">
+		<condition field-name="statusId" operator="equals" value="ORDER_CANCELLED" />
+		<action mode="async" service="orderCancelSupplier"/>
+	</eca>
+	
+	<eca service="cancelOrderItemLoadToCart" event="return">
+		<action mode="async" service="orderItemCancelSupplier"/>
+	</eca>
+	
+</service-eca>

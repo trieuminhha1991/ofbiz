@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+
+    <screen name="main">
+        <section>
+            <actions>
+                <set field="headerItem" value="main"/><!-- this highlights the selected menu-item with name "main" -->
+            </actions>
+            <widgets>
+                <decorator-screen name="BaseAccountingCommonDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ViewListCustomer">
+        <section>
+            <actions>
+                <set field="selectedMenuItem" value="CustomerMenu"/>
+                <set field="selectedSubMenuItem" value="customerList"/>
+                <set field="titleProperty" value="BSListCustomer"/>
+                <property-to-field field="defaultCountryGeoId" resource="general" property="country.geo.id.default" default="VNM"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="BaseAccountingCommonDecorator" location="component://baseaccounting/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-olbius-has-permission/>
+                            </condition>
+                            <actions>
+                                <entity-condition list="countryGeoList" entity-name="Geo">
+                                    <condition-expr field-name="geoTypeId" value="COUNTRY"/>
+                                    <order-by field-name="geoName"/>
+                                </entity-condition>
+                            </actions>
+                            <widgets>
+                                <platform-specific>
+                                    <html>
+                                        <html-template location="component://baseaccounting/webapp/baseaccounting/customer/ViewListCustomer.ftl" />
+                                    </html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+                                <container style="alert alert-info">
+                                    <label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+                                </container>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ViewCustomer">
+        <section>
+            <actions>
+                <set field="selectedMenuItem" value="CustomerMenu"/>
+                <set field="selectedSubMenuItem" value="customerList"/>
+                <set field="titleProperty" value="BACCViewCustomer"/>
+                <entity-condition list="statusFinAccList" entity-name="StatusItem">
+                    <condition-list combine="or">
+                        <condition-expr field-name="statusId" value="FNACT_ACTIVE"/>
+                        <condition-expr field-name="statusId" value="FNACT_MANFROZEN"/>
+                    </condition-list>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+                <property-to-field field="defaultCountryGeoId" resource="general" property="country.geo.id.default" default="VNM"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="BaseAccountingCommonDecorator" location="component://baseaccounting/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                            <!--<condition>-->
+                                <!--<if-olbius-has-permission/>-->
+                            <!--</condition>-->
+                            <actions>
+                                <entity-condition list="countryGeoList" entity-name="Geo">
+                                    <condition-expr field-name="geoTypeId" value="COUNTRY"/>
+                                    <order-by field-name="geoName"/>
+                                </entity-condition>
+                            </actions>
+                            <widgets>
+                                <platform-specific>
+                                    <html>
+                                        <html-template location="component://baseaccounting/webapp/baseaccounting/customer/viewCustomer.ftl" />
+                                    </html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+                                <container style="alert alert-info">
+                                    <label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+                                </container>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+</screens>

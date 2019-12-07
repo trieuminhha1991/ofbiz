@@ -1,0 +1,688 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>hrolbius Services</description>
+    <vendor></vendor>
+    <version>1.0</version>
+    <service name="updateEmplLeaveApproval" engine="java" 
+             location="com.olbius.basehr.employee.services.EmployeeServices" invoke="updateEmplLeaveApproval" auth="true">
+        <description>Update a Employee Leave</description>
+        <required-permissions join-type="AND">
+        	<check-permission permission="HR_EMPLEAVE" action="_UPDATE"/>
+        </required-permissions>
+        <attribute name="emplLeaveId" mode="IN" type="String"></attribute>
+        <attribute name="fromDate" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="thruDate" mode="IN" type="String" optional="true"></attribute>
+        <!-- <attribute name="workingShiftList" mode="IN" type="List"></attribute> -->
+        <attribute name="ntfId" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="approvalStatusId" mode="IN" type="String"></attribute>
+    </service>
+    
+    <service name="updateEmplLeaveStatusHr" engine="java" invoke="updateEmplLeaveStatus" 
+    	location="com.olbius.basehr.employee.services.EmployeeServices" auth="true">
+    	<required-permissions join-type="AND">
+        	<check-permission permission="HR_EMPLEAVE" action="_UPDATE"/>
+        </required-permissions>
+    	<attribute name="approvalStatusId" mode="IN" type="String"></attribute>
+    	<!-- <attribute name="partyIdLeave" mode="IN" type="String"></attribute>
+    	<attribute name="leaveTypeId" mode="IN" type="String"></attribute>
+    	<attribute name="leaveFromDate" mode="IN" type="java.sql.Timestamp"></attribute> -->
+    	<attribute name="emplLeaveId" mode="IN" type="String"></attribute>	
+   	</service>
+    <!-- <service name="preProcessCreateEmplLeave" engine="java" invoke="preProcessCreateEmplLeave" auth="true"
+    	location="com.olbius.basehr.employee.services.EmployeeServices">
+    	<attribute name="partyId" mode="IN" type="String"></attribute>
+    	<attribute name="fromDate" mode="IN" type="String"></attribute>
+    	<attribute name="thruDate" mode="IN" type="String"></attribute>
+    	<attribute name="emplLeaveReasonTypeId" mode="IN" type="String"></attribute>
+    	<attribute name="leaveUnpaid" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="workingShift" mode="IN" type="String"></attribute>	
+   	</service> -->
+    <service name="createEmplLeave" engine="java" default-entity-name="EmplLeave"
+             location="com.olbius.basehr.employee.services.EmployeeLeaveServices" invoke="createEmplLeave" auth="true">
+        <description>Create a Employee Leave</description>
+        <required-permissions join-type="AND">
+        	<check-permission permission="HR_EMPLEAVE" action="_CREATE"/>
+        </required-permissions>
+        <auto-attributes mode="OUT" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+        <override name="partyId" optional="false"></override>
+        <override name="workingShiftId" optional="false"></override>
+        <override name="fromDate" optional="false"></override>
+        <override name="thruDate" optional="false"></override>
+        <override name="fromDateLeaveTypeId" optional="false"></override>
+        <override name="thruDateLeaveTypeId" optional="false"></override>
+        <!-- <override name="approverPartyId" optional="false"></override> -->
+        <override name="description" allow-html="any"></override>
+    </service>
+    <service name="deletePartyContact" engine="java" invoke="deletePartyContact" auth="true"
+		location="com.olbius.basehr.employee.services.EmployeeServices">
+		<attribute name="partyId" mode="IN" type="String"/>
+		<attribute name="contactMechId" mode="IN" type="String"/>
+		<attribute name="contactMechPurposeTypeId" mode="IN" type="String"/>
+		<attribute name="fromDate" mode="IN" type="Timestamp"/>
+	</service>
+   <!--  <service name="createEmplLeaveApprRoleType" engine="java" invoke="createEmplLeaveApprRoleType" default-entity-name="EmplLeaveApprovalRoleType"
+    	location="com.olbius.basehr.employee.services.EmployeeServices" auth="true">
+    	<auto-attributes mode="IN" include="pk" optional="false"></auto-attributes>
+    	<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>	
+    	<override name="fromDate" optional="true"></override>
+   	</service> -->
+    
+    <service name="createNtfToApprEmplLeave" engine="java" invoke="createNtfToApprEmplLeave" default-entity-name="EmplLeave"
+    	location="com.olbius.basehr.employee.services.EmployeeServices" auth="true">
+    	<auto-attributes mode="IN" include="pk" optional="false"></auto-attributes>	    	
+   		<attribute name="roleTypeId" mode="IN" type="String"></attribute>
+   	</service>
+    
+    <!-- <service name="updateEmplLeaveStatus" engine="simple" default-entity-name="EmplLeave"
+             location="component://hrolbius/script/com/olbius/services/CommonServices.xml" invoke="updateEmplLeaveStatus" auth="true">
+        <description>Update a Employee Leave status</description>
+        <required-permissions join-type="AND">
+        	<check-permission permission="HR_EMPLEAVE" action="_UPDATE"/>
+        </required-permissions>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service> -->
+    
+    <service name="approveEmplLeave" engine="simple" default-entity-name="EmplLeave" location="component://hrolbius/script/com/olbius/services/CommonServices.xml" 
+    	invoke="approveEmplLeave" auth="true">
+    	<description>Approve a Employee Leave</description>
+    	<required-permissions join-type="AND">
+        	<check-permission permission="HR_EMPLEAVE" action="_UPDATE"/>
+        </required-permissions>
+    	<auto-attributes mode="IN" include="pk" optional="false"></auto-attributes >
+    	<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes >
+    </service>
+    
+    <service name="createEmploymentWorkInfo" engine="java" invoke="createEmploymentWorkInfo" 
+    	location="com.olbius.basehr.employee.services.EmployeeServices" auth="true">
+    	<attribute name="emplPositionTypeId" mode="IN" type="String"></attribute>
+    	<attribute name="partyIdFrom" mode="IN" type="String"></attribute>
+    	<attribute name="partyIdTo" mode="IN" type="String"></attribute>
+    	<attribute name="fromDate" mode="IN" type="java.sql.Timestamp"></attribute>
+    	<attribute name="thruDate" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>
+    	<attribute name="periodTypeId" mode="IN" type="String"></attribute>
+    	<attribute name="rateAmount" mode="IN" type="java.math.BigDecimal"></attribute>
+    	<attribute name="insuranceSalary" mode="IN" type="java.math.BigDecimal" optional="true"></attribute>
+    	<attribute name="insHealthCard" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="heathInsuranceFromDate" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>
+    	<attribute name="heathInsuranceThruDate" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>
+    	<attribute name="insParticipateFrom" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>
+    	<attribute name="participateFromDate" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>
+    	<attribute name="healthCareProvider" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="orgId" mode="IN" type="String" optional="true"></attribute>    	
+    	<attribute name="isParticipateIns" mode="IN" type="String" optional="true"></attribute>    	
+    	<attribute name="insuranceTypeIdList" mode="IN" type="List" optional="true"></attribute>    	
+    </service>
+    
+    <service name="createEmplPositionAndFulfillment" engine="java" default-entity-name="EmplPosition" 
+    	location="com.olbius.basehr.employee.services.EmployeeServices" invoke="createEmplPositionAndFulfillment">
+    	<auto-attributes mode="INOUT" include="all" optional="true"></auto-attributes>
+    	<attribute name="internalOrgId" mode="IN" type="String" optional="false"></attribute>
+    	<attribute name="fromDate" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>
+    	<attribute name="thruDate" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>
+    	<override mode="INOUT" name="emplPositionId"/>
+    </service>
+    
+    <service name="createHrmUserLogin" engine="simple" auth="false"
+        location="component://hrolbius/script/com/olbius/services/CommonServices.xml" invoke="createHrmUserLogin">
+        <description>Create a UserLogin for HRM</description>
+        <implements service="createUserLogin"/>
+        <attribute name="fromDate" mode="OUT" type="Timestamp" optional="false"></attribute>
+    </service>
+    
+    <service name="addUserLoginToSecurityGroupHR" engine="java" invoke="addUserLoginToSecurityGroup" 
+    	location="com.olbius.basehr.employee.services.EmployeeServices" default-entity-name="UserLoginSecurityGroup" auth="true">
+        <description>Add a UserLogin to a SecurityGroup</description>
+        <auto-attributes mode="IN" include="pk" optional="false"></auto-attributes>
+        <auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+        <override name="fromDate" optional="true"></override>
+    </service>
+    
+    <service name="removeInternalPerson" engine="java" location="com.olbius.event.services.RemoveInternalPerson" invoke="removeInternalPerson">
+    	<description> remove a person from</description>
+    	<required-permissions join-type="AND">
+    		<check-permission permission="HR_DIRECTORY" action="_UPDATE"/>
+    	</required-permissions>
+    	<attribute name="partyIdFrom" mode="IN" type="String" optional="false"/>
+    	<attribute name="partyIdTo" mode="IN" type="String" optional="false"/>
+    	<attribute name="roleTypeIdTo" mode="IN" type="String" optional="false"/>
+    	<attribute name="roleTypeIdFrom" mode="IN" type="String" optional="false"/>
+    </service>
+    <service name="createNtfUpdateEmplLeave" engine="simple" invoke="createNtfUpdateEmplLeave" default-entity-name="EmplLeave"
+    	location="component://hrolbius/script/com/olbius/services/employees/EmployeeServices.xml">
+    	<attribute name="ntfId" mode="IN" type="String" optional="false"></attribute>
+    	<auto-attributes mode="IN" include="pk" optional="true"/>
+    </service>  
+    
+	<service name="updateEmplDeptAndEmplPosition" engine="java" invoke="updateEmplDeptAndEmplPosition"
+		location="com.olbius.basehr.employee.services.EmployeeServices" auth="true">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="emplPositionTypeOldId" mode="IN" type="String"></attribute>
+		<attribute name="newInternalOrgId" mode="IN" type="String"></attribute>
+		<attribute name="emplPositionTypeNewId" mode="IN" type="String"></attribute>
+		<attribute name="dateMoveTo" mode="IN" type="java.sql.Timestamp"></attribute>
+		<attribute name="dateLeave" mode="IN" type="java.sql.Timestamp"></attribute>	
+	</service>
+	
+ 	<service name="getPositionTypeOfDept" engine="simple" invoke="getPositionTypeOfDept"
+ 		location="component://hrolbius/script/com/olbius/services/employees/EmployeeServices.xml">
+ 		<attribute name="departmentId" mode="IN" type="String" optional="true"></attribute>
+ 		<attribute name="positionTypeList" mode="OUT" type="java.util.List" optional="true"></attribute>	
+	</service>
+	
+	<service name="getPositionTypeOfEmpl" engine="simple" invoke="getPositionTypeOfEmpl"
+		location="component://hrolbius/script/com/olbius/services/employees/EmployeeServices.xml">
+		<attribute name="employeeId" mode="IN" type="String" optional="true"></attribute>
+ 		<attribute name="positionTypeList" mode="OUT" type="java.util.List" optional="true"></attribute>
+	</service>
+	
+	<service name="findEmployeeByManager" engine="java" invoke="findEmployeeByManager" 
+		location="com.olbius.basehr.employee.services.EmployeeServices">
+		<required-permissions join-type="AND">
+			<check-role-member role-type="MANAGER"/>
+		</required-permissions>
+		<attribute name="lastName" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="firstName" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="listIt" mode="OUT" type="java.util.List" optional="false"></attribute>	
+	</service>
+	
+	
+	<!-- service resign employee -->
+	<service name="getPartyFixedAssetAssignment" engine="java" invoke="getPartyFixedAssetAssignment" auth="true"
+		location="com.olbius.basehr.employee.services.EmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+   		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+   		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+   		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+   		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>	
+   		<attribute name="request" mode="IN" type="javax.servlet.http.HttpServletRequest"></attribute>
+	</service>
+	
+	<service name="getPartyTerminationAssetAssignment" engine="java" invoke="getPartyTerminationAssetAssignment" auth="true"
+		location="com.olbius.basehr.employee.services.EmployeeServices">
+		<attribute name="pagenum" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="pagesize" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="emplTerminationProposalId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="listReturn" mode="OUT" type="List"></attribute>	
+		<attribute name="TotalRows" mode="OUT" type="String" optional="true"></attribute>	
+	</service>
+	
+	<service name="getPartyInvoiceAR" engine="java" invoke="getPartyInvoiceAR" auth="true"
+		location="com.olbius.basehr.employee.services.EmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+   		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+   		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+   		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+   		<attribute name="listIterator" mode="OUT" type="List" optional="false"></attribute>
+   		<attribute name="TotalRows" mode="OUT" type="String" optional="true"></attribute>	
+   		<attribute name="request" mode="IN" type="javax.servlet.http.HttpServletRequest"></attribute>	
+	</service>
+	<service name="getPartyTerminationInvoicePaid" engine="java" invoke="getPartyTerminationInvoicePaid" auth="true"
+		location="com.olbius.basehr.employee.services.EmployeeServices">
+		<attribute name="pagenum" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="pagesize" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="emplTerminationProposalId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="listReturn" mode="OUT" type="List"></attribute>	
+		<attribute name="TotalRows" mode="OUT" type="String" optional="true"></attribute>	
+	</service>
+	
+	<service name="getPartyPaymentAR" engine="java" invoke="getPartyPaymentAR" auth="true"
+		location="com.olbius.basehr.employee.services.EmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+   		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+   		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+   		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+   		<attribute name="listIterator" mode="OUT" type="List" optional="false"></attribute>
+   		<attribute name="TotalRows" mode="OUT" type="String" optional="true"></attribute>	
+   		<attribute name="request" mode="IN" type="javax.servlet.http.HttpServletRequest"></attribute>	
+	</service>
+	
+	<service name="getPartyTerminationPaymentPaid" engine="java" invoke="getPartyTerminationPaymentPaid" auth="true"
+		location="com.olbius.basehr.employee.services.EmployeeServices">
+		<attribute name="pagenum" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="pagesize" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="emplTerminationProposalId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="listReturn" mode="OUT" type="List"></attribute>	
+		<attribute name="TotalRows" mode="OUT" type="String" optional="true"></attribute>	
+	</service>
+	<!--  -->
+	
+	<service name="createWorkFlowApprTermination" engine="java" invoke="createWorkFlowApprTermination" auth="true"
+		location="com.olbius.basehr.employee.services.EmployeeServices">
+		<attribute name="emplTerminationProposalId" mode="IN" type="String"></attribute>	
+	</service>
+	<service name="getEmplTerminationPpslList" engine="java" invoke="getEmplTerminationPpslList" auth="true"
+		location="com.olbius.basehr.employee.services.EmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+   		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+   		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+   		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+   		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>	
+   		<attribute name="request" mode="IN" type="javax.servlet.http.HttpServletRequest"></attribute>	
+	</service>
+	
+	<service name="getEmplTerminationList" engine="java" invoke="getEmplTerminationList" auth="true"
+		location="com.olbius.basehr.employee.services.EmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+   		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+   		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+   		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+   		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>	
+   		<attribute name="request" mode="IN" type="javax.servlet.http.HttpServletRequest"></attribute>
+	</service>
+	<service name="expireEmplRelationship" engine="java" invoke="expireEmplRelationship" auth="true">
+		<attribute name="emplTerminationProposalId" mode="IN" type="String"></attribute>
+	</service>
+	
+	<!-- ./ end resign service-->
+	
+	<service name="getGeneralInfoOfEmpl" engine="java" invoke="getGeneralInfoOfEmpl"
+		location="com.olbius.basehr.employee.services.EmployeeServices">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="emplRemindCount" mode="OUT" type="Long" optional="true"></attribute>
+		<attribute name="emplPunishmentLevel" mode="OUT" type="Long" optional="true"></attribute>
+		<attribute name="departmentName" mode="OUT" type="String" optional="true"></attribute>	
+		<attribute name="emplPosition" mode="OUT" type="String" optional="true"></attribute>
+	</service>
+	<service name="getNbrDayLeaveEmp" engine="java" invoke="getNbrDayLeaveEmp" 
+		location="com.olbius.basehr.employee.services.EmployeeServices">
+		<description>calculate number day leave of employee</description>
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<!-- <attribute name="leaveTypeId" mode="IN" type="String" optional="true"></attribute> -->
+		<!-- <attribute name="parentTypeId" mode="IN" type="String" optional="true"></attribute> -->
+		<attribute name="fromDate" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>
+		<attribute name="thruDate" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>
+		<attribute name="nbrDayLeaveUnPaid" mode="OUT" type="Float"></attribute>
+		<attribute name="nbrDayLeavePaid" mode="OUT" type="Float"></attribute>	
+		<attribute name="nbrDayLeave" mode="OUT" type="Float"></attribute>
+	</service>
+	<service name="getNbrHourWorkOvertime" engine="java" invoke="getNbrHourWorkOvertime"
+		location="com.olbius.basehr.employee.services.EmployeeServices" auth="true">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="fromDate" mode="IN" type="java.sql.Timestamp"></attribute>
+		<attribute name="thruDate" mode="IN" type="java.sql.Timestamp"></attribute>
+		<attribute name="statusId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="hoursRegisWorkOvertime" mode="OUT" type="Float"></attribute>
+		<attribute name="hoursActualWorkOvertime" mode="OUT" type="Float"></attribute>	
+	</service>
+	<service name="getNbrDayLeaveEmplInfo" engine="java" invoke="getNbrDayLeaveEmplInfo" 
+		location="com.olbius.basehr.employee.services.EmployeeServices">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="emplTimesheetId" mode="IN" type="String"></attribute>
+		<attribute name="fromDate" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>
+		<attribute name="thruDate" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>
+		<attribute name="nbrDayLeavePaidInMonth" mode="OUT" type="Float"></attribute>
+		<attribute name="nbrDayLeaveUnPaidInMonth" mode="OUT" type="Float"></attribute>
+		<attribute name="nbrDayLeavePaidInYear" mode="OUT" type="Float"></attribute>
+		<attribute name="nbrDayLeaveUnPaidInYear" mode="OUT" type="Float"></attribute>
+		<attribute name="numberDayPaidLeave" mode="OUT" type="Float"></attribute>
+		<attribute name="dayLeaveRegulation" mode="OUT" type="Long" optional="true"></attribute>
+		<attribute name="numberDayLeave" mode="OUT" type="Float" optional="true"></attribute>
+		<attribute name="numberDayLeaveUnPaid" mode="OUT" type="Float" optional="true"></attribute>
+		<attribute name="nbrDayLeaveInYear" mode="OUT" type="Float" optional="true"></attribute>
+		<attribute name="actualLeavePaidInMonth" mode="OUT" type="Float" optional="true"></attribute>
+		<attribute name="actualLeavePaidInYear" mode="OUT" type="Float" optional="true"></attribute>
+	</service>
+	<service name="checkEmplLeaveDayInRegulation" engine="java" invoke="checkEmplLeaveDayInRegulation"
+		location="com.olbius.basehr.employee.services.EmployeeServices">
+		<attribute name="fromDate" mode="IN" type="java.sql.Timestamp"></attribute>
+		<attribute name="thruDate" mode="IN" type="java.sql.Timestamp"></attribute>
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="dayLeaveInRegulation" mode="OUT" type="Boolean" optional="true"></attribute>	
+	</service>
+	<service name="getDayLeaveRegulation" engine="java" invoke="getDayLeaveRegulation"
+		location="com.olbius.basehr.employee.services.EmployeeServices">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="dayLeaveRegulation" mode="OUT" type="Long"></attribute>	
+	</service>	
+	
+	<service name="createBussinessTripProposal" engine="java" invoke="createBussinessTripProposal"
+		location="com.olbius.basehr.employee.services.EmployeeServices" auth="true">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="busTripContent" mode="IN" type="java.util.List" optional="true"></attribute>
+		<attribute name="busDest" mode="IN" type="java.util.List" optional="true"></attribute>
+		<attribute name="busFromDate" mode="IN" type="java.util.List" optional="true"></attribute>
+		<attribute name="busThruDate" mode="IN" type="java.util.List" optional="true"></attribute>
+		<attribute name="busNotes" mode="IN" type="java.util.List" optional="true"></attribute>
+		<attribute name="vehTypeId" mode="IN" type="java.util.List" optional="true"></attribute>
+		<attribute name="journey" mode="IN" type="java.util.List" optional="true"></attribute>
+		<attribute name="dateDeparture" mode="IN" type="java.util.List" optional="true"></attribute>
+		<attribute name="dateArrival" mode="IN" type="java.util.List" optional="true"></attribute>
+		<attribute name="vehNotes" mode="IN" type="java.util.List" optional="true"></attribute>
+		<attribute name="partyBusinessTripId" mode="OUT" type="String"></attribute>
+	</service>
+	<service name="approvalBussTripProposal" engine="java" invoke="approvalBussTripProposal"
+		location="com.olbius.basehr.employee.services.EmployeeServices" auth="true">
+		<attribute name="partyBusinessTripId" mode="IN" type="String"></attribute>
+		<attribute name="statusId" mode="IN" type="String"></attribute>
+		<attribute name="approverId" mode="IN" type="String"></attribute>	
+		<attribute name="notes" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="ntfId" mode="IN" type="String" optional="true"></attribute>
+	</service>
+	<service name="updateStatusBussTripProposal" engine="java" invoke="updateStatusBussTripProposal"
+		location="com.olbius.basehr.employee.services.EmployeeServices" auth="true">
+		<attribute name="partyBusinessTripId" mode="IN" type="String"></attribute>
+		<attribute name="statusId" mode="IN" type="String"></attribute>	
+	</service>
+	<service name="checkPermissionApproveBussTripProposal" engine="java" invoke="checkPermissionApproveBussTripProposal"
+		location="com.olbius.basehr.employee.services.EmployeeServices" auth="true">
+		<attribute name="partyBusinessTripId" mode="IN" type="String"></attribute>
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="isPermisson" mode="OUT" type="Boolean"></attribute>
+		<attribute name="partyBusinessRole" mode="OUT" type="org.ofbiz.entity.GenericValue" optional="true"></attribute>
+		
+	</service>
+	
+	<service name="updateCurrentResidence" engine="java" invoke="updateCurrentResidence"
+		location="com.olbius.basehr.employee.services.EmployeeServices" auth="true">
+		<attribute name="address1_CurrResidence" mode="IN" type="String"></attribute>
+    	<attribute name="currResidence_countryGeoId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="currResidence_stateProvinceGeoId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="currResidence_districtGeoId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="currResidence_wardGeoId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="currentResidenceContactmechId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="partyId" mode="IN" type="String"></attribute>
+    	<attribute name="contactMechId" type="String" mode="OUT" optional="false"/>
+	</service>
+	<service name="updatePermanentResidence" engine="java" invoke="updatePermanentResidence"
+		location="com.olbius.basehr.employee.services.EmployeeServices" auth="true">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="address1_PermanentResidence" mode="IN" type="String"></attribute>
+    	<attribute name="permanentResidence_countryGeoId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="permanentResidence_stateProvinceGeoId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="permanentResidence_districtGeoId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="permanentResidence_wardGeoId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="permanentResidenceContactmechId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="contactMechId" type="String" mode="OUT" optional="false"/>
+	</service>
+	<service name="updateOtherEmail" engine="java" invoke="updateOtherEmail"
+		location="com.olbius.basehr.employee.services.EmployeeServices" auth="true">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+    	<attribute name="otherEmailAddress" mode="IN" type="String" ></attribute>
+    	<attribute name="otherEmailContactmechId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="contactMechId" type="String" mode="OUT" optional="false"/>
+	</service>
+	<service name="updatePrimaryEmail" engine="java" invoke="updatePrimaryEmail"
+		location="com.olbius.basehr.employee.services.EmployeeServices" auth="true">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+    	<attribute name="primaryEmailAddress" mode="IN" type="String"></attribute>
+    	<attribute name="primaryEmailContactmechId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="contactMechId" type="String" mode="OUT" optional="false"/>
+	</service>
+	<service name="updateHomeMobile" engine="java" invoke="updateHomeMobile"
+		location="com.olbius.basehr.employee.services.EmployeeServices" auth="true">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="phone_home" mode="IN" type="String"></attribute>
+    	<attribute name="homePhoneContactMechId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="contactMechId" type="String" mode="OUT" optional="false"/>
+	</service>
+	<service name="updatePhoneMobile" engine="java" invoke="updatePhoneMobile"
+		location="com.olbius.basehr.employee.services.EmployeeServices" auth="true">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+    	<attribute name="phone_mobile" mode="IN" type="String" ></attribute>		
+    	<attribute name="mobilePhoneContactMechId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="contactMechId" type="String" mode="OUT" optional="false"/>
+	</service>
+	<service name="updatePersonalImage" engine="java" invoke="updatePersonalImage" 
+		location="com.olbius.basehr.employee.services.EmployeeServices" auth="true">
+		<attribute name="partyId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="uploadedFile" type="java.nio.ByteBuffer" mode="IN" optional="false"/>
+		<attribute name="_uploadedFile_fileName" type="String" mode="IN" optional="true"/>
+        <attribute name="_uploadedFile_contentType" type="String" mode="IN" optional="true"/>
+        <attribute name="contentUrl" mode="OUT" type="String" optional="true"></attribute>	
+	</service>	
+	<service name="updatePersonOlbius" engine="java" invoke="updatePersonOlbius" 
+		location="com.olbius.basehr.employee.services.EmployeeServices" auth="true" default-entity-name="Person">
+		<auto-attributes mode="IN" include="pk" optional="true"></auto-attributes>
+		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+		<override name="firstName" optional="false"/>
+        <override name="lastName" optional="false"/>
+	</service>
+	<!-- include service by trung anh -->
+	<service name="updatePointForEmp" engine="java" invoke="updatePointForEmp" location="com.olbius.basehr.employee.services.EmployeeServices">
+	    <attribute name="listdata" mode="IN" type="String" optional="false"></attribute>
+	</service>
+	<!-- end -->
+	<!-- <service name="updatePersonDemo" engine="java" invoke="updatePersonDemo" 
+		location="com.olbius.basehr.employee.services.EmployeeServices" auth="true">
+		<attribute name="mail" mode="IN" type="String" optional="false"></attribute>
+		<attribute name="result123" mode="OUT" type="String" optional="false"></attribute>
+	</service> -->
+	
+	<!-- Jqx profile -->
+	<service name="JQGetListEmplNotification" engine="java" invoke="jqGetListEmplNotification" 
+		location="com.olbius.basehr.employee.services.JQEmployeeServices">
+		<implements service="jqxGetListInterface"/>
+   </service>
+   <service name="JQGetListEmplPayrollParameter" engine="java" invoke="jqGetListEmplPayrollParameter" 
+   		location="com.olbius.basehr.employee.services.JQEmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>
+		<attribute name="request" mode="IN" type="javax.servlet.http.HttpServletRequest" optional="true"></attribute>
+   </service>
+   <!-- <service name="JQGetListEmplLeave" engine="java" invoke="jqGetListEmplLeave" 
+   		location="com.olbius.basehr.employee.services.EmployeeLeaveServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>
+   </service> -->
+   <service name="JQGetListEmplPosFulfillment" engine="java" invoke="jqGetListEmplPosFulfillment" location="com.olbius.basehr.employee.services.JQEmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>
+   </service>
+   <service name="JQGetListEmplSkill" engine="java" invoke="jqGetListEmplSkill" location="com.olbius.basehr.employee.services.JQEmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>
+   </service>
+   <service name="JQGetListEmplQual" engine="java" invoke="jqGetListEmplQual" location="com.olbius.basehr.employee.services.JQEmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>
+   </service>
+   <service name="JQGetEmplPayrollHistory" engine="java" invoke="jqGetEmplPayrollHistory" location="com.olbius.basehr.employee.services.JQEmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>
+   </service>
+   <service name="JQGetListEmplPunishment" engine="java" invoke="jqGetListEmplPunishment" location="com.olbius.basehr.employee.services.JQEmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>
+   </service>
+   <service name="JQGetListEmplOvertimeHistory" engine="java" invoke="jqGetListEmplOvertimeHistory" 
+   		location="com.olbius.basehr.employee.services.JQEmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>
+   </service>
+   <service name="JQGetListEmplWorkLate" engine="java" invoke="jqGetListEmplWorkLate" location="com.olbius.basehr.employee.services.JQEmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>
+   </service>
+   <service name="JQGetListEmplFamily" engine="java" invoke="jqGetListEmplFamily" 
+   		location="com.olbius.basehr.employee.services.JQEmployeeServices" auth="true">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+		<attribute name="listIterator" mode="OUT" type="List" optional="false"></attribute>
+		<attribute name="TotalRows" mode="OUT" type="String" optional="true"></attribute>
+   </service>
+   <service name="JQGetListEmplLeaveList" engine="java" invoke="getListEmplLeaveList" 
+   		location="com.olbius.basehr.employee.services.EmployeeLeaveServices" auth="true">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+		<attribute name="request" mode="IN" type="javax.servlet.http.HttpServletRequest" optional="false"></attribute>
+		<attribute name="listIterator" mode="OUT" type="List" optional="false"></attribute>
+		<attribute name="TotalRows" mode="OUT" type="String" optional="true"></attribute>
+   </service>
+   <service name="JQGetListEmplEducation" engine="java" invoke="jqGetListEmplEducation" location="com.olbius.basehr.employee.services.JQEmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>
+   </service>
+   <service name="JQGetListEmplWorkProcess" engine="java" invoke="jqGetListEmplWorkProcess" 
+   		location="com.olbius.basehr.employee.services.JQEmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>
+   </service>
+   <!-- /Jqx profile -->
+   <!-- recruiment service -->
+    <service name="createPersonFamilyBackground" engine="java" invoke="createPersonFamilyBackground"
+		location="com.olbius.basehr.employee.services.JQEmployeeServices" auth="true" default-entity-name="PersonFamilyBackground">
+		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+		<attribute name="partyId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="firstName" mode="IN" type="String"></attribute>
+		<attribute name="middleName" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="lastName" mode="IN" type="String" optional="false"></attribute>
+		<attribute name="partyRelationshipTypeId" mode="IN" type="String" optional="false"></attribute>
+		<attribute name="birthDate" mode="IN" type="java.sql.Date" optional="true"></attribute>
+		<attribute name="phoneNumber" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="personFamilyId" mode="OUT" type="String" optional="true"></attribute>
+	</service>
+	<service name="deletePersonFamilyBackgroundSv" engine="java" invoke="deletePersonFamilyBackgroundSv"
+		location="com.olbius.basehr.employee.services.JQEmployeeServices" auth="true">
+		<attribute name="personFamilyBackgroundId" mode="IN" type="String" optional="false"></attribute>
+		<attribute name="success" mode="OUT" type="String" optional="false"></attribute>
+	</service>
+	<service name="createNewUserLogin" engine="java" invoke="createNewUserLogin" location="com.olbius.basehr.employee.services.EmployeeServices">
+	    <attribute name="userLoginId" mode="IN" type="String" optional="false"></attribute>
+	    <attribute name="currentPassword" mode="IN" type="String" optional="false"></attribute>
+	    <attribute name="currentPasswordVerify" mode="IN" type="String" optional="false"></attribute>
+	    <attribute name="partyId" mode="IN" type="String" optional="false"></attribute>
+	</service>
+	<service name="reEnableUserLogin" engine="java" invoke="reEnableUserLogin" location="com.olbius.basehr.employee.services.EmployeeServices">
+	    <attribute name="partyId" mode="IN" type="String" optional="false"></attribute>
+	</service>
+	<service name="getUserLoginByPartyId" engine="java" invoke="getUserLoginByPartyId" location="com.olbius.basehr.employee.services.EmployeeServices">
+	    <attribute name="partyId" mode="IN" type="String" optional="false"></attribute>
+	    <attribute name="userLoginId" mode="OUT" type="String"></attribute>
+	</service>
+	<service name="getListEmplMgrByParty" engine="java" invoke="getListEmplMgrByParty" auth="true"
+		location="com.olbius.basehr.employee.services.EmployeeServices">
+		<attribute name="mgrUserLoginId" mode="IN" type="String"></attribute>
+		<attribute name="fromDate" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>	
+		<attribute name="thruDate" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>
+		<attribute name="roleTypeId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="listEmployee" mode="OUT" type="List"></attribute>	
+	</service>
+	<service name="getListEmplInPartyGroupByRole" engine="java" invoke="getListEmplInPartyGroupByRole" auth="true"
+		location="com.olbius.basehr.employee.services.EmployeeServices">
+		<attribute name="partyGroupId" mode="IN" type="String"></attribute>
+		<attribute name="fromDate" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>	
+		<attribute name="thruDate" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>
+		<attribute name="roleTypeId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="listEmployee" mode="OUT" type="List"></attribute>		
+	</service>
+	<service name="getListEmplByRoleTypeOrg" engine="java" invoke="getListEmplByRoleTypeOrg" auth="true"
+		location="com.olbius.basehr.employee.services.EmployeeServices">
+		<attribute name="orgRoleTypeId" mode="IN" type="String" optional="false"></attribute>
+		<attribute name="emplRoleTypeId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="fromDate" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>	
+		<attribute name="thruDate" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>
+		<attribute name="listEmployee" mode="OUT" type="List"></attribute>	
+	</service>
+	<service name="JQGetManagerOfEmpl" engine="java" invoke="getManagerOfEmpl" auth="true"
+		location="com.olbius.basehr.employee.services.EmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+		<attribute name="request" mode="IN" type="javax.servlet.http.HttpServletRequest" optional="true"></attribute>
+		<attribute name="listIterator" mode="OUT" type="List" optional="false"></attribute>
+		<attribute name="TotalRows" mode="OUT" type="String" optional="true"></attribute>	
+	</service>
+	<service name="getEmplLeaveInfo" engine="java" invoke="getEmplLeaveInfo" auth="true"
+		location="com.olbius.basehr.employee.services.EmployeeServices">
+		<attribute name="year" mode="IN" type="Integer"></attribute>
+		<attribute name="partyId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="annualLeft" mode="OUT" type="java.math.BigDecimal" optional="true"></attribute>	
+		<attribute name="annualLeaveRemain" mode="OUT" type="java.math.BigDecimal" optional="true"></attribute>	
+		<attribute name="unpaidLeave" mode="OUT" type="java.math.BigDecimal" optional="true"></attribute>	
+		<attribute name="annualLeaveDayYear" mode="OUT" type="java.math.BigDecimal" optional="true"></attribute>	
+		<attribute name="annualLastYearTransferred" mode="OUT" type="java.math.BigDecimal" optional="true"></attribute>
+		<attribute name="annualGrantedLeaveInYear" mode="OUT" type="java.math.BigDecimal" optional="true"></attribute>
+	</service>
+	<service name="createNationality" engine="java" invoke="createNationality" auth="true"
+		location="com.olbius.basehr.employee.services.EmployeeServices" default-entity-name="Nationality">
+		<auto-attributes mode="OUT" include="pk" optional="false"></auto-attributes>	
+		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+		<override name="description" optional="false"></override>
+	</service>
+	<service name="createEthnicOrigin" engine="java" invoke="createEthnicOrigin" auth="true"
+		location="com.olbius.basehr.employee.services.EmployeeServices" default-entity-name="EthnicOrigin">
+		<auto-attributes mode="OUT" include="pk" optional="false"></auto-attributes>	
+		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+		<override name="description" optional="false"></override>
+	</service>
+	<service name="createReligion" engine="java" invoke="createReligion" auth="true"
+		location="com.olbius.basehr.employee.services.EmployeeServices" default-entity-name="Religion">
+		<auto-attributes mode="OUT" include="pk" optional="false"></auto-attributes>	
+		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+		<override name="description" optional="false"></override>
+	</service>
+	<service name="createNewSalesmanImports" engine="java" invoke="createNewSalesmanImports" location="com.olbius.basehr.employee.services.EmployeeServices">
+		<implements service="jqxGetListInterface"/>
+		<override name="listIterator" mode="OUT" type="List" optional="true" ></override>
+	</service>
+	<service name="createSalesmanFromFileExcel" engine="java" invoke="createSalesmanFromFileExcel" location="com.olbius.basehr.employee.services.EmployeeServices">
+		<attribute name="partyCode" mode="IN" type="String" optional="false"/>
+		<attribute name="lastName" mode="IN" type="String" optional="false"/>
+		<attribute name="middleName" mode="IN" type="String" optional="true"/>
+		<attribute name="firstName" mode="IN" type="String" optional="false"/>
+		<attribute name="gender" mode="IN" type="String" optional="true"/>
+		<attribute name="birthDate" mode="IN" type="String" optional="false"/>
+		<attribute name="idNumber" mode="IN" type="String" optional="true"/>
+		<attribute name="religion" mode="IN" type="String" optional="true"/>
+		<attribute name="idIssueDate" mode="IN" type="String" optional="false"/>
+		<attribute name="idIssuePlace" mode="IN" type="String" optional="true"/>
+		<attribute name="maritalStatusId" mode="IN" type="String" optional="true"/>
+		<attribute name="ethnicOrigin" mode="IN" type="String" optional="true"/>
+		<attribute name="nationality" mode="IN" type="String" optional="true"/>
+		<attribute name="nativeLand" mode="IN" type="String" optional="true"/>
+		<attribute name="partyIdFrom" mode="IN" type="String" optional="false"/>
+		<attribute name="emplPositionTypeId" mode="IN" type="String" optional="false"/>
+		<attribute name="dateJoinCompany" mode="IN" type="String" optional="false"/>
+		<attribute name="salaryBaseFlat" mode="IN" type="String" optional="false"/>
+		<attribute name="periodTypeId" mode="IN" type="String" optional="false"/>
+		<attribute name="workingStatusId" mode="IN" type="String" optional="true"/>
+		<attribute name="isParticipateIns" mode="IN" type="String" optional="true"/>
+		<attribute name="permanentRes" mode="IN" type="String" optional="true"/>
+		<attribute name="currRes" mode="IN" type="String" optional="true"/>
+		<attribute name="userLoginId" mode="IN" type="String" optional="true"/>
+		<attribute name="password" mode="IN" type="String" optional="true"/>
+		<attribute name="partyId" mode="OUT" type="String" optional="true"/>
+		<attribute name="message" mode="OUT" type="String" optional="true"/>
+	</service>
+</services>

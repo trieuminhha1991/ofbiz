@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+	<simple-method method-name="getListAllStoreNameByUserLogin">
+		<entity-condition entity-name="ProductStoreRoleDetail" filter-by-date="true" list="listAllStoreByUserLogin" distinct="true">
+       		<condition-list>
+       			<condition-expr field-name="partyId" from-field="userLogin.partyId"/>
+       			<condition-expr field-name="roleTypeId" value="MANAGER"/>
+       		</condition-list>
+       		<select-field field-name="productStoreId"/>
+       	</entity-condition>
+       	<set field="listAllStoreNameByUserLogin"/>
+       	<iterate entry="item" list="listAllStoreByUserLogin">
+       		<set field="listAllStoreNameByUserLoginItem" from-field="item.productStoreId"/>
+       		<field-to-list list="listAllStoreNameByUserLogin" field="listAllStoreNameByUserLoginItem"/>
+       	</iterate>
+       	<field-to-result field="listAllStoreNameByUserLogin" result-name="listAllStoreNameByUserLogin"/>
+	</simple-method>
+	<simple-method method-name="getListAllStoreByUserLogin">
+		<set field="sortField" from-field="parameters.sortField"/>
+		<if-not-empty field="sortField">
+			<entity-condition entity-name="ProductStoreRoleDetail" filter-by-date="true" list="listAllStoreByUserLogin" distinct="true">
+	       		<condition-list>
+	       			<condition-expr field-name="partyId" from-field="userLogin.partyId"/>
+	       			<condition-expr field-name="roleTypeId" value="MANAGER"/>
+	       		</condition-list>
+	       		<order-by field-name="${sortField}"/>
+	       	</entity-condition>
+	    <else>
+	    	<entity-condition entity-name="ProductStoreRoleDetail" filter-by-date="true" list="listAllStoreByUserLogin" distinct="true">
+	       		<condition-list>
+	       			<condition-expr field-name="partyId" from-field="userLogin.partyId"/>
+	       			<condition-expr field-name="roleTypeId" value="MANAGER"/>
+	       		</condition-list>
+	       	</entity-condition>
+	    </else>
+		</if-not-empty>
+       	<field-to-result field="listAllStoreByUserLogin" result-name="listAllStore"/>
+	</simple-method>
+	<!-- <simple-method method-name="getListAllStoreNameByUserLogin">
+		<if-empty field="parameters.viewSize">
+			<set field="viewSize" value="10"/>
+		<else>
+			<set field="viewSize" from-field="parameters.viewSize"/>
+		</else>
+		</if-empty>
+		<if-empty field="parameters.viewIndex">
+			<set field="viewIndex" value="1"/>
+		<else>
+			<set field="viewIndex" from-field="parameters.viewIndex"/>
+		</else>
+		</if-empty>
+		<entity-condition entity-name="ProductStoreRoleDetail" filter-by-date="true" list="listAllStoreByUserLogin" distinct="true">
+       		<condition-list>
+       			<condition-expr field-name="partyId" from-field="userLogin.partyId"/>
+       			<condition-expr field-name="roleTypeId" value="MANAGER"/>
+       		</condition-list>
+       		<select-field field-name="productStoreId"/>
+       		<limit-range size="${viewSize}" start="${viewIndex}"/>
+       	</entity-condition>
+       	<field-to-result field="listAllStoreByUserLogin" result-name="listAllStoreNameByUserLogin"/>
+       	<set field="listAllStoreNameByUserLogin"/>
+       	<iterate entry="item" list="listAllStoreByUserLogin">
+       		<set field="listAllStoreNameByUserLoginItem" from-field="item.productStoreId"/>
+       		<field-to-list list="listAllStoreNameByUserLogin" field="listAllStoreNameByUserLoginItem"/>
+       	</iterate>
+       	<field-to-result field="listAllStoreNameByUserLogin" result-name="listAllStoreNameByUserLogin"/>
+	</simple-method> -->
+	<simple-method method-name="createUpdateShippingAddress" short-description="create and update Shipping address" login-required="false">
+		<entity-one value-field="countryGeo" entity-name="Geo">
+        	<field-map field-name="geoId" from-field="parameters.shipToCountryGeoId"/>
+        </entity-one>
+        <if-not-empty field="countryGeo">
+        	<set field="parameters.shipToCity" from-field="countryGeo.geoName"/>
+        </if-not-empty>
+        <entity-one value-field="stateProvinceGeo" entity-name="Geo">
+        	<field-map field-name="geoId" from-field="parameters.shipToStateProvinceGeoId"/>
+        </entity-one>
+        <if-not-empty field="stateProvinceGeo">
+        	<set field="parameters.shipToCity" from-field="stateProvinceGeo.geoName"/>
+        </if-not-empty>
+        
+        <set field="keepAddressBook" from-field="parameters.keepAddressBook" default-value="Y"/>
+        <call-map-processor xml-resource="component://order/script/org/ofbiz/order/customer/CheckoutMapProcs.xml"
+            processor-name="shipToAddress" in-map-name="parameters" out-map-name="shipToAddressCtx"/>
+        <check-errors/>
+        <set field="shipToAddressCtx.partyId" from-field="parameters.partyId"/>
+        
+        <entity-one value-field="userLogin" entity-name="UserLogin">
+        	<field-map field-name="userLoginId" value="distributorsuper"/>
+        </entity-one>
+        <if-not-empty field="userLogin">
+        	<set field="shipToAddressCtx.userLogin" from-field="userLogin"/>
+        </if-not-empty>
+        
+        <if-not-empty field="parameters.shipToDistrictGeoId">
+        	<set field="shipToAddressCtx.districtGeoId" from-field="parameters.shipToDistrictGeoId"/>
+        	<set field="shipToAddressCtx.countyGeoId" from-field="parameters.shipToDistrictGeoId"/>
+        </if-not-empty>
+        <if-not-empty field="parameters.shipToWardGeoId">
+        	<set field="shipToAddressCtx.wardGeoId" from-field="parameters.shipToWardGeoId"/>
+        </if-not-empty>
+        
+        <if-empty field="shipToAddressCtx.contactMechId">
+            <set field="shipToAddressCtx.contactMechPurposeTypeId" value="SHIPPING_LOCATION"/>
+            <call-service service-name="createPartyPostalAddress" in-map-name="shipToAddressCtx">
+                <result-to-field result-name="contactMechId" field="parameters.shipToContactMechId"/>
+            </call-service>
+            <log level="info" message="Shipping address created with contactMechId ${parameters.shipToContactMechId}"/>
+        <else>
+            <if-compare field="keepAddressBook" operator="equals" value="Y">
+                <make-value entity-name="PostalAddress" value-field="newValue"/>
+                <set-pk-fields value-field="newValue" map="shipToAddressCtx"/>
+                <find-by-primary-key entity-name="PostalAddress" map="newValue" value-field="oldValue"/>
+                <set-nonpk-fields map="shipToAddressCtx" value-field="newValue"/>
+                <if-compare-field field="oldValue" to-field="newValue" operator="not-equals" type="Object">
+                    <set field="shipToAddressCtx.contactMechId" from-field="nullField"/>
+                    <call-service service-name="createPartyPostalAddress" in-map-name="shipToAddressCtx">
+                        <result-to-field result-name="contactMechId" field="parameters.shipToContactMechId"/>
+                    </call-service>
+                </if-compare-field>
+                <entity-and entity-name="PartyContactMechPurpose" list="pcmpShipList" filter-by-date="true">
+                    <field-map field-name="partyId" from-field="userLogin.partyId"/>
+                    <field-map field-name="contactMechId" from-field="parameters.shipToContactMechId"/>
+                    <field-map field-name="contactMechPurposeTypeId" value="SHIPPING_LOCATION"/>
+                </entity-and>
+                <!-- If purpose is not exists then create -->
+                <if-empty field="pcmpShipList">
+                    <set-service-fields service-name="createPartyContactMechPurpose" map="parameters" to-map="serviceContext"/>
+                    <set field="serviceContext.partyId" from-field="userLogin.partyId"/>
+
+                    <entity-and entity-name="PartyContactMechPurpose" list="pcmpList" filter-by-date="true">
+                        <field-map field-name="partyId" from-field="userLogin.partyId"/>
+                        <field-map field-name="contactMechPurposeTypeId" value="SHIPPING_LOCATION"/>
+                    </entity-and>
+                    <if-not-empty field="pcmpList">
+                        <first-from-list list="pcmpList" entry="pcmp"/>
+                        <set-service-fields service-name="deletePartyContactMechPurposeIfExists" map="pcmp" to-map="serviceInMap"/>
+                        <call-service service-name="deletePartyContactMechPurposeIfExists" in-map-name="serviceInMap"/>
+                        <clear-field field="serviceInMap"/>
+                    </if-not-empty>
+                    <set field="serviceContext.partyId" from-field="userLogin.partyId"/>
+                    <set field="serviceContext.contactMechId" from-field="parameters.shipToContactMechId"/>
+                    <set field="serviceContext.contactMechPurposeTypeId" value="SHIPPING_LOCATION"/>
+                    <call-service service-name="createPartyContactMechPurpose" in-map-name="serviceContext"/>
+                    <clear-field field="pcmpList"/>
+                    <clear-field field="serviceContext"/>
+                </if-empty>
+                <if-compare field="parameters.setDefaultShipping" operator="equals" value="Y">
+                    <set-service-fields service-name="setPartyProfileDefaults" map="parameters" to-map="partyProfileDefaultsCtx"/>
+                    <set field="partyProfileDefaultsCtx.defaultShipAddr" from-field="parameters.shipToContactMechId"/>
+                    <set field="partyProfileDefaultsCtx.partyId" from-field="userLogin.partyId"/>
+                    <call-service service-name="setPartyProfileDefaults" in-map-name="partyProfileDefaultsCtx"/>
+                </if-compare>
+            </if-compare>
+            <if-compare field="keepAddressBook" operator="equals" value="N">
+                <set field="shipToAddressCtx.shipToContactMechId" from-field="shipToAddressCtx.contactMechId"></set>
+                <if-compare-field field="shipToAddressCtx.shipToContactMechId" operator="equals" to-field="parameters.billToContactMechId">
+                    <make-value entity-name="PostalAddress" value-field="newValue"/>
+                    <set-pk-fields value-field="newValue" map="shipToAddressCtx"/>
+                    <find-by-primary-key entity-name="PostalAddress" map="newValue" value-field="oldValue"/>
+                    <set-nonpk-fields map="shipToAddressCtx" value-field="newValue"/>
+                    <if-compare-field field="oldValue" to-field="newValue" operator="not-equals" type="Object">
+                        <entity-and entity-name="PartyContactMechPurpose" list="pcmpList" filter-by-date="true">
+                            <field-map field-name="contactMechId" from-field="shipToAddressCtx.shipToContactMechId"/>
+                            <field-map field-name="partyId" from-field="userLogin.partyId"/>
+                            <field-map field-name="contactMechPurposeTypeId" value="SHIPPING_LOCATION"/>
+                        </entity-and>
+                        <first-from-list list="pcmpList" entry="pcmp"/>
+                        <if-not-empty field="pcmp">
+                            <set-service-fields service-name="deletePartyContactMechPurposeIfExists" map="pcmp" to-map="serviceInMap"/>
+                            <call-service service-name="deletePartyContactMechPurposeIfExists" in-map-name="serviceInMap"/>
+                        </if-not-empty>
+                        <set field="shipToAddressCtx.contactMechPurposeTypeId" value="SHIPPING_LOCATION"/>
+                        <set field="shipToAddressCtx.contactMechId" from-field="nullField"/>
+                        <call-service service-name="createPartyPostalAddress" in-map-name="shipToAddressCtx">
+                            <result-to-field result-name="contactMechId" field="parameters.shipToContactMechId"/>
+                        </call-service>
+                        <log level="info" message="Shipping address updated with contactMechId ${shipToAddressCtx.shipToContactMechId}"/>
+                    </if-compare-field>
+                <else>
+                    <set field="shipToAddressCtx.userLogin" from-field="parameters.userLogin"/>
+                    <call-service service-name="updatePartyPostalAddress" in-map-name="shipToAddressCtx">
+                        <result-to-field result-name="contactMechId" field="parameters.shipToContactMechId"/>
+                    </call-service>
+                    <log level="info" message="Shipping address updated with contactMechId ${shipToAddressCtx.shipToContactMechId}"/>
+                </else>
+                </if-compare-field>
+            </if-compare>
+        </else>
+        </if-empty>
+        <field-to-result field="parameters.shipToContactMechId" result-name="contactMechId"/>
+        
+    	<!-- list to find all the POSTAL_ADDRESS for the shipment party. -->
+    	<entity-one value-field="orderParty" entity-name="Party">
+    		<field-map field-name="partyId" from-field="parameters.partyId"/>
+    	</entity-one>
+    	<call-class-method method-name="getContactMech" class-name="org.ofbiz.party.contact.ContactHelper" ret-field="shippingContactMechList">
+    		<field field="orderParty" type="org.ofbiz.entity.GenericValue"/>
+    		<string value="SHIPPING_LOCATION"/>
+    		<string value="POSTAL_ADDRESS"/>
+    		<field field="false" type="boolean"/>
+    	</call-class-method>
+        <if-not-empty field="shippingContactMechList">
+        	<set field="shippingContactMechListMap"/>
+        	<iterate entry="itemContactMech" list="shippingContactMechList">
+        		<clear-field field="itemContactMechMap"/>
+        		<set field="itemContactMechMap.contactMechId" from-field="itemContactMech.contactMechId"/>
+        		<entity-one value-field="postalAddress" entity-name="PostalAddress">
+        			<field-map field-name="contactMechId" from-field="itemContactMech.contactMechId"/>
+        		</entity-one>
+       			<set field="itemContactMechMap.address1" from-field="postalAddress.address1" default-value=""/>
+     			<set field="itemContactMechMap.city" from-field="postalAddress.city" default-value=""/>
+        		<field-to-list list="shippingContactMechListMap" field="itemContactMechMap"/>
+        	</iterate>
+        	<field-to-result field="shippingContactMechListMap" result-name="shippingContactMechList"/>
+        </if-not-empty>
+    </simple-method>
+</simple-methods>

@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+    <simple-method method-name="removeWholeConfigPacking" short-description="remove all config packing of product">
+    	<entity-condition list="listConfigPacking" entity-name="ConfigPacking">
+    		<condition-list>
+    			<condition-expr field-name="productId" from-field="parameters.productId"/>
+    			<condition-expr field-name="uomToId" from-field="parameters.oldQuantityUomId"/>
+    			<condition-expr field-name="thruDate" operator="equals" value=""/>
+    		</condition-list>
+    	</entity-condition>
+    	<if-not-empty field="listConfigPacking">
+    		<now-timestamp field="nowTimeStamp"/>
+    		<iterate entry="configPacking" list="listConfigPacking">
+    			<set field="configPacking.thruDate" from-field="nowTimeStamp"/>
+    			<store-value value-field="configPacking"/>
+    		</iterate>
+    		<check-errors/>
+    	</if-not-empty>
+    </simple-method>
+    
+   	<simple-method method-name="removeSupplierProduct" short-description="Remove a Supplier Product record on Pos">
+        <set field="resultPartyId" from-field="parameters.partyId"/>
+		<if-not-empty field="parameters.oldPartyId">
+			<set field="parameters.partyId" from-field="parameters.oldPartyId"/>
+			<make-value value-field="lookupPKMap" entity-name="SupplierProduct"/>
+        	<set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        	<find-by-primary-key entity-name="SupplierProduct" map="lookupPKMap" value-field="sprod"/>
+        	<if-not-empty field="sprod">
+        		<remove-value value-field="sprod"/>
+        	</if-not-empty>
+		</if-not-empty>
+		<if-empty field="parameters.lastPrice">
+        	<set field="lastPrice" value="0" type="BigDecimal"/>
+        <else>
+        	<set field="lastPrice" from-field="parameters.lastPrice" type="BigDecimal"/>
+        </else>
+        </if-empty>
+        <set field="supplierPrefOrderId" value="10_MAIN_SUPPL"/>
+        <field-to-result field="lastPrice" result-name="lastPrice"/>
+        <field-to-result field="supplierPrefOrderId" result-name="supplierPrefOrderId"/>
+		<field-to-result field="parameters.availableFromDate" result-name="availableFromDate"/>
+        <field-to-result field="parameters.minimumOrderQuantity" result-name="minimumOrderQuantity"/>
+        <field-to-result field="lookedUpValue.productId" result-name="supplierProductId"/>
+        <field-to-result field="resultPartyId" result-name="partyId"/>
+    </simple-method>
+    
+   	<simple-method method-name="createUom" short-description="Create an Uom">
+        <check-permission permission="CATALOG" action="_CREATE">
+            <alt-permission permission="CATALOG_ROLE" action="_CREATE"/>
+            <fail-property resource="ProductUiLabels" property="ProductCatalogCreatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+        <check-permission permission="UOM_POS" action="_CREATE">
+    		<fail-property resource="WebPosSettingUiLabels" property="SettingNotPermissionCreate"/>
+    	</check-permission>
+    	<check-errors/>
+       <!-- check uom is whether existed or not -->
+		<if-not-empty field="parameters.description">
+			<entity-condition list="listUomExist" entity-name="Uom">
+				<condition-expr field-name="description" from-field="parameters.description"/>
+			</entity-condition>
+		</if-not-empty>
+		<if-not-empty field="listUomExist">
+			<add-error>
+				<fail-property resource="WebPosSettingUiLabels" property="SettingUomExists"/>
+			</add-error>
+		</if-not-empty>
+		 <check-errors/>
+        <now-timestamp field="nowTimestamp"/>
+        <make-value value-field="newEntity" entity-name="Uom"/>
+        
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+
+        <if-empty field="parameters.uomId">
+            <sequenced-id sequence-name="Uom" field="newEntity.uomId"/>
+        <else>
+            <set field="newEntity.uomId" from-field="parameters.uomId"/>
+            <check-id field="newEntity.uomId"/>
+            <check-errors/>
+        </else>
+        </if-empty>
+        <create-value value-field="newEntity"/>
+        <field-to-result field="newEntity.uomId" result-name="uomId"/>
+		<field-to-result field="newEntity.description" result-name="description"/>
+		 <set field="Notification" value="SettingCreateSuccess"/>
+        <call-bsh >
+			import org.ofbiz.base.util.UtilProperties;
+			import org.ofbiz.service.ServiceUtil;
+			resourceNoti = "WebPosSettingUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti, Notification, locale));			
+		</call-bsh>
+    </simple-method>
+    
+    <simple-method method-name="deleteUom" short-description="Delete an Uom">
+    	<check-permission permission="UOM_POS" action="_DELETE">
+    		<fail-property resource="WebPosSettingUiLabels" property="SettingNotPermissionDelete"/>
+    	</check-permission>
+    	<check-errors/>
+        <entity-one entity-name="Uom" value-field="uom" />
+        <if-not-empty field="uom">
+        	<remove-value value-field="uom"/> 
+        </if-not-empty>
+        <check-errors/>
+    </simple-method>
+    
+    <simple-method method-name="updateUom" short-description="Update an Uom">
+    	<check-permission permission="UOM_POS" action="_UPDATE">
+    		<fail-property resource="WebPosSettingUiLabels" property="SettingNotPermissionUpdate"/>
+    	</check-permission>
+    	<check-errors/>
+        <entity-one entity-name="Uom" value-field="lookedUpValue"/>
+        <set-nonpk-fields map="parameters" value-field="lookedUpValue"/>
+        <store-value value-field="lookedUpValue"/>
+        <check-errors/>
+		<if-not-empty field="parameters.priceDerivativeUom">
+			<set field="PriceMap.price" from-field="parameters.priceDerivativeUom"/>
+			<set field="PriceMap.productId" from-field="parameters.productId"/>
+			<set field="PriceMap.productPricePurposeId" value="PURCHASE"/>
+			<set field="PriceMap.currencyUomId" value="VND"/>
+			<set field="PriceMap.termUomId" value="parameters.uomFromId"/>
+			<set field="PriceMap.productStoreGroupId" value="_NA_"/>
+			<set field="PriceMap.fromDate" from-field="parameters.fromDate"/>
+			<call-service service-name="updateProductPriceWebPos" in-map-name="PriceMap"></call-service>
+		</if-not-empty>
+		<check-errors/>
+		<set field="Notification" value="SettingUpdateSuccess"/>
+        <call-bsh >
+			import org.ofbiz.base.util.UtilProperties;
+			import org.ofbiz.service.ServiceUtil;
+			resourceNoti = "WebPosSettingUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceNoti, Notification, locale));			
+		</call-bsh>
+    </simple-method>
+    
+    
+    
+    <simple-method method-name="deleteProduct" short-description="Delete Product">
+    	<check-permission permission="PRODUCT" action="_DELETE">
+    		<fail-property resource="WebPosSettingUiLabels" property="SettingNotPermissionDelete"/>
+    	</check-permission>
+    	<check-errors/>
+		<entity-one value-field="lookUpValue" entity-name="Product"/>
+		<now-timestamp field="nowTimestamp"/>
+		<set field="parameters.salesDiscontinuationDate" from-field="nowTimestamp" />
+		<set-nonpk-fields value-field="lookUpValue" map="parameters"/>
+		<store-value value-field="lookUpValue"/>
+    </simple-method>
+    
+     <simple-method method-name="restoreProduct" short-description="Restore Product">
+     	<check-permission permission="PRODUCT" action="_RESTORE">
+    		<fail-property resource="WebPosSettingUiLabels" property="SettingNotPermissionRestore"/>
+    	</check-permission>
+    	<check-errors/>
+		<entity-one value-field="lookUpValue" entity-name="Product"/>
+		<set field="lookUpValue.salesDiscontinuationDate" from-field="nullField"/>
+		<store-value value-field="lookUpValue"/>
+    </simple-method>
+    
+    
+    <simple-method method-name="removeProductCategoryFromCategory" short-description="Remove ProductCategory From Category">
+        <set field="productCategoryId" from-field="parameters.productCategoryId"/>
+        <entity-condition list="listProdCatalogCategory" entity-name="ProdCatalogCategory">
+        	<condition-list>
+        		<condition-expr field-name="productCategoryId" from-field="productCategoryId"/>
+        		<condition-expr field-name="prodCatalogId" value="Pos_Catalog"/>	
+        	</condition-list>
+        </entity-condition>
+        <now-timestamp field="nowTimestamp"/>
+        <if-not-empty field="listProdCatalogCategory">
+        	<iterate entry="prodCatalogCategory" list="listProdCatalogCategory">
+        		<set field="prodCatalogCategory.thruDate" from-field="nowTimestamp"/>
+        		<store-value value-field="prodCatalogCategory"/>
+        	</iterate>
+        </if-not-empty>
+    </simple-method>
+    
+	<simple-method method-name="addProductCategoryToCategory" short-description="Add ProductCategory to Category">
+        
+        <now-timestamp field="nowTimestamp"/>
+      
+       	<entity-condition list="prodCatalogs" entity-name="ProdCatalogCategory">
+       		<condition-expr field-name="productCategoryId" operator="equals" from-field="parameters.productCategoryId"/>
+       	</entity-condition>
+      
+       	<if-not-empty field="prodCatalogs">
+       		<iterate entry="prodCatalog" list="prodCatalogs">
+       			<remove-value value-field="prodCatalog"/>
+       		</iterate>
+       	</if-not-empty>
+		<if-not-empty field="parameters.parentProductCategoryId">
+			<set field="parentProductCategory" from-field="parameters.parentProductCategoryId"/>
+			<!-- checking category which has whether product or not -->
+			<set field="CheckingProdInCat.productCategoryId" from-field="parentProductCategory"/>
+			<set field="CheckingProdInCat.defaultViewSize" value="10" type="Integer"/>
+			<set field="CheckingProdInCat.limitView" value="false" type="Boolean"/>
+			<call-service service-name="getProductCategoryAndLimitedMembers" in-map-name="CheckingProdInCat">
+				<result-to-field result-name="listSize" field="listSizeProduct"/>
+			</call-service>
+			<set field="noProduct" value="0" type="Integer"/>	
+			<if-compare-field operator="greater" to-field="noProduct"  field="listSizeProduct">
+				<add-error error-list-name="test" >
+					<fail-property  resource="WebPosSettingUiLabels" property="SettingParentCategoryHasProduct"/>
+				</add-error>
+				<check-errors error-list-name="test" error-code="error"/>
+				<return response-code="error"/>
+			</if-compare-field>
+			<!--end checking category which has whether product or not -->
+			
+			<set field="AddCategoryToCategoryMap.productCategoryId" from-field="parameters.productCategoryId"/>
+			<set field="AddCategoryToCategoryMap.fromDate" from-field="nowTimestamp"/>
+			<set field="AddCategoryToCategoryMap.parentProductCategoryId" from-field="parentProductCategory"/>
+			<call-service service-name="safeAddProductCategoryToCategory" in-map-name="AddCategoryToCategoryMap"></call-service>
+			<check-errors/>
+			
+			<field-to-result field="parameters.productCategoryId" result-name="productCategoryId"/>
+			
+			<field-to-result field="parameters.parentProductCategoryId" result-name="parentProductCategoryId"/>
+			<field-to-result field="nowTimestamp" result-name="fromDate"/>
+		</if-not-empty>
+        
+    </simple-method>
+    
+    <simple-method method-name="addProductToCategory" short-description="Add Product to Category">
+    	<if-not-empty field="parameters.productCategoryId">
+    		<entity-condition list="parentCategory" entity-name="ProductCategoryRollup">
+    			<condition-expr field-name="parentProductCategoryId" from-field="parameters.productCategoryId"/>
+    		</entity-condition>
+    	</if-not-empty>
+    	<if-not-empty field="parentCategory">
+    		<add-error>
+    			<fail-property resource="WebPosSettingUiLabels" property="SettingMessageAddProductToCategory"/>
+    		</add-error>
+    		<check-errors/>
+    	</if-not-empty>
+    	<set-service-fields service-name="safeAddProductToCategory" to-map="safeAddProductToCategoryMap" map="parameters"/>
+    	<call-service service-name="safeAddProductToCategory" in-map-name="safeAddProductToCategoryMap">
+    	</call-service>
+    	<check-errors/>
+		<set field="newEntity.fromDate" from-field="fromDate"/>
+		<field-to-result field="fromDate" result-name="fromDate"/>
+        <if-empty field="parameters.primaryProductCategoryId">
+        	<entity-one value-field="product" entity-name="Product"></entity-one>
+        	<set field="product.primaryProductCategoryId" from-field="parameters.productCategoryId"/>
+        	<store-value value-field="product"/>
+        </if-empty>
+        
+        
+    </simple-method>
+    
+    <simple-method method-name="updateDefaultUom" short-description="Update Default Uom">
+    	<entity-one entity-name="Product" value-field="lookedUpValue"/>
+    	<if-not-empty field="parameters.salesUomId">
+    		<set field="lookedUpValue.salesUomId" from-field="parameters.salesUomId"/>
+    	</if-not-empty>
+    	<if-not-empty field="parameters.purchaseUomId">
+    		<set field="lookedUpValue.purchaseUomId" from-field="parameters.purchaseUomId"/>
+    		<field-to-result field="parameters.purchaseUomId" result-name="purchaseUomId"/>
+    	</if-not-empty>
+        <field-to-result field="parameters.productId" result-name="productId"/>
+        <field-to-result field="parameters.salesUomId" result-name="salesUomId"/>
+        <field-to-result field="parameters.purchaseUomId" result-name="purchaseUomId"/>
+        <store-value value-field="lookedUpValue"/>
+    </simple-method>
+    
+    <simple-method method-name="updateUomForSupplierProduct">
+    	<entity-condition list="supplierProducts" entity-name="SupplierProduct">
+    		<condition-expr field-name="productId" operator="equals" from-field="parameters.productId"/>
+    	</entity-condition>
+    	
+    	<if-not-empty field="supplierProducts">
+    		<iterate entry="supplierProduct" list="supplierProducts">
+    			<set field="supplierProduct.quantityUomId" from-field="parameters.purchaseUomId"/>
+    			<store-value value-field="supplierProduct"/>
+    		</iterate>
+    	</if-not-empty>
+    	
+    </simple-method>
+    
+   
+    
+    <simple-method method-name="createBarcodeUom" short-description="Create a Barcode for uom record">
+        <check-permission permission="CATALOG" action="_CREATE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogCreatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+        <make-value value-field="newEntity" entity-name="GoodIdentification"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+       	
+		<create-value value-field="newEntity"/>
+		<field-to-result field="newEntity.productId" result-name="productId"/>
+		<field-to-result field="newEntity.uomId" result-name="uomId"/>
+		<field-to-result field="newEntity.goodIdentificationTypeId" result-name="goodIdentificationTypeId"/>
+    </simple-method>
+
+    <simple-method method-name="updateBarcodeUom" short-description="Update a Barcode For Uom record">
+        <check-permission permission="CATALOG" action="_UPDATE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogUpdatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+		
+        <make-value value-field="lookupPKMap" entity-name="GoodIdentification"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key entity-name="GoodIdentification" map="lookupPKMap" value-field="barcodeUom"/>
+        <set-nonpk-fields map="parameters" value-field="barcodeUom"/>
+        
+        <store-value value-field="barcodeUom"/>
+        <field-to-result field="barcodeUom.productId" result-name="productId"/>
+        <field-to-result field="barcodeUom.uomId" result-name="uomId"/>
+        <field-to-result field="barcodeUom.goodIdentificationTypeId" result-name="goodIdentificationTypeId"/>
+        <if-not-empty field="parameters.oldbarcodeUom">
+        	<field-to-result field="parameters.oldbarcodeUom" result-name="oldbarcodeUom"/>
+        </if-not-empty>
+        
+    </simple-method>
+
+    <simple-method method-name="removeBarcodeUom" short-description="Remove a Barcode record">
+        <check-permission permission="CATALOG" action="_DELETE">
+            <fail-property resource="ProductUiLabels" property="ProductCatalogDeletePermissionError"/>
+        </check-permission>
+        <check-errors/>
+        <make-value value-field="lookupPKMap" entity-name="GoodIdentification"/>
+        <set-pk-fields map="parameters" value-field="lookupPKMap"/>
+        <find-by-primary-key entity-name="GoodIdentification" map="lookupPKMap" value-field="barcodeUom"/>
+        <remove-value value-field="barcodeUom"/>
+     </simple-method>
+     <simple-method method-name="updateProductAverageCostToProductFacility" short-description="update product average cost to productFacility">
+     	<entity-one value-field="productAverageCost" entity-name="ProductAverageCost"></entity-one>
+     	<set field="averageCost" from-field="productAverageCost.averageCost"/>
+     	<set field="productId" from-field="productAverageCost.productId"/>
+     	<set field="facilityId" from-field="productAverageCost.facilityId"/>
+     	<entity-one value-field="productFacility" entity-name="ProductFacility">
+     		<field-map field-name="productId" from-field="productId"/>
+     		<field-map field-name="facilityId" from-field="facilityId"/>
+     	</entity-one>
+     	<if-empty field="productFacility">
+     		<make-value value-field="productFacilityEntity" entity-name="ProductFacility"/>
+     		<set field="productFacilityEntity.productId" from-field="productId"/>
+     		<set field="productFacilityEntity.facilityId" from-field="facilityId"/>
+     		<set field="productFacilityEntity.unitCost" from-field="averageCost"/>
+     		<create-value value-field="productFacilityEntity"/>
+     	<else>
+     		<set field="productFacility.unitCost" from-field="averageCost"/>
+     		<store-value value-field="productFacility"/>
+     	</else>	
+     	</if-empty>
+     	<field-to-result field="productId" result-name="productId"/>
+     	<field-to-result field="facilityId" result-name="facilityId"/>
+     </simple-method>
+     <simple-method method-name="updateProductAverageCostToProduct">	
+     	<set field="getProductAverageCostMap.productId" from-field="parameters.productId"/>
+     	<call-service service-name="getProductAverageCostAverageFacility" in-map-name="getProductAverageCostMap" >
+     		<result-to-field result-name="unitCost" field="unitCost"/>
+     	</call-service>
+     	<entity-one value-field="product" entity-name="Product">
+     		<field-map field-name="productId" from-field="parameters.productId"/>
+     	</entity-one>
+     	<set field="product.unitCost" from-field="unitCost"/>
+     	<store-value value-field="product"/>
+     </simple-method>
+     <simple-method method-name="createProductFacilitySummary">
+     	<make-value value-field="lookUp" entity-name="ProductFacilitySummary"/>
+     	<set-pk-fields value-field="lookUp" map="parameters"/>
+     	<set-nonpk-fields value-field="lookUp" map="parameters"/>
+     	<create-value value-field="lookUp"/>
+     </simple-method>
+     <simple-method method-name="updateProductFacilitySummary">
+     	<entity-one value-field="productFacilitySummary" entity-name="ProductFacilitySummary" ></entity-one>
+     	<set-nonpk-fields value-field="productFacilitySummary" map="parameters"/>
+     	<store-value value-field="productFacilitySummary"/>
+     </simple-method>
+     <simple-method method-name="createProductSummary">
+     	<make-value value-field="lookUp" entity-name="ProductSummary"/>
+     	<set-pk-fields value-field="lookUp" map="parameters"/>
+     	<set-nonpk-fields value-field="lookUp" map="parameters"/>
+     	<create-value value-field="lookUp"/>
+     </simple-method>
+     <simple-method method-name="updateProductSummary">
+     	<entity-one value-field="productSummary" entity-name="ProductSummary"></entity-one>
+     	<set-nonpk-fields value-field="productSummary" map="parameters"/>
+     	<store-value value-field="productSummary"/>
+     </simple-method>
+</simple-methods>

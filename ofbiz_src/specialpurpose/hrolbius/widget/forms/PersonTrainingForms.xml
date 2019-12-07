@@ -1,0 +1,1023 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+       xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
+    <form name="showTrainingCalendar" type="single" target="applyTraining">
+        <field name="partyId"><hidden value="${loginPartyId}"/></field>
+        <field name="approverId" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="trainingClassTypeId" title="${uiLabelMap.HumanResTraining} ${uiLabelMap.CommonName}"><display/></field>
+        <field name="approvalStatus"><hidden value="TRAINING_APPLIED"/></field>
+        <field name="workEffortTypeId"><hidden/></field>
+        <field name="workEffortId"><display/></field>
+        <field name="fromDate" title="${uiLabelMap.CommonFromDate}"><display type="date-time"/></field>
+        <field name="thruDate" title="${uiLabelMap.CommonThruDate}"><display type="date-time"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonApply}" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-ok"/></field>
+    </form>
+    <form name="editTrainingCalendar" type="single" target="createTrainingCalendar" default-map-name="workEffort">
+        <alt-target use-when="workEffort!=null" target="updateTrainingCalendar"/>
+        <field name="workEffortId" use-when="workEffort!=null"><hidden/></field>
+        <field name="partyId"><hidden value="${parameters.userLogin.partyId}"/></field>
+        <field name="roleTypeId" use-when="workEffort==null"><hidden value="CAL_OWNER"/></field>
+        <field name="workEffortTypeId"><hidden value="TRAINING"/></field>
+        <field name="statusId" use-when="workEffort==null"><hidden value="PRTYASGN_ASSIGNED"/></field>
+        <field name="currentStatusId"><hidden value="CAL_TENTATIVE"/></field>
+        <field name="workEffortName" title="${uiLabelMap.HumanResTrainings} ${uiLabelMap.CommonName}">
+            <drop-down allow-empty="false">
+                <entity-options description="${description}" key-field-name="trainingClassTypeId" entity-name="TrainingClassType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="description" title="${uiLabelMap.CommonDescription}"><text/></field>
+        <field name="scopeEnumId"><hidden value="WES_PUBLIC"/></field>
+        <field name="estimatedStartDate" title="${uiLabelMap.CommonFromDate}"><date-time input-method="time-dropdown" /></field>
+        <field name="estimatedCompletionDate" title="${uiLabelMap.CommonThruDate}"><date-time input-method="time-dropdown"/></field>
+        <field name="add" title="${uiLabelMap.CommonAdd}" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-ok"/></field>
+    </form>
+    <form name="AssignTraining" type="single" target="assignTraining">
+        <field name="approverId"><hidden value="${loginPartyId}"/></field>
+        <field name="fromDate"><hidden/></field>
+        <field name="thruDate"><hidden/></field>
+        <field name="trainingClassTypeId"><hidden/></field>
+        <field name="workEffortId"><hidden/></field>
+        <field name="approvalStatus"><hidden value="TRAINING_ASSIGNED"/></field>
+        <field name="partyId" position="1"><lookup target-form-name="LookupPartyName" size="10"/></field>
+        <field name="roleTypeId"> <hidden value="CAL_ATTENDEE"/></field>
+        <field name="add" title="${uiLabelMap.CommonAdd}" widget-style="btn btn-primary btn-small"><submit button-type="button" image-location="icon-ok"/></field>
+    </form>
+    <form name="ListTrainingParticipants" list-name="listIt" title="" type="list" odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="table table-hover table-striped table-bordered dataTable margin-bottom30">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="PersonTraining"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <auto-fields-entity entity-name="PersonTraining" default-field-type="hidden"/>
+        <field name="partyId" title="${uiLabelMap.FormFieldTitle_employeePartyId}" widget-style="btn btn-mini btn-info">
+            <display-entity entity-name="PartyNameView" description="${firstName} ${middleName} ${lastName} ${groupName}">
+                <sub-hyperlink target="/partymgr/control/viewprofile" target-type="inter-app" description="${partyId}" link-style="btn btn-mini btn-primary">
+                    <parameter param-name="partyId" from-field="partyId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="approvalStatus"><display-entity entity-name="StatusItem" key-field-name="statusId"/></field>
+        <field name="trainingRequestId" widget-style="btn btn-mini btn-info"><display/></field>
+        <field name="trainingClassTypeId"><display-entity entity-name="TrainingClassType"/></field>
+    </form>
+    <form name="FindTrainingApprovals" target="FindTrainingApprovals" title="" type="single" default-title-style="tableheadtext" default-widget-style="inputBox">
+        <auto-fields-entity entity-name="PersonTraining" default-field-type="find"/>
+        <field name="partyId" title="${uiLabelMap.FormFieldTitle_employeePartyId}"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="trainingClassTypeId" title="${uiLabelMap.HumanResTrainingClassType}">
+            <drop-down allow-empty="true">
+                <entity-options description="${description}" key-field-name="trainingClassTypeId" entity-name="TrainingClassType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="approverId" use-when="!hasAdminPermission"><hidden value="${loginPartyId}"/></field>
+        <field name="reason"><text-find ignore-case="true"/></field>
+        <field name="noConditionFind"><hidden value="Y"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-search"/></field>
+    </form>
+    <form name="ListTrainingApprovals" type="list" list-name="listIt" target="updateTrainingStatus" 
+    	title="" odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="table table-hover table-striped table-bordered dataTable">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="PersonTraining"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+        </actions>
+        <auto-fields-entity entity-name="PersonTraining" default-field-type="display"/>
+        <field name="partyId" title="${uiLabelMap.FormFieldTitle_employeePartyId}" widget-style="btn btn-mini btn-info">
+            <display-entity entity-name="PartyNameView" description="${firstName} ${middleName} ${lastName} ${groupName}">
+                <sub-hyperlink target="/partymgr/control/viewprofile" target-type="inter-app" description="${partyId}" link-style="btn btn-mini btn-primary">
+                    <parameter param-name="partyId" from-field="partyId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="approverId" widget-style="btn btn-mini btn-info">
+            <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${firstName} ${middleName} ${lastName} ${groupName}">
+                <sub-hyperlink target="/partymgr/control/viewprofile" target-type="inter-app" description="${approverId}" link-style="btn btn-mini btn-primary">
+                    <parameter param-name="partyId" from-field="approverId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="trainingClassTypeId" title="${uiLabelMap.HumanResTrainingClassType}"/>
+        <field name="trainingRequestId" widget-style="btn btn-mini btn-info"/>
+        <field name="UpdateStatus" title="${uiLabelMap.CommonUpdate}" widget-style="btn btn-mini btn-primary">
+            <hyperlink description="${uiLabelMap.CommonUpdate}" target="EditTrainingApprovals">
+                <parameter param-name="partyId"/>
+                <parameter param-name="trainingClassTypeId"/>
+                <parameter param-name="fromDate"/>
+            </hyperlink>
+        </field>
+        <field name="approvalStatus"><display-entity entity-name="StatusItem" key-field-name="statusId"/></field>
+        <field name="trainingClassTypeId"><display-entity entity-name="TrainingClassType"/></field>
+    </form>
+    <form name="EditTrainingApprovals" type="single" target="updateTrainingStatus" default-map-name="personTraining">
+        <auto-fields-service service-name="updateTrainingStatus" default-field-type="display"/>
+        <field name="partyId" title="${uiLabelMap.FormFieldTitle_employeePartyId}"/>
+        <field name="trainingClassTypeId" title="${uiLabelMap.HumanResTrainingClassType}"/>
+        <field name="approvalStatus">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="StatusItem" key-field-name="statusId" description="${description}">
+                    <entity-constraint name="statusTypeId" operator="equals" value="TRAINING_STATUS"/>
+                        <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="approvalStatus" use-when="personTraining!=null&amp;&amp;personTraining.getString(&quot;approvalStatus&quot;).equals(&quot;TRAINING_REJECTED&quot;)"><display/></field>
+        <field name="reason" tooltip="${uiLabelMap.CommonRequired}" widget-style="required"><text/></field>
+        <field name="reason" use-when="personTraining!=null&amp;&amp;personTraining.getString(&quot;approvalStatus&quot;).equals(&quot;TRAINING_REJECTED&quot;)"><display/></field>
+        <field name="submitButton" title="Update" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-ok"/></field>
+    </form>
+    <form name="FindTrainingStatus" target="FindTrainingStatus" title="" type="single" default-title-style="tableheadtext" default-widget-style="inputBox">
+        <auto-fields-entity entity-name="PersonTraining" default-field-type="find"/>
+        <field name="partyId"><hidden value="${loginPartyId}"/></field>
+        <field name="trainingClassTypeId" title="${uiLabelMap.HumanResTrainingClassType}">
+            <drop-down allow-empty="true">
+                <entity-options description="${description}" key-field-name="trainingClassTypeId" entity-name="TrainingClassType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>  
+        </field>
+        <field name="approverId"><lookup target-form-name="LookupPartyName"/></field>
+        <field name="approvalStatus"><text-find ignore-case="true"/></field>
+        <field name="reason"><text-find ignore-case="true"/></field>
+        <field name="noConditionFind"><hidden value="Y"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSearch}" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-search"/></field>
+    </form>
+    <form name="ListTrainingStatus" list-name="listIt" title="" type="list" odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="table table-hover table-striped table-bordered dataTable">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="PersonTraining"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <auto-fields-entity entity-name="PersonTraining" default-field-type="display"/>
+        <field name="partyId" title="${uiLabelMap.FormFieldTitle_employeePartyId}" widget-style="btn btn-mini btn-info">
+            <display-entity entity-name="PartyNameView" description="${firstName} ${middleName} ${lastName} ${groupName}">
+                <sub-hyperlink target="/partymgr/control/viewprofile" target-type="inter-app" description="${partyId}" link-style="btn btn-mini btn-primary">
+                    <parameter param-name="partyId" from-field="partyId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="approverId" widget-style="btn btn-mini btn-info">
+            <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${firstName} ${middleName} ${lastName} ${groupName}">
+                <sub-hyperlink target="/partymgr/control/viewprofile" target-type="inter-app" description="${approverId}" link-style="btn btn-mini btn-primary">
+                    <parameter param-name="partyId" from-field="approverId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="trainingRequestId" widget-style="btn btn-mini btn-info"/>
+        <field name="trainingClassTypeId" title="${uiLabelMap.HumanResTrainingClassType}"/>
+        <field name="approvalStatus"><display-entity entity-name="StatusItem" key-field-name="statusId"/></field>
+        <field name="trainingClassTypeId"><display-entity entity-name="TrainingClassType"/></field>
+    </form>
+
+    <form name="simpleListTrainingStatus" list-name="listIt" title="" type="list" odd-row-style="alternate-row" default-table-style="table table-hover table-striped table-bordered dataTable">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="PersonTraining"/>
+                <field-map field-name="orderBy" value="fromDate"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+        </actions>
+        <field name="fromDate"><display type="date-time"/></field>
+        <field name="thruDate"><display type="date-time"/></field>
+        <field name="approvalStatus"><display-entity entity-name="StatusItem" key-field-name="statusId"/></field>
+        <field name="trainingClassTypeId"><display-entity entity-name="TrainingClassType"/></field>
+        <field name="approverId" title="Approver Employee" widget-style="btn btn-mini btn-info">
+            <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${firstName} ${middleName} ${lastName} ${groupName}"/>
+        </field>
+    </form>
+
+    <form name="ListEmplTrainings" type="list" list-name="listIt" separate-columns="true" target="updateEmplLeave" paginate-target="FindEmplLeaves"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="table table-hover table-striped table-bordered dataTable">
+        <actions>
+            <entity-condition entity-name="PersonTraining">
+                <condition-expr field-name="partyId" from-field="partyId"/>
+                <order-by field-name="fromDate"/>
+            </entity-condition>
+        </actions>
+        <auto-fields-entity entity-name="PersonTraining" default-field-type="display"/>
+        <field name="partyId" title="${uiLabelMap.FormFieldTitle_employeePartyId}">
+            <display-entity entity-name="PartyNameView" description="${firstName} ${middleName} ${lastName} ${groupName}"/>
+        </field>
+        <field name="approverId">
+            <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${firstName} ${middleName} ${lastName} ${groupName}"/>
+        </field>
+        <field name="trainingRequestId"/>
+        <field name="trainingClassTypeId" title="${uiLabelMap.HumanResTrainingClassType}"/>
+        <field name="approvalStatus"><display-entity entity-name="StatusItem" key-field-name="statusId"/></field>
+        <field name="trainingClassTypeId"><display-entity entity-name="TrainingClassType"/></field>
+    </form>
+    
+    <form name="createTrainingPlan" type="multi" list-name="deptTrainingPosTypeList" use-row-submit="true" group-columns="false"
+    	target="createTrainingPlan?header=${header}&amp;action=${action}&amp;state=${state}&amp;partyId=${partyId}&amp;dateTime=${dateTime}&amp;targetLink=${targetLink}" 
+    	header-row-style="header-row" default-table-style="table table-striped table-hover table-bordered dataTable">
+    	<actions>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/trainingplan/getDeptTrainingPositionType.groovy" />	
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/util/DateUtil.groovy" />
+			<set field="createdDate" value="${currentTime}"/>
+		</actions>
+	 	<field name="trainingClassTypeId" title="${uiLabelMap.HROlbiusTrainingClassType}" widget-area-style="width215">
+	 		<display-entity entity-name="TrainingClassType" description="${description}" key-field-name="trainingClassTypeId"></display-entity>
+ 		</field>
+ 		<field name="createdDate">
+ 			<hidden />
+ 		</field>
+    	<field name="fromDate" title="${uiLabelMap.HROlbiusFromDate}"  widget-style="width70pc" widget-area-style="width22pc" required-field="true" ><date-time /></field>
+    	<field name="thruDate" title="${uiLabelMap.HROlbiusThruDate}"  widget-style="width70pc" widget-area-style="width22pc" required-field="true"><date-time /></field>
+    	<field name="quality" title="${uiLabelMap.HROlbiusQualityPeople}" widget-area-style="width4pc"  widget-style="width50"><text default-value="0" mask="99"/></field>
+    	<field name="description" widget-area-style="width15pc" widget-style="olbius-textarea"><textarea rows="1"/></field>
+    	<field name="expense"><hidden/></field>
+    	<field name="partyId"><hidden/></field>
+    	<field name="statusId"><hidden/></field>
+    	<field name="_rowSubmit" title="${uiLabelMap.CommonSelect}">
+    		<hidden value="Y"/>
+    	</field>
+    	<field name="submitButton" title="${uiLabelMap.CommonCreate}" widget-style="btn btn-primary btn-small mgt20">
+    		<submit button-type="button" image-location="icon-ok"/>
+   		</field>
+    </form>
+    
+    <form name="UpdateTrainingPlan" type="multi" target="updateTrainingPlan?ntfId=${ntfId}" odd-row-style="alternate-row" header-row-style="header-row-2"
+        default-table-style="table table-striped table-hover table-bordered dataTable"> 
+        <actions>
+        	<entity-condition entity-name="TrainingPlan" >
+				<condition-expr field-name="statusId" operator="equals" value="ITRS_INIT" />
+        	 </entity-condition>
+        	 <set field="HdID" from-field="parameters.HdID"/>
+        	 <set field="HrID" value="${groovy: com.olbius.util.PartyUtil.getHrmAdmin(delegator)}"/>
+        </actions>
+        <field name="HdID" use-when="HdID!=null"><hidden value="${HdID}"/></field>
+        <field name="HdID" use-when="HdID==null"><hidden value="${HrID}"/></field>
+        <field name="partyId" title="${uiLabelMap.HrolbiusDepartment}" sort-field="true">
+        	<display-entity entity-name="PartyGroup" description="${groupName}" key-field-name="partyId"></display-entity>
+        </field>
+        <field name="trainingClassTypeId" title="${uiLabelMap.HROlbiusTrainingClassType}" sort-field="true">
+        	<display-entity entity-name="TrainingClassType" description="${description}" key-field-name="trainingClassTypeId"></display-entity>
+        </field>
+        <field name="createdDate" title="${uiLabelMap.HROlbiusCreatedDate}" sort-field="true"><display></display></field>
+        <field name="fromDate" red-when="never" title="${uiLabelMap.HROlbiusFromDate}" sort-field="true"><display></display></field>
+        <field name="thruDate" red-when="never" title="${uiLabelMap.HROlbiusThruDate}" sort-field="true"><display></display></field>
+        <field name="quality" title="${uiLabelMap.HROlbiusQualityPeople}" sort-field="true"><display></display></field>
+        <field name="description" title="${uiLabelMap.CommonDescription}" sort-field="true"><display></display></field>
+        <field name="expense" title="${uiLabelMap.HROlbiusExpense}"><text size="40" maxlength="45"></text></field>
+        <field name="statusId" title="${uiLabelMap.HROlbiusTrainingStatus}">
+        	<drop-down allow-empty="false" current="selected">
+        		<entity-options description="${description}" entity-name="StatusItem" key-field-name="statusId"><entity-constraint name="statusTypeId" operator="equals" value="CHECK_TP"/> </entity-options>
+        	 </drop-down>
+        </field>
+        <field name="_rowSubmit" title="${uiLabelMap.CommonSelect}"> <hidden value="Y"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-ok"/></field>
+	</form>
+	
+	<form name="ApproveTrainingPlan" type="multi" target="updateApprovalTrainingPlan?ntfId=${ntfId}&amp;header=${header}&amp;action=${action}&amp;dateTime=${dateTime}&amp;notiToId2=${notiToId2}&amp;state=${state}&amp;"
+		 odd-row-style="alternate-row" header-row-style="header-row-2"
+        default-table-style="table table-striped table-hover table-bordered dataTable"> 
+        <actions>
+        	<entity-condition entity-name="TrainingPlan" >
+        		<condition-list combine="or">
+        			<condition-expr field-name="statusId" operator="equals" value="CTP_ACCEPTED"/>
+        		</condition-list>
+        	 </entity-condition>
+        </actions>
+        <field name="partyId" title="${uiLabelMap.HrolbiusDepartment}" sort-field="true">
+        	<display-entity entity-name="PartyGroup" description="${groupName}" key-field-name="partyId"></display-entity>
+        </field>
+        <field name="trainingClassTypeId" title="${uiLabelMap.HROlbiusTrainingClassType}" sort-field="true">
+        	<display-entity entity-name="TrainingClassType" description="${description}" key-field-name="trainingClassTypeId"></display-entity>
+        </field>
+        <field name="createdDate" title="${uiLabelMap.HROlbiusCreatedDate}" sort-field="true"><display></display></field>
+        <field name="fromDate" red-when="never" title="${uiLabelMap.HROlbiusFromDate}" sort-field="true" ><display></display></field>
+        <field name="thruDate" red-when="never" title="${uiLabelMap.HROlbiusThruDate}" sort-field="true"><display></display></field>
+        <field name="quality" title="${uiLabelMap.HROlbiusQualityPeople}" sort-field="true"><display></display></field>
+        <field name="description" title="${uiLabelMap.CommonDescription}" ><display></display></field>
+        <field name="expense" title="${uiLabelMap.HROlbiusExpense}"><text/></field>
+        <field name="statusId" title="${uiLabelMap.HROlbiusTrainingStatus}">
+        	<drop-down allow-empty="false" current="selected">
+        		<entity-options description="${description}" entity-name="StatusItem" key-field-name="statusId">
+        			<entity-constraint name="statusTypeId" operator="equals" value="APPR_TP_STATUS"/> 
+        		</entity-options>
+        	 </drop-down>
+        </field>
+        <field name="_rowSubmit" title="${uiLabelMap.CommonSelect}"> <hidden value="Y"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-ok"/></field>
+		
+	</form>
+	
+	 <form name="FindTrainingPlan" type="single" target="FindTrainingPlan">
+        <auto-fields-entity entity-name="TrainingPlan" default-field-type="find"/>
+        <field name="noConditionFind"><hidden value="Y"/></field>
+        <field name="createdDate"><hidden/></field>
+        <field name="statusId"><hidden/></field>
+        <field name="expense"><hidden/></field>
+        <field name="partyId"><hidden/></field>
+        <field name="partyIdFrom"><hidden value="${userLogin.partyId}"/></field>
+        <field name="quality"><hidden/></field>  
+        <field name="description"><hidden/></field>
+        <field name="trainingClassTypeId">
+            <drop-down allow-empty="true">
+                <entity-options key-field-name="trainingClassTypeId" description="${description}" entity-name="TrainingClassType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="searchButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-primary btn-small"><submit button-type="button" image-location="icon-search"/></field>
+    </form>
+    
+    <form name="ListTrainingPlan" type="list" list-name="listIt" paginate-target="FindTrainingPlan" odd-row-style="alternate-row" header-row-style="header-row-2" 
+     default-table-style="table table-hover table-striped table-bordered dataTable" group-columns="false">
+        <actions>
+            <set field="entityName" value="TrainingPlan"/>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="requestParameters"/>
+                <field-map field-name="entityName" from-field="entityName"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+        </actions>
+       
+        <field name="trainingClassTypeId" title="${uiLabelMap.HROlbiusTrainingClassType}">
+        	<display-entity entity-name="TrainingClassType" description="${description}"></display-entity>
+        </field>
+         <field name="partyId" title="${uiLabelMap.HrolbiusDepartment}">
+        	<display-entity entity-name="PartyGroup" description="${groupName}"></display-entity>
+        </field>
+        <field name="createdDate" title="${uiLabelMap.HROlbiusCreatedDate}"><display></display></field>
+        <field name="fromDate" red-when="never" title="${uiLabelMap.HROlbiusFromDate}"><display></display></field>
+        <field name="thruDate" red-when="never" title="${uiLabelMap.HROlbiusThruDate}"><display></display></field>
+        <field name="quality" title="${uiLabelMap.HROlbiusQualityPeople}"><display></display></field>
+        <field name="description" title="${uiLabelMap.CommonDescription}"><display></display></field>
+        <field name="expense" title="${uiLabelMap.HROlbiusExpense}"><display></display> </field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}">
+        	<display-entity entity-name="StatusItem" description="${description}"></display-entity>
+        </field>
+    </form>
+    
+    <form name="CheckTrainingPlan" target="checkTrainingPlan" type="multi" list-name="listIt" paginate-target="FindTrainingPlan" odd-row-style="alternate-row" header-row-style="header-row-2" 
+     default-table-style="table table-hover table-striped table-bordered dataTable" group-columns="false">
+        <actions>
+            <set field="entityName" value="TrainingPlan"/>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="requestParameters"/>
+                <field-map field-name="entityName" from-field="entityName"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+        </actions>
+       	<field name="ntfId"><hidden value="${parameters.ntfId}"/></field>
+        <field name="trainingClassTypeId" title="${uiLabelMap.HROlbiusTrainingClassType}">
+        	<display-entity entity-name="TrainingClassType" description="${description}"></display-entity>
+        </field>
+         <field name="partyId" title="${uiLabelMap.HrolbiusDepartment}">
+        	<display-entity entity-name="PartyGroup" description="${groupName}"></display-entity>
+        </field>
+        <field name="createdDate" title="${uiLabelMap.HROlbiusCreatedDate}"><display></display></field>
+        <field name="fromDate" red-when="never" title="${uiLabelMap.HROlbiusFromDate}"><display></display></field>
+        <field name="thruDate" red-when="never" title="${uiLabelMap.HROlbiusThruDate}"><display></display></field>
+        <field name="quality" title="${uiLabelMap.HROlbiusQualityPeople}"><display></display></field>
+        <field name="description" title="${uiLabelMap.CommonDescription}"><display></display></field>
+        <field name="expense" title="${uiLabelMap.HROlbiusExpense}"><display></display> </field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}">
+        	<drop-down allow-empty="false" current="selected">
+        		<entity-options description="${description}" entity-name="StatusItem" key-field-name="statusId">
+        			<entity-constraint name="statusTypeId" operator="equals" value="CHK_TP_STATUS"/>
+        		</entity-options>
+        	 </drop-down>
+        </field>
+        
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="btn btn-primary btn-small"><submit button-type="button" image-location="icon-ok"/></field>
+    </form>
+    
+    <form name="CreateTrainingProposal" target="createTrainingProposal" type="single">	    
+	    <field name="listEmployeeId" title="${uiLabelMap.ListProposedEmpl}" required-field="true" widget-style="height100">
+	    	<drop-down allow-multiple="true" size="10">
+	 			<entity-options description="${lastName} ${middleName} ${firstName}" entity-name="Person" key-field-name="partyId"></entity-options>   	
+	    	</drop-down>
+	    </field>
+	    <field name="trainingTypeId" title="${uiLabelMap.HROlbiusTrainingType}">
+	    	<drop-down allow-empty="false"><entity-options description="${description}" key-field-name="trainingTypeId" entity-name="TrainingType"></entity-options></drop-down>
+	    </field>
+	    <field name="trainingFormId" title="${uiLabelMap.HROlbiusTrainingForm}">
+	    	<drop-down allow-empty="false">
+	    		<entity-options description="${description}" key-field-name="trainingFormId" entity-name="TrainingForm"></entity-options>
+    		</drop-down>
+	    </field>
+	    
+	    <field name="trainingContentId" title="${uiLabelMap.HROlbiusTrainingContent}">
+	    	<drop-down allow-empty="false">
+	    		<entity-options description="${description}" key-field-name="trainingClassTypeId" entity-name="TrainingClassType"></entity-options>
+    		</drop-down>
+	    </field>
+	    <field name="fromDate" title="${uiLabelMap.HROlbiusFromDate}" title-style="asterisk" required-field="true"><date-time/></field>
+	    <field name="thruDate" title="${uiLabelMap.HROlbiusThruDate}" title-style="asterisk" required-field="true"><date-time/></field>
+ 	 	<field name="submitButton" title="${uiLabelMap.CommonCreate}" widget-style="btn btn-primary btn-small"><submit button-type="button" image-location="icon-ok"/></field>
+    </form>
+    
+     <form name="CheckProposeTraining" target="CheckProposeTraining" type="single" default-table-style="table table-striped table-hover table-bordered dataTable" separate-columns="true"> 
+    	<actions>
+	    	<entity-one entity-name="TrainingProposal" auto-field-map="true" >
+	    		<field-map field-name="trainingProposalId" from-field="parameters.ppId" />
+	    	</entity-one>
+ 	     	 <set field="trainingProposalId" value="${trainingProposalId}" />
+    		<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/trainingplan/getListempl.groovy"/>
+    		<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/util/getHeadOfHr.groovy" />
+    	</actions>
+    	<field name="ntfId"><hidden value= "${ntfId}"/></field>
+    	<field name="header"><hidden value="${header}"/></field>
+    	<field name="notiToId"><hidden value="${notiToId}"/></field>
+    	<field name="returnId" use-when="returnId!=null"><hidden value="${returnId}"/></field>
+    	<field name="returnId" ><hidden value="${headHRId}"/></field>
+    	<field name="targetLink"><hidden value="${targetLink}"/></field>
+    	<field name="trainingProposalId" title="${uiLabelMap.HROlbiustrainingProposalId}" ><display/></field>
+    	<field name="partyId" title="${uiLabelMap.HrolbiusDepartment}">
+    		<display-entity entity-name="PartyGroup" description="${groupName}" key-field-name="partyId"></display-entity>
+    	</field>
+    	<field name="trainingContentId" title="${uiLabelMap.HROlbiusTrainingContent}" >
+    	 	<display-entity entity-name="TrainingClassType" description="${description}" key-field-name="trainingClassTypeId"></display-entity>
+    	</field>
+    	<field name="fromDate" title="${uiLabelMap.HROlbiusFromDate}"  red-when="never"><display/></field>
+     	<field name="thruDate" title="${uiLabelMap.HROlbiusThruDate}" red-when="never"><display/></field>
+     	<field name="ListNameEmplId" title="${uiLabelMap.ListProposedEmpl}">
+      		<display></display>
+       </field>
+     	<field name="trainingFormId" title="${uiLabelMap.HROlbiusTrainingForm}"  >
+		 	<display-entity entity-name="TrainingForm" description="${description}" key-field-name="trainingFormId"></display-entity>
+    	</field>
+	    <field name="trainingTypeId" title="${uiLabelMap.HROlbiusTrainingType}" >
+    		 	<display-entity entity-name="TrainingType" description="${description}" key-field-name="trainingTypeId"></display-entity>
+        </field>
+	    <field name="typeProposeId" title="${uiLabelMap.HROlbiusTypePropose}" >
+		 	<display-entity entity-name="TypePropose" description="${description}" key-field-name="typeProposeId"></display-entity>
+        </field>
+   	    <field name="expense" title="${uiLabelMap.HROlbiusExpense}" ><text/></field>
+	    <field name="statusId" title="${uiLabelMap.HROlbiusTrainingStatus}">
+	    	<drop-down allow-empty="false" current="selected">
+	    		<entity-options description="${description}" entity-name="StatusItem" key-field-name="statusId"><entity-constraint name="statusTypeId" operator="equals" value="CHECK_PT"/></entity-options>
+	    	</drop-down>
+	    </field>
+	   	 <field name="_rowSubmit" title="${uiLabelMap.CommonSelect}" > <hidden value="Y"/></field>
+	     <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-ok"/></field>
+    </form>
+    <form name="ApprovalsProposeTraining" target="approveTrainingProposal" 
+    		type="single" default-table-style="table table-striped table-hover table-bordered dataTable" separate-columns="true">
+    	<actions>
+	    	 <entity-one entity-name="TrainingProposal" auto-field-map="true" >
+	    	 	<field-map field-name="trainingProposalId" value="${parameters.ppId}"/>
+	    	 </entity-one>
+    		<set field="trainingProposalId" value="${trainingProposalId}" />
+    		<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/trainingplan/getListempl.groovy"/>
+    	</actions>
+    	<field name="ppId"><hidden value="${parameters.ppId}"/></field>
+    	<field name="ntfId"><hidden value="${ntfId}"/></field>
+    	<field name="header"><hidden value="${header}"/></field>
+    	<field name="targetLink"><hidden value="${targetLink}"/></field>
+    	<field name="notiToId1" use-when="notiToId1!=null"><hidden value="${notiToId1}"/></field>
+    	<field name="notiToId1"><hidden value=" "/></field>
+    	<field name="notiToId2"><hidden value="${notiToId2}"/></field>
+    	<field name="targetLink"><hidden value="${targetLink}"/></field>
+    	<field name="trainingProposalId" title="${uiLabelMap.HROlbiustrainingProposalId}" ><display/></field>
+    	<field name="partyId" title="${uiLabelMap.HrolbiusDepartment}" >
+    		<display-entity entity-name="PartyGroup" description="${groupName}" key-field-name="partyId"></display-entity>
+    	</field>
+    	<field name="trainingContentId" title="${uiLabelMap.HROlbiusTrainingContent}" >
+    	 	<display-entity entity-name="TrainingClassType" description="${description}" key-field-name="trainingClassTypeId"></display-entity>
+    	</field>
+     	<field name="fromDate" title="${uiLabelMap.HROlbiusFromDate}" ><display/></field>
+     	<field name="thruDate" title="${uiLabelMap.HROlbiusThruDate}" ><display/></field>
+     	<field name="ListNameEmplId" title="${uiLabelMap.ListProposedEmpl}" >
+      		<display></display>
+       </field>
+     	<field name="trainingFormId" title="${uiLabelMap.HROlbiusTrainingForm}" >
+		 	<display-entity entity-name="TrainingForm" description="${description}" key-field-name="trainingFormId"></display-entity>
+    	</field>
+	    <field name="trainingTypeId" title="${uiLabelMap.HROlbiusTrainingType}" >
+    		 	<display-entity entity-name="TrainingType" description="${description}" key-field-name="trainingTypeId"></display-entity>
+        </field>
+	    <field name="typeProposeId" title="${uiLabelMap.HROlbiusTypePropose}" >
+		 	<display-entity entity-name="TypePropose" description="${description}" key-field-name="typeProposeId"></display-entity>
+        </field>
+   	    <field name="expense" title="${uiLabelMap.HROlbiusExpense}" ><text/></field>
+	    <field name="statusId"   title="${uiLabelMap.HROlbiusTrainingStatus}">
+	    	<drop-down allow-empty="false" current="selected">
+	    		<entity-options description="${description}" entity-name="StatusItem" key-field-name="statusId">
+	    			<entity-constraint name="statusTypeId" operator="equals" value="APPR_PT_STATUS"/>
+	    		</entity-options>
+	    	</drop-down>
+	    </field>
+	   	 <field name="_rowSubmit" title="${uiLabelMap.CommonSelect}" > <hidden value="Y"/></field>
+	     <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-ok"/></field>
+    </form>
+    
+    <form name="proposeTraining" target="requireProposeTraining?header=${header}&amp;action=${action}&amp;state=${state}&amp;partyId=${partyId}&amp;dateTime=${dateTime}" 
+    	type="multi" default-table-style="table table-striped table-hover table-bordered dataTable" separate-columns="true">
+    	<actions>
+    	 <entity-condition entity-name="TrainingProposal">
+    	 	<condition-list combine="or">
+    	 		<condition-expr field-name="statusId" operator="equals" value="AGRE_PT"/>
+   		 	</condition-list>
+    	 <order-by field-name="trainingProposalId"/>
+    	 </entity-condition>
+    	</actions>
+    	<row-actions>
+    		<set field="trainingProposalId" value="${trainingProposalId}" />
+    		<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/trainingplan/getListempl.groovy"/>
+    	</row-actions>
+    	<field name="trainingProposalId" title="${uiLabelMap.HROlbiustrainingProposalId}" widget-style="width-table-column50" sort-field="true"><display/></field>
+    	<field name="partyId" title="${uiLabelMap.HrolbiusDepartment}" widget-style="width-table-column50" sort-field="true">
+    		<display-entity entity-name="PartyGroup" description="${groupName}" key-field-name="partyId"></display-entity>
+    	</field>
+    	<field name="trainingContentId" title="${uiLabelMap.HROlbiusTrainingContent}" widget-style="width-table-column50" sort-field="true">
+    	 	<display-entity entity-name="TrainingClassType" description="${description}" key-field-name="trainingClassTypeId"></display-entity>
+    	</field>
+     	<field name="fromDate" title="${uiLabelMap.HROlbiusFromDate}" widget-style="width-table-column50" sort-field="true" red-when="never"><display/></field>
+     	<field name="thruDate" title="${uiLabelMap.HROlbiusThruDate}" widget-style="width-table-column50" sort-field="true" red-when="never"><display/></field>
+     	<field name="ListNameEmplId" title="${uiLabelMap.ListProposedEmpl}" sort-field="true">
+      		<display></display>
+       </field>
+     	<field name="trainingFormId" title="${uiLabelMap.HROlbiusTrainingForm}" widget-style="width-table-column50" sort-field="true">
+		 	<display-entity entity-name="TrainingForm" description="${description}" key-field-name="trainingFormId"></display-entity>
+    	</field>
+	    <field name="trainingTypeId" title="${uiLabelMap.HROlbiusTrainingType}" widget-style="width-table-column50" sort-field="true">
+    		 	<display-entity entity-name="TrainingType" description="${description}" key-field-name="trainingTypeId"></display-entity>
+        </field>
+	    <field name="typeProposeId" title="${uiLabelMap.HROlbiusTypePropose}" widget-style="width-table-column50" sort-field="true">
+		 	<display-entity entity-name="TypePropose" description="${description}" key-field-name="typeProposeId"></display-entity>
+        </field>
+   	    <field name="expense" title="${uiLabelMap.HROlbiusExpense}" widget-style="width-table-column50" sort-field="true"><hidden/></field>
+	    <field name="statusId"  widget-style="width-table-column50" sort-field="true" title="${uiLabelMap.HROlbiusTrainingStatus}">
+	   	<display-entity entity-name="StatusItem" description="${description}" key-field-name="statusId"></display-entity>
+	    </field>
+	   	 <field name="_rowSubmit" title="${uiLabelMap.CommonSelect}" > <hidden value="Y"/></field>
+	     <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-ok"/></field>
+    </form>
+    <form name="FindProposeTraining" type="single">
+    	<auto-fields-entity entity-name="EmplTrainingProposalView" default-field-type="find"/>    
+    	<field name="trainingProposalId"><hidden/></field>	
+    	<field name="partyId"><hidden/></field>
+    	<field name="partyIdFrom"><hidden/></field>
+    	<field name="employeeId"><hidden/></field>
+    	<field name="fromDate"><date-find/></field>
+    	<field name="thruDate"><date-find/></field>
+    	<field name="trainingFormId"><hidden/></field>
+    	<field name="trainingTypeId"><hidden/></field>
+    	<field name="typeProposeId"><hidden/></field>
+    	<field name="expense"><hidden/></field>
+    	<field name="statusId"><hidden/></field>
+		<field name="trainingContentId" title="${uiLabelMap.HROlbiusTrainingContent}">
+		<drop-down>
+			<entity-options description="${description}" entity-name="TrainingClassType" key-field-name="trainingClassTypeId"></entity-options>
+		</drop-down>
+		</field>
+ 		 <field name="searchButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-primary btn-small"><submit button-type="button" image-location="icon-search"/></field>
+    </form>
+     <form name="ListProposeTraining" type="list" list-name="listIt" odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="table table-hover table-striped table-bordered dataTable">
+        <actions>
+            <set field="entityName" value="TrainingProposal"/>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="requestParameters"/>
+                <field-map field-name="entityName" from-field="entityName"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+        	
+        </actions>
+        
+        <row-actions>
+    		<set field="trainingProposalId" value="${trainingProposalId}" />
+    		<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/trainingplan/getListempl.groovy"/>
+    	</row-actions>
+       <field name="trainingProposalId" title="${uiLabelMap.HROlbiustrainingProposalId}" sort-field="true"><display/></field>
+       <field name="partyId" title="${uiLabelMap.HrolbiusDepartment}" sort-field="true">
+       		<display-entity entity-name="PartyGroup" description="${groupName}" key-field-name="partyId"></display-entity>
+       </field>
+       <field name="trainingContentId" title="${uiLabelMap.HROlbiusTrainingContent}" sort-field="true"><display-entity entity-name="TrainingClassType" description="${description}" key-field-name="trainingClassTypeId"></display-entity></field>
+       <field name="fromDate" title="${uiLabelMap.HROlbiusFromDate}" sort-field="true" red-when="never"><display></display></field>
+       <field name="thruDate" title="${uiLabelMap.HROlbiusThruDate}" sort-field="true" red-when="never"><display></display></field>
+       <field name="ListNameEmplId" title="${uiLabelMap.ListProposedEmpl}" sort-field="true">
+      	<display></display>
+       </field>
+       <field name="trainingFormId" title="${uiLabelMap.HROlbiusTrainingForm}" sort-field="true"><display-entity entity-name="TrainingForm" description="${description}" key-field-name="trainingFormId"></display-entity></field>
+       <field name="trainingTypeId" title="${uiLabelMap.HROlbiusTrainingType}" sort-field="true"><display-entity entity-name="TrainingType" description="${description}" key-field-name="trainingTypeId"></display-entity></field>
+       <field name="typeProposeId" title="${uiLabelMap.HROlbiusTypePropose}" sort-field="true"><display-entity entity-name="TypePropose" description="${description}" key-field-name="typeProposeId"></display-entity></field>
+       <field name="expense" title="${uiLabelMap.HROlbiusExpense}" sort-field="true">
+      		<display></display> 	
+       </field>
+       <field name="statusId" title="${uiLabelMap.HROlbiusTrainingStatus}" sort-field="true">
+       		<display-entity entity-name="StatusItem" description="${description}" key-field-name="statusId"></display-entity>
+       </field>
+    </form>
+    
+    <!-- Forms Rating Training -->
+    <form name="EditTrainingClass" type="single" target="CreatedTrainingClass" default-map-name="trainingClass">
+    	<alt-target use-when="trainingClassId != null" target="updateTrainingClass"/>
+    	<field name="trainingClassId"><hidden value="${trainingClassId}"/></field>
+		<field name="listEmplRequest"><hidden value="${listEmplRequest}"/></field>
+    	<field name="trainingClassName" title="${uiLabelMap.HRolbiusTrainingClass}" title-style="asterisk" required-field="true"><text/></field>
+    	<field name="trainingProposalId" title="${uiLabelMap.HROlbiustrainingProposalId}">
+    		<lookup target-form-name="LookupTrainingProposal"></lookup>
+    	</field>
+    	<field name="teacher" title="${uiLabelMap.HROlbiusTrainingTeachers}" title-style="asterisk" required-field="true"><text/></field>
+   		<field name="location" title="${uiLabelMap.HROlbiusTrainingLocation}"><text/></field>	 
+   		<field name="fromDate" title="${uiLabelMap.HROlbiusFromDate}" title-style="asterisk" required-field="true"><date-time/></field>
+   		<field name="thruDate" title="${uiLabelMap.HROlbiusThruDate}" title-style="asterisk" required-field="true"><date-time/></field>
+   		<field name="fromDate" title="${uiLabelMap.HROlbiusFromDate}" use-when="trainingClassId != null" title-style="asterisk" required-field="true"><display></display></field>
+   		<field name="thruDate" title="${uiLabelMap.HROlbiusThruDate}" use-when="trainingClassId != null" title-style="asterisk" required-field="true"><display></display></field>
+    	<field name="submitButton" title="${uiLabelMap.CommonCreate}" use-when="trainingClassId == null" widget-style="btn btn-primary btn-small"><submit button-type="button" image-location="icon-ok"/></field>
+    	<field name="submitButton" title="${uiLabelMap.CommonUpdate}" use-when="trainingClassId != null" widget-style="btn btn-primary btn-small"><submit button-type="button" image-location="icon-ok"/></field>
+    </form>
+    
+    <form name="RatingTraining" type="multi" target="ratingTrainingResults"  list-name="listIt" odd-row-style="alternate-row" 
+    	paginate-target="RatingTraining" header-row-style="header-row-2" default-table-style="table table-hover table-striped table-bordered dataTable">
+    	<actions>
+   			<set field="entityName" value="TrainingTrackerView"/>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="requestParameters"/>
+                <field-map field-name="entityName" from-field="entityName"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+   		</actions>
+    	<row-actions>
+    		<set field="eplId" value="${partyId}"/>
+    		<set field="ClassId" value="${trainingClassId}"/>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/trainingplan/getEmpId.groovy"/>
+    	</row-actions>
+    	<field name="emplID" title="${uiLabelMap.ListProposedEmpl}" widget-style="btn btn-mini btn-info"><display></display></field>
+    	<field name="partyId" title="${uiLabelMap.HRolbiusEmployeeName}">
+    		<display-entity entity-name="Person" description="${lastName} ${middleName} ${firstName}" key-field-name="partyId"></display-entity>
+    	</field>
+    	 <field name="trainingClassId" title="${uiLabelMap.HRolbiusTrainingClassId}" widget-style="btn btn-mini btn-info">
+   			<display></display>
+   		 </field>	
+<!-- 		<field name="trainingClassName" title="${uiLabelMap.HRolbiusTrainingClass}"> -->
+<!--    		 	<display></display> -->
+<!--    		 </field> -->
+    	<field name="tclName" title="${uiLabelMap.HRolbiusTrainingClass}">
+			<display></display>
+    	</field>
+    	<field name="fromDate"><hidden/></field>
+    	<field name="thruDate"><hidden/></field>
+    	<field name="statusId" title="${uiLabelMap.HROlbiusTrainingStatus}">
+	    	<drop-down allow-empty="false" current="selected" >
+	    		<entity-options description="${description}" entity-name="StatusItem" key-field-name="statusId" >
+	    			<entity-constraint name="statusTypeId" operator="equals" value="RESULT_TRAINING" />
+	    			<entity-order-by field-name="sequenceId" />
+	    		</entity-options>
+	    	</drop-down>
+    	</field>
+    	 <field name="_rowSubmit" title="${uiLabelMap.CommonSelect}"> <hidden value="Y"/></field>
+	 	<field name="submitButton" title="${uiLabelMap.CommonSubmit}"  widget-style="btn btn-primary btn-small mgt20"><submit button-type="button" image-location="icon-ok"/></field>
+    </form>
+    
+    <form name="ResultsRatingTraining" type="list"   odd-row-style="alternate-row" 
+    	 header-row-style="header-row-2" default-table-style="table table-hover table-striped table-bordered dataTable">
+    	<actions>
+   			<entity-condition entity-name="TrainingTracker">
+   					<condition-list combine="and">
+	   					<condition-expr field-name="statusId" operator="not-equals" value="TRS_PROGRESS"/>
+	   					<condition-expr field-name="partyId" operator="equals" value="${emplId}"/>
+   					</condition-list>
+   			</entity-condition> 
+   		</actions>
+    	<row-actions>
+    		<set field="eplId" from-field="${partyId}"/>
+    		<set field="ClassId" from-field="${trainingClassId}"/>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/trainingplan/getEmpId.groovy"/>
+    	</row-actions>
+    	<field name="listEmplRequest"><hidden value="${listEmplRequest}"/></field>
+    	<field name="partyId" title="${uiLabelMap.ListProposedEmpl}">
+    		<display-entity entity-name="Person" description="${lastName} ${middleName} ${firstName}" key-field-name="partyId"></display-entity>
+    	</field>
+    	 <field name="trainingClassId" title="${uiLabelMap.HRolbiusTrainingClassId}" widget-style="btn btn-mini btn-info">
+   			<display></display>
+   		 </field>	
+    	<field name="ClassId" title="${uiLabelMap.HRolbiusTrainingClass}">
+			<display-entity entity-name="TrainingClass" description="${trainingClassName}" key-field-name="trainingClassId"></display-entity>
+    	</field>
+    	<field name="fromDate"><hidden/></field>
+    	<field name="thruDate"><hidden/></field>
+    	<field name="statusId" title="${uiLabelMap.HROlbiusTrainingStatus}">
+	    	<display-entity entity-name="StatusItem" description="${description}" key-field-name="statusId"></display-entity>
+    	</field>
+    </form>
+    
+    
+    <form name="searchTrainingClass" type="single" target="findTrainingRatingClass">	
+    	<actions>
+    		<entity-condition entity-name="TrainingClass" distinct="true" list="listTc" >
+    			<select-field field-name="trainingClassName"/>
+    		</entity-condition>
+    	</actions>
+    	<field name="trainingClassId" title="${uiLabelMap.HROlbiusTrainingClassName}"> 
+    		<drop-down allow-empty="true" current="selected"> 
+				<list-options key-name="trainingClassName" list-name="listTc" description="${trainingClassName}"/>    		
+    		</drop-down>
+    	</field>
+    	<field name="submitButton"  title="${uiLabelMap.CommonSearch}" widget-style="btn btn-primary btn-small"><submit image-location="icon-search"/></field>
+    </form>
+    
+     <form name="FindTrainingClass" type="single" target="findTrainingClass">	
+     	<actions>
+     		<entity-condition entity-name="TrainingClass" distinct="true" list="listTC" >
+     			<select-field field-name="trainingClassName"/>
+     		</entity-condition>
+     	</actions>
+    	<field name="trainingClassName" title="${uiLabelMap.HROlbiusTrainingClassName}" > 
+    		<drop-down allow-empty="true" current="selected"> 
+    			<list-options key-name="trainingClassName" list-name="listTC" description="${trainingClassName}"/>
+    		</drop-down>
+    	</field>
+    	<field name="submitButton"  title="${uiLabelMap.CommonSearch}" widget-style="btn btn-primary btn-small"><submit image-location="icon-search"/></field>
+    </form>
+    <form name="ListTrainingClass" type="list"   list-name="listIt" odd-row-style="alternate-row" 
+    	 header-row-style="header-row-2" default-table-style="table table-hover table-striped table-bordered dataTable">
+    	<actions>
+   			<set field="entityName" value="TrainingClass"/>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="requestParameters"/>
+                <field-map field-name="entityName" from-field="entityName"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+   		</actions>
+   		<row-actions>
+    		<set field="trainingProposalId" value="${trainingProposalId}" />
+    		<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/trainingplan/getListempl.groovy"/>
+    	</row-actions>
+    	
+    	 <field name="trainingClassId" title="${uiLabelMap.HRolbiusTrainingClassId}">
+   			<hyperlink target="EditTrainingClass" also-hidden="true" description="${trainingClassId}" link-type="hidden-form"> 
+   				<parameter param-name="trainingClassId"/>
+   				<parameter param-name="fromDate"/>
+   				<parameter param-name="thruDate"/>
+   			</hyperlink>
+   		 </field>	
+    	<field name="trainingClassName" title="${uiLabelMap.HRolbiusTrainingClass}">
+			<display></display>
+    	</field>
+    	<field name="ListNameEmplId" title="${uiLabelMap.ListProposedEmpl}">
+      		<display></display>
+       </field>
+    	<field name="trainingProposalId"><hidden/></field>
+    	<field name="teacher" title="${uiLabelMap.HROlbiusTrainingTeachers}"><display/></field>
+    	<field name="location" title="${uiLabelMap.HROlbiusTrainingLocation}"><display/></field>
+    	<field name="fromDate" red-when="never"><display/></field>
+    	<field name="thruDate" red-when="never"><display/></field>
+    </form>
+    
+   
+   <form name="EditVotesTrainingPersonal"  type="multi" default-table-style="table table-striped table-bordered table-hover dataTable" separate-columns="true" target="updateTrainingResults">
+   		<actions>
+   			<entity-condition entity-name="TrainingTracker" >
+   				<condition-expr field-name="partyId" operator="equals" value="${partyId}"/>
+   			</entity-condition>
+   		</actions>
+   		<field name="partyId"><hidden value="${partyId}"/></field>
+   	   <field name="trainingClassId"><hidden value="${trainingClassId}"/></field>
+   	   <field name="fromDate" title="${uiLabelMap.HROlbiusFromDate}"><date-time/></field>
+	   <field name="thruDate" title="${uiLabelMap.HROlbiusThruDate}"><date-time/></field>
+	   <field name="trainingContentId" title="${uiLabelMap.HROlbiusTrainingContent}"><drop-down><entity-options entity-name="TrainingClassType" description="${description}" key-field-name="trainingClassTypeId"></entity-options></drop-down></field>
+	   <field name="trainingFormId" title="${uiLabelMap.HROlbiusTrainingForm}"><drop-down><entity-options entity-name="TrainingForm" description="${description}" key-field-name="trainingFormId"></entity-options></drop-down></field>
+	   <field name="statusId" title="${uiLabelMap.HROlbiusTrainingStatus}">
+		   	<drop-down allow-empty="true" current="selected">
+				  <entity-options entity-name="StatusItem" description="${description}" key-field-name="statusId">
+				  		<entity-constraint name="statusTypeId" operator="equals" value="RESULT_TRAINING"/>
+				  </entity-options>
+	  		 </drop-down>
+	  	</field>
+   		<field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="btn btn-primary btn-small"><submit image-location="icon-ok"/></field>
+   </form>
+   
+   <form name="EditResultsTraining"  type="multi" default-table-style="table table-striped table-bordered table-hover dataTable" separate-columns="false" target="EditResultsTraining">
+   		<actions>
+   			<entity-condition entity-name="EmplFailedTraining" >
+   			</entity-condition>
+   		</actions>
+   		<row-actions>
+   			<set field="empl" value= "${partyId}"/>
+   			<set field="classId" value="${trainingClassId}"/>
+   			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/trainingplan/getNameTrainingClass.groovy"/>
+   		</row-actions>
+   		<field name="partyId" title="${uiLabelMap.ListProposedEmpl}" sort-field="true">
+   			<display></display>
+   		</field>
+   		<field name="employeeName" title="${uiLabelMap.HRolbiusEmployeeName}"  sort-field="true"><display></display></field>
+   		<field name="TrainingClassName" title="${uiLabelMap.HROlbiusTrainingClassName}"  sort-field="true">
+   			<display></display>
+   		</field>
+   		<field name="trainingClassId" title="${uiLabelMap.HRolbiusTrainingClassId}" ><hidden/></field>
+		 <field name="statusId" title="${uiLabelMap.HROlbiusTrainingStatus}">
+		   	<drop-down allow-empty="true" current="selected">
+				  <entity-options entity-name="StatusItem" description="${description}" key-field-name="statusId">
+				  		<entity-constraint name="statusTypeId" operator="equals" value="RESULT_TRAINING"/>
+				  </entity-options>
+	  		 </drop-down>
+	  	</field>
+   		<field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="btn btn-primary btn-small"><submit image-location="icon-ok"/></field>
+   </form>
+   
+   <form name="ResultsTraining"  type="list" default-table-style="table table-striped table-bordered table-hover dataTable" separate-columns="true" >
+   		<actions>
+   			<entity-condition entity-name="TrainingTracker" >
+   				<condition-expr field-name="partyId" operator="equals" value="${partyId}"/>
+   			</entity-condition>
+   		</actions>
+   		<row-actions>
+   			<set field="empl" value= "${partyId}"/>
+   			<set field="classId" value="${trainingClassId}"/>
+   			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/trainingplan/getNameTrainingClass.groovy"/>
+   		</row-actions>
+   		<field name="partyId" title="${uiLabelMap.ListProposedEmpl}" sort-field="true" widget-style="btn btn-info btn-mini">
+   			<display></display>
+   		</field>
+   		<field name="employeeName" title="${uiLabelMap.HRolbiusEmployeeName}"  sort-field="true"><display></display></field>
+   		
+   		<field name="trainingClassId" title="${uiLabelMap.HRolbiusTrainingClassId}" sort-field="true" widget-style="btn btn-info btn-mini">
+   			<display></display>
+   		</field>
+   		<field name="TrainingClassName" title="${uiLabelMap.HROlbiusTrainingClassName}"  sort-field="true">
+   			<display></display>
+   		</field>
+   		
+		<field name="statusId" title="${uiLabelMap.HROlbiusTrainingStatus}" use-when="statusId != null">
+		   <display-entity entity-name="StatusItem" description="${description}" ></display-entity>
+	  	</field>
+   </form>
+   
+   
+   <form name="ListTrainedEmpl" type="list" default-table-style="table table-striped table-bordered table-hover dataTable" target="EditVotesTrainingPersonal">
+   		<actions>
+   			<entity-condition entity-name="TrainingTrackerView" distinct="true" >
+   			 </entity-condition>
+   		</actions>
+   		<row-actions>
+   			<set field="partyId"  value="${partyId}"/>
+			<set field="fullName"  value="${fullName}"/>
+			<script
+				location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/trainingplan/getFullNameEmplRequestJob.groovy" />
+		</row-actions>
+   <field name="partyId" widget-style="" title="${uiLabelMap.ListProposedEmpl}">
+   		<hyperlink target="EmployeeProfile" also-hidden="true" description="${partyId}"> 
+   			<parameter param-name="partyId"  from-field="${partyId}"/>
+   		</hyperlink>
+   </field>
+   <field name="fullName" title="${uiLabelMap.HRolbiusEmployeeName}"><display></display></field>
+   <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="btn btn-info btn-mini"><submit image-location="icon-ok"/></field>
+   </form>
+    
+    <!-- Lookup ProposeTraining -->
+     <form name="LookupTrainingProposal" type="single" target="LookupTrainingProposal"
+		header-row-style="header-row" default-table-style="basic-table">
+     
+   		<field name="trainingContentId" title="${uiLabelMap.HROlbiusTrainingContent}">
+			<drop-down allow-empty="true">
+				<entity-options description="${description}" entity-name="TrainingClassType" key-field-name="trainingClassTypeId"></entity-options>
+			</drop-down>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.HROlbiusFromDate}"><date-find/></field>
+		<field name="thruDate" title="${uiLabelMap.HROlbiusThruDate}"><date-find/></field>
+		<field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-small btn-primary"><submit image-location="icon-search" button-type="button"/></field>
+	</form>
+
+	<form name="ListTrainingProposal" type="list" list-name="listIt" paginate-target="LookupTrainingProposal" odd-row-style="alternate-row" default-table-style="table table-striped table-bordered table-hover dataTable">
+		 <actions>
+            <set field="entityName" value="EmplTrainingProposalView" />
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="requestParameters"/>
+                <field-map field-name="entityName" from-field="entityName"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+        </actions>
+        <row-actions>
+    		<set field="trainingProposalId" value="${trainingProposalId}" />
+    		<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/trainingplan/getListempl.groovy"/>
+    	</row-actions>
+    	<field name="trainingProposalId" widget-style="btn btn-mini btn-info"  title="${uiLabelMap.HROlbiustrainingProposalId}">
+			<hyperlink also-hidden="false" target-type="plain" description="${trainingProposalId}" target="javascript:set_value('${trainingProposalId}')"/>
+		</field>
+       <field name="partyId" title="${uiLabelMap.HrolbiusDepartment}">
+			<display-entity entity-name="PartyGroup" description="${groupName}" key-field-name="partyId"></display-entity>
+       </field>
+       <field name="trainingContentId" title="${uiLabelMap.HROlbiusTrainingContent}"><display-entity entity-name="TrainingClassType" description="${description}" key-field-name="trainingClassTypeId"></display-entity></field>
+       <field name="fromDate" title="${uiLabelMap.HROlbiusFromDate}"><display></display></field>
+       <field name="thruDate" title="${uiLabelMap.HROlbiusThruDate}"><display></display></field>
+       <field name="ListNameEmplId" title="${uiLabelMap.ListProposedEmpl}">
+      		<display></display>
+       </field>
+       <field name="trainingFormId" title="${uiLabelMap.HROlbiusTrainingForm}"><display-entity entity-name="TrainingForm" description="${description}" key-field-name="trainingFormId"></display-entity></field>
+       <field name="trainingTypeId" title="${uiLabelMap.HROlbiusTrainingType}"><display-entity entity-name="TrainingType" description="${description}" key-field-name="trainingTypeId"></display-entity></field>
+       <field name="typeProposeId" title="${uiLabelMap.HROlbiusTypePropose}"><display-entity entity-name="TypePropose" description="${description}" key-field-name="typeProposeId"></display-entity></field>
+       <field name="expense" title="${uiLabelMap.HROlbiusExpense}">
+      		<display></display> 	
+       </field>
+       <field name="statusId">
+       		<display-entity entity-name="StatusItem" description="${description}" key-field-name="statusId">
+       		</display-entity>
+       </field>
+	</form>
+    
+    <form name="ProposeTrainingPlan"  type="multi" odd-row-style="alternate-row"  default-table-style="table table-striped table-bordered table-hover dataTable" 
+    	target="proposeTrainingPlan?header=${header}&amp;action=${action}&amp;state=${state}&amp;partyId=${partyId}&amp;dateTime=${dateTime}&amp;targetLink=${targetLink}">
+ 		<actions>
+        	<entity-condition entity-name="TrainingPlan" >
+				<condition-expr field-name="statusId" operator="equals" value="CTP_ACCEPTED" />
+        	 </entity-condition>
+        </actions>
+        <field name="partyId" title="${uiLabelMap.HrolbiusDepartment}">
+        	<display-entity entity-name="PartyGroup" description="${groupName}" key-field-name="partyId"></display-entity>
+        </field>
+        <field name="trainingClassTypeId" title="${uiLabelMap.HROlbiusTrainingClassType}">
+        	<display-entity entity-name="TrainingClassType" description="${description}" key-field-name="trainingClassTypeId"></display-entity>
+        </field>
+        <field name="createdDate" title="${uiLabelMap.HROlbiusCreatedDate}"><display></display></field>
+        <field name="fromDate" title="${uiLabelMap.HROlbiusFromDate}" red-when="never"><display></display></field>
+        <field name="thruDate" title="${uiLabelMap.HROlbiusThruDate}" red-when="never"><display></display></field>
+        <field name="quality" title="${uiLabelMap.HROlbiusQualityPeople}"><display></display></field>
+        <field name="description" title="${uiLabelMap.CommonDescription}"><display></display></field>
+        <field name="expense" title="${uiLabelMap.HROlbiusExpense}" widget-style="width20"><display></display></field>
+        <field name="statusId" widget-style="width20">
+        	<display-entity entity-name="StatusItem" description="${description}"></display-entity>
+        </field>
+        <field name="_rowSubmit"><hidden/></field>
+        <field name="submitButton" title="${uiLabelMap.HROlbiusPropose}" widget-style="btn btn-small btn-primary mgt20"><submit button-type="button" image-location="icon-ok"/></field>	
+    </form>
+    
+    <form name="ListTrainingApprovalResult" type="list" odd-row-style="alternate-row" default-table-style="table table-striped table-bordered table-hover dataTable"  list-name="listDeptName" separate-columns="true">
+	    	<actions>
+	    		<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/trainingplan/getDeptPositionType.groovy" />
+			</actions>
+			<row-actions>
+    			<set field="trainingProposalId" value="${trainingProposalId}" />
+    			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/trainingplan/getListempl.groovy"/>
+    		</row-actions>
+	    	
+			<field name="trainingProposalId" title="${uiLabelMap.HROlbiustrainingProposalId}"><display/></field>
+	       <field name="partyId" title="${uiLabelMap.HrolbiusDepartment}">
+	       		<display-entity entity-name="PartyGroup" description="${groupName}" key-field-name="partyId"></display-entity>
+	       </field>
+	       <field name="ListNameEmplId" title="${uiLabelMap.ListProposedEmpl}">
+	      		<display></display>
+	       </field>
+	       <field name="trainingContentId" title="${uiLabelMap.HROlbiusTrainingContent}"><display-entity entity-name="TrainingClassType" description="${description}" key-field-name="trainingClassTypeId"></display-entity></field>
+	       <field name="fromDate" title="${uiLabelMap.HROlbiusFromDate}" red-when="never"><display></display></field>
+	       <field name="thruDate" title="${uiLabelMap.HROlbiusThruDate}" red-when="never"><display></display></field>
+	       <field name="trainingFormId" title="${uiLabelMap.HROlbiusTrainingForm}" ><display-entity entity-name="TrainingForm" description="${description}" key-field-name="trainingFormId"></display-entity></field>
+	       <field name="trainingTypeId" title="${uiLabelMap.HROlbiusTrainingType}" ><display-entity entity-name="TrainingType" description="${description}" key-field-name="trainingTypeId"></display-entity></field>
+	       <field name="typeProposeId" title="${uiLabelMap.HROlbiusTypePropose}" ><display-entity entity-name="TypePropose" description="${description}" key-field-name="typeProposeId"></display-entity></field>
+	       <field name="expense" title="${uiLabelMap.HROlbiusExpense}" >
+	      		<display></display> 	
+	       </field>
+	       <field name="statusId" title="${uiLabelMap.HROlbiusTrainingStatus}">
+	       		<display-entity entity-name="StatusItem" description="${description}" key-field-name="statusId"></display-entity>
+	       </field>
+    </form>
+    <!-- Training harvest Report -->
+    <form name="TrainingHarvestReport" type="single" target="addTrainingHarvestReport" header-row-style="header-row" default-table-style="basic-table">
+		<field name="trainingName" title="${uiLabelMap.TrainingName}" title-style="asterisk" required-field="true"><text></text></field>    
+    	<field name="trainingContent" title="${uiLabelMap.HROlbiusTrainingContent}"  title-style="asterisk" required-field="true"><textarea/></field>    
+    	<field name="comments" title="${uiLabelMap.HROlbiusComments}"  title-style="asterisk" required-field="true"><textarea/></field>    
+    	<field name="propose" title="${uiLabelMap.HROlbiusProposeReport}" ><textarea/></field>    
+    	<field name="accompanyingDocumentation" title="${uiLabelMap.HROlbiusAccompanyingDocumentation}"><textarea/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-ok"/></field>	
+    </form>
+</forms>

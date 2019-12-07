@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	
+	<screen name="DashboardQA">
+		<section>
+			<actions>
+			</actions>
+			<widgets>
+				<decorator-screen name="DelysCommonDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <label style="alert alert-info" text="Welcome to QA management system"></label>
+                    </decorator-section>
+                </decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="DashboardQualityManager">
+		<section>
+			<actions>
+			</actions>
+			<widgets>
+				<decorator-screen name="DelysCommonDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <label style="alert alert-info" text="Welcome to Quality management system"></label>
+                    </decorator-section>
+                </decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+    <screen name="QAListReceipts">
+    	<section>
+	    	<actions>
+	    		<set field="selectedMenuItem" value="import"/>
+                <set field="selectedSubMenuItem" value="ReceiptQA"/>
+    			<set field="navMenuName" value="FindReceiptTabBar"/>
+				<set field="navMenuLocation" value="component://delys/widget/DelysMenus.xml"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="DelysCommonDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+							<decorator-section name="search-options">
+                            	<include-form name="FindReceipts" location="component://delys/widget/logistics/LogisticsForms.xml"/>
+                            </decorator-section>
+                            <decorator-section name="search-results">
+                            	<screenlet title="${uiLabelMap.CommonList} ${uiLabelMap.Receipt}">
+                                 	<include-form name="QAListReceipts" location="component://delys/widget/qa/QAForms.xml"/>
+                                 </screenlet>
+                            </decorator-section>
+                        </decorator-screen>
+    				</decorator-section>
+    			</decorator-screen>
+    		</widgets>
+   		</section>
+    </screen>
+    <screen name="QADetailReceipts">
+    	<section>
+    		<condition>
+    			<or>
+    				<if-has-permission permission="QA" action="_QUALITY_MANAGER"/>
+    				<if-has-permission permission="QA" action="_ADMIN"/>
+    			</or>
+			</condition>
+	    	<actions>
+	    		<set field="selectedMenuItem" value="import"/>
+                <set field="selectedSubMenuItem" value="ReceiptQA"/>
+				<set field="receiptId" from-field="parameters.receiptId"/>
+                <entity-one value-field="receipt" entity-name="Receipt">
+                	<field-map field-name="receiptId" from-field="receiptId"></field-map>
+                </entity-one>
+                <entity-condition list="listItemToReceives" entity-name="ReceiptItem">
+    				<condition-expr field-name="receiptId" from-field="receiptId"/>
+    			</entity-condition>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="DelysCommonDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.Receipt} ${uiLableMap.CommonNumber} ${receiptId}">
+		    				<include-form name="DetailReceipt" location="component://delys/widget/logistics/LogisticsForms.xml"/>
+		    			</screenlet>
+		    			<screenlet title="${uiLabelMap.ProductListProduct}">
+		    				<container id="table-container">
+		    					<include-form name="ListProductByReceipt" location="component://delys/widget/qa/QAForms.xml"/>
+		    				</container>
+		    			</screenlet>
+                    </decorator-section>
+   	 			</decorator-screen>
+    		</widgets>
+   		</section>
+    </screen>
+    <screen name="billOfLadingBudget">
+		<section>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="DelysUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="WidgetUiLabels" global="true"/>
+				<set field="titleProperty" value="${uiLabelMap.BillOfLadingBudget}"/>
+				<set field="selectedMenuItem" value="budgetQASub" />
+				<set field="selectedSubMenuItem" value="billOfLadingCost"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="DelysCommonDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<screenlet>
+							<platform-specific>
+								<html>
+									<html-template location="component://delys/webapp/delys/import/billOfLadingBudget.ftl"/>
+								</html>
+							</platform-specific>
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="QADetailReceipts2">
+    	<section>
+    		<condition>
+    			<or>
+    				<if-has-permission permission="QA" action="_QUALITY_MANAGER"/>
+    				<if-has-permission permission="QA" action="_ADMIN"/>
+    			</or>
+			</condition>
+	    	<actions>
+	    		<set field="selectedMenuItem" value="import"/>
+                <set field="selectedSubMenuItem" value="ReceiptQA"/>
+				<set field="receiptId" from-field="parameters.receiptId"/>
+                <entity-one value-field="receipt" entity-name="Receipt">
+                	<field-map field-name="receiptId" from-field="receiptId"></field-map>
+                </entity-one>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="DelysCommonDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.Receipt} ${uiLableMap.CommonNumber} ${receiptId}">
+		    				<include-form name="DetailReceipt" location="component://delys/widget/logistics/LogisticsForms.xml"/>
+		    			</screenlet>
+		    			<screenlet title="${uiLabelMap.ProductListProduct}">
+		    					<platform-specific>
+									<html>
+										<html-template location="component://delys/webapp/delys/qa/listProductByReceipt.ftl"/>
+									</html>
+								</platform-specific>
+		    			</screenlet>
+                    </decorator-section>
+   	 			</decorator-screen>
+    		</widgets>
+   		</section>
+    </screen>
+</screens>

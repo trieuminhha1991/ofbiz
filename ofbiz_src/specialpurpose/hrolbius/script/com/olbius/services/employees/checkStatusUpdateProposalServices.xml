@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+	<simple-method method-name="checkResignStatusApproval">
+		<entity-one value-field="empTerminal" entity-name="EmplTerminationProposal"></entity-one>
+		<set field="statusId" from-field="empTerminal.statusId"/>
+		<call-class-method method-name="getHrmAdmin" class-name="com.olbius.util.PartyUtil" ret-field="headOfHrId">
+			<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+		</call-class-method>
+		<call-class-method method-name="getManagerOfEmpl" class-name="com.olbius.util.PartyUtil" ret-field="mgrOfEmpl">
+			<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+			<field field="empTerminal.partyId" type="String"/>
+		</call-class-method>
+		<call-class-method method-name="getCEO" class-name="com.olbius.util.PartyUtil" ret-field="ceoId">
+			<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+		</call-class-method>
+		<if-compare operator="equals" value="statusId" field="TER_PPSL_CREATED">
+			<if-compare-field to-field="mgrOfEmpl" operator="not-equals" field="userLogin.partyId">
+				<add-error>
+					<fail-property resource="EmployeeUiLabels" property="HRNotApprovalByManager"/>
+				</add-error>			
+			</if-compare-field>						
+		</if-compare>
+		<if-compare operator="equals" value="RESIGN_MGR_A" field="statusId">
+			<if-compare-field to-field="headOfHrId" operator="not-equals" field="userLogin.partyId">
+				<add-error>
+					<fail-property resource="EmployeeUiLabels" property="HRNotApprovalByHeadOfHR"/>
+				</add-error>
+			</if-compare-field>
+		<else>
+			<if-compare operator="equals" value="RESIGN_MGR_R" field="statusId">
+				<add-error>
+					<fail-property resource="EmployeeUiLabels" property="HRProposalRejectedByManager"/>
+				</add-error>
+			</if-compare>
+		</else>	
+		</if-compare>
+		<if-compare operator="equals" value="RESIGN_HOHR_A" field="statusId">
+			<if-compare-field to-field="ceoId" operator="not-equals" field="userLogin.partyId">
+				<add-error>
+					<fail-property resource="EmployeeUiLabels" property="HRNotApprovalByCeo"/>
+				</add-error>
+			</if-compare-field>
+		<else>
+			<if-compare operator="equals" value="RESIGN_HOHR_R" field="statusId">
+				<add-error>
+					<fail-property resource="EmployeeUiLabels" property="HRProposalRejectedByHeadOfHR"/>
+				</add-error>
+			</if-compare>
+		</else>	
+		</if-compare>
+		<check-errors/>	
+	</simple-method>
+	
+	<simple-method method-name="checkSackingStatusApproval">
+		<entity-one value-field="empTerminal" entity-name="EmplTerminationProposal"></entity-one>
+		<set field="statusId" from-field="empTerminal.statusId"/>
+		<call-class-method method-name="getHrmAdmin" class-name="com.olbius.util.PartyUtil" ret-field="headOfHrId">
+			<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+		</call-class-method>		
+		<call-class-method method-name="getCEO" class-name="com.olbius.util.PartyUtil" ret-field="ceoId">
+			<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+		</call-class-method>
+		<if-compare operator="equals" value="statusId" field="TER_PPSL_CREATED">
+			<if-compare-field to-field="headOfHrId" operator="not-equals" field="userLogin.partyId">
+				<add-error>
+					<fail-property resource="EmployeeUiLabels" property="HRNotApprovalByManager"/>
+				</add-error>			
+			</if-compare-field>						
+		</if-compare>		
+		<if-compare operator="equals" value="SACKING_HOHR_A" field="statusId">
+			<if-compare-field to-field="ceoId" operator="not-equals" field="userLogin.partyId">
+				<add-error>
+					<fail-property resource="EmployeeUiLabels" property="HRNotApprovalByCeo"/>
+				</add-error>
+			</if-compare-field>
+		<else>
+			<if-compare operator="equals" value="SACKING_HOHR_R" field="statusId">
+				<add-error>
+					<fail-property resource="EmployeeUiLabels" property="HRProposalRejectedByHeadOfHR"/>
+				</add-error>
+			</if-compare>
+		</else>	
+		</if-compare>
+		<check-errors/>
+	</simple-method>
+	<simple-method method-name="checkTransPositionStatusAppl">
+		<entity-one value-field="jobTransferProposal" entity-name="JobTransferProposal" auto-field-map="true"></entity-one>
+		<set field="statusId" from-field="jobTransferProposal.statusId"/>		
+		<set field="partyIdTransfer" from-field="jobTransferProposal.partyIdTransfer"/>
+		<call-class-method method-name="getHrmAdmin" class-name="com.olbius.util.PartyUtil" ret-field="headOfHrId">
+			<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+		</call-class-method>
+		<call-class-method method-name="getManagerOfEmpl" class-name="com.olbius.util.PartyUtil" ret-field="mgrOfEmplId">
+			<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+			<field field="partyIdTransfer" type="String"/>
+		</call-class-method>
+		<call-class-method method-name="getCEO" class-name="com.olbius.util.PartyUtil" ret-field="ceoId">
+			<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+		</call-class-method>
+		<if-compare operator="equals" value="JTP_CREATED" field="statusId">
+			<!-- transfer position just created, so first, it must approve by current manager of employee -->
+			<if-compare-field to-field="mgrOfEmplId" operator="not-equals" field="userLogin.partyId">
+				<add-error>
+					<fail-property resource="EmployeeUiLabels" property="HRNotApprovalByManager"/>
+				</add-error>			
+			</if-compare-field>
+		</if-compare>
+		
+		<if-compare operator="equals" value="TRANS_POS_MGR_A" field="statusId">
+			<if-compare-field to-field="headOfHrId" operator="not-equals" field="userLogin.partyId">
+				<add-error>
+					<fail-property resource="EmployeeUiLabels" property="HRNotApprovalByHeadOfHr"/>
+				</add-error>			
+			</if-compare-field>
+		<else>
+			<if-compare operator="equals" value="TRANS_POS_MGR_R" field="statusId">
+				<add-error>
+					<fail-property resource="EmployeeUiLabels" property="HRRejectedByManager"/>
+				</add-error>
+			</if-compare>
+		</else>	
+		</if-compare>
+		<if-compare operator="equals" value="TRANS_POS_HHR_A" field="statusId">
+			<if-compare-field to-field="ceoId" operator="not-equals" field="userLogin.partyId">
+				<add-error>
+					<fail-property resource="EmployeeUiLabels" property="HRNotApprovalByCeo"/>
+				</add-error>			
+			</if-compare-field>
+		<else>
+			<if-compare operator="equals" value="TRANS_POS_HHR_R" field="statusId">
+				<add-error>
+					<fail-property resource="EmployeeUiLabels" property="HRRejectedByHeadOfHR"/>
+				</add-error>
+			</if-compare>
+		</else>	
+		</if-compare>
+		<check-errors/>
+	</simple-method>
+</simple-methods>	

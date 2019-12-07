@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+    <screen name="neworder">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PageTitleOrderInits"/>
+                <set field="headerItem" value="neworder"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/Salesadmin/NewOrderInfoCommon.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<platform-specific>
+							<html>
+								<html-template location="component://delys/webapp/delys/salesadmin/newOrderInfoCommon.ftl" />
+							</html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    <screen name="neworderFinalize">
+		<section>
+			<actions>
+				<set field="productsummaryScreen" value="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml#productsummary"/>
+                <property-to-field resource="order" property="orderPreference.giftEnable" field="giftEnable" default="Y"/>
+                <set field="promoUseDetailsInlineScreen" value="component://order/widget/ordermgr/OrderEntryCartScreens.xml#promoUseDetailsInline"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/ShowCart.groovy"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/ShowPromoText.groovy"/>
+                <entity-condition entity-name="ProductStorePromoAndAppl" list="allProductPromos" filter-by-date="true">
+                    <condition-list combine="and">
+                        <condition-expr field-name="manualOnly" value="Y"/>
+                        <condition-expr field-name="productStoreId" from-field="productStoreId"/>
+                    </condition-list>
+                    <order-by field-name="productPromoId"/>
+                </entity-condition>
+                
+                <entity-and entity-name="ProductStoreFacility" list="productStoreFacilities">
+	                <field-map field-name="productStoreId" from-field="productStoreId"/>
+	                <order-by field-name="sequenceNum"/>
+	                <order-by field-name="fromDate"/>
+	            </entity-and>
+	            
+				<set field="stepTitleId" value="OrderOrderConfirmation"/>
+                <set field="stepLabelId" value="OrderReviewOrder"/>
+                <property-to-field resource="order" property="orderPreference.giftEnable" field="giftEnable" default="Y"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetShoppingCart.groovy"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/CheckoutReview.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<platform-specific>
+							<html><html-template location="component://delys/webapp/delys/salesadmin/newOrderFinalize.ftl" /></html>
+						</platform-specific>
+<!-- 						<platform-specific> -->
+<!--                             <html><html-template location="component://order/webapp/ordermgr/entry/order/orderheaderinfo.ftl"/></html> -->
+<!--                         </platform-specific> -->
+<!--                         <platform-specific> -->
+<!--                             <html><html-template location="component://order/webapp/ordermgr/entry/order/orderpaymentinfo.ftl"/></html> -->
+<!--                         </platform-specific> -->
+<!--                         <platform-specific> -->
+<!--                             <html><html-template location="component://order/webapp/ordermgr/entry/order/shipGroupConfirmSummary.ftl"/></html> -->
+<!--                         </platform-specific> -->
+<!--                         <platform-specific> -->
+<!--                             <html><html-template location="component://order/webapp/ordermgr/entry/order/orderitems.ftl"/></html> -->
+<!--                         </platform-specific> -->
+						<platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/javascript.ftl"/></html></platform-specific>
+						<platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/manualPromotions.ftl"/></html></platform-specific>
+                        <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/promoText.ftl"/></html></platform-specific>
+                        <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/associatedProducts.ftl"/></html></platform-specific>
+                        <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/promotionsApplied.ftl"/></html></platform-specific>
+						
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    <screen name="quickFinalizeOrder">
+        <section>
+            <actions>
+                <set field="headerItem" value="orderentry"/>
+                <set field="titleProperty" value="PageTitleCheckoutOptions"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/CheckoutPayment.groovy"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/CheckoutOptions.groovy"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/StorePaymentOptions.groovy"/>
+                <property-to-field resource="order" property="orderPreference.giftEnable" field="giftEnable" default="Y"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container id="custom-header">
+                            <label style="h3" text="${uiLabelMap.OrderQuickFinalizeOrder}"/>
+                        </container>
+                        <platform-specific><html><html-template location="component://delys/webapp/delys/salesadmin/checkoutoptions.ftl"/></html></platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="neworderAddProduct">
+		<section>
+			<actions>
+				<set field="headerItem" value="neworder"/>
+				
+				<set field="productsummaryScreen" value="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml#productsummary"/>
+                <property-to-field resource="order" property="orderPreference.giftEnable" field="giftEnable" default="Y"/>
+                <set field="promoUseDetailsInlineScreen" value="component://order/widget/ordermgr/OrderEntryCartScreens.xml#promoUseDetailsInline"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/ShowCart.groovy"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/ShowPromoText.groovy"/>
+                <entity-condition entity-name="ProductStorePromoAndAppl" list="allProductPromos" filter-by-date="true">
+                    <condition-list combine="and">
+                        <condition-expr field-name="manualOnly" value="Y"/>
+                        <condition-expr field-name="productStoreId" from-field="productStoreId"/>
+                    </condition-list>
+                    <order-by field-name="productPromoId"/>
+                </entity-condition>
+                
+                <entity-and entity-name="ProductStoreFacility" list="productStoreFacilities">
+	                <field-map field-name="productStoreId" from-field="productStoreId"/>
+	                <order-by field-name="sequenceNum"/>
+	                <order-by field-name="fromDate"/>
+	            </entity-and>
+	            
+	            <script location="component://delys/webapp/delys/WEB-INF/actions/delys/Salesadmin/NewOrderAddProduct.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<platform-specific>
+							<html>
+								<html-template location="component://delys/webapp/delys/salesadmin/newOrderAddProduct.ftl" />
+							</html>
+						</platform-specific>
+						
+						<platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/javascript.ftl"/></html></platform-specific>
+<!--                         <platform-specific><html><html-template location="component://order/webapp/ordermgr/salesadmin/showCartInNewOrder.ftl"/></html></platform-specific> -->
+<!--                         <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/addItemsToShoppingList.ftl"/></html></platform-specific> -->
+<!--                         <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/showcartitems.ftl"/></html></platform-specific> -->
+<!--                         <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/promoCodes.ftl"/></html></platform-specific> -->
+                        <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/manualPromotions.ftl"/></html></platform-specific>
+                        <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/promoText.ftl"/></html></platform-specific>
+                        <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/associatedProducts.ftl"/></html></platform-specific>
+                        <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/promotionsApplied.ftl"/></html></platform-specific>
+						
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+     <!-- =========== Top-Level and Stand-Alone Screens =========== -->
+    <screen name="DAShowCart">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleOrderShowCart"/>
+                <set field="productsummaryScreen" value="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml#productsummary"/>
+                <property-to-field resource="order" property="orderPreference.giftEnable" field="giftEnable" default="Y"/>
+                <set field="promoUseDetailsInlineScreen" value="component://order/widget/ordermgr/OrderEntryCartScreens.xml#promoUseDetailsInline"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/ShowCart.groovy"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/ShowPromoText.groovy"/>
+                <entity-condition entity-name="ProductStorePromoAndAppl" list="allProductPromos" filter-by-date="true">
+                    <condition-list combine="and">
+                        <condition-expr field-name="manualOnly" value="Y"/>
+                        <condition-expr field-name="productStoreId" from-field="productStoreId"/>
+                    </condition-list>
+                    <order-by field-name="productPromoId"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrderEntryDecorator" location="component://order/widget/ordermgr/OrderEntryCommonScreens.xml">
+                    <decorator-section name="body">
+                        <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/javascript.ftl"/></html></platform-specific>
+                        <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/showcart.ftl"/></html></platform-specific>
+                        <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/addItemsToShoppingList.ftl"/></html></platform-specific>
+                        <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/showcartitems.ftl"/></html></platform-specific>
+                        <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/promoCodes.ftl"/></html></platform-specific>
+                        <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/manualPromotions.ftl"/></html></platform-specific>
+                        <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/promoText.ftl"/></html></platform-specific>
+                        <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/associatedProducts.ftl"/></html></platform-specific>
+                        <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/promotionsApplied.ftl"/></html></platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="viewDebt">
+        <section>
+            <actions>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/Salesadmin/NewOrderInfoCommon.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+							<html>
+								<html-template location="component://delys/webapp/delys/salesadmin/viewDebt.ftl" />
+							</html>
+						</platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+</screens>

@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+	<title>Extend Entity for BaseEcommerce Component</title>
+	<description>None</description>
+	<version>1.0</version>
+	
+	<view-entity entity-name="StoreCatalogCategory" package-name="org.ofbiz.baseecommerce">
+		<member-entity entity-alias="PSC" entity-name="ProductStoreCatalog"></member-entity>
+		<member-entity entity-alias="PC" entity-name="ProdCatalog"></member-entity>
+		<alias name="description" entity-alias="PC"></alias>
+		<alias name="catalogName" entity-alias="PC"></alias>
+		<alias name="headerLogo" entity-alias="PC"></alias>
+		<alias name="productStoreId" entity-alias="PSC"></alias>
+		<alias name="prodCatalogId" entity-alias="PSC"></alias>
+		<alias name="sequenceNum" entity-alias="PSC"></alias>
+		<alias name="fromDate" entity-alias="PSC"></alias>
+		<alias name="thruDate" entity-alias="PSC"></alias>
+		<view-link rel-entity-alias="PSC" entity-alias="PC">
+			<key-map field-name="prodCatalogId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PersonAndPartyGroup" package-name="org.ofbiz.baseecommerce">
+		<member-entity entity-alias="PT" entity-name="Party" />
+		<member-entity entity-alias="PS" entity-name="Person" />
+		<member-entity entity-alias="PG" entity-name="PartyGroup" />
+		<alias-all entity-alias="PS"></alias-all>
+		<alias-all entity-alias="PG"></alias-all>
+		<alias name="partyFullName">
+			<complex-alias operator="||' '||">
+				<complex-alias-field entity-alias="PS" field="lastName" default-value="''" />
+				<complex-alias-field entity-alias="PS" field="middleName" default-value="''" />
+				<complex-alias-field entity-alias="PS" field="firstName" default-value="''" />
+				<complex-alias-field entity-alias="PG" field="groupName" default-value="''" />
+			</complex-alias>
+		</alias>
+		<alias name="partyCode" entity-alias="PT"></alias>
+		<alias name="description" entity-alias="PT"></alias>
+		<view-link rel-entity-alias="PS" entity-alias="PT" rel-optional="true">
+			<key-map field-name="partyId" />
+		</view-link>
+		<view-link rel-entity-alias="PG" entity-alias="PT" rel-optional="true">
+			<key-map field-name="partyId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="ProductReviewDetail" package-name="org.ofbiz.baseecommerce">
+		<member-entity entity-alias="PRR" entity-name="ProductReview"></member-entity>
+		<member-entity entity-alias="PR" entity-name="Product"></member-entity>
+		<alias-all entity-alias="PRR"></alias-all>
+		<alias name="productName" entity-alias="PR"></alias>
+		<view-link rel-entity-alias="PR" entity-alias="PRR">
+			<key-map field-name="productId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="ImageAttribute" package-name="com.olbius.ecommerce">
+		<member-entity entity-alias="CTAN" entity-name="ContentAttribute" />
+		<member-entity entity-alias="CTAW" entity-name="ContentAttribute" />
+		<member-entity entity-alias="CTAH" entity-name="ContentAttribute" />
+		<alias entity-alias="CTAN" name="contentId" />
+		<alias entity-alias="CTAN" name="size" field="attrValue" />
+		<alias entity-alias="CTAW" name="width" field="attrValue" />
+		<alias entity-alias="CTAH" name="height" field="attrValue" />
+		<view-link rel-entity-alias="CTAW" entity-alias="CTAN">
+			<key-map field-name="contentId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="attrName" entity-alias="CTAN" value="THUMBNAIL_SIZE" />
+					<condition-expr field-name="attrName" entity-alias="CTAW" value="WIDTH" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="CTAH" entity-alias="CTAN">
+			<key-map field-name="contentId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="attrName" entity-alias="CTAN" value="THUMBNAIL_SIZE" />
+					<condition-expr field-name="attrName" entity-alias="CTAH" value="HEIGHT" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ContentImageView" package-name="com.olbius.ecommerce">
+		<member-entity entity-alias="CA" entity-name="ContentAssoc" />
+		<member-entity entity-alias="CT" entity-name="Content" />
+		<member-entity entity-alias="IMG" entity-name="Content" />
+		<member-entity entity-alias="CTA" entity-name="ImageAttribute" />
+		<alias entity-alias="CT" name="contentId" />
+		<alias entity-alias="CT" name="contentName" />
+		<alias entity-alias="CT" name="description" />
+		<alias entity-alias="CT" name="createdDate" />
+		<alias entity-alias="CT" name="contentTypeId" />
+		<alias entity-alias="IMG" name="imgContentId" field="contentId" />
+		<alias entity-alias="IMG" name="imgSrc" field="contentName" />
+		<alias entity-alias="IMG" name="imgCaption" field="description" />
+		<alias entity-alias="IMG" name="imgCreatedDate" field="createdDate" />
+		<alias entity-alias="CTA" name="size" />
+		<alias entity-alias="CTA" name="width" />
+		<alias entity-alias="CTA" name="height" />
+		<view-link rel-entity-alias="CT" entity-alias="CA">
+			<key-map field-name="contentId" />
+		</view-link>
+		<view-link rel-entity-alias="IMG" entity-alias="CA">
+			<key-map field-name="contentIdTo" rel-field-name="contentId" />
+			<entity-condition>
+				<condition-expr field-name="contentTypeId" entity-alias="IMG" value="IMAGE_FRAME" />
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="CTA" entity-alias="IMG">
+			<key-map field-name="contentId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="ProductAndContent" package-name="com.olbius.ecommerce">
+		<member-entity entity-alias="PR" entity-name="Product" />
+		<member-entity entity-alias="PRC" entity-name="ProductContent" />
+		<member-entity entity-alias="C" entity-name="TopicAndComment" />
+		<alias-all entity-alias="C"></alias-all>
+		<alias name="productId" entity-alias="PR"></alias>
+		<alias name="productName" entity-alias="PR"></alias>
+		<alias name="productCode" entity-alias="PR"></alias>
+		<alias name="productContentTypeId" entity-alias="PRC"></alias>
+		<alias name="fromDate" entity-alias="PRC"></alias>
+		<alias name="thruDate" entity-alias="PRC"></alias>
+		<view-link rel-entity-alias="PR" entity-alias="PRC">
+			<key-map field-name="productId" />
+		</view-link>
+		<view-link rel-entity-alias="C" entity-alias="PRC">
+			<key-map field-name="contentId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="TopicAndComment" package-name="com.olbius.ecommerce">
+		<member-entity entity-alias="CONT" entity-name="WebSiteContentDetail"></member-entity>
+		<member-entity entity-alias="CASS" entity-name="ContentAssoc"></member-entity>
+		<alias name="webSiteId" entity-alias="CONT" group-by="true"></alias>
+		<alias name="contentId" entity-alias="CONT" group-by="true"></alias>
+		<alias name="contentTypeId" entity-alias="CONT" group-by="true"></alias>
+		<alias name="dataResourceId" entity-alias="CONT" group-by="true"></alias>
+		<alias name="dataSourceId" entity-alias="CONT" group-by="true"></alias>
+		<alias name="statusId" entity-alias="CONT" group-by="true"></alias>
+		<alias name="contentName" entity-alias="CONT" group-by="true"></alias>
+		<alias name="description" entity-alias="CONT" group-by="true"></alias>
+		<alias name="longDescription" entity-alias="CONT" group-by="true"></alias>
+		<alias name="lastUpdatedStamp" entity-alias="CONT" group-by="true"></alias>
+		<alias name="createdStamp" entity-alias="CONT" group-by="true"></alias>
+		<alias name="infoString" entity-alias="CONT" group-by="true"></alias>
+		<alias name="author" entity-alias="CONT" group-by="true"></alias>
+		<alias name="detailImageUrl" entity-alias="CONT" group-by="true"></alias>
+		<alias name="smallImageUrl" entity-alias="CONT" group-by="true"></alias>
+		<alias name="mediumImageUrl" entity-alias="CONT" group-by="true"></alias>
+		<alias name="largeImageUrl" entity-alias="CONT" group-by="true"></alias>
+		<alias name="originalImageUrl" entity-alias="CONT" group-by="true"></alias>
+		<alias name="numberOfComments" function="count" entity-alias="CASS" field="contentId"></alias>
+		<view-link entity-alias="CONT" rel-entity-alias="CASS" rel-optional="true">
+			<key-map field-name="contentId" rel-field-name="contentIdTo" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="ContentAndContentType" package-name="com.olbius.ecommerce">
+		<member-entity entity-alias="CTYP" entity-name="ContentType"></member-entity>
+		<member-entity entity-alias="TAC" entity-name="TopicAndComment"></member-entity>
+		<alias-all entity-alias="TAC"></alias-all>
+		<alias name="topicName" field="description" entity-alias="CTYP"></alias>
+		<alias name="parentTypeId" entity-alias="CTYP"></alias>
+		<view-link entity-alias="CTYP" rel-entity-alias="TAC">
+			<key-map field-name="contentTypeId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="FAQCategory" package-name="com.olbius.ecommerce">
+		<member-entity entity-alias="CTYP" entity-name="ContentType"></member-entity>
+		<member-entity entity-alias="CONT" entity-name="Content"></member-entity>
+		<alias name="contentTypeId" entity-alias="CTYP" group-by="true"></alias>
+		<alias name="topicName" field="description" entity-alias="CTYP" group-by="true"></alias>
+		<alias name="parentTypeId" entity-alias="CTYP" group-by="true"></alias>
+		<alias name="numberOfAsked" function="count" entity-alias="CONT" field="contentId"></alias>
+		<view-link entity-alias="CTYP" rel-entity-alias="CONT" rel-optional="true">
+			<key-map field-name="contentTypeId" />
+		</view-link>
+		<entity-condition>
+			<condition-expr field-name="parentTypeId" entity-alias="CTYP" value="FAQ_ROOT" />
+		</entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="ProductCategoryMemberAndPriceFilter" package-name="com.olbius.ecommerce">
+		<member-entity entity-alias="PCM" entity-name="ProductCategoryMember" />
+		<member-entity entity-alias="PRD" entity-name="Product" />
+		<member-entity entity-alias="PRP" entity-name="ProductPrice" />
+		<alias-all entity-alias="PCM">
+			<exclude field="comments" />
+			<exclude field="fromDate" />
+			<exclude field="thruDate" />
+		</alias-all>
+		<alias-all entity-alias="PRD" />
+		<alias-all entity-alias="PRP">
+			<exclude field="createdDate" />
+		</alias-all>
+		<alias name="categoryComments" field="comments" entity-alias="PCM" />
+		<alias name="categoryFromDate" field="fromDate" entity-alias="PCM" />
+		<alias name="categoryThruDate" field="thruDate" entity-alias="PCM" />
+		<alias name="priceCreatedDate" field="createdDate" entity-alias="PRP" />
+		<view-link rel-entity-alias="PRD" entity-alias="PCM">
+			<key-map field-name="productId" />
+		</view-link>
+		<view-link rel-entity-alias="PRP" entity-alias="PRD" rel-optional="true">
+			<key-map field-name="productId" />
+			<entity-condition>
+				<condition-expr field-name="productPriceTypeId" value="DEFAULT_PRICE" entity-alias="PRP" />
+			</entity-condition>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ProductCategorySupplier" package-name="com.olbius.ecommerce">
+		<member-entity entity-alias="PCM" entity-name="ProductCategoryMember" />
+		<member-entity entity-alias="SP" entity-name="SupplierProduct" />
+		<member-entity entity-alias="PRD" entity-name="Product" />
+		<alias name="brandName" entity-alias="PRD" />
+		<alias name="originGeoId" entity-alias="PRD" />
+		<alias name="productId" entity-alias="PCM" />
+		<alias name="productCategoryId" entity-alias="PCM" />
+		<alias name="fromDate" entity-alias="PCM" />
+		<alias name="thruDate" entity-alias="PCM" />
+		<alias name="availableFromDate" entity-alias="SP" />
+		<alias name="availableThruDate" entity-alias="SP" />
+		<alias name="partyId" entity-alias="SP" />
+		<view-link rel-entity-alias="SP" entity-alias="PCM">
+			<key-map field-name="productId" />
+		</view-link>
+		<view-link rel-entity-alias="PRD" entity-alias="PCM">
+			<key-map field-name="productId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ProductBrand" package-name="com.olbius.ecommerce">
+		<member-entity entity-alias="PRO" entity-name="Product" />
+		<member-entity entity-alias="PTG" entity-name="PartyGroup" />
+		<member-entity entity-alias="PT" entity-name="Party" />
+		<alias-all entity-alias="PRO" />
+		<alias name="groupName" entity-alias="PTG" />
+		<view-link rel-entity-alias="PTG" entity-alias="PRO">
+			<key-map field-name="brandName" rel-field-name="partyId" />
+		</view-link>
+		<view-link rel-entity-alias="PT" entity-alias="PTG">
+			<key-map field-name="partyId" />
+			<entity-condition>
+				<condition-expr field-name="statusId" entity-alias="PT" value="PARTY_DISABLED" operator="not-equals" />
+			</entity-condition>
+		</view-link>
+	</view-entity>
+	
+	<!-- <view-entity entity-name="ProductGeo" package-name="com.olbius.ecommerce"> -->
+	<!-- <member-entity entity-alias="PCM" entity-name="Product"/> -->
+	<!-- <member-entity entity-alias="GEO" entity-name="Geo"/> -->
+	<!-- <alias-all entity-alias="PCM"/> -->
+	<!-- <alias name="geoName" entity-alias="GEO" /> -->
+	<!-- <view-link rel-entity-alias="GEO" entity-alias="PCM"> -->
+	<!-- <key-map field-name="originGeoId" rel-field-name="geoId"/> -->
+	<!-- </view-link> -->
+	<!-- </view-entity> -->
+	
+	<view-entity entity-name="ContentAssocCommentCount" package-name="com.olbius.ecommerce">
+		<member-entity entity-alias="CA" entity-name="ContentAssoc" />
+		<alias name="contentIdTo" entity-alias="CA" group-by="true" />
+		<alias name="total" field="contentId" entity-alias="CA" function="count" />
+		<entity-condition>
+			<condition-expr field-name="contentAssocTypeId" value="COMMENT" entity-alias="CA" />
+		</entity-condition>
+	</view-entity>
+
+	<view-entity entity-name="ProductCategoryContentDetail" package-name="com.olbius.ecommerce">
+		<member-entity entity-alias="PCC" entity-name="ProductCategoryContent"></member-entity>
+		<member-entity entity-alias="WSCD" entity-name="WebSiteContentDetail"></member-entity>
+		<alias-all entity-alias="WSCD"></alias-all>
+		<alias name="productCategoryId" entity-alias="PCC"></alias>
+		<alias name="prodCatContentTypeId" entity-alias="PCC"></alias>
+		<alias name="fromDate" entity-alias="PCC"></alias>
+		<view-link rel-entity-alias="WSCD" entity-alias="PCC">
+			<key-map field-name="contentId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ProductCacheDataDetail" package-name="com.olbius.ecommerce">
+		<member-entity entity-alias="PCD" entity-name="ProductCacheData" />
+		<member-entity entity-alias="PST" entity-name="ProductStore" />
+		<member-entity entity-alias="BRD" entity-name="PartyGroup" />
+		<alias-all entity-alias="PCD" />
+		<alias name="storeName" entity-alias="PST" />
+		<alias name="groupName" entity-alias="BRD" />
+		<view-link rel-entity-alias="PST" entity-alias="PCD">
+			<key-map field-name="productStoreId" />
+		</view-link>
+		<view-link rel-entity-alias="BRD" entity-alias="PCD" rel-optional="true">
+			<key-map field-name="brandName" rel-field-name="partyId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ProductReviewSum" package-name="com.olbius.ecommerce">
+		<member-entity entity-alias="PR" entity-name="ProductReview" />
+		<alias name="totalRating" field="productRating" function="sum" entity-alias="PR" />
+		<alias name="totalReview" field="productReviewId" function="count" entity-alias="PR" />
+		<alias entity-alias="PR" name="productId" group-by="true" />
+		<alias entity-alias="PR" name="productStoreId" group-by="true" />
+		<entity-condition>
+			<condition-expr field-name="statusId" value="PRR_APPROVED" entity-alias="PR" />
+		</entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="ProductCategoryMemberAndProduct" package-name="com.olbius.ecommerce">
+		<member-entity entity-alias="PCM" entity-name="ProductCategoryMember" />
+		<member-entity entity-alias="PRD" entity-name="Product" />
+		<alias-all entity-alias="PCM" />
+		<alias-all entity-alias="PRD" />
+		<view-link rel-entity-alias="PRD" entity-alias="PCM">
+			<key-map field-name="productId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ProductCacheDataBrand" package-name="com.olbius.ecommerce">
+		<member-entity entity-alias="PCD" entity-name="ProductCacheData" />
+		<alias entity-alias="PCD" name="productId" />
+		<alias name="brandName" entity-alias="PCD" />
+	</view-entity>
+	
+	<view-entity entity-name="ProductCategoryMemberAndProductBrand" package-name="com.olbius.ecommerce">
+		<member-entity entity-alias="PCB" entity-name="ProductCategoryMemberAndProduct" />
+		<member-entity entity-alias="PG" entity-name="PartyGroup" />
+		<alias-all entity-alias="PCB" />
+		<alias name="groupName" entity-alias="PG" />
+		<view-link rel-entity-alias="PG" entity-alias="PCB" rel-optional="true">
+			<key-map field-name="brandName" rel-field-name="partyId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="Topic" package-name="com.olbius.ecommerce">
+		<member-entity entity-alias="CCM" entity-name="ContentCategoryMember"></member-entity>
+		<member-entity entity-alias="WCCD" entity-name="WebsiteContentCategoryDetail"></member-entity>
+		<alias name="contentId" entity-alias="CCM"></alias>
+		<alias name="contentCategoryId" entity-alias="CCM"></alias>
+		<alias name="fromDate" entity-alias="CCM"></alias>
+		<alias name="sequenceNum" entity-alias="CCM"></alias>
+		<alias name="webSiteId" entity-alias="WCCD"></alias>
+		<alias name="contentCategoryTypeId" entity-alias="WCCD"></alias>
+		<view-link rel-entity-alias="CCM" entity-alias="WCCD">
+			<key-map field-name="contentCategoryId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="TopicDetail" package-name="com.olbius.ecommerce">
+		<member-entity entity-alias="TP" entity-name="Topic"></member-entity>
+		<member-entity entity-alias="CT" entity-name="TopicAndComment"></member-entity>
+		<alias-all entity-alias="TP"></alias-all>
+		<alias-all entity-alias="CT"></alias-all>
+		<view-link rel-entity-alias="CT" entity-alias="TP">
+			<key-map field-name="contentId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="WebsiteContentCategoryDetail" package-name="com.olbius.ecommerce">
+		<member-entity entity-alias="WCC" entity-name="WebsiteContentCategory"></member-entity>
+		<member-entity entity-alias="CC" entity-name="ContentCategory"></member-entity>
+		<alias-all entity-alias="WCC"></alias-all>
+		<alias-all entity-alias="CC"></alias-all>
+		<view-link rel-entity-alias="CC" entity-alias="WCC">
+			<key-map field-name="contentCategoryId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="WebSiteContentDetail" package-name="com.olbius.ecommerce">
+		<member-entity entity-alias="WSC" entity-name="WebSiteContent" />
+		<member-entity entity-alias="CT" entity-name="Content" />
+		<alias-all entity-alias="WSC" />
+		<alias-all entity-alias="CT" />
+		<alias name="lastUpdatedStamp" entity-alias="CT"></alias>
+		<alias name="createdStamp" entity-alias="CT"></alias>
+		<view-link rel-entity-alias="CT" entity-alias="WSC">
+			<key-map field-name="contentId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="WebSiteContentCategoryContentDetail" package-name="com.olbius.ecommerce">
+		<member-entity entity-alias="CT" entity-name="Content" />
+		<member-entity entity-alias="CCM" entity-name="ContentCategoryMember" />
+		<member-entity entity-alias="WCC" entity-name="WebsiteContentCategory" />
+		<member-entity entity-alias="WSC" entity-name="WebSiteContent" />
+		<alias-all entity-alias="WSC" />
+		<alias-all entity-alias="CT" />
+		<alias name="lastUpdatedStamp" entity-alias="CT"></alias>
+		<alias name="createdStamp" entity-alias="CT"></alias>
+		<alias name="contentCategoryId" entity-alias="CCM" />
+		<alias name="CategoryFromDate" field="fromDate" entity-alias="WCC" />
+		<alias name="CategoryThruDate" field="thruDate" entity-alias="WCC" />
+		<view-link rel-entity-alias="CT" entity-alias="CCM">
+			<key-map field-name="contentId" />
+		</view-link>
+		<view-link rel-entity-alias="WCC" entity-alias="CCM">
+			<key-map field-name="contentCategoryId" />
+		</view-link>
+		<view-link rel-entity-alias="WSC" entity-alias="WCC">
+			<key-map field-name="webSiteId" />
+		</view-link>
+		<entity-condition>
+			<condition-expr field-name="contentId" entity-alias="CT" rel-field-name="contentId" rel-entity-alias="WSC" />
+		</entity-condition>
+	</view-entity>
+</entitymodel>

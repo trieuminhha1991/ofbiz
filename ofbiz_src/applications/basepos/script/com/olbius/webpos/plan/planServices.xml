@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+	<simple-method method-name="createPlanHeader" short-description="Create a plan header Entity" >
+		
+		<make-value value-field="newEntity" entity-name="PlanHeader" />
+		<sequenced-id sequence-name="PlanHeader" field="newEntity.planId"/>
+		
+		<set-nonpk-fields value-field="newEntity" map="parameters"/>
+		<if-not-empty field="parameters.createdDate">
+			<set field="newEntity.createdDate" from-field="parameters.createdDate"/>
+		<else>
+			<now-timestamp field="nowTimestamp"/>
+			<set field="newEntity.createdDate" from-field="nowTimestamp"/>
+		</else>	
+		</if-not-empty>
+		<if-not-empty field="parameters.createdBy">
+			<set field="newEntity.createdBy" from-field="parameters.createdBy"/>
+		<else>
+			<set field="newEntity.createdBy" from-field="userLogin.userLoginId"/>
+		</else>	
+		</if-not-empty>
+		<create-value value-field="newEntity"/>
+		<check-errors/>
+		<field-to-result field="newEntity.planId" result-name="planId"/>
+	</simple-method>
+	<simple-method method-name="createPlanItem" short-description="Create a plan Plan Item Entity" >
+		<make-value value-field="newEntity" entity-name="PlanItem"/>
+		<set field="planId" from-field="parameters.planId"/>
+		<set field="planItemSeqId" from-field="parameters.planItemSeqId"/>
+		<set field="newEntity.planId" from-field="planId" />
+		<set field="newEntity.planItemSeqId" from-field="planItemSeqId"/>
+		<set-nonpk-fields value-field="newEntity" map="parameters"/>
+		<create-value value-field="newEntity"/>
+		<check-errors/>
+		<field-to-result field="planId" result-name="planId"/>
+		<field-to-result field="planItemSeqId" result-name="planItemSeqId"/>
+	</simple-method>
+</simple-methods>

@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	<!-- maybe delete -->
+	<screen name="ViewEmplTimesheetList">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="EmplTimekeeping" />
+				<set field="selectedSubMenuItem" value="emplTimesheets"/>
+				<set field="titleProperty" value="EmplTimesheetList"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="EmplTimekeepingDecorator" location="component://basehr/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<section>
+									<actions>
+										<entity-condition list="statusList" entity-name="StatusItem">
+											<condition-expr field-name="statusTypeId" value="EMPL_TIME_SHEET_STT"/>
+										</entity-condition>
+										<entity-condition list="listEmplTimekeepingSign" entity-name="EmplTimekeepingSign">
+											<condition-expr field-name="emplTimekeepingSignId" operator="not-equals" value="_NA_"/>
+										</entity-condition>
+										<entity-condition list="statusListWorkOvertime" entity-name="StatusItem">
+											<condition-expr field-name="statusTypeId" value="WOT_REGISTER"/>
+											<order-by field-name="sequenceId"/>
+										</entity-condition>
+										<entity-condition list="statusListWorkingLate" entity-name="StatusItem">
+											<condition-expr field-name="statusTypeId" value="EMPL_LATE_APPR"/>
+											<order-by field-name="sequenceId"/>
+										</entity-condition>
+										<entity-condition list="emplPosType" entity-name="EmplPositionType">
+											<condition-expr field-name="emplPositionTypeId" operator="not-equals" value="_NA_"/>
+											<order-by field-name="emplPositionTypeId"/>
+										</entity-condition>
+										
+										<script location="component://basehr/webapp/basehr/WEB-INF/actions/getCustomTimePeriod.groovy"/>
+										<entity-condition list="customTimePeriodYear" entity-name="CustomTimePeriod">
+											<condition-expr field-name="periodTypeId" value="YEARLY"/>
+											<order-by field-name="-fromDate"/>
+										</entity-condition>
+									</actions>
+									<widgets>
+										<platform-specific>
+											<html>
+												<html-template location="component://basehr/webapp/basehr/timesheet/ViewEmplTimesheetList.ftl"/>
+											</html>
+										</platform-specific>
+									</widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.ScreenNoPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<!-- maybe delete -->
+	<screen name="ProposalTimesheet">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="EmplTimekeeping" />
+				<set field="selectedSubMenuItem" value="emplTimesheets"/>
+				<set field="titleProperty" value="EmplTimesheetList"/>
+				<entity-one value-field="emplTimesheet" entity-name="EmplTimesheets"></entity-one>
+			</actions>
+			<widgets>
+				<decorator-screen name="EmplTimekeepingDecorator" location="component://basehr/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<not>
+									<if-empty field="emplTimesheet"/>
+								</not>
+							</condition>
+							<actions>
+								<entity-condition list="statusList" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="EMPL_TIME_SHEET_STT"/>
+								</entity-condition>
+								<entity-condition list="listEmplTimekeepingSign" entity-name="EmplTimekeepingSign">
+									<condition-expr field-name="emplTimekeepingSignId" operator="not-equals" value="_NA_"/>
+								</entity-condition>
+								<entity-condition list="statusListWorkOvertime" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="WOT_REGISTER"/>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>
+								<entity-condition list="statusListWorkingLate" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="EMPL_LATE_APPR"/>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>
+								<entity-condition list="emplPosType" entity-name="EmplPositionType">
+									<condition-expr field-name="emplPositionTypeId" operator="not-equals" value="_NA_"/>
+									<order-by field-name="emplPositionTypeId"/>
+								</entity-condition>
+								<script location="component://basehr/webapp/basehr/WEB-INF/actions/getPartyGroupTree.groovy"/>
+							</actions>
+							<widgets>
+								<screenlet title="${uiLabelMap.ApprovalTimesheets}">
+									<platform-specific>
+										<html>
+											<html-template location="component://basehr/webapp/basehr/timesheet/ProposalTimesheet.ftl"/>
+										</html>
+									</platform-specific>
+								</screenlet>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	<!-- maybe delete -->
+	<screen name="ViewEmplTimekeepingReport">
+		<section>
+			<actions>
+				<set field="tabButtonItem" value="EmplTimekeepingReport" />
+				<set field="selectedMenuItem" value="EmplTimekeepingReport"/>
+				<set field="selectedMenuItem" value="EmplTimekeeping" />
+				<set field="selectedSubMenuItem" value="timeRecorder"/>
+				<set field="titleProperty" value="DetailEmplTimekeepingReportTiltle" />
+			</actions>
+			<widgets>
+				<decorator-screen name="EmplTimekeepingDecorator" location="component://basehr/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<actions>
+								<script location="component://basehr/webapp/basehr/WEB-INF/actions/EmplTimekeepingReport.groovy"/>
+								<set field="currentDateTime" value="${groovy: java.util.Calendar.getInstance()}" type="Object"/>
+							</actions>
+							<widgets>
+								<section>
+									<actions>										
+									</actions>
+									<widgets>
+										<platform-specific>
+											<html>
+												<html-template location="component://basehr/webapp/basehr/timesheet/ViewEmplTimekeepingReport.ftl"/>
+											</html>
+										</platform-specific>
+									</widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.ScreenNoPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewEmplWorkingLateList">
+    	<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="EmplTimekeeping" />
+				<set field="selectedSubMenuItem" value="mgrWorkingLate"/>
+				<set field="titleProperty" value="HREmplWorkingLateList"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="EmplTimekeepingDecorator" location="component://basehr/widget/CommonScreens.xml">
+    				<decorator-section name="body">
+    					<section>
+    						<condition>
+								<if-has-permission permission="HR_TIMESHEET" action="_UPDATE"/>
+							</condition>
+    						<widgets>
+    							<section>
+		    						<actions>
+		    							<entity-condition list="statusListWorkinglate" entity-name="StatusItem">
+											<condition-expr field-name="statusTypeId" value="EMPL_LATE_APPR"/>
+											<order-by field-name="sequenceId"/>
+										</entity-condition>
+		    						</actions>
+		    						<widgets>
+		    							<platform-specific>
+		    								<html>
+		    									<html-template location="component://basehr/webapp/basehr/timesheet/ViewEmplWorkingLateList.ftl"/>
+		    								</html>
+		    							</platform-specific>
+		    						</widgets>
+		    					</section>
+    						</widgets>
+    						<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.ScreenNoPermission}"></label>
+								</container>
+							</fail-widgets>
+    					</section>
+    					
+    				</decorator-section>
+    			</decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    
+    <screen name="ViewEmplTimesheetDetailList">
+    	<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="EmplTimekeeping" />
+				<set field="selectedSubMenuItem" value="emplTimesheetDetail"/>
+				<set field="titleProperty" value="EmplTimesheetDetailList"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="EmplTimekeepingDecorator" location="component://basehr/widget/CommonScreens.xml">
+    				<decorator-section name="body">
+    					<section>
+    						<condition>
+								<if-olbius-has-permission/>
+							</condition>
+    						<widgets>
+    							<section>
+		    						<actions>
+		    							<entity-condition list="enumList" entity-name="Enumeration">
+		    								<condition-expr field-name="enumTypeId" value="TIMESHEET_ATTENDANCE_TYPE"/>
+		    								<order-by field-name="sequenceId"/>
+		    							</entity-condition>
+		    							<entity-condition list="workingShiftList" entity-name="WorkingShift">
+											<order-by field-name="shiftStartTime"/>
+										</entity-condition>
+		    						</actions>
+		    						<widgets>
+		    							<platform-specific>
+		    								<html>
+		    									<html-template location="component://basehr/webapp/basehr/timesheet/ViewEmplTimesheetDetailList.ftl"/>
+		    								</html>
+		    							</platform-specific>
+		    						</widgets>
+		    					</section>
+    						</widgets>
+    						<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.ScreenNoPermission}"></label>
+								</container>
+							</fail-widgets>
+    					</section>
+    				</decorator-section>
+    			</decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="ViewTimekeepingDetailParty">
+    	<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="EmplTimekeeping" />
+				<set field="selectedSubMenuItem" value="emplTimesheetDetail"/>
+				<entity-one value-field="timekeepingDetail" entity-name="TimekeepingDetail"></entity-one>
+				<set field="timekeepingDetailId" from-field="parameters.timekeepingDetailId" global="true"/>
+				<set field="titleProperty" value="EmplTimesheetDetail" global="true"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="EmplTimekeepingDecorator" location="component://basehr/widget/CommonScreens.xml">
+    				<decorator-section name="body">
+    					<section>
+    						<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<section>
+									<condition>
+										<not>
+											<if-empty field="timekeepingDetail"/>
+										</not>
+									</condition>
+									<actions>
+										<set field="month" value="${groovy: return (timekeepingDetail.month + 1)}" global="true"/>
+										<set field="year" value="${groovy: return String.valueOf(timekeepingDetail.getLong(&quot;year&quot;))}" global="true"/>
+										<set field="titleProperty" value="TimesheetDetailListParty" global="true"/>
+										<set field="fromDate" from-field="timekeepingDetail.fromDate" type="Timestamp"/>
+										<set field="thruDate" from-field="timekeepingDetail.thruDate" type="Timestamp"/>
+										<entity-condition list="workdayTimekeepingEnum" entity-name="Enumeration">
+											<condition-expr field-name="enumTypeId" value="WORKDAY_TIMEKEEPING_TYPE"/>
+											<order-by field-name="sequenceId"/>
+										</entity-condition>
+										<entity-condition list="workingShiftList" entity-name="WorkingShift">
+											<order-by field-name="shiftStartTime"/>
+										</entity-condition>
+									</actions>
+									<widgets>
+										<platform-specific>
+		    								<html>
+		    									<html-template location="component://basehr/webapp/basehr/timesheet/ViewTimekeepingDetailParty.ftl"/>
+		    								</html>
+		    							</platform-specific>
+									</widgets>	
+									<fail-widgets>
+										<container style="alert alert-info">
+											<label text="${uiLabelMap.CannotFindTimesheetDetailHaveId}"></label>
+										</container>
+									</fail-widgets>
+								</section>
+							</widgets>
+	    					<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.ScreenNoPermission}"></label>
+								</container>
+							</fail-widgets>
+    					</section>
+    				</decorator-section>
+    			</decorator-screen>
+    		</widgets>		
+    	</section>
+    </screen>
+    <screen name="ViewTimekeepingSummaryList">
+    	<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="EmplTimekeeping" />
+				<set field="selectedSubMenuItem" value="ViewTimekeepingSummary"/>
+				<set field="titleProperty" value="TimekeepingSummary" global="true"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="EmplTimekeepingDecorator" location="component://basehr/widget/CommonScreens.xml">
+    				<decorator-section name="body">
+    					<section>
+    						<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<actions>
+								<!-- <entity-condition list="workingShiftList" entity-name="WorkingShift">
+									<order-by field-name="shiftStartTime"/>
+								</entity-condition> -->
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+    									<html-template location="component://basehr/webapp/basehr/timesheet/ViewTimekeepingSummaryList.ftl"/>
+    								</html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.ScreenNoPermission}"></label>
+								</container>
+							</fail-widgets>
+    					</section>
+    				</decorator-section>
+    			</decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="ViewTimekeepingSummaryParty">
+    	<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="EmplTimekeeping" />
+				<set field="selectedSubMenuItem" value="ViewTimekeepingSummary"/>
+				<entity-one value-field="timekeepingSummary" entity-name="TimekeepingSummary"></entity-one>
+				<set field="timekeepingSummaryId" from-field="parameters.timekeepingSummaryId" global="true"/>
+				<set field="titleProperty" value="TimekeepingSummary" global="true"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="EmplTimekeepingDecorator" location="component://basehr/widget/CommonScreens.xml">
+    				<decorator-section name="body">
+    					<section>
+    						<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<section>
+									<condition>
+										<not>
+											<if-empty field="timekeepingSummary"/>
+										</not>
+									</condition>
+									<actions>
+										<set field="month" value="${groovy: return (timekeepingSummary.month + 1)}" global="true"/>
+										<set field="year" value="${groovy: return String.valueOf(timekeepingSummary.getLong(&quot;year&quot;))}" global="true"/>
+										<set field="titleProperty" value="TimesheetSummaryListParty" global="true"/>
+										<set field="fromDate" from-field="timekeepingSummary.fromDate" type="Timestamp"/>
+										<set field="thruDate" from-field="timekeepingSummary.thruDate" type="Timestamp"/>
+									</actions>
+									<widgets>
+										<platform-specific>
+		    								<html>
+		    									<html-template location="component://basehr/webapp/basehr/timesheet/ViewTimekeepingSummaryParty.ftl"/>
+		    								</html>
+		    							</platform-specific>
+									</widgets>
+									<fail-widgets>
+										<container style="alert alert-info">
+											<label text="${uiLabelMap.CannotFindTimesheetSummaryHaveId}"></label>
+										</container>
+									</fail-widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.ScreenNoPermission}"></label>
+								</container>
+							</fail-widgets>
+    					</section>
+    				</decorator-section>
+    			</decorator-screen>
+    		</widgets>		
+    	</section>
+    </screen>
+</screens>	

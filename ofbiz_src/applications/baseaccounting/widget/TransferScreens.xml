@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-screen.xsd">     
+        
+	<screen name="CommonTransferDecorator">
+        <section>
+            <actions>
+                <set field="selectedMenuItem" value="accApprovement"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="AccTransfer">
+        <section>
+            <actions>
+            	<set field="titleProperty" value="ListTransfers" global="true"/>
+            	<set field="selectedSubMenuItem" value="accTransferList"/>
+            </actions>
+            <widgets>        
+            	<section>
+            		<condition>
+            			<if-olbius-has-permission/>
+            		</condition>
+            		<widgets>
+            			<decorator-screen name="CommonTransferDecorator">
+		                    <decorator-section name="body">
+		                        <section>
+		                            <widgets>
+		                                <platform-specific>
+		                                    <html>
+				                        		<html-template location="component://baselogistics/webapp/baselogistics/transfer/listTransfers.ftl"/>
+				                        	</html>
+		                                </platform-specific>
+		                            </widgets>
+		                        </section>
+		                    </decorator-section>
+		                </decorator-screen>
+            		</widgets>
+            		<fail-widgets>
+            			<decorator-screen name="CommonTransferDecorator">
+		                    <decorator-section name="body">
+		                    	<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+		    				</decorator-section>
+		    			</decorator-screen>
+            		</fail-widgets>
+            	</section>       
+            </widgets>
+        </section>
+    </screen>
+    
+   	<screen name="TransferTitle">
+		<section>
+			<condition>
+				<not><if-empty field="parameters.transferId"/></not>
+			</condition>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text=" ${uiLabelMap.Transfer}: "></label>
+				<link url-mode="plain" target="accViewTransferDetail?transferId=${parameters.transferId}" text="${parameters.transferId}"></link>
+			</widgets>
+		</section>
+	</screen>
+	
+    <screen name="AccTransferDetail">
+        <section>
+        	<condition>
+        		<if-olbius-has-permission/>
+        	</condition>
+        	<actions>
+        		<set field="selectedSubMenuItem" value="accTransferList"/>
+           	 	<set field="titleProperty" value="TransferInformation" global="true"/>
+                <set field="titleHeaderValue" value="TransferTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://baseaccounting/widget/TransferScreens.xml" global="true"/>
+				<set field="activeTab" from-field="parameters.activeTab" default-value="general-tab"/>
+        	</actions>
+        	<widgets>
+        		<section>
+		            <actions>
+						<entity-one value-field="transfer" entity-name="TransferHeader"/>
+		            </actions>
+		            <widgets>
+		            	<section>
+			            	<condition>
+			            		<not>
+			            			<if-empty field="transfer"/>
+			            		</not>
+			            	</condition>
+		            		<widgets>
+		            			<decorator-screen name="CommonTransferDecorator">
+				                    <decorator-section name="body">
+					                    <platform-specific>
+											<html>
+												<html-template location="component://baselogistics/webapp/baselogistics/transfer/transferDetailBegin.ftl"/>
+											</html>
+										</platform-specific>
+										<include-screen name="TransferDetailContainer"/>
+										<platform-specific>
+											<html>
+												<html-template location="component://baselogistics/webapp/baselogistics/transfer/transferDetailEnd.ftl"/>
+											</html>
+										</platform-specific>
+				    				</decorator-section>
+				    			</decorator-screen>
+		            		</widgets>
+		            		<fail-widgets>
+		            			<decorator-screen name="CommonTransferDecorator">
+				                    <decorator-section name="body">
+				                    	<container style="alert alert-info">
+											<label text="${uiLabelMap.BLTransferIdNotFound} ${parameters.transferId}"></label>
+										</container>
+				    				</decorator-section>
+				    			</decorator-screen>
+		            		</fail-widgets>
+		            	</section>
+					</widgets>
+				</section>
+			</widgets>
+			<fail-widgets>
+      			<decorator-screen name="CommonTransferDecorator">
+                    <decorator-section name="body">
+                    	<container style="alert alert-info">
+							<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+						</container>
+    				</decorator-section>
+    			</decorator-screen>
+      		</fail-widgets>
+        </section>
+    </screen>
+    
+    <screen name="TransferDetailContainer">
+		<section>
+			<widgets>
+				<include-screen name="TransferInfo"/>
+				<include-screen name="TransferDelivery"/>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="TransferInfo">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baselogistics/webapp/baselogistics/transfer/transferDetailInfo.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="TransferDelivery">
+		<section>
+			<actions>
+				<set field="activeTab" from-field="parameters.activeTab"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baselogistics/webapp/baselogistics/transfer/transferDelivery.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	
+</screens>

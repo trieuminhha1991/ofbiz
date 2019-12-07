@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>WebposSetting Accounting Services</description>
+    <vendor></vendor>
+    <version>1.0</version>
+    <service name="setInvoiceStatusPos" engine="simple"
+        location="component://accounting/script/org/ofbiz/accounting/invoice/InvoiceServices.xml" invoke="setInvoiceStatus">
+        <description>Set the Invoice  Status</description>
+        <attribute name="invoiceId" type="String" mode="IN" optional="false"/>
+        <attribute name="statusId" type="String" mode="IN" optional="false"/>
+        <attribute name="statusDate" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="paidDate" type="Timestamp" mode="IN" optional="true"/> <!-- only relevant for changes to PAID -->
+        <attribute name="invoiceTypeId" type="String" mode="OUT" optional="true"/>
+        <attribute name="oldStatusId" type="String" mode="OUT" optional="true"/>
+    </service>
+    
+    <service name="createInvoiceForOrderPos" engine="java"
+        location="com.olbius.basepos.invoice.PosInvoiceServices" invoke="createInvoiceForOrder">
+        <description>
+            Create an invoice from existing order
+            orderId = The orderId to associate the invoice with
+            billItems = List of ItemIssuance records to use for creating the invoice
+        </description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="billItems" type="List" mode="IN" optional="false"/>
+        <attribute name="eventDate" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="invoiceId" type="String" mode="INOUT" optional="true"/>
+        <attribute name="invoiceTypeId" type="String" mode="OUT" optional="true"/>
+    </service>
+    
+    <service name="createAcctgTransForReceiptMoneyFromEmployee" engine="simple"
+                location="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" invoke="createAcctgTransForReceiptMoneyFromEmployee">
+        <description>Create an Acctg Trans For Receipt Money From Employee</description>
+        <attribute name="glAccountTypeId" type="String" mode="IN" optional="false"/>
+        <attribute name="ownerPartyId" type="String" mode="IN" optional="false"/>
+        <attribute name="differentAmount" type="BigDecimal" mode="IN" optional="false"/>
+        <attribute name="currencyUomId" type="String" mode="IN" optional="false"/>
+        <attribute name="acctgTransId" type="String" mode="OUT" optional="true"/>
+    </service> 
+</services>  

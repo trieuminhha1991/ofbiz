@@ -1,0 +1,2089 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+   
+    <entity entity-name="StockEvent" package-name="com.olbius">
+		<field name="eventId" type="id"></field>
+		<field name="facilityId" type="id"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<field name="isClosed" type="indicator"></field>
+		<field name="eventName" type="very-long"></field>
+		<field name="description" type="description"/>
+		<prim-key field="eventId" />
+		<relation rel-entity-name="Facility" type="one" fk-name="StockEvent_Facility">
+			<key-map field-name="facilityId" />
+		</relation>
+	</entity>
+	
+	<entity entity-name="StockEventParty" package-name="com.olbius">
+		<field name="eventId" type="id"></field>
+		<field name="entryDate" type="date-time"></field>
+		<field name="partyId" type="id"></field>
+		<field name="idValue" type="id-long"></field>
+		<field name="quantity" type="fixed-point"></field>
+		<prim-key field="eventId" />
+		<prim-key field="entryDate" />
+		<prim-key field="partyId" />
+		<prim-key field="idValue" />
+		<relation rel-entity-name="StockEvent" type="one" fk-name="StockEventParty_StockEvent">
+			<key-map field-name="eventId" />
+		</relation>
+		<relation rel-entity-name="Party" type="one" fk-name="Party_StockEventParty">
+			<key-map field-name="partyId" />
+		</relation>
+	</entity>
+	
+	<entity entity-name="StockEventSummary" package-name="com.olbius">
+		<field name="eventId" type="id"></field>
+		<field name="facilityId" type="id"></field>
+		<field name="productId" type="id"></field>
+		<field name="quantity" type="fixed-point"></field>
+		<prim-key field="eventId" />
+		<prim-key field="facilityId" />
+		<prim-key field="productId" />
+		<relation rel-entity-name="StockEvent" type="one" fk-name="StockEvent_StockEventSummary">
+			<key-map field-name="eventId" />
+		</relation>
+		<relation rel-entity-name="Product" type="one" fk-name="Product_StockEventSummary">
+			<key-map field-name="productId" />
+		</relation>
+		<relation rel-entity-name="Facility" type="one" fk-name="Facility_StockEventSummary">
+			<key-map field-name="facilityId" />
+		</relation>
+	</entity>
+	
+    <entity entity-name="InventoryItemLocation" package-name="com.olbius.logistics.facility">
+    	<field name="inventoryItemId" type="id-ne"/>
+    	<field name="productId" type="id-ne"/>
+    	<field name="locationId" type="id-ne"/>
+    	<field name="quantity" type="fixed-point"/>
+    	<field name="expireDate" type="date-time"/>
+    	<field name="uomId" type="id-ne"/>
+    	<prim-key field="inventoryItemId"/>
+    	<prim-key field="locationId"/>
+    	<prim-key field="uomId"/>
+    	<relation rel-entity-name="InventoryItem" type="one" fk-name="FK_INVENTORYITEM">
+    		<key-map field-name="inventoryItemId" rel-field-name="inventoryItemId"/>
+    	</relation>
+    	<relation rel-entity-name="LocationFacility" type="one" fk-name="FK_LOCATIONFACILITYID">
+    		<key-map field-name="locationId" rel-field-name="locationId"/>
+    	</relation>
+    	<relation rel-entity-name="Uom" type="one" fk-name="FK_UOM">
+    		<key-map field-name="uomId"/>
+    	</relation>
+    </entity>
+    
+    <entity entity-name="LocationFacility" default-resource-name="DelysSalesUiLabels" package-name="com.olbius.logistics.facility">
+    	<description>Location Facility for requirement</description>
+    	<field name="locationId" type="id-ne"/>
+    	<field name="facilityId" type="id-ne"/>
+    	<field name="parentLocationId" type="id-ne"/>
+    	<field name="locationCode" type="id-ne"/>
+    	<field name="locationFacilityTypeId" type="id-ne"/>
+    	<field name="description" type="description"/>
+    	<prim-key field="locationId"/>
+    	<relation rel-entity-name="LocationFacilityType" type="one" fk-name="FK_LOCATIONFACILITYTYPE">
+    		<key-map field-name="locationFacilityTypeId" rel-field-name="locationFacilityTypeId"/>
+    	</relation>
+    	<relation rel-entity-name="Facility" type="one" fk-name="FK_FACILITYID">
+    		<key-map field-name="facilityId" rel-field-name="facilityId"/>
+    	</relation>
+    </entity>
+    
+    <entity entity-name="LocationFacilityType" default-resource-name="DelysSalesUiLabels"  package-name="com.olbius.logistics.facility">
+    	<description>Location Facility Type for requirement</description>
+    	<field name="locationFacilityTypeId" type="id-ne"/>
+    	<field name="prefixCharacters" type="name"/>
+    	<field name="defaultChildNumber" type="fixed-point"/>
+    	<field name="parentLocationFacilityTypeId" type="id-ne"/>
+    	<field name="description" type="description"/>
+    	<prim-key field="locationFacilityTypeId"/>
+    </entity>
+    
+    <entity entity-name="Delivery" package-name="com.olbius.logistics.delivery" title="Delivery">
+    	<field name="deliveryId" type="id-ne"/>
+    	<field name="partyIdFrom" type="id"/>
+    	<field name="partyIdTo" type="id"/>
+    	<field name="orderId" type="id"/>
+    	<field name="transferId" type="id"/>
+    	<field name="shipmentId" type="id"/>
+    	<field name="invoiceId" type="id"/>
+    	<field name="requirementId" type="id"/>
+    	<field name="deliveryTypeId" type="id"/>
+    	<field name="no" type="name"/>
+    	<field name="createDate" type="date-time"/>
+    	<field name="deliveryDate" type="date-time"/>
+    	<field name="originContactMechId" type="id"/>
+    	<field name="destContactMechId" type="id"/>
+    	<field name="defaultWeightUomId" type="id"/>
+    	<field name="statusId" type="id"/>
+    	<field name="originFacilityId" type="id"/>
+      	<field name="destFacilityId" type="id"/>
+      	<field name="actualStartDate" type="date-time"/>
+      	<field name="actualArrivalDate" type="date-time"/>
+      	<field name="estimatedStartDate" type="date-time"/>
+      	<field name="estimatedArrivalDate" type="date-time"/>
+      	<field name="pathScanFile" type="value"/>
+      	<field name="pathScanFileExpt" type="value"/>
+    	<field name="contentId" type="id"/>
+    	<field name="shipmentDistributorId" type="id"/>
+        <field name="conversionFactor" type="currency-amount"/>
+		<field name="picklistBinId" type="id"/><!--huyendt them moi vi tao phieu xuat ben ke toan -->
+		<field name="isPacked" type="value"/>
+    	<prim-key field="deliveryId"/>
+    	<relation rel-entity-name="OrderHeader" type="one" fk-name="FK_DLV_ORDER_HEADER">
+    		<key-map field-name="orderId" rel-field-name="orderId"/>
+    	</relation>
+    	<relation rel-entity-name="PicklistBin" type="one" fk-name="FK_DLV_PIKCK_BIN">
+            <key-map field-name="picklistBinId" rel-field-name="picklistBinId"/>
+        </relation>
+    	<relation rel-entity-name="Requirement" type="one" fk-name="FK_DLV_REQ_HEADER">
+    		<key-map field-name="requirementId" rel-field-name="requirementId"/>
+    	</relation>
+    	<relation rel-entity-name="Shipment" type="one" fk-name="FK_DLV_SMT_1">
+    		<key-map field-name="shipmentId" rel-field-name="shipmentId"/>
+    	</relation>
+    	<relation rel-entity-name="Invoice" type="one" fk-name="FK_DLV_INVOICE_1">
+    		<key-map field-name="invoiceId" rel-field-name="invoiceId"/>
+    	</relation>
+    	<relation rel-entity-name="TransferHeader" type="one" fk-name="FK_DLV_TRANSFER_HEADER">
+    		<key-map field-name="transferId" rel-field-name="transferId"/>
+    	</relation>
+    	<relation rel-entity-name="DeliveryType" type="one" fk-name="FK_DLV_DELIVERY_TYPE">
+    		<key-map field-name="deliveryTypeId"/>
+    	</relation>
+        <relation rel-entity-name="Party" type="one" title="from" fk-name="FK_DLV_PARTY_FROM">
+    		<key-map field-name="partyIdFrom" rel-field-name="partyId"/>
+    	</relation>
+        <relation rel-entity-name="Party" type="one" title="to" fk-name="FK_DLV_PARTY_TO">
+        <key-map field-name="partyIdTo" rel-field-name="partyId"/>
+    	</relation>
+    	<relation rel-entity-name="StatusItem" type="one" fk-name="FK_DLV_STATUS">
+    		<key-map field-name="statusId" rel-field-name="statusId"/>
+    	</relation>
+        <relation type="one" fk-name="DLV_FA_ORIGIN" title="orginFac" rel-entity-name="Facility">
+        <key-map field-name="originFacilityId" rel-field-name="facilityId"/>
+      	</relation>
+        <relation type="one" fk-name="DLV_FA_DEST" title="destFac" rel-entity-name="Facility">
+            <key-map field-name="destFacilityId" rel-field-name="facilityId"/>
+      	</relation>
+        <relation rel-entity-name="ContactMech" type="one" title="orginContact" fk-name="FK_DLV_ORIGIN_CONTACT_MECH">
+            <key-map field-name="originContactMechId" rel-field-name="contactMechId"/>
+    	</relation>
+        <relation rel-entity-name="ContactMech" type="one" title="destContact" fk-name="FK_DLV_DEST_CONTACT_MECH">
+            <key-map field-name="destContactMechId" rel-field-name="contactMechId"/>
+    	</relation>
+    	<relation rel-entity-name="Uom" type="one" fk-name="FK_DLV_WEIGHT_UOM">
+    		<key-map field-name="defaultWeightUomId" rel-field-name="uomId"/>
+    	</relation>
+    	<relation rel-entity-name="Content" type="one" fk-name="FK_DLV_CTN_UOM">
+    		<key-map field-name="contentId" rel-field-name="contentId"/>
+    	</relation>
+    	<relation rel-entity-name="Shipment" type="one" fk-name="FK_DLV_SMT_DIS_UOM">
+    		<key-map field-name="shipmentDistributorId" rel-field-name="shipmentId"/>
+    	</relation>
+    	<index name="DeliveryId">
+    		<index-field name="deliveryId"/>
+    	</index>
+    </entity>
+    
+    <entity entity-name="DeliveryType" package-name="com.olbius.logistics.delivery" default-resource-name="CommonEntityLabels">
+    	<field name="deliveryTypeId" type="id-ne"/>
+    	<field name="parentDeliveryTypeId" type="id"/>
+    	<field name="description" type="long-varchar"/>
+    	<field name="fromDate" type="date-time"/>
+  		<field name="thruDate" type="date-time"/>
+    	<prim-key field="deliveryTypeId"/>
+    	<relation rel-entity-name="DeliveryType" type="one" fk-name="FK_DELIVERY_DELIVERY">
+    		<key-map field-name="parentDeliveryTypeId" rel-field-name="deliveryTypeId"/>
+    	</relation>
+    	<index name="DeliveryTypeId">
+    		<index-field name="deliveryTypeId"/>
+    	</index>
+    </entity>
+    
+    <entity entity-name="DeliveryItem" package-name="com.olbius.logistics.delivery" title="Delivery Item">
+    	<field name="deliveryId" type="id-ne"/>
+    	<field name="deliveryItemSeqId" type="id-ne"/>
+    	<field name="fromOrderId" type="id"/>
+    	<field name="fromOrderItemSeqId" type="id"/>
+    	<field name="fromTransferId" type="id"/>
+    	<field name="fromTransferItemSeqId" type="id"/>
+   		<field name="fromRequirementId" type="id"/>
+    	<field name="fromReqItemSeqId" type="id"/>
+    	<field name="batch" type="id"/>
+    	<field name="statusId" type="id"/>
+    	<field name="inventoryItemId" type="id"/>
+    	<field name="quantityUomId" type="id"/>
+    	<field name="weightUomId" type="id"/>
+    	<field name="actualExportedQuantity" type="fixed-point"/>
+    	<field name="actualDeliveredQuantity" type="fixed-point"/>
+    	<field name="actualExportedAmount" type="fixed-point"/>
+    	<field name="actualDeliveredAmount" type="fixed-point"/>
+    	<field name="actualExpireDate" type="date-time"/>
+    	<field name="actualManufacturedDate" type="date-time"/>
+    	<field name="actualDeliveredExpireDate" type="date-time"/>
+    	<field name="actualDeliveredManufacturedDate" type="date-time"/>
+    	<field name="quantity" type="fixed-point"/>
+		<field name="packedQuantity" type="fixed-point"  />
+    	<field name="amount" type="fixed-point"/>
+    	<field name="comment" type="name"/>
+    	<prim-key field="deliveryId"/>
+    	<prim-key field="deliveryItemSeqId"/>
+    	<relation rel-entity-name="InventoryItem" type="one" fk-name="FK_DLV_ITEM_INV">
+    		<key-map field-name="inventoryItemId" rel-field-name="inventoryItemId"/>
+    	</relation>
+    	<relation rel-entity-name="Delivery" type="one" fk-name="FK_DLV_ITEM_DELIVERY">
+    		<key-map field-name="deliveryId" rel-field-name="deliveryId"/>
+    	</relation>
+    	<relation rel-entity-name="OrderItem" type="one" fk-name="FK_ORDER_DLV_ITEM">
+    		<key-map field-name="fromOrderId" rel-field-name="orderId"/>
+    		<key-map field-name="fromOrderItemSeqId" rel-field-name="orderItemSeqId"/>
+    	</relation>
+    	<relation rel-entity-name="TransferItem" type="one" fk-name="FK_TRANSFER_DLV_ITEM">
+    		<key-map field-name="fromTransferId" rel-field-name="transferId"/>
+    		<key-map field-name="fromTransferItemSeqId" rel-field-name="transferItemSeqId"/>
+    	</relation>
+    	<relation rel-entity-name="RequirementItem" type="one" fk-name="FK_REQ_ITEM_DLV_ITEM">
+    		<key-map field-name="fromRequirementId" rel-field-name="requirementId"/>
+    		<key-map field-name="fromReqItemSeqId" rel-field-name="reqItemSeqId"/>
+    	</relation>
+    	<relation rel-entity-name="StatusItem" type="one" fk-name="FK_STATUS_DLV_ITEM">
+    		<key-map field-name="statusId" rel-field-name="statusId"/>
+    	</relation>
+        <relation rel-entity-name="Uom" type="one" fk-name="FK_UOM_DLV_ITEM" title="quantityUom">
+            <key-map field-name="quantityUomId" rel-field-name="uomId"/>
+    	</relation>
+        <relation rel-entity-name="Uom" type="one" fk-name="FK_W_UOM_DLV_ITEM" title="weightUom">
+    		<key-map field-name="weightUomId" rel-field-name="uomId"/>
+    	</relation>
+   	</entity>
+   	
+   	<entity entity-name="DeliveryStatus" package-name="com.olbius.logistics.delivery" title="Delivery Status Entity">
+      <field name="deliveryStatusId" type="id-ne"/>
+      <field name="statusId" type="id"/>
+      <field name="deliveryId" type="id"/>
+      <field name="statusDatetime" type="date-time"/>
+      <field name="statusUserLogin" type="id"/>
+      <field name="changeReason" type="description"/>
+      <prim-key field="deliveryStatusId"/>
+      <relation type="one" fk-name="DELIVERY_STTS_STTS" rel-entity-name="StatusItem">
+        <key-map field-name="statusId" rel-field-name="statusId"/>
+      </relation>
+      <relation type="one" fk-name="DLV_STTS_DELIVERY" rel-entity-name="Delivery">
+        <key-map field-name="deliveryId" rel-field-name="deliveryId"/>
+      </relation>
+      <relation type="one" fk-name="DLV_STTS_USER" rel-entity-name="UserLogin">
+        <key-map field-name="statusUserLogin" rel-field-name="userLoginId"/>
+      </relation>
+    </entity>
+    
+    <entity entity-name="ConfigPacking" package-name="com.olbius.logistics.product"
+            title="Product config packing method" default-resource-name="LogisticsEntityLabels">
+      <field name="productId" type="id-ne"/>
+      <field name="uomFromId" type="id-ne"/>
+      <field name="uomToId" type="id-ne"/>
+      <field name="quantityConvert" type="fixed-point"/>
+      <field name="fromDate" type="date-time"/>
+      <field name="thruDate" type="date-time"/>
+      <field name="description" type="description"/>
+      <field name="lastUpdatedStamp" type="date-time"/>
+      <field name="lastUpdatedTxStamp" type="date-time"/>
+      <field name="createdStamp" type="date-time"/>
+      <field name="createdTxStamp" type="date-time"/>
+      <prim-key field="productId"/>
+      <prim-key field="uomFromId"/>
+      <prim-key field="uomToId"/>
+      <prim-key field="fromDate"/>
+      <relation type="one" fk-name="FK_CONFIG_PKG_PR" rel-entity-name="Product">
+        <key-map field-name="productId" rel-field-name="productId"/>
+      </relation>
+      <relation type="one" fk-name="FK_QTY_UOM_FROM" title="From" rel-entity-name="Uom">
+        <key-map field-name="uomFromId" rel-field-name="uomId"/>
+      </relation>
+      <relation type="one" fk-name="FK_QTY_UOM_TO" title="To" rel-entity-name="Uom">
+        <key-map field-name="uomToId" rel-field-name="uomId"/>
+      </relation>
+    </entity>
+    
+    <entity entity-name="DeliveryEntry" package-name="com.olbius.logistics.delivery">
+		<field name="deliveryEntryId" type="id-ne"></field>
+		<field name="description" type="description"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<field name="weight" type="fixed-point"></field>
+		<field name="shipCost" type="fixed-point"></field>
+		<field name="statusId" type="id-ne"></field>
+		<field name="weightUomId" type="id-ne"></field>
+		<field name="facilityId" type="id-ne"></field>
+		<field name="contactMechId" type="id-ne"></field>
+		<prim-key field="deliveryEntryId" />
+		<relation type="one" fk-name="FK_DE_STAT" rel-entity-name="StatusItem">
+			<key-map field-name="statusId"/>
+		</relation>
+		<relation type="one" fk-name="FK_DE_FA" rel-entity-name="Facility">
+			<key-map field-name="facilityId"></key-map>
+		</relation>
+		<relation fk-name="FK_DE_UOM" rel-entity-name="Uom" type="one">
+			<key-map field-name="weightUomId" rel-field-name="uomId"></key-map>
+		</relation>
+		<relation fk-name="FK_DE_CONTACTMECH" rel-entity-name="ContactMech" type="one">
+			<key-map field-name="contactMechId" rel-field-name="contactMechId"></key-map>
+		</relation>
+	</entity>
+	
+	<entity entity-name="DeliveryEntryRole" package-name="com.olbius.logistics.delivery">
+		<field name="deliveryEntryId" type="id-ne"/>
+		<field name="partyId" type="id-ne"/>
+		<field name="roleTypeId" type="id-ne"/>
+		<field name="fromDate" type="date-time"/>
+		<field name="thruDate" type="date-time"/>
+		<prim-key field="deliveryEntryId" />
+		<prim-key field="partyId" />
+		<prim-key field="roleTypeId" />
+		<prim-key field="fromDate" />
+		<relation type="one" fk-name="FK_DER_DELIVERY_ENTRY" rel-entity-name="DeliveryEntry">
+			<key-map field-name="deliveryEntryId"/>
+		</relation>
+		<relation type="one" fk-name="FK_DER_PARTY" rel-entity-name="Party">
+			<key-map field-name="partyId" rel-field-name="partyId"/>
+		</relation>
+		<relation type="one" fk-name="FK_DER_PARTY_ROLE" rel-entity-name="PartyRole">
+			<key-map field-name="partyId" rel-field-name="partyId"/>
+			<key-map field-name="roleTypeId" rel-field-name="roleTypeId"/>
+		</relation>
+	</entity>
+	
+	<entity entity-name="CostBillAccounting"
+            package-name="com.olbius.accounting.invoice"
+            title="Cost for all bill of lading transaction in bussiness">
+       <description>Cost for all bill of lading transaction in bussiness</description>
+       <field name="costBillAccountingId" type="id-ne"/> 
+       <field name="costAccBaseId" type="id-ne"/>      
+       <field name="billOfLadingId" type="id-ne"/>
+       <field name="costPriceTemporary" type="fixed-point"></field>
+        <field name="costPriceActual" type="fixed-point"></field>
+        <field name="exchangedRate" type="fixed-point"></field>
+       <prim-key field="costBillAccountingId"/>
+       <!-- <relation type="one" rel-entity-name="CostAccBase" fk-name="COST_BILL_ACC_CAB">
+           <key-map field-name="costAccBaseId"/>
+       </relation> -->
+      <relation type="one" fk-name="COST_ACC_BOL" rel-entity-name="BillOfLading">
+          <key-map field-name="billOfLadingId" rel-field-name="billId"/>
+      </relation>      
+    </entity>
+	<entity entity-name="CostAccBase" package-name="com.olbius.accounting.ledger"
+            title="Cost accounting to application base">
+       <description>Application base and rate</description> 
+       <field name="costAccBaseId" type="id-ne"/>      
+       <field name="invoiceItemTypeId" type="id-ne"/>
+       <field name="costAccountingTypeId" type="id-ne"/>
+       <field name="applicationBaseId" type="id-ne"/>
+       <field name="organizationPartyId" type="id-ne"/>
+       <field name="departmentId" type="id-ne"/> 
+       <field name="costAccBaseTypeId" type="id-ne"/> 
+       <field name="fromDate" type="date-time"/>   
+       <field name="thruDate" type="date-time"/>
+       <prim-key field="costAccBaseId"/>
+       <!--<prim-key field="invoiceItemTypeId"/>-->
+       <!--<prim-key field="costAccountingTypeId"/>-->
+       <!--<prim-key field="organizationPartyId"/>-->
+       <!--<prim-key field="departmentId"/>-->
+       <!--<prim-key field="fromDate"/>-->
+       <relation type="one" rel-entity-name="InvoiceItemType" fk-name="COST_ACC_IIT">
+           <key-map field-name="invoiceItemTypeId"/>
+       </relation>
+        <relation type="one" rel-entity-name="Enumeration" title="costAcc" fk-name="COST_ENUM_CAT">
+            <key-map field-name="costAccountingTypeId" rel-field-name="enumId"/>
+       </relation>
+        <relation type="one" rel-entity-name="Enumeration" title="application" fk-name="COST_ENUM_ABI">
+            <key-map field-name="applicationBaseId" rel-field-name="enumId"/>
+       </relation>
+        <relation type="one" rel-entity-name="Enumeration" title="costAccBase" fk-name="COST_ENUM_ABT">
+            <key-map field-name="costAccBaseTypeId" rel-field-name="enumId"/>
+       </relation>
+       <relation type="one" fk-name="COST_PAR_OPI" title="Organization" rel-entity-name="Party">
+       		<key-map field-name="organizationPartyId" rel-field-name="partyId"/>
+       </relation>
+       <relation type="one" fk-name="COST_PAR_DPI" title="Department" rel-entity-name="Party">
+       		<key-map field-name="departmentId" rel-field-name="partyId"/>
+       </relation>                        
+    </entity>  
+    
+    <entity entity-name="CostAccounting" package-name="com.olbius.accounting.invoice"
+            title="Cost for all transaction in bussiness">
+       	<description>Cost for all in bussiness</description>
+       	<field name="costAccountingId" type="id-ne"/> 
+   	 	<field name="costAccBaseId" type="id-ne"/>      
+       	<field name="orderId" type="id"/>
+       	<field name="partyId" type="id"/>
+       	<field name="description" type="name"/>
+       	<field name="costPriceTemporary" type="fixed-point"/>
+    	<field name="costPriceActual" type="fixed-point"/>
+        <field name="exchangedRate" type="fixed-point"/>
+       	<field name="currencyUomId" type="id-ne"/>
+       	<field name="statusId" type="id-ne"/>
+       	<field name="pathScanFile" type="value"/>
+       	<field name="costAccDate" type="date-time"/>
+       	<field name="createdByUserLogin" type="id-ne"/>
+       	<field name="changedByUserLogin" type="id-ne"/>
+       	<prim-key field="costAccountingId"/>
+       	<!-- <relation type="one" rel-entity-name="CostAccBase" fk-name="COST_ACC_CAB">
+           	<key-map field-name="costAccBaseId"/>
+       	</relation> -->
+       	<relation type="one" fk-name="COST_ACC_ODRH" rel-entity-name="OrderHeader">
+          	<key-map field-name="orderId"/>
+		</relation>  
+		<relation type="one" fk-name="COST_ACC_PARTY" rel-entity-name="Party">
+          	<key-map field-name="partyId"/>
+		</relation>
+    	<relation type="one" fk-name="COST_ACC_CURRENCY" rel-entity-name="Uom">
+          	<key-map field-name="currencyUomId" rel-field-name="uomId"/>
+   		</relation>
+        <relation type="one" rel-entity-name="UserLogin" title="createdBy" fk-name="FK_COST_ACC_CRUSER">
+            <key-map field-name="createdByUserLogin" rel-field-name="userLoginId"/>
+      	</relation>
+        <relation type="one" rel-entity-name="UserLogin" title="changedBy" fk-name="FK_COST_ACC_CHUSER">
+            <key-map field-name="changedByUserLogin" rel-field-name="userLoginId"/>
+      	</relation>
+      	<relation type="one" rel-entity-name="StatusItem" fk-name="FK_COST_ACC_STT">
+        	<key-map field-name="statusId" rel-field-name="statusId"/>
+      	</relation>
+   	</entity>
+    
+    <entity entity-name="OrderRequirement" package-name="com.olbius.logistics.requirement"
+            title="Order Requirement Entity">
+      <field name="orderId" type="id-ne"/>
+      <field name="requirementId" type="id-ne"/>
+      <field name="agreementId" type="id"/>
+      <field name="productStoreId" type="id"/>
+      <field name="facilityId" type="id"/>
+      <field name="contactMechId" type="id"/>
+      <field name="requirementDate" type="date-time"/>
+      <field name="statusId" type="id"/>
+      <field name="fromDate" type="date-time"/>
+      <field name="thruDate" type="date-time"/>
+      <prim-key field="orderId"/>
+      <prim-key field="requirementId"/>
+      <relation type="one" fk-name="FK_ORD_REQ" rel-entity-name="OrderHeader">
+	  	<key-map field-name="orderId"/>
+      </relation>
+      <relation type="one" fk-name="FK_ORDER_REQ_AGR" rel-entity-name="Agreement">
+	  	<key-map field-name="agreementId"/>
+      </relation>
+      <relation type="one" fk-name="FK_REQ_ORD" rel-entity-name="Requirement">
+        <key-map field-name="requirementId"/>
+      </relation>
+      <relation type="one" fk-name="FK_REQ_STATUS" rel-entity-name="StatusItem">
+        <key-map field-name="statusId"/>
+      </relation>
+    </entity>
+    
+    <entity entity-name="DeliveryEntryFixedAsset" package-name="com.olbius.logistics.delivery">
+		<field name="deliveryEntryId" type="id-ne"/>
+		<field name="fixedAssetId" type="id-ne"/>
+		<field name="fromDate" type="date-time"/>
+  		<field name="thruDate" type="date-time"/>
+		<prim-key field="deliveryEntryId" />	
+		<prim-key field="fixedAssetId" />
+		<relation type="one" fk-name="FK_DE_FIXED_ASSET_DE" rel-entity-name="DeliveryEntry">
+			<key-map field-name="deliveryEntryId"/>
+		</relation>
+		<relation type="one" fk-name="FK_DEVS_FIXED_ASSET" rel-entity-name="FixedAsset">
+			<key-map field-name="fixedAssetId"/>
+		</relation>
+	</entity>
+	
+    <entity entity-name="TransferHeader" package-name="com.olbius.logistics.transfer" title="Transfer Header Entity" default-resource-name="BaseLogisticsEntityLabels">
+      <field name="transferId" type="id-ne"/>
+      <field name="transferTypeId" type="id"/>
+      <field name="statusId" type="id"/>
+      <field name="originFacilityId" type="id"/>
+      <field name="destFacilityId" type="id"/>
+      <field name="needsReservesInventory" type="indicator"/>
+      <field name="maySplit" type="indicator"/>
+      <field name="invoicePerShipment" type="indicator"/>
+      <field name="priority" type="fixed-point"/>
+      <field name="grandTotal" type="fixed-point"/>
+      <field name="createdByUserLogin" type="id"/>
+      <field name="lastModifyByUserLogin" type="id"/>
+      <field name="createdDate" type="date-time"/>
+      <field name="transferDate" type="date-time"/>
+      <field name="shipBeforeDate" type="date-time"/>
+      <field name="shipAfterDate" type="date-time"/>
+      <field name="description" type="name"/>
+      <prim-key field="transferId"/>
+      <relation type="one" fk-name="TRANSFER_HDR_TYPE" rel-entity-name="TransferType">
+        <key-map field-name="transferTypeId"/>
+      </relation>
+      <relation type="one" fk-name="TRANSFER_HDR_OFAC" title="Origin" rel-entity-name="Facility">
+        <key-map field-name="originFacilityId" rel-field-name="facilityId"/>
+      </relation>
+      <relation type="one" fk-name="TRANSFER_HDR_DFAC" title="Destination" rel-entity-name="Facility">
+        <key-map field-name="destFacilityId" rel-field-name="facilityId"/>
+      </relation>
+      <relation type="one" fk-name="TRANSFER_HDR_STTS" rel-entity-name="StatusItem">
+        <key-map field-name="statusId"/>
+      </relation>
+      <!--<relation type="many" rel-entity-name="TransferItemAndShipGroupAssoc">-->
+        <!--<key-map field-name="transferId"/>-->
+      <!--</relation>-->
+    </entity>
+    
+    <entity entity-name="TransferHeaderNote" package-name="com.olbius.logistics.transfer" never-cache="true" title="Order Header Note Entity">
+      <field name="transferId" type="id-ne"/>
+      <field name="noteId" type="id-ne"/>
+      <prim-key field="transferId"/>
+      <prim-key field="noteId"/>
+      <relation type="one" fk-name="TRANSFER_HDRNT_TRANFER" rel-entity-name="TransferHeader">
+        <key-map field-name="transferId"/>
+      </relation>
+      <relation type="one" fk-name="TRANSFER_HDRNT_NOTE" rel-entity-name="NoteData">
+        <key-map field-name="noteId"/>
+      </relation>
+    </entity>
+    
+    <entity entity-name="TransferItem" package-name="com.olbius.logistics.transfer" title="Transfer Item Entity">
+      <field name="transferId" type="id-ne"/>
+      <field name="transferItemSeqId" type="id-ne"/>
+      <field name="transferItemTypeId" type="id-ne"/>
+      <field name="fromInventoryItemId" type="id-ne"/>
+      <field name="productId" type="id"/>
+      <field name="quantityUomId" type="id"/>
+      <field name="weightUomId" type="id"/>
+      <field name="quantity" type="fixed-point" enable-audit-log="true"/>
+      <field name="amount" type="fixed-point" enable-audit-log="true"/>
+      <field name="cancelQuantity" type="fixed-point"/>
+      <field name="cancelAmount" type="fixed-point"/>
+      <field name="expiredDate" type="date-time"/>
+      <field name="fromExpiredDate" type="date-time"/>
+      <field name="toExpiredDate" type="date-time"/>
+      <field name="statusId" type="id"/>
+      <field name="estimatedShipDate" type="date-time"/>
+      <field name="estimatedDeliveryDate" type="date-time"/>
+      <field name="shipBeforeDate" type="date-time"/>
+      <field name="shipAfterDate" type="date-time"/>
+      <field name="changeByUserLoginId" type="id"/>
+      <prim-key field="transferId"/>
+      <prim-key field="transferItemSeqId"/>
+      <relation type="one" fk-name="TRANSFER_ITEM_HDR" rel-entity-name="TransferHeader">
+        <key-map field-name="transferId"/>
+      </relation>
+      <relation type="one" fk-name="TRANSFER_ITEM_TRFITYP" rel-entity-name="TransferItemType">
+        <key-map field-name="transferItemTypeId"/>
+      </relation>
+      <relation type="one" fk-name="TRANSFER_ITEM_PRODUCT" rel-entity-name="Product">
+        <key-map field-name="productId"/>
+      </relation>
+      <relation type="one" fk-name="TRANSFER_ITEM_STTS" rel-entity-name="StatusItem">
+        <key-map field-name="statusId"/>
+      </relation>
+      <relation type="one" fk-name="TRANSFER_ITEM_QTY_UOM" rel-entity-name="Uom">
+        <key-map field-name="quantityUomId" rel-field-name="uomId"/>
+      </relation>
+      <relation type="one" rel-entity-name="InventoryItem" fk-name="INVTRANSF">
+        <key-map field-name="fromInventoryItemId" rel-field-name="inventoryItemId"/>
+      </relation>
+      <relation type="many" rel-entity-name="StatusValidChange">
+        <key-map field-name="statusId"/>
+      </relation>
+    </entity>
+    
+    <entity entity-name="TransferItemShipGroup" package-name="com.olbius.logistics.transfer" title="Transfer Item Ship Group">
+      <field name="transferId" type="id-ne"/>
+      <field name="shipGroupSeqId" type="id-ne"/>
+      <field name="shipmentMethodTypeId" type="id" enable-audit-log="true"/>
+      <field name="carrierPartyId" type="id" enable-audit-log="true"/>
+      <field name="carrierRoleTypeId" type="id"/>
+      <field name="originFacilityId" type="id"/>
+      <field name="originContactMechId" type="id"/>
+      <field name="destFacilityId" type="id"/>
+      <field name="destContactMechId" type="id"/>
+      <field name="shipAfterDate" type="date-time"/>
+      <field name="shipBeforeDate" type="date-time"/>
+      <field name="estimatedShipDate" type="date-time"/>
+      <field name="estimatedDeliveryDate" type="date-time"/>
+      <prim-key field="transferId"/>
+      <prim-key field="shipGroupSeqId"/>
+      <relation type="one" fk-name="TRANSFER_ITSG_TRFDH" rel-entity-name="TransferHeader">
+        <key-map field-name="transferId"/>
+      </relation>
+      <relation type="one" fk-name="TRANSFER_ITSG_CSHM" rel-entity-name="CarrierShipmentMethod">
+        <key-map field-name="shipmentMethodTypeId"/>
+        <key-map field-name="carrierPartyId" rel-field-name="partyId"/>
+        <key-map field-name="carrierRoleTypeId" rel-field-name="roleTypeId"/>
+      </relation>
+      <relation type="one" fk-name="TRANSFER_ITSG_CPRTY" title="Carrier" rel-entity-name="Party">
+        <key-map field-name="carrierPartyId" rel-field-name="partyId"/>
+      </relation>
+      <relation type="one" fk-name="TRANSFER_ITSG_CPRLE" title="Carrier" rel-entity-name="PartyRole">
+        <key-map field-name="carrierPartyId" rel-field-name="partyId"/>
+        <key-map field-name="carrierRoleTypeId" rel-field-name="roleTypeId"/>
+      </relation>
+      <relation type="one" fk-name="TRANSFER_ITSG_ORG_FAC" title="orgin" rel-entity-name="Facility">
+            <key-map field-name="originFacilityId" rel-field-name="facilityId"/>
+      </relation>
+      <relation type="one" fk-name="TRANSFER_ITSG_DES_FAC" title="dest" rel-entity-name="Facility">
+            <key-map field-name="destFacilityId" rel-field-name="facilityId"/>
+      </relation>
+      <relation type="one" fk-name="TRANSFER_ITSG_SHMTP" rel-entity-name="ShipmentMethodType">
+        <key-map field-name="shipmentMethodTypeId"/>
+      </relation>
+      <relation type="one" fk-name="TRANSFER_ITSG_ORG_CNTM" title="originContact" rel-entity-name="ContactMech">
+        <key-map field-name="originContactMechId" rel-field-name="contactMechId"/>
+      </relation>
+      <relation type="one" fk-name="TRANSFER_ITSG_PADR2" title="originAddress" rel-entity-name="PostalAddress">
+        <key-map field-name="originContactMechId" rel-field-name="contactMechId"/>
+      </relation>
+      <relation type="one" fk-name="TRANSFER_ITSG_DES_CNTM" title="destContact" rel-entity-name="ContactMech">
+        <key-map field-name="destContactMechId" rel-field-name="contactMechId"/>
+      </relation>
+      <relation type="one" fk-name="TRANSFER_ITSG_PADR" title="destAddress" rel-entity-name="PostalAddress">
+        <key-map field-name="destContactMechId" rel-field-name="contactMechId"/>
+      </relation>
+    </entity>
+    <entity entity-name="TransferItemShipGroupAssoc" package-name="com.olbius.logistics.transfer"
+            title="Transfer Item Package Association">
+      <field name="transferId" type="id-ne"/>
+      <field name="transferItemSeqId" type="id-ne"/>
+      <field name="shipGroupSeqId" type="id-ne"/>
+      <field name="quantity" type="fixed-point"/>
+      <field name="amount" type="fixed-point"/>
+      <field name="cancelQuantity" type="fixed-point"/>
+      <field name="cancelAmount" type="fixed-point"/>
+      <prim-key field="transferId"/>
+      <prim-key field="transferItemSeqId"/>
+      <prim-key field="shipGroupSeqId"/>
+      <relation type="one" fk-name="TRANSFER_ISGA_TRFDH" rel-entity-name="TransferHeader">
+        <key-map field-name="transferId"/>
+      </relation>
+      <relation type="one" fk-name="TRANSFER_ISGA_TRFI" rel-entity-name="TransferItem">
+        <key-map field-name="transferId"/>
+        <key-map field-name="transferItemSeqId"/>
+      </relation>
+      <relation type="one" fk-name="TRANSFER_ISGA_TRFISG" rel-entity-name="TransferItemShipGroup">
+        <key-map field-name="transferId"/>
+        <key-map field-name="shipGroupSeqId"/>
+      </relation>
+    </entity>
+    <entity entity-name="TransferItemShipGrpInvRes" package-name="com.olbius.logistics.transfer"
+            never-cache="true"
+            title="Transfer Item Inventory Reservation Entity">
+      <field name="transferId" type="id-ne"/>
+      <field name="reserveTransferEnumId" type="id-ne"/>
+      <field name="shipGroupSeqId" type="id-ne"/>
+      <field name="transferItemSeqId" type="id-ne"/>
+      <field name="inventoryItemId" type="id-ne"/>
+      <field name="quantity" type="fixed-point"/>
+      <field name="amount" type="fixed-point"/>
+      <field name="quantityNotAvailable" type="fixed-point"/>
+      <field name="promisedDatetime" type="date-time"/>
+      <field name="reservedDatetime" type="date-time"/>
+      <field name="createdDatetime" type="date-time"/>
+      <prim-key field="transferId"/>
+      <prim-key field="shipGroupSeqId"/>
+      <prim-key field="transferItemSeqId"/>
+      <prim-key field="inventoryItemId"/>
+      <relation type="one-nofk" rel-entity-name="TransferHeader">
+        <key-map field-name="transferId"/>
+      </relation>
+      <relation type="one" fk-name="TRF_ITIR_TRFIT" rel-entity-name="TransferItem">
+        <key-map field-name="transferId"/>
+        <key-map field-name="transferItemSeqId"/>
+      </relation>
+      <relation type="one-nofk" rel-entity-name="TransferItemShipGroup">
+        <key-map field-name="transferId"/>
+        <key-map field-name="shipGroupSeqId"/>
+      </relation>
+      <relation type="one-nofk" rel-entity-name="TransferItemShipGroupAssoc">
+        <key-map field-name="transferId"/>
+        <key-map field-name="transferItemSeqId"/>
+        <key-map field-name="shipGroupSeqId"/>
+      </relation>
+      <relation type="one" fk-name="TRF_ITIR_INVITM" rel-entity-name="InventoryItem">
+        <key-map field-name="inventoryItemId"/>
+      </relation>
+    </entity>
+    <entity entity-name="TransferItemType" package-name="com.olbius.logistics.transfer"
+            default-resource-name="BaseLogisticsEntityLabels"
+            title="Transfer Item Type Entity">
+      <field name="transferItemTypeId" type="id-ne"/>
+      <field name="parentTypeId" type="id-ne"/>
+      <field name="hasTable" type="indicator"/>
+      <field name="description" type="description"/>
+      <prim-key field="transferItemTypeId"/>
+      <relation type="one" fk-name="TRANSFER_ITEM_TYPPAR" title="Parent" rel-entity-name="TransferItemType">
+        <key-map field-name="parentTypeId" rel-field-name="transferItemTypeId"/>
+      </relation>
+    </entity>
+    <entity entity-name="TransferRole" package-name="com.olbius.logistics.transfer"
+            never-cache="true"
+            title="Transfer Role Entity">
+      <field name="transferId" type="id-ne"/>
+      <field name="partyId" type="id-ne"/>
+      <field name="roleTypeId" type="id-ne"/>
+      <prim-key field="transferId"/>
+      <prim-key field="partyId"/>
+      <prim-key field="roleTypeId"/>
+      <relation type="one" fk-name="TRANSFER_ROLE_TRFHDR" rel-entity-name="TransferHeader">
+        <key-map field-name="transferId"/>
+      </relation>
+      <relation type="one" fk-name="TRANSFER_ROLE_PARTY" rel-entity-name="Party">
+        <key-map field-name="partyId"/>
+      </relation>
+      <relation type="one" fk-name="TRANSFER_ROLE_PROLE" rel-entity-name="PartyRole">
+        <key-map field-name="partyId"/>
+        <key-map field-name="roleTypeId"/>
+      </relation>
+      <relation type="one-nofk" rel-entity-name="RoleType">
+        <key-map field-name="roleTypeId"/>
+      </relation>
+      <relation type="many" rel-entity-name="TransferItem">
+        <key-map field-name="transferId"/>
+      </relation>
+    </entity>
+     <entity entity-name="TransferShipment" package-name="com.olbius.logistics.transfer"
+            title="Transfer Shipment Entity">
+      <field name="transferId" type="id-ne"/>
+      <field name="transferItemSeqId" type="id-ne"/>
+      <field name="shipGroupSeqId" type="id-ne"/>
+      <field name="shipmentId" type="id-ne"/>
+      <field name="shipmentItemSeqId" type="id-ne"/>
+      <field name="quantity" type="fixed-point"/>
+      <field name="amount" type="fixed-point"/>
+      <prim-key field="transferId"/>
+      <prim-key field="transferItemSeqId"/>
+      <prim-key field="shipGroupSeqId"/>
+      <prim-key field="shipmentId"/>
+      <prim-key field="shipmentItemSeqId"/>
+      <relation type="one" fk-name="TRANSFER_SHPMT_TRFHDR" rel-entity-name="TransferHeader">
+        <key-map field-name="transferId"/>
+      </relation>
+      <relation type="one-nofk" rel-entity-name="TransferItem">
+        <key-map field-name="transferId"/>
+        <key-map field-name="transferItemSeqId"/>
+      </relation>
+      <relation type="one" fk-name="TRANSFER_SHPMT_SHPMT" rel-entity-name="Shipment">
+        <key-map field-name="shipmentId"/>
+      </relation>
+      <relation type="one-nofk" rel-entity-name="ShipmentItem">
+        <key-map field-name="shipmentId"/>
+        <key-map field-name="shipmentItemSeqId"/>
+      </relation>
+      <relation type="one-nofk" rel-entity-name="TransferItemShipGroupAssoc">
+        <key-map field-name="transferId"/>
+        <key-map field-name="transferItemSeqId"/>
+        <key-map field-name="shipGroupSeqId"/>
+      </relation>
+    </entity>
+    <entity entity-name="TransferStatus" package-name="com.olbius.logistics.transfer"
+            title="Transfer Status Entity">
+      <field name="transferStatusId" type="id-ne"/>
+      <field name="statusId" type="id"/>
+      <field name="transferId" type="id"/>
+      <field name="transferItemSeqId" type="id"/>
+      <field name="statusDatetime" type="date-time"/>
+      <field name="statusUserLogin" type="id"/>
+      <field name="changeReason" type="description"/>
+      <prim-key field="transferStatusId"/>
+      <relation type="one" fk-name="TRANSFER_STTS_STTS" rel-entity-name="StatusItem">
+        <key-map field-name="statusId"/>
+      </relation>
+      <relation type="one" fk-name="TRANSFER_STTS_TRFHDR" rel-entity-name="TransferHeader">
+        <key-map field-name="transferId"/>
+      </relation>
+      <relation type="one-nofk" rel-entity-name="TransferItem">
+        <key-map field-name="transferId"/>
+        <key-map field-name="transferItemSeqId"/>
+      </relation>
+      <relation type="one" fk-name="TRANSFER_STTS_USER" rel-entity-name="UserLogin">
+        <key-map field-name="statusUserLogin" rel-field-name="userLoginId"/>
+      </relation>
+    </entity>
+    <entity entity-name="TransferType" package-name="com.olbius.logistics.transfer"
+            default-resource-name="BaseLogisticsEntityLabels"
+            title="Transfer Type Entity">
+      <field name="transferTypeId" type="id-ne"/>
+      <field name="parentTypeId" type="id-ne"/>
+      <field name="hasTable" type="indicator"/>
+      <field name="description" type="description"/>
+      <prim-key field="transferTypeId"/>
+      <relation type="one" fk-name="TRANSFER_TYPE_PARENT" title="Parent" rel-entity-name="TransferType">
+        <key-map field-name="parentTypeId" rel-field-name="transferTypeId"/>
+      </relation>
+    </entity>
+    <entity entity-name="TransferItemIssuance" package-name="com.olbius.logistics.transfer" title="Transfer Item Issuance Entity">
+      <field name="transItemIssuanceId" type="id-ne"/>
+      <field name="transferId" type="id-ne"/>
+      <field name="transferItemSeqId" type="id-ne"/>
+      <field name="shipGroupSeqId" type="id-ne"/>
+      <field name="inventoryItemId" type="id"/>
+      <field name="shipmentId" type="id"/>
+      <field name="shipmentItemSeqId" type="id"/>
+      <field name="issuedDateTime" type="date-time"/>
+      <field name="issuedByUserLoginId" type="id"/>
+      <field name="quantity" type="fixed-point"/>
+      <field name="amount" type="fixed-point"/>
+      <field name="cancelQuantity" type="fixed-point"/>
+      <field name="cancelAmount" type="fixed-point"/>
+      <prim-key field="transItemIssuanceId"/>
+      <relation type="one" fk-name="TRANS_ITEM_ISS_INVITM" rel-entity-name="InventoryItem">
+        <key-map field-name="inventoryItemId"/>
+      </relation>
+      <relation type="one-nofk" rel-entity-name="TransferItemShipGrpInvRes">
+        <key-map field-name="transferId"/>
+        <key-map field-name="transferItemSeqId"/>
+        <key-map field-name="shipGroupSeqId"/>
+        <key-map field-name="inventoryItemId"/>
+      </relation>
+      <relation type="one-nofk" rel-entity-name="Shipment">
+        <key-map field-name="shipmentId"/>
+      </relation>
+      <relation type="one" fk-name="TRANS_ITEM_ISS_SHITM" rel-entity-name="ShipmentItem">
+        <key-map field-name="shipmentId"/>
+        <key-map field-name="shipmentItemSeqId"/>
+      </relation>
+      <relation type="one-nofk" rel-entity-name="TransferHeader">
+        <key-map field-name="transferId"/>
+      </relation>
+      <relation type="one" fk-name="TRANS_ITEM_ISS_ORITM" rel-entity-name="TransferItem">
+        <key-map field-name="transferId"/>
+        <key-map field-name="transferItemSeqId"/>
+      </relation>
+      <relation type="one" fk-name="TRANS_ITEM_ISS_IBUL" title="IssuedBy" rel-entity-name="UserLogin">
+        <key-map field-name="issuedByUserLoginId" rel-field-name="userLoginId"/>
+      </relation>
+    </entity>
+    
+    <entity entity-name="TransferRequirement" package-name="com.olbius.logistics.transfer"
+            title="Transfer Requirement Entity">
+      <field name="transferId" type="id-ne"/>
+      <field name="transferItemSeqId" type="id-ne"/>
+      <field name="requirementId" type="id-ne"/>
+      <field name="reqItemSeqId" type="id-ne"/>
+      <field name="quantity" type="fixed-point"/>
+      <field name="quantityUomId" type="id-ne"/>
+      <field name="amount" type="fixed-point"/>
+      <field name="weightUomId" type="id-ne"/>
+      <prim-key field="transferId"/>
+      <prim-key field="transferItemSeqId"/>
+      <prim-key field="requirementId"/>
+      <prim-key field="reqItemSeqId"/>
+      <relation type="one" fk-name="FK_TRANSFER_ITEM_REQ" rel-entity-name="TransferItem">
+	  	<key-map field-name="transferId"/>
+	  	<key-map field-name="transferItemSeqId"/>
+      </relation>
+      <relation type="one" fk-name="FK_REQ_ITEM_TRANSFER" rel-entity-name="RequirementItem">
+        <key-map field-name="requirementId"/>
+        <key-map field-name="reqItemSeqId"/>
+      </relation>
+      <relation type="one" fk-name="FK_REQ_TRANSFER_UOM" rel-entity-name="Uom">
+        <key-map field-name="quantityUomId" rel-field-name="uomId"/>
+      </relation>
+    </entity>
+    
+    <entity entity-name="TransferItemIssuanceRole" package-name="com.olbius.logistics.transfer" title="Transfer Item Issuance Role Entity">
+      <field name="transItemIssuanceId" type="id-ne"/>
+      <field name="partyId" type="id-ne"/>
+      <field name="roleTypeId" type="id-ne"/>
+      <prim-key field="transItemIssuanceId"/>
+      <prim-key field="partyId"/>
+      <prim-key field="roleTypeId"/>
+      <relation type="one" fk-name="TRANS_ITEM_IR_TRFITIS" rel-entity-name="TransferItemIssuance">
+        <key-map field-name="transItemIssuanceId"/>
+      </relation>
+      <relation type="one" fk-name="TRANS_ITEM_ISSRL_PTY" rel-entity-name="Party">
+        <key-map field-name="partyId"/>
+      </relation>
+      <relation type="one" fk-name="TRANS_ITEM_ISSRL_PTRL" rel-entity-name="PartyRole">
+        <key-map field-name="partyId"/>
+        <key-map field-name="roleTypeId"/>
+      </relation>
+    </entity>
+
+    <!--<entity entity-name="EnumerationInvoiceItemType" package-name="com.olbius.logistics.enumeration">-->
+    	<!--<field name="enumId" type="id-ne"/>-->
+    	<!--<field name="invoiceItemTypeId" type="id-ne"/>-->
+    	<!--<field name="fromDate" type="date-time"/>-->
+    	<!--<field name="thruDate" type="date-time"/>-->
+    	<!--<field name="description" type="description"/>-->
+    	<!--<prim-key field="enumId"/>-->
+    	<!--<prim-key field="organizationPartyId"/>-->
+    	<!--<prim-key field="invoiceItemTypeId"/>-->
+    	<!--<prim-key field="fromDate"/>-->
+    	<!--<relation rel-entity-name="InvoiceItemType" type="one" fk-name="FK_ENUM_INV_ITEM">-->
+    		<!--<key-map field-name="invoiceItemTypeId" rel-field-name="invoiceItemTypeId"/>-->
+    	<!--</relation>-->
+    	<!--<relation rel-entity-name="Enumeration" type="one" fk-name="FK_GL_ACC_ENUM">-->
+    		<!--<key-map field-name="enumId" rel-field-name="enumId"/>-->
+    	<!--</relation>-->
+    <!--</entity>-->
+
+    <entity entity-name="EnumerationInvoiceItemType" package-name="com.olbius.logistics.enumeration">
+    	<field name="enumId" type="id-ne"/>
+    	<field name="invoiceItemTypeId" type="id-ne"/>
+    	<field name="fromDate" type="date-time"/>
+    	<field name="thruDate" type="date-time"/>
+    	<field name="description" type="description"/>
+    	<prim-key field="enumId"/>
+    	<prim-key field="invoiceItemTypeId"/>
+    	<prim-key field="fromDate"/>
+    	<relation rel-entity-name="InvoiceItemType" type="one" fk-name="FK_ENUM_INV_ITEM">
+    		<key-map field-name="invoiceItemTypeId" rel-field-name="invoiceItemTypeId"/>
+    	</relation>
+    	<relation rel-entity-name="Enumeration" type="one" fk-name="FK_INV_ITEM_ENUM">
+    		<key-map field-name="enumId" rel-field-name="enumId"/>
+    	</relation>
+    </entity>
+    
+    <entity entity-name="EnumerationInvoiceType" package-name="com.olbius.logistics.enumeration">
+    	<field name="enumId" type="id-ne"/>
+    	<field name="invoiceTypeId" type="id-ne"/>
+    	<field name="fromDate" type="date-time"/>
+    	<field name="thruDate" type="date-time"/>
+    	<field name="description" type="description"/>
+    	<prim-key field="enumId"/>
+    	<prim-key field="invoiceTypeId"/>
+    	<prim-key field="fromDate"/>
+    	<relation rel-entity-name="InvoiceType" type="one" fk-name="FK_ENUM_INV_TYPE">
+    		<key-map field-name="invoiceTypeId" rel-field-name="invoiceTypeId"/>
+    	</relation>
+    	<relation rel-entity-name="Enumeration" type="one" fk-name="FK_INV_TYPE_ENUM">
+    		<key-map field-name="enumId" rel-field-name="enumId"/>
+    	</relation>
+    </entity>
+    
+    <entity entity-name="RequirementItem" package-name="com.olbius.logistics.requirement">
+    	<description>Products for requirement</description>
+    	<field name="requirementId" type="id-ne"/>
+    	<field name="reqItemSeqId" type="id-ne"/>
+    	<field name="productId" type="id"/>
+    	<field name="prodCatalogId" type="id"/>
+    	<field name="prodCategoryId" type="id"/>
+    	<field name="inventoryItemId" type="id"/>
+    	<field name="invStatusId" type="id"/>
+    	<field name="quantity" type="fixed-point"/>
+    	<field name="weight" type="fixed-point"/>
+    	<field name="actualExecutedQuantity" type="fixed-point"/>
+    	<field name="actualExecutedWeight" type="fixed-point"/>
+    	<field name="actualExportedQuantity" type="fixed-point"/>
+    	<field name="actualReceivedQuantity" type="fixed-point"/>
+    	<field name="quantityUomId" type="id"/>
+    	<field name="weightUomId" type="id"/>
+    	<field name="currencyUomId" type="id"/>
+    	<field name="unitCost" type="currency-amount"/>
+    	<field name="amount" type="currency-amount"/>
+    	<field name="expireDate" type="date-time"/>
+    	<field name="fromExpiredDate" type="date-time"/>
+    	<field name="toExpiredDate" type="date-time"/>
+    	<field name="shipBeforeDate" type="date-time"/>
+    	<field name="shipAfterDate" type="date-time"/>
+    	<field name="createDate" type="date-time"/>
+    	<field name="receiveDate" type="date-time"/>
+    	<field name="datetimeManufactured" type="date-time"/>
+    	<field name="statusId" type="id"/>
+    	<field name="description" type="description"/>
+    	<field name="invoiceItemTypeId" type="id"/>
+    	<prim-key field="requirementId"/>
+    	<prim-key field="reqItemSeqId"/>
+    	<relation rel-entity-name="Requirement" type="one" fk-name="FK_REQ_IREM_REQ">
+			<key-map field-name="requirementId"/>
+    	</relation>
+    	<relation rel-entity-name="ProdCatalog" type="one" fk-name="FK_REQ_ITEM_CATALOG">
+    		<key-map field-name="prodCatalogId"/>
+    	</relation>
+    	<relation rel-entity-name="Product" type="one" fk-name="FK_REQ_IREM_PROD">
+    		<key-map field-name="productId"/>
+    	</relation>
+    	<relation rel-entity-name="ProductCategory" type="one" fk-name="FK_REQ_ITEM_CATEGORY">
+    		<key-map field-name="prodCategoryId" rel-field-name="productCategoryId"/>
+    	</relation>
+    	<relation rel-entity-name="InventoryItem" type="one" fk-name="FK_INVENTORY_ITEM">
+    		<key-map field-name="inventoryItemId" rel-field-name="inventoryItemId"/>
+    	</relation>
+        <relation rel-entity-name="StatusItem" type="one" title="status" fk-name="FK_STATUS_ITEM">
+            <key-map field-name="statusId"/>
+    	</relation>
+        <relation rel-entity-name="StatusItem" type="one" title="invStatus" fk-name="FK_INV_STATUS_ITEM">
+            <key-map field-name="invStatusId" rel-field-name="statusId"/>
+    	</relation>
+        <relation rel-entity-name="Uom" type="one" title="quantityUom" fk-name="FK_UOM_QUANTITY">
+    		<key-map field-name="quantityUomId" rel-field-name="uomId"/>
+    	</relation>
+        <relation rel-entity-name="Uom" type="one" title="currencyUom" fk-name="FK_UOM_CURRENCY">
+    		<key-map field-name="currencyUomId" rel-field-name="uomId"/>
+    	</relation>
+    	<relation rel-entity-name="InvoiceItemType" type="one" fk-name="FK_INVOICE_ITEM_TYPE2">
+    		<key-map field-name="invoiceItemTypeId"/>
+    	</relation>
+    </entity>
+    
+    <entity entity-name="RequirementNote" package-name="com.olbius.logistics.requirement" never-cache="true" title="requirement noting">
+      <field name="requirementId" type="id-ne"/>
+      <field name="noteId" type="id-ne"/>
+      <prim-key field="requirementId"/>
+      <prim-key field="noteId"/>
+      <relation type="one" fk-name="REQ_HDRNT_REQ" rel-entity-name="Requirement">
+        <key-map field-name="requirementId"/>
+      </relation>
+      <relation type="one" fk-name="REQ_HDRNT_NOTE" rel-entity-name="NoteData">
+        <key-map field-name="noteId"/>
+      </relation>
+    </entity>
+    
+     <entity entity-name="RequirementItemBilling" package-name="com.olbius.logistics.requirement" never-cache="true"
+            title="Requirement Item Billing Entity">
+      <field name="requirementId" type="id-ne"></field>
+      <field name="reqItemSeqId" type="id-ne"></field>
+      <field name="invoiceId" type="id-ne"></field>
+      <field name="invoiceItemSeqId" type="id-ne"></field>
+      <field name="itemIssuanceId" type="id"></field>
+      <field name="shipmentReceiptId" type="id"></field>
+      <field name="quantity" type="fixed-point"></field>
+      <field name="amount" type="currency-amount"></field>
+      <prim-key field="requirementId"/>
+      <prim-key field="reqItemSeqId"/>
+      <prim-key field="invoiceId"/>
+      <prim-key field="invoiceItemSeqId"/>
+      <relation type="one" fk-name="REQ_ITBLNG_OHDR" rel-entity-name="Requirement">
+        <key-map field-name="requirementId"/>
+      </relation>
+      <relation type="one" fk-name="REQ_ITBLNG_OITM" rel-entity-name="RequirementItem">
+        <key-map field-name="requirementId"/>
+        <key-map field-name="reqItemSeqId"/>
+      </relation>
+      <relation type="one-nofk" fk-name="REQ_ITBLNG_INV" rel-entity-name="Invoice">
+        <key-map field-name="invoiceId"/>
+      </relation>
+      <relation type="one" fk-name="REQ_ITBLNG_IITM" rel-entity-name="InvoiceItem">
+        <key-map field-name="invoiceId"/>
+        <key-map field-name="invoiceItemSeqId"/>
+      </relation>
+      <relation type="one" fk-name="REQ_ITBL_SHIPRCP" rel-entity-name="ShipmentReceipt">
+        <key-map field-name="shipmentReceiptId" rel-field-name="receiptId"/>
+      </relation>
+      <relation type="one" fk-name="REQ_ITBLNG_IISS" rel-entity-name="ItemIssuance">
+        <key-map field-name="itemIssuanceId"/>
+      </relation>
+    </entity>
+    
+   	<entity entity-name="RequirementEnumType" package-name="com.olbius.logistics.requirement">
+    	<field name="enumTypeId" type="id-ne"/>
+    	<field name="requirementTypeId" type="id-ne"/>
+    	<field name="fromDate" type="date-time"/>
+    	<field name="thruDate" type="date-time"/>
+    	<field name="description" type="description"/>
+    	<prim-key field="enumTypeId"/>
+    	<prim-key field="requirementTypeId"/>
+    	<prim-key field="fromDate"/>
+    	<relation rel-entity-name="RequirementType" type="one" fk-name="FK_ENUM_REQ_TYPE">
+    		<key-map field-name="requirementTypeId" rel-field-name="requirementTypeId"/>
+    	</relation>
+    	<relation rel-entity-name="EnumerationType" type="one" fk-name="FK_REQ_ENUM_TYPE">
+    		<key-map field-name="enumTypeId" rel-field-name="enumTypeId"/>
+    	</relation>
+    </entity>
+    
+    <entity entity-name="ShipmentTypeEnum" package-name="com.olbius.logistics.enumeration">
+    	<field name="enumId" type="id-ne"/>
+    	<field name="shipmentTypeId" type="id-ne"/>
+    	<field name="fromDate" type="date-time"/>
+    	<field name="thruDate" type="date-time"/>
+    	<field name="description" type="description"/>
+    	<prim-key field="enumId"/>
+    	<prim-key field="shipmentTypeId"/>
+    	<prim-key field="fromDate"/>
+    	<relation rel-entity-name="ShipmentType" type="one" fk-name="FK_ENUM_SMTT_TYPE">
+    		<key-map field-name="shipmentTypeId" rel-field-name="shipmentTypeId"/>
+    	</relation>
+    	<relation rel-entity-name="Enumeration" type="one" fk-name="FK_SMTT_ENUM_TYPE">
+    		<key-map field-name="enumId" rel-field-name="enumId"/>
+    	</relation>
+    </entity>
+    
+    <entity entity-name="TransferTypeEnum" package-name="com.olbius.logistics.transfer">
+    	<field name="enumId" type="id-ne"/>
+    	<field name="transferTypeId" type="id-ne"/>
+    	<field name="fromDate" type="date-time"/>
+    	<field name="thruDate" type="date-time"/>
+    	<field name="description" type="description"/>
+    	<prim-key field="enumId"/>
+    	<prim-key field="transferTypeId"/>
+    	<prim-key field="fromDate"/>
+    	<relation rel-entity-name="TransferType" type="one" fk-name="FK_ENUM_TRANS_TYPE">
+    		<key-map field-name="transferTypeId" rel-field-name="transferTypeId"/>
+    	</relation>
+    	<relation rel-entity-name="Enumeration" type="one" fk-name="FK_TRANS_ENUM_TYPE">
+    		<key-map field-name="enumId" rel-field-name="enumId"/>
+    	</relation>
+    </entity>
+    
+    <entity entity-name="RequirementShipment" package-name="com.olbius.logistics.requirement">
+    	<field name="requirementId" type="id-ne"/>
+    	<field name="reqItemSeqId" type="id-ne"/>
+    	<field name="shipmentId" type="id-ne"/>
+    	<field name="shipmentItemSeqId" type="id-ne"/>
+    	<field name="quantity" type="fixed-point"/>
+    	<field name="weight" type="fixed-point"/>
+    	<prim-key field="requirementId"/>
+    	<prim-key field="reqItemSeqId"/>
+    	<prim-key field="shipmentId"/>
+    	<prim-key field="shipmentItemSeqId"/>
+    	<relation rel-entity-name="RequirementItem" type="one" fk-name="FK_REQ_SMT_REQ">
+    		<key-map field-name="requirementId" rel-field-name="requirementId"/>
+    		<key-map field-name="reqItemSeqId" rel-field-name="reqItemSeqId"/>
+    	</relation>
+    	<relation rel-entity-name="ShipmentItem" type="one" fk-name="FK_SMT_REQ_SMT">
+    		<key-map field-name="shipmentId" rel-field-name="shipmentId"/>
+    		<key-map field-name="shipmentItemSeqId" rel-field-name="shipmentItemSeqId"/>
+    	</relation>
+    </entity>
+    
+    <entity entity-name="DeliveryEntryItem" package-name="com.olbius.logistics.delivery">
+		<field name="deliveryEntryId" type="id-ne"/>
+		<field name="deliveryEntryItemSeqId" type="id-ne"/>
+		<field name="productId" type="id-ne"/>
+		<field name="quantityUomId" type="id-ne"/>
+		<field name="quantity" type="fixed-point"/>
+		<prim-key field="deliveryEntryId"/>
+		<prim-key field="deliveryEntryItemSeqId"/>
+		<relation fk-name="FK_DLV_ITEM_ENTRY" rel-entity-name="DeliveryEntry" type="one">
+			<key-map field-name="deliveryEntryId" rel-field-name="deliveryEntryId"></key-map>
+		</relation>
+		<relation fk-name="FK_DLV_ITEM_PRODUCT" rel-entity-name="Product" type="one">
+			<key-map field-name="productId" rel-field-name="productId"></key-map>
+		</relation>
+		<relation fk-name="FK_DLV_ITEM_QTY_UOM" rel-entity-name="Uom" type="one">
+			<key-map field-name="quantityUomId" rel-field-name="uomId"></key-map>
+		</relation>
+	</entity>
+    
+    <entity entity-name="DeliveryEntryShipment" package-name="com.olbius.logistics.delivery">
+		<field name="deliveryEntryId" type="id-ne"/>
+		<field name="deliveryEntryItemSeqId" type="id-ne"/>
+		<field name="shipmentId" type="id-ne"/>
+		<field name="shipmentItemSeqId" type="id-ne"/>
+		<field name="quantity" type="fixed-point"/>
+		<prim-key field="deliveryEntryId"/>
+		<prim-key field="deliveryEntryItemSeqId"/>
+		<prim-key field="shipmentId"/>
+		<prim-key field="shipmentItemSeqId"/>
+		<relation fk-name="FK_DLV_ITEM_SHIPMENT" rel-entity-name="DeliveryEntryItem" type="one">
+			<key-map field-name="deliveryEntryId" rel-field-name="deliveryEntryId"/>
+			<key-map field-name="deliveryEntryItemSeqId" rel-field-name="deliveryEntryItemSeqId"/>
+		</relation>
+		<relation fk-name="FK_SHIPMENT_DLV_ITEM" rel-entity-name="ShipmentItem" type="one">
+			<key-map field-name="shipmentId" rel-field-name="shipmentId"/>
+			<key-map field-name="shipmentItemSeqId" rel-field-name="shipmentItemSeqId"/>
+		</relation>
+	</entity>
+	
+    <entity entity-name="InventoryLabelChangeReason" package-name="com.olbius.logistics.inventory">
+    	<field name="fromInventoryLabelId" type="id-ne"/>
+    	<field name="toInventoryLabelId" type="id-ne"/>
+    	<field name="reasonEnumId" type="id-ne"/>
+    	<field name="fromDate" type="date-time"/>
+    	<field name="thruDate" type="date-time"/>
+    	<field name="description" type="description"/>
+    	<prim-key field="fromInventoryLabelId"/>
+    	<prim-key field="toInventoryLabelId"/>
+    	<prim-key field="reasonEnumId"/>
+    	<prim-key field="fromDate"/>
+        <relation rel-entity-name="InventoryItemLabel" title="from" type="one" fk-name="FK_INV_LABEL_FROM">
+    		<key-map field-name="fromInventoryLabelId" rel-field-name="inventoryItemLabelId"/>
+    	</relation>
+        <relation rel-entity-name="InventoryItemLabel" title="to" type="one" fk-name="FK_INV_LABEL_TO">
+    		<key-map field-name="toInventoryLabelId" rel-field-name="inventoryItemLabelId"/>
+    	</relation>
+    	<relation rel-entity-name="Enumeration" type="one" fk-name="FK_INV_LABEL_ENUM_TYPE">
+    		<key-map field-name="reasonEnumId" rel-field-name="enumId"/>
+    	</relation>
+    </entity>
+
+    <entity entity-name="DeliveryTypeEnum" package-name="com.olbius.logistics.enumeration">
+    	<field name="enumId" type="id-ne"/>
+    	<field name="deliveryTypeId" type="id-ne"/>
+    	<field name="fromDate" type="date-time"/>
+    	<field name="thruDate" type="date-time"/>
+    	<field name="description" type="description"/>
+    	<prim-key field="enumId"/>
+    	<prim-key field="deliveryTypeId"/>
+    	<prim-key field="fromDate"/>
+    	<relation rel-entity-name="DeliveryType" type="one" fk-name="FK_ENUM_DLV_TYPE">
+    		<key-map field-name="deliveryTypeId" rel-field-name="deliveryTypeId"/>
+    	</relation>
+    	<relation rel-entity-name="Enumeration" type="one" fk-name="FK_DLV_ENUM_TYPE">
+    		<key-map field-name="enumId" rel-field-name="enumId"/>
+    	</relation>
+    </entity>
+
+    <entity entity-name="ProductRelationship" package-name="com.olbius.logistics.product">
+    	<field name="productIdFrom" type="id-ne"/>
+    	<field name="productIdTo" type="id-ne"/>
+    	<field name="inventoryItemLabelIdFrom" type="id-ne"/>
+    	<field name="inventoryItemLabelIdTo" type="id-ne"/>
+    	<field name="productRelationshipTypeId" type="id-ne"/>
+    	<field name="fromDate" type="date-time"/>
+    	<field name="thruDate" type="date-time"/>
+    	<field name="description" type="description"/>
+    	<prim-key field="productIdFrom"/>
+    	<prim-key field="productIdTo"/>
+    	<prim-key field="inventoryItemLabelIdFrom"/>
+    	<prim-key field="inventoryItemLabelIdTo"/>
+    	<prim-key field="fromDate"/>
+    	<relation rel-entity-name="Product" type="one" title="from" fk-name="FK_PRRLS_PR_FROM">
+    		<key-map field-name="productIdFrom" rel-field-name="productId"/>
+    	</relation>
+    	<relation rel-entity-name="Product" type="one" title="to" fk-name="FK_PRRLS_PR_TO">
+    		<key-map field-name="productIdTo" rel-field-name="productId"/>
+    	</relation>
+    	<relation rel-entity-name="InventoryItemLabel" type="one" title="labelFrom" fk-name="FK_PRRLS_LB_FROM">
+    		<key-map field-name="inventoryItemLabelIdFrom" rel-field-name="inventoryItemLabelId"/>
+    	</relation>
+    	<relation rel-entity-name="InventoryItemLabel" type="one" title="labelTo" fk-name="FK_PRRLS_LB_TO">
+    		<key-map field-name="inventoryItemLabelIdTo" rel-field-name="inventoryItemLabelId"/>
+    	</relation>
+    	<relation rel-entity-name="ProductRelationshipType" type="one" fk-name="FK_PRRLS_RLST">
+    		<key-map field-name="productRelationshipTypeId" rel-field-name="productRelationshipTypeId"/>
+    	</relation>
+    </entity>
+    
+    <entity entity-name="ProductRelationshipType" package-name="com.olbius.logistics.product"
+            default-resource-name="PartyEntityLabels"
+            title="Product Relationship Type Entity">
+      <field name="productRelationshipTypeId" type="id-ne"></field>
+      <field name="parentTypeId" type="id"></field>
+      <field name="hasTable" type="indicator"></field>
+      <field name="productRelationshipName" type="name"></field>
+      <field name="description" type="description"></field>
+      <prim-key field="productRelationshipTypeId"/>
+      <relation type="one" fk-name="PR_RELTYP_PR" title="Parent" rel-entity-name="ProductRelationshipType">
+        <key-map field-name="parentTypeId" rel-field-name="productRelationshipTypeId"/>
+      </relation>
+    </entity>
+    
+    <entity entity-name="ConfigLabel" package-name="com.olbius.logistics.product"
+            title="Product config label method" default-resource-name="LogisticsEntityLabels">
+      <field name="productId" type="id-ne"/>
+      <field name="inventoryItemLabelId" type="id-ne"/>
+      <field name="fromDate" type="date-time"/>
+      <field name="thruDate" type="date-time"/>
+      <field name="description" type="description"/>
+      <prim-key field="productId"/>
+      <prim-key field="inventoryItemLabelId"/>
+      <prim-key field="fromDate"/>
+      <relation type="one" fk-name="FK_CONFIG_LABEL_PR" rel-entity-name="Product">
+        <key-map field-name="productId" rel-field-name="productId"/>
+      </relation>
+      <relation type="one" fk-name="FK_CONFIG_LABEL_LB" title="Label" rel-entity-name="InventoryItemLabel">
+        <key-map field-name="inventoryItemLabelId" rel-field-name="inventoryItemLabelId"/>
+      </relation>
+    </entity>
+    
+    <entity entity-name="InventoryItemCount" package-name="com.olbius.logistics.inventory"
+            title="Inventory Item Count Entity">
+      <field name="inventoryItemId" type="id-ne"/>
+      <field name="physicalInventoryId" type="id-ne"/>
+      <field name="quantityOnHandTotal" type="fixed-point"/>
+      <field name="amountOnHandTotal" type="fixed-point"/>
+      <field name="comments" type="comment"/>
+      <prim-key field="inventoryItemId"/>
+      <prim-key field="physicalInventoryId"/>
+      <relation type="one" fk-name="INV_ITEM_COUNT_PINV" rel-entity-name="PhysicalInventory">
+        <key-map field-name="physicalInventoryId"/>
+      </relation>
+      <relation type="one" fk-name="INV_ITEM_COUNT_ITEM" rel-entity-name="InventoryItem">
+        <key-map field-name="inventoryItemId"/>
+      </relation>
+    </entity>
+    
+    <entity entity-name="ProductFacilityAttribute" package-name="com.olbius.logistics.facility" title="Product Facility Attributes Entity">
+        <field name="productId" type="id-ne"/>
+        <field name="facilityId" type="id-ne"/>
+        <field name="attrName" type="id-long-ne"/>
+      	<field name="attrValue" type="value"/>
+      	<field name="attrType" type="value"/>
+        <field name="fromDate" type="date-time"/>
+        <field name="thruDate" type="date-time"/>
+        <prim-key field="productId"/>
+        <prim-key field="facilityId"/>
+        <prim-key field="fromDate"/>
+        <relation type="one" fk-name="PROD_FAC_PROD_ATTR" rel-entity-name="Product">
+            <key-map field-name="productId"/>
+        </relation>
+        <relation type="one" fk-name="PROD_FAC_FAC_ATTR" rel-entity-name="Facility">
+            <key-map field-name="facilityId"/>
+        </relation>
+    </entity>
+    
+    <!-- Formula -->
+    <entity entity-name="Formula" package-name="com.olbius.logistics.product" title="Formula">
+        <field name="formulaId" type="id-ne"/>
+        <field name="formulaCode" type="id-ne"/>
+        <field name="formulaName" type="name"/>
+        <field name="formulaTypeId" type="id"/>
+        <field name="statusId" type="id"/>
+        <field name="formulaValue" type="description"/>
+        <field name="description" type="description"/>
+        <prim-key field="formulaId"/>
+        <relation type="one" fk-name="FORMULA_STATUS" rel-entity-name="StatusItem">
+            <key-map field-name="statusId"/>
+        </relation>
+        <relation type="one" fk-name="FORMULA_FORMULA_TYPE" rel-entity-name="FormulaType">
+            <key-map field-name="formulaTypeId"/>
+        </relation>
+    </entity>
+    
+    <entity entity-name="FormulaType" package-name="com.olbius.logistics.product" title="Formula type">
+        <field name="formulaTypeId" type="id-ne"/>
+        <field name="parentTypeId" type="id"/>
+        <field name="description" type="description"/>
+        <prim-key field="formulaTypeId"/>
+        <relation type="one" fk-name="FORMULA_TYPE_PR" rel-entity-name="FormulaType">
+            <key-map field-name="parentTypeId" rel-field-name="formulaTypeId"/>
+        </relation>
+    </entity>
+    
+   	<entity entity-name="FormulaParameterType" package-name="com.olbius.logistics.product" title="Formula parametertype">
+        <field name="parameterTypeId" type="id-ne"/>
+        <field name="parentTypeId" type="id"/>
+        <field name="description" type="description"/>
+        <prim-key field="parameterTypeId"/>
+        <relation type="one" fk-name="FORMULA_PAR_TYPE_PR" rel-entity-name="FormulaParameterType">
+            <key-map field-name="parentTypeId" rel-field-name="parameterTypeId"/>
+        </relation>
+    </entity>
+    
+    <entity entity-name="FormulaParameter" package-name="com.olbius.logistics.product" title="Formula parameter">
+      	<field name="parameterId" type="id-ne"/>
+       	<field name="parameterCode" type="id-ne"/>
+       	<field name="parameterName" type="name"/>
+        <field name="parameterTypeId" type="id"/>
+        <field name="parameterValue" type="value"/>
+        <field name="defaultValue" type="value"/>
+        <field name="statusId" type="id"/>
+        <field name="description" type="description"/>
+        <prim-key field="parameterId"/>
+        <relation type="one" fk-name="FORMULA_PARAM_STATUS" rel-entity-name="StatusItem">
+            <key-map field-name="statusId"/>
+        </relation>
+       	<relation type="one" fk-name="FORMULA_PARAM_TYPE" rel-entity-name="FormulaParameterType">
+            <key-map field-name="parameterTypeId"/>
+        </relation>
+    </entity>
+    
+    <entity entity-name="FormulaProduct" package-name="com.olbius.logistics.product" title="Product Facility Formula Product">
+        <field name="productId" type="id-ne"/>
+        <field name="formulaId" type="id-ne"/>
+        <field name="quantityUomId" type="id"/>
+        <field name="fromDate" type="date-time"/>
+        <field name="thruDate" type="date-time"/>
+        <prim-key field="productId"/>
+        <prim-key field="formulaId"/>
+        <prim-key field="fromDate"/>
+        <relation type="one" fk-name="PROD_FOR_PROD" rel-entity-name="Product">
+            <key-map field-name="productId"/>
+        </relation>
+        <relation type="one" fk-name="PROD_PROD_FOR" rel-entity-name="Formula">
+            <key-map field-name="formulaId"/>
+        </relation>
+        <relation type="one" fk-name="PROD_PROD_FOR_UOM" rel-entity-name="Uom">
+            <key-map field-name="quantityUomId" rel-field-name="uomId"/>
+        </relation>
+    </entity>
+    
+    <entity entity-name="FormulaParameterApply" package-name="com.olbius.logistics.product" title="Formula and parameter mapping">
+        <field name="formulaId" type="id-ne"/>
+        <field name="parameterId" type="id-ne"/>
+        <field name="fromDate" type="date-time"/>
+        <field name="thruDate" type="date-time"/>
+        <prim-key field="formulaId"/>
+        <prim-key field="parameterId"/>
+        <prim-key field="fromDate"/>
+        <relation type="one" fk-name="FOR_PARAM_APPL_FOR" rel-entity-name="Formula">
+            <key-map field-name="formulaId"/>
+        </relation>
+        <relation type="one" fk-name="FOR_PARAM_APPL_PARAM" rel-entity-name="FormulaParameter">
+            <key-map field-name="parameterId"/>
+        </relation>
+    </entity>
+    
+    <entity entity-name="FormulaParameterProductStore" package-name="com.olbius.logistics.product" title="Formula Parameter and Product Store">
+        <field name="productStoreId" type="id-ne"/>
+        <field name="parameterId" type="id-ne"/>
+        <field name="parameterValue" type="value"/>
+        <field name="fromDate" type="date-time"/>
+        <field name="thruDate" type="date-time"/>
+        <prim-key field="productStoreId"/>
+        <prim-key field="parameterId"/>
+        <prim-key field="fromDate"/>
+        <relation type="one" fk-name="PROD_PARAM_STR" rel-entity-name="ProductStore">
+            <key-map field-name="productStoreId"/>
+        </relation>
+        <relation type="one" fk-name="PROD_PROD_STR_PARAM" rel-entity-name="FormulaParameter">
+            <key-map field-name="parameterId"/>
+        </relation>
+    </entity>
+    
+    <entity entity-name="FormulaHistory"
+        package-name="com.olbius.logistics.product"
+        title="Formula History Entity">
+        <field name="formulaId" type="id-ne"/>
+        <field name="changeDate" type="date-time"/>
+        <field name="formulaName" type="name"/>
+        <field name="formulaCode" type="name"/>
+        <field name="formulaTypeId" type="id"/>
+        <field name="description" type="description"/>
+        <field name="formulaValue" type="description"/>
+        <field name="statusId" type="id"/>
+        <prim-key field="formulaId"/>
+        <prim-key field="changeDate"/>
+        <relation type="one" fk-name="FOR_HIS_FORMULA" rel-entity-name="Formula">
+            <key-map field-name="formulaId"/>
+        </relation>
+    </entity>
+    
+    <entity entity-name="ProductFacilityParameter" package-name="com.olbius.logistics.product" title="Formula Parameter and Product Facility">
+        <field name="productId" type="id-ne"/>
+        <field name="facilityId" type="id-ne"/>
+        <field name="parameterId" type="id-ne"/>
+        <field name="parameterValue" type="name"/>
+        <prim-key field="productId"/>
+        <prim-key field="facilityId"/>
+        <prim-key field="parameterId"/>
+        <relation type="one" fk-name="PROD_FA_PARAM_PR" rel-entity-name="Product">
+            <key-map field-name="productId"/>
+        </relation>
+        <relation type="one" fk-name="PROD_FA_PARAM_FA" rel-entity-name="Facility">
+            <key-map field-name="facilityId"/>
+        </relation>
+        <relation type="one" fk-name="PROD_FA_PARAM_PAR" rel-entity-name="FormulaParameter">
+            <key-map field-name="parameterId"/>
+        </relation>
+    </entity>
+    
+    <!-- end formula -->
+
+	<entity entity-name="DeliveryCluster" package-name="com.olbius.salesmtl">
+		<field name="deliveryClusterId" type="id-ne"></field>
+		<field name="deliveryClusterCode" type="id"></field>
+		<field name="deliveryClusterName" type="description"></field>
+		<field name="description" type="description"></field>
+		<field name="createdDate" type="date-time"></field>
+		<field name="createdByUserLoginId" type="id"></field>
+		<field name="executorId" type="id"></field>
+		<field name="managerId" type="id"></field>
+		<field name="statusId" type="value"></field>
+		<prim-key field="deliveryClusterId"/>
+
+		<relation type="one" title="party shipper" rel-entity-name="Party" fk-name="PR_SHIPPER_PT">
+			<key-map field-name="executorId" rel-field-name="partyId"/>
+		</relation>
+
+		<relation type="one" title="" rel-entity-name="UserLogin" fk-name="PR_USER_LOGIN_PT_DC">
+			<key-map field-name="createdByUserLoginId" rel-field-name="userLoginId"/>
+		</relation>
+	</entity>
+
+	<entity entity-name="DeliveryClusterCustomer" package-name="com.olbius.salesmtl">
+		<field name="deliveryClusterId" type="id-ne"></field>
+		<field name="customerId" type="id-ne"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<prim-key field="deliveryClusterId"/>
+		<prim-key field="customerId"/>
+		<prim-key field="fromDate"/>
+
+		<relation type="one" title="" rel-entity-name="DeliveryCluster" fk-name="PRC_ROUTE_PT_DC">
+			<key-map field-name="deliveryClusterId" rel-field-name="deliveryClusterId"/>
+		</relation>
+
+		<relation type="one" title="" rel-entity-name="Party" fk-name="PRC_PC_PT_DC">
+			<key-map field-name="partyId" rel-field-name="partyId"/>
+		</relation>
+
+	</entity>
+
+    <extend-entity entity-name="ConfigPacking">
+		<field name="largest" type="indicator"></field>
+	</extend-entity>
+	<entity entity-name="StockEventVariance" package-name="com.olbius.logistics">
+		<field name="eventId" type="id-ne"></field>
+		<field name="eventVarianceSeqId" type="id"></field>
+		<field name="productId" type="id-ne"></field>
+		<field name="varianceReasonId" type="id"></field>
+		<field name="statusId" type="id"></field>
+		<field name="quantity" type="fixed-point"></field>
+		<field name="comments" type="comment"></field>
+		<prim-key field="eventId"/>
+		<prim-key field="eventVarianceSeqId"/>
+		<relation type="one" fk-name="SEV_REL_SE" rel-entity-name="StockEvent">
+			<key-map field-name="eventId" />
+		</relation>
+		<relation type="one" fk-name="SEV_REL_PRD" rel-entity-name="Product">
+			<key-map field-name="productId" />
+		</relation>
+		<relation type="one" fk-name="SEV_REL_VR" rel-entity-name="VarianceReason">
+			<key-map field-name="varianceReasonId" />
+		</relation>
+		<relation type="one" fk-name="SEV_REL_SI" rel-entity-name="StatusItem">
+			<key-map field-name="statusId" />
+		</relation>
+	</entity>
+	<!--for picklist -->
+	<entity entity-name="PickingItemTempData" package-name="com.olbius.logistics">
+		<field name="pickingItemId" type="id-ne"></field>
+		<field name="facilityId" type="id"></field>
+		<field name="userLoginId" type="id"></field>
+		<field name="orderId" type="id"></field>
+		<field name="orderItemSeqId" type="id"></field>
+		<field name="productId" type="id"></field>
+		<field name="productCode" type="id"></field>
+		<field name="productName" type="long-varchar"></field>
+		<field name="primaryProductCategoryId" type="id"></field>
+		<field name="quantity" type="fixed-point"></field>
+		<field name="quantityOnHandTotal" type="fixed-point"></field>
+		<field name="quantityInPickFace" type="fixed-point"></field>
+		<field name="quantityPickable" type="fixed-point"></field>
+		<field name="quantityPicked" type="fixed-point"></field>
+		<field name="picklistBinId" type="id"></field>
+		<prim-key field="pickingItemId" />
+	</entity>
+	<entity entity-name="PicklistBinStatus" package-name="com.olbius.logistics.facility">
+   		<field name="picklistBinStatusId" type="id-ne"></field>
+      	<field name="statusId" type="id"></field>
+      	<field name="picklistBinId" type="id"></field>
+	    <field name="statusDatetime" type="date-time"></field>
+	    <field name="statusUserLogin" type="id"></field>
+	    <prim-key field="picklistBinStatusId"/>
+	    <relation type="one" fk-name="PLB_STTS_STTS" rel-entity-name="StatusItem">
+	    	<key-map field-name="statusId"/>
+	    </relation>
+	    <relation type="one" fk-name="PLB_STTS_PLB" rel-entity-name="PicklistBin">
+	    	<key-map field-name="picklistBinId"/>
+	    </relation>
+	    <relation type="one" fk-name="PLB_STTS_USER" rel-entity-name="UserLogin">
+	    	<key-map field-name="statusUserLogin" rel-field-name="userLoginId"/>
+	    </relation>
+    </entity>
+    <entity entity-name="PicklistItemLocation" package-name="com.olbius.logistics.facility.location" title="Pick list item and location">
+      	<field name="picklistBinId" type="id-ne"/>
+    	<field name="orderId" type="id-ne"/>
+      	<field name="orderItemSeqId" type="id-ne"/>
+      	<field name="shipGroupSeqId" type="id-ne"/>
+      	<field name="inventoryItemId" type="id-ne"/>
+      	<field name="locationId" type="id-ne"/>
+      	<field name="quantity" type="fixed-point"/>
+      	<field name="amount" type="fixed-point"/>
+      	<prim-key field="picklistBinId"/>
+      	<prim-key field="orderId"/>
+      	<prim-key field="orderItemSeqId"/>
+      	<prim-key field="shipGroupSeqId"/>
+      	<prim-key field="inventoryItemId"/>
+      	<prim-key field="locationId"/>
+      	<relation type="one" fk-name="PICKLOC_PCKLST_ITM" rel-entity-name="PicklistItem">
+        	<key-map field-name="picklistBinId"/>
+       	 	<key-map field-name="orderId"/>
+        	<key-map field-name="orderItemSeqId"/>
+        	<key-map field-name="shipGroupSeqId"/>
+        	<key-map field-name="inventoryItemId"/>
+      	</relation>
+      	<!--<relation type="one" fk-name="PICKLOC_INV_LOC" rel-entity-name="InventoryItemLocation">-->
+        	<!--<key-map field-name="locationId"/>-->
+        	<!--<key-map field-name="inventoryItemId"/>-->
+      	<!--</relation>-->
+    </entity>
+    <entity entity-name="PicklistBinRole" package-name="com.olbius.logistics.shipment.picklist" title="PicklistBin Role Entity">
+		<field name="picklistBinId" type="id-ne"></field>
+		<field name="partyId" type="id-ne"></field>
+		<field name="roleTypeId" type="id-ne"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<field name="createdByUserLogin" type="id"></field>
+		<field name="lastModifiedByUserLogin" type="id"></field>
+		<prim-key field="picklistBinId" />
+		<prim-key field="partyId" />
+		<prim-key field="roleTypeId" />
+		<prim-key field="fromDate" />
+		<relation type="one" fk-name="PCKBIN_RLE_PKLT"
+			rel-entity-name="PicklistBin">
+			<key-map field-name="picklistBinId" />
+		</relation>
+		<relation type="one" fk-name="PCKBIN_RLE_PRLE"
+			rel-entity-name="PartyRole">
+			<key-map field-name="partyId" />
+			<key-map field-name="roleTypeId" />
+		</relation>
+		<relation type="one-nofk" rel-entity-name="RoleType">
+			<key-map field-name="roleTypeId" />
+		</relation>
+		<relation type="one-nofk" rel-entity-name="PartyNameView">
+			<key-map field-name="partyId" />
+		</relation>
+		<relation type="one" fk-name="PCKBIN_RLE_CBUL" title="CreatedBy"
+			rel-entity-name="UserLogin">
+			<key-map field-name="createdByUserLogin" rel-field-name="userLoginId" />
+		</relation>
+		<relation type="one" fk-name="PCKBIN_RLE_LMUL" title="LastModifiedBy"
+			rel-entity-name="UserLogin">
+			<key-map field-name="lastModifiedByUserLogin" rel-field-name="userLoginId" />
+		</relation>
+	</entity>
+	<entity entity-name="PicklistBinItem" package-name="com.olbius.logistics.product"
+            title="Picklist bin and product relationship">
+      	<field name="picklistBinId" type="id"/>
+      	<field name="picklistBinItemSeqId" type="id"/>
+      	<field name="productId" type="id"/>
+		<field name="quantity" type="fixed-point"/>
+        <field name="quantityPicked" type="fixed-point"/>
+        <field name="quantityChecked" type="fixed-point"/>
+        <prim-key field="picklistBinId"/>
+      	<prim-key field="picklistBinItemSeqId"/>
+      	<relation type="one" fk-name="BIN_ITEM_PRODUCT" rel-entity-name="Product">
+        	<key-map field-name="productId"/>
+      	</relation>
+      	<relation type="one" fk-name="BIN_ITEM_BIN" rel-entity-name="PicklistBin">
+        	<key-map field-name="picklistBinId" rel-field-name="picklistBinId"/>
+      	</relation>
+    </entity>
+    <extend-entity entity-name="PicklistBin"><!--for picklist-->
+    	<field name="holding" type="indicator"/>
+    	<field name="holdUserLoginId" type="id"/>
+    	<relation rel-entity-name="UserLogin" type="one" fk-name="PLBIN_HODING_USER_LOGIN">
+			<key-map field-name="holdUserLoginId" rel-field-name="userLoginId" />
+		</relation>
+	</extend-entity>
+<!-- 	<extend-entity entity-name="PicklistItem"> -->
+<!--     	<field name="amount" type="fixed-point"/> -->
+<!--     </extend-entity> -->
+    	<extend-entity entity-name="OrderItem">
+    	<field name="executedAmount" type="fixed-point"/>
+	</extend-entity>
+	<extend-entity entity-name="OrderItem">
+    	<field name="initQuantity" type="fixed-point"/>
+    	<field name="cancelAmount" type="fixed-point"/>
+    </extend-entity>
+    <extend-entity entity-name="Product">
+    	<field name="exportUomId" type="id"></field> <!--default uom when export -->
+    </extend-entity>
+    <extend-entity entity-name="OrderHeader">
+    	<field name="pushed" type="indicator"/>
+    </extend-entity>
+    <!-- 
+    <extend-entity entity-name="OrderHeaderPass">
+    	<field name="pushed" type="indicator"/>
+    </extend-entity>
+     -->
+    <entity entity-name="FacilityPartyExchange" package-name="com.olbius.logistics">
+		<field name="partyId" type="id-ne"></field>
+		<field name="telecomId" type="id"></field>
+		<field name="postalAddressId" type="id"></field>
+		<field name="partyIdDtm" type="id-ne"></field>
+		<field name="facilityIdDtm" type="id-ne"></field>
+		<field name="productStoreIdDtm" type="id"></field>
+		<field name="productStoreStatusId" type="id"></field>
+		<field name="productStoreNameDtm" type="name"></field>
+		<prim-key field="partyIdDtm" />
+		<prim-key field="facilityIdDtm" />
+		<relation type="one" fk-name="FPEX_REL_PTY" rel-entity-name="Party">
+			<key-map field-name="partyId" />
+		</relation>
+		<relation type="one" fk-name="FPEX_REL_TELE" title="telecomContact" rel-entity-name="ContactMech">
+			<key-map field-name="telecomId" rel-field-name="contactMechId" />
+		</relation>
+		<relation type="one" fk-name="FPEX_REL_POST" title="postalContact" rel-entity-name="ContactMech">
+			<key-map field-name="postalAddressId" rel-field-name="contactMechId" />
+		</relation>
+		<relation type="one" fk-name="FPEX_PRODSTORE_STTS" rel-entity-name="StatusItem">
+			<key-map field-name="productStoreStatusId" rel-field-name="statusId"/>
+		</relation>
+	</entity>
+	<!--/End picklist -->
+	
+	<entity entity-name="ProductFacilityHistory" package-name="com.olbius.logistics">
+		<field name="facilityId" type="id-ne"></field>
+		<field name="productId" type="id-ne"></field>
+		<field name="lastUpdated" type="date-time"></field>
+		<field name="quantity" type="fixed-point"/>
+		<field name="averageCost" type="fixed-point"/>
+		<prim-key field="facilityId" />
+		<prim-key field="productId" />
+		<prim-key field="lastUpdated" />
+		<relation type="one" fk-name="PFH_FACI_1" rel-entity-name="Facility">
+			<key-map field-name="facilityId" />
+		</relation>
+		<relation type="one" fk-name="PFH_PROD_1" rel-entity-name="Product">
+			<key-map field-name="productId"/>
+		</relation>
+	</entity>
+	
+	<!-- Extend Entity -->
+	
+	<extend-entity entity-name="Facility">
+    	<field name="facilityCode" type="id-ne"></field>
+    	<field name="requireLocation" type="indicator"/>
+    	<field name="requireDate" type="indicator"/>
+	</extend-entity>
+	
+	<extend-entity entity-name="ProductFacility">
+    	<field name="thresholdsSale" type="fixed-point"/>
+    	<field name="thresholdsDate" type="fixed-point"/>
+    	<field name="thresholdsQuantity" type="fixed-point"/>
+    	<field name="thresholdsQuantityMax" type="fixed-point"/>
+    	<field name="expRequired" type="indicator"/>
+    	<field name="mnfRequired" type="indicator"/>
+    	<field name="lotRequired" type="indicator"/>
+    </extend-entity>
+        
+   	<extend-entity entity-name="VarianceReason">
+    	<field name="negativeNumber" type="indicator"/>
+	</extend-entity>
+	
+	<extend-entity entity-name="ItemIssuance">
+    	<field name="weight" type="fixed-point"/>
+		<field name="requirementId" type="id"/>
+    	<field name="reqItemSeqId" type="id"/>    	
+	</extend-entity>
+	
+   	<extend-entity entity-name="InventoryItem">
+    	<field name="amountOnHandTotal" type="fixed-point"/>
+    	<field name="UPCACode" type="id"/>
+	</extend-entity>
+	
+    <extend-entity entity-name="ReturnItem">
+    	<field name="returnAmount" type="fixed-point"/>
+    	<field name="receivedAmount" type="fixed-point"/>
+    	<field name="weightUomId" type="id"/>
+    	<field name="datetimeManufactured" type="date-time"/>
+    	<field name="expiredDate" type="date-time"/>
+    	<field name="lotId" type="id"/>
+    	<relation rel-entity-name="Lot" type="one" fk-name="FK_RETURN_ITEM_LOT">
+    		<key-map field-name="lotId" rel-field-name="lotId"/>
+    	</relation>
+    	<relation rel-entity-name="Uom" type="one" fk-name="FK_RETURN_ITEM_WE_UOM">
+    		<key-map field-name="weightUomId" rel-field-name="uomId"/>
+    	</relation>
+    </extend-entity>
+	
+    <extend-entity entity-name="ReturnItemShipment">
+    	<field name="amount" type="fixed-point"/>
+    </extend-entity>
+    
+    <extend-entity entity-name="InventoryItemDetail">
+    	<field name="amountOnHandDiff" type="fixed-point"/>
+    	<field name="transferId" type="id"/>
+    	<field name="transferItemSeqId" type="id"/>
+    	<field name="transItemIssuanceId" type="id"/>
+    	<field name="requirementId" type="id"/>
+    	<field name="reqItemSeqId" type="id"/>
+    	<field name="returnReasonId" type="id"/>
+      	<relation type="one" fk-name="INV_DETAIL_REQ_ITEM" rel-entity-name="RequirementItem">
+	        <key-map field-name="requirementId"/>
+	        <key-map field-name="reqItemSeqId"/>
+      	</relation>
+    	<relation type="one" fk-name="INV_DT_TRIT_ISS" title="transferItemIssuance" rel-entity-name="TransferItemIssuance">
+	        <key-map field-name="transItemIssuanceId" rel-field-name="transItemIssuanceId"/>
+      	</relation>
+      	<relation type="one" fk-name="INV_DETAIL_RETURN_REASON" rel-entity-name="ReturnReason">
+	        <key-map field-name="returnReasonId"/>
+      	</relation>
+      	<relation type="one-nofk" rel-entity-name="TransferItemShipGrpInvRes">
+	       <key-map field-name="transferId"/>
+	       <key-map field-name="transferItemSeqId"/>
+	       <key-map field-name="shipGroupSeqId"/>
+	       <key-map field-name="inventoryItemId"/>
+	     </relation>
+    </extend-entity>
+    
+    <extend-entity entity-name="ShipmentReceipt">
+    	<field name="amountAccepted" type="fixed-point"/>
+    	<field name="amountRejected" type="fixed-point"/>
+    	<field name="transferId" type="id"/>
+    	<field name="transferItemSeqId" type="id"/>
+    	<field name="requirementId" type="id"/>
+    	<field name="reqItemSeqId" type="id"/>
+      	<relation type="one" fk-name="SHP_RCPT_TRANSFER_ITEM" rel-entity-name="TransferItem">
+	        <key-map field-name="transferId"/>
+	        <key-map field-name="transferItemSeqId"/>
+      	</relation>
+      	<relation type="one" fk-name="ISHP_RCPT_REQ_ITEM" rel-entity-name="RequirementItem">
+	        <key-map field-name="requirementId"/>
+	        <key-map field-name="reqItemSeqId"/>
+      	</relation>
+    </extend-entity>
+    
+    <extend-entity entity-name="ShipmentItem">
+    	<field name="unitCost" type="fixed-point"/>
+    	<field name="purCost" type="fixed-point"/>
+    	<field name="weight" type="fixed-point"/>
+    </extend-entity>
+    
+    <extend-entity entity-name="RequirementStatus">
+    	<field name="statusUserLogin" type="id"/>
+      	<field name="changeReason" type="description"/>
+      	<relation type="one" fk-name="REQ_STTS_USER" rel-entity-name="UserLogin">
+        	<key-map field-name="statusUserLogin" rel-field-name="userLoginId"/>
+      	</relation>
+    </extend-entity>
+    
+    <extend-entity entity-name="Shipment">
+    	<field name="deliveryEntryId" type="id"/>
+    	<field name="primaryTransferId" type="id"/>
+    	<field name="primaryRequirementId" type="id"/>
+    	<field name="deliveryId" type="id"/>
+    	<field name="description" type="description"/>
+    	<relation type="one" fk-name="SHIPMENT_TRANSFER_HEADER" title="ShipmentTransferHeader" rel-entity-name="TransferHeader">
+	        <key-map field-name="primaryTransferId" rel-field-name="transferId"/>
+      	</relation>
+    	<relation type="one" fk-name="SHIPMENT_REQUIREMENT" title="ShipmentRequirementHeader" rel-entity-name="Requirement">
+	        <key-map field-name="primaryRequirementId" rel-field-name="requirementId"/>
+      	</relation>
+      	<relation type="one" fk-name="FK_SHIP_DE" title="Entry" rel-entity-name="DeliveryEntry">
+            <key-map field-name="deliveryEntryId"/>
+        </relation>
+      	<relation type="one" fk-name="FK_SHIP_DLV" title="Delivery" rel-entity-name="Delivery">
+            <key-map field-name="deliveryId"/>
+        </relation>
+    </extend-entity>
+    
+    <extend-entity entity-name="Requirement">
+    	<field name="reasonEnumId" type="long-varchar"/>
+    	<field name="destFacilityId" type="id-ne"/>
+    	<field name="destContactMechId" type="id-ne"/>
+      	<field name="grandTotal" type="currency-amount"></field>
+        <relation rel-entity-name="Facility" type="one" title="destFac" fk-name="FK_REQ_DEST_FA">
+        <key-map field-name="destFacilityId" rel-field-name="facilityId"/>
+    	</relation>
+        <relation rel-entity-name="ContactMech" type="one" title="destContact" fk-name="FK_REQ_DEST_CTM">
+    		<key-map field-name="destContactMechId" rel-field-name="contactMechId"/>
+    	</relation>
+    </extend-entity>
+
+    <extend-entity entity-name="PhysicalInventory">
+        <field name="facilityId" type="id"/>
+        <field name="eventId" type="id"/>
+        <relation rel-entity-name="Facility" type="one" fk-name="FK_PHYSICAL_FACILITY">
+            <key-map field-name="facilityId" rel-field-name="facilityId"/>
+        </relation>
+        <relation rel-entity-name="StockEvent" type="one" fk-name="FK_PHYSICAL_STOCKEVENT">
+            <key-map field-name="eventId" rel-field-name="eventId"/>
+        </relation>
+    </extend-entity>
+    
+    <extend-entity entity-name="InventoryItemVariance">
+    	<field name="amountOnHandVar" type="fixed-point"/>
+    </extend-entity>
+    
+    <extend-entity entity-name="OrderShipment">
+    	<field name="weight" type="fixed-point"/>
+    </extend-entity>
+
+
+	<!-- SHIPPING MT-->
+	<entity entity-name="Pack" package-name="com.olbius.logistics.pack" title="Pack">
+		<field name="packId" type="id-ne"/>
+		<field name="partyIdFrom" type="id"/>
+		<field name="partyIdTo" type="id"/>
+		<field name="createdDate" type="date-time"/>
+		<field name="shipAfterDate" type="date-time"/>
+		<field name="shipBeforeDate" type="date-time"/>
+		<field name="originContactMechId" type="id"/>
+		<field name="destContactMechId" type="id"/>
+		<field name="defaultWeightUomId" type="id"/>
+		<field name="statusId" type="id"/>
+		<field name="actualStartDate" type="date-time"/>
+		<field name="actualArrivalDate" type="date-time"/>
+		<field name="estimatedStartDate" type="date-time"/>
+		<field name="estimatedArrivalDate" type="date-time"/>
+		<field name="createdByUserLogin" type="id"></field>
+		<field name="lastModifiedByUserLogin" type="id"></field>
+		<prim-key field="packId"/>
+		<relation rel-entity-name="Party" type="one" title="from" fk-name="FK_PA_PARTY_FROM">
+			<key-map field-name="partyIdFrom" rel-field-name="partyId"/>
+		</relation>
+		<relation rel-entity-name="Party" type="one" title="to" fk-name="FK_PA_PARTY_TO">
+			<key-map field-name="partyIdTo" rel-field-name="partyId"/>
+		</relation>
+		<relation rel-entity-name="StatusItem" type="one" fk-name="FK_PA_STATUS">
+			<key-map field-name="statusId" rel-field-name="statusId"/>
+		</relation>
+		<relation rel-entity-name="ContactMech" type="one" title="orginContact" fk-name="FK_PA_ORIGIN_CONTACT_MECH">
+			<key-map field-name="originContactMechId" rel-field-name="contactMechId"/>
+		</relation>
+		<relation rel-entity-name="ContactMech" type="one" title="destContact" fk-name="FK_PA_DEST_CONTACT_MECH">
+			<key-map field-name="destContactMechId" rel-field-name="contactMechId"/>
+		</relation>
+		<relation type="one" rel-entity-name="UserLogin" title="createdBy" fk-name="FK_CRBY_PACK_USLOGIN">
+			<key-map field-name="createdByUserLogin" rel-field-name="userLoginId"/>
+		</relation>
+		<index name="PackId">
+			<index-field name="packId"/>
+		</index>
+	</entity>
+
+	<entity entity-name="PackItem"
+			package-name="com.olbius.logistics.pack"
+			title="Pack Item Entity">
+		<field name="packId" type="id-ne"></field>
+		<field name="packItemSeqId" type="id-ne"></field>
+		<field name="deliveryId" type="id-ne"></field>
+		<field name="deliveryItemSeqId" type="id-ne"></field>
+		<field name="externalId" type="id"></field>
+		<field name="productId" type="id"></field>
+		<field name="quantity" type="fixed-point" enable-audit-log="true"></field>
+		<field name="quantityUomId" type="id"></field>
+		<relation type="one" fk-name="PACK_ITEM_QTT_UOM" title="QuantityUom" rel-entity-name="Uom">
+			<key-map field-name="quantityUomId" rel-field-name="uomId"/>
+		</relation>
+
+		<field name="selectedAmount" type="fixed-point"></field>
+		<field name="unitPrice" type="currency-precise" enable-audit-log="true"></field>
+		<field name="unitListPrice" type="currency-precise"></field>
+		<field name="unitAverageCost" type="currency-amount"></field>
+		<field name="unitRecurringPrice" type="currency-amount"></field>
+		<field name="itemDescription" type="description"></field>
+		<field name="statusId" type="id"></field>
+		<field name="shipBeforeDate" type="date-time"></field>
+		<field name="shipAfterDate" type="date-time"></field>
+		<prim-key field="packId"/>
+		<prim-key field="packItemSeqId"/>
+		<relation type="one" fk-name="PACK_ITEM_PID" rel-entity-name="Pack">
+			<key-map field-name="packId"/>
+		</relation>
+		<relation type="one" fk-name="PACK_ITEM_PRODUCT" rel-entity-name="Product">
+			<key-map field-name="productId"/>
+		</relation>
+		<relation type="one" fk-name="PACK_ITEM_STTS" rel-entity-name="StatusItem">
+			<key-map field-name="statusId"/>
+		</relation>
+		<index name="PACITMEXT_ID_IDX">
+			<index-field name="externalId"/>
+		</index>
+	</entity>
+
+	<entity entity-name="ShippingTrip"
+			package-name="com.olbius.logistics"
+			title="ShippingTrip Entity">
+		<field name="shippingTripId" type="id-ne"></field>
+		<field name="shipperId" type="id-ne"></field>
+		<field name="facilityId" type="id-ne"></field>
+		<field name="originContactMechId" type="id-ne"></field>
+		<field name="startDateTime" type="date-time"></field>
+		<field name="finishedDateTime" type="date-time"></field>
+		<field name="createdDate" type="date-time"></field>
+		<field name="tripCost" type="currency-amount"></field> <!-- chi phi chuyến đi giao hàng -->
+		<field name="costCustomerPaid" type="currency-amount"></field> <!-- tiền phí ship các đại lí phải trả cho NPP -->
+		<field name="statusId" type="id-ne"></field>
+        <field name="isHasOptimalRoute" type="id-ne"></field>
+		<field name="description" type="description"></field>
+		<prim-key field="shippingTripId"/>
+		<relation type="one" fk-name="FK_SHP_FACILITY" rel-entity-name="Facility">
+			<key-map field-name="facilityId" />
+		</relation>
+		<relation type="one" fk-name="FK_SHP_ContactMech" rel-entity-name="ContactMech">
+			<key-map field-name="originContactMechId" rel-field-name="contactMechId"/>
+		</relation>
+		<relation type="one" fk-name="TRIP_R_PARTY" rel-entity-name="Party">
+			<key-map field-name="shipperId" rel-field-name="partyId"/>
+		</relation>
+		<relation rel-entity-name="StatusItem" type="one" fk-name="FK_TRIP_STATUS">
+			<key-map field-name="statusId" rel-field-name="statusId"/>
+		</relation>
+        <relation rel-entity-name="ShippingTripRoute" type="one" fk-name="FK_TRIP_ROUTE">
+    			<key-map field-name="shippingTripId" rel-field-name="shippingTripId"/>
+    	</relation>
+	</entity>
+
+	<entity entity-name="ShippingTripRoute"
+			package-name="com.olbius.logistics"
+			title="Optimal Route for Shipping Trip Entity">
+		<field name="routeTripId" type="id-ne"></field>
+		<field name="shippingTripId" type="id-ne"></field>
+		<field name="shipperId" type="id-ne"></field>
+		<field name="startPointLatitude" type="id-ne"></field>
+		<field name="startPointLongitude" type="id-ne"></field>
+		<field name="description" type="description"></field>
+		<prim-key field="routeTripId"/>
+	</entity>
+
+	<entity entity-name="ShippingTripRouteCustomer"
+			package-name="com.olbius.logistics"
+			title="Optimal Route Detail for Shipping Trip Entity">
+		<field name="routeTripId" type="id-ne"></field>
+		<field name="customerId" type="id-ne"></field>
+		<field name="packId" type="id-ne"></field>
+		<field name="sequenceNum" type="id-ne"></field>
+		<field name="latitude" type="id-ne"></field>
+		<field name="longitude" type="id-ne"></field>
+		<field name="description" type="description"></field>
+		<prim-key field="routeTripId"/>
+		<prim-key field="customerId"/>
+		<prim-key field="packId"/>
+        <relation rel-entity-name="ShippingTripRoute" type="one" fk-name="FK_TRIP_ROUTE_CUSTOMER">
+			<key-map field-name="routeTripId" rel-field-name="routeTripId"/>
+		</relation>
+	</entity>
+
+	<view-entity entity-name="ShippingTripUnpaidInvoice" package-name="com.olbius.logistics">
+		<member-entity entity-alias="ST" entity-name="ShippingTrip"></member-entity>
+		<member-entity entity-alias="STI" entity-name="ShippingTripInvoice"></member-entity>
+		<member-entity entity-name="PartyNameView" entity-alias="PN"/>
+		<alias-all entity-alias="ST"></alias-all>
+		<alias name="shipperName">
+			<complex-alias operator="||' '||">
+				<complex-alias-field entity-alias="PN" field="lastName" default-value="''"/>
+				<complex-alias-field entity-alias="PN" field="middleName" default-value="''"/>
+				<complex-alias-field entity-alias="PN" field="firstName" default-value="''"/>
+			</complex-alias>
+		</alias>
+		<alias entity-alias="STI" name="invoiceId"/>
+		<view-link entity-alias="ST" rel-entity-alias="PN">
+			<key-map field-name="shipperId" rel-field-name="partyId"/>
+		</view-link>
+		<view-link rel-entity-alias="STI" entity-alias="ST" rel-optional="true">
+			<key-map field-name="shippingTripId" rel-field-name="shippingTripId" />
+		</view-link>
+		<entity-condition>
+			<condition-expr field-name="statusId" entity-alias="ST" operator="equals" value="TRIP_EXPORTED" />
+		</entity-condition>
+	</view-entity>
+
+	<entity entity-name="ShippingTripPack"
+			package-name="com.olbius.logistics"
+			title="Shipping Trip Entity">
+		<field name="shippingTripId" type="id-ne"></field>
+		<field name="packId" type="id-ne"></field>
+		<field name="statusId" type="id-ne"></field>
+
+		<prim-key field="shippingTripId"/>
+		<prim-key field="packId"/>
+		<relation type="one" fk-name="TRIP_PACK_R_PACK" rel-entity-name="Pack">
+			<key-map field-name="packId"/>
+		</relation>
+		<relation type="one" fk-name="TRIP_PACK_R_TRIP" rel-entity-name="ShippingTrip">
+			<key-map field-name="shippingTripId"/>
+		</relation>
+		<relation rel-entity-name="StatusItem" type="one" fk-name="FK_TRIP_PACK_STATUS">
+			<key-map field-name="statusId" rel-field-name="statusId"/>
+		</relation>
+	</entity>
+
+	<entity entity-name="ShippingTripInvoice"
+			package-name="com.olbius.logistics"
+			title="Shipping Trip Invoice">
+		<field name="shippingTripId" type="id-ne"></field>
+		<field name="invoiceId" type="id-ne"></field>
+		<prim-key field="shippingTripId"/>
+		<prim-key field="invoiceId"/>
+		<relation type="one" fk-name="TRIP_INVOICE_R_INVOICE" rel-entity-name="Invoice">
+			<key-map field-name="invoiceId"/>
+		</relation>
+		<relation type="one" fk-name="TRIP_INVOICE_R_TRIP" rel-entity-name="ShippingTrip">
+			<key-map field-name="shippingTripId"/>
+		</relation>
+	</entity>
+
+	<!-- end SHIPPING MT -->
+
+</entitymodel>

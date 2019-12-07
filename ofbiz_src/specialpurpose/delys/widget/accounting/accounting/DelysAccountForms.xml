@@ -1,0 +1,986 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">	
+	<form name="ListGlAccountOrganization" list-name="listIt" target="" title="" type="list" view-size="50"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="table table-striped table-hover table-bordered dataTable" paginate-target="ListGlAccountOrganization">
+        <actions>
+            <entity-condition entity-name="GlAccountOrganizationAndClass">
+                <condition-expr field-name="organizationPartyId" from-field="organizationPartyId"/>
+                <order-by field-name="glAccountId"/>
+            </entity-condition>
+        </actions>
+        <auto-fields-entity entity-name="GlAccount" default-field-type="display"/>
+        <field name="glAccountId" widget-style="">
+            <hyperlink also-hidden="false" description="${glAccountId}" target="GlAccountNavigate">
+                <parameter param-name="glAccountId"/>
+            </hyperlink>
+        </field>
+        <field name="glAccountClassId">
+            <display-entity entity-name="GlAccountClass"/>
+        </field>
+        <field name="glAccountTypeId">
+            <display-entity entity-name="GlAccountType"/>
+        </field>
+        <field name="accountName" entry-name="glAccountId"><display-entity entity-name="GlAccount" key-field-name="glAccountId" description="${accountName}"/></field>
+    </form>
+    <form name="FindInvoiceAggregateDistributors" type="single" target="FindInvoiceAggregateDistributors" title="Find and list invoices Distributors"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>                     
+        <field name="partyIdFrom" title="${uiLabelMap.accDistributors}"><lookup target-form-name="LookupDistributorsDelysName"/></field>        
+        <field name="invoiceDate"><date-find type="date"/></field>
+        <field name="searchButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-search"/></field>
+    </form>
+    <form name="FindInvoiceAggregateCustomers" type="single" target="FindInvoiceAggregateCustomers" title="Find and list invoices Customers"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>                     
+        <field name="partyIdFrom" title="${uiLabelMap.accCustomers}"><lookup target-form-name="LookupCustomersDelysName"/></field>        
+        <field name="invoiceDate"><date-find type="date"/></field>
+        <field name="searchButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-search"/></field>
+    </form>
+    <form name="FindInvoiceAggregateSuppliers" type="single" target="FindInvoiceAggregateSuppliers" title="Find and list invoices Suppliers"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>                     
+        <field name="partyIdFrom" title="${uiLabelMap.accSuppliers}"><lookup target-form-name="LookupSuppliersDelysName"/></field>        
+        <field name="invoiceDate"><date-find type="date"/></field>
+        <field name="searchButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-search"/></field>
+    </form>
+    <form name="ListInvoicesArDistributors" type="list" separate-columns="true" title="Invoice List" list-name="listIt" target="" default-entity-name="Invoice" paginate-target="FindInvoiceAggregateDistributors"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="table table-hover table-striped table-bordered dataTable">
+        <actions>
+            <set field="parameters.sortField" from-field="parameters.sortField" default-value="-invoiceDate"/>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="InvoiceAndTypeAndRole"/>
+                <field-map field-name="orderBy" from-field="parameters.sortField"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+                <field-map field-name="distinct" value="Y"/>
+            </service>
+        </actions>
+        <row-actions>
+            <service service-name="getPartyNameForDate" result-map="partyNameResultFrom">
+                <field-map field-name="partyId" from-field="partyIdFrom"/>
+                <field-map field-name="compareDate" from-field="invoiceDate"/>
+                <field-map field-name="lastNameFirst" value="Y"/>
+            </service>
+            <service service-name="getPartyNameForDate" result-map="partyNameResultTo">
+                <field-map field-name="partyId" from-field="partyId"/>
+                <field-map field-name="compareDate" from-field="invoiceDate"/>
+                <field-map field-name="lastNameFirst" value="Y"/>
+            </service>
+            <set field="amountToApply" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceNotApplied(delegator,invoiceId)
+                .multiply(org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceCurrencyConversionRate(delegator,invoiceId))}"/>
+            <set field="total" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceTotal(delegator,invoiceId)
+                .multiply(org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceCurrencyConversionRate(delegator,invoiceId))}"/>
+            <set field="currencyUomId" from-field="defaultOrganizationPartyCurrencyUomId"/>
+        </row-actions>
+		
+        <field name="invoiceId" widget-style="" sort-field="true">
+            <hyperlink description="${invoiceId}" target="invoiceOverview">
+                <parameter param-name="invoiceId"/>
+            </hyperlink>
+        </field>
+        <field name="invoiceTypeId" sort-field="true"><display-entity entity-name="InvoiceType"/></field>
+        <field name="invoiceDate" sort-field="true"><display type="date"/></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}" sort-field="true"><display-entity entity-name="StatusItem"/></field>
+        <field name="description" sort-field="true"><display /></field>
+        
+        <field name="partyIdFrom" title="${uiLabelMap.accDistributors}" sort-field="true" widget-style="">
+            <hyperlink target="/partymgr/control/PartyFinancialHistory" target-type="inter-app" description="${partyNameResultFrom.fullName} [${partyIdFrom}]">
+                <parameter param-name="partyId" from-field="partyIdFrom"/>
+            </hyperlink>
+        </field>
+        <field name="total" widget-area-style="align-text"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="amountToApply" widget-area-style="align-text"><display type="currency" currency="${currencyUomId}"/></field>         
+    </form>
+    
+    <form name="ListInvoicesApDistributors" type="list" separate-columns="true" title="Invoice List" list-name="listIt" target="" default-entity-name="Invoice" paginate-target="FindInvoiceAggregateDistributors"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="table table-hover table-striped table-bordered dataTable">
+        <actions>
+            <set field="parameters.sortField" from-field="parameters.sortField" default-value="-invoiceDate"/>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="InvoiceAndTypeAndRole"/>
+                <field-map field-name="orderBy" from-field="parameters.sortField"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+                <field-map field-name="distinct" value="Y"/>
+            </service>
+        </actions>
+        <row-actions>
+            <service service-name="getPartyNameForDate" result-map="partyNameResultFrom">
+                <field-map field-name="partyId" from-field="partyIdFrom"/>
+                <field-map field-name="compareDate" from-field="invoiceDate"/>
+                <field-map field-name="lastNameFirst" value="Y"/>
+            </service>
+            <service service-name="getPartyNameForDate" result-map="partyNameResultTo">
+                <field-map field-name="partyId" from-field="partyId"/>
+                <field-map field-name="compareDate" from-field="invoiceDate"/>
+                <field-map field-name="lastNameFirst" value="Y"/>
+            </service>
+            <set field="amountToApply" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceNotApplied(delegator,invoiceId)
+                .multiply(org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceCurrencyConversionRate(delegator,invoiceId))}"/>
+            <set field="total" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceTotal(delegator,invoiceId)
+                .multiply(org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceCurrencyConversionRate(delegator,invoiceId))}"/>
+            <set field="currencyUomId" from-field="defaultOrganizationPartyCurrencyUomId"/>
+        </row-actions>
+        <field name="invoiceId" widget-style="" sort-field="true">
+            <hyperlink description="${invoiceId}" target="invoiceOverview">
+                <parameter param-name="invoiceId"/>
+            </hyperlink>
+        </field>
+        <field name="invoiceTypeId" sort-field="true"><display-entity entity-name="InvoiceType"/></field>
+        <field name="invoiceDate" sort-field="true"><display type="date"/></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}" sort-field="true"><display-entity entity-name="StatusItem"/></field>
+        <field name="description" sort-field="true"><display/></field>
+        <field name="partyIdTo" title="${uiLabelMap.accDistributors}" parameter-name="partyId"  sort-field="true" widget-style="">
+            <hyperlink target="/partymgr/control/PartyFinancialHistory" target-type="inter-app" description="${partyNameResultTo.fullName} [${partyId}]">
+                <parameter param-name="partyIdTo"/>
+            </hyperlink>
+        </field>
+        <field name="total" widget-area-style="align-text"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="amountToApply" widget-area-style="align-text"><display type="currency" currency="${currencyUomId}"/></field>
+    </form>
+    
+    <form name="ListInvoicesArSuppliers" type="list" separate-columns="true" title="Invoice List" list-name="listIt" target="" default-entity-name="Invoice" paginate-target="FindInvoiceAggregateSuppliers"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="table table-hover table-striped table-bordered dataTable">
+        <actions>
+            <set field="parameters.sortField" from-field="parameters.sortField" default-value="-invoiceDate"/>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="InvoiceAndTypeAndRole"/>
+                <field-map field-name="orderBy" from-field="parameters.sortField"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+                <field-map field-name="distinct" value="Y"/>
+            </service>
+        </actions>
+        <row-actions>
+            <service service-name="getPartyNameForDate" result-map="partyNameResultFrom">
+                <field-map field-name="partyId" from-field="partyIdFrom"/>
+                <field-map field-name="compareDate" from-field="invoiceDate"/>
+                <field-map field-name="lastNameFirst" value="Y"/>
+            </service>
+            <service service-name="getPartyNameForDate" result-map="partyNameResultTo">
+                <field-map field-name="partyId" from-field="partyId"/>
+                <field-map field-name="compareDate" from-field="invoiceDate"/>
+                <field-map field-name="lastNameFirst" value="Y"/>
+            </service>
+            <set field="amountToApply" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceNotApplied(delegator,invoiceId)
+                .multiply(org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceCurrencyConversionRate(delegator,invoiceId))}"/>
+            <set field="total" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceTotal(delegator,invoiceId)
+                .multiply(org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceCurrencyConversionRate(delegator,invoiceId))}"/>
+            <set field="currencyUomId" from-field="defaultOrganizationPartyCurrencyUomId"/>
+        </row-actions>
+		
+        <field name="invoiceId" widget-style="" sort-field="true">
+            <hyperlink description="${invoiceId}" target="invoiceOverview">
+                <parameter param-name="invoiceId"/>
+            </hyperlink>
+        </field>
+        <field name="invoiceTypeId" sort-field="true"><display-entity entity-name="InvoiceType"/></field>
+        <field name="invoiceDate" sort-field="true"><display type="date"/></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}" sort-field="true"><display-entity entity-name="StatusItem"/></field>
+        <field name="description" sort-field="true"><display /></field>
+        
+        <field name="partyIdFrom" title="${uiLabelMap.accSuppliers}" sort-field="true" widget-style="">
+            <hyperlink target="/partymgr/control/PartyFinancialHistory" target-type="inter-app" description="${partyNameResultFrom.fullName} [${partyIdFrom}]">
+                <parameter param-name="partyId" from-field="partyIdFrom"/>
+            </hyperlink>
+        </field>
+        <field name="total" widget-area-style="align-text"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="amountToApply" widget-area-style="align-text"><display type="currency" currency="${currencyUomId}"/></field>         
+    </form>
+    
+    <form name="ListInvoicesApSuppliers" type="list" separate-columns="true" title="Invoice List" list-name="listIt" target="" default-entity-name="Invoice" paginate-target="FindInvoiceAggregateSuppliers"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="table table-hover table-striped table-bordered dataTable">
+        <actions>
+            <set field="parameters.sortField" from-field="parameters.sortField" default-value="-invoiceDate"/>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="InvoiceAndTypeAndRole"/>
+                <field-map field-name="orderBy" from-field="parameters.sortField"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+                <field-map field-name="distinct" value="Y"/>
+            </service>
+        </actions>
+        <row-actions>
+            <service service-name="getPartyNameForDate" result-map="partyNameResultFrom">
+                <field-map field-name="partyId" from-field="partyIdFrom"/>
+                <field-map field-name="compareDate" from-field="invoiceDate"/>
+                <field-map field-name="lastNameFirst" value="Y"/>
+            </service>
+            <service service-name="getPartyNameForDate" result-map="partyNameResultTo">
+                <field-map field-name="partyId" from-field="partyId"/>
+                <field-map field-name="compareDate" from-field="invoiceDate"/>
+                <field-map field-name="lastNameFirst" value="Y"/>
+            </service>
+            <set field="amountToApply" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceNotApplied(delegator,invoiceId)
+                .multiply(org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceCurrencyConversionRate(delegator,invoiceId))}"/>
+            <set field="total" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceTotal(delegator,invoiceId)
+                .multiply(org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceCurrencyConversionRate(delegator,invoiceId))}"/>
+            <set field="currencyUomId" from-field="defaultOrganizationPartyCurrencyUomId"/>
+        </row-actions>
+        <field name="invoiceId" widget-style="" sort-field="true">
+            <hyperlink description="${invoiceId}" target="invoiceOverview">
+                <parameter param-name="invoiceId"/>
+            </hyperlink>
+        </field>
+        <field name="invoiceTypeId" sort-field="true"><display-entity entity-name="InvoiceType"/></field>
+        <field name="invoiceDate" sort-field="true"><display type="date"/></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}" sort-field="true"><display-entity entity-name="StatusItem"/></field>
+        <field name="description" sort-field="true"><display/></field>
+        <field name="partyIdTo" title="${uiLabelMap.accSuppliers}" parameter-name="partyId"  sort-field="true" widget-style="">
+            <hyperlink target="/partymgr/control/PartyFinancialHistory" target-type="inter-app" description="${partyNameResultTo.fullName} [${partyId}]">
+                <parameter param-name="partyIdTo"/>
+            </hyperlink>
+        </field>
+        <field name="total" widget-area-style="align-text"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="amountToApply" widget-area-style="align-text"><display type="currency" currency="${currencyUomId}"/></field>
+    </form>  
+    
+    <form name="ListInvoicesArCustomers" type="list" separate-columns="true" title="Invoice List" list-name="listIt" target="" default-entity-name="Invoice" paginate-target="FindInvoiceAggregateCustomers"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="table table-hover table-striped table-bordered dataTable">
+        <actions>
+            <set field="parameters.sortField" from-field="parameters.sortField" default-value="-invoiceDate"/>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="InvoiceAndTypeAndRole"/>
+                <field-map field-name="orderBy" from-field="parameters.sortField"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+                <field-map field-name="distinct" value="Y"/>
+            </service>
+        </actions>
+        <row-actions>
+            <service service-name="getPartyNameForDate" result-map="partyNameResultFrom">
+                <field-map field-name="partyId" from-field="partyIdFrom"/>
+                <field-map field-name="compareDate" from-field="invoiceDate"/>
+                <field-map field-name="lastNameFirst" value="Y"/>
+            </service>
+            <service service-name="getPartyNameForDate" result-map="partyNameResultTo">
+                <field-map field-name="partyId" from-field="partyId"/>
+                <field-map field-name="compareDate" from-field="invoiceDate"/>
+                <field-map field-name="lastNameFirst" value="Y"/>
+            </service>
+            <set field="amountToApply" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceNotApplied(delegator,invoiceId)
+                .multiply(org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceCurrencyConversionRate(delegator,invoiceId))}"/>
+            <set field="total" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceTotal(delegator,invoiceId)
+                .multiply(org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceCurrencyConversionRate(delegator,invoiceId))}"/>
+            <set field="currencyUomId" from-field="defaultOrganizationPartyCurrencyUomId"/>
+        </row-actions>
+		
+        <field name="invoiceId" widget-style="" sort-field="true">
+            <hyperlink description="${invoiceId}" target="invoiceOverview">
+                <parameter param-name="invoiceId"/>
+            </hyperlink>
+        </field>
+        <field name="invoiceTypeId" sort-field="true"><display-entity entity-name="InvoiceType"/></field>
+        <field name="invoiceDate" sort-field="true"><display type="date"/></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}" sort-field="true"><display-entity entity-name="StatusItem"/></field>
+        <field name="description" sort-field="true"><display /></field>
+        
+        <field name="partyIdFrom" title="${uiLabelMap.accCustomers}" sort-field="true" widget-style="">
+            <hyperlink target="/partymgr/control/PartyFinancialHistory" target-type="inter-app" description="${partyNameResultFrom.fullName} [${partyIdFrom}]">
+                <parameter param-name="partyId" from-field="partyIdFrom"/>
+            </hyperlink>
+        </field>
+        <field name="total" widget-area-style="align-text"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="amountToApply" widget-area-style="align-text"><display type="currency" currency="${currencyUomId}"/></field>         
+    </form>
+    
+    <form name="ListInvoicesApCustomers" type="list" separate-columns="true" title="Invoice List" list-name="listIt" target="" default-entity-name="Invoice" paginate-target="FindInvoiceAggregateCustomers"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="table table-hover table-striped table-bordered dataTable">
+        <actions>
+            <set field="parameters.sortField" from-field="parameters.sortField" default-value="-invoiceDate"/>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="InvoiceAndTypeAndRole"/>
+                <field-map field-name="orderBy" from-field="parameters.sortField"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+                <field-map field-name="distinct" value="Y"/>
+            </service>
+        </actions>
+        <row-actions>
+            <service service-name="getPartyNameForDate" result-map="partyNameResultFrom">
+                <field-map field-name="partyId" from-field="partyIdFrom"/>
+                <field-map field-name="compareDate" from-field="invoiceDate"/>
+                <field-map field-name="lastNameFirst" value="Y"/>
+            </service>
+            <service service-name="getPartyNameForDate" result-map="partyNameResultTo">
+                <field-map field-name="partyId" from-field="partyId"/>
+                <field-map field-name="compareDate" from-field="invoiceDate"/>
+                <field-map field-name="lastNameFirst" value="Y"/>
+            </service>
+            <set field="amountToApply" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceNotApplied(delegator,invoiceId)
+                .multiply(org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceCurrencyConversionRate(delegator,invoiceId))}"/>
+            <set field="total" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceTotal(delegator,invoiceId)
+                .multiply(org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceCurrencyConversionRate(delegator,invoiceId))}"/>
+            <set field="currencyUomId" from-field="defaultOrganizationPartyCurrencyUomId"/>
+        </row-actions>
+        <field name="invoiceId" widget-style="" sort-field="true">
+            <hyperlink description="${invoiceId}" target="invoiceOverview">
+                <parameter param-name="invoiceId"/>
+            </hyperlink>
+        </field>
+        <field name="invoiceTypeId" sort-field="true"><display-entity entity-name="InvoiceType"/></field>
+        <field name="invoiceDate" sort-field="true"><display type="date"/></field>
+        <field name="statusId" title="${uiLabelMap.CommonStatus}" sort-field="true"><display-entity entity-name="StatusItem"/></field>
+        <field name="description" sort-field="true"><display/></field>
+        <field name="partyIdTo" title="${uiLabelMap.accCustomers}" parameter-name="partyId"  sort-field="true" widget-style="">
+            <hyperlink target="/partymgr/control/PartyFinancialHistory" target-type="inter-app" description="${partyNameResultTo.fullName} [${partyId}]">
+                <parameter param-name="partyIdTo"/>
+            </hyperlink>
+        </field>
+        <field name="total" widget-area-style="align-text"><display type="currency" currency="${currencyUomId}"/></field>
+        <field name="amountToApply" widget-area-style="align-text"><display type="currency" currency="${currencyUomId}"/></field>
+    </form> 
+    
+    <form name="ListPaymentMethodType" type="list" target="updatePaymentMethodType" list-name="paymentMethodTypes"
+        odd-row-style="alternate-row" default-table-style="table table-hover table-striped table-bordered dataTable" paginate-target="editPaymentMethodType">
+        <field name="paymentMethodTypeId"><display/></field>
+        <field name="description"><display/></field>
+        <field name="defaultGlAccountId" title="${uiLabelMap.accDefaultGlAccountId}" parameter-name="defaultGlAccountId">
+            <drop-down allow-empty="true">
+                <entity-options description="${glAccountId} : ${accountName}" entity-name="GlAccount" key-field-name="glAccountId">
+                    <entity-order-by field-name="glAccountId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="btn btn-primary btn-mini"><submit button-type="button" image-location="icon-ok"/></field>
+    </form> 
+    
+     <form name="ListInvoiceItemType" type="list" target="updateInvoiceItemType" list-name="invoiceItemTypes"
+        odd-row-style="alternate-row" default-table-style="table table-hover table-striped table-bordered dataTable" paginate-target="editInvoiceItemType">
+        <field name="invoiceItemTypeId"><display/></field>
+        <field name="description"><display/></field>
+        <field name="defaultGlAccountId" title="${uiLabelMap.ProductGlAccount}" parameter-name="defaultGlAccountId">
+            <drop-down allow-empty="true">
+                <entity-options description="${glAccountId} : ${accountName}" entity-name="GlAccount" key-field-name="glAccountId">
+                    <entity-order-by field-name="glAccountId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="btn btn-mini btn-primary"><submit button-type="button" image-location="icon-ok"/></field>
+    </form> 
+    
+    <!-- forms for Sales invoice Itemtypes to GLAccount number -->
+    <form name="ListSalInvoiceItemTypeGlAssignments" type="list" list-name="invoiceItemTypes"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="table table-striped table-hover table-bordered dataTable">
+        <field name="organizationPartyId"><hidden value="${organizationPartyId}"/></field>
+        <field name="invoiceItemTypeId"><hidden/></field>
+        <field name="description"><display/></field>
+        <field name="defaultGlAccountId" widget-style="btn btn-mini btn-info">
+            <hyperlink target="GlAccountNavigate" description="${defaultGlAccountId}">
+                <parameter param-name="glAccountId" from-field="defaultGlAccountId"/>
+            </hyperlink>
+        </field>
+        <field name="overrideGlAccountId"><display/></field>
+        <field name="activeGlDescription"><display/></field>
+        <field name="remove" title=" " widget-style="btn btn-mini btn-warning btn-position" use-when="defaultAccount==false">
+            <hyperlink target="removeSalInvoiceItemTypeGlAssignment" description="${uiLabelMap.CommonRemove}">
+                <parameter param-name="organizationPartyId"/><parameter param-name="invoiceItemTypeId"/>
+            </hyperlink>
+        </field>
+    </form>
+       
+    <form name="AddSalInvoiceItemTypeGlAssignment" type="single" target="addSalInvoiceItemTypeGlAssignment"
+        header-row-style="header-row" default-table-style="basic-table">
+        <actions>
+            <entity-one entity-name="GlAccountClass" value-field="revenueGlAccountClass">
+                <field-map field-name="glAccountClassId" value="REVENUE"/>
+            </entity-one>
+            <set field="revenueAccountClassIds" value="${bsh:org.ofbiz.accounting.util.UtilAccounting.getDescendantGlAccountClassIds(revenueGlAccountClass)}" type="List"/>
+        </actions>
+        <auto-fields-service service-name="addInvoiceItemTypeGlAssignment"/>
+        <field name="organizationPartyId"><hidden value="${organizationPartyId}"/></field>
+        <field name="invoiceItemTypeId">
+            <drop-down allow-empty="false" >
+                <entity-options description="${description}" entity-name="InvoiceItemType">
+                    <entity-constraint name="invoiceItemTypeId" operator="like" value="INV_%"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field> 
+      <field name="glAccountId" title="${uiLabelMap.AccountingOverrideRevenueGlAccountId}">
+            <drop-down>
+                <entity-options entity-name="GlAccountOrganizationAndClass" description="${accountCode} - ${accountName} [${glAccountId}]">
+                    <entity-constraint name="organizationPartyId" operator="equals" value="${organizationPartyId}"/>
+                    <entity-constraint name="glAccountClassId" operator="in" env-name="revenueAccountClassIds"></entity-constraint>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+
+        <field name="submitButton" title="${uiLabelMap.CommonSave}" widget-style="btn btn-primary btn-small"><submit button-type="button" image-location="icon-save"/></field>
+    </form>
+    
+    <!-- forms for Purchase invoice Itemtypes to GLAccount number -->
+    <form name="ListPurInvoiceItemTypeGlAssignments" type="list" list-name="invoiceItemTypes" default-map-name="iTypes"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="table table-striped table-hover table-bordered dataTable">
+        <actions>
+            <set field="invItemTypePrefix" value="PINV"/>
+            <script location="component://accounting/webapp/accounting/WEB-INF/actions/admin/ListInvoiceItemTypesGlAccount.groovy"/>
+        </actions>
+        <field name="organizationPartyId"><hidden value="${organizationPartyId}"/></field>
+        <field name="invoiceItemTypeId"><hidden/></field>
+        <field name="description"><display/></field>
+        <field name="defaultGlAccountId" widget-style="btn btn-mini btn-info">
+            <hyperlink target="GlAccountNavigate" description="${defaultGlAccountId}">
+                <parameter param-name="glAccountId" from-field="defaultGlAccountId"/>
+            </hyperlink>
+        </field>
+        <field name="overrideGlAccountId" title="${uiLabelMap.AccountingInvoiceOverrideExpenseGlAccountId}"><display/></field>
+        <field name="activeGlDescription"><display/></field>
+        <field name="remove" title=" " widget-style="btn btn-mini btn-warning btn-position" use-when="defaultAccount==false">
+            <hyperlink target="removePurInvoiceItemTypeGlAssignment" description="${uiLabelMap.CommonRemove}">
+                <parameter param-name="organizationPartyId"/><parameter param-name="invoiceItemTypeId"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="AddPurInvoiceItemTypeGlAssignment" type="single" target="addPurInvoiceItemTypeGlAssignment"
+        header-row-style="header-row" default-table-style="basic-table">
+        <actions>
+            <entity-one entity-name="GlAccountClass" value-field="expenseGlAccountClass">
+                <field-map field-name="glAccountClassId" value="EXPENSE"/>
+            </entity-one>
+            <set field="expenseAccountClassIds" value="${bsh:org.ofbiz.accounting.util.UtilAccounting.getDescendantGlAccountClassIds(expenseGlAccountClass)}" type="List"/>
+        </actions>
+        <auto-fields-service service-name="addInvoiceItemTypeGlAssignment"/>
+        <field name="organizationPartyId"><hidden value="${organizationPartyId}"/></field>
+        <field name="invoiceItemTypeId" title="${uiLabelMap.AccountingInvoicePurchaseItemType}">
+            <drop-down allow-empty="false" >
+                <entity-options description="${description}" entity-name="InvoiceItemType">
+                    <entity-constraint name="invoiceItemTypeId" operator="like" value="PINV%"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="glAccountId" title="${uiLabelMap.AccountingInvoiceOverrideExpenseGlAccountId}">
+            <drop-down>
+                <entity-options entity-name="GlAccountOrganizationAndClass" description="${accountCode} - ${accountName} [${glAccountId}]">
+                    <entity-constraint name="organizationPartyId" operator="equals" value="${organizationPartyId}"/>
+                    <entity-constraint name="glAccountClassId" operator="in" env-name="expenseAccountClassIds"></entity-constraint>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonSave}" widget-style="btn btn-primary btn-small"><submit button-type="button" image-location="icon-save"/></field>
+    </form> 
+    
+    <form name="PartyAcctgPreference" type="single" target="createPartyAcctgPreference" default-map-name="aggregatedPartyAcctgPreference"
+            header-row-style="header-row" default-table-style="basic-table">
+        <actions>
+            <service service-name="getPartyAccountingPreferences" result-map="result">
+                <field-map field-name="organizationPartyId"/>
+            </service>
+            <set field="aggregatedPartyAcctgPreference" from-field="result.partyAccountingPreference" type="Object"/>
+        </actions>
+        <alt-target use-when="partyAcctgPreference!=null" target="updatePartyAcctgPreference"/>
+        
+        <auto-fields-service service-name="createPartyAcctgPreference"/>
+        <field name="organizationPartyId"><hidden value="${parameters.organizationPartyId}"/></field>
+        <!-- the partyId is always displayed -->
+        <field name="partyId" title="${uiLabelMap.AccountingOrganizationPartyId}"><display/></field>
+        <!-- if there is no partyAcctgPreference yet, then we show drop-downs for the fields and a submit button -->
+        <field name="fiscalYearStartMonth" use-when="partyAcctgPreference==null"
+            tooltip="${groovy: import org.ofbiz.base.util.UtilProperties; if(aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('fiscalYearStartMonth')!=null)return (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <drop-down>
+                <option key="1" description="${uiLabelMap.AccountingFiscalMonth01}"/>
+                <option key="2" description="${uiLabelMap.AccountingFiscalMonth02}"/>
+                <option key="3" description="${uiLabelMap.AccountingFiscalMonth03}"/>
+                <option key="4" description="${uiLabelMap.AccountingFiscalMonth04}"/>
+                <option key="5" description="${uiLabelMap.AccountingFiscalMonth05}"/>
+                <option key="6" description="${uiLabelMap.AccountingFiscalMonth06}"/>
+                <option key="7" description="${uiLabelMap.AccountingFiscalMonth07}"/>
+                <option key="8" description="${uiLabelMap.AccountingFiscalMonth08}"/>
+                <option key="9" description="${uiLabelMap.AccountingFiscalMonth09}"/>
+                <option key="10" description="${uiLabelMap.AccountingFiscalMonth10}"/>
+                <option key="11" description="${uiLabelMap.AccountingFiscalMonth11}"/>
+                <option key="12" description="${uiLabelMap.AccountingFiscalMonth12}"/>
+            </drop-down>
+        </field>
+        <field name="fiscalYearStartDay" use-when="partyAcctgPreference==null"
+            tooltip="${groovy: import org.ofbiz.base.util.UtilProperties; if(aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('fiscalYearStartDay')!=null)return (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <drop-down>
+                <option key="1"/><option key="2"/><option key="3"/><option key="4"/><option key="5"/>
+                <option key="6"/><option key="7"/><option key="8"/><option key="9"/><option key="10"/>
+                <option key="11"/><option key="12"/><option key="13"/><option key="14"/><option key="15"/>
+                <option key="16"/><option key="17"/><option key="18"/><option key="19"/><option key="20"/>
+                <option key="21"/><option key="22"/><option key="23"/><option key="24"/><option key="25"/>
+                <option key="26"/><option key="27"/><option key="28"/><option key="29"/><option key="30"/>
+                <option key="31"/>
+            </drop-down>
+        </field>
+        <field name="taxFormId" use-when="partyAcctgPreference==null"
+            tooltip="${groovy: import org.ofbiz.base.util.UtilProperties; if(aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('taxFormId')!=null)return
+            (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <drop-down>
+                <entity-options entity-name="Enumeration" description="${description}" key-field-name="enumId">
+                    <entity-constraint name="enumTypeId" operator="equals" value="TAX_FORMS"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="cogsMethodId" use-when="partyAcctgPreference==null"
+            tooltip="${groovy: import org.ofbiz.base.util.UtilProperties; if(aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('cogsMethodId')!=null)return (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <drop-down>
+                <entity-options entity-name="Enumeration" description="${description}" key-field-name="enumId">
+                    <entity-constraint name="enumTypeId" operator="equals" value="COGS_METHODS"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="baseCurrencyUomId" use-when="partyAcctgPreference==null"
+            tooltip="${groovy: import org.ofbiz.base.util.UtilProperties; if(aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('baseCurrencyUomId')!=null)return
+            (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <drop-down no-current-selected-key="${defaultOrganizationPartyCurrencyUomId}">
+                <entity-options key-field-name="uomId" description="${description} - ${abbreviation}" entity-name="Uom">
+                    <entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="invoiceIdPrefix" use-when="partyAcctgPreference==null"
+            tooltip="${groovy: import org.ofbiz.base.util.UtilProperties; if(aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('invoiceIdPrefix')!=null)return
+            (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <text maxlength="10" size="5"/>
+        </field>
+        <field name="oldInvoiceSequenceEnumId" use-when="partyAcctgPreference==null"
+            tooltip="${groovy: import org.ofbiz.base.util.UtilProperties; if(aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('oldInvoiceSequenceEnumId')!=null)return
+            (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <drop-down>
+                <entity-options entity-name="Enumeration" description="${description}" key-field-name="enumId">
+                    <entity-constraint name="enumTypeId" operator="equals" value="INVOICE_SEQMD"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="useInvoiceIdForReturns" use-when="partyAcctgPreference==null"
+            tooltip="${groovy: import org.ofbiz.base.util.UtilProperties; if(aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('useInvoiceIdForReturns')!=null)return
+            (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <drop-down allow-empty="true">
+                <option key="Y" description="${uiLabelMap.CommonY}"/><option key="N" description="${uiLabelMap.CommonN}"/>
+            </drop-down>
+        </field>
+        <field name="quoteIdPrefix" use-when="partyAcctgPreference==null"
+            tooltip="${groovy: import org.ofbiz.base.util.UtilProperties; if(aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('quoteIdPrefix')!=null)return
+            (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <text maxlength="10" size="5"/>
+        </field>
+        <field name="oldQuoteSequenceEnumId" use-when="partyAcctgPreference==null"
+            tooltip="${groovy: import org.ofbiz.base.util.UtilProperties; if(aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('oldQuoteSequenceEnumId')!=null)return
+            (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <drop-down>
+                <entity-options entity-name="Enumeration" description="${description}" key-field-name="enumId">
+                    <entity-constraint name="enumTypeId" operator="equals" value="QUOTE_SEQMD"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="orderIdPrefix" use-when="partyAcctgPreference==null"
+            tooltip="${groovy: import org.ofbiz.base.util.UtilProperties; if(aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('orderIdPrefix')!=null)return (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <text maxlength="10" size="5"/>
+        </field>
+        <field name="oldOrderSequenceEnumId" use-when="partyAcctgPreference==null"
+            tooltip="${groovy: import org.ofbiz.base.util.UtilProperties; if(aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('oldOrderSequenceEnumId')!=null)return
+            (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <drop-down>
+                <entity-options entity-name="Enumeration" description="${description}" key-field-name="enumId">
+                    <entity-constraint name="enumTypeId" operator="equals" value="ORDER_SEQMD"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" use-when="partyAcctgPreference==null" title="${uiLabelMap.CommonAdd}" widget-style="btn btn-primary btn-small"><submit button-type="button" image-location="icon-ok"/></field>
+        <field name="submitButton" use-when="partyAcctgPreference!=null" title="${uiLabelMap.CommonUpdate}" widget-style="btn btn-primary btn-small"><submit button-type="button" image-location="icon-ok"/></field>
+
+        <!-- otherwise, we just display the fields.  there is no submit button because we shouldn't try to create it again and don't support an update option right now-->
+        <field name="fiscalYearStartMonth" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.ofbiz.base.util.UtilProperties;
+                if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('fiscalYearStartMonth')==null&amp;&amp;aggregatedPartyAcctgPreference.get('fiscalYearStartMonth')!=null)return
+            (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display/>
+        </field>
+        <field name="fiscalYearStartDay" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.ofbiz.base.util.UtilProperties;
+            if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('fiscalYearStartDay')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('fiscalYearStartDay')!=null)return
+                    (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display/>
+        </field>
+        <field name="taxFormId" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.ofbiz.base.util.UtilProperties;
+                if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('taxFormId')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('taxFormId')!=null)return
+                    (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display-entity entity-name="Enumeration" key-field-name="enumId"/>
+        </field>
+        <field name="cogsMethodId" title="${uiLabelMap.CogsMethodId}" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.ofbiz.base.util.UtilProperties;
+            if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('cogsMethodId')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('cogsMethodId')!=null)return
+                    (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display-entity entity-name="Enumeration" key-field-name="enumId"/>
+        </field>
+        <field name="baseCurrencyUomId" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.ofbiz.base.util.UtilProperties;
+                if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('baseCurrencyUomId')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('baseCurrencyUomId')!=null)return
+                (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display/>
+        </field>
+        <field name="invoiceIdPrefix" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.ofbiz.base.util.UtilProperties;
+                if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('invoiceIdPrefix')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('invoiceIdPrefix')!=null)return
+                (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display/>
+        </field>
+        <field name="oldInvoiceSequenceEnumId" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.ofbiz.base.util.UtilProperties;
+                if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('oldInvoiceSequenceEnumId')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('oldInvoiceSequenceEnumId')!=null)return
+                (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display-entity entity-name="Enumeration" key-field-name="enumId"/>
+        </field>
+        <field name="useInvoiceIdForReturns" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.ofbiz.base.util.UtilProperties;
+                if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('useInvoiceIdForReturns')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('useInvoiceIdForReturns')!=null)return
+                (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display/>
+        </field>
+        <field name="oldQuoteSequenceEnumId" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.ofbiz.base.util.UtilProperties;
+                if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('oldQuoteSequenceEnumId')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('oldQuoteSequenceEnumId')!=null)return
+                (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display-entity entity-name="Enumeration" key-field-name="enumId"/>
+        </field>
+        <field name="quoteIdPrefix" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.ofbiz.base.util.UtilProperties;
+                if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('quoteIdPrefix')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('quoteIdPrefix')!=null)return
+                (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display/>
+        </field>
+        <field name="lastQuoteNumber" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.ofbiz.base.util.UtilProperties;
+                if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('lastQuoteNumber')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('lastQuoteNumber')!=null)return
+                (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display/>
+        </field>
+        <field name="oldOrderSequenceEnumId" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.ofbiz.base.util.UtilProperties;
+                if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('oldOrderSequenceEnumId')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('oldOrderSequenceEnumId')!=null)return
+                (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display-entity entity-name="Enumeration" key-field-name="enumId"/>
+        </field>
+        <field name="orderIdPrefix" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.ofbiz.base.util.UtilProperties;
+                if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('orderIdPrefix')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('orderIdPrefix')!=null)return
+                (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display/>
+        </field>
+        <field name="lastOrderNumber" use-when="partyAcctgPreference!=null" tooltip="${groovy: import org.ofbiz.base.util.UtilProperties;
+                if(partyAcctgPreference!= null&amp;&amp;partyAcctgPreference.get('lastOrderNumber')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('lastOrderNumber')!=null)return
+                (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display/>
+        </field>
+        <!-- these 2 are ONLY displayed, never allow manual editing -->
+        <field name="lastInvoiceNumber" tooltip="${groovy: import org.ofbiz.base.util.UtilProperties;
+                if((partyAcctgPreference==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('lastInvoiceNumber')!=null) ||
+                (partyAcctgPreference!=null&amp;&amp;partyAcctgPreference.get('lastInvoiceNumber')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('lastInvoiceNumber')!=null))return
+                    (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display/>
+        </field>
+        <field name="lastInvoiceRestartDate" tooltip="${groovy: import org.ofbiz.base.util.UtilProperties;
+                if((partyAcctgPreference==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('lastInvoiceRestartDate')!=null) ||
+                (partyAcctgPreference!=null&amp;&amp;partyAcctgPreference.get('lastInvoiceRestartDate')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('lastInvoiceRestartDate')!=null))return (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <display/>
+        </field>
+        <!-- these 2 are always can be updated -->
+        <field name="refundPaymentMethodId" tooltip="${groovy: import org.ofbiz.base.util.UtilProperties;
+                if((partyAcctgPreference==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('refundPaymentMethodId')!=null) ||
+                (partyAcctgPreference!=null&amp;&amp;partyAcctgPreference.get('refundPaymentMethodId')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('refundPaymentMethodId')!=null))return
+                (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <drop-down>
+                <entity-options entity-name="PaymentMethod" description="${description}" key-field-name="paymentMethodId">
+                    <entity-constraint name="partyId" operator="equals" env-name="organizationPartyId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="errorGlJournalId" tooltip="${groovy: import org.ofbiz.base.util.UtilProperties;
+            if((partyAcctgPreference==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('errorGlJournalId')!=null) ||
+            (partyAcctgPreference!=null&amp;&amp;partyAcctgPreference.get('errorGlJournalId')==null&amp;&amp;aggregatedPartyAcctgPreference!= null&amp;&amp;aggregatedPartyAcctgPreference.get('errorGlJournalId')!=null))return 
+            (UtilProperties.getMessage('AccountingUiLabels', 'AccountingInheritedValue', locale))}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="GlJournal" key-field-name="glJournalId" description="${glJournalName} [${glJournalId}]">
+                    <entity-constraint name="organizationPartyId" operator="equals" env-name="organizationPartyId"/>
+                    <entity-order-by field-name="glJournalName"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <sort-order>
+        	<field-group style="no-widget-header span6 no-left-margin">
+        		<sort-field name="partyId"/>
+        		<sort-field name="fiscalYearStartMonth"/>
+        		<sort-field name="fiscalYearStartDay"/>
+        		<sort-field name="taxFormId"/>
+        		<sort-field name="cogsMethodId"/>
+        		<sort-field name="baseCurrencyUomId"/>
+        		<sort-field name="invoiceSeqCustMethId"/>
+        		<sort-field name="invoiceIdPrefix"/>
+        		<sort-field name="lastInvoiceNumber"/>
+        		<sort-field name="lastInvoiceRestartDate"/>
+        		<sort-field name="useInvoiceIdForReturns"/>
+        	</field-group>
+        	<field-group style="no-widget-header span6 no-right-margin">
+        		
+        		<sort-field name="quoteSeqCustMethId"/>
+        		<sort-field name="quoteIdPrefix"/>
+        		<sort-field name="lastQuoteNumber"/>
+        		<sort-field name="orderSeqCustMethId"/>
+        		<sort-field name="orderIdPrefix"/>
+        		<sort-field name="lastOrderNumber"/>
+        		<sort-field name="refundPaymentMethodId"/>
+        		<sort-field name="errorGlJournalId"/>
+        		<sort-field name="oldInvoiceSequenceEnumId"/>
+        		<sort-field name="oldOrderSequenceEnumId"/>
+        		<sort-field name="oldQuoteSequenceEnumId"/>
+        	</field-group>
+        	<field-group style="no-widget-header span12 no-left-margin align-center">
+            	<sort-field name="submitButton"/>
+            </field-group>
+        </sort-order>
+    </form>
+    
+        <!-- Accounting Time Period forms-->
+    <form name="ListClosedTimePeriods" type="list" list-name="closedTimePeriods"
+        odd-row-style="alternate-row" default-table-style="table table-striped table-hover table-bordered dataTable">
+        <auto-fields-entity entity-name="CustomTimePeriod" default-field-type="display"/>
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="isClosed"><hidden/></field>
+        <field name="periodTypeId">
+          <display-entity entity-name="PeriodType"/>
+        </field>
+        <field name="parentPeriodId">
+          <display-entity entity-name="CustomTimePeriod" key-field-name="customTimePeriodId" description="[${customTimePeriodId}] ${periodName}: ${fromDate} - ${thruDate}"/>
+        </field>
+    </form>
+    <form name="ListOpenTimePeriods" type="list" list-name="openTimePeriods"
+        odd-row-style="alternate-row" default-table-style="table table-striped table-hover table-bordered dataTable">
+        <auto-fields-entity entity-name="CustomTimePeriod" default-field-type="display"/>
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="isClosed"><hidden/></field>
+        <field name="periodTypeId">
+          <display-entity entity-name="PeriodType"/>
+        </field>
+        <field name="parentPeriodId">
+          <display-entity entity-name="CustomTimePeriod" key-field-name="customTimePeriodId" description="[${customTimePeriodId}] ${periodName}: ${fromDate} - ${thruDate}"/>
+        </field>
+        <field name="close" title=" " widget-style="btn btn-small btn-info btn-position">
+            <hyperlink target="closeFinancialTimePeriod" description="${uiLabelMap.CommonClose}">
+                <parameter param-name="organizationPartyId"/><parameter param-name="customTimePeriodId"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="CreateTimePeriod" type="single" title="" target="createCustomTimePeriod"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-service service-name="createCustomTimePeriod"/>
+        <field name="organizationPartyId"><hidden value="${organizationPartyId}"/></field>
+        <field name="isClosed">
+            <drop-down>
+                <option description="${uiLabelMap.CommonNo}" key="N"/>
+                <option description="${uiLabelMap.CommonYes}" key="Y"/>
+            </drop-down>
+        </field>
+        <field name="parentPeriodId">
+            <drop-down allow-empty="true">
+                <list-options list-name="openTimePeriods" key-name="customTimePeriodId" description="[${customTimePeriodId}] ${periodName}: ${fromDate} - ${thruDate}"/>
+            </drop-down>
+        </field>
+        <field name="periodTypeId">
+            <drop-down>
+                <entity-options entity-name="PeriodType" description="${description}">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonCreate}" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-ok"/></field>
+    </form>
+    
+    <!-- forms for managing FX rates -->
+    <form name="ListConversions" type="list" list-name="conversions"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="table table-striped table-bordered table-hover dataTable">
+        <field name="uomId" title="${uiLabelMap.CommonFrom} ${uiLabelMap.CommonCurrency}"><display/></field>
+        <field name="uomIdTo" title="${uiLabelMap.CommonTo} ${uiLabelMap.CommonCurrency}"><display/></field>
+        <field name="purposeEnumId" title="${uiLabelMap.CommonPurpose}"><display-entity entity-name="Enumeration" key-field-name="enumId"/></field>
+        <field name="conversionFactor"><display/></field>
+        <field name="fromDate" title="${uiLabelMap.CommonFromDate}"><display/></field>
+        <field name="thruDate" title="${uiLabelMap.CommonThruDate}"><display/></field>
+    </form>
+
+    <form name="updateFXConversion" type="single" target="updateFXConversion" default-service-name="updateFXConversion"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="organizationPartyId"><hidden value="${organizationPartyId}"/></field>
+        <field name="uomId" title="${uiLabelMap.CommonFrom} ${uiLabelMap.CommonCurrency}">
+            <drop-down allow-empty="true" no-current-selected-key="${defaultOrganizationPartyCurrencyUomId}">
+                <entity-options key-field-name="uomId" description="${description} - ${abbreviation}" entity-name="Uom">
+                    <entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="uomIdTo" title="${uiLabelMap.CommonTo} ${uiLabelMap.CommonCurrency}">
+            <drop-down allow-empty="true" no-current-selected-key="${defaultOrganizationPartyCurrencyUomId}">
+                <entity-options key-field-name="uomId" description="${description} - ${abbreviation}" entity-name="Uom">
+                    <entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="purposeEnumId" title="${uiLabelMap.CommonPurpose}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="Enumeration" description="${description}" key-field-name="enumId">
+                    <entity-constraint name="enumTypeId" operator="equals" value="CONVERSION_PURPOSE"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="conversionFactor"><text/></field>
+        <field name="fromDate"><date-time/></field>
+        <field name="thruDate"><date-time/></field>
+        <field name="submitButton" title="${uiLabelMap.AccountingUpdateFX}" widget-style="btn btn-small btn-primary"><submit image-location="icon-ok"/></field>
+    </form>
+
+    <form name="ListTaxAuthorityGlAccounts" type="list" target="updateOrganizationTaxAuthorityGlAccount" list-name="taxAuthorityGlAccounts"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="table table-striped table-hover table-bordered dataTable">
+        <auto-fields-service service-name="updateTaxAuthorityGlAccount" default-field-type="display"/>
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="taxAuthGeoId" title="${uiLabelMap.AccountingTaxAuthorityGeo}">
+            <display-entity entity-name="Geo" key-field-name="geoId" description="[${geoId}] ${geoName}"/>
+        </field>
+        <field name="taxAuthPartyId" title="${uiLabelMap.AccountingTaxAuthorityParty}">
+            <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${firstName} ${middleName} ${lastName} ${groupName}">
+                <sub-hyperlink link-style="btn btn-mini btn-info" description="${taxAuthPartyId}" target="/partymgr/control/viewprofile" target-type="inter-app">
+                    <parameter param-name="partyId" from-field="taxAuthPartyId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="glAccountId" title="${uiLabelMap.AccountingGlAccountId}">
+            <drop-down allow-empty="false">
+                <entity-options description="${accountCode} - ${accountName} [${glAccountId}]" entity-name="GlAccountOrganizationAndClass">
+                    <entity-constraint name="organizationPartyId" operator="equals" env-name="organizationPartyId"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="deleteLink" title=" " widget-style="btn btn-small btn-warning btn-position">
+            <hyperlink target="deleteOrganizationTaxAuthorityGlAccount" description="${uiLabelMap.CommonDelete}">
+                <parameter param-name="organizationPartyId"/><parameter param-name="taxAuthGeoId"/><parameter param-name="taxAuthPartyId"/>
+            </hyperlink>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-ok"/></field>
+    </form>
+
+    <form name="AddTaxAuthorityGlAccount" type="list" target="createOrganizationTaxAuthorityGlAccount" list-name="taxAuthorityHavingNoGlAccountList"
+        odd-row-style="alternate-row" default-table-style="table table-striped table-hover table-bordered dataTable">
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="taxAuthGeoId" title="${uiLabelMap.AccountingTaxAuthorityGeo}">
+            <display-entity entity-name="Geo" key-field-name="geoId" description="[${geoId}] ${geoName}"/>
+        </field>
+        <field name="taxAuthPartyId" title="${uiLabelMap.AccountingTaxAuthorityParty}">
+            <display-entity entity-name="PartyNameView" key-field-name="partyId" description="${firstName} ${middleName} ${lastName} ${groupName}">
+                <sub-hyperlink description="${taxAuthPartyId}" target="/partymgr/control/viewprofile" target-type="inter-app" link-style="btn btn-mini btn-info">
+                    <parameter param-name="partyId" from-field="taxAuthPartyId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="glAccountId" title="${uiLabelMap.AccountingGlAccountId}">
+            <drop-down allow-empty="false">
+                <entity-options description="${accountCode} - ${accountName} [${glAccountId}]" entity-name="GlAccountOrganizationAndClass">
+                    <entity-constraint name="organizationPartyId" operator="equals" env-name="organizationPartyId"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}" widget-style="btn btn-primary btn-small"><submit button-type="button" image-location="icon-ok"/></field>
+    </form>
+    
+    <form name="ListGlAccountTypeDefaults" type="list" target="" list-name="glAccountTypeDefaults"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="table table-striped table-hover table-bordered dataTable">
+        <actions>
+            <entity-condition entity-name="GlAccountTypeDefault" list="glAccountTypeDefaults">
+                <condition-list>
+                    <condition-expr field-name="organizationPartyId" operator="equals" from-field="organizationPartyId"/>
+                </condition-list>
+                <order-by field-name="glAccountTypeId"/>
+            </entity-condition>
+        </actions>
+        <field name="glAccountTypeId">
+            <display-entity entity-name="GlAccountType"/>
+        </field>
+        <field name="glAccountId">
+            <display-entity entity-name="GlAccount" description="${accountCode} ${accountName}">
+                <sub-hyperlink link-style="btn btn-mini btn-info" target="GlAccountNavigate" description="${glAccountId}">
+                    <parameter param-name="glAccountId"/>
+                </sub-hyperlink>
+            </display-entity>
+        </field>
+        <field name="remove" title=" " widget-style="btn btn-mini btn-warning btn-position icon-remove open-sans">
+            <hyperlink description="${uiLabelMap.CommonRemove}" target="removeGlAccountTypeDefault">
+                <parameter param-name="glAccountTypeId"/><parameter param-name="glAccountId"/><parameter param-name="organizationPartyId"/>
+            </hyperlink>
+        </field>
+    </form>
+    <form name="EditGlAccountTypeDefault" type="single" title="" target="createGlAccountTypeDefault"
+        header-row-style="header-row" default-table-style="basic-table">
+        <auto-fields-service service-name="createGlAccountTypeDefault"/>
+        <field name="organizationPartyId"><hidden value="${organizationPartyId}"/></field>
+        <field name="glAccountTypeId" title="${uiLabelMap.FormFieldTitle_glAccountType}">
+            <drop-down>
+                <entity-options entity-name="GlAccountType" description="${description}">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="glAccountId">
+            <drop-down>
+                <entity-options entity-name="GlAccountOrganizationAndClass" description="${accountCode} - ${accountName} [${glAccountId}]">
+                    <entity-constraint name="organizationPartyId" operator="equals" value="${organizationPartyId}"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonSave}" widget-style="btn btn-primary btn-small"><submit button-type="button" image-location="icon-save"/></field>
+    </form>
+    <form name="ListVarianceReasonGlAccounts" type="list" target="updateVarianceReasonGlAccount" list-name="varianceReasonGlAccounts"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="table table-striped table-hover table-bordered dataTable">
+        <auto-fields-service service-name="updateVarianceReasonGlAccount" default-field-type="display"/>
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="varianceReasonId"><display-entity entity-name="VarianceReason"/></field>
+        <field name="glAccountId" title="${uiLabelMap.AccountingGlAccountId}">
+            <drop-down allow-empty="false">
+                <entity-options description="${accountCode} - ${accountName} [${glAccountId}]" entity-name="GlAccountOrganizationAndClass">
+                    <entity-constraint name="organizationPartyId" operator="equals" env-name="organizationPartyId"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="deleteLink" title=" " widget-style="btn btn-small btn-warning btn-position">
+            <hyperlink target="deleteVarianceReasonGlAccount" description="${uiLabelMap.CommonRemove}">
+                <parameter param-name="organizationPartyId"/><parameter param-name="varianceReasonId"/>
+            </hyperlink>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-ok"/></field>
+    </form>
+
+    <form name="AddVarianceReasonGlAccount" type="single" target="createVarianceReasonGlAccount"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="organizationPartyId"><hidden/></field>
+        <field name="varianceReasonId" title="${uiLabelMap.FormFieldTitle_varianceReasonId}">
+            <drop-down allow-empty="false">
+                <entity-options entity-name="VarianceReason" description="${description}">
+                    <entity-order-by field-name="varianceReasonId"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="glAccountId" title="${uiLabelMap.FormFieldTitle_glAccountTypeId}">
+            <drop-down allow-empty="false">
+                <entity-options description="${accountCode} - ${accountName} [${glAccountId}]" entity-name="GlAccountOrganizationAndClass">
+                    <entity-constraint name="organizationPartyId" operator="equals" env-name="organizationPartyId"/>
+                    <entity-order-by field-name="accountCode"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonAdd}" widget-style="btn btn-primary btn-small"><submit button-type="button" image-location="icon-ok"/></field>
+    </form>
+</forms>

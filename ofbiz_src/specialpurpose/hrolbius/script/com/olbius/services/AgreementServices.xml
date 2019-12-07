@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+	<simple-method method-name="createAgreementTerm">
+		<set field="value" from-field="parameters.termValue"/>
+		
+		<call-map-processor in-map-name="parameters" out-map-name="tempMap">
+			<simple-map-processor name="convertTermValue">
+				<process field="termValue">
+					<convert type="BigDecimal">
+						<fail-property resource="HrCommonUiLabels" property="CommonConvertValue"/>
+					</convert>
+				</process>
+			</simple-map-processor>
+		</call-map-processor>
+		<check-errors/>
+		<set field="parameters.termValue" from-field="tempMap.termValue"/>
+		
+		<set-service-fields service-name="createAgreementTerm" to-map="context" map="parameters"/>
+		<call-service service-name="createAgreementTerm" in-map-name="context">
+			<result-to-field result-name="agreementTermId" field="agreementTermId"/>
+		</call-service>
+		<check-errors/>		
+		<set field="createParameterPayroll" from-field="parameters.createParameterPayroll"/>
+		<if-not-empty field="createParameterPayroll">
+			<if-compare operator="equals" value="Y" field="createParameterPayroll">
+				<entity-one value-field="agreement" entity-name="Agreement" auto-field-map="true"></entity-one>
+				<set field="partyId" from-field="agreement.partyIdTo"/>
+				<set field="ctxMap.name" from-field="parameters.textValue"/>
+				<set field="ctxMap.code" from-field="parameters.textValue"/>
+				<set field="ctxMap.periodTypeId" value="NA"/>
+				
+				<if-compare operator="contains" value="%" field="value">
+					<set field="ctxMap.type" value="CONSTPERCENT"/>
+				<else>
+					<set field="ctxMap.type" value="CONST"/>
+				</else>
+				</if-compare>
+				<entity-one value-field="payrollParameters" entity-name="PayrollParameters">
+					<field-map field-name="code" from-field="ctxMap.code"/>
+				</entity-one>
+				<if-empty field="payrollParameters">
+					<call-service service-name="createPayrollParameter" in-map-name="ctxMap"></call-service>
+					<check-errors/>
+				<else>
+					<set-nonpk-fields value-field="payrollParameters" map="ctxMap"/>
+					<store-value value-field="payrollParameters"/>
+				</else>	
+				</if-empty>
+				
+				<if-compare operator="equals" value="CONST" field="ctxMap.type">
+					<set field="ctxMap.value" from-field="value"/>
+				<else>
+					<if-compare operator="equals" value="CONSTPERCENT" field="ctxMap.type">
+						<set field="percentValue" value="${groovy: value.substring(0, value.indexOf(&quot;%&quot;))}"/>
+						<set field="ctxMap.value" from-field="percentValue"/>
+						<set field="ctxMap.actualPercent" from-field="percentValue"/>						
+					</if-compare>
+				</else>						
+				</if-compare>
+				<set field="ctxMap.partyId" from-field="partyId"/>
+				<set field="ctxMap.fromDate" from-field="parameters.fromDate"/>
+				<entity-one value-field="payrollEmplParam" entity-name="PayrollEmplParameters">
+					<field-map field-name="partyId" from-field="partyId"/>
+					<field-map field-name="fromDate" from-field="ctxMap.fromDate"/>
+					<field-map field-name="code" from-field="ctxMap.code"/>
+				</entity-one>
+				<if-empty field="payrollEmplParam">
+					<set-service-fields service-name="assignEmployeePayrollParameters" to-map="ctxPayrollEmplParamMap" map="ctxMap"/>
+					<call-service service-name="assignEmployeePayrollParameters" in-map-name="ctxPayrollEmplParamMap"></call-service>
+				<else>
+					<set-nonpk-fields value-field="payrollEmplParam" map="ctxMap"/>
+					<store-value value-field="payrollEmplParam"/>
+				</else>
+				</if-empty>
+				<check-errors/>
+			</if-compare>
+		</if-not-empty>
+	</simple-method>
+</simple-methods>

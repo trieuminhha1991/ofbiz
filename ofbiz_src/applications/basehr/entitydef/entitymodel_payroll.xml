@@ -1,0 +1,728 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+	<!-- ========================================================= -->
+	<!-- ======================== Defaults ======================= -->
+	<!-- ========================================================= -->
+	<title>Entity of Payroll</title>
+	<description>None</description>
+	<copyright></copyright>
+	<version></version>
+
+	<!-- Payroll's entities -->
+	<!-- extend entitymodel from humanres/entitydef/entitymodel_old -->
+	<entity entity-name="OldEmplPositionTypeRate" table-name="EMPL_POSITION_TYPE_RATE"
+	    package-name="org.ofbiz.humanres.position" title="EmplPosition Type Rate Entity">
+		<field name="emplPositionTypeRateId" type="id-ne"></field>	   
+	    <field name="emplPositionTypeId" type="id-ne"/>
+	    <field name="periodTypeId" type="id-ne"/>
+	    <field name="payGradeId" type="id"/>
+	    <field name="salaryStepSeqId" type="id"/>
+	    <field name="roleTypeGroupId" type="id-ne"></field>
+	    <field name="rateTypeId" type="id"/>
+	    <field name="fromDate" type="date-time"/>
+	    <field name="thruDate" type="date-time"/>
+	    <field name="rate" type="id"/>
+	    <!-- <prim-key field="emplPositionTypeId"/>
+	    <prim-key field="fromDate"/>
+	    <prim-key field="roleTypeGroupId"/> -->
+	    <prim-key field="emplPositionTypeRateId"/>
+	    <relation type="one" fk-name="EMPL_PSTPRT_EPTP" rel-entity-name="EmplPositionType">
+	      <key-map field-name="emplPositionTypeId"/>
+	    </relation>
+	    <relation type="one" fk-name="EMPL_PSTPRT_PRDTYP" rel-entity-name="PeriodType">
+	      <key-map field-name="periodTypeId"/>
+	    </relation>
+	    <relation type="one-nofk" fk-name="EMPL_PSTPRT_SSTP" rel-entity-name="SalaryStep">
+	      <key-map field-name="salaryStepSeqId"/>
+	      <key-map field-name="payGradeId"/>
+	    </relation>
+	    <relation type="one-nofk" fk-name="EMPL_PSTPRT_RTTYP" rel-entity-name="RateType">
+	      <key-map field-name="rateTypeId"/>
+	    </relation>
+	    <relation rel-entity-name="RoleTypeGroup" type="one" fk-name="EMPL_PSTPRT_ROLE_TYP_GROUP">
+	    	<key-map field-name="roleTypeGroupId"/>
+	    </relation>
+	</entity>
+	<entity entity-name="EmplPositionTypeRateGeoAppl" package-name="org.ofbiz.humanres.position">
+		<field name="emplPositionTypeRateId" type="id-ne"></field>
+		<field name="geoId" type="id-ne"></field>
+		<field name="enumId" type="id-ne"></field>
+		<prim-key field="emplPositionTypeRateId"/>
+		<prim-key field="geoId"/>
+		<relation rel-entity-name="OldEmplPositionTypeRate" type="one" fk-name="EPTR_GEO_APPL_EPTR">
+			<key-map field-name="emplPositionTypeRateId"/>
+		</relation>
+		<relation rel-entity-name="Geo" type="one" fk-name="EPTR_GEO_APPL_GEO">
+	    	<key-map field-name="geoId"/>
+	    </relation>
+	    <relation rel-entity-name="Enumeration" type="one" fk-name="EPTR_GEO_APPL_ENUM">
+	    	<key-map field-name="enumId"/>
+	    </relation>
+	</entity>
+	<!-- ./ -->
+	<entity entity-name="PayrollParamCharacteristic" package-name="com.olbius.payroll">
+		<field name="paramCharacteristicId" type="id-ne"></field>
+		<field name="parentTypeId" type="id"></field>
+		<field name="description" type="description"></field>
+		<prim-key field="paramCharacteristicId"/>
+		<relation rel-entity-name="PayrollParamCharacteristic" type="one" fk-name="PYRLL_PARAM_CHARAC_PARENT">
+			<key-map field-name="parentTypeId" rel-field-name="paramCharacteristicId"/>
+		</relation>
+	</entity>
+	
+	<entity entity-name="PayrollParameters" package-name="com.olbius.payroll">
+		<field name="code" type="id-ne"></field>
+		<field name="name" type="name"></field>
+		<field name="defaultValue" type="name"></field>
+		<field name="type" type="id"></field>
+		<field name="actualValue" type="name"></field>
+		<field name="partyId" type="id-ne"></field>
+		<field name="description" type="description"></field>
+		<field name="periodTypeId" type="id-ne" ></field>
+		<field name="paramCharacteristicId" type="id"></field>
+		<field name="abbreviation" type="name"></field>
+		<field name="inputEnumSalesId" type="id-ne">
+			<description>link with type bonus in sales</description>
+		</field>
+		<prim-key field="code"/>
+		<relation fk-name="FK_PP_P" rel-entity-name="Party" type="many">
+			<key-map field-name="partyId" rel-field-name="partyId"/>
+		</relation>
+		<relation rel-entity-name="PeriodType" type="one" fk-name="FK_PP_PT">
+			<key-map field-name="periodTypeId"/>
+		</relation>
+		<relation fk-name="FK_PP_PEPT" rel-entity-name="PayrollEmplParameterType" type="one-nofk">
+			<key-map field-name="type" rel-field-name="code"/>
+		</relation>
+		<relation rel-entity-name="Enumeration" type="one" fk-name="PYRLL_PARAM_ENUM">
+			<key-map field-name="inputEnumSalesId" rel-field-name="enumId"/>
+		</relation>
+		<relation rel-entity-name="PayrollParamCharacteristic" type="one" fk-name="PRYLL_PARAM_PRYLL_CHAR">
+			<key-map field-name="paramCharacteristicId"/>
+		</relation>
+	</entity>	
+	
+	<entity entity-name="PayrollCharacteristic" package-name="com.olbius.payroll">
+		<field name="payrollCharacteristicId" type="id-ne"></field>
+		<field name="parentTypeId" type="id-ne"></field>
+		<field name="description" type="description"></field>
+		<field name="sequenceNum" type="numeric"></field>
+		<prim-key field="payrollCharacteristicId"/>
+		<relation rel-entity-name="PayrollCharacteristic" type="one" fk-name="PARENT_PYRLL_CHAR">
+			<key-map field-name="parentTypeId" rel-field-name="payrollCharacteristicId"/>
+		</relation>
+	</entity>
+	
+	<entity entity-name="PayrollItemType" package-name="com.olbius.payroll">
+		<field name="payrollItemTypeId" type="id-ne"></field>
+		<field name="parentTypeId" type="id-ne"></field>
+		<field name="description" type="description"></field>
+		<field name="sequenceNum" type="numeric"></field>
+		<prim-key field="payrollItemTypeId"/>
+		<relation rel-entity-name="PayrollItemType" type="one" fk-name="PARENT_PYRLL_ITEM_TYP">
+			<key-map field-name="parentTypeId" rel-field-name="payrollItemTypeId"/>
+		</relation>
+	</entity>
+	
+	<entity entity-name="TaxableType" package-name="com.olbius.payroll">
+		<field name="taxableTypeId" type="id-ne"></field>
+		<field name="parentTypeId" type="id-ne"></field>
+		<field name="description" type="description"></field>
+		<prim-key field="taxableTypeId"/>
+		<relation rel-entity-name="TaxableType" type="one" fk-name="PRT_TAX_TYPE">
+			<key-map field-name="parentTypeId" rel-field-name="taxableTypeId"/>
+		</relation>
+	</entity>
+	
+	<entity entity-name="PayrollFormula" package-name="com.olbius.payroll">
+		<field name="code" type="id-ne"></field>
+		<field name="name" type="name"></field>
+		<field name="abbreviation" type="name"></field>
+		<!-- <field name="invoiceItemTypeId" type="name"></field> -->
+		<field name="function" type="very-long"></field>
+		<field name="functionType" type="id"></field>
+		<field name="maxValue" type="name"></field>
+		<field name="description" type="description"></field>
+		<field name="functionRelated" type="long-varchar"></field>
+		<field name="payrollCharacteristicId" type="id-ne"></field>
+		<field name="taxableTypeId" type="id-ne"></field>
+		<field name="payrollItemTypeId" type="id-ne"></field>
+		<field name="exempted" type="indicator"></field>
+		<field name="taxRate" type="floating-point">
+			<description>use when field "payrollCharacteristicId" is "Income" and taxableTypeId is "Whole Income Tariff"</description>
+		</field>
+		<field name="includedPayrollTable" type="indicator"></field>
+		<prim-key field="code"/>
+		<relation fk-name="FK_PF_PFT" rel-entity-name="PayrollFormulaType" type="one-nofk">
+			<key-map field-name="functionType" rel-field-name="code"/>
+		</relation>
+		<!--<relation fk-name="FK_PF_IIT" rel-entity-name="InvoiceItemType" type="many">-->
+			<!--<key-map field-name="invoiceItemTypeId"/>-->
+		<!--</relation>-->
+		<relation rel-entity-name="PayrollCharacteristic" type="one" fk-name="PYRLL_FORMULA_CHAR">
+			<key-map field-name="payrollCharacteristicId"/>
+		</relation>
+		<relation rel-entity-name="PayrollItemType" type="one" fk-name="PYRLL_FORMULA_ITEM">
+			<key-map field-name="payrollItemTypeId"/>
+		</relation>
+		<relation rel-entity-name="TaxableType" type="one" fk-name="PYRLL_FORMULA_TAXABLE_TYP">
+			<key-map field-name="taxableTypeId"/>
+		</relation>
+	</entity>
+	
+	<entity entity-name="PartyPayrollFormulaInvoiceItemType" package-name="com.olbius.payroll">
+		<field name="partyId" type="id-ne"></field>
+		<field name="invoiceItemTypeId" type="id-ne"></field>
+		<field name="code" type="id-ne"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<prim-key field="partyId"/>
+		<prim-key field="invoiceItemTypeId"/>
+		<prim-key field="code"/>
+		<prim-key field="fromDate"/>
+		<relation rel-entity-name="Party" type="one" fk-name="PTY_PF_IIT_PTY">
+			<key-map field-name="partyId"/>
+		</relation>
+		<relation rel-entity-name="InvoiceItemType" type="one" fk-name="PTY_PF_IIT_IIT">
+			<key-map field-name="invoiceItemTypeId"/>
+		</relation>
+		<relation rel-entity-name="PayrollFormula" type="one" fk-name="PTY_PF_IIF_PF">
+			<key-map field-name="code"/>
+		</relation>
+	</entity>
+	<entity entity-name="PayrollFormulaType" package-name="com.olbius.payroll">
+		<field name="code" type="id-ne"></field>
+		<field name="name" type="name"></field>
+		<field name="description" type="description"></field>
+		<prim-key field="code"/>
+	</entity>
+	<entity entity-name="PayrollEmplParameters" package-name="com.olbius.payroll">
+		<field name="partyId" type="id-ne"></field>
+		<field name="orgId" type="id-ne"><description>for multi organization</description> </field>
+		<field name="code" type="id-ne"></field>
+		<!-- <field name="type" type="id-ne"></field> -->
+		<field name="value" type="description" ></field>
+		<!-- <field name="actualPercent" type="name"></field> -->
+		<field name="fromDate" type="date-time" ></field>
+		<field name="thruDate" type="date-time" ></field>
+		<field name="createdDate" type="date-time"></field>
+		<!-- <field name="periodTypeId" type="id-ne"></field> -->
+		<prim-key field="partyId"/>
+		<prim-key field="orgId"/>
+		<prim-key field="code"/>
+		<prim-key field="fromDate"/>
+		<relation fk-name="FK_PEP_PARTY" rel-entity-name="Party" type="many">
+			<key-map field-name="partyId" rel-field-name="partyId"/>
+		</relation>
+		<relation fk-name="FK_PEP_PP" rel-entity-name="PayrollParameters" type="many">
+			<key-map field-name="code" rel-field-name="code"/>
+		</relation>
+		<!--<relation fk-name="FK_PEP_PEPT" rel-entity-name="PayrollEmplParameterType" type="one-nofk">-->
+			<!--<key-map field-name="type" rel-field-name="code"/>-->
+		<!--</relation>-->
+		<!-- <relation rel-entity-name="PeriodType" type="one" fk-name="FK_PEP_PeriodType">
+			<key-map field-name="periodTypeId"/>
+		</relation> -->
+		<relation rel-entity-name="PartyGroup" type="one" fk-name="PYL_EMPLPARAM_PTYGRP">
+			<key-map field-name="orgId" rel-field-name="partyId"/>
+		</relation>
+	</entity>
+	
+	<entity entity-name="PayrollParamPositionType" package-name="com.olbius.payroll">
+		<field name="payrollParamPositionTypeId" type="id-ne"></field>
+		<field name="emplPositionTypeId" type="id-ne"></field>
+		<field name="code" type="id-ne"></field>
+		<field name="roleTypeGroupId" type="id-ne"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<!-- <field name="periodTypeId" type="id-ne"></field> -->
+		<field name="rateAmount" type="currency-amount"></field>
+		<field name="uomId" type="id-ne"></field>
+		<prim-key field="payrollParamPositionTypeId"/>
+		<relation rel-entity-name="EmplPositionType" type="one" fk-name="PYRLL_POSTYPE_PARAM_POSTYP">
+			<key-map field-name="emplPositionTypeId"/>
+		</relation>
+		<relation rel-entity-name="PayrollParameters" type="one" fk-name="PYRLL_POSTYPE_PARAM_PARAM">
+			<key-map field-name="code"/>
+		</relation>
+		<relation rel-entity-name="RoleTypeGroup" type="one" fk-name="PYRLL_POSTYPE_ROLE_TYP_GROUP">
+			<key-map field-name="roleTypeGroupId"/>
+		</relation>
+		<relation rel-entity-name="Uom" type="one" fk-name="PYRLL_POSTYPE_UOM">
+			<key-map field-name="uomId"/>
+		</relation>
+	</entity>
+	<entity entity-name="PyrllParamPosTypeGeoAppl" package-name="com.olbius.payroll">
+		<field name="payrollParamPositionTypeId" type="id-ne"></field>
+		<field name="geoId" type="id-ne"></field>
+		<field name="enumId" type="id-ne"></field>
+		<prim-key field="payrollParamPositionTypeId"/>
+		<prim-key field="geoId"/>
+		<relation rel-entity-name="PayrollParamPositionType" type="one" fk-name="PYRLL_PARAM_POS_GEO_APPL_PPPT">
+			<key-map field-name="payrollParamPositionTypeId"/>
+		</relation>
+		<relation rel-entity-name="Geo" type="one" fk-name="PYRLL_PARAM_POS_GEO_APPL_GEO">
+			<key-map field-name="geoId"/>
+		</relation>
+		<relation rel-entity-name="Enumeration" type="one" fk-name="PYRLL_PARAM_POS_GEO_APPL_ENUM">
+	    	<key-map field-name="enumId"/>
+	    </relation>
+	</entity>
+	<!-- <entity entity-name="PayrollEmplPositionTypeParameters" package-name="com.olbius.payroll">
+		<field name="emplPositionTypeId" type="id-ne"></field>
+	</entity> -->
+	<entity entity-name="PayrollEmplParameterType" package-name="com.olbius.payroll">
+		<field name="code" type="id-ne"></field>
+		<field name="parentTypeId" type="id"></field>
+		<field name="name" type="id-ne"></field>
+		<field name="description" type="description"></field>
+		<prim-key field="code"/>
+		<relation rel-entity-name="PayrollEmplParameterType" type="one" fk-name="PAYRLL_PARAM_TYP_PARENT">
+			<key-map field-name="parentTypeId" rel-field-name="code"/>
+		</relation>
+	</entity>
+	<entity entity-name="PayrollParameterHistory" package-name="com.olbius.payroll">
+		<field name="code" type="id-ne"></field>
+		<field name="date" type="date-time"></field>
+		<prim-key field="code"/>
+		<prim-key field="date"/>
+		<relation fk-name="FK_PPH_PP" rel-entity-name="PayrollParameters" type="many">
+			<key-map field-name="code" rel-field-name="code"/>
+		</relation>
+	</entity>
+	<entity entity-name="PayrollFormulaHistory" package-name="com.olbius.payroll">
+		<field name="code" type="id-ne"></field>
+		<field name="date" type="date-time"></field>
+		<prim-key field="code"/>
+		<prim-key field="date"/>
+		<relation fk-name="FK_PPH_PF" rel-entity-name="PayrollFormula" type="many">
+			<key-map field-name="code" rel-field-name="code"/>
+		</relation>
+	</entity>
+	<entity entity-name="TaxAuthorityRatePayroll" package-name="com.olbius.payroll">
+		<field name="taxAuthorityRateSeqId" type="id-ne"></field>
+		<field name="taxAuthGeoId" type="id-ne"></field>
+		<field name="taxAuthPartyId" type="id-ne"></field>
+		<field name="taxAuthorityRateTypeId" type="id-ne"></field>
+		<field name="name" type="description"></field>
+		<field name="fromValue" type="name"></field>
+		<field name="thruValue" type="name"></field>
+		<field name="taxPercentage" type="name"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<field name="periodTypeId" type="id-ne"></field>
+		<prim-key field="taxAuthorityRateSeqId"/>
+		<relation rel-entity-name="PeriodType" type="one" fk-name="TARP_PT">
+			<key-map field-name="periodTypeId"/>
+		</relation>
+		<relation rel-entity-name="TaxAuthorityRateType" type="one" fk-name="TARP_TARTYPE">
+			<key-map field-name="taxAuthorityRateTypeId"/>
+		</relation>
+		<relation rel-entity-name="TaxAuthority" type="one" fk-name="FR_TAXAUTHORITY">
+			<key-map field-name="taxAuthGeoId"/>
+			<key-map field-name="taxAuthPartyId"/>
+		</relation>
+	</entity>
+	<entity entity-name="TaxAuthorityRateRankPayroll" package-name="com.olbius.payroll">
+		<field name="taxAuthorityRateSeqId" type="id-ne"></field>
+		<field name="code" type="id-ne"></field>
+		<field name="fromValue" type="name"></field>
+		<field name="thruValue" type="name"></field>
+		<field name="taxPercentage" type="name"></field>
+		<prim-key field="code"/>
+		<prim-key field="fromValue"/>
+		<relation fk-name="FK_TARRP_TARP" rel-entity-name="TaxAuthorityRatePayroll" type="many">
+			<key-map field-name="taxAuthorityRateSeqId" rel-field-name="taxAuthorityRateSeqId"/>
+		</relation>
+	</entity>
+	
+	<entity entity-name="PayrollScheduleLog" package-name="com.olbius.payroll">
+		<field name="jobName" type="name"></field>
+		<field name="jobFrequency" type="numeric"></field>
+		<field name="startTime" type="date-time"></field>
+		<field name="expireTime" type="date-time"></field>
+		<field name="runTime" type="date-time"></field>
+		<field name="description" type="description"></field>
+		<prim-key field="jobName"/>
+	</entity>
+	<entity entity-name="PayrollScheduleFormula" package-name="com.olbius.payroll">
+		<field name="jobName" type="name"></field>
+		<field name="code" type="id-ne"></field>
+		<prim-key field="jobName"/>
+		<prim-key field="code"/>
+		<relation rel-entity-name="PayrollScheduleLog" type="one">
+			<key-map field-name="jobName"/>
+		</relation>
+		<relation rel-entity-name="PayrollFormula" type="one">
+			<key-map field-name="code"/>
+		</relation>
+	</entity>
+	
+	<!-- maybe delete -->
+	<entity entity-name="PayrollTable" package-name="com.olbius.payroll">
+		<field name="payrollTableId" type="id-ne"></field>
+		<field name="partyId" type="id-ne"></field>
+		<field name="code" type="id-ne"></field>
+		<field name="value" type="currency-amount"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<field name="statusId" type="id-ne"></field>
+		<prim-key field="payrollTableId"/>
+		<prim-key field="partyId"/>
+		<prim-key field="code"/>
+		<prim-key field="fromDate"/>
+		<!-- <prim-key field="thruDate"/> -->
+		<relation rel-entity-name="StatusItem" type="one" fk-name="FK_STATUSITEM_NEW1">
+			<key-map field-name="statusId"/>
+		</relation>
+		<relation rel-entity-name="PayrollFormula" type="one" fk-name="FK_PAYROLLFORMULA_NEW">
+			<key-map field-name="code"/>
+		</relation>
+		<relation rel-entity-name="Party" type="one" fk-name="FK_PARTY_NEW">
+			<key-map field-name="partyId"/>
+		</relation>
+	</entity>	
+	
+	<!-- maybe delete -->
+	<entity entity-name="PaySalaryHistory" package-name="com.olbius.payroll">
+		<field name="partyIdFrom" type="id-ne"></field>
+		<field name="partyIdTo" type="id-ne"></field>
+		<field name="customTimePeriodId" type="id-ne"></field>
+		<field name="statusId" type="id-ne"></field>
+		<field name="invoiceId" type="id-ne"></field>
+		<prim-key field="partyIdFrom"/>
+		<prim-key field="partyIdTo"/>
+		<prim-key field="customTimePeriodId"/>
+		<relation rel-entity-name="Party" type="one" title="fromParty" fk-name="PAYSLHIS_PTY_FROM">
+			<key-map field-name="partyIdFrom" rel-field-name="partyId"/>
+		</relation>
+		<relation rel-entity-name="Party" type="one" title="toParty" fk-name="PAYSLHIS_PTY_TO">
+			<key-map field-name="partyIdTo" rel-field-name="partyId"/>
+		</relation>
+		<relation rel-entity-name="CustomTimePeriod" type="one" fk-name="PAYSLHIS_CUS_TIME">
+			<key-map field-name="customTimePeriodId"/>
+		</relation>
+		<relation rel-entity-name="StatusItem" type="one" fk-name="PAYSLHIS_STT">
+			<key-map field-name="statusId"/>
+		</relation>
+		<relation rel-entity-name="Invoice" type="one" fk-name="PAYSLHIS_INV">
+			<key-map field-name="invoiceId"/>
+		</relation>
+	</entity>
+	
+	<!-- maybe delete -->
+	<entity entity-name="PaySalaryItemHistory" package-name="com.olbius.payroll">
+		<field name="partyIdFrom" type="id-ne"></field>
+		<field name="partyIdTo" type="id-ne"></field>
+		<field name="salaryItem" type="id-long"></field>
+		<field name="customTimePeriodId" type="id-ne"></field>
+		<field name="amount" type="currency-amount"></field>		
+		<field name="invoiceItemTypeId" type="id-ne"></field>
+		<prim-key field="partyIdFrom"/>
+		<prim-key field="partyIdTo"/>
+		<prim-key field="salaryItem"/>
+		<prim-key field="customTimePeriodId"/>
+		<relation rel-entity-name="PaySalaryHistory" type="one" fk-name="PAYSALHIS_ITEM_HIS">
+			<key-map field-name="partyIdFrom"/>
+			<key-map field-name="partyIdTo"/>
+			<key-map field-name="customTimePeriodId"/>
+		</relation>
+		<relation rel-entity-name="InvoiceItemType" type="one" fk-name="PAYSALITEMHIS_IIT">
+			<key-map field-name="invoiceItemTypeId"/>
+		</relation>
+		
+	</entity>
+	
+	<!-- ========================== add in 15/06/2016 ========================== -->
+	<entity entity-name="PayrollTableRecord" package-name="com.olbius.payroll">
+		<field name="payrollTableId" type="id-ne"></field>
+		<field name="payrollTableName" type="name"></field>
+		<field name="statusId" type="id-ne"></field>
+		<field name="month" type="numeric"></field>
+		<field name="year" type="numeric"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<field name="orgId" type="id-ne"></field>
+		<field name="timekeepingSummaryId" type="id-ne"></field>
+		<prim-key field="payrollTableId"/>
+		<relation rel-entity-name="StatusItem" type="one" fk-name="FK_PAYROLL_RECORD_STT">
+			<key-map field-name="statusId"/>
+		</relation>
+		<relation rel-entity-name="TimekeepingSummary" type="one" fk-name="PAYROLL_RECORD_TIME_SUM">
+			<key-map field-name="timekeepingSummaryId"/>
+		</relation>
+		<relation rel-entity-name="Party" type="one" fk-name="PAYROLL_RECORD_PTY">
+			<key-map field-name="orgId" rel-field-name="partyId"/>
+		</relation>
+	</entity>
+	
+	<entity entity-name="PayrollTableRecordStatus" package-name="com.olbius.payroll">
+		<field name="payrollTableRecordStatusId" type="id-ne"></field>
+		<field name="payrollTableId" type="id-ne"></field>
+		<field name="statusId" type="id-ne"></field>
+		<field name="statusDatetime" type="date-time"></field>
+		<field name="statusUserLogin" type="id-ne"></field>
+		<field name="changeReason" type="description"></field>
+		<prim-key field="payrollTableRecordStatusId"/>
+		<relation rel-entity-name="PayrollTableRecord" type="one" fk-name="PYLLSTT_PYLLTAB">
+			<key-map field-name="payrollTableId"/>
+		</relation>
+		<relation rel-entity-name="StatusItem" type="one" fk-name="PYLLSTT_STT">
+			<key-map field-name="statusId"/>
+		</relation>
+		<relation rel-entity-name="UserLogin" type="one" fk-name="PYLLSTT_USERLOG">
+			<key-map field-name="statusUserLogin" rel-field-name="userLoginId"/>
+		</relation>
+	</entity>
+	<entity entity-name="PayrollTableRecordParty" package-name="com.olbius.payroll">
+		<field name="payrollTableId" type="id-ne"></field>
+		<field name="partyId" type="id-ne"></field>
+		<field name="statusId" type="id-ne"></field>
+		<field name="invoiceId" type="id-ne"></field>
+		<field name="partyGroupId" type="id-ne"></field>
+		<field name="actualSalReceive" type="currency-amount">
+			<description>Luong thuc linh</description>
+		</field>
+		<prim-key field="payrollTableId"/>
+		<prim-key field="partyId"/>
+		<relation rel-entity-name="Invoice" type="one" fk-name="PRLL_PTY_INVC">
+			<key-map field-name="invoiceId"/>
+		</relation>
+		<relation rel-entity-name="PayrollTableRecord" type="one" fk-name="PRLL_PTY_PRLL_TB">
+			<key-map field-name="payrollTableId"/>
+		</relation>
+		<relation rel-entity-name="Party" type="one" title="party" fk-name="PRLL_PTY_PRLL_PTY">
+			<key-map field-name="partyId"/>
+		</relation>
+		<relation rel-entity-name="Party" type="one" title="group" fk-name="PRLL_PTY_PRLL_PG">
+			<key-map field-name="partyGroupId" rel-field-name="partyId"/>
+		</relation>
+	</entity>
+	<entity entity-name="PayrollTableRecordPartyAmount" package-name="com.olbius.payroll">
+		<field name="payrollTableId" type="id-ne"></field>
+		<field name="partyId" type="id-ne"></field>
+		<field name="code" type="id-ne"></field>
+		<field name="amount" type="currency-amount"></field>
+		<field name="invoiceItemTypeId" type="id-ne"></field>
+		<field name="statusId" type="id-ne"></field>
+		<prim-key field="payrollTableId"/>
+		<prim-key field="partyId"/>
+		<prim-key field="code"/>
+		<relation rel-entity-name="PayrollTableRecordParty" type="one" fk-name="PRLL_PTY_AM_PRLL_PTY">
+			<key-map field-name="payrollTableId"/>
+			<key-map field-name="partyId"/>
+		</relation>
+		<relation rel-entity-name="PayrollFormula" type="one" fk-name="PAYRLL_TB_PTY_FORMULA">
+			<key-map field-name="code"/>
+		</relation>
+		<relation rel-entity-name="InvoiceItemType" type="one" fk-name="PAYRLL_TB_PTY_IIT">
+			<key-map field-name="invoiceItemTypeId"/>
+		</relation>
+		<relation rel-entity-name="StatusItem" type="one" fk-name="PAYRLL_TB_PTY_STT">
+			<key-map field-name="statusId"/>
+		</relation>
+	</entity>
+	
+	<!-- ============================== ./end=============================== -->
+	
+	<entity entity-name="PayrollTableCode" package-name="com.olbius.payroll">
+		<field name="payrollTableId" type="id-ne"></field>
+		<field name="code" type="id"></field>
+		<prim-key field="payrollTableId"/>
+		<prim-key field="code"/>
+		<relation rel-entity-name="PayrollTableRecord" type="one" fk-name="FK_PTC_PTR">
+			<key-map field-name="payrollTableId"/>
+		</relation>
+		<relation rel-entity-name="PayrollFormula" type="one" fk-name="FK_PTC_PFORMULA">
+			<key-map field-name="code"/>
+		</relation>
+	</entity>
+	
+	<entity entity-name="Holiday" package-name="com.olbius.payroll">
+		<description>store information about holiday</description>
+		<!-- <field name="holidayId" type="id-ne"></field> -->
+		<field name="dateHoliday" type="date"></field>		
+		<field name="holidayName" type="long-varchar"></field>				
+		<field name="note" type="long-varchar"></field>
+		<field name="emplTimekeepingSignId" type="id-ne"></field>
+		<prim-key field="dateHoliday"/>				
+		<relation rel-entity-name="EmplTimekeepingSign" type="one" fk-name="HOLIDAY_EMPL_TIME_SIGN">
+			<key-map field-name="emplTimekeepingSignId"/>
+		</relation>
+	</entity>	
+	<entity entity-name="HolidayConfig" package-name="com.olbius.payroll" default-resource-name="HolidayConfigEntityUiLabels">
+		<field name="holidayConfigId" type="id-long"></field>		
+		<field name="description" type="long-varchar"></field>
+		<field name="emplTimekeepingSignId" type="id-ne"></field>
+		<field name="dateOfMonth" type="numeric"></field>
+		<field name="month" type="numeric"></field>
+		<field name="calendarType" type="short-varchar"></field>
+		<prim-key field="holidayConfigId"/>
+		<relation rel-entity-name="EmplTimekeepingSign" type="one" fk-name="HOLIDAY_TY_EMPL_TIME_SIGN">
+			<key-map field-name="emplTimekeepingSignId"/>
+		</relation>
+	</entity>
+	<entity entity-name="DayOfWeek" package-name="com.olbius.payroll">
+		<field name="dayOfWeek" type="id-ne"></field>
+		<field name="description" type="long-varchar"></field>
+		<prim-key field="dayOfWeek"/>		
+	</entity>
+	<entity entity-name="EmplAttendanceTracker" package-name="com.olbius.payroll">
+		<field name="partyId" type="id-ne"></field>
+		<field name="dateAttendance" type="date"></field>
+		<field name="orgId" type="id-ne"></field>
+		<field name="startTime" type="time"></field>
+		<field name="endTime" type="time"></field>
+		<field name="description" type="description"></field>
+		<prim-key field="partyId"/>
+		<prim-key field="dateAttendance"/>
+		<prim-key field="orgId"/>
+		<!-- <prim-key field="startTime"/> -->
+		<relation rel-entity-name="Party" type="one" fk-name="EMPATT_PTY">
+			<key-map field-name="partyId"/>
+		</relation>
+		<relation rel-entity-name="PartyGroup" type="one" fk-name="EMPLATT_ORG">
+			<key-map field-name="orgId" rel-field-name="partyId"/>
+		</relation>
+	</entity>
+	
+	<entity entity-name="EmplTimesheets" package-name="com.olbius.payroll">
+		<field name="emplTimesheetId" type="id-ne"></field>
+		<field name="emplTimesheetName" type="description"></field>
+		<field name="partyId" type="id-ne"></field>
+		<field name="customTimePeriodId" type="id-ne"></field>
+		<field name="statusId" type="id"></field>
+		<prim-key field="emplTimesheetId"/>
+		<relation rel-entity-name="StatusItem" type="one" fk-name="EMPL_TIMESHEET_STT">
+			<key-map field-name="statusId"/>
+		</relation>
+		<relation rel-entity-name="CustomTimePeriod" type="one" fk-name="EMPL_TIME_SHEET_CUS_PER">
+			<key-map field-name="customTimePeriodId"/>
+		</relation>
+		<relation rel-entity-name="Party" type="one" fk-name="EMPLTS_PTY">
+			<key-map field-name="partyId"/>
+		</relation>
+	</entity>
+	<entity entity-name="EmplTimesheetAttendance" package-name="com.olbius.payroll">
+		<field name="emplTimesheetId" type="id-ne"></field>
+		<field name="dateAttendance" type="date"></field>
+		<field name="partyId" type="id-ne"></field>
+		<field name="emplTimekeepingSignId" type="id-ne"></field>
+		<field name="hours" type="floating-point"></field>
+		<field name="workday" type="floating-point">
+			<description>number of workday corresponding timekeeping sign</description>
+		</field>
+		<prim-key field="emplTimesheetId"/>
+		<prim-key field="dateAttendance"/>
+		<prim-key field="partyId"/>
+		<prim-key field="emplTimekeepingSignId"/>
+		<relation rel-entity-name="EmplTimesheets" type="one" fk-name="EMPL_TS_ATT_TS">
+			<key-map field-name="emplTimesheetId"/>
+		</relation>
+		<relation rel-entity-name="Party" type="one" fk-name="EMPL_TS_ATT_PTY">
+			<key-map field-name="partyId"/>
+		</relation>
+		<relation rel-entity-name="EmplTimekeepingSign" type="one" fk-name="EMPL_TS_ATT_ETSIGN">
+			<key-map field-name="emplTimekeepingSignId"/>
+		</relation>
+	</entity>
+	<entity entity-name="EmplTimekeepingSign" package-name="com.olbius.payroll">
+		<field name="emplTimekeepingSignId" type="id-ne"></field>
+		<field name="timekeepingSignTypeId" type="id-ne"></field>
+		<field name="description" type="description"></field>
+		<field name="sign" type="id"></field>
+		<field name="rateBenefit" type="floating-point"></field>
+		<prim-key field="emplTimekeepingSignId"/>
+	</entity>
+	
+	<entity entity-name="TimeKeepingSignType" package-name="com.olbius.payroll">
+		<field name="timekeepingSignTypeId" type="id-ne"></field>
+		<field name="parentTypeId" type="id-ne"></field>
+		<field name="description" type="description"></field>
+		<prim-key field="timekeepingSignTypeId"/>
+		<relation rel-entity-name="TimeKeepingSignType" type="one" fk-name="TIME_KEEP_SIGN_PAR">
+			<key-map field-name="parentTypeId" rel-field-name="timekeepingSignTypeId"/>
+		</relation>
+	</entity>
+	
+	<entity entity-name="EmplTimekeepingSignValidCombine" package-name="com.olbius.payroll">
+		<field name="emplTimekeepingSignId" type="id-ne"></field>
+		<field name="emplTimekeepingSignIdTo" type="id-ne"></field>
+		<prim-key field="emplTimekeepingSignId"/>
+		<prim-key field="emplTimekeepingSignIdTo"/>
+		<relation rel-entity-name="EmplTimekeepingSign" title="fromTimeKeepingSign" type="one" fk-name="FK_ETKS_VLD_CBE">
+			<key-map field-name="emplTimekeepingSignId"/>
+		</relation>
+		<relation rel-entity-name="EmplTimekeepingSign" title="toTimeKeepingSign" type="one" fk-name="FK_ETKS_VLD_CBE_TO">
+			<key-map field-name="emplTimekeepingSignIdTo" rel-field-name="emplTimekeepingSignId"/>
+		</relation>
+	</entity>
+	
+	<entity entity-name="WorkingShift" package-name="com.olbius.payroll">
+		<field name="workingShiftId" type="id-ne"></field>
+		<field name="workingShiftName" type="long-varchar"></field>
+		<field name="shiftStartTime" type="time"></field>
+		<field name="shiftEndTime" type="time"></field>
+		<field name="shiftBreakStart" type="time"></field>
+		<field name="shiftBreakEnd" type="time"></field>
+		<field name="startOverTimeAfterShift" type="time"></field>
+		<field name="endOverTimeAfterShift" type="time"></field>
+		<field name="isAllowOTAfterShift" type="indicator"></field>
+		<field name="minMinuteOvertime" type="numeric">
+			<description>Minimum minutes  to calculated as OT</description>
+		</field>
+		<field name="allowLateMinute" type="numeric">
+			<description>minutes allow employee to go to late</description>
+		</field>		
+		<prim-key field="workingShiftId"/>
+	</entity>
+	<entity entity-name="WorkingShiftDayWeek" package-name="com.olbius.payroll">
+		<field name="workingShiftId" type="id-ne"></field>
+		<field name="dayOfWeek" type="id-ne"></field>
+		<field name="workTypeId" type="id-ne"></field>
+		<prim-key field="workingShiftId"/>
+		<prim-key field="dayOfWeek"/>		
+		<relation rel-entity-name="WorkingShift" type="one" fk-name="FK_WS_DAY_WEEK_WS">
+			<key-map field-name="workingShiftId"/>
+		</relation>
+		<relation rel-entity-name="DayOfWeek" type="one" fk-name="FK_WS_DAY_WEEK_DW">
+			<key-map field-name="dayOfWeek"/>
+		</relation>
+		<relation rel-entity-name="WorkingShiftWorkType" type="one" fk-name="FK_WS_DAY_WEEK_WT">
+			<key-map field-name="workTypeId"/>
+		</relation>
+	</entity>
+	<entity entity-name="WorkingShiftWorkType" package-name="com.olbius.payroll">
+		<field name="workTypeId" type="id-ne"></field>
+		<field name="description" type="id-ne"></field>
+		<field name="parentTypeId" type="id-ne"></field>
+		<prim-key field="workTypeId"/>
+		<relation rel-entity-name="WorkingShiftWorkType" type="one" fk-name="FK_WSWT_PAR_TYP">
+			<key-map field-name="parentTypeId" rel-field-name="workTypeId"/>
+		</relation>
+	</entity>
+	<entity entity-name="WorkingShiftPartyConfig" package-name="com.olbius.payroll">
+		<field name="partyId" type="id-ne"></field>
+		<field name="workingShiftId" type="id-ne"></field>
+		<prim-key field="partyId"/>
+		<!-- <prim-key field="workingShiftId"/> -->
+		<relation rel-entity-name="Party" type="one" fk-name="WSHIFT_PTY_COG_PTY">
+			<key-map field-name="partyId"/>
+		</relation>
+		<relation rel-entity-name="WorkingShift" type="one" fk-name="WSHIFT_PTY_COG_WS">
+			<key-map field-name="workingShiftId"/>
+		</relation>
+	</entity>
+	<entity entity-name="WorkingShiftEmployee" package-name="com.olbius.payroll">
+		<field name="partyId" type="id-ne"></field>
+		<field name="dateWork" type="date"></field>
+		<field name="workingShiftId" type="id-ne"></field>
+		<prim-key field="partyId"/>		
+		<prim-key field="dateWork"/>
+		<relation rel-entity-name="WorkingShift" type="one" fk-name="WSEMPLPOS_WS">
+			<key-map field-name="workingShiftId"/>
+		</relation>
+	</entity>
+	<!-- End of Payroll's entities -->
+</entitymodel>

@@ -1,0 +1,558 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+	<description>BaseImEx Services</description>
+	<vendor></vendor>
+	<version>1.0</version>
+
+	<service name="jqGetListCommercialPeriod" engine="java" invoke="jqGetListCommercialPeriod" location="com.olbius.plan.PeriodServices" auth="true">
+		<implements service="jqxGetListInterface" />
+		<override name="listIterator" mode="OUT" type="java.util.List" />
+	</service>
+
+	<service name="createCommercialPeriodExe" engine="java" invoke="createCommercialPeriodExe" location="com.olbius.plan.PeriodServices" auth="true">
+		<attribute name="yearPeriod" mode="IN" type="String"></attribute>
+		<attribute name="customTimePeriodId" mode="OUT" type="String" optional="true"></attribute>
+	</service>
+
+	<service name="createProductPlan" engine="java" invoke="createProductPlan" location="com.olbius.plan.PlanImExServices" auth="true"
+		default-entity-name="ProductPlanHeader">
+		<auto-attributes mode="INOUT" include="all" optional="true"></auto-attributes>
+	</service>
+
+	<service name="JQGetListProductPlan" engine="java" location="com.olbius.plan.PlanImExServices" invoke="jqGetListProductPlan" auth="true">
+		<implements service="jqxGetListInterface" />
+	</service>
+
+	<service name="JQGetListProductRemainDeclaration" engine="java" location="com.olbius.product.ProductServices" invoke="JQGetListProductRemainDeclaration" auth="true">
+		<description>Service lấy danh sách các sản phẩm còn công bố chất lượng</description>
+		<implements service="jqxGetListInterface" />
+		<attribute name="TotalRows" mode="OUT" type="String" optional="true"/>
+		<override name="listIterator" type="List"></override>
+	</service>
+	
+	<service name="JQGetListProductOutOfDeclaration" engine="java" location="com.olbius.product.ProductServices" invoke="JQGetListProductOutOfDeclaration" auth="true">
+		<description>Service lấy danh sách các sản phẩm hết hạn công bố chất lượng</description>
+		<implements service="jqxGetListInterface" />
+		<attribute name="TotalRows" mode="OUT" type="String" optional="true"/>
+		<override name="listIterator" type="List"></override>
+	</service>
+	
+	<service name="JqxGetPlanOfYear" engine="java" invoke="JqxGetPlanOfYear" location="com.olbius.plan.PlanImExServices" auth="true">
+		<attribute name="productPlanId" mode="IN" type="String"></attribute>
+		<attribute name="isImEx" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="fromMonth" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="toMonth" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="listWeekHeader" mode="OUT" type="java.util.List"></attribute>
+		<attribute name="listIterator" mode="OUT" type="java.util.List"></attribute>
+		<attribute name="listWeek[]" mode="IN" type="java.util.List" optional="true"></attribute>
+	</service>
+
+	<service name="JqxGetStockAndPlan" engine="java" invoke="JqxGetStockAndPlan" location="com.olbius.plan.PlanImExServices" auth="true" transaction-timeout="7200">
+		<attribute name="fromMonth" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="toMonth" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="checkedMonth" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="checkedWeek" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="productPlanId" mode="IN" type="String"></attribute>
+		<attribute name="periodTypeId" mode="OUT" type="String" optional="true"></attribute>
+		<attribute name="listWeekHeader" mode="OUT" type="java.util.List"></attribute>
+		<attribute name="listIterator" mode="OUT" type="java.util.List"></attribute>
+	</service>
+
+	<service name="JqxGetSalesForecastByWeek" engine="java" auth="true" location="com.olbius.plan.PlanImExServices" invoke="JqxGetSalesForecastByWeek">
+		<description>get sales forecast by week</description>
+		<attribute name="fromMonth" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="toMonth" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="checkedMonth" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="checkedWeek" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="salesForecastId" mode="IN" type="String"></attribute>
+		<attribute name="listWeekHeader" mode="OUT" type="java.util.List"></attribute>
+		<attribute name="listIterator" mode="OUT" type="java.util.List"></attribute>
+		<attribute name="listWeek[]" mode="IN" type="java.util.List" optional="true"></attribute>
+		<attribute name="value" mode="OUT" type="String"></attribute>
+	</service>
+
+	<service name="storeSaleForecastByPO" engine="java" auth="true" location="com.olbius.plan.PlanImExServices" invoke="storeSaleForecastByPO">
+		<description>store sales forecast by week</description>
+		<attribute name="organizationPartyId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="internalPartyId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="currencyUomId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="salesForecastId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="sfcItems" mode="IN" type="String" allow-html="any"></attribute>
+	</service>
+
+	<service name="getPartyTelecomNumbers" engine="java" invoke="getPartyTelecomNumbers" location="com.olbius.party.AddressPartyServices"
+		default-entity-name="PartyContactMechPurpose" auth="true">
+		<description>get phone/fax/.. of party</description>
+		<attribute name="partyId" mode="INOUT" type="String"></attribute>
+		<attribute name="contactMechPurposeTypeId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="listPartyTelecomNumbers" mode="OUT" type="List"></attribute>
+	</service>
+
+	<service name="getPartyContactMechs" engine="java" invoke="getPartyContactMechs" location="com.olbius.party.AddressPartyServices"
+		default-entity-name="PartyContactMechPurpose" auth="true">
+		<description>get contact mech of party</description>
+		<attribute name="partyId" mode="INOUT" type="String" optional="true"></attribute>
+		<attribute name="contactMechPurposeTypeId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="listPartyContactMechs" mode="OUT" type="List"></attribute>
+	</service>
+
+	<service name="getPartyFinAccounts" engine="java" invoke="getPartyFinAccounts" location="com.olbius.party.AddressPartyServices"
+		default-entity-name="PartyContactMechPurpose" auth="true">
+		<description>get Fin Account of party</description>
+		<attribute name="partyId" mode="INOUT" type="String"></attribute>
+		<attribute name="finAccountTypeId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="listPartyFinAccounts" mode="OUT" type="List"></attribute>
+	</service>
+
+	<service name="getPartyRepresents" engine="java" invoke="getPartyRepresents" location="com.olbius.party.AddressPartyServices" default-entity-name="PartyRelationship"
+		auth="true">
+		<description>get party is represent of an organization</description>
+		<attribute name="partyId" mode="INOUT" type="String"></attribute>
+		<attribute name="partyRelationshipTypeId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="roleTypeIdFrom" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="roleTypeIdTo" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="listPartyRepresents" mode="OUT" type="List"></attribute>
+	</service>
+
+	<service name="getCurrencyUomIdBySupplier" engine="java" invoke="getCurrencyUomIdBySupplier" location="com.olbius.party.AddressPartyServices"
+		default-entity-name="" auth="true">
+		<description>get contact mech of facility</description>
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="listgetCurrencyUomIdBySupplier" mode="OUT" type="List"></attribute>
+	</service>
+
+	<service name="getPartyPrimaryEmails" engine="java" invoke="getPartyPrimaryEmails" location="com.olbius.party.AddressPartyServices"
+		default-entity-name="PartyContactMechPurpose" auth="true">
+		<description>get Fin Account of party</description>
+		<attribute name="partyId" mode="INOUT" type="String"></attribute>
+		<attribute name="contactMechTypeId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="listPartyPrimaryEmails" mode="OUT" type="List"></attribute>
+	</service>
+
+	<service name="storePlanAndStock" engine="java" invoke="storePlanAndStock" location="com.olbius.plan.PlanImExServices" auth="true">
+		<attribute name="dataPlans" mode="IN" type="String" allow-html="any"></attribute>
+		<attribute name="dataEnds" mode="IN" type="String" allow-html="any"></attribute>
+		<attribute name="productPlanId" mode="IN" type="String"></attribute>
+	</service>
+
+	<service name="updatePlanItemWeek" engine="java" invoke="updatePlanItemWeek" location="com.olbius.plan.PlanImExServices" auth="true"
+		default-entity-name="ProductPlanItem">
+		<attribute name="productPlanId" mode="IN" type="String"></attribute>
+		<attribute name="customTimePeriodId" mode="IN" type="String"></attribute>
+		<attribute name="productId" mode="IN" type="String"></attribute>
+		<attribute name="planQuantity" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="statusId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="inventoryForecast" mode="IN" type="String" optional="true"></attribute>
+	</service>
+
+	<service name="loadProductPlanItemByCustomTimePeriodId" engine="java" location="com.olbius.plan.PlanImExServices" invoke="loadProductPlanItemByCustomTimePeriodId"
+		auth="true">
+		<attribute name="customTimePeriodId" type="String" mode="IN" />
+		<attribute name="productPlanId" type="String" mode="IN" />
+		<attribute name="listProductPlanItem" type="java.util.List" mode="OUT" optional="true" />
+		<attribute name="supplierPartyId" type="String" mode="IN" />
+		<attribute name="uomCurency" type="String" mode="IN" />
+	</service>
+
+	<service name="getPartyPostalAddressByPurpose" engine="java" invoke="getPartyPostalAddressByPurpose" location="com.olbius.party.AddressPartyServices"
+		default-entity-name="PartyContactMechPurpose" auth="true">
+		<description>get contact mech of party</description>
+		<attribute name="partyId" mode="INOUT" type="String" optional="true"></attribute>
+		<attribute name="contactMechPurposeTypeId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="listPartyPostalAddress" mode="OUT" type="List"></attribute>
+	</service>
+	
+	<service name="createPartyPeriod" engine="java" invoke="createPartyPeriod" location="com.olbius.plan.PlanImExServices">
+		<attribute name="partyId" mode="IN" type="String"/>
+		<attribute name="periodTypeId" mode="IN" type="String"/>
+		<attribute name="fromDate" mode="IN" type="String"/>
+		<attribute name="thruDate" mode="IN" type="String" optional="true"/>
+	</service>
+	
+	<service name="updatePartyPeriod" engine="java" invoke="updatePartyPeriod" location="com.olbius.plan.PlanImExServices">
+		<attribute name="partyId" mode="IN" type="String"/>
+		<attribute name="periodTypeId" mode="IN" type="String"/>
+		<attribute name="fromDate" mode="IN" type="String" optional="true"/>
+		<attribute name="thruDate" mode="IN" type="String" optional="true"/>
+	</service>
+	
+	<service name="jqGetPartyPeriodTypes" engine="java" invoke="jqGetPartyPeriodTypes" location="com.olbius.plan.PlanImExServices" auth="true">
+		<implements service="jqxGetListInterface" />
+		<override name="listIterator" mode="OUT" type="java.util.List" />
+	</service>
+	
+	<service name="jqGetContainers" engine="java" invoke="jqGetContainers" location="com.olbius.importsrc.AgreementServices" auth="true">
+		<implements service="jqxGetListInterface" />
+		<override name="listIterator" mode="OUT" type="java.util.List" />
+	</service>
+	
+	<service name="jqGetPackingLists" engine="java" invoke="jqGetPackingLists" location="com.olbius.importsrc.AgreementServices" auth="true">
+		<implements service="jqxGetListInterface" />
+		<override name="listIterator" mode="OUT" type="java.util.List" />
+	</service>
+	
+	<service name="jqGetPackingListItems" engine="java" invoke="jqGetPackingListItems" location="com.olbius.importsrc.AgreementServices" auth="true">
+		<implements service="jqxGetListInterface" />
+		<override name="listIterator" mode="OUT" type="java.util.List" />
+	</service>
+	
+	<service name="jqGetBillOfLading" engine="java" invoke="jqGetBillOfLading" location="com.olbius.importsrc.AgreementServices" auth="true">
+		<implements service="jqxGetListInterface" />
+		<override name="listIterator" mode="OUT" type="java.util.List" />
+	</service>
+	
+	<service name="jqGetBillCost" engine="java" invoke="jqGetBillCost" location="com.olbius.importsrc.AgreementServices" auth="true">
+		<implements service="jqxGetListInterface" />
+		<override name="listIterator" mode="OUT" type="java.util.List" />
+	</service>
+
+	<service name="JqxGetStockAndPlanByMonth" engine="java" invoke="JqxGetStockAndPlanByMonth" location="com.olbius.plan.PlanImExServices" auth = "true">
+    	<attribute name="fromMonth" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="toMonth" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="checkedMonth" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="checkedWeek" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="productPlanId" mode="IN" type="String"></attribute>
+    	<attribute name="listWeekHeader" mode="OUT" type="java.util.List"></attribute>
+		<attribute name="listIterator" mode="OUT" type="java.util.List"></attribute>
+   </service>
+
+    <service name="createAccCostForProduct" engine="java" invoke="createAccCostForProduct" location="com.olbius.importsrc.AgreementServices" auth="true">
+        <attribute name="orderId" mode="IN" type="String"/>
+        <attribute name="productId" mode="IN" type="String"/>
+        <attribute name="totalCost" mode="IN" type="BigDecimal"/>
+        <attribute name="costAccountingId" mode="IN" type="String"/>
+        <attribute name="currencyUomId" mode="IN" type="String" optional="true"/>
+        <attribute name="costProductInOrderId" mode="OUT" type="String"/>
+    </service>
+   
+   <service name="JqxGetStockAndPlanByMonthSaved" engine="java" invoke="JqxGetStockAndPlanByMonthSaved" location="com.olbius.plan.PlanImExServices" auth = "true">
+    	<attribute name="fromMonth" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="toMonth" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="checkedMonth" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="checkedWeek" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="productPlanId" mode="IN" type="String"></attribute>
+    	<attribute name="listWeekHeader" mode="OUT" type="java.util.List"></attribute>
+		<attribute name="listIterator" mode="OUT" type="java.util.List"></attribute>
+   </service>
+   
+   <service name="createPurchaseOrderFromAgreement" engine="java" invoke="createPurchaseOrderFromAgreement" location="com.olbius.importsrc.AgreementServices" auth = "true">
+    	<attribute name="agreementId" mode="IN" type="String"></attribute>
+   </service>
+   
+   <service name="getOrderItemByAgreements" engine="java" invoke="getOrderItemByAgreements" location="com.olbius.importsrc.AgreementServices" auth = "true">
+    	<attribute name="agreementId" mode="IN" type="String"/>
+		<attribute name="listProducts" mode="OUT" type="java.util.List"/>
+   </service>
+   
+   <service name="createPortOfDischarge" engine="java" invoke="createPortOfDischarge" location="com.olbius.importsrc.AgreementServices" auth = "true">
+    	<attribute name="facilityId" mode="OUT" type="String"/>
+    	<attribute name="address" mode="IN" type="String"/>
+    	<attribute name="facilityName" mode="IN" type="String"/>
+    	<attribute name="facilityCode" mode="IN" type="String"/>
+    	<attribute name="countryGeoId" mode="IN" type="String"/>
+    	<attribute name="provinceGeoId" mode="IN" type="String"/>
+    	<attribute name="districtGeoId" mode="IN" type="String"/>
+    	<attribute name="wardGeoId" mode="IN" type="String"/>
+   </service>
+   
+   <!-- quota -->
+   	<service name="createQuotaHeader" engine="java" invoke="createQuotaHeader" location="com.olbius.quota.QuotaServices" default-entity-name="QuotaHeader">
+		<auto-attributes mode="IN" include="nonpk" optional="true" entity-name="QuotaHeader"/>
+		<attribute name="quotaId" mode="OUT" type="String"/>
+		<attribute name="listProducts" mode="IN" type="String"/>
+		<override name="periodTypeId" optional="false" mode="IN" type="String"/>
+<!-- 		<override name="supplierPartyId" optional="false" mode="IN" type="String"/> -->
+		<override name="fromDate" optional="false" mode="IN" type="String"/>
+		<override name="thruDate" optional="false" mode="IN" type="String"/>
+	</service>
+	
+	<service name="updateQuotaHeader" engine="java" invoke="updateQuotaHeader" location="com.olbius.quota.QuotaServices" default-entity-name="QuotaHeader">
+		<auto-attributes mode="IN" include="nonpk" optional="true" entity-name="QuotaHeader"/>
+		<attribute name="quotaId" mode="INOUT" type="String"/>
+		<attribute name="listProductUpdates" mode="IN" type="String" optional="true"/>
+		<attribute name="listProductCancels" mode="IN" type="String" optional="true"/>
+		<attribute name="listProductNews" mode="IN" type="String" optional="true"/>
+	</service>
+	
+	
+   	<service name="createQuotaItem" engine="java" invoke="createQuotaItem" location="com.olbius.quota.QuotaServices" default-entity-name="QuotaItem">
+		<auto-attributes mode="IN" include="nonpk" optional="true" entity-name="QuotaItem"/>
+		<attribute name="quotaId" mode="INOUT" type="String"/>
+		<attribute name="quotaItemSeqId" mode="OUT" type="String"/>
+		<override name="productId" optional="false" mode="IN" type="String"/>
+		<override name="quotaQuantity" optional="false" mode="IN" type="BigDecimal"/>
+	</service>
+	
+	<service name="updateQuotaItem" engine="java" invoke="updateQuotaItem" location="com.olbius.quota.QuotaServices" default-entity-name="QuotaItem">
+		<auto-attributes mode="IN" include="nonpk" optional="true" entity-name="QuotaItem"/>
+		<attribute name="quotaId" optional="false" mode="INOUT" type="String"/>
+		<attribute name="quotaItemSeqId" optional="false" mode="INOUT" type="String"/>
+	</service>
+	
+	<service name="changeQuotaStatus" engine="java" invoke="changeQuotaStatus" location="com.olbius.quota.QuotaServices" default-entity-name="QuotaHeader">
+		<attribute name="quotaId" mode="INOUT" type="String"/>
+		<attribute name="statusId" mode="INOUT" type="String"/>
+	</service>
+	
+	<service name="changeQuotaItemStatus" engine="java" invoke="changeQuotaItemStatus" location="com.olbius.quota.QuotaServices" default-entity-name="QuotaItem">
+		<attribute name="quotaId" mode="INOUT" type="String"/>
+		<attribute name="quotaItemSeqId" mode="INOUT" type="String"/>
+		<attribute name="statusId" mode="INOUT" type="String"/>
+	</service>
+	
+	<service name="checkQuotaStatus" engine="java" invoke="checkQuotaStatus" location="com.olbius.quota.QuotaServices" default-entity-name="QuotaItem">
+		<attribute name="quotaId" mode="IN" type="String"/>
+	</service>
+	
+	<service name="jqGetQuotaTypes" engine="java" invoke="jqGetQuotaTypes" location="com.olbius.quota.QuotaServices" auth="true">
+		<implements service="jqxGetListInterface" />
+		<override name="listIterator" mode="OUT" type="java.util.List" />
+	</service>
+	
+	<service name="jqGetQuotaHeaders" engine="java" invoke="jqGetQuotaHeaders" location="com.olbius.quota.QuotaServices" auth="true">
+		<implements service="jqxGetListInterface" />
+		<override name="listIterator" mode="OUT" type="java.util.List" />
+	</service>
+	
+	<service name="jqGetQuotaItems" engine="java" invoke="jqGetQuotaItems" location="com.olbius.quota.QuotaServices" auth="true">
+		<implements service="jqxGetListInterface" />
+		<override name="listIterator" mode="OUT" type="java.util.List" />
+	</service>
+	
+	<service name="jqGetProductInQuota" engine="java" invoke="jqGetProductInQuota" location="com.olbius.quota.QuotaServices" auth="true">
+		<implements service="jqxGetListInterface" />
+		<override name="listIterator" mode="OUT" type="java.util.List" />
+	</service>
+	
+	<service name="jqGetProductOutOfQuota" engine="java" invoke="jqGetProductOutOfQuota" location="com.olbius.quota.QuotaServices" auth="true">
+		<implements service="jqxGetListInterface" />
+		<override name="listIterator" mode="OUT" type="java.util.List" />
+	</service>
+	
+	<service name="getProductQuota" engine="java" invoke="getProductQuota" location="com.olbius.quota.QuotaServices" default-entity-name="QuotaItem">
+		<attribute name="quotaId" mode="INOUT" type="String"/>
+		<attribute name="listProducts" mode="OUT" type="java.util.List"/>
+	</service>
+	
+	<service name="updateQuotaFromAgreement" engine="java" invoke="updateQuotaFromAgreement" location="com.olbius.quota.QuotaServices">
+		<attribute name="agreementId" mode="IN" type="String"/>
+	</service>
+	
+	<!-- quota -->
+	
+ 	<!-- event -->
+   	<service name="createProductEvent" engine="java" invoke="createProductEvent" location="com.olbius.product.ProductServices" default-entity-name="ProductEvent">
+		<auto-attributes mode="IN" include="nonpk" optional="true" entity-name="ProductEvent"/>
+		<attribute name="eventId" mode="OUT" type="String"/>
+		<attribute name="listProducts" mode="IN" type="String"/>
+		<override name="eventTypeId" optional="false" mode="IN" type="String"/>
+		<override name="executedDate" optional="false" mode="IN" type="String"/>
+		<override name="completedDate" optional="true" mode="IN" type="String"/>
+	</service>
+	
+	<service name="updateProductEvent" engine="java" invoke="updateProductEvent" location="com.olbius.product.ProductServices" default-entity-name="ProductEvent">
+		<auto-attributes mode="IN" include="nonpk" optional="true" entity-name="ProductEvent"/>
+		<attribute name="eventId" mode="INOUT" type="String"/>
+		<attribute name="listProductUpdates" mode="IN" type="String" optional="true"/>
+		<attribute name="listProductCancels" mode="IN" type="String" optional="true"/>
+		<attribute name="listProductNews" mode="IN" type="String" optional="true"/>
+		<override name="executedDate" optional="true" mode="IN" type="String"/>
+		<override name="completedDate" optional="true" mode="IN" type="String"/>
+	</service>
+	
+   	<service name="createProductEventItem" engine="java" invoke="createProductEventItem" location="com.olbius.product.ProductServices" default-entity-name="ProductEventItem">
+		<auto-attributes mode="IN" include="nonpk" optional="true" entity-name="ProductEventItem"/>
+		<attribute name="eventId" mode="INOUT" type="String"/>
+		<attribute name="eventItemSeqId" mode="OUT" type="String"/>
+		<override name="productId" optional="false" mode="IN" type="String"/>
+		<override name="quantity" optional="true" mode="IN" type="BigDecimal"/>
+	</service>
+	
+	<service name="updateProductEventItem" engine="java" invoke="updateProductEventItem" location="com.olbius.product.ProductServices" default-entity-name="ProductEventItem">
+		<auto-attributes mode="IN" include="nonpk" optional="true" entity-name="ProductEventItem"/>
+		<attribute name="eventId" optional="false" mode="INOUT" type="String"/>
+		<attribute name="eventItemSeqId" optional="false" mode="INOUT" type="String"/>
+	</service>
+	
+	<service name="changeProductEventStatus" engine="java" invoke="changeProductEventStatus" location="com.olbius.product.ProductServices" default-entity-name="ProductEvent">
+		<attribute name="eventId" mode="INOUT" type="String"/>
+		<attribute name="statusId" mode="INOUT" type="String"/>
+	</service>
+	
+	<service name="changeProductEventItemStatus" engine="java" invoke="changeProductEventItemStatus" location="com.olbius.product.ProductServices" default-entity-name="ProductEventItem">
+		<attribute name="eventId" mode="INOUT" type="String"/>
+		<attribute name="eventItemSeqId" mode="INOUT" type="String"/>
+		<attribute name="statusId" mode="INOUT" type="String"/>
+	</service>
+	
+	<service name="getProductByEvent" engine="java" invoke="getProductByEvent" location="com.olbius.product.ProductServices" default-entity-name="ProductEventItem">
+		<attribute name="eventId" mode="INOUT" type="String"/>
+		<attribute name="listProducts" mode="OUT" type="java.util.List"/>
+	</service>
+	
+	<service name="checkProductEventStatus" engine="java" invoke="checkProductEventStatus" location="com.olbius.product.ProductServices" default-entity-name="ProductEventItem">
+		<attribute name="eventId" mode="IN" type="String"/>
+	</service>
+	
+	<service name="jqGetProductEventTypes" engine="java" invoke="jqGetProductEventTypes" location="com.olbius.product.ProductServices" auth="true">
+		<implements service="jqxGetListInterface" />
+		<override name="listIterator" mode="OUT" type="java.util.List" />
+	</service>
+	
+	<service name="jqGetProductEvents" engine="java" invoke="jqGetProductEvents" location="com.olbius.product.ProductServices" auth="true">
+		<implements service="jqxGetListInterface" />
+		<override name="listIterator" mode="OUT" type="java.util.List" />
+	</service>
+	
+	<service name="jqGetProductEventItems" engine="java" invoke="jqGetProductEventItems" location="com.olbius.product.ProductServices" auth="true">
+		<implements service="jqxGetListInterface" />
+		<override name="listIterator" mode="OUT" type="java.util.List" />
+	</service>
+	
+	<service name="createRequirementFromProductEvent" engine="java" invoke="createRequirementFromProductEvent" location="com.olbius.product.ProductServices" default-entity-name="ProductEvent">
+		<attribute name="eventId" mode="IN" type="String"/>
+		<attribute name="requirementId" mode="OUT" type="String"/>
+	</service>
+	
+	<!-- event -->
+	
+	<!-- import plan -->
+	
+	<service name="changeProductPlanStatus" engine="java" invoke="changeProductPlanStatus" location="com.olbius.plan.PlanImExServices" default-entity-name="ProductPlanHeader">
+		<attribute name="productPlanId" mode="INOUT" type="String"/>
+		<attribute name="statusId" mode="INOUT" type="String"/>
+	</service>
+	
+	<service name="getDataPlanByPeriod" engine="java" invoke="getDataPlanByPeriod" location="com.olbius.plan.PlanImExServices">
+		<attribute name="customTimePeriodId" mode="IN" type="String"/>
+		<attribute name="supplierPartyId" mode="IN" type="String"/>
+		<attribute name="currencyUomId" mode="IN" type="String"/>
+		<attribute name="salesForecastId" mode="OUT" type="String" optional="true"/>
+		<attribute name="periodTypeId" mode="OUT" type="String"/>
+		<attribute name="listProducts" mode="OUT" type="java.util.List" optional="true"/>
+		<attribute name="listPeriods" mode="OUT" type="java.util.List" optional="true"/>
+	</service>
+	
+	<service name="createImportPlan" engine="java" invoke="createImportPlan" location="com.olbius.plan.PlanImExServices" auth="true"
+		default-entity-name="ProductPlanHeader">
+		<auto-attributes mode="INOUT" include="all" optional="true"/>
+		<attribute name="listProducts" mode="IN" type="String" optional="true"/>
+	</service>
+	
+	<service name="jqGetCustomTimePeriodImportPlan" engine="java" invoke="jqGetCustomTimePeriodImportPlan" location="com.olbius.plan.PlanImExServices" auth="true">
+		<implements service="jqxGetListInterface" />
+		<override name="listIterator" mode="OUT" type="java.util.List" />
+	</service>
+	
+	<service name="getProductFromImportPlanToCreatePO" engine="java" invoke="getProductFromImportPlanToCreatePO" location="com.olbius.product.ProductServices" auth="true"
+		default-entity-name="ProductPlanHeader">
+		<attribute name="productPlanId" mode="IN" type="String" optional="true"/>
+		<attribute name="customTimePeriodId" mode="IN" type="String" optional="true"/>
+		<attribute name="listProducts" mode="OUT" type="java.util.List" optional="true"/>
+	</service>
+	
+	<service name="updateProductPlanByOrder" engine="java" invoke="updateProductPlanByOrder" location="com.olbius.plan.PlanImExServices" auth="true">
+		<attribute name="orderId" mode="IN" type="String" optional="false"/>
+	</service>
+	
+	<service name="updateProductPlanByShipment" engine="java" invoke="updateProductPlanByShipment" location="com.olbius.plan.PlanImExServices" auth="true">
+		<attribute name="shipmentId" mode="IN" type="String" optional="false"/>
+	</service>
+	
+	<service name="getDataImportPlan" engine="java" invoke="getDataImportPlan" location="com.olbius.plan.PlanImExServices" auth="true">
+		<attribute name="productPlanId" mode="IN" type="String" optional="false"/>
+		<attribute name="listProducts" mode="OUT" type="java.util.List" optional="true"/>
+		<attribute name="listPeriods" mode="OUT" type="java.util.List" optional="true"/>
+	</service>
+	
+	<service name="updateImportPlan" engine="java" invoke="updateImportPlan" location="com.olbius.plan.PlanImExServices" auth="true">
+		<attribute name="productPlanId" mode="INOUT" type="String" optional="false"/>
+		<attribute name="listProducts" mode="IN" type="String" optional="true"/>
+	</service>
+	
+	<!--  end import plan -->
+	
+	<!-- config -->
+   	<service name="jqGetConfigCapacitys" engine="java" invoke="jqGetConfigCapacitys" location="com.olbius.product.ProductServices" auth="true">
+		<implements service="jqxGetListInterface" />
+		<override name="listIterator" mode="OUT" type="java.util.List" />
+	</service>
+	
+	<service name="createConfigPacking" default-entity-name="ConfigPacking" engine="java" location="com.olbius.product.ProductServices"
+		invoke="createConfigPacking" auth="true">
+		<attribute name="productId" mode="IN" type="String"/>
+		<attribute name="uomFromId" mode="IN" type="String"/>
+		<attribute name="uomToId" mode="IN" type="String"/>
+		<attribute name="quantityConvert" mode="IN" type="String" optional="false"/>
+		<attribute name="description" mode="IN" type="String" optional="true" allow-html="any"/>
+		<attribute name="fromDate" mode="IN" type="Long" optional="true"/>
+		<attribute name="thruDate" mode="IN" type="Long" optional="true"/>
+	</service>
+	
+	<service name="updateConfigPacking" default-entity-name="ConfigPacking" engine="java" location="com.olbius.product.ProductServices"
+		invoke="updateConfigPacking" auth="true">
+		<attribute name="productId" mode="IN" type="String"/>
+		<attribute name="uomFromId" mode="IN" type="String"/>
+		<attribute name="uomToId" mode="IN" type="String"/>
+		<attribute name="fromDate" mode="IN" type="Long" optional="false"/>
+		<attribute name="quantityConvert" mode="IN" type="String" optional="true"/>
+		<attribute name="description" mode="IN" type="String" optional="true" allow-html="any"/>
+		<attribute name="thruDate" mode="IN" type="Long" optional="true"/>
+	</service>
+	
+	<service name="deleteConfigPacking" default-entity-name="ConfigPacking" engine="java" location="com.olbius.product.ProductServices"
+		invoke="deleteConfigPacking" auth="true">
+		<attribute name="productId" mode="IN" type="String"/>
+		<attribute name="uomFromId" mode="IN" type="String"/>
+		<attribute name="uomToId" mode="IN" type="String"/>
+		<attribute name="fromDate" mode="IN" type="Long" optional="false"/>
+	</service>
+	
+	<service name="getProductPackingUomWithConvertNumbers" default-entity-name="ConfigPacking" engine="java" location="com.olbius.product.ProductServices"
+		invoke="getProductPackingUomWithConvertNumbers" auth="true">
+		<attribute name="productId" mode="IN" type="String"/>
+		<attribute name="listUoms" mode="OUT" type="java.util.List"/>
+	</service>
+	
+	<!-- end config -->
+	
+	<service name="getOrderItemByOrderToCreateAgreement" engine="java" invoke="getOrderItemByOrderToCreateAgreement" location="com.olbius.product.ProductServices"  auth="true">
+		<attribute name="orderId" mode="IN" type="String"/>
+		<attribute name="listProducts" mode="OUT" type="java.util.List"/>
+	</service>
+	
+	<service name="getAgreementProductAppls" engine="java" invoke="getAgreementProductAppls" location="com.olbius.importsrc.AgreementServices"  auth="true">
+		<attribute name="agreementId" mode="IN" type="String"/>
+		<attribute name="listProducts" mode="OUT" type="java.util.List"/>
+	</service>
+	
+	<service name="createImportDocument" engine="java" location="com.olbius.importsrc.AgreementServices" invoke="createImportDocument" auth="true">
+		<auto-attributes mode="IN" include="all" optional="true" entity-name="BillOfLading">
+			<exclude field-name="departureDate"/>
+			<exclude field-name="arrivalDate"/>
+		</auto-attributes>
+		<auto-attributes mode="IN" include="all" optional="true" entity-name="Container"/>
+		<auto-attributes mode="IN" include="all" optional="true" entity-name="PackingListHeader">
+			<exclude field-name="packingListDate"/>
+			<exclude field-name="invoiceDate"/>
+		</auto-attributes>
+		
+		<attribute name="agreementId" mode="IN" type="String" optional="false"/>
+		<attribute name="orderNumberSupp" mode="IN" type="String" optional="true"/>
+		<attribute name="orderTypeSuppId" mode="IN" type="String" optional="true"/>
+		<attribute name="invoiceNumber" mode="IN" type="String" optional="true"/>
+		<attribute name="departureDate" mode="IN" type="Long" optional="true"/>
+		<attribute name="arrivalDate" mode="IN" type="Long" optional="true"/>
+		<attribute name="packingListDate" mode="IN" type="Long" optional="true"/>
+		<attribute name="invoiceDate" mode="IN" type="Long" optional="true"/>
+		<attribute name="contDescription" mode="IN" type="String" optional="true"/>
+		
+		<attribute name="totalNetWeight" mode="IN" type="String" optional="true"/>
+		<attribute name="totalGrossWeight" mode="IN" type="String" optional="true"/>
+		<attribute name="packingListDetail" mode="IN" type="String" optional="true"/>
+		
+		<attribute name="billId" mode="OUT" type="String"/>
+	</service>
+	
+</services>

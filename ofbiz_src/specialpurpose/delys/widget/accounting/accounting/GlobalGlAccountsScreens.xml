@@ -1,0 +1,307 @@
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	<screen name="ListGlAccounts">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListAccounts"/>
+                <set field="labelTitleProperty" value="PageTitleListAccounts"/>
+                <set field="tabButtonItem" value="Chartofaccounts"/>
+                <set field="selectedMenuItem" value="accSetting"/>
+                <set field="selectedSubMenuItem" value="accGeneralSetting"/> 
+                <property-map resource="DelysUiLabels" map-name="uiLabelMap" global="true" />
+                <entity-condition list="listGlAccountType" entity-name="GlAccountType">
+					<order-by field-name="description"/>
+				</entity-condition>            
+				<entity-condition list="listGlAccountClass" entity-name="GlAccountClass">
+					<order-by field-name="description"/>
+				</entity-condition>
+				<entity-condition list="listGlResourceType" entity-name="GlResourceType">
+					<order-by field-name="description"/>
+				</entity-condition>
+				<entity-condition list="listGlXbrlClass" entity-name="GlXbrlClass">
+					<order-by field-name="description"/>
+				</entity-condition>
+				<entity-condition list="listGlAccount" entity-name="GlAccount">
+					<order-by field-name="description"/>
+				</entity-condition>
+				<entity-condition list="listTaxFormId" entity-name="Enumeration">
+					<condition-expr field-name="enumTypeId" operator="equals" value="TAX_FORMS"/>
+					<order-by field-name="enumId"/>
+				</entity-condition>		
+            </actions>
+            <widgets>
+                <decorator-screen name="GlobalGLSettingsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+<!--                         <include-menu name="GlSettingTabBar" location="component://accounting/widget/AccountingMenus.xml"/> -->
+                        	
+                            <!-- <container style="open-sans" id="button-list-acount">
+                                <link target="ListGlAccountsReport" text=" ${uiLabelMap.CommonPrint}" style="btn btn-info btn-mini icon-print open-sans"/>
+                                <link target="ListGlAccountsExport" text=" ${uiLabelMap.CommonExport}" style="btn btn-info btn-mini icon-cloud-upload open-sans"/>
+                            </container>  -->
+                            <!-- <include-menu name="GlSettingTabBar" location="component://accounting/widget/AccountingMenus.xml"/> -->
+                            <!-- <include-form name="ListGlAccount" location="component://accounting/widget/GlobalGlAccountsForms.xml"/> -->
+               				<platform-specific>
+               					<html>
+               						<html-template location="component://delys/webapp/delys/accounting/setting/ListGlAccountJqx.ftl"/>
+               					</html>
+               				</platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>  
+    <screen name="CustomTimePeriod">
+    	<section>
+    		<actions>
+    			<set field="tabButtonItem" value="CustomTimePeriod"/>
+    			<set field="titleProperty" value="accCustomTimePeriod"/>
+                <set field="selectedMenuItem" value="accSetting"/>
+                <set field="selectedSubMenuItem" value="accGeneralSetting"/> 
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>               
+                <entity-condition entity-name="CustomTimePeriod" list="openTimePeriods">
+                    <condition-list>
+                        <condition-expr field-name="isClosed" operator="equals" value="N"/>
+                    </condition-list>
+                    <order-by field-name="thruDate"/>
+                </entity-condition>
+                <entity-condition entity-name="CustomTimePeriod" list="closedTimePeriods">
+                    <condition-list>
+                        <condition-expr field-name="isClosed" operator="equals" value="Y"/>
+                    </condition-list>
+                    <order-by field-name="periodTypeId"/>
+                    <order-by field-name="periodNum"/>
+                    <order-by field-name="thruDate"/>
+                </entity-condition>
+                <entity-condition list="listPeriodType" entity-name="PeriodType"></entity-condition>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="GlobalGLSettingsDecorator" location="${parameters.mainDecoratorLocation}">
+    				<decorator-section name="body">
+    					<platform-specific>
+               					<html>
+               						<html-template location="component://delys/webapp/delys/accounting/setting/CustomTimePeriod.ftl"/>
+               					</html>
+               				</platform-specific>
+    				</decorator-section>
+    			</decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="CostCalcs">
+    	<section>
+    		<actions>
+    			<set field="tabButtonItem" value="Costs"/>
+                <set field="selectedMenuItem" value="accSetting"/>
+                <set field="selectedSubMenuItem" value="accGeneralSetting"/> 
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <set field="titleProperty" value="ManufacturingCostCalcs"/>
+                <entity-condition list="listGlAccountType" entity-name="GlAccountType">
+                	
+                </entity-condition>
+                <entity-condition list="listCurrency" entity-name="Uom">
+                	<condition-expr field-name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+                	<order-by field-name="description"/>
+                	
+                </entity-condition>
+                <entity-condition list="listCustomMethod" entity-name="CustomMethod">
+                	
+                </entity-condition>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="GlobalGLSettingsDecorator" location="${parameters.mainDecoratorLocation}">
+    				<decorator-section name="body">
+    					<platform-specific>
+               					<html>
+               						<html-template location="component://delys/webapp/delys/accounting/setting/CostCalcs.ftl"/>
+               					</html>
+               				</platform-specific>
+    				</decorator-section>
+    			</decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>   
+    <screen name="PaymentMethodType">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="accSetting"/>
+                <set field="selectedSubMenuItem" value="accGeneralSetting"/>
+             	<set field="tabButtonItem" value="PaymentMethodTypes"/>
+                <set field="titleProperty" value="CommonPaymentMethodType"/>
+                
+                <entity-condition entity-name="PaymentMethodType" list="paymentMethodTypes">
+                    <order-by field-name="paymentMethodTypeId"/>
+                </entity-condition>
+                <entity-condition entity-name="GlAccount" list="listGlAccount">
+                    <order-by field-name="glAccountId"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="GlobalGLSettingsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+
+                        <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/setting/listPaymentMethodType.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="InvoiceItemType">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="accSetting"/>
+                <set field="selectedSubMenuItem" value="accGeneralSetting"/>            
+                <set field="titleProperty" value="FormFieldTitle_invoiceItemTypeId"/>
+                <set field="tabButtonItem" value="InvoiceItemTypes"/>
+               
+                <entity-condition entity-name="GlAccount" list="listGlAccount">
+                    <order-by field-name="glAccountId"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="GlobalGLSettingsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                      
+                        <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/setting/listInvoiceItemTypeJQ.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen> 
+    <screen name="RateAmounts">
+        <section>
+            <actions>
+                
+                <set field="selectedMenuItem" value="accSetting"/>
+                <set field="selectedSubMenuItem" value="accGeneralSetting"/>            
+               	<set field="titleProperty" value="Rates"/>
+                <set field="tabButtonItem" value="RateAmounts"/>
+                <entity-condition list="listRateType" entity-name="RateType">
+                	<order-by field-name="description"/>
+                </entity-condition>
+                <entity-condition list="listPeriodType" entity-name="PeriodType">
+                	<condition-expr field-name="periodTypeId" operator="like" value="RATE_%"/>
+                	<order-by field-name="description"/>
+                </entity-condition>
+                <entity-condition list="listCurrency" entity-name="Uom">
+                	<condition-expr field-name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+                	<order-by field-name="description"/>
+                </entity-condition>
+                <entity-condition list="listEmplPositionType" entity-name="EmplPositionType">
+                	<condition-expr field-name="emplPositionTypeId" operator="not-equals" value="_NA_"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="GlobalGLSettingsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+						<platform-specific>
+							<html>
+								<html-template location="component://delys/webapp/delys/accounting/setting/listRateJQ.ftl"/>
+							</html>
+						</platform-specific>
+                        
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="FXConversions">
+        <section>
+            <actions>
+                <set field="selectedMenuItem" value="accSetting"/>
+                <set field="selectedSubMenuItem" value="accGeneralSetting"/>    
+             
+                <set field="titleProperty" value="AccountingFX"/>
+             
+                <set field="tabButtonItem" value="FXConversions"/>
+                <property-to-field field="defaultCurrencyUomId" resource="general" property="currency.uom.id.default" default="USD"/>
+           
+                <entity-condition entity-name="UomConversionDated" list="conversions">
+                    <order-by field-name="uomId"/>
+                    <order-by field-name="uomIdTo"/>
+                    <order-by field-name="fromDate"/>
+                </entity-condition>
+                
+                <script location="component://delys/script/com/olbius/accounting/listEnumerationConversion.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="GlobalGLSettingsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+
+                    	<platform-specific>
+                    		<html>
+                    			<html-template location="component://delys/webapp/delys/accounting/setting/listForeignExchangeRates.ftl"></html-template>
+                    		</html>
+                    	</platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="GlAccountCategory">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="accSetting"/>
+                <set field="selectedSubMenuItem" value="accGeneralSetting"/>    
+             
+                <set field="titleProperty" value="FormFieldTitle_findGlAccountCategory"/>
+             
+                <set field="tabButtonItem" value="GlAccountCategory"/>
+                <entity-condition list="listGlAccountCategoryType" entity-name="GlAccountCategoryType">
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="GlobalGLSettingsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<platform-specific>
+                    		<html>
+                    			<html-template location="component://delys/webapp/delys/accounting/setting/listGlAccountCategory.ftl"/>
+                    		</html>
+                    	</platform-specific>
+                        
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="CostCenters">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="accSetting"/>
+                <set field="selectedSubMenuItem" value="accGeneralSetting"/>    
+             
+                <set field="titleProperty" value="CostCenters"/>
+             
+                <set field="tabButtonItem" value="CostCenters"/>
+              	<entity-condition list="glAccountCategories" entity-name="GlAccountCategory">
+              		<condition-expr field-name="glAccountCategoryTypeId" operator="equals" value="COST_CENTER"/>
+              	</entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="GlobalGLSettingsDecorator" location="${parameters.mainDecoratorLocation}">
+	                    <decorator-section name="body">
+	                   	<section>
+	                        <actions>                               
+	               					 <set field="organizationPartyId" from-field="parameters.organizationPartyId" default-value ="${defaultOrganizationPartyId}"/>
+	                        </actions>
+	                        <widgets>
+	                    	<platform-specific>
+	                    		<html>
+	                    			<html-template location="component://delys/webapp/delys/accounting/setting/listCostCenter.ftl"/>
+	                    		</html>
+	                    	</platform-specific>
+	                    	</widgets>
+	                    </section>    
+	                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+</screens>

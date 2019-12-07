@@ -1,0 +1,1826 @@
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	<screen name="CommonReportDecorator">
+        <section>
+            <actions>
+                <set field="selectedMenuItem" value="Report"/>
+                <set field="layoutSettings.javaScripts[+0]" value="/aceadmin/jqw/jqwidgets/olbMain.js" global="true"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="BaseAccountingCommonDecorator" location="component://baseaccounting/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                            	<include-screen name="lib-report" location="component://bi-x/widget/libReport.xml"/>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="ReportList">
+		<section>
+			<actions>
+				<set field="titleProperty" value="Report" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonReportDecorator">
+					<decorator-section name="body">
+						<section>
+							<widgets>
+								<container style="screenlet">
+									<platform-specific>
+										<html>
+											<html-template
+												location="component://baseaccounting/webapp/baseaccounting/report/reportViewList.ftl" />
+										</html>
+									</platform-specific>
+								</container>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+    
+    <screen name="MCSReportList">
+		<section>
+			<actions>
+				<set field="titleProperty" value="Report" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonReportDecorator">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<container style="screenlet">
+									<platform-specific>
+										<html>
+											<html-template
+												location="component://baseaccounting/webapp/baseaccounting/report/mcsReportViewList.ftl" />
+										</html>
+									</platform-specific>
+								</container>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+    
+    <screen name="IncomeReport">
+        <section>
+            <actions>
+            	<set field="selectedSubMenuItem" value="IncomeStatement"/>
+            </actions>
+            <widgets>
+            	<section>
+            		<actions>
+            			<set field="tabBarName" value="IncomeReportTabs"/>
+                		<set field="tabBarLocation" value="component://baseaccounting/widget/BaseAccountingMenus.xml"/>
+            		</actions>
+            		<widgets>
+            			<section>
+            				<actions>
+            					<set field="printTabBar" value="true" />
+            				</actions>
+            				<widgets>
+            				</widgets>
+            			</section>
+            		</widgets>
+            	</section>
+                <decorator-screen name="CommonReportDecorator">
+                    <decorator-section name="body">
+                    	<decorator-section-include name="body"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="IncomeGrowthReport">
+        <section>
+            <actions>
+                <set field="selectedSubMenuItem" value="IncomeGrowthStm"/>
+            </actions>
+            <widgets>
+            	<section>
+            		<actions>
+            			<set field="tabBarName" value="IncomeGrowthReportTabs"/>
+                		<set field="tabBarLocation" value="component://baseaccounting/widget/BaseAccountingMenus.xml"/>
+            		</actions>
+            		<widgets>
+            			<section>
+            				<actions>
+            					<set field="printTabBar" value="true" />
+            				</actions>
+            				<widgets>
+            				</widgets>
+            			</section>
+            		</widgets>
+            	</section>
+                <decorator-screen name="CommonReportDecorator">
+                    <decorator-section name="body">
+                    	<decorator-section-include name="body"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="IncomeStatement">
+        <section>
+            <actions>
+                <set field="titleProperty" value="BACCIncomeStatement"/>
+                <set field="tabButtonItem" value="IncomeStatement"/>
+                <script location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/report/getIncomeStatementReport.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="IncomeReport">
+                    <decorator-section name="body">
+                        <section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>                        
+                            <widgets>         
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/reportIncomeStatement.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+    	                        <container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="FiFinancialStatement">
+        <section>
+            <actions>
+                <set field="viewSize" value="99999"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <service service-name="getPartyAccountingPreferences" result-map="result">
+                    <field-map field-name="organizationPartyId"/>
+                </service>
+                <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
+                <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
+                <set field="selectedSubMenuItem" value="FIFinancialStatement"/>
+            </actions>
+            <widgets>
+            	<section>
+            		<actions>
+            			<set field="tabBarName" value="FiFinancialStatementTabs"/>
+                		<set field="tabBarLocation" value="component://baseaccounting/widget/BaseAccountingMenus.xml"/>
+            		</actions>
+            		<widgets>
+            			<section>
+            				<actions>
+            					<set field="printTabBar" value="true" />
+            				</actions>
+            				<widgets>
+            				</widgets>
+            			</section>
+            		</widgets>
+            	</section>
+                <decorator-screen name="CommonOrganizationAccountingReportsDecorator" location="component://baseaccounting/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                    	<include-screen name="lib-report" location="component://bi-x/widget/libReport.xml" />
+                    	<include-screen name="FSLib" />
+                    	<decorator-section-include name="body"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="FinancialStatement">
+        <section>
+            <actions>
+                <set field="viewSize" value="99999"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <service service-name="getPartyAccountingPreferences" result-map="result">
+                    <field-map field-name="organizationPartyId"/>
+                </service>
+                <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
+                <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
+                <set field="selectedSubMenuItem" value="FinancialStatement"/>
+            </actions>
+            <widgets>
+            	<section>
+            		<actions>
+            			<set field="tabBarName" value="FinancialStatementTabs"/>
+                		<set field="tabBarLocation" value="component://baseaccounting/widget/BaseAccountingMenus.xml"/>
+            		</actions>
+            		<widgets>
+            			<section>
+            				<actions>
+            					<set field="printTabBar" value="true" />
+            				</actions>
+            				<widgets>
+            				</widgets>
+            			</section>
+            		</widgets>
+            	</section>
+                <decorator-screen name="CommonOrganizationAccountingReportsDecorator" location="component://baseaccounting/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                    	<include-screen name="lib-report" location="component://bi-x/widget/libReport.xml" />
+                    	<decorator-section-include name="body"/>
+                    	<include-screen name="FSLib" />
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="FinancialReport" use-transaction="false">
+        <section>
+ 			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+            <actions>
+            	<script location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/report/FinancialReport.groovy"/>
+                <set field="viewSize" value="99999"/>
+                <set field="titleProperty" from-field="titleProperty"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <service service-name="getPartyAccountingPreferences" result-map="result">
+                    <field-map field-name="organizationPartyId"/>
+                </service>
+                <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
+                <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
+                <set field="tabButtonItem" from-field="tabButtonItem"/>
+                <entity-condition entity-name="CustomTimePeriodAndType" list="customTimePeriodList">
+                    <condition-list>
+                        <condition-expr field-name="groupPeriodTypeId" operator="equals" value="FISCAL_ACCOUNT"/>
+                        <condition-expr field-name="organizationPartyId" operator="equals" from-field="parameters.organizationPartyId"/>
+                    </condition-list>
+                </entity-condition>
+                <entity-condition entity-name="CustomTimePeriodAndType" list="defaultcustomTimePeriodList">
+                    <condition-list>
+                        <condition-expr field-name="periodTypeId" operator="equals" value="FISCAL_MONTH"/>
+                        <condition-expr field-name="organizationPartyId" operator="equals" from-field="parameters.organizationPartyId"/>
+                        <condition-expr field-name="fromDate" operator="less-equals" value="${nowTimestamp}"/>
+                        <condition-expr field-name="thruDate" operator="greater-equals" value="${nowTimestamp}"/>
+                    </condition-list>
+                    <order-by field-name="-thruDate"/>
+                </entity-condition>
+                <set field="customTimePeriodDefault" from-field="defaultcustomTimePeriodList[0]"/>
+            </actions>
+            <widgets>
+	            <decorator-screen name="FinancialStatement">
+	            	<decorator-section name="body">
+						<section>
+                            <widgets>           
+                                <include-screen name="FSFilter"/>
+                                <include-screen name="FSGrid"/>
+                            </widgets>                            				
+						</section>		            	
+                    </decorator-section>
+	            </decorator-screen>
+            </widgets>
+			<fail-widgets>
+				<include-screen location="component://baseaccounting/widget/CommonScreens.xml" name="ErrorPermissionAccountingCommonDecorator"/>
+		    </fail-widgets>	            
+        </section>
+    </screen>
+    
+    <screen name="FinancialRatioes">
+        <section>
+ 			<condition>
+				<if-olbius-has-permission/>
+			</condition>         
+            <actions>
+                <set field="viewSize" value="99999"/>
+                <set field="titleProperty" value="BACCFinancialRatioes"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <service service-name="getPartyAccountingPreferences" result-map="result">
+                    <field-map field-name="organizationPartyId"/>
+                </service>
+                <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
+                <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
+				<set field="tabButtonItem" value="FinancialRatioes" />
+				<entity-condition entity-name="CustomTimePeriodAndType" list="customTimePeriodList">
+                    <condition-list>
+                        <condition-expr field-name="groupPeriodTypeId" operator="equals" value="FISCAL_ACCOUNT"/>
+                        <condition-expr field-name="organizationPartyId" operator="equals" from-field="parameters.organizationPartyId"/>
+                    </condition-list>
+                </entity-condition>
+            </actions>
+            <widgets>
+	            <decorator-screen name="FinancialStatement">
+	            	<decorator-section name="body">
+		            	<section>
+                            <widgets>
+				                <platform-specific>
+				                    <html>
+				                        <html-template location="component://baseaccounting/webapp/baseaccounting/report/fsViewManagementIndexStatistics.ftl"/>
+				                    </html>
+				                </platform-specific>
+			                </widgets>
+		                </section>
+	                </decorator-section>
+                </decorator-screen>
+            </widgets>
+			<fail-widgets>
+				<include-screen location="component://baseaccounting/widget/CommonScreens.xml" name="ErrorPermissionAccountingCommonDecorator"/>
+		    </fail-widgets>            
+        </section>
+    </screen>
+    
+    <screen name="FIFinancialRatioes">
+        <section>
+ 			<condition>
+				<if-olbius-has-permission/>
+			</condition>         
+            <actions>
+                <set field="viewSize" value="99999"/>
+                <set field="titleProperty" value="BACCFinancialRatioes"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <service service-name="getPartyAccountingPreferences" result-map="result">
+                    <field-map field-name="organizationPartyId"/>
+                </service>
+                <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
+                <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
+				<set field="tabButtonItem" value="FinancialRatioes" />
+				<entity-condition entity-name="CustomTimePeriodAndType" list="customTimePeriodList">
+                    <condition-list>
+                        <condition-expr field-name="groupPeriodTypeId" operator="equals" value="FISCAL_ACCOUNT"/>
+                        <condition-expr field-name="organizationPartyId" operator="equals" from-field="parameters.organizationPartyId"/>
+                    </condition-list>
+                </entity-condition>
+            </actions>
+            <widgets>
+	            <decorator-screen name="FiFinancialStatement">
+	            	<decorator-section name="body">
+		            	<section>
+                            <widgets>
+				                <platform-specific>
+				                    <html>
+				                        <html-template location="component://baseaccounting/webapp/baseaccounting/report/fsFIViewManagementIndexStatistics.ftl"/>
+				                    </html>
+				                </platform-specific>
+			                </widgets>
+		                </section>
+	                </decorator-section>
+                </decorator-screen>
+            </widgets>
+			<fail-widgets>
+				<include-screen location="component://baseaccounting/widget/CommonScreens.xml" name="ErrorPermissionAccountingCommonDecorator"/>
+		    </fail-widgets>            
+        </section>
+    </screen>
+    
+    <screen name="CurrentRatio">
+		<section>
+			<actions>
+                <set field="titleProperty" value="BACCCurrentRatio" global="true"/>
+				<script location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/report/financialratio/CurrentRatio.groovy"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baseaccounting/webapp/baseaccounting/report/financialratio/currentRatio.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="FICurrentRatio">
+		<section>
+			<actions>
+                <set field="titleProperty" value="BACCCurrentRatio" global="true"/>
+				<script location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/report/financialratio/FICurrentRatio.groovy"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baseaccounting/webapp/baseaccounting/report/financialratio/currentRatio.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="QuickRatio">
+		<section>
+			<actions>
+                <set field="titleProperty" value="BACCQuickRatio" global="true"/>
+				<script location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/report/financialratio/QuickRatio.groovy"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baseaccounting/webapp/baseaccounting/report/financialratio/quickRatio.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="FIQuickRatio">
+		<section>
+			<actions>
+                <set field="titleProperty" value="BACCQuickRatio" global="true"/>
+				<script location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/report/financialratio/FIQuickRatio.groovy"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baseaccounting/webapp/baseaccounting/report/financialratio/quickRatio.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="CashSales">
+		<section>
+			<actions>
+				<script location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/report/financialratio/CashPerSales.groovy"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baseaccounting/webapp/baseaccounting/report/financialratio/cashPerSales.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="FICashSales">
+		<section>
+			<actions>
+				<script location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/report/financialratio/FICashPerSales.groovy"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baseaccounting/webapp/baseaccounting/report/financialratio/cashPerSales.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="AssetTurnover">
+		<section>
+			<actions>
+				<script location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/report/financialratio/AssetTurnover.groovy"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baseaccounting/webapp/baseaccounting/report/financialratio/assetTurnover.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="FIAssetTurnover">
+		<section>
+			<actions>
+				<script location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/report/financialratio/FIAssetTurnover.groovy"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baseaccounting/webapp/baseaccounting/report/financialratio/assetTurnover.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="WorkingCapitalSales">
+		<section>
+			<actions>
+				<script location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/report/financialratio/WorkingCapitalSales.groovy"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baseaccounting/webapp/baseaccounting/report/financialratio/workingCapitalSales.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="FIWorkingCapitalSales">
+		<section>
+			<actions>
+				<script location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/report/financialratio/FIWorkingCapitalSales.groovy"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baseaccounting/webapp/baseaccounting/report/financialratio/workingCapitalSales.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="DebtSales">
+		<section>
+			<actions>
+				<script location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/report/financialratio/DebtSales.groovy"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baseaccounting/webapp/baseaccounting/report/financialratio/debtSales.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="FIDebtSales">
+		<section>
+			<actions>
+				<script location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/report/financialratio/FIDebtSales.groovy"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baseaccounting/webapp/baseaccounting/report/financialratio/debtSales.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="ROA1">
+		<section>
+			<actions>
+				<script location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/report/financialratio/ROA1.groovy"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baseaccounting/webapp/baseaccounting/report/financialratio/roa1.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+    </screen>
+    
+ 	<screen name="FIROA1">
+		<section>
+			<actions>
+				<script location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/report/financialratio/FIROA1.groovy"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baseaccounting/webapp/baseaccounting/report/financialratio/roa1.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="ROE">
+		<section>
+			<actions>
+				<script location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/report/financialratio/ROE.groovy"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baseaccounting/webapp/baseaccounting/report/financialratio/roe.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="FIROE">
+		<section>
+			<actions>
+				<script location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/report/financialratio/FIROE.groovy"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baseaccounting/webapp/baseaccounting/report/financialratio/roe.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="FIFinancialReport" use-transaction="false">
+        <section>
+ 			<condition>
+				<if-olbius-has-permission/>
+			</condition> 
+            <actions>
+            	<script location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/report/FinancialReport.groovy"/>
+                <set field="viewSize" value="99999"/>
+                <set field="titleProperty" from-field="titleProperty"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <service service-name="getPartyAccountingPreferences" result-map="result">
+                    <field-map field-name="organizationPartyId"/>
+                </service>
+                <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
+                <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
+                <set field="tabButtonItem" from-field="tabButtonItem"/>
+                <entity-condition entity-name="CustomTimePeriodAndType" list="customTimePeriodList">
+                    <condition-list>
+                        <condition-expr field-name="groupPeriodTypeId" operator="equals" value="FISCAL_ACCOUNT"/>
+                        <condition-expr field-name="organizationPartyId" operator="equals" from-field="parameters.organizationPartyId"/>
+                    </condition-list>
+                </entity-condition>
+                <entity-condition entity-name="CustomTimePeriodAndType" list="defaultcustomTimePeriodList">
+                    <condition-list>
+                        <condition-expr field-name="periodTypeId" operator="equals" value="FISCAL_MONTH"/>
+                        <condition-expr field-name="organizationPartyId" operator="equals" from-field="parameters.organizationPartyId"/>
+                        <condition-expr field-name="fromDate" operator="less-equals" value="${nowTimestamp}"/>
+                        <condition-expr field-name="thruDate" operator="greater-equals" value="${nowTimestamp}"/>
+                    </condition-list>
+                    <order-by field-name="-thruDate"/>
+                </entity-condition>
+                <set field="customTimePeriodDefault" from-field="defaultcustomTimePeriodList[0]"/>
+            </actions>
+            <widgets>
+	            <decorator-screen name="FiFinancialStatement">
+	            	<decorator-section name="body">
+						<section>
+                            <widgets>           
+                                <include-screen name="FSFilter"/>
+                                <include-screen name="FSGrid"/>
+                            </widgets>                            				
+						</section>		            	
+                    </decorator-section>
+	            </decorator-screen>
+            </widgets>
+			<fail-widgets>
+				<include-screen location="component://baseaccounting/widget/CommonScreens.xml" name="ErrorPermissionAccountingCommonDecorator"/>
+		    </fail-widgets>	            
+        </section>
+    </screen>
+    
+    <screen name="InventoryAverageCosts">
+        <section>
+            <actions>
+                <set field="titleProperty" value="BACCPageTitleInventoryAverage"/>
+                <set field="selectedSubMenuItem" value="InventoryAverageCosts"/>
+                <set field="facilityId" from-field="parameters.facilityId"/>
+            	<set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+				<entity-condition entity-name="Facility" list="facilityList" >				 	                
+                	  <condition-expr field-name="ownerPartyId" operator="equals" from-field="organizationPartyId"/>
+                </entity-condition>
+                <set field="facilitiesDefault" from-field="facilityList[0]"/>                      	
+            </actions>
+            <widgets>
+             <decorator-screen name="CommonReportDecorator">
+                    <decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>                        
+                            <widgets>           
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/inventoryAverageCostsGrid.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+    	                        <container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+                            </fail-widgets>					
+						</section>		                    
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="GlAccountTrialBalance">
+        <section>
+     	    <condition>
+				<if-olbius-has-permission/>
+			</condition> 
+            <actions>
+                <set field="titleProperty" value="BACCBalanceTrialReport"/>
+                <set field="selectedSubMenuItem" value="balanceTrialReport"/>
+                <set field="organizationPartyId" value="${userLogin.lastOrg}"/>                
+                <service service-name="getPartyAccountingPreferences" result-map="result">
+                    <field-map field-name="organizationPartyId"/>
+                </service>
+                <set field="partyAcctgPreference" from-field="result.partyAccountingPreference"/>
+                <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId"/>
+                <entity-condition entity-name="CustomTimePeriodAndType" list="customTimePeriodList">
+                    <condition-list>
+                        <condition-expr field-name="groupPeriodTypeId" operator="equals" value="FISCAL_ACCOUNT"/>
+                        <condition-expr field-name="organizationPartyId" operator="equals" from-field="organizationPartyId"/>
+                    </condition-list>
+                </entity-condition>
+                <entity-condition entity-name="CustomTimePeriodAndType" list="defaultcustomTimePeriodList">
+                    <condition-list>
+                        <condition-expr field-name="periodTypeId" operator="equals" value="FISCAL_YEAR"/>
+                        <condition-expr field-name="organizationPartyId" operator="equals" from-field="organizationPartyId"/>
+                    </condition-list>
+                    <order-by field-name="-thruDate"/>
+                </entity-condition>
+                <set field="customTimePeriodDefault" from-field="defaultcustomTimePeriodList[0]"/>                                
+            </actions>
+            <widgets>            	
+                <decorator-screen name="CommonReportDecorator">
+                    <decorator-section name="body">
+						<section>
+                            <widgets>                            
+  								<screenlet>
+				                    <platform-specific>
+					                    <html>
+					                        <html-template location="component://baseaccounting/webapp/baseaccounting/report/reportViewBalanceTrial.ftl"/>
+					                    </html>
+				                     </platform-specific>
+                                </screenlet>                          
+                            </widgets>                           				
+						</section>                    
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+ 			<fail-widgets>
+	            <include-screen location="component://baseaccounting/widget/CommonScreens.xml" name="ErrorPermissionAccountingCommonDecorator"/>
+            </fail-widgets>	            
+        </section>
+    </screen>
+    
+    <screen name="ReportImpExpStockWarehouse">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="Report"/>
+                <set field="selectedSubMenuItem" value="ImpExpStock"/>
+                <set field="titleProperty" value="BACCImportExportStock" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonReportDecorator">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>                        
+                            <widgets>           
+                            	<include-screen name="lib-report" location="component://bi-x/widget/libReport.xml"/>                 
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/reportViewImExStockWarehouseOlap.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+    	                        <container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+                            </fail-widgets>					
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="ReportImpExpStockWarehouseAcc">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="Report"/>
+                <set field="selectedSubMenuItem" value="ImpExpStock"/>
+                <set field="titleProperty" value="BACCImportExportStockAcc" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonReportDecorator">
+					<decorator-section name="body">
+						<section>
+                            <widgets>           
+                            	<include-screen name="lib-report" location="component://bi-x/widget/libReport.xml"/>                 
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/reportViewImExStockWarehouseAccOlap.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="ReportStockWarehouseAcc">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="Report"/>
+                <set field="selectedSubMenuItem" value="ImpExpStock"/>
+                <set field="titleProperty" value="BACCStockWarehouseAccReport" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonReportDecorator">
+					<decorator-section name="body">
+						<section>
+                            <widgets>           
+                            	<include-screen name="lib-report" location="component://bi-x/widget/libReport.xml"/>                 
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/reportViewStockWarehouseAccOlap.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="ExpenseStatement">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="Report"/>
+                <set field="selectedSubMenuItem" value="ExpenseStatement"/>
+                <set field="titleProperty" value="BACCExpenseStatement" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonReportDecorator">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>                        
+                            <widgets>                            
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/reportViewExpenseStatement.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+    	                        <container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+                            </fail-widgets>					
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="GeneralJournal">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="Report"/>
+                <set field="selectedSubMenuItem" value="GeneralJournal"/>
+                <set field="titleProperty" value="BACCGeneralJournal" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonReportDecorator">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>                        
+                            <widgets>                            
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/generalJournalGrid.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+    	                        <container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+                            </fail-widgets>					
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+        
+    <screen name="GeneralJournalTotal">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="Report"/>
+                <set field="selectedSubMenuItem" value="GeneralJournalTotal"/>
+                <set field="titleProperty" value="BACCGeneralJournal" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonReportDecorator">
+					<decorator-section name="body">
+						<section>
+                            <widgets>                            
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/generalJournalTotalGrid.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+    	                        <container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+                            </fail-widgets>					
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="GeneralJournalTotalV2">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="Report"/>
+                <set field="selectedSubMenuItem" value="GeneralJournalTotalV2"/>
+                <set field="titleProperty" value="BACCGeneralJournal" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonReportDecorator">
+					<decorator-section name="body">
+						<section>
+                            <widgets>                            
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/generalJournalTotalGridV2.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+    	                        <container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+                            </fail-widgets>					
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>        
+    
+    <screen name="Income2Statement">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="Report"/>
+                <set field="selectedSubMenuItem" value="Income2Statement"/>
+                <set field="titleProperty" value="BACCIncome2Statement" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonReportDecorator">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="ACCREP_GRINCOM" action="_VIEW"/>
+							</condition>                        
+                            <widgets>                            
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/IncomeStatmentv2Grid.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+    	                        <container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+                            </fail-widgets>					
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="ProductIncomeStatement">
+		<section>
+			<actions>
+                <set field="tabButtonItem" value="ProductIncomeStatement"/>
+                <set field="titleProperty" value="BACCProductIncomeStatement" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="IncomeReport">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>                        
+                            <widgets>                            
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/reportIncomeStatementByProduct.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+    	                        <container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+                            </fail-widgets>					
+						</section>							
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="ProductStoreIncomeStatement">
+		<section>
+			<actions>
+                <set field="tabButtonItem" value="ProductStoreIncomeStatement"/>
+                <set field="titleProperty" value="BACCProductStoreIncomeStatement" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="IncomeReport">
+					<decorator-section name="body">
+						<section>
+                            <widgets>                            
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/reportIncomeStatementByProductStore.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+    	                        <container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+                            </fail-widgets>					
+						</section>							
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>    
+    
+    <screen name="CustomerIncomeStatement">
+		<section>
+			<actions>
+                <set field="tabButtonItem" value="CustomerIncomeStatement"/>
+                <set field="titleProperty" value="BACCCustomerIncomeStatement" global="true"/>
+                <script location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/report/getIncomeStatementReport.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="IncomeReport">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>                        
+                            <widgets>                            
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/reportIncomeStatementByCustomer.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+    	                        <container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+                            </fail-widgets>					
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="CategoryIncomeStatement">
+		<section>
+			<actions>
+                <set field="tabButtonItem" value="CategoryIncomeStatement"/>
+                <set field="titleProperty" value="BACCCategoryIncomeStatement" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="IncomeReport">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>                        
+                            <widgets>                            
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/reportIncomeStatementByCategory.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+    	                        <container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+                            </fail-widgets>					
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="CustGroupIncomeStatement">
+		<section>
+			<actions>
+                <set field="tabButtonItem" value="CustGroupIncomeStatement"/>
+                <set field="titleProperty" value="BACCCustGroupIncomeStatement" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="IncomeReport">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>                        
+                            <widgets>                            
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/custGroupIncomeStmView.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+    	                        <container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+                            </fail-widgets>					
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="ProductIncomeGrowthStm">
+		<section>
+			<actions>
+                <set field="tabButtonItem" value="ProductIncomeGrowthStm"/>
+                <set field="titleProperty" value="BACCProductIncomeGrowthStm" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="IncomeGrowthReport">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>                        
+                            <widgets>                            
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/productIncomeGrowthStmView.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+    	                        <container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+                            </fail-widgets>					
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="CustomerIncomeGrowthStm">
+		<section>
+			<actions>
+                <set field="tabButtonItem" value="CustomerIncomeGrowthStm"/>
+                <set field="titleProperty" value="BACCCustomerIncomeGrowthStm" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="IncomeGrowthReport">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>                        
+                            <widgets>                            
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/custIncomeGrowthStmView.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+    	                        <container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+                            </fail-widgets>					
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="CategoryIncomeGrowthStm">
+		<section>
+			<actions>
+                <set field="tabButtonItem" value="CategoryIncomeGrowthStm"/>
+                <set field="titleProperty" value="BACCCategoryIncomeGrowthStm" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="IncomeGrowthReport">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>                        
+                            <widgets>                            
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/categoryIncomeGrowthStmView.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+    	                        <container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+                            </fail-widgets>					
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    
+   <screen name="CustGroupIncomeGrowthStm">
+		<section>
+			<actions>
+                <set field="tabButtonItem" value="CustGroupIncomeGrowthStm"/>
+                <set field="titleProperty" value="BACCCustGroupIncomeGrowthStm" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="IncomeGrowthReport">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>                        
+                            <widgets>                            
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/custGroupIncomeGrowthStmView.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+    	                        <container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+                            </fail-widgets>					
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    
+    <screen name="liabilityGlReport">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="accReport"/>
+				<set field="selectedSubMenuItem" value="liabilityGlReport"/>
+				<set field="titleProperty" value="BACCReportLiabilityReport" />
+				<set field="organizationPartyId" from-field="userLogin.lastOrg"/>
+				<property-map map-name="uiLabelMap" resource="OlapUiLabels"/>		
+				<property-to-field resource="chart" property="tickInterval" field="tickInterval"/>		
+				<property-to-field resource="general" property="ORGANIZATION_PARTY" field="${userLogin.lastOrg}"/>
+				<script location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/report/ReportConfigData.groovy" />
+			</actions>
+			<widgets>
+				<section>
+					<widgets>
+						<decorator-screen name="CommonReportDecorator">
+							<decorator-section name="body">
+								<section>
+									<condition>
+										<if-olbius-has-permission/>
+									</condition>
+									<widgets>
+										<platform-specific>
+											<html>
+												<html-template location="component://baseaccounting/webapp/baseaccounting/report/liabilityGlReportView.ftl"/>
+											</html>
+										</platform-specific>										
+									</widgets>
+									<fail-widgets>
+										<container style="alert alert-info">
+											<label text="${uiLabelMap.DAYouHavenotViewPermission}"></label>
+										</container>
+									</fail-widgets> 									
+								</section>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="FSLib">
+		<section>
+			<actions>
+			</actions>
+			<widgets>
+				<section>
+					<widgets>
+						<platform-specific>
+                             <html>
+                   				<html-template location="component://baseaccounting/webapp/baseaccounting/report/financialStatementLib.ftl"/>
+                			 </html>
+                         </platform-specific>
+					</widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="FSGrid">
+		<section>
+			<actions>
+				<entity-one value-field="customTimePeriod" entity-name="CustomTimePeriod">
+					<field-map field-name="customTimePeriodId" from-field="customTimePeriodDefault.customTimePeriodId"/>
+				</entity-one>
+				<set field="isClosed" from-field="customTimePeriod.isClosed"/>
+			</actions>
+			<widgets>
+				<section>
+					<widgets>
+						<section>
+						 	<widgets>
+								<platform-specific>
+		                             <html>
+		                   				<html-template location="component://baseaccounting/webapp/baseaccounting/report/financialStatementGrid.ftl"/>
+		                			 </html>
+                         		</platform-specific>						 	
+						 	</widgets>
+						</section>	
+					</widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="FSFilter">
+		<section>
+			<actions>
+			</actions>
+			<widgets>
+				<section>
+					<widgets>
+						<platform-specific>
+                             <html>
+                   				<html-template location="component://baseaccounting/webapp/baseaccounting/report/financialStatementFilter.ftl"/>
+                			 </html>
+                         </platform-specific>
+					</widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="GeneralLedger">
+		<section>
+			<actions>
+                <set field="titleProperty" value="BACCGeneralLedger" global="true"/>
+                <set field="selectedSubMenuItem" value="GeneralLedger"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonReportDecorator">
+					<decorator-section name="body">
+						<section>
+                            <widgets>                            
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/summary/generalLedger.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="AnalysisReport">
+		<section>
+			<actions>
+                <set field="titleProperty" value="BACCAnalysisReport" global="true"/>
+                <set field="selectedSubMenuItem" value="AnalysisReport"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonReportDecorator">
+					<decorator-section name="body">
+						<section>
+                            <widgets>                            
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/summary/analysisReport.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="CashDetailBook">
+		<section>
+			<actions>
+                <set field="titleProperty" value="BACCCashDetailBook" global="true"/>
+                <set field="selectedSubMenuItem" value="CashDetailBook"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonReportDecorator">
+					<decorator-section name="body">
+						<section>
+                            <widgets>                            
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/summary/cashDetailBook.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="MoneyInBank">
+		<section>
+			<actions>
+                <set field="titleProperty" value="BACCMoneyInBank" global="true"/>
+                <set field="selectedSubMenuItem" value="MoneyInBank"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonReportDecorator">
+					<decorator-section name="body">
+						<section>
+                            <widgets>                            
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/summary/moneyInBank.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="PaymentDetailBook">
+		<section>
+			<actions>
+                <set field="titleProperty" value="BACCPaymentDetailBook" global="true"/>
+                <set field="selectedSubMenuItem" value="PaymentDetailBook"/>
+                <entity-condition list="enumPartyTypeList" entity-name="Enumeration">
+	        		<condition-expr field-name="enumTypeId" value="PARTY_TYPE"/>
+	        		<order-by field-name="sequenceId"/>
+	        	</entity-condition>	                
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonReportDecorator">
+					<decorator-section name="body">
+						<section>
+                            <widgets>                            
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/summary/paymentDetailBook.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="LiabilityBalance">
+		<section>
+			<actions>
+                <set field="titleProperty" value="BACCLiabilityBalance" global="true"/>
+                <set field="selectedSubMenuItem" value="LiabilityBalance"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonReportDecorator">
+					<decorator-section name="body">
+						<section>
+                            <widgets>
+                            	<platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/summary/liabilityBalance.ftl"/>
+		                        	</html>
+                                </platform-specific>                            
+                            </widgets>
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="LiabilitySupplier">
+		<section>
+			<actions>
+                <set field="titleProperty" value="BACCLiabilitySupplier" global="true"/>
+                <set field="selectedSubMenuItem" value="LiabilitySupplier"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonReportDecorator">
+					<decorator-section name="body">
+						<section>
+                            <widgets>
+                            	<platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/summary/liabilitySupplier.ftl"/>
+		                        	</html>
+                                </platform-specific>                            
+                            </widgets>
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="LiabilityReceivable">
+		<section>
+			<actions>
+                <set field="titleProperty" value="BACCLiabilityReceivable" global="true"/>
+                <set field="selectedSubMenuItem" value="LiabilityReceivable"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonReportDecorator">
+					<decorator-section name="body">
+						<section>
+                            <widgets>
+                            	<platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/summary/liabilityReceivable.ftl"/>
+		                        	</html>
+                                </platform-specific>                            
+                            </widgets>
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="LiabilityReceivableTotal">
+		<section>
+			<actions>
+                <set field="titleProperty" value="BACCLiabilityReceivableTotal" global="true"/>
+                <set field="selectedSubMenuItem" value="LiabilityReceivableTotal"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonReportDecorator">
+					<decorator-section name="body">
+						<section>
+                            <widgets>
+                            	<platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/summary/liabilityReceivableTotal.ftl"/>
+		                        	</html>
+                                </platform-specific>                            
+                            </widgets>
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="VoucherDeclaration">
+		<section>
+			<actions>
+                <set field="titleProperty" value="BACCVoucherDeclaration" global="true"/>
+                <set field="selectedSubMenuItem" value="VoucherDeclaration"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonReportDecorator">
+					<decorator-section name="body">
+						<section>
+                            <widgets>
+                            	<platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/summary/voucherDeclaration.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="LiabilityPref">
+		<section>
+			<actions>
+                <set field="titleProperty" value="BACCLiabilityPref" global="true"/>
+                <set field="selectedSubMenuItem" value="LiabilityPref"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonReportDecorator">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<entity-condition list="enumPartyTypeList" entity-name="Enumeration">
+					        		<condition-expr field-name="enumTypeId" value="PARTY_TYPE"/>
+					        		<order-by field-name="sequenceId"/>
+					        	</entity-condition>	
+							</actions>
+                            <widgets>
+                            	<platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/summary/liabilityPref.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="LiabilityPrefDetail">
+		<section>
+			<actions>
+                <set field="titleProperty" value="BACCLiabilityPref" global="true"/>
+                <set field="selectedSubMenuItem" value="LiabilityPref"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonReportDecorator">
+					<decorator-section name="body">
+						<section>
+                            <widgets>
+                            	<platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/summary/liabilityPrefDetail.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ViewLiabilityPref">
+		<section>
+			<actions>
+				<set field="titleProperty" value="BACCLiabilityPref" global="true"/>
+                <set field="selectedSubMenuItem" value="LiabilityPref"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonReportDecorator">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<entity-condition list="enumPartyTypeList" entity-name="Enumeration">
+					        		<condition-expr field-name="enumTypeId" value="PARTY_TYPE"/>
+					        		<order-by field-name="sequenceId"/>
+					        	</entity-condition>
+							</actions>
+							<widgets>
+								<platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/summary/ViewLiabilityPrefNew.ftl"/>
+		                        	</html>
+                                </platform-specific>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ViewSaleInvoiceStatisticsReport">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="Report"/>
+                <set field="titleProperty" value="SalesOutReportStatisticsTitle" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonReportDecorator">
+					<decorator-section name="body">
+						<section>
+                            <widgets>                            
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/taxReport/ViewSaleInvoiceStatisticsReport.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+    	                        <container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+                            </fail-widgets>					
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    
+	<screen name="ViewPurchaseInvoiceStatisticsReport">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="Report"/>
+                <set field="titleProperty" value="PurchasingReportStatisticsTitle" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonReportDecorator">
+					<decorator-section name="body">
+						<section>
+                            <widgets>                            
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/taxReport/ViewPurchaseInvoiceStatisticsReport.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+    	                        <container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+                            </fail-widgets>					
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    
+	<screen name="ViewPurchaseInvoiceStatisticsPaymentReport">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="Report"/>
+                <set field="titleProperty" value="PurchasingReportStatisticsPaymentTitle" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonReportDecorator">
+					<decorator-section name="body">
+						<section>
+                            <widgets>                            
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/report/taxReport/ViewPurchaseInvoiceStatisticsPaymentReport.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+    	                        <container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+                            </fail-widgets>					
+						</section>					
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+</screens>

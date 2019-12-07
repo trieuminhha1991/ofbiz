@@ -1,0 +1,2565 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Licensed to the Apache Software Foundation (ASF) under one or more contributor 
+	license agreements. See the NOTICE file distributed with this work for additional 
+	information regarding copyright ownership. The ASF licenses this file to 
+	you under the Apache License, Version 2.0 (the "License"); you may not use 
+	this file except in compliance with the License. You may obtain a copy of 
+	the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required 
+	by applicable law or agreed to in writing, software distributed under the 
+	License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS 
+	OF ANY KIND, either express or implied. See the License for the specific 
+	language governing permissions and limitations under the License. -->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	<screen name="FindEmployee">		    
+		<section>
+			<actions>
+				<set field="navMenuName" value="FindEmployeeSubTabBar" />
+				<set field="navMenuLocation" value="component://hrolbius/widget/menus/hrolbiusMenus.xml" />
+				<set field="tabButtonItem" value="Employee" />
+				<set field="titleProperty"
+					value="${uiLabelMap.CommonFind} ${uiLabelMap.HumanResEmployee}" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonDirectoryDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<service service-name="findParty" auto-field-map="true" />
+								<set field="tabButtonItem" value="Employee" />
+							</actions>
+							<widgets>
+								<section>
+									<widgets>
+										<decorator-screen name="FindScreenDecorator"
+											location="component://common/widget/CommonScreens.xml">
+											<decorator-section name="search-options">
+												<platform-specific>
+													<html>
+														<html-template
+															location="component://hrolbius/webapp/hrolbius/ftl/findEmployeeOption.ftl" />
+													</html>
+												</platform-specific>
+											</decorator-section>
+											<decorator-section name="search-results">
+												<platform-specific>
+													<html>
+														<html-template
+															location="component://hrolbius/webapp/hrolbius/ftl/findEmployee.ftl" />
+													</html>
+												</platform-specific>
+											</decorator-section>
+										</decorator-screen>
+
+									</widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<container style="header smaller lighter red">
+									<label style="h3">${uiLabelMap.PartyMgrViewPermissionError}
+									</label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="NewEmployee">
+		<section>
+			<actions>
+				<set field="tabButtonItem" value="Employee" />
+				<set field="titleProperty" value="PartyCreateNewEmployee" />
+				<set field="headerItem" value="Employees" />
+				<set field="selectedMenuItem" value="directory" />
+
+				<script
+					location="component://party/webapp/partymgr/WEB-INF/actions/party/EditContactMech.groovy" />
+				<set field="dependentForm" value="createEmployee" />
+				
+				<set field="paramKey" value="countryGeoId" />
+				<set field="paramKey_district" value="provinceGeoId"/>
+				<set field="paramKey_ward" value="districtGeoId"/>
+				
+				<set field="PermtRes_mainId" value="permanentResidence_countryGeoId" />
+				<set field="PermtRes_stateProvinceGeoId" value="permanentResidence_stateProvinceGeoId" />
+				<set field="PermtRes_distGeoId" value="permanentResidence_districtGeoId"/>
+				<set field="PermtRes_wardGeoId" value="permanentResidence_wardGeoId"/>
+				<set field="currRes_mainId" value="currResidence_countryGeoId"/>
+				<set field="currRes_stateProvinceGeoId" value="currResidence_stateProvinceGeoId"/>
+				<set field="currRes_distGeoId" value="currResidence_districtGeoId"/>
+				<set field="currRes_wardGeoId" value="currResidence_wardGeoId"/>
+				
+				<set field="requestName" value="getAssociatedStateList" />
+				<set field="requestName_district" value="getAssociatedDistList"/>
+				<set field="requestName_ward" value="getAssociatedWardList"/>
+				
+				<set field="responseName" value="stateList" />
+				<set field="responseName_district" value="districtList" />
+				<set field="responseName_ward" value="wardList" />
+				
+				<set field="dependentKeyName" value="geoId" />
+				<set field="descName" value="geoName" />
+				<set field="selectedDependentOption" from-field="mechMap.postalAddress.stateProvinceGeoId"
+					default-value="_none_" />
+				<set field="internalOrgId" from-field="parameters.internalOrgId"></set>					
+				<set field="interOrgName" value="${groovy: internalOrgId != null? org.ofbiz.party.party.PartyHelper.getPartyName(delegator, internalOrgId, false): &quot;&quot;}"/>
+				<set field="additionalTitle" value="${groovy: import org.ofbiz.base.util.UtilProperties; 
+										internalOrgId !=null? UtilProperties.getMessage(&quot;CommonUiLabels&quot; , &quot;CommonTo&quot;, locale) + &quot; &quot; + interOrgName: &quot;&quot;}"/>
+				<entity-condition list="nationality" entity-name="Nationality"></entity-condition>												
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<screenlet icon-style="icon-user"
+							title="${uiLabelMap.HumanResNewEmployee} ${additionalTitle}">
+							<section>
+								<widgets>
+									<platform-specific>
+										<html>
+											<html-template
+												location="component://hrolbius/webapp/hrolbius/ftl/setDependentDropdownProvinceDistWard.ftl" />
+											<html-template
+												location="component://hrolbius/webapp/hrolbius/ftl/editEmployee.ftl" />
+										</html>
+									</platform-specific>
+								</widgets>
+							</section>
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ResignationApplication">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PageTitleResignationApplication" />
+				<set field="tabButtonItem" value="EmployeeProfile" />
+				<set field="selectedSubMenuItem" value="ResignationApplication" />
+				<set field="partyId" from-field="userLogin.partyId"/>
+				<entity-one entity-name="PartyAndPerson" value-field="lookupPerson">
+					<field-map field-name="partyId" from-field="partyId" />
+				</entity-one>
+			</actions>
+			<widgets>
+				<decorator-screen name="profileDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<service service-name="getCurrentPartyEmploymentData" result-map="employmentData" >
+								 	<field-map field-name="partyId" from-field="partyId"/>
+								</service>
+								<entity-condition list="statusList" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="PRTYASGN_STATUS"/>
+								</entity-condition>
+								<entity-condition list="listInvoiceType" entity-name="InvoiceType">
+				                	<condition-expr field-name="parentTypeId" operator="equals" value="SALES_INVOICE"/>
+				                </entity-condition>
+				                <entity-condition list="listStatusItem" entity-name="StatusItem">
+				                	<condition-expr field-name="statusTypeId" operator="equals" value="INVOICE_STATUS"/>
+				                </entity-condition>
+				                
+				                <entity-condition list="listPaymentType" entity-name="PaymentType">
+				                	<condition-expr field-name="parentTypeId" operator="equals" value="RECEIPT"/>
+				                </entity-condition>
+				                <entity-condition list="listStatusItemPayment" entity-name="StatusItem">
+				                	<condition-expr field-name="statusTypeId" operator="equals" value="PMNT_STATUS"/>
+				                </entity-condition>
+				                <entity-condition list="terminationReasonList" entity-name="TerminationReason">
+				                	<condition-expr field-name="parentTypeId" value="RESIGN"/>
+				                </entity-condition>
+				                <entity-condition list="emplTerminationList" entity-name="EmplTerminationProposal">
+				                	<condition-list>
+				                		<condition-expr field-name="partyId" from-field="userLogin.partyId"/>
+				                		<condition-expr field-name="statusId" operator="not-equals" value="TER_PPSL_REJECTED"/>
+				                	</condition-list>
+				                </entity-condition>
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/profile/ResignationApplication.ftl"/>
+									</html>
+								</platform-specific>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="NewEmployeeProfile">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PageTitleViewPartyProfile" />
+				<set field="tabButtonItem" value="EmployeeProfile" />
+				<set field="selectedSubMenuItem" value="EmployeeProfile" />
+				<set field="partyId" from-field="parameters.partyId" />
+				<set field="layoutSettings.javaScripts[]" value="/hrolbius/js/bootbox.min.js" global="true"/>
+				<entity-one entity-name="PartyAndPerson" value-field="lookupPerson">
+					<field-map field-name="partyId" from-field="parameters.partyId" /><!-- 
+						is required -->
+				</entity-one>
+				<script
+					location="component://party/webapp/partymgr/WEB-INF/actions/party/ViewProfile.groovy" />
+			</actions>
+			<widgets>				
+				<decorator-screen name="profileDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<and>
+									<not>
+										<if-empty field="party" />
+									</not>
+									<not>
+										<if-empty field="lookupPerson"/>
+									</not>
+								</and>
+							</condition>
+							<actions>
+								<set field="nowTimestamp" value="${groovy: org.ofbiz.base.util.UtilDateTime.nowTimestamp()}"/>
+								<property-map resource="PartyUiLabels" map-name="uiLabelMap"
+									global="true" />
+								<set field="parameters.partyId" from-field="parameters.partyId"
+									default-value="${userLogin.partyId}" />
+								<entity-and entity-name="PartyNameHistory" list="partyNameHistoryList">
+									<field-map field-name="partyId" from-field="parameters.partyId" />
+									<order-by field-name="-changeDate" />
+								</entity-and>
+								<entity-one entity-name="PartyAndGroup" value-field="lookupGroup">
+									<field-map field-name="partyId" from-field="parameters.partyId" /><!-- 
+										is required -->
+								</entity-one>
+								<entity-one entity-name="PartyAndPerson" value-field="lookupPerson">
+									<field-map field-name="partyId" from-field="parameters.partyId" /><!-- 
+										is required -->
+								</entity-one>
+								<service service-name="getPartyPostalAddress" result-map="permanentResidence">
+									<field-map field-name="partyId" from-field="parameters.partyId"/>
+									<field-map field-name="contactMechPurposeTypeId" value="PERMANENT_RESIDENCE"/>
+								</service>
+								
+								<service service-name="getPartyPostalAddress" result-map="currentResidence">
+									<field-map field-name="partyId" from-field="parameters.partyId"/>
+									<field-map field-name="contactMechPurposeTypeId" value="CURRENT_RESIDENCE"/>
+								</service>
+								<service service-name="getPartyEmail" result-map="partyEmail">
+									<field-map field-name="partyId" from-field="parameters.partyId"/>
+									<field-map field-name="contactMechPurposeTypeId" value="PRIMARY_EMAIL"/>
+								</service>
+								<service service-name="getPartyTelephone" result-map="phoneNumber">
+									<field-map field-name="partyId" from-field="parameters.partyId"/>
+									<field-map field-name="contactMechPurposeTypeId" value="PHONE_HOME"/>
+								</service>
+								<service service-name="getPartyTelephone" result-map="mobileNumber">
+									<field-map field-name="partyId" from-field="parameters.partyId"/>
+									<field-map field-name="contactMechPurposeTypeId" value="PHONE_MOBILE"/>
+								</service>
+								<service service-name="getCurrentPartyEmploymentData" auto-field-map="true" result-map="employmentData" />
+								<entity-one value-field="systemUserLogin" entity-name="UserLogin">
+									<field-map field-name="userLoginId" value="system"/>
+								</entity-one>
+								<entity-condition list="partyEducation" entity-name="PersonEduAndSystemType">
+									<condition-expr field-name="partyId" from-field="parameters.partyId"/>
+									<order-by field-name="-level"/>
+								</entity-condition>
+								<entity-condition list="personFamilyBackground" entity-name="PersonFamilyBackground">
+									<condition-expr field-name="partyId" operator="equals" from-field="parameters.partyId"/>
+								</entity-condition>
+								<entity-condition list="personFamilyBackgroundEmercy" entity-name="PersonFamilyBackground">
+									<condition-list combine="and">
+										<condition-expr field-name="partyId" operator="equals" from-field="parameters.partyId"/>
+										<condition-expr field-name="emergencyContact" operator="equals" value="Y"/>
+									</condition-list>
+								</entity-condition>
+								
+								<entity-condition list="personWorkingProcess" entity-name="PersonWorkingProcess">
+									<condition-expr field-name="partyId" operator="equals" from-field="parameters.partyId"/>
+								</entity-condition>
+								<entity-and list="partyContentList" entity-name="PartyContent">
+									<field-map field-name="partyId" from-field="parameters.partyId" />
+									<field-map field-name="partyContentTypeId" value="LGOIMGURL" />
+									<order-by field-name="-fromDate" />
+								</entity-and>
+								<set field="partyContentId" from-field="partyContentList[0].contentId" />
+								<set field="partyContent"
+									value="${groovy: partyContentId!=null?&quot;/content/control/stream?contentId=&quot; + partyContentId : &quot;&quot;}" />
+								<set field="partyGroupLogoLinkUrl" from-field="partyContent"
+									default-value="${lookupGroup.logoImageUrl}" global="true" />
+								<set field="personalImage" from-field="partyContent" />
+							</actions>
+							<widgets>
+								<screenlet>
+									<platform-specific>
+										<html>
+											<html-template location="component://hrolbius/webapp/hrolbius/ftl/profile/EmployeeProfile.ftl"/>
+										</html>
+									</platform-specific>
+								</screenlet>
+							</widgets>
+							<fail-widgets>
+								<container>
+									<label style="h3">${uiLabelMap.PartyNoPartyFoundWithPartyId}:
+										${parameters.partyId}
+									</label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="EditEmployeeProfile">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="profile" />
+				<set field="titleProperty" value="PageTitleEditPersonalInformation" />
+				<set field="tabButtonItem" value="EmployeeProfile" />
+				<set field="headerItem" value="find" />
+				<set field="labelTitleProperty" value="PageTitleEditPersonalInformation" />				
+				<set field="partyId" from-field="parameters.partyId" />
+				<entity-one entity-name="PartyAndPerson" value-field="personInfo" />
+				<set field="layoutSettings.javaScripts[]" value="/hrolbius/js/bootbox.min.js" global="true"/>
+				<entity-condition list="partyEducation" entity-name="PersonEduAndSystemType">
+					<condition-expr field-name="partyId" from-field="parameters.partyId"/>
+					<order-by field-name="-level"/>
+				</entity-condition>
+				<entity-condition list="personFamilyBackground" entity-name="PersonFamilyBackground">
+					<condition-expr field-name="partyId" operator="equals" from-field="parameters.partyId"/>
+				</entity-condition>
+				<entity-condition list="personWorkingProcess" entity-name="PersonWorkingProcess">
+					<condition-expr field-name="partyId" operator="equals" from-field="parameters.partyId"/>
+				</entity-condition>
+				<entity-one value-field="systemUserLogin" entity-name="UserLogin">
+					<field-map field-name="userLoginId" value="system"/>
+				</entity-one>
+				<entity-condition list="nationality" entity-name="Nationality">
+				</entity-condition>
+				
+				<service service-name="getPartyPostalAddress" result-map="permanentResidence">
+					<field-map field-name="partyId" from-field="parameters.partyId"/>
+					<field-map field-name="contactMechPurposeTypeId" value="PERMANENT_RESIDENCE"/>
+				</service>
+				<set field="permanentResidenceContactmechId" from-field="permanentResidence.contactMechId"/>
+				<set field="permanentResidenceAddress1" from-field="permanentResidence.address1"/>
+				<set field="permanentResidenceState" from-field="permanentResidence.stateProvinceGeoId"/>
+				<set field="permanentResidenceCountry" from-field="permanentResidence.countryGeoId"/>
+				<entity-one value-field="postalAddressPermanent" entity-name="PostalAddress">
+					<field-map field-name="contactMechId" from-field="permanentResidenceContactmechId"/>
+				</entity-one>
+				
+				<service service-name="getPartyPostalAddress" result-map="currentResidence">
+					<field-map field-name="partyId" from-field="parameters.partyId"/>
+					<field-map field-name="contactMechPurposeTypeId" value="CURRENT_RESIDENCE"/>
+				</service>
+				<set field="currentResidenceContactmechId" from-field="currentResidence.contactMechId"/>
+				<set field="currentResidenceAddress1" from-field="currentResidence.address1"/>
+				<set field="currentResidenceState" from-field="currentResidence.stateProvinceGeoId"/>
+				<set field="currentResidenceCountry" from-field="currentResidence.countryGeoId"/>
+				<entity-one value-field="currentResidence" entity-name="PostalAddress">
+					<field-map field-name="contactMechId" from-field="currentResidenceContactmechId"/>
+				</entity-one>
+				
+				<service service-name="getPartyEmail" result-map="partyEmail">
+					<field-map field-name="partyId" from-field="parameters.partyId"/>
+					<field-map field-name="contactMechPurposeTypeId" value="PRIMARY_EMAIL"/>
+				</service>
+				<set field="primaryEmailContactmechId" from-field="partyEmail.contactMechId"/>
+				<set field="primaryEmailAddress" from-field="partyEmail.emailAddress"/>
+				
+				<service service-name="getPartyEmail" result-map="otherEmail">
+					<field-map field-name="partyId" from-field="parameters.partyId"/>
+					<field-map field-name="contactMechPurposeTypeId" value="OTHER_EMAIL"/>
+				</service>
+				<set field="otherEmailContactmechId" from-field="otherEmail.contactMechId"/>
+				<set field="otherEmailAddress" from-field="otherEmail.emailAddress"/>
+				
+				<service service-name="getPartyTelephone" result-map="phoneNumber">
+					<field-map field-name="partyId" from-field="parameters.partyId"/>
+					<field-map field-name="contactMechPurposeTypeId" value="PHONE_HOME"/>
+				</service>
+				<set field="homePhoneContactMechId" from-field="phoneNumber.contactMechId"/>
+				<set field="homePhoneContactNbr" from-field="phoneNumber.contactNumber"/>				
+				<service service-name="getPartyTelephone" result-map="mobileNumber">
+					<field-map field-name="partyId" from-field="parameters.partyId"/>
+					<field-map field-name="contactMechPurposeTypeId" value="PHONE_MOBILE"/>				
+				</service>
+				<set field="mobilePhoneContactMechId" from-field="mobileNumber.contactMechId"/>
+				<set field="mobilePhoneContactNbr" from-field="mobileNumber.contactNumber"/>
+				
+				
+				<set field="dependentForm" value="basicInformation" />
+
+				<set field="paramKey" value="countryGeoId" />
+				<set field="paramKey_district" value="provinceGeoId" />
+				<set field="paramKey_ward" value="districtGeoId" />
+
+				<set field="PermtRes_mainId" value="permanentResidence_countryGeoId" />
+				<set field="PermtRes_stateProvinceGeoId" value="permanentResidence_stateProvinceGeoId" />
+				<set field="PermtRes_distGeoId" value="permanentResidence_districtGeoId" />
+				<set field="PermtRes_wardGeoId" value="permanentResidence_wardGeoId" />
+				<set field="currRes_mainId" value="currResidence_countryGeoId" />
+				<set field="currRes_stateProvinceGeoId" value="currResidence_stateProvinceGeoId" />
+				<set field="currRes_distGeoId" value="currResidence_districtGeoId" />
+				<set field="currRes_wardGeoId" value="currResidence_wardGeoId" />
+
+				<set field="requestName" value="getAssociatedStateList" />
+				<set field="requestName_district" value="getAssociatedDistList" />
+				<set field="requestName_ward" value="getAssociatedWardList" />
+
+				<set field="responseName" value="stateList" />
+				<set field="responseName_district" value="districtList" />
+				<set field="responseName_ward" value="wardList" />
+
+				<set field="dependentKeyName" value="geoId" />
+				<set field="descName" value="geoName" />
+				<set field="selectedDependentOption" from-field="mechMap.postalAddress.stateProvinceGeoId"
+					default-value="_none_" />
+			</actions>
+			<widgets>
+				<decorator-screen name="profileDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<screenlet title="${uiLabelMap.PageTitleEditPersonalInformation}">
+							<platform-specific>
+								<html>
+									<html-template
+												location="component://hrolbius/webapp/hrolbius/ftl/setDependentDropdownProvinceDistWard.ftl" />
+									<html-template location="component://hrolbius/webapp/hrolbius/ftl/profile/EditEmployeeProfile.ftl"></html-template>
+								</html>
+							</platform-specific>						
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>	
+		</section>
+	</screen>
+	
+	<screen name="EmployeeProfile">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PageTitleViewPartyProfile" />
+				<set field="tabButtonItem" value="EmployeeProfile" />
+				<set field="selectedMenuItem" value="profile" />
+				<set field="labelTitleProperty" value="PartyTaxAuthInfos" />
+				<set field="partyId" from-field="parameters.partyId" />
+				<set field="layoutSettings.javaScripts[]" value="/partymgr/js/PartyProfileContent.js"
+					global="true" />
+				<script
+					location="component://party/webapp/partymgr/WEB-INF/actions/party/ViewProfile.groovy" />
+				<script
+					location="component://party/webapp/partymgr/WEB-INF/actions/party/GetUserLoginPrimaryEmail.groovy" />
+			</actions>
+			<widgets>
+				<decorator-screen name="profileDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<not>
+									<if-empty field="party" />
+								</not>
+							</condition>
+							<widgets>
+								<section>
+									<condition>
+										<if-compare field="showOld" operator="equals"
+											value="true" type="Boolean" />
+									</condition>
+									<widgets>
+										<container>
+											
+											<link
+												style="btn btn-small btn-primary margin-top5 icon-eye-open open-sans"
+												target="EmployeeProfile" text="${uiLabelMap.PartyHideOld}">
+												<parameter param-name="partyId" from-field="party.partyId" />
+											</link>
+										</container>
+									</widgets>
+									<fail-widgets>										
+										<container>
+											<link
+												style="btn btn-small btn-primary margin-top5 icon-eye-open open-sans"
+												target="EmployeeProfile" text="${uiLabelMap.PartyShowOld}">
+												<parameter param-name="partyId" from-field="party.partyId" />
+												<parameter param-name="SHOW_OLD" value="true" />
+											</link>
+										</container>
+									</fail-widgets>
+								</section>
+								<section>
+									<widgets>
+										<container style="row-fluid">
+											<container style="span12">
+												<include-screen name="Party" />
+											</container>
+											<container style="span12 no-left-margin">
+												<container style="span6 no-left-margin">
+													<include-screen name="CurrentEmploymentData"
+														location="component://hrolbius/widget/EmployeeScreens.xml" />
+													<include-screen name="UserLogin" />
+													<include-screen name="Attributes" />
+													<include-screen name="Content" />
+												</container>
+												<container style="span6">
+													<include-screen name="Notes" />
+													<include-screen name="Contact" />
+													<include-screen name="trainingsList" />
+													<screenlet collapsible="true" id="contactsAndAccounts" title="${uiLabelMap.PartyListRelatedAccounts}" initially-collapsed="true" >
+														<include-screen name="contactsAndAccounts" />
+													</screenlet>
+												</container>
+											</container>
+										</container>
+									</widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<container>
+									<label style="h3">${uiLabelMap.PartyNoPartyFoundWithPartyId}:
+										${parameters.partyId}
+									</label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>	
+	<screen name="EmployeeProfileDir">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PageTitleViewPartyProfile" />
+				<set field="tabButtonItem" value="EmployeeProfile" />
+				<set field="labelTitleProperty" value="PartyTaxAuthInfos" />
+				<set field="partyId" from-field="parameters.partyId" />
+				<set field="layoutSettings.javaScripts[]" value="/partymgr/js/PartyProfileContent.js"
+					global="true" />
+				<script
+					location="component://party/webapp/partymgr/WEB-INF/actions/party/ViewProfile.groovy" />
+				<script
+					location="component://party/webapp/partymgr/WEB-INF/actions/party/GetUserLoginPrimaryEmail.groovy" />
+				<entity-one entity-name="PartyAndPerson" value-field="lookupPerson">
+					<field-map field-name="partyId" from-field="parameters.partyId" /><!-- 
+					is required -->
+				</entity-one>
+			</actions>
+			<widgets>
+				<decorator-screen name="profileDirDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<and>
+									<not>
+										<if-empty field="party" />
+									</not>
+									<not>
+										<if-empty field="lookupPerson"/>
+									</not>
+								</and>
+							</condition>
+							<actions>
+								<set field="nowTimestamp" value="${groovy: org.ofbiz.base.util.UtilDateTime.nowTimestamp()}"/>
+								<property-map resource="PartyUiLabels" map-name="uiLabelMap"
+									global="true" />
+								<set field="parameters.partyId" from-field="parameters.partyId"
+									default-value="${userLogin.partyId}" />
+								<entity-and entity-name="PartyNameHistory" list="partyNameHistoryList">
+									<field-map field-name="partyId" from-field="parameters.partyId" />
+									<order-by field-name="-changeDate" />
+								</entity-and>
+								<entity-one entity-name="PartyAndGroup" value-field="lookupGroup">
+									<field-map field-name="partyId" from-field="parameters.partyId" /><!-- 
+										is required -->
+								</entity-one>
+								<entity-one entity-name="PartyAndPerson" value-field="lookupPerson">
+									<field-map field-name="partyId" from-field="parameters.partyId" /><!-- 
+										is required -->
+								</entity-one>
+								<service service-name="getPartyPostalAddress" result-map="permanentResidence">
+									<field-map field-name="partyId" from-field="parameters.partyId"/>
+									<field-map field-name="contactMechPurposeTypeId" value="PERMANENT_RESIDENCE"/>
+								</service>
+								
+								<service service-name="getPartyPostalAddress" result-map="currentResidence">
+									<field-map field-name="partyId" from-field="parameters.partyId"/>
+									<field-map field-name="contactMechPurposeTypeId" value="CURRENT_RESIDENCE"/>
+								</service>
+								<service service-name="getPartyEmail" result-map="partyEmail">
+									<field-map field-name="partyId" from-field="parameters.partyId"/>
+									<field-map field-name="contactMechPurposeTypeId" value="PRIMARY_EMAIL"/>
+								</service>
+								<service service-name="getPartyTelephone" result-map="phoneNumber">
+									<field-map field-name="partyId" from-field="parameters.partyId"/>
+									<field-map field-name="contactMechPurposeTypeId" value="PHONE_HOME"/>
+								</service>
+								<service service-name="getPartyTelephone" result-map="mobileNumber">
+									<field-map field-name="partyId" from-field="parameters.partyId"/>
+									<field-map field-name="contactMechPurposeTypeId" value="PHONE_MOBILE"/>
+								</service>
+								<service service-name="getCurrentPartyEmploymentData" auto-field-map="true" result-map="employmentData" />
+								<entity-one value-field="systemUserLogin" entity-name="UserLogin">
+									<field-map field-name="userLoginId" value="system"/>
+								</entity-one>
+								<entity-condition list="partyEducation" entity-name="PersonEduAndSystemType">
+									<condition-expr field-name="partyId" from-field="parameters.partyId"/>
+									<order-by field-name="-level"/>
+								</entity-condition>
+								<entity-condition list="personFamilyBackground" entity-name="PersonFamilyBackground">
+									<condition-expr field-name="partyId" operator="equals" from-field="parameters.partyId"/>
+								</entity-condition>
+								<entity-condition list="personWorkingProcess" entity-name="PersonWorkingProcess">
+									<condition-expr field-name="partyId" operator="equals" from-field="parameters.partyId"/>
+								</entity-condition>
+								
+								<entity-and list="partyContentList" entity-name="PartyContent">
+									<field-map field-name="partyId" from-field="parameters.partyId" />
+									<field-map field-name="partyContentTypeId" value="LGOIMGURL" />
+									<order-by field-name="-fromDate" />
+								</entity-and>
+								<set field="partyContentId" from-field="partyContentList[0].contentId" />
+								<set field="partyContent"
+									value="${groovy: partyContentId!=null?&quot;/content/control/stream?contentId=&quot; + partyContentId : &quot;&quot;}" />
+								<set field="partyGroupLogoLinkUrl" from-field="partyContent"
+									default-value="${lookupGroup.logoImageUrl}" global="true" />
+								<set field="personalImage" from-field="partyContent" />
+							</actions>
+							<widgets>
+								<screenlet title="${uiLabelMap.PartyPersonalInformation}" navigation-menu-name="personUpdate">
+									<include-menu name="personUpdate"
+										location="component://hrolbius/widget/menus/hrolbiusMenus.xml" />
+									<platform-specific>
+										<html>
+											<html-template location="component://hrolbius/webapp/hrolbius/ftl/profile/EmployeeProfile.ftl"/>
+										</html>
+									</platform-specific>
+								</screenlet>
+							</widgets>
+							<fail-widgets>
+								<container>
+									<label style="h3">${uiLabelMap.PartyNoPartyFoundWithPartyId}:
+										${parameters.partyId}
+									</label>
+								</container>
+							</fail-widgets>
+						</section>
+						<!-- <section>
+							<condition>
+								<not>
+									<if-empty field="party" />
+								</not>
+							</condition>
+							<widgets>
+								<section>
+									<condition>
+										<if-compare field="showOld" operator="equals"
+											value="true" type="Boolean" />
+									</condition>
+									<widgets>
+										<container>
+											<link
+												style="btn btn-small btn-primary margin-top5 icon-eye-open open-sans"
+												target="EmployeeProfile" text="${uiLabelMap.PartyHideOld}">
+												<parameter param-name="partyId" from-field="party.partyId" />
+											</link>
+										</container>
+									</widgets>
+									<fail-widgets>
+										<container>
+											<link
+												style="btn btn-small btn-primary margin-top5 icon-eye-open open-sans"
+												target="EmployeeProfile" text="${uiLabelMap.PartyShowOld}">
+												<parameter param-name="partyId" from-field="party.partyId" />
+												<parameter param-name="SHOW_OLD" value="true" />
+											</link>
+										</container>
+									</fail-widgets>
+								</section>
+								<section>
+									<widgets>
+										<container style="row-fluid">											
+											<container style="span12">
+												<include-screen name="Party"/>
+											</container>
+											<container style="span12 no-left-margin">
+												<container style="span6 no-left-margin">
+													<include-screen name="CurrentEmploymentData"
+														location="component://hrolbius/widget/EmployeeScreens.xml" />
+													<include-screen name="UserLogin" />
+													<include-screen name="Attributes" />
+													<include-screen name="Content" />
+												</container>
+												<container style="span6">
+													<include-screen name="Notes" />
+													<include-screen name="Contact" />
+													<include-screen name="trainingsList" />
+													<screenlet collapsible="true" id="contactsAndAccounts" title="${uiLabelMap.PartyListRelatedAccounts}" initially-collapsed="true">
+														<include-screen name="contactsAndAccounts" />
+													</screenlet>
+												</container>
+											</container>
+										</container>
+									</widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<container>
+									<label style="h3">${uiLabelMap.PartyNoPartyFoundWithPartyId}:
+										${parameters.partyId}
+									</label>
+								</container>
+							</fail-widgets>
+						</section> -->
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen> 
+	
+	<screen name="GroupProfileDir">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="directory"></set>
+				<set field="titleProperty" value="PageTitleViewPartyProfile" />
+				<set field="tabButtonItem" value="GroupProfile" />
+				<set field="labelTitleProperty" value="PartyTaxAuthInfos" />
+				<set field="partyId" from-field="parameters.partyId" />
+				<set field="layoutSettings.javaScripts[]" value="/aceadmin/jqw/jqwidgets/jqxvalidator.js" global="true" />
+				<set field="layoutSettings.javaScripts[]" value="/aceadmin/jqw/jqwidgets/jqxmaskedinput.js" global="true" />
+				<set field="layoutSettings.javaScripts[]" value="/aceadmin/jqw/jqwidgets/jqxdropdownlist.js" global="true" />
+				<set field="layoutSettings.javaScripts[]" value="/aceadmin/jqw/jqwidgets/jqxwindow.js" global="true" />
+<!-- 				<set field="layoutSettings.javaScripts[]" value="/partymgr/js/PartyProfileContent.js" -->
+<!-- 					global="true" /> -->
+				<script
+					location="component://party/webapp/partymgr/WEB-INF/actions/party/ViewProfile.groovy" />
+				<script
+					location="component://party/webapp/partymgr/WEB-INF/actions/party/GetUserLoginPrimaryEmail.groovy" />
+				<entity-one value-field="partyInformation" entity-name="PartyGroup" auto-field-map="true"/>
+				<entity-condition list="listPhoneNumber" entity-name="PartyTelecomNumberPurpose" auto-field-map="true" filter-by-date="true">
+				    <condition-expr field-name="contactMechPurposeTypeId" value="PRIMARY_PHONE"/>
+				</entity-condition>
+				<entity-condition list="listAddress" entity-name="PartyPostalAddressPurposeGeo" auto-field-map="true" filter-by-date="true">
+				    <condition-expr field-name="contactMechPurposeTypeId" value="PRIMARY_LOCATION"/>
+				</entity-condition>
+				<entity-condition list="listEmail" entity-name="PartyContactMechPurposeType" auto-field-map="true" filter-by-date="true">
+				    <condition-list combine="and">
+					    <condition-expr field-name="contactMechPurposeTypeId" value="PRIMARY_EMAIL"/>
+					    <condition-expr field-name="contactMechTypeId" value="EMAIL_ADDRESS"/>
+					    <condition-expr field-name="partyId" from-field="parameters.partyId"/>
+				    </condition-list>
+				</entity-condition>
+				<entity-condition list="listUom" entity-name="Uom">
+				    <condition-expr field-name="uomTypeId" value="CURRENCY_MEASURE"/>
+				</entity-condition>
+				<entity-condition list="listCountry" entity-name="Geo">
+				    <condition-expr field-name="geoTypeId" value="COUNTRY"/>
+				    <order-by field-name="geoName"/>
+				</entity-condition>
+				<entity-condition list="listState" entity-name="GeoAssocAndGeoTo">
+					<condition-list combine="or">
+						<condition-expr field-name="geoTypeId" value="PROVINCE"/>
+						<condition-expr field-name="geoTypeId" value="STATE"/>
+					</condition-list>
+					<order-by field-name="geoName"/>
+				</entity-condition>
+				<entity-condition list="listCounty" entity-name="GeoAssocAndGeoTo">
+				    <condition-list combine="or">
+				    	<condition-expr field-name="geoTypeId" value="COUNTY"/>
+						<condition-expr field-name="geoTypeId" value="DISTRICT"/>
+					</condition-list>
+					<order-by field-name="geoName"/>
+				</entity-condition>
+				<entity-condition list="listContactMechPurposeType" entity-name="ContactMechPurposeTypeDetail">
+					<condition-expr field-name="contactMechTypeId" value="POSTAL_ADDRESS"/>
+				</entity-condition>
+				<entity-condition list="listEmailType" entity-name="ContactMechPurposeTypeDetail">
+					<condition-expr field-name="contactMechTypeId" value="EMAIL_ADDRESS"/>
+				</entity-condition>
+				<entity-condition list="listTelecomNumber" entity-name="ContactMechPurposeTypeDetail">
+					<condition-expr field-name="contactMechTypeId" value="TELECOM_NUMBER"/>
+				</entity-condition>
+			</actions>
+			<widgets>
+				<decorator-screen name="GroupProfileDirDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+					    <platform-specific>
+							<html>
+								<html-template location="component://hrolbius/webapp/hrolbius/ftl/employee/GroupPartyDir.ftl"/>
+							</html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen> 
+	
+	<screen name="mainEmployeeProfile">
+		<section>
+			<actions>
+				<property-map resource="hrolbiusUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="DirectoryUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="GlobalHRSettingUiLabels"
+					map-name="uiLabelMap" global="true" />
+				<property-map resource="JobAnalysisUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="PayrollUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="PerfReviewUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="RecruitmentUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="TrainingUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="LookupUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="DashBoardUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="CommonUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<set field="titleProperty" value="PageTitleViewPartyProfile" />
+				<set field="tabButtonItem" value="EmployeeProfile" />
+				<set field="labelTitleProperty" value="PartyTaxAuthInfos" />
+				<set field="partyId" from-field="parameters.partyId" />
+				<set field="layoutSettings.javaScripts[]" value="/partymgr/js/PartyProfileContent.js"
+					global="true" />
+				<script
+					location="component://party/webapp/partymgr/WEB-INF/actions/party/ViewProfile.groovy" />
+				<script
+					location="component://party/webapp/partymgr/WEB-INF/actions/party/GetUserLoginPrimaryEmail.groovy" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not>
+							<if-empty field="party" />
+						</not>
+					</condition>
+					<widgets>
+						<section>
+							<condition>
+								<if-has-permission permission="HR_DIRECTORY"
+									action="_VIEW" />
+							</condition>
+							<widgets>
+								<include-screen name="DirectoryParty" />
+							</widgets>
+							<fail-widgets>
+								<label style="h3">${uiLabelMap.HROlbiusViewPermissionError}
+								</label>
+							</fail-widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<container>
+							<label style="h3">${uiLabelMap.PartyNoPartyFoundWithPartyId}:
+								${parameters.partyId}
+							</label>
+						</container>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="EditPerson">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="profile" />
+				<set field="titleProperty" value="PageTitleEditPersonalInformation" />
+				<set field="tabButtonItem" value="EmployeeProfile" />
+				<set field="headerItem" value="find" />
+				<set field="labelTitleProperty" value="PageTitleEditPersonalInformation" />
+
+				<set field="donePage" from-field="parameters.DONE_PAGE"
+					default-value="EmployeeProfile" />
+				<set field="partyId" from-field="parameters.partyId" />
+				<entity-one entity-name="PartyAndPerson" value-field="personInfo" />
+			</actions>
+			<widgets>
+				<decorator-screen name="profileDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<platform-specific>
+							<html>
+								<html-template location="component://hrolbius/webapp/hrolbius/ftl/placeholderEditperson.ftl"></html-template>
+							</html>
+						</platform-specific>
+						<screenlet title="${uiLabelMap.PageTitleEditPersonalInformation}">
+							<include-form name="EditPerson"
+								location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="Party">
+		<section>
+			<actions>
+				<property-map resource="PartyUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<set field="parameters.partyId" from-field="parameters.partyId"
+					default-value="${userLogin.partyId}" />
+				<entity-and entity-name="PartyNameHistory" list="partyNameHistoryList">
+					<field-map field-name="partyId" from-field="parameters.partyId" />
+					<order-by field-name="-changeDate" />
+				</entity-and>
+				<entity-one entity-name="PartyAndGroup" value-field="lookupGroup">
+					<field-map field-name="partyId" from-field="parameters.partyId" /><!-- 
+						is required -->
+				</entity-one>
+				<entity-one entity-name="PartyAndPerson" value-field="lookupPerson">
+					<field-map field-name="partyId" from-field="parameters.partyId" /><!-- 
+						is required -->
+				</entity-one>
+				<entity-and list="partyContentList" entity-name="PartyContent">
+					<field-map field-name="partyId" from-field="parameters.partyId" />
+					<field-map field-name="partyContentTypeId" value="LGOIMGURL" />
+					<order-by field-name="-fromDate" />
+				</entity-and>
+				<set field="partyContentId" from-field="partyContentList[0].contentId" />
+				<set field="partyContent"
+					value="${groovy: partyContentId!=null?&quot;/content/control/stream?contentId=&quot; + partyContentId : &quot;&quot;}" />
+				<set field="partyGroupLogoLinkUrl" from-field="partyContent"
+					default-value="${lookupGroup.logoImageUrl}" global="true" />
+				<set field="personalImage" from-field="partyContent" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not>
+							<if-empty field="lookupPerson" />
+						</not>
+					</condition>
+					<widgets>
+						<section>
+							<condition>
+								<or>
+									<if-has-permission permission="HR_DIRECTORY"
+										action="_UPDATE" />
+									<if-compare-field field="parameters.partyId"
+										operator="equals" to-field="userLogin.partyId" />
+								</or>
+							</condition>
+							<widgets>
+								<screenlet icon-style="icon-info-sign"
+									title="${uiLabelMap.PartyPersonalInformation}"
+									navigation-menu-name="personUpdate" id="PartyPersonalInformationPanel">
+									<include-menu name="personUpdate"
+										location="component://hrolbius/widget/menus/hrolbiusMenus.xml" />
+									<include-form name="ViewPartyPerson"
+										location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+									<section>
+										<condition>
+											<not>
+												<if-empty field="partyNameHistoryList" />
+											</not>
+										</condition>
+										<widgets>
+											<container style="span12 no-left-margin">
+												<screenlet id="ViewPartyPersonHistory"  title="${uiLabelMap.HistoryChangeProfileEmployee}" collapsible="true" initially-collapsed="true">
+													<include-form name="ViewPartyPersonHistory"
+														location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+												</screenlet>
+											</container>
+										</widgets>
+									</section>
+								</screenlet>
+							</widgets>
+							<fail-widgets>
+								<screenlet title="${uiLabelMap.PartyPersonalInformation}"
+									id="PartyPersonalInformationPanel">
+									<include-form name="ViewPartyPerson"
+										location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+									<section>
+										<condition>
+											<not>
+												<if-empty field="partyNameHistoryList" />
+											</not>
+										</condition>
+										<widgets>
+											<container style="span12 no-left-margin">
+												<screenlet id="ViewPartyPersonHistory"  title="${uiLabelMap.HistoryChangeProfileEmployee}" collapsible="true" initially-collapsed="true">
+													<include-form name="ViewPartyPersonHistory"
+														location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+												</screenlet>
+											</container>
+										</widgets>
+									</section>
+								</screenlet>
+							</fail-widgets>
+						</section>
+					</widgets>
+				</section>
+				<section>
+					<condition>
+						<not>
+							<if-empty field="lookupGroup" />
+						</not>
+					</condition>
+					<widgets>
+						<section>
+							<condition>
+								<if-has-permission permission="HR_DIRECTORY"
+									action="_UPDATE" />
+							</condition>
+							<widgets>
+								<screenlet title="${uiLabelMap.PartyOrgGroupInformation}"
+									navigation-menu-name="groupUpdate" id="PartyGroupInformationPanel">
+									<include-menu name="groupUpdate"
+										location="component://hrolbius/widget/menus/hrolbiusMenus.xml" />
+									<include-form name="ViewPartyGroup"
+										location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+									<section>
+										<condition>
+											<not>
+												<if-empty field="partyNameHistoryList" />
+											</not>
+										</condition>
+										<widgets>
+											<container style="span12 no-left-margin">
+												<screenlet id="ViewPartyGroupHistory" collapsible="true" initially-collapsed="true" title="${uiLabelMap.HrolbiusPartyHistory}">
+													<include-form name="ViewPartyGroupHistory"
+															location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+												</screenlet>
+											</container>
+										</widgets>
+									</section>
+								</screenlet>
+							</widgets>
+							<fail-widgets>
+								<screenlet title="${uiLabelMap.PartyPartyGroupInformation}"
+									id="PartyGroupInformationPanel">
+									<include-form name="ViewPartyGroup"
+										location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+									<section>
+										<condition>
+											<not>
+												<if-empty field="partyNameHistoryList" />
+											</not>
+										</condition>
+										<widgets>
+											<container style="span12 no-left-margin">
+												<screenlet id="ViewPartyGroupHistory" collapsible="true" initially-collapsed="true" title="${uiLabelMap.HrolbiusPartyHistory}">
+													<include-form name="ViewPartyGroupHistory"
+													location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+												</screenlet>
+											</container>
+										</widgets>
+									</section>
+								</screenlet>
+							</fail-widgets>
+						</section>
+					</widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="DirectoryParty">
+		<section>
+			<actions>
+				<property-map resource="PartyUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="HrCommonUiLabels" map-name="uiLabelMap"
+					global="true" />	
+				<property-map resource="EmployeeUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<set field="parameters.partyId" from-field="parameters.partyId"
+					default-value="${userLogin.partyId}" />
+				<entity-and entity-name="PartyNameHistory" list="partyNameHistoryList">
+					<field-map field-name="partyId" from-field="parameters.partyId" />
+					<order-by field-name="-changeDate" />
+				</entity-and>
+				<entity-one entity-name="PartyAndGroup" value-field="lookupGroup">
+					<field-map field-name="partyId" from-field="parameters.partyId" /><!-- 
+						is required -->
+				</entity-one>
+				<entity-one entity-name="PartyAndPerson" value-field="lookupPerson">
+					<field-map field-name="partyId" from-field="parameters.partyId" /><!-- 
+						is required -->
+				</entity-one>
+				<entity-and list="partyContentList" entity-name="PartyContent">
+					<field-map field-name="partyId" from-field="parameters.partyId" />
+					<field-map field-name="partyContentTypeId" value="LGOIMGURL" />
+					<order-by field-name="-fromDate" />
+				</entity-and>
+				<set field="partyContentId" from-field="partyContentList[0].contentId" />
+				<set field="partyContent"
+					value="${groovy: partyContentId!=null?&quot;/content/control/stream?contentId=&quot; + partyContentId : &quot;&quot;}" />
+				<set field="partyGroupLogoLinkUrl" from-field="partyContent"
+					default-value="${lookupGroup.logoImageUrl}" global="true" />
+				<set field="personalImage" from-field="partyContent" />
+				<script
+					location="component://party/webapp/partymgr/WEB-INF/actions/party/GetContactMechs.groovy" />
+				<service service-name="getCurrentPartyEmploymentData"
+					auto-field-map="true" result-map="employmentData" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not>
+							<if-empty field="lookupPerson" />
+						</not>
+					</condition>
+					<widgets>
+						<section>
+							<widgets>
+								<screenlet icon-style="icon-info-sign"
+									title="${uiLabelMap.PartyPersonalInformation}"
+									navigation-menu-name="viewDetailPartyPerson" id="PartyPersonalInformationPanel">
+									<include-menu name="viewDetailPartyPerson"
+										location="component://hrolbius/widget/menus/hrolbiusMenus.xml" />
+<!-- 									<include-form name="ViewPartyPersonDirect" -->
+<!-- 										location="component://hrolbius/widget/forms/EmployeeForms.xml" /> -->
+									<platform-specific>
+										<html><html-template location="component://hrolbius/webapp/hrolbius/ftl/ViewPersonDirectory.ftl"></html-template></html>
+									</platform-specific>
+								</screenlet>
+							</widgets>
+							<fail-widgets>
+								<screenlet title="${uiLabelMap.PartyPersonalInformation}"
+									id="PartyPersonalInformationPanel">
+									<platform-specific>
+										<html><html-template location="component://hrolbius/webapp/hrolbius/ftl/ViewPersonDirectory.ftl"></html-template></html>
+									</platform-specific>
+								</screenlet>
+							</fail-widgets>
+						</section>
+					</widgets>
+				</section>
+				<section>
+					<condition>
+						<not>
+							<if-empty field="lookupGroup" />
+						</not>
+					</condition>
+					<widgets>
+						<section>
+							<condition>
+								<if-has-permission permission="HR_DIRECTORY"
+									action="_UPDATE" />
+							</condition>
+							<widgets>
+								<screenlet title="${uiLabelMap.PartyOrgGroupInformation}"
+									navigation-menu-name="viewDetailPartyGroup" id="PartyGroupInformationPanel">
+									<include-menu name="viewDetailPartyGroup"
+										location="component://hrolbius/widget/menus/hrolbiusMenus.xml" />
+									<include-form name="ViewPartyGroupDirect"
+										location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+								</screenlet>
+							</widgets>
+							<fail-widgets>
+								<screenlet title="${uiLabelMap.PartyOrgGroupInformation}"
+									id="PartyGroupInformationPanel">
+									<include-form name="ViewPartyGroupDirect"
+										location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+								</screenlet>
+							</fail-widgets>
+						</section>
+					</widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="contactsAndAccounts">
+		<section>
+			<widgets>
+				<include-screen name="partyRelContacts" />
+				<include-screen name="partyRelAccounts" />
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="partyRelContacts">
+		<section>
+			<actions>
+				<property-map resource="PartyUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<entity-one entity-name="Party" value-field="party"></entity-one>
+				<entity-and list="contacts" entity-name="PartyRelationship"
+					filter-by-date="true">
+					<field-map field-name="partyIdFrom" from-field="parameters.partyId" />
+					<field-map field-name="roleTypeIdFrom" value="ACCOUNT" />
+					<field-map field-name="roleTypeIdTo" value="CONTACT" />
+					<order-by field-name="partyIdTo" />
+				</entity-and>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-compare field="party.partyTypeId" operator="equals"
+							value="PARTY_GROUP" />
+					</condition>
+					<widgets>
+						<screenlet title="${uiLabelMap.PartyListRelatedContacts}"
+							navigation-menu-name="addRelContactAccounts">
+							<include-menu name="addRelContactAccounts"
+								location="component://hrolbius/widget/menus/hrolbiusMenus.xml" />
+							<section>
+								<condition>
+									<not>
+										<if-empty field="parameters.editPartyRel" />
+									</not>
+								</condition>
+								<widgets>
+									<include-form name="AddContact"
+										location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+								</widgets>
+							</section>
+							<include-form name="ListRelatedContacts"
+								location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+						</screenlet>
+					</widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="partyRelAccounts">
+		<section>
+			<actions>
+				<property-map resource="PartyUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<entity-and list="accounts" entity-name="PartyRelationship"
+					filter-by-date="true">
+					<field-map field-name="partyIdTo" from-field="parameters.partyId" />
+					<field-map field-name="roleTypeIdFrom" value="ACCOUNT" />
+					<field-map field-name="roleTypeIdTo" value="CONTACT" />
+					<order-by field-name="partyIdFrom" />
+				</entity-and>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-compare field="party.partyTypeId" operator="equals"
+							value="PERSON" />
+					</condition>
+					<widgets>
+						<screenlet icon-style="icon-group"
+							title="${uiLabelMap.PartyListRelatedAccounts}"
+							navigation-menu-name="addRelContactAccounts">
+							<include-menu name="addRelContactAccounts"
+								location="component://hrolbius/widget/menus/hrolbiusMenus.xml" />
+							<section>
+								<condition>
+									<not>
+										<if-empty field="parameters.editPartyRel" />
+									</not>
+								</condition>
+								<widgets>
+									<include-form name="AddAccount"
+										location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+								</widgets>
+							</section>
+							<include-form name="ListRelatedAccounts"
+								location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+						</screenlet>
+					</widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="Contact">
+		<section>
+			<actions>
+				<property-map resource="PartyUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<set field="partyId" from-field="parameters.partyId"
+					default-value="${userLogin.partyId}" />
+				<script
+					location="component://party/webapp/partymgr/WEB-INF/actions/party/GetContactMechs.groovy" />
+				<script
+					location="component://party/webapp/partymgr/WEB-INF/actions/party/GetUserLoginPrimaryEmail.groovy" />
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template
+							location="component://hrolbius/webapp/hrolbius/ftl/Contact.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="Notes">
+		<section>
+			<actions>
+				<property-map resource="PartyUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<set field="partyId" from-field="parameters.partyId"
+					default-value="${userLogin.partyId}" />
+				<entity-and entity-name="PartyNoteView" list="notes">
+					<field-map field-name="targetPartyId" from-field="partyId" />
+					<order-by field-name="-noteDateTime" />
+				</entity-and>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template
+							location="component://hrolbius/webapp/hrolbius/ftl/Notes.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+
+	<screen name="ContentList">
+		<section>
+			<actions>
+				<set field="partyId" from-field="parameters.partyId"
+					default-value="${userLogin.partyId}" />
+				<property-map resource="CommonUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="ContentUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<entity-and entity-name="PartyContent" list="partyContent">
+					<field-map field-name="partyId" from-field="partyId" />
+				</entity-and>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template
+							location="component://hrolbius/webapp/hrolbius/ftl/ContentList.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="Content">
+		<section>
+			<actions>
+				<property-map resource="PartyUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<entity-condition entity-name="PartyContentType"
+					list="partyContentTypes">
+					<order-by field-name="description" />
+				</entity-condition>
+				<entity-condition entity-name="MimeType" list="mimeTypes">
+					<order-by field-name="description" />
+					<order-by field-name="mimeTypeId" />
+				</entity-condition>
+				<entity-condition entity-name="RoleType" list="roles">
+					<order-by field-name="description" />
+					<order-by field-name="roleTypeId" />
+				</entity-condition>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template
+							location="component://hrolbius/webapp/hrolbius/ftl/Content.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="Attributes">
+		<section>
+			<actions>
+				<property-map resource="PartyUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<set field="partyId" from-field="parameters.partyId"
+					default-value="${userLogin.partyId}" />
+				<entity-one entity-name="Party" value-field="party" />
+				<entity-and entity-name="PartyAttribute" list="attributes">
+					<field-map field-name="partyId" from-field="partyId" />
+				</entity-and>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template
+							location="component://hrolbius/webapp/hrolbius/ftl/Attributes.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="UserLogin">
+		<section>
+			<actions>
+				<property-map resource="PartyUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<set field="partyId" from-field="parameters.partyId"
+					default-value="${userLogin.partyId}" />
+				<entity-one entity-name="Party" value-field="party" />
+				<entity-and entity-name="UserLogin" list="userLogins">
+					<field-map field-name="partyId" from-field="partyId" />
+				</entity-and>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template
+							location="component://hrolbius/webapp/hrolbius/ftl/UserLogin.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="EditEmployeeSkills">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PageTitleViewPartySkill" />
+				<set field="tabButtonItem" value="EditEmployeeSkills" />
+				<set field="partyId" from-field="parameters.partyId" />
+				<set field="skillTypeId" from-field="parameters.skillTypeId" />
+				<set field="partySkillsCtx.partyId" from-field="parameters.partyId" />
+				<set field="parameters.insideEmployee" value="true" />
+			</actions>
+			<widgets>
+				<decorator-screen name="EmployeeDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<screenlet title="${uiLabelMap.HumanResSkills}">
+							<include-form name="ListEmployeeSkills"
+								location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+						</screenlet>
+						<screenlet id="AddPartySkillPanel" title="${uiLabelMap.HumanResAddPartySkill}"
+							collapsible="true">
+							<include-form name="AddEmployeeSkills"
+								location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EditEmployeeQuals">
+		<section>
+			<actions>
+				<set field="titleProperty" value="HumanResEditPartyQual" />
+				<set field="headerItem" value="Employee" />
+				<set field="tabButtonItem" value="EditEmployeeQuals" />
+				<set field="partyId" from-field="parameters.partyId" />
+				<set field="partyQualCtx.partyId" from-field="parameters.partyId" />
+				<set field="parameters.insideEmployee" value="true" />
+			</actions>
+			<widgets>
+				<decorator-screen name="EmployeeDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<screenlet title="${uiLabelMap.HumanResPartyQualification}">
+							<container id="table-container">
+								<include-form name="ListEmployeeQualification"
+									location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+							</container>
+						</screenlet>
+						<screenlet id="AddPartyQualPanel" title="${uiLabelMap.HumanResAddPartyQual}"
+							collapsible="true">
+							<include-form name="AddEmployeeQualification"
+								location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EditEmployeeTrainings">
+		<section>
+			<actions>
+				<set field="tabButtonItem" value="EditEmployeeTrainings" />
+			</actions>
+			<widgets>
+				<decorator-screen name="EmployeeDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<screenlet id="TrainingStatus" title="${uiLabelMap.HumanResTrainingStatus}"
+							collapsible="true">
+							<include-form name="ListTrainingStatus"
+								location="component://hrolbius/widget/forms/PersonTrainingForms.xml" />
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EditEmployeeEmploymentApps">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PageTitleViewEmploymentApp" />
+				<set field="tabButtonItem" value="EditEmployeeEmploymentApps" />
+				<set field="referredByPartyId" from-field="parameters.partyId" />
+				<set field="employmentAppCtx.applicationId" from-field="parameters.applicationId" />
+				<set field="parameters.insideEmployee" value="true" />
+			</actions>
+			<widgets>
+				<decorator-screen name="EmployeeDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<include-form name="ListEmploymentApps"
+							location="component://hrolbius/widget/forms/EmploymentAppForms.xml" />
+						<screenlet id="AddEmploymentAppPanel"
+							title="${uiLabelMap.CommonAdd} ${uiLabelMap.HumanResEmploymentApp}"
+							collapsible="true">
+							<include-form name="AddEmploymentApp"
+								location="component://hrolbius/widget/forms/EmploymentAppForms.xml" />
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EditEmployeeResumes">
+		<section>
+			<actions>
+				<set field="headerItem" value="PartyResume"></set>
+				<set field="tabButtonItem" value="EditEmployeeResumes" />
+				<set field="resumeId" from-field="parameters.resumeId" />
+				<set field="partyId" from-field="parameters.partyId" />
+				<entity-one entity-name="PartyResume" value-field="partyResume" />
+			</actions>
+			<widgets>
+				<decorator-screen name="EmployeeDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<include-form name="ListPartyResumes"
+							location="component://hrolbius/widget/forms/PartyResumeForms.xml" />
+						<screenlet id="AddEmploymentAppPanel"
+							title="${uiLabelMap.CommonAdd} ${uiLabelMap.HumanResEditPartyResume}"
+							collapsible="true">
+							<include-form name="EditPartyResume"
+								location="component://hrolbius/widget/forms/PartyResumeForms.xml" />
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EditEmployeePerformanceNotes">
+		<section>
+			<actions>
+				<set field="titleProperty" value="HumanResPerfNote" />
+				<set field="tabButtonItem" value="EditEmployeePerformanceNotes" />
+				<set field="partyId" from-field="parameters.partyId" />
+			</actions>
+			<widgets>
+				<decorator-screen name="EmployeeDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<include-form name="ListPerformanceNotes"
+							location="component://hrolbius/widget/forms/EmploymentForms.xml" />
+						<screenlet id="AddPerformanceNotePanel" title="${uiLabelMap.HumanResAddPerfNote}"
+							collapsible="true">
+							<include-form name="AddPerformanceNote"
+								location="component://hrolbius/widget/forms/EmploymentForms.xml" />
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EditEmployeeLeaves">
+		<section>
+			<actions>
+				<set field="titleProperty" value="HumanResEditEmplLeave" />
+				<set field="tabButtonItem" value="EditEmployeeLeaves" />
+				<set field="partyId" from-field="parameters.partyId" />
+				<entity-one entity-name="EmplLeave" value-field="leaveApp" />
+			</actions>
+			<widgets>
+				<decorator-screen name="EmployeeDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<screenlet title="${uiLabelMap.HumanResEmplLeave}">
+							<container id="table-container">
+								<include-form name="ListEmplLeaves"
+									location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+							</container>
+						</screenlet>
+						<screenlet id="AddEmplLeavePanel" title="${uiLabelMap.HumanResAddEmplLeave}"
+							collapsible="true">
+							<include-form name="AddEmplLeave"
+								location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="CurrentEmploymentData">
+		<section>
+			<actions>
+				<service service-name="getCurrentPartyEmploymentData"
+					auto-field-map="true" result-map="employmentData" />
+			</actions>
+			<widgets>
+				<!-- <container style="widget-header widget-header-small header-color-blue2" 
+					> -->
+				<!-- <label style="h5">${uiLabelMap.HumanResCurrentEmploymentData}</label> -->
+				<!-- </container> -->
+				<!-- <screenlet icon-style="icon-info-sign" -->
+				<!-- title="${uiLabelMap.HumanResCurrentEmploymentData}"> -->
+				<include-form name="CurrentEmploymentData"
+					location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+				<!-- </screenlet> -->
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="trainingsList">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template
+							location="component://hrolbius/webapp/hrolbius/ftl/simpleListTrainingStatus.ftl" />
+					</html>
+				</platform-specific>
+				<!-- <container style="widget-header widget-header-small header-color-blue2" 
+					> -->
+				<!-- <label style="h5">${uiLabelMap.HumanResTrainings}</label> -->
+				<!-- </container> -->
+				<!-- <screenlet icon-style="icon-bar-chart" title=""> -->
+				<!-- <include-form name="simpleListTrainingStatus" -->
+				<!-- location="component://hrolbius/widget/forms/PersonTrainingForms.xml" 
+					/> -->
+				<!-- </screenlet> -->
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="PayrollHistory">
+		<section>
+			<actions>
+				<set field="titleProperty" value="HumanResPayRollHistory" />
+				<set field="tabButtonItem" value="PayrollHistory" />
+				<set field="selectedMenuItem" value="profile" />
+				<set field="partyId" from-field="parameters.partyId" />
+				<set field="parameters.sortField" from-field="parameters.sortField"
+					default-value="invoiceDate DESC" />
+				<entity-condition list="payroll" entity-name="InvoiceAndType">
+					<condition-list combine="and">
+						<condition-expr field-name="partyIdFrom" operator="equals"
+							from-field="partyId" />
+						<condition-expr field-name="invoiceTypeId"
+							operator="equals" value="PAYROL_INVOICE" />
+					</condition-list>
+					<order-by field-name="${parameters.sortField}" />
+				</entity-condition>
+			</actions>
+			<widgets>
+				<decorator-screen name="profileDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<screenlet icon-style="icon-table"
+							title="${uiLabelMap.HumanResPayRollHistory}">
+							<include-form name="PayrollHistoryList"
+								location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="MyLeaveList">
+		<section>
+			<actions>
+				<set field="partyId" from-field="userLogin.partyId" />
+			</actions>
+			<widgets>
+				<screenlet title="${uiLabelMap.HumanResMyLeaves}"
+					navigation-form-name="ListEmplLeaves">
+					<include-form name="ListEmplLeaves"
+						location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+				</screenlet>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="MyTrainings">
+		<section>
+			<actions>
+				<set field="partyId" from-field="userLogin.partyId" />
+			</actions>
+			<widgets>
+				<screenlet title="${uiLabelMap.HumanResMyTrainings}">
+					<include-form name="ListEmplTrainings"
+						location="component://hrolbius/widget/forms/PersonTrainingForms.xml" />
+				</screenlet>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EmployeePayrollParameter">
+		<section>
+			<actions>
+				<set field="titleProperty" value="AddUpdatePayrollparameters" />
+				<set field="tabButtonItem" value="EmployeePayrollParameter" />
+				<set field="partyId" from-field="parameters.partyId" />
+			</actions>
+			<widgets>
+				<decorator-screen name="profileDirDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<screenlet icon-style="icon-ok-circle"
+							title="${uiLabelMap.AddUpdatePayrollparameters}">
+							<include-form name="AssignEmployeePayrollParameters"
+								location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+						</screenlet>
+						<screenlet icon-style="icon-table" title="${uiLabelMap.PayrollParameters}">
+							<include-form name="ListEmployeePayrollParameters"
+								location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ViewEmployeePayrollParameter">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PayrollParameters" />
+				<set field="selectedSubMenuItem" value="EmployeePayrollParameter" />
+				<set field="partyId" from-field="parameters.partyId" />
+			</actions>
+			<widgets>
+				<decorator-screen name="profileDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<platform-specific>
+							<html>
+								<html-template location="component://hrolbius/webapp/hrolbius/ftl/profile/jqxListEmplPayrollParameter.ftl"></html-template>
+							</html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="viewprofile">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PageTitleViewPartyProfile" />
+				<set field="tabButtonItem" value="viewprofile" />
+				<set field="labelTitleProperty" value="PartyTaxAuthInfos" />
+				<set field="partyId" from-field="parameters.partyId" />
+				<set field="layoutSettings.javaScripts[]" value="/partymgr/js/PartyProfileContent.js"
+					global="true" />
+				<script
+					location="component://party/webapp/partymgr/WEB-INF/actions/party/ViewProfile.groovy" />
+			</actions>
+			<widgets>
+
+				<decorator-screen name="profileDecorator"
+					location="${parameters.mainDecoratorLocation}">
+
+					<decorator-section name="body">
+
+						<section>
+							<condition>
+								<and>
+									<if-empty field="partyId" />
+									<not>
+										<if-empty field="parameters.telno" />
+									</not>
+								</and>
+							</condition>
+							<actions>
+								<service service-name="findPartyFromTelephone"
+									auto-field-map="true" result-map="telnoMap" />
+								<entity-one entity-name="Party" value-field="party">
+									<field-map field-name="partyId" from-field="telnoMap.partyId" />
+								</entity-one>
+								<set field="parameters.partyId" from-field="party.partyId" />
+							</actions>
+							<widgets />
+						</section>
+						<section>
+							<condition>
+								<and>
+									<if-empty field="partyId" />
+									<not>
+										<if-empty field="parameters.email" />
+									</not>
+								</and>
+							</condition>
+							<actions>
+								<service service-name="findPartyFromEmailAddress"
+									result-map="emailMap">
+									<field-map field-name="address" from-field="parameters.email" />
+								</service>
+								<entity-one entity-name="Party" value-field="party">
+									<field-map field-name="partyId" from-field="emailMap.partyId" />
+								</entity-one>
+								<set field="parameters.partyId" from-field="party.partyId" />
+							</actions>
+							<widgets />
+						</section>
+						<section>
+							<condition>
+								<not>
+									<if-empty field="party" />
+								</not>
+							</condition>
+							<widgets>
+								<section>
+									<condition>
+										<if-compare field="showOld" operator="equals"
+											value="true" type="Boolean" />
+									</condition>
+									<widgets>
+										<container
+											style="button-bar button-style-2 padding-top8 padding-bottom8">
+											<link target="viewprofile" text="${uiLabelMap.PartyHideOld}"
+												style="btn btn-mini icon-eye-close btn-primary">
+												<parameter param-name="partyId" from-field="party.partyId" />
+											</link>
+										</container>
+									</widgets>
+									<fail-widgets>
+										<container
+											style="button-bar button-style-2 padding-top8 padding-bottom8">
+											<link target="viewprofile" text="${uiLabelMap.PartyShowOld}"
+												style="btn btn-primary btn-mini icon-eye-open">
+												<parameter param-name="partyId" from-field="party.partyId" />
+												<parameter param-name="SHOW_OLD" value="true" />
+											</link>
+										</container>
+									</fail-widgets>
+								</section>
+								<section>
+									<widgets>
+										<include-screen name="EmployeeProfileView" />
+									</widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<container>
+									<label style="h3">${uiLabelMap.PartyNoPartyFoundWithPartyId}:
+										${parameters.partyId}
+									</label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="CreateUserLogin">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="profile"></set>
+				<set field="titleProperty" value="CreateUserLogin" />
+				<set field="tabButtonItem" value="EmployeeProfile" />
+				<set field="labelTitleProperty" value="CreateUserLogin" />
+				<set field="cancelPage" from-field="parameters.CANCEL_PAGE"
+					default-value="EmployeeProfile" />
+				<set field="createUserLoginURI" value="ProfileCreateUserLogin" />
+				<set field="partyId" from-field="parameters.partyId" />
+			</actions>
+			<widgets>
+				<decorator-screen name="profileDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<screenlet title="${uiLabelMap.CreateUserLogin}">
+							<include-form name="AddUserLogin"
+								location="component://common/widget/SecurityForms.xml" />
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="EditUserLogin">
+		<section>
+			<actions>
+				<set field="titleProperty" value="UserLoginUpdateSecuritySettings" />
+				<set field="tabButtonItem" value="EmployeeProfile" />
+				<set field="labelTitleProperty" value="UserLoginUpdateSecuritySettings" />
+				<set field="updateUserLoginSecurityURI" value="ProfileUpdateUserLoginSecurity" />
+				<set field="updatePasswordURI" value="ProfileUpdatePassword" />
+				<set field="cancelPage" from-field="parameters.CANCEL_PAGE"
+					default-value="EmployeeProfile" />
+				<set field="partyId" from-field="parameters.partyId" />
+				<set field="userLoginId" from-field="parameters.userLoginId" />
+				<entity-one entity-name="UserLogin" value-field="editUserLogin" />
+			</actions>
+			<widgets>
+				<decorator-screen name="profileDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<container style="row-fluid">
+							<container style="span12">
+								<container style="span6">
+									<screenlet title="${uiLabelMap.UserLoginUpdateSecuritySettings} - ${userLoginId}">
+										<include-form name="updateUserLoginSecurity"
+											location="component://common/widget/SecurityForms.xml" />
+									</screenlet>
+								</container>
+								<container style="span6">
+									<screenlet title="${uiLabelMap.UserLoginChangePassword}">
+										<include-form name="updatePassword"
+											location="component://common/widget/SecurityForms.xml" />
+									</screenlet>
+								</container>
+							</container>
+						</container>
+<!-- 						<container style="page-title margin-top8 margin-bottom8" -->
+<!-- 							id="custom-header2"> -->
+<!-- 							<label style="h3" -->
+<!-- 								text="${uiLabelMap.UserLoginUpdateSecuritySettings} - ${userLoginId}" /> -->
+<!-- 						</container> -->
+<!-- 						<include-form name="updateUserLoginSecurity" -->
+<!-- 							location="component://common/widget/SecurityForms.xml" /> -->
+<!-- 						<screenlet title="${uiLabelMap.UserLoginChangePassword}"> -->
+<!-- 							<include-form name="updatePassword" -->
+<!-- 								location="component://common/widget/SecurityForms.xml" /> -->
+<!-- 						</screenlet> -->
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="EditUserLoginSecurityGroups">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PageTitleEditUserLoginSecurityGroups" />
+				<set field="tabButtonItem" value="EmployeeProfile" />
+				<set field="cancelPage" from-field="parameters.CANCEL_PAGE"
+					default-value="EmployeeProfile" />
+				<set field="addUserLoginSecurityGroupURI" value="ProfileAddUserLoginToSecurityGroup" />
+				<set field="removeUserLoginSecurityGroupURI" value="ProfileRemoveUserLoginFromSecurityGroup" />
+				<set field="updateUserLoginSecurityGroupURI" value="ProfileUpdateUserLoginToSecurityGroup" />
+				<set field="userLoginId" from-field="parameters.userLoginId" />
+				<entity-one entity-name="UserLogin" value-field="editUserLogin" />
+				<set field="partyId" from-field="parameters.partyId"
+					default-value="${editUserLogin.partyId}" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonPartyDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<screenlet id="AddUserLoginSecurityGroupsPanel"
+							title="${uiLabelMap.AddUserLoginToSecurityGroup}" collapsible="true">
+							<include-form name="AddUserLoginSecurityGroup"
+								location="component://common/widget/SecurityForms.xml" />
+						</screenlet>
+						<include-form name="ListUserLoginSecurityGroups"
+							location="component://common/widget/SecurityForms.xml" />
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="EditPartyAttribute">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PageTitleEditPartyAttribute" />
+				<set field="headerItem" value="find" />
+				<set field="tabButtonItem" value="viewvendor" />
+
+				<set field="labelTitleProperty" value="PartyAttribute" />
+
+				<set field="cancelPage" from-field="parameters.CANCEL_PAGE"
+					default-value="EmployeeProfile" />
+				<set field="partyId" from-field="parameters.partyId" />
+				<set field="attrName" from-field="parameters.attrName" />
+				<entity-one entity-name="Party" value-field="party" />
+				<entity-one entity-name="PartyAttribute" value-field="attribute" />
+			</actions>
+			<widgets>
+				<decorator-screen name="profileDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<screenlet title="${uiLabelMap.PartyAttribute}">
+							<include-form name="EditPartyAttribute"
+								location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="EditPartyContents">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PageTitleListContent" />
+				<set field="headerItem" value="find" />
+				<set field="selectedMenuItem" value="profile"/>
+				<set field="tabButtonItem" value="EditPartyContents" />
+				<set field="partyId" from-field="parameters.partyId" />
+				<set field="contentId" from-field="parameters.contentId" />
+				<entity-one entity-name="Content" value-field="content" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonPartyDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<screenlet title="${uiLabelMap.PageTitleListContent}" navigation-menu-name="SubtabEditPartyContents">
+<!-- 							<container style="padding-top8 padding-bottom8 padding-left8"> -->
+<!-- 								<link target="EditPartyContents" text="${uiLabelMap.CommonCreateNew}" -->
+<!-- 									style="btn btn-mini btn-primary"> -->
+<!-- 									<parameter param-name="partyId" /> -->
+<!-- 								</link> -->
+<!-- 							</container> -->
+							<include-menu location="component://hrolbius/widget/menus/hrolbiusMenus.xml" name="SubtabEditPartyContents"/>
+							<include-form name="ListPartyContents"
+								location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+						</screenlet>
+						<screenlet title="${uiLabelMap.PageTitleAddPartyContent}">
+							<include-form name="AddPartyContent"
+								location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="AddPartyNote">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PageTitleNewPartyNote" />
+				<set field="tabButtonItem" value="EmployeeProfile" />
+				<set field="labelTitleProperty" value="PageTitleNewPartyNote" />
+
+				<set field="donePage" from-field="parameters.DONE_PAGE"
+					default-value="EmployeeProfile" />
+				<set field="partyId" from-field="parameters.partyId" />
+			</actions>
+			<widgets>
+				<decorator-screen name="profileDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<screenlet title="${uiLabelMap.PageTitleNewPartyNote}">
+							<include-form name="AddPartyNote"
+								location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="EmployeeProfileView">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PageTitleViewPartyProfile" />
+				<set field="tabButtonItem" value="EmployeeProfile" />
+				<set field="labelTitleProperty" value="PartyTaxAuthInfos" />
+				<set field="partyId" from-field="parameters.partyId" />
+				<set field="layoutSettings.javaScripts[]" value="/partymgr/js/PartyProfileContent.js"
+					global="true" />
+				<script
+					location="component://party/webapp/partymgr/WEB-INF/actions/party/ViewProfile.groovy" />
+				<script
+					location="component://party/webapp/partymgr/WEB-INF/actions/party/GetUserLoginPrimaryEmail.groovy" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not>
+							<if-empty field="party" />
+						</not>
+					</condition>
+					<widgets>
+						<!-- <section> -->
+						<!-- <condition> -->
+						<!-- <if-compare field="showOld" operator="equals" -->
+						<!-- value="true" type="Boolean" /> -->
+						<!-- </condition> -->
+						<!-- <widgets> -->
+						<!-- <container> -->
+						<!-- <link style="btn bnt-mini btn-primary margin-top5 icon-eye-open 
+							open-sans" -->
+						<!-- target="viewprofile" text="${uiLabelMap.PartyHideOld}"> -->
+						<!-- <parameter param-name="partyId" from-field="party.partyId" /> -->
+						<!-- </link> -->
+						<!-- </container> -->
+						<!-- </widgets> -->
+						<!-- <fail-widgets> -->
+						<!-- <container> -->
+						<!-- <link style="btn btn-mini btn-primary margin-top5 icon-eye-open 
+							open-sans" -->
+						<!-- target="viewprofile" text="${uiLabelMap.PartyShowOld}"> -->
+						<!-- <parameter param-name="partyId" from-field="party.partyId" /> -->
+						<!-- <parameter param-name="SHOW_OLD" value="true" /> -->
+						<!-- </link> -->
+						<!-- </container> -->
+						<!-- </fail-widgets> -->
+						<!-- </section> -->
+						<section>
+							<widgets>
+								<container style="row-fluid">
+									<container style="span6">
+										<include-screen name="Party" />
+									</container>
+									<container style="span6">
+										<screenlet id="CurrentEmploymentData"
+											title="${uiLabelMap.HumanResCurrentEmploymentData}"
+											collapsible="true" initially-collapsed="false">
+											<include-screen name="CurrentEmploymentData"
+												location="component://hrolbius/widget/EmployeeScreens.xml" />
+										</screenlet>
+										<screenlet title="${uiLabelMap.PartyUserName}" id="userlogin"
+											collapsible="true" initially-collapsed="true">
+											<include-screen name="UserLogin" />
+										</screenlet>
+										<screenlet title="${uiLabelMap.EmpoyeeAttributes}"
+											id="Attributes" collapsible="true" initially-collapsed="true">
+											<include-screen name="Attributes" />
+										</screenlet>
+
+										<screenlet title="${uiLabelMap.EmployeeContent}" id="content"
+											collapsible="true" initially-collapsed="true">
+											<include-screen name="Content" />
+										</screenlet>
+
+										<screenlet title="${uiLabelMap.CommonNotes}" id="Notes"
+											collapsible="true" initially-collapsed="true">
+											<include-screen name="Notes" />
+										</screenlet>
+
+										<screenlet title="${uiLabelMap.PartyContactInformation}"
+											id="Contact" collapsible="true" initially-collapsed="true">
+											<include-screen name="Contact" />
+										</screenlet>
+
+										<screenlet title="${uiLabelMap.HumanResTrainings}"
+											id="trainingsList" collapsible="true" initially-collapsed="true">
+											<include-screen name="trainingsList" />
+										</screenlet>
+
+										<include-screen name="contactsAndAccounts" />
+									</container>
+								</container>
+							</widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<container>
+							<label style="h3">${uiLabelMap.PartyNoPartyFoundWithPartyId}:
+								${parameters.partyId}
+							</label>
+						</container>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="editcontactmech">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PageTitleEditContactMech" />
+				<set field="headerItem" value="find" />
+				<set field="tabButtonItem" value="EmployeeProfile" />
+
+				<set field="labelTitleProperty" value="PageTitleEditContactMech" />
+
+				<script
+					location="component://party/webapp/partymgr/WEB-INF/actions/HasPartyPermissions.groovy" />
+				<script
+					location="component://party/webapp/partymgr/WEB-INF/actions/party/EditContactMech.groovy" />
+
+				<set field="dependentForm" value="editcontactmechform" />
+				
+				<set field="paramKey" value="countryGeoId" />
+				<set field="paramKey_district" value="provinceGeoId"/>
+				<set field="paramKey_ward" value="districtGeoId"/>
+				
+				<set field="mainId" value="countryGeoId" />
+				<set field="stateProvinceGeoId" value="stateProvinceGeoId" />
+				<set field="distGeoId" value="districtGeoId"/>
+				<set field="wardGeoId" value="wardGeoId"/>
+				
+				<set field="requestName" value="getAssociatedStateList" />
+				<set field="requestName_district" value="getAssociatedDistList"/>
+				<set field="requestName_ward" value="getAssociatedWardList"/>
+				
+				<set field="responseName" value="stateList" />
+				<set field="responseName_district" value="districtList" />
+				<set field="responseName_ward" value="wardList" />
+				
+				<set field="dependentKeyName" value="geoId" />
+				<set field="descName" value="geoName" />
+				<set field="selectedDependentOption" from-field="mechMap.postalAddress.stateProvinceGeoId"
+					default-value="_none_" />
+			</actions>
+			<widgets>
+				<decorator-screen name="profileDirDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<or>
+									<if-compare field="hasViewPermission" operator="equals"
+										value="true" type="Boolean" />
+									<if-compare field="hasPcmCreatePermission" operator="equals"
+										value="true" type="Boolean" />
+									<if-compare field="hasPcmUpdatePermission" operator="equals"
+										value="true" type="Boolean" />
+									<if-compare-field field="parameters.partyId"
+										operator="equals" to-field="userLogin.partyId" />
+									<not>
+										<if-empty field="mechMap.partyContactMech" />
+									</not>
+								</or>
+							</condition>
+							<widgets>
+							<screenlet title="${uiLabelMap.PageTitleEditContactMech}">
+								<platform-specific>
+									<html>
+										<!-- <html-template
+											location="component://common/webcommon/includes/setDependentDropdownValuesJs.ftl" /> -->
+										<html-template
+											location="component://hrolbius/webapp/hrolbius/ftl/setDependentDropdownProvinceDistWardOneForm.ftl" />	
+										<html-template
+											location="component://hrolbius/webapp/hrolbius/ftl/editcontactmech.ftl" />
+									</html>
+								</platform-specific>
+							</screenlet>
+							</widgets>
+							<fail-widgets>
+								<container style="button-bar padding-top8 padding-bottom8">
+									<link target="backHome" text="[${uiLabelMap.CommonBack}]"
+										style="btn btn-primary" />
+								</container>
+								<container>
+									<label style="h3">${uiLabelMap.PartyMsgContactNotBelongToYou}
+									</label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="EditPartyGroup">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PageTitleEditGroupInformation" />
+				<set field="tabButtonItem" value="GroupProfile" />
+				<set field="headerItem" value="find" />
+				<set field="labelTitleProperty" value="PageTitleEditGroupInformation" />
+
+				<set field="donePage" from-field="parameters.DONE_PAGE"
+					default-value="EmployeeProfile" />
+				<set field="partyId" from-field="parameters.partyId" />
+				<entity-one entity-name="PartyAndGroup" value-field="partyGroup" />
+			</actions>
+			<widgets>
+				<decorator-screen name="GroupProfileDirDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<screenlet title="${uiLabelMap.PageTitleEditGroupInformation}">
+							<include-form name="EditPartyGroup"
+								location="component://hrolbius/widget/forms/EmployeeForms.xml" />
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+    <screen name="NewEmplDirectory">
+    	<section>
+    		<actions>
+    			<property-map resource="hrolbiusUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="DirectoryUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="GlobalHRSettingUiLabels"
+					map-name="uiLabelMap" global="true" />
+				<property-map resource="TrainingUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="LookupUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="DashBoardUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="CommonUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map map-name="uiLabelMap" resource="HumanResUiLabels" global="true"/>	
+				<property-map map-name="uiLabelMap" resource="HrCommonUiLabels" global="true"/>	
+				<property-map map-name="uiLabelMap" resource="PartyUiLabels" global="true"/>
+				<!-- <set field="titleProperty" value="PageTitleViewPartyProfile" /> -->
+				<set field="tabButtonItem" value="EmployeeProfile" />
+				<!-- <set field="labelTitleProperty" value="PartyTaxAuthInfos" /> -->
+				<set field="internalOrgId" from-field="parameters.internalOrgId" />			
+    		</actions>
+    		<widgets>
+    			<section>
+					<condition>
+						<not>
+							<if-empty field="internalOrgId" />
+						</not>
+					</condition>
+					<widgets>
+						<section>
+							<condition>
+								<if-has-permission permission="HR_DIRECTORY" action="_VIEW"/>
+							</condition>
+							<actions>
+								<!-- <set field="tabButtonItem" value="Employee" />
+								<set field="titleProperty" value="PartyCreateNewEmployee" />
+								<set field="headerItem" value="Employees" /> -->
+							
+								<script location="component://party/webapp/partymgr/WEB-INF/actions/party/EditContactMech.groovy" />
+								<set field="dependentForm" value="createEmployee" />
+								
+								<set field="paramKey" value="countryGeoId" />
+								<set field="paramKey_district" value="provinceGeoId"/>
+								<set field="paramKey_ward" value="districtGeoId"/>
+								
+								<set field="PermtRes_mainId" value="permanentResidence_countryGeoId" />
+								<set field="PermtRes_stateProvinceGeoId" value="permanentResidence_stateProvinceGeoId" />
+								<set field="PermtRes_distGeoId" value="permanentResidence_districtGeoId"/>
+								<set field="PermtRes_wardGeoId" value="permanentResidence_wardGeoId"/>
+								<set field="currRes_mainId" value="currResidence_countryGeoId"/>
+								<set field="currRes_stateProvinceGeoId" value="currResidence_stateProvinceGeoId"/>
+								<set field="currRes_distGeoId" value="currResidence_districtGeoId"/>
+								<set field="currRes_wardGeoId" value="currResidence_wardGeoId"/>
+								
+								<set field="requestName" value="getAssociatedStateList" />
+								<set field="requestName_district" value="getAssociatedDistList"/>
+								<set field="requestName_ward" value="getAssociatedWardList"/>
+								
+								<set field="responseName" value="stateList" />
+								<set field="responseName_district" value="districtList" />
+								<set field="responseName_ward" value="wardList" />
+								
+								<set field="dependentKeyName" value="geoId" />
+								<set field="descName" value="geoName" />
+								<set field="selectedDependentOption" from-field="mechMap.postalAddress.stateProvinceGeoId"
+									default-value="_none_" />
+								<set field="interOrgName" value="${groovy: internalOrgId != null? org.ofbiz.party.party.PartyHelper.getPartyName(delegator, internalOrgId, false): &quot;&quot;}"/>	
+							</actions>
+							<widgets>
+								<screenlet title="${uiLabelMap.HumanResNewEmployee} ${uiLabelMap.CommonTo} ${interOrgName}">
+										<section>
+											<widgets>
+												<platform-specific>
+													<html>
+														<html-template
+															location="component://hrolbius/webapp/hrolbius/ftl/setDependentDropdownProvinceDistWard.ftl" />
+														<html-template
+															location="component://hrolbius/webapp/hrolbius/ftl/editEmployee.ftl" />
+													</html>
+												</platform-specific>
+											</widgets>
+										</section>
+									</screenlet>
+							</widgets>
+							<fail-widgets>
+								<label style="h3">${uiLabelMap.HROlbiusViewPermissionError}</label>
+							</fail-widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<container>
+							<label style="h3">${uiLabelMap.PartyNoPartyFoundWithPartyId}:
+								${parameters.internalOrgId}</label>
+						</container>
+					</fail-widgets>
+				</section>
+    		</widgets>
+    	</section>
+    </screen>    
+	
+	<screen name="EmplWorkingProcessDir">
+		<section>
+			<actions>
+				<set field="navMenuName" value="EmplCommonSubTabBar" />
+				<set field="navMenuLocation" value="component://hrolbius/widget/menus/EmployeeMenus.xml" />
+				<set field="titleProperty" value="HREmplWorkingProcess" />
+				<set field="tabButtonItem" value="EmployeeAdvancesTabBar" />
+				<set field="tabSubButtonItem" value="EmplWorkingProcessDir" />
+				<set field="labelTitleProperty" value="HREmplWorkingProcess" />
+				<set field="editPartyId" value="true" type="Boolean"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="profileDirDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="HROLBIUS" action="_VIEW"></if-has-permission>
+							</condition>
+							<widgets>
+								<decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">                                    
+		                            <decorator-section name="search-options">
+		                            	<include-form name="SearchEmplWorkingProcess" location="component://hrolbius/widget/forms/EmployeeForms.xml"/>
+		                            </decorator-section>
+		                            <decorator-section name="search-results">
+		                                <include-form name="ListEmplWorkingProcess" location="component://hrolbius/widget/forms/EmployeeForms.xml"/>
+		                            </decorator-section>
+	                        	</decorator-screen>
+							</widgets>
+							<fail-widgets>
+								<label style="h3">${uiLabelMap.ViewPermissionError}</label>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="EmplWorkingProcess">
+		<section>
+			<actions>
+				<set field="navMenuName" value="EmplCommonSubTabBar" />
+				<set field="navMenuLocation" value="component://hrolbius/widget/menus/EmployeeMenus.xml" />
+				<set field="titleProperty" value="HREmplWorkingProcess" />
+				<set field="selectedSubMenuItem" value="EmplWorkingProcess" />
+				<set field="labelTitleProperty" value="EmplWorkingProcess" />
+				<set field="parameters.employeePartyId" from-field="userLogin.partyId"/>
+				<set field="editPartyId" value="false" type="Boolean"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="profileDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="HROLBIUS" action="_VIEW"></if-has-permission>
+							</condition>
+							<widgets>
+								<!-- <screenlet title="${uiLabelMap.HREmplWorkingProcess}">
+		                    		<include-form name="ViewListEmplWorkingProcess" location="component://hrolbius/widget/forms/EmployeeForms.xml"/>
+								</screenlet> -->
+								<platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/profile/jqxListEmplPositionFulfillment.ftl"></html-template>
+									</html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<label style="h3">${uiLabelMap.ViewPermissionError}</label>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>       	
+	<screen name="EmplBussinessTripProposal">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="EmplMgrWorking"/>
+				<set field="titleProperty" value="EmplBussinessTripProposal"/>
+				<set field="tabButtonItem" value="EmplBussinessTrip" />
+				<set field="tabSubButtonItem" value="EmplBussinessTripProposal"/>
+				
+				<set field="emplId" from-field="userLogin.partyId"/>
+				<set field="employeeName" value="${groovy: return org.ofbiz.party.party.PartyHelper.getPartyName(delegator, userLogin.partyId, false)}"/>
+				<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrDeptEmpl.groovy"/>
+				<entity-condition list="vehicleType" entity-name="VehicleType"></entity-condition>
+			</actions>
+			<widgets>
+				<decorator-screen name="EmplMgrWorkingDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<widgets>
+								<screenlet title="${uiLabelMap.EmplBussinessTripProposal}">
+									<platform-specific>
+										<html>
+											<html-template location="component://hrolbius/webapp/hrolbius/ftl/businessTrip/bussinessTripProposal.ftl"/>
+										</html>
+									</platform-specific>
+								</screenlet>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ApprovalBusinessTripProposal">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="EmplMgrWorking"/>
+				<set field="titleProperty" value="EmplBussinessTripProposal"/>
+				<set field="tabButtonItem" value="EmplBussinessTrip" />
+				<set field="tabSubButtonItem" value="EmplBussinessTripProposal"/>
+				<set field="partyBusinessTripId" from-field="parameters.partyBusinessTripId"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="EmplMgrWorkingDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<entity-one value-field="partyBusinessTrip" entity-name="PartyBusinessTrip">
+									<field-map field-name="partyBusinessTripId" from-field="partyBusinessTripId"/>
+								</entity-one>								
+								<entity-condition list="businessTripPlanList" entity-name="PartyBusinessTripPlan">
+									<condition-expr field-name="partyBusinessTripId" from-field="partyBusinessTripId"/>
+								</entity-condition>
+								<entity-condition list="businessTripVehicleList" entity-name="PartyBusinessTripVehicle">
+									<condition-expr field-name="partyBusinessTripId" from-field="partyBusinessTripId"/>
+								</entity-condition>
+								<entity-condition list="statusItemList" entity-name="StatusItem">
+									<condition-list combine="or">
+										<condition-expr field-name="statusId" value="BUSS_TRIP_APPROVAL" operator="equals"/>
+										<condition-expr field-name="statusId" value="BUSS_TRIP_REJECT" operator="equals"/>
+									</condition-list>
+								</entity-condition>
+								<set field="emplId" from-field="partyBusinessTrip.partyId"/>
+								<set field="employeeName" value="${groovy: return org.ofbiz.party.party.PartyHelper.getPartyName(delegator, emplId, false)}"/>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrDeptEmpl.groovy"/>
+								<entity-condition list="businessTripApproval" entity-name="BusinessTripApproval">
+									<condition-list>
+										<condition-expr field-name="partyBusinessTripId" from-field="partyBusinessTripId"/>
+										<condition-expr field-name="roleTypeId" value="APPROVER"/>
+									</condition-list>
+								</entity-condition>
+								<service service-name="checkPermissionApproveBussTripProposal" result-map="checkMap">
+									<field-map field-name="partyId" from-field="userLogin.partyId"/>
+									<field-map field-name="partyBusinessTripId" from-field="partyBusinessTripId"/>
+								</service>
+							</actions>
+							<widgets>
+								<screenlet title="${uiLabelMap.ApprovalBusinessTripProposal}">
+									<platform-specific>
+										<html>
+											<html-template location="component://hrolbius/webapp/hrolbius/ftl/businessTrip/ApprovalBusinessTripPropsal.ftl"/>
+										</html>
+									</platform-specific>								
+								</screenlet>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	
+</screens>

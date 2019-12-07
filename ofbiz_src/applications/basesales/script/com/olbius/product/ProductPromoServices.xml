@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../../framework/minilang/dtd/simple-methods-v2.xsd">
+	<simple-method method-name="createProductPromoCustom">
+		<make-value value-field="newEntity" entity-name="ProductPromo"/>
+		<if-empty field="parameters.statusId">
+		    <set field="parameters.statusId" value="PROMO_CREATED"/>
+		</if-empty>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <set field="newEntity.productPromoId" from-field="parameters.productPromoId"/>
+        <if-empty field="newEntity.productPromoId">
+    		<sequenced-id sequence-name="ProductPromo" field="newEntity.productPromoId"/>
+    	<else>
+    		<check-id field="newEntity.productPromoId" />
+    		<check-errors/>
+    		<entity-one value-field="dummyProductPromo" entity-name="ProductPromo">
+    			<field-map field-name="productPromoId" from-field="parameters.productPromoId"/>
+    		</entity-one>
+    		<if-not-empty field="dummyProductPromo">
+    			<add-error>
+    				<fail-property resource="CommonErrorUiLabels" property="CommonErrorDublicateKey" />
+    			</add-error>
+    		</if-not-empty>
+    		<check-errors/>
+    	</else>
+    	</if-empty>
+        
+		<set field="productPromoId" from-field="newEntity.productPromoId"/>
+        <if-empty field="newEntity.userEntered">
+            <set value="Y" set-if-empty="true" field="newEntity.userEntered"/>
+        </if-empty>
+		
+        <now-timestamp field="nowTimestamp"/>
+        <set from-field="nowTimestamp" field="newEntity.createdDate"/>
+        <set from-field="nowTimestamp" field="newEntity.lastModifiedDate"/>
+        <set from-field="userLogin.userLoginId" field="newEntity.lastModifiedByUserLogin"/>
+        <set from-field="userLogin.userLoginId" field="newEntity.createdByUserLogin"/>
+        <create-value value-field="newEntity"/>
+        
+        <make-value value-field="newPromoStatus" entity-name="ProductPromoStatus"/>
+        <sequenced-id sequence-name="ProductPromoStatus" field="newPromoStatus.promoStatusId"/>
+        <set field="newPromoStatus.statusId" from-field="newEntity.statusId"/>
+        <set field="newPromoStatus.productPromoId" from-field="newEntity.productPromoId"/>
+        <set field="newPromoStatus.statusDatetime" from-field="nowTimestamp"/>
+        <set field="newPromoStatus.statusUserLogin" from-field="userLogin.userLoginId"/>
+        <set field="newPromoStatus.changeReason" from-field="parameters.changeReason"/>
+        <create-value value-field="newPromoStatus"/>
+        
+        <if-not-empty field="parameters.budgetId">
+        	<make-value value-field="newPromoBudget" entity-name="ProductPromoBudget"/>		
+			<set field="newPromoBudget.productPromoId" from-field="productPromoId"/>
+			<set field="newPromoBudget.budgetId" from-field="parameters.budgetId"/>
+			<set field="newPromoBudget.budgetTypeId" value="PROMO_BUDGET_DIS"/>
+			<create-value value-field="newPromoBudget"/>
+        </if-not-empty>
+		
+		<if-not-empty field="parameters.miniRevenueId">
+			<make-value value-field="newPromoMiniRevenue" entity-name="ProductPromoBudget"/>
+			<set field="newPromoMiniRevenue.productPromoId" from-field="productPromoId"/>
+			<set field="newPromoMiniRevenue.budgetId" from-field="parameters.miniRevenueId"/>
+			<set field="newPromoMiniRevenue.budgetTypeId" value="PROMO_MINI_REVENUE"/>
+			<create-value value-field="newPromoMiniRevenue"/>
+		</if-not-empty>
+		
+		<if-not-empty field="parameters.roleTypeIds">
+			<!-- <call-class-method method-name="toSet" class-name="org.ofbiz.base.util.UtilMisc" ret-field="partiesSet">
+				<field field="parameters.parties"/>
+			</call-class-method> -->		
+			<iterate entry="roleTypeId" list="parameters.roleTypeIds">
+				<set field="promoRoleCtx.roleTypeId" from-field="roleTypeId"/>
+				<set field="promoRoleCtx.productPromoId" from-field="productPromoId"/>
+				<if-not-empty field="parameters.fromDate">
+					<set field="promoRoleCtx.fromDate" from-field="parameters.fromDate"/>
+					<else>
+						<now-timestamp field="promoRoleCtx.fromDate"/>		
+					</else>
+				</if-not-empty>
+				<call-service service-name="createProductPromoRoleCustom" in-map-name="promoRoleCtx"></call-service>
+			</iterate>
+		</if-not-empty>
+		<if-not-empty field="parameters.productStoreIds"> 			
+			<iterate entry="productStoreId" list="parameters.productStoreIds">
+				<set field="productStorePromo.productStoreId" from-field="productStoreId"/>
+				<set field="productStorePromo.productPromoId" from-field="productPromoId"/>				
+				<if-not-empty field="parameters.fromDate">
+					<set field="productStorePromo.fromDate" from-field="parameters.fromDate"/>
+					<else>
+						<now-timestamp field="productStorePromo.fromDate"/>		
+					</else>
+				</if-not-empty>
+				<if-not-empty field="parameters.thruDate">
+					<set field="productStorePromo.thruDate" from-field="parameters.thruDate"/>
+				</if-not-empty>
+				<!-- set from date, thru date for promotion -->
+				<call-service service-name="createProductStorePromoAppl" in-map-name="productStorePromo">
+				</call-service>
+			</iterate>
+		</if-not-empty>
+		<field-to-result field="productPromoId" result-name="productPromoId"/>
+	</simple-method>
+	
+	<!-- product role apply -->
+    <simple-method method-name="createProductPromoRole">
+    	<set field="lookupPKMap.productPromoId" from-field="parameters.productPromoId"/>
+    	<find-by-primary-key value-field="lookedUpValue" map="lookupPKMap" entity-name="ProductPromo"/>
+    	<if-compare operator="equals" value="PROMO_CREATED" field="lookedUpValue.statusId">
+			<make-value value-field="newPromoRole" entity-name="ProductPromoRoleTypeAppl"/>
+			<set-pk-fields value-field="newPromoRole" map="parameters"/>
+			<find-by-primary-key value-field="lookedUpValue" map="newPromoRole"/>
+			<if-not-empty field="lookedUpValue">
+				<call-bsh>
+					import org.ofbiz.base.util.UtilProperties;
+					import org.ofbiz.service.ServiceUtil;
+					resourceError = "BaseSalesErrorUiLabels";
+					ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "ProductPromoRoleExists", locale));
+				</call-bsh>
+				<return/>
+			</if-not-empty>
+			<set-nonpk-fields value-field="newPromoRole" map="parameters"/>
+			<create-value value-field="newPromoRole"/>
+		<else>
+			<call-bsh>
+				import org.ofbiz.base.util.UtilProperties;
+				import org.ofbiz.service.ServiceUtil;
+				resourceError = "BaseSalesErrorUiLabels";
+				ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "ProductPromoSttNotCreated", locale));			
+			</call-bsh>
+		</else>
+    	</if-compare>	
+    </simple-method>
+    
+	<!-- ProductPromoRule methods -->
+    <simple-method method-name="createProductPromoRule" short-description="Create a ProductPromoRule">
+       	<if-empty field="parameters.ruleName">
+        	<add-error>
+        		<fail-property resource="BaseSalesErrorUiLabels" property="BSRuleNameMustNotBeEmpty"/>
+        	</add-error>
+        </if-empty>
+        <check-errors/>
+        
+		<set from-field="parameters.productPromoId" field="lookupPKMap.productPromoId"/>
+        <find-by-primary-key entity-name="ProductPromo" map="lookupPKMap" value-field="lookedUpValue"/>
+        <if-compare operator="equals" value="PROMO_CREATED" field="lookedUpValue.statusId">
+        	<call-service service-name="createProductPromoRule" in-map-name="parameters">
+        	    <result-to-field result-name="productPromoRuleId" field="productPromoRuleId"/>
+        	</call-service>
+	    <else>
+	    	<add-error>
+        		<fail-property resource="BaseSalesErrorUiLabels" property="ProductPromoSttNotCreated"/>
+        	</add-error>
+        	<check-errors/>
+	    </else>    
+        </if-compare>
+        <field-to-result field="productPromoRuleId" result-name="productPromoRuleId"/>
+    </simple-method>
+    
+    <!-- ProductPromoCond methods -->
+    <simple-method method-name="createProductPromoCond" short-description="Create an ProductPromoCond">        
+		<set field="lookupPKMap.productPromoId" from-field="parameters.productPromoId"/>
+		<find-by-primary-key value-field="productPromo" map="lookupPKMap" entity-name="ProductPromo"/>
+		<if-compare operator="equals" value="PROMO_CREATED" field="productPromo.statusId">
+			<set-service-fields service-name="createProductPromoCond" to-map="context" map="parameters"/>
+			<call-service service-name="createProductPromoCond" in-map-name="context">
+				<result-to-field result-name="productPromoCondSeqId" field="productPromoCondSeqId"/>
+			</call-service>
+			<if-not-empty field="parameters.productCatIdListCond">
+				<iterate entry="productCatId" list="parameters.productCatIdListCond">
+					<set field="parameters.productCategoryId" from-field="productCatId"/>
+					<set field="parameters.productPromoActionSeqId" value="_NA_"/>
+					<set field="parameters.productPromoCondSeqId" from-field="productPromoCondSeqId"/>
+					<set field="parameters.andGroupId" value="_NA_"/>
+					<set-service-fields service-name="createProductPromoCategory" to-map="productCatContext" map="parameters"/>
+					<call-service service-name="createProductPromoCategory" in-map-name="productCatContext"></call-service>
+				</iterate>
+			</if-not-empty>
+			<if-not-empty field="parameters.productIdListCond">
+				<iterate entry="productId" list="parameters.productIdListCond">
+					<set field="parameters.productId" from-field="productId"/>
+					<set field="parameters.productPromoActionSeqId" value="_NA_"/>
+					<set field="parameters.productPromoCondSeqId" from-field="productPromoCondSeqId"/>
+					<set-service-fields service-name="createProductPromoProduct" to-map="productContext" map="parameters"/>
+					<call-service service-name="createProductPromoProduct" in-map-name="productContext"></call-service>
+				</iterate>
+			</if-not-empty>
+	        <else>
+	        	<call-bsh>
+					import org.ofbiz.base.util.UtilProperties;
+					import org.ofbiz.service.ServiceUtil;
+					resourceError = "DelysUiLabels";
+					ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "ProductPromoSttNotCreated", locale));			
+				</call-bsh>
+	        </else>
+		</if-compare>
+    </simple-method>
+    
+    <!-- ProductPromoAction methods -->
+    <simple-method method-name="createProductPromoAction" short-description="Create an ProductPromoAction">        
+		<set field="lookupPKMap.productPromoId" from-field="parameters.productPromoId"/>
+		<find-by-primary-key value-field="productPromo" map="lookupPKMap" entity-name="ProductPromo"/>
+		<if-compare operator="equals" value="PROMO_CREATED" field="productPromo.statusId">
+			<set-service-fields service-name="createProductPromoAction" to-map="context" map="parameters"/>	       
+	        <call-service service-name="createProductPromoAction" in-map-name="context">
+	        	<result-to-field result-name="productPromoActionSeqId" field="productPromoActionSeqId"/>
+	        </call-service>
+	        <if-not-empty field="parameters.productCatIdListAction">
+				<iterate entry="productCatId" list="parameters.productCatIdListAction">
+					<set field="parameters.productCategoryId" from-field="productCatId"/>
+					<set field="parameters.productPromoActionSeqId" from-field="productPromoActionSeqId"/>
+					<set field="parameters.productPromoCondSeqId" value="_NA_"/>
+					<set field="parameters.andGroupId" value="_NA_"/>
+					<set-service-fields service-name="createProductPromoCategory" to-map="productCatContext" map="parameters"/>
+					<call-service service-name="createProductPromoCategory" in-map-name="productCatContext"></call-service>
+				</iterate>
+			</if-not-empty>
+			<if-not-empty field="parameters.productIdListAction">
+				<iterate entry="productId" list="parameters.productIdListAction">
+					<set field="parameters.productId" from-field="productId"/>
+					<set field="parameters.productPromoActionSeqId" from-field="productPromoActionSeqId"/>
+					<set field="parameters.productPromoCondSeqId" value="_NA_"/>
+					<set-service-fields service-name="createProductPromoProduct" to-map="productContext" map="parameters"/>
+					<call-service service-name="createProductPromoProduct" in-map-name="productContext"></call-service>
+				</iterate>
+			</if-not-empty>
+	    <else>
+	    	<call-bsh>
+				import org.ofbiz.base.util.UtilProperties;
+				import org.ofbiz.service.ServiceUtil;
+				resourceError = "DelysUiLabels";
+				ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "ProductPromoSttNotCreated", locale));			
+			</call-bsh>
+	    </else>
+        </if-compare>
+    </simple-method>
+    <simple-method method-name="deleteProductPromo" short-description="Delete a ProductPromo">        
+        <olbius-check-permission type="MODULE" app="PRODPROMOTION_DELETE">
+        	<fail-property resource="BaseSalesErrorUiLabels" property="BSYouHavenotDeletePermission"/>
+        </olbius-check-permission>
+        <check-errors/>
+        
+        <set from-field="parameters.productPromoId" field="lookupPKMap.productPromoId"/>
+        <find-by-primary-key entity-name="ProductPromo" map="lookupPKMap" value-field="lookedUpValue"/>
+        <if-empty field="lookedUpValue">
+        	<set field="productPromoId" value="lookedUpValue.productPromoId"/>
+        	<add-error><fail-property resource="BaseSalesErrorUiLabels" property="BSNotFoundProductPromotionHasProductPromoIdIs"/></add-error>
+        	<check-errors/>
+        </if-empty>
+        <if-compare operator="equals" value="PROMO_CREATED" field="lookedUpValue.statusId">
+        	<!-- TODO: add new record in ProductPromoStatus
+        	NOT: delete in condition, action, category, content, product, rule -->
+        	<now-timestamp field="nowTimestamp"/>
+        	
+        	<!-- thru date relationship with product store and product promotion -->
+       		<entity-condition list="listStorePromoAppl" entity-name="ProductStorePromoAppl">
+       			<condition-list>
+       				<condition-expr field-name="productPromoId" from-field="lookupPKMap.productPromoId"/>
+       			</condition-list>
+       		</entity-condition>
+       		<if-not-empty field="listStorePromoAppl">
+        		<iterate entry="storePromo" list="listStorePromoAppl">
+        			<set field="storePromo.thruDate" from-field="nowTimestamp"/>
+        		</iterate>
+        		<store-list list="listStorePromoAppl"/>
+       		</if-not-empty>
+       		<!-- service application: deleteProductPromo
+       		Change it to: thru date promotion -->
+	        <set field="lookedUpValue.thruDate" from-field="nowTimestamp"/>
+	        <set field="lookedUpValue.statusId" value="PROMO_CANCELLED"/>
+	        <store-value value-field="lookedUpValue"/>
+	        
+	        <make-value value-field="promoStatus" entity-name="ProductPromoStatus"/>
+	        <sequenced-id sequence-name="ProductPromoStatus" field="promoStatus.promoStatusId"/>
+	        <set field="promoStatus.statusId" value="PROMO_CANCELLED"/>
+	        <set field="promoStatus.productPromoId" from-field="lookedUpValue.productPromoId"/>
+	        <set field="promoStatus.statusDatetime" from-field="nowTimestamp"/>
+	        <set field="promoStatus.statusUserLogin" from-field="userLogin.userLoginId"/>
+	        <create-value value-field="promoStatus"/>
+       	<else>
+       		<add-error>
+       			<fail-property resource="BaseSalesErrorUiLabels" property="BSJustOnlyDeleteProductPromotionWithStatusIsCreated"/>
+       		</add-error>
+       		<check-errors/>
+       	</else>
+        </if-compare>
+    </simple-method>
+    
+    <simple-method method-name="updateProductPromoThruDate">
+        <olbius-check-permission type="MODULE" app="PRODPROMOTION_APPROVE">
+        	<fail-property resource="BaseSalesErrorUiLabels" property="BSYouHavenotUpdatePermission"/>
+        </olbius-check-permission>
+        <check-errors/>
+        
+		<if-empty field="parameters.productPromoId">
+        	<add-error>
+        		<fail-property resource="BaseSalesErrorUiLabels" property="BSProductPromoIdIsEmpty"/>
+        	</add-error>
+        </if-empty>
+        <if-empty field="parameters.thruDate">
+        	<add-error>
+        		<fail-property resource="BaseSalesErrorUiLabels" property="BSThruDateIsEmpty"/>
+        	</add-error>
+        </if-empty>
+        <check-errors/>
+        
+        <field-to-result field="parameters.productPromoId" result-name="productPromoId"/>
+        <entity-one value-field="dummyPromo" entity-name="ProductPromo">
+        	<field-map field-name="productPromoId" from-field="parameters.productPromoId"/>
+        </entity-one>
+        <if-empty field="dummyPromo">
+        	<set field="productPromoId" from-field="parameters.productPromoId"/>
+   			<add-error>
+   				<fail-property resource="BaseSalesErrorUiLabels" property="BSNotFoundProductPromotionHasProductPromoIdIs" />
+   			</add-error>
+   		</if-empty>
+   		
+   		<now-timestamp field="nowTimestamp"/>
+       	<set-calendar field="compareDate" from-field="nowTimestamp" seconds="-30" />
+       	<!-- <set field="thruDateLong" from-field="parameters.thruDate"/>
+       	<set field="thruDate" from-field="thruDateLong" type="Timestamp"/> -->
+       	<set field="thruDate" from-field="parameters.thruDate"/>
+       	
+       	<if-compare-field field="thruDate" operator="less" to-field="compareDate" type="Timestamp">
+       		<add-error>
+       			<fail-property resource="BaseSalesErrorUiLabels" property="BSRequiredValueGreatherOrEqualDateTimeToDay"/>
+       		</add-error>
+       	</if-compare-field>
+       	<!-- <set-calendar field="compareDate" from-field="dummyPromo.fromDate"/>
+       	<if-compare-field field="thruDate" operator="less" to-field="compareDate" type="Timestamp">
+       		<add-error>
+       			<fail-property resource="BaseSalesErrorUiLabels" property="BSFinishDateMustGreaterThanOrEqualStartDate"/>
+       		</add-error>
+       	</if-compare-field> -->
+        <check-errors/>
+        
+        <set field="dummyPromo.thruDate" from-field="thruDate"/>
+        <store-value value-field="dummyPromo"/>
+        
+        <entity-condition list="productStoreApplList" entity-name="ProductStorePromoAppl">
+			<condition-expr field-name="productPromoId" from-field="parameters.productPromoId"/>
+		</entity-condition>
+		<if-not-empty field="productStoreApplList">
+			<!-- thru date all product store in promotion -->
+			<iterate entry="productStoreApplItem" list="productStoreApplList">
+				<set field="productStoreApplItem.thruDate" from-field="thruDate"/>
+			</iterate>
+			<store-list list="productStoreApplList"/>
+		</if-not-empty>
+    </simple-method>
+    
+    <simple-method method-name="changePromoStatus">
+    	<!-- set status for Promotion, ProductPromoStatus
+    	if PROMO_CANCELLED: Change status of ProductStorePromoAppl => if thruDate is NULL or thruDate greater than nowTimestamp => set thruDate for Store
+    	 -->
+       	<olbius-check-permission type="MODULE" app="PRODPROMOTION_APPROVE">
+        	<fail-property resource="BaseSalesErrorUiLabels" property="BSYouHavenotUpdatePermission"/>
+        </olbius-check-permission>    
+       	<check-errors/>
+    	<if>
+    		<condition>
+    			<or>
+    				<if-compare operator="equals" value="PROMO_CANCELLED" field="parameters.statusId"></if-compare>
+    				<if-compare operator="equals" value="PROMO_ACCEPTED" field="parameters.statusId"></if-compare>
+    			</or>
+    		</condition>
+    		<then>
+    			<now-timestamp field="nowTimestamp"/>
+    			<set from-field="parameters.productPromoId" field="lookupPKMap.productPromoId"/>
+				<find-by-primary-key value-field="lookedUpValue" map="lookupPKMap" entity-name="ProductPromo"/>
+				<set field="oldStatusId" from-field="lookedUpValue.statusId"/>
+				<if-compare operator="not-equals" value="PROMO_CREATED" field="oldStatusId">
+					<add-error>
+						<fail-property resource="BaseSalesErrorUiLabels" property="BSJustOnlyUpdateProductPromotionWithStatusIsCreated"/>
+					</add-error>
+					<check-errors/>
+				</if-compare>
+				
+    			<if-compare operator="equals" value="PROMO_CANCELLED" field="parameters.statusId">
+	    			<entity-condition list="productStoreApplList" entity-name="ProductStorePromoAppl" filter-by-date="true">
+	    				<condition-expr field-name="productPromoId" from-field="lookupPKMap.productPromoId"/>
+	    			</entity-condition>
+	    			<if-not-empty field="productStoreApplList">
+	    				<!-- thru date all product store in promotion -->
+	    				<iterate entry="productStoreApplItem" list="productStoreApplList">
+		    				<set field="productStoreApplItem.thruDate" from-field="nowTimestamp"/>
+		    			</iterate>
+		    			<store-list list="productStoreApplList"/>
+	    			</if-not-empty>
+    			</if-compare>
+				
+				<set field="lookedUpValue.statusId" from-field="parameters.statusId"/>
+				<store-value value-field="lookedUpValue"/>
+
+				<now-timestamp field="nowTimestamp"/>
+				<make-value value-field="newPromoStatus" entity-name="ProductPromoStatus"/>
+		        <sequenced-id sequence-name="ProductPromoStatus" field="newPromoStatus.promoStatusId"/>
+		        <set field="newPromoStatus.statusId" from-field="lookedUpValue.statusId"/>
+		        <set field="newPromoStatus.productPromoId" from-field="lookedUpValue.productPromoId"/>
+		        <set field="newPromoStatus.statusDatetime" from-field="nowTimestamp"/>
+		        <set field="newPromoStatus.statusUserLogin" from-field="userLogin.userLoginId"/>
+		        <set field="newPromoStatus.changeReason" from-field="parameters.changeReason"/>
+		        <create-value value-field="newPromoStatus"/>
+    		</then>
+    	</if>
+    </simple-method>
+</simple-methods>

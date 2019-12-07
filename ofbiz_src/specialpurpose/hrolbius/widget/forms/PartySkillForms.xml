@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+       xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
+    <form name="FindPartySkills" type="single" target="FindPartySkills"
+       		header-row-style="header-row" default-table-style="basic-table">
+		<alt-target use-when="${groovy: editPartyId != null &amp;&amp; !editPartyId}" target="${donePage}"/>        
+        <auto-fields-entity entity-name="PartySkill" default-field-type="find"/>
+        <!-- <field name="partyId" title="${uiLabelMap.HRolbiusEmployeeID}" use-when="${groovy: editPartyId==null || editPartyId == true}" >
+        	<lookup target-form-name="LookupEmployeeNew"/>
+       	</field>
+       	<field name="partyId" title="${uiLabelMap.EmployeeName}" use-when="${groovy: editPartyId != null &amp;&amp; !editPartyId}">
+        	<display-entity entity-name="Person" description="${lastName} ${firstName}"></display-entity>
+       	</field> -->
+       	<field name="partyId" title="${uiLabelMap.HRolbiusEmployeeID}" >
+        	<lookup target-form-name="LookupEmployeeNew"/>
+       	</field>
+        <field name="noConditionFind">
+        	<hidden value="Y" />
+        </field>
+        <field name="skillTypeId">
+            <drop-down allow-empty="true">
+                <entity-options description="${description}" entity-name="SkillType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="yearsExperience"><text-find/></field>
+        <field name="rating"><text-find/></field>
+        <field name="skillLevel"><text-find/></field>
+        <field name="searchButton" title="${uiLabelMap.CommonFind}"
+        	 widget-style="btn btn-small btn-success">
+       	 	<submit button-type="button" image-location="icon-search"/>
+       	 </field>
+    </form>
+    <form name="ListPartySkillsDir" type="list" list-name="listIt" use-row-submit="true" separate-columns="true" 
+    	target="updatePartySkillExt" paginate-target="FindPartySkills"	
+        odd-row-style="alternate-row" header-row-style="header-row-2"
+        default-table-style="table table-hover table-striped table-bordered dataTable">
+        <actions>
+            <!-- <entity-condition entity-name="PartySkill">
+                <condition-expr field-name="partyId" from-field="partyId"/>
+                <order-by field-name="skillTypeId"/>
+            </entity-condition> -->
+            
+        </actions>
+        <auto-fields-service default-field-type="hidden" service-name="updatePartySkill"/>
+		<field name="partyId" title="${uiLabelMap.EmployeeName}" >
+			<display-entity entity-name="Person" description="${lastName} ${firstName}">
+				
+			</display-entity>
+		</field>       
+        <field name="skillTypeId">
+            <display-entity entity-name="SkillType" description="${description}"/>
+        </field>
+        <field name="yearsExperience" widget-area-style="no-border-left"><text size="10"/></field>
+        <field name="rating"><text size="10"/></field>
+        <field name="skillLevel"><text size="10"/></field>
+        
+        <field name="deleteLink" title="${uiLabelMap.CommonDelete}" widget-style="btn btn-small btn-danger icon-trash">
+            <hyperlink target="deletePartySkill" description=" ${uilabelmap.commondelete}" also-hidden="false">
+                <parameter param-name="skillTypeId"/>
+                <parameter param-name="partyId"/>
+            </hyperlink>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}"  widget-style="btn btn-success btn-small" >
+        	<submit button-type="image" image-location="/images/icons/icon-check.svg"/>
+       	</field>
+    </form>
+    
+    <form name="ListPartySkills" type="list" separate-columns="true" paginate-target="EditEmplSkill"
+        odd-row-style="alternate-row" header-row-style="header-row-2" default-table-style="table table-hover table-striped table-bordered dataTable">
+        <actions>
+            <entity-condition entity-name="PartySkill">
+                 <condition-expr field-name="partyId" from-field="partyId"/>                 
+                 <order-by field-name="skillTypeId"/>
+            </entity-condition>
+        </actions>
+        <auto-fields-service default-field-type="hidden" service-name="updatePartySkill"/>
+		<field name="partyId" title="${uiLabelMap.EmployeeName}">
+			<display-entity entity-name="Person" description="${lastName} ${firstName}"></display-entity>
+		</field>       
+        <field name="skillTypeId">
+            <display-entity entity-name="SkillType" description="${description}"/>
+        </field>
+        <field name="yearsExperience"><display></display> </field>
+        <field name="rating"><display></display></field>
+        <field name="skillLevel"><display></display></field>
+    </form>
+    
+    <form name="AddPartySkills" type="single" target="createPartySkill" default-map-name="partySkill"
+        header-row-style="header-row" default-table-style="basic-table">
+        <actions>
+            <set field="insideEmployee" from-field="parameters.insideEmployee"/>
+            <set field="donePage" from-field="parameters.donePage"/>
+        </actions>
+        <alt-target use-when="insideEmployee != null" target="createPartySkillExt"/>
+        <alt-target use-when="donePage!=null" target="createPartySkill/${donePage}"/>
+        
+        <field name="partyId" use-when="partySkill != null" title="${uiLabelMap.HRolbiusEmployeeID}"><hidden/></field>
+        <field name="partyId" use-when="partySkill == null"  title="${uiLabelMap.HRolbiusEmployeeID}" title-style="asterisk" required-field="true">
+        	<lookup target-form-name="LookupEmployeeNew"/>
+       	</field>
+        <field name="skillTypeId" title-style="asterisk" required-field="true">
+            <drop-down>
+                <entity-options description="${description}" entity-name="SkillType">
+                    <entity-order-by field-name="description"/>
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="yearsExperience"><text/></field>
+        <field name="rating"><text/></field>
+        <field name="skillLevel"><text/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonCreate}" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-ok"/></field>
+    </form>
+</forms>

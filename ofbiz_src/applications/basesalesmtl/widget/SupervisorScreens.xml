@@ -1,0 +1,1289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-screen.xsd">
+
+	<screen name="QuotationListSup">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="product"/>
+				<set field="selectedSubMenuItem" value="QuotationList"/>
+				<set field="titleProperty" value="DAQuotationDSList" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="PRODQUOTATION_VIEW"/>
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html><html-template location="component://basesales/webapp/basesales/quotation/quotationList.ftl"/></html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<!-- <screen name="CustomerSup">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="customer"/>
+				<set field="selectedSubMenuItem" value="CustomerSup"/>
+				<set field="titleProperty" value="DAListCustomer"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<platform-specific>
+							<html>
+								<html-template location="component://basesalesmtl/webapp/basesalesmtl/supervisor/customerSupList.ftl"/>
+							</html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	 -->
+	<!-- <screen name="CustomerKey">
+        <section>
+            <actions>
+                <set field="titleProperty" value="DAListCustomerKey"/>
+                <set field="selectedMenuItem" value="customer" />
+                <set field="selectedSubMenuItem" value="customerKey" />
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetShoppingCart.groovy"/>
+                <service service-name="getListCustomTimePeriod" result-map="result">
+                	<field-map field-name="periodTypeModule" value="sales"/>
+                	<field-map field-name="periodTypeId" value="SALES_YEAR"/>
+                </service>
+                <set field="listCustomTimePeriodRoot" from-field="result.listCustomTimePeriod"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                            <html><html-template location="component://basesalesmtl/webapp/basesalesmtl/supervisor/listCustomerKeyJQ.ftl"/></html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen> -->
+    
+    <screen name="CheckInventoryAgents">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="retailOutlet"/>
+				<set field="selectedSubMenuItem" value="CheckInventoryAgents"/>
+				<set field="titleProperty" value="BSCheckInventoryInfo" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<platform-specific>
+									<!--<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/supervisor/checkInventoryAgents.ftl"/></html> -->
+									<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/supervisor/checkInventoryAgentsUpGrade.ftl"/></html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+    <screen name="Agents">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="retailOutlet"/>
+				<set field="selectedSubMenuItem" value="retailOutletList"/>
+				<set field="titleProperty" value="BSListAgents" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<include-screen name="RetailOutletListInner"/>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="RetailOutletListInner">
+		<section>
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+			<actions>
+                <set field="customTitleProperties" value="BSListAgents" global="true"/>
+                <entity-condition list="Days" entity-name="DayOfWeek"/>
+            </actions>
+			<widgets>
+				<platform-specific>
+					<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/customer/retailOutletList.ftl"/></html>
+				</platform-specific>
+			</widgets>
+			<fail-widgets>
+				<container style="alert alert-info">
+					<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+				</container>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="agentTitle">
+		<section>
+			<condition>
+				<not><if-empty field="parameters.partyId"/></not>
+			</condition>
+			<actions>
+				<service service-name="loadAgentInfo" result-map="resultValueLoadAgent">
+					<field-map field-name="partyId" from-field="parameters.partyId"/>
+					<field-map field-name="detail" value="Y"/>
+				</service>
+				<set field="agentInfo" from-field="resultValueLoadAgent.agentInfo"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not><if-empty field="agentInfo"/></not>
+					</condition>
+					<widgets>
+						<label style="ibefore-icon-angle-right" text="${uiLabelMap.DAId}: "></label>
+						<link url-mode="plain" target="${link}?partyId=${agentInfo.partyId}" text="${agentInfo.partyCode}"></link>
+					</widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ListOpponentInfo">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="retailOutlet"/>
+				<set field="selectedSubMenuItem" value="ListOpponentInfo"/>
+				<set field="titleProperty" value="MKOpponentInfo" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+									<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+									<platform-specific>
+										<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/customer/opponentInfoList.ftl"/></html>
+									</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.DAYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+    <screen name="AddAgent">
+		<section>
+			<actions>
+				<set field="link" value="AddAgent"/>
+				<set field="titleHeaderValue" value="agentTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://basesalesmtl/widget/SupervisorScreens.xml" global="true"/>
+				<set field="selectedMenuItem" value="retailOutlet"/>
+				<set field="selectedSubMenuItem" value="newRetailOutlet"/>
+				<set field="titleProperty" value="BSAddAgent" global="true"/>
+				
+				<set field="linkDetail" value="AgentDetail"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<or>
+									<if-olbius-has-permission permission="CREATE"/>
+									<if-olbius-has-permission permission="UPDATE"/>
+								</or>
+							</condition>
+							<widgets>
+								<screenlet title="${uiLabelMap.BSAddAgent}">
+									<!-- <include-menu name="CommonBackToDetail" location="component://basesalesmtl/widget/BaseSalesMtlMenus.xml" /> -->
+									<platform-specific>
+										<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/customer/retailOutletNewTotal.ftl"/></html>
+									</platform-specific>
+								</screenlet>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotCreatePermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="EditAddressAgent">
+		<section>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="WidgetUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="CommonUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="OrderUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="BaseSalesUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="BaseSalesErrorUiLabels" global="true"/>
+				<set field="link" value="AddAgent"/>
+				<set field="titleHeaderValue" value="agentTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://basesalesmtl/widget/SupervisorScreens.xml" global="true"/>
+				<set field="selectedMenuItem" value="retailOutlet"/>
+				<set field="selectedSubMenuItem" value="newRetailOutlet"/>
+				<set field="titleProperty" value="BSAddAgent" global="true"/>
+
+				<set field="linkDetail" value="AgentDetail"/>
+			</actions>
+			<widgets>
+				<!-- <include-menu name="CommonBackToDetail" location="component://basesalesmtl/widget/BaseSalesMtlMenus.xml" /> -->
+				<platform-specific>
+					<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/customer/retailOutletNewContactInfo.ftl"/></html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+    <screen name="AgentDetail">
+		<section>
+			<actions>
+				<set field="link" value="AgentDetail"/>
+				<set field="titleHeaderValue" value="agentTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://basesalesmtl/widget/SupervisorScreens.xml" global="true"/>
+				<set field="selectedMenuItem" value="retailOutlet"/>
+				<set field="selectedSubMenuItem" value="retailOutletList"/>
+				<set field="titleProperty" value="BSAgentDetail" global="true"/>
+				<set field="permission" value="PARTY_OUTLET_NEW"/>
+				<set field="linkEdit" value="AddAgent"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<actions>
+								<service service-name="loadAgentInfo" result-map="resultValueLoadAgent">
+									<field-map field-name="partyId" from-field="parameters.partyId"/>
+									<field-map field-name="detail" value="Y"/>
+								</service>
+								<set field="agentInfo" from-field="resultValueLoadAgent.agentInfo"/>
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/customer/retailOutletViewTotal.ftl"/></html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+    <screen name="MTCustomers">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="customerMT"/>
+				<set field="selectedSubMenuItem" value="MTCustomers"/>
+				<set field="titleProperty" value="BSCustomer" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/supervisor/mtcustomers.ftl"/></html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="MTRepresentativeOffice">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="customerMT"/>
+				<set field="selectedSubMenuItem" value="MTRepresentativeOffice"/>
+				<set field="titleProperty" value="CommonListRepresentativeOffice" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<section>
+									<condition>
+										<not><if-empty field="parameters.addRepresentativeOffice"/></not>
+									</condition>
+									<widgets>
+										<screenlet title="${uiLabelMap.BSAddNewRepresentativeOffice}" navigation-menu-name="CommonBackToDetail">
+										<platform-specific>
+											<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/supervisor/addRepresentativeOffices.ftl"/></html>
+										</platform-specific>
+										</screenlet>
+									</widgets>
+									<fail-widgets>
+										<platform-specific>
+											<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/supervisor/mtrepresentativeoffices.ftl"/></html>
+										</platform-specific>
+									</fail-widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="MTConsignee">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="customerMT"/>
+				<set field="selectedSubMenuItem" value="MTConsignee"/>
+				<set field="titleProperty" value="BSConsignee" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<section>
+									<condition>
+										<not><if-empty field="parameters.addConsignee"/></not>
+									</condition>
+									<widgets>
+										<screenlet title="${uiLabelMap.BSAddNewConsignee}" navigation-menu-name="CommonBackToDetail">
+											<platform-specific>
+												<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/supervisor/addConsignee.ftl"/></html>
+											</platform-specific>
+										</screenlet>
+									</widgets>
+									<fail-widgets>
+										<platform-specific>
+											<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/supervisor/mtconsignee.ftl"/></html>
+										</platform-specific>
+									</fail-widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="MTConsigneeDetail">
+		<section>
+			<actions>
+				<set field="link" value="MTConsigneeDetail"/>
+				<set field="selectedMenuItem" value="customerMT"/>
+				<set field="selectedSubMenuItem" value="MTConsignee"/>
+				<entity-one value-field="partyRepresentative" entity-name="Party">
+					<field-map field-name="partyId" from-field="parameters.partyId"/>
+				</entity-one>
+				<set field="titleProperty" value="BSConsignee" global="true"/>
+				<set field="permission" value="PARTY_CUSTOMER_MT_CONSIGNEE"/>
+				<set field="linkEdit" value="MTConsignee?addConsignee='true'"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not><if-empty field="partyRepresentative"/></not>
+					</condition>
+					<actions>
+						<service service-name="loadMTConsigneeInfo" result-map="resultValueModernTradeInfo">
+							<field-map field-name="partyId" from-field="parameters.partyId"/>
+							<field-map field-name="detail" value="Y"/>
+						</service>
+						<set field="modernTradeInfo" from-field="resultValueModernTradeInfo.MTCustomerInfo"/>
+						<set field="titleHeaderValue" value="MTCustomerTitle" global="true"/>
+						<set field="titleHeaderLocation" value="component://basesalesmtl/widget/SupervisorScreens.xml" global="true"/>
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<section>
+									<condition>
+										<if-olbius-has-permission/>
+									</condition>
+									<widgets>
+										<platform-specific>
+											<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/customer_mt/consigneeViewDetail.ftl"/></html>
+										</platform-specific>
+									</widgets>
+									<fail-widgets>
+										<container style="alert alert-info">
+											<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+										</container>
+									</fail-widgets>
+								</section>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSCustomerNoOrderFound}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="MTRepresentativeOfficeDetail">
+		<section>
+			<actions>
+				<set field="link" value="MTCustomerDetail"/>
+				<set field="selectedMenuItem" value="customerMT"/>
+				<set field="selectedSubMenuItem" value="MTRepresentativeOffice"/>
+				<entity-one value-field="partyRepresentative" entity-name="Party">
+					<field-map field-name="partyId" from-field="parameters.partyId"/>
+				</entity-one>
+				<set field="titleProperty" value="BSMTRepresentativeOfficeDetail" global="true"/>
+
+				<set field="permission" value="PARTY_CUSTOMER_MT_OFFICE"/>
+				<set field="linkEdit" value="MTRepresentativeOffice?addRepresentativeOffice='true'"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not><if-empty field="partyRepresentative"/></not>
+					</condition>
+					<actions>
+						<service service-name="loadMTRepresentativeOfficeInfo" result-map="resultValueModernTradeInfo">
+							<field-map field-name="partyId" from-field="parameters.partyId"/>
+							<field-map field-name="detail" value="Y"/>
+						</service>
+						<set field="modernTradeInfo" from-field="resultValueModernTradeInfo.MTCustomerInfo"/>
+						<set field="titleHeaderValue" value="MTCustomerTitle" global="true"/>
+						<set field="titleHeaderLocation" value="component://basesalesmtl/widget/SupervisorScreens.xml" global="true"/>
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<section>
+									<condition>
+										<if-olbius-has-permission/>
+									</condition>
+									<widgets>
+										<platform-specific>
+											<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/customer_mt/representativeViewDetail.ftl"/></html>
+										</platform-specific>
+									</widgets>
+									<fail-widgets>
+										<container style="alert alert-info">
+											<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+										</container>
+									</fail-widgets>
+								</section>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSCustomerNoOrderFound}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+    <screen name="AddMTCustomer">
+		<section>
+			<actions>
+				<set field="link" value="AddMTCustomer"/>
+				<set field="titleHeaderValue" value="agentTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://basesalesmtl/widget/SupervisorScreens.xml" global="true"/>
+				<set field="selectedMenuItem" value="customerMT"/>
+				<set field="selectedSubMenuItem" value="AddMTCustomer"/>
+				<set field="titleProperty" value="BSAddCustomer" global="true"/>
+				
+				<set field="linkDetail" value="MTCustomerDetail"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<screenlet title="${uiLabelMap.BSAddCustomer}" navigation-menu-name="CommonBackToDetail">
+									<include-menu name="CommonBackToDetail" location="component://basesalesmtl/widget/BaseSalesMtlMenus.xml" />
+									<platform-specific>
+										<!-- <html><html-template location="component://basesalesmtl/webapp/basesalesmtl/supervisor/addMTCustomer.ftl"/></html> -->
+										<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/customer_mt/customerMTNewTotal.ftl"/></html>
+									</platform-specific>
+								</screenlet>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotCreatePermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="MTCustomerTitle">
+		<section>
+			<condition>
+				<not><if-empty field="partyCustomer"/></not>
+			</condition>
+			<actions>
+			</actions>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text="${uiLabelMap.DAId}: "></label>
+				<link url-mode="plain" target="${link}?partyId=${modernTradeInfo.partyId}" text="${modernTradeInfo.partyCode}"></link>
+			</widgets>
+		</section>
+	</screen>
+    <screen name="MTCustomerDetail">
+		<section>
+			<actions>
+				<set field="link" value="MTCustomerDetail"/>
+				<set field="selectedMenuItem" value="customerMT"/>
+				<set field="selectedSubMenuItem" value="MTCustomers"/>
+				<entity-one value-field="partyCustomer" entity-name="Party">
+					<field-map field-name="partyId" from-field="parameters.partyId"/>
+				</entity-one>
+				<set field="titleProperty" value="BSMTCustomerDetail" global="true"/>
+				
+				<set field="permission" value="PARTY_CUSTOMER_MT_NEW"/>
+				<set field="linkEdit" value="AddMTCustomer"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not><if-empty field="partyCustomer"/></not>
+					</condition>
+					<actions>
+                        <service service-name="loadMTCustomerInfo" result-map="resultValueModernTradeInfo">
+                            <field-map field-name="partyId" from-field="parameters.partyId"/>
+                            <field-map field-name="detail" value="Y"/>
+                        </service>
+                        <set field="modernTradeInfo" from-field="resultValueModernTradeInfo.MTCustomerInfo"/>
+						<set field="titleHeaderValue" value="MTCustomerTitle" global="true"/>
+						<set field="titleHeaderLocation" value="component://basesalesmtl/widget/SupervisorScreens.xml" global="true"/>
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<section>
+									<condition>
+										<if-olbius-has-permission/>
+									</condition>
+									<widgets>
+                                        <platform-specific>
+                                            <html><html-template location="component://basesalesmtl/webapp/basesalesmtl/customer_mt/modernTradeViewTotal.ftl"/></html>
+                                        </platform-specific>
+									</widgets>
+									<fail-widgets>
+										<container style="alert alert-info">
+											<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+										</container>
+									</fail-widgets>
+								</section>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSCustomerNoOrderFound}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+    <screen name="MTCustomerChangeSalesman">
+        <section>
+            <actions>
+                <set field="selectedMenuItem" value="customerMT"/>
+                <set field="selectedSubMenuItem" value="MTCustomers"/>
+                <set field="titleProperty" value="BSChangeSalesman" global="true"/>
+            </actions>
+        <widgets>
+            <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-olbius-has-permission/>
+                            </condition>
+                            <widgets>
+                                <platform-specific>
+                                    <html><html-template location="component://basesalesmtl/webapp/basesalesmtl/customer_mt/modernTradeEditSalesmanTotal.ftl"/></html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+                                <container style="alert alert-info">
+                                    <label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+                                </container>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="DisRequirements">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="disRequirement"/>
+				<set field="selectedSubMenuItem" value="ListRequirement"/>
+				<set field="titleProperty" value="WithdrawalRequirement"/>
+				<set field="fromSales" value="Y"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/distributor/requirement/listRequirements.ftl"/></html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+    <screen name="getDisTransferRequirement">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="disRequirement"/>
+				<set field="selectedSubMenuItem" value="ListTransferRequirement"/>
+				<set field="titleProperty" value="RequestTransfer"/>
+				<set field="fromSales" value="Y"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/distributor/requirement/listRequirements.ftl"/></html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+    <screen name="getRequestRemoveRequirement">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="disRequirement"/>
+				<set field="selectedSubMenuItem" value="RequestRemoveProduct"/>
+				<set field="titleProperty" value="RequestRemoveProduct"/>
+				<set field="fromSales" value="Y"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/distributor/requirement/listRequirements.ftl"/></html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+    <screen name="CreateDisRequirement">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="disRequirement"/>
+				<set field="selectedSubMenuItem" value="NewRequirement"/>
+				<set field="titleProperty" value="CreateNewRequirement"/>
+				<set field="fromSales" value="Y"/>
+				<set field="displayCost" value="N"/>
+                <set field="displayQOH" value="N"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/distributor/requirement/createNewRequirement.ftl"/></html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="RequirementTitle">
+		<section>
+			<condition>
+				<not><if-empty field="parameters.requirementId"/></not>
+			</condition>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text=" ${uiLabelMap.Requirement}: "></label>
+				<link url-mode="plain" target="viewDisRequirementDetail?requirementId=${parameters.requirementId}" text="${parameters.requirementId}"></link>
+			</widgets>
+		</section>
+	</screen>
+	
+    <screen name="RequirementDetail">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="disRequirement"/>
+                <set field="selectedSubMenuItem" value="ListRequirement"/>
+                <set field="titleProperty" value="RequirementInformation" global="true"/>
+                <set field="titleHeaderValue" value="RequirementTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/RequirementScreens.xml" global="true"/>
+				<set field="activeTab" from-field="parameters.activeTab" default-value="general-tab"/>
+				<entity-one value-field="requirement" entity-name="Requirement"></entity-one>
+			</actions>
+			<widgets>
+                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<section>
+                    		<condition>
+                    			<not>
+                    				<if-empty field="requirement"/>
+                    			</not>
+                    		</condition>
+                    		<widgets>
+	                    		<platform-specific>
+									<html>
+										<html-template location="component://basesalesmtl/webapp/basesalesmtl/distributor/requirement/requirementDetailBegin.ftl"/>
+									</html>
+								</platform-specific>
+								<include-screen name="RequirementDetailContainer"/>
+								<platform-specific>
+									<html>
+										<html-template location="component://baselogistics/webapp/baselogistics/requirement/requirementDetailEnd.ftl"/>
+									</html>
+								</platform-specific>
+                    		</widgets>
+                    	</section>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+       </section>
+    </screen>
+    <screen name="TransferRequirementDetail">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="disRequirement"/>
+                <set field="selectedSubMenuItem" value="ListTransferRequirement"/>
+                <set field="titleProperty" value="RequirementInformation" global="true"/>
+                <set field="titleHeaderValue" value="RequirementTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/RequirementScreens.xml" global="true"/>
+				<set field="activeTab" from-field="parameters.activeTab" default-value="general-tab"/>
+				<entity-one value-field="requirement" entity-name="Requirement"></entity-one>
+			</actions>
+			<widgets>
+                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<section>
+                    		<condition>
+                    			<not>
+                    				<if-empty field="requirement"/>
+                    			</not>
+                    		</condition>
+                    		<widgets>
+	                    		<platform-specific>
+									<html>
+										<html-template location="component://basesalesmtl/webapp/basesalesmtl/distributor/requirement/transferRequirementDetailBegin.ftl"/>
+									</html>
+								</platform-specific>
+								<include-screen name="RequirementDetailContainer"/>
+								<platform-specific>
+									<html>
+										<html-template location="component://baselogistics/webapp/baselogistics/requirement/requirementDetailEnd.ftl"/>
+									</html>
+								</platform-specific>
+                    		</widgets>
+                    	</section>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+       </section>
+    </screen>
+    <screen name="RemoveRequirementDetail">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="disRequirement"/>
+                <set field="selectedSubMenuItem" value="RequestRemoveProduct"/>
+                <set field="titleProperty" value="RequestRemoveProduct" global="true"/>
+                <set field="titleHeaderValue" value="RequirementTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/RequirementScreens.xml" global="true"/>
+				<set field="activeTab" from-field="parameters.activeTab" default-value="general-tab"/>
+				<entity-one value-field="requirement" entity-name="Requirement"></entity-one>
+			</actions>
+			<widgets>
+                 <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<section>
+                    		<condition>
+                    			<not>
+                    				<if-empty field="requirement"/>
+                    			</not>
+                    		</condition>
+                    		<widgets>
+	                    		<platform-specific>
+									<html>
+										<html-template location="component://basesalesmtl/webapp/basesalesmtl/distributor/requirement/removeRequirementDetailBegin.ftl"/>
+									</html>
+								</platform-specific>
+								<include-screen name="RequirementDetailContainer"/>
+								<platform-specific>
+									<html>
+										<html-template location="component://baselogistics/webapp/baselogistics/requirement/requirementDetailEnd.ftl"/>
+									</html>
+								</platform-specific>
+                    		</widgets>
+                    	</section>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="RequirementDetailContainer">
+		<section>
+			<widgets>
+				<include-screen name="RequirementInfo"/>
+				<include-screen name="RequirementTransfer"/>
+				<include-screen name="RequirementDelivery"/>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="RequirementDelivery">
+		<section>
+			<actions>
+				<set field="activeTab" from-field="parameters.activeTab"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baselogistics/webapp/baselogistics/requirement/listRequirementDelivery.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="RequirementInfo">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://basesalesmtl/webapp/basesalesmtl/distributor/requirement/detailDisRequirement.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="RequirementTransfer">
+		<section>
+			<actions>
+				<set field="activeTab" from-field="parameters.activeTab"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baselogistics/webapp/baselogistics/requirement/listTransferRequirement.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="CustomerReturnsForSup">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="stockInForSup"/>
+            	<set field="selectedSubMenuItem" value="ReturnSO"/>
+            	<set field="titleProperty" value="POListReturnItem" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<platform-specific>
+							<html>
+								<html-template location="component://basesalesmtl/webapp/basesalesmtl/supervisor/return/listReturnProduct.ftl"/>
+							</html>
+						</platform-specific>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+       </section>
+    </screen>
+	<screen name="CustomerReturnDetailForSup">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="stockInForSup"/>
+            	<set field="selectedSubMenuItem" value="ReturnSO"/>
+            	<set field="returnId" from-field="parameters.returnId"/>
+                <entity-one value-field="returnHeader" entity-name="ReturnHeader"/>
+                <set field="statusId" from-field="returnHeader.statusId"/>
+                <set field="titleHeaderValue" value="ReturnTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/ReturnScreens.xml" global="true"/>
+                <script location="component://baselogistics/webapp/baselogistics/WEB-INF/actions/return/getProductDetailReturn.groovy"></script>
+                <entity-condition list="listFacilityParty" entity-name="FacilityParty" filter-by-date="true">
+                	<condition-list>
+                		<condition-expr field-name="roleTypeId" value="MANAGER"/>
+                		<condition-expr field-name="partyId" value="${userLogin.partyId}"/>
+                		<condition-expr field-name="facilityId" from-field="returnHeader.destinationFacilityId"/>
+                	</condition-list>
+                </entity-condition>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<screenlet title="${uiLabelMap.GeneralInfo}" navigation-menu-name="CustomerReturnDetailSubTabBar">
+               				<include-menu location="component://basesalesmtl/widget/BaseSalesMtlMenus.xml" name="CustomerReturnDetailSubTabBar"/>
+	                    	<platform-specific>
+								<html>
+									<html-template location="component://basesalesmtl/webapp/basesalesmtl/supervisor/return/customerReturnDetail.ftl"/>
+								</html>
+							</platform-specific>
+						</screenlet>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+       </section>
+    </screen>
+    <screen name="PrepareReceiveReturnForSup">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="stockInForSup"/>
+                <set field="selectedSubMenuItem" value="ReturnSO"/>
+                <set field="returnId" from-field="parameters.returnId"/>
+                <entity-one value-field="returnHeader" entity-name="ReturnHeader"/>
+                <set field="statusId" from-field="returnHeader.statusId"/>
+                <set field="titleHeaderValue" value="ReturnTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/ReturnScreens.xml" global="true"/>
+				<script location="component://baselogistics/webapp/baselogistics/WEB-INF/actions/return/getProductDetailReturn.groovy"></script>
+				<script location="component://product/webapp/facility/WEB-INF/actions/returns/ReceiveReturn.groovy"/>
+				<set field="fromSales" value="Y"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<platform-specific>
+							<html>
+								<html-template location="component://basesalesmtl/webapp/basesalesmtl/supervisor/return/receiveReturn.ftl"/>
+							</html>
+						</platform-specific>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="ListCostsGeneral">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="SupCost"/>
+                <set field="selectedSubMenuItem" value="ListCostsGeneral"/>
+                <set field="titleProperty" value="CostsGeneral" global="true"/>
+                <set field="urlGetParty" value="JQGetListDistributor&amp;sD=N"/>
+				<property-map resource="BaseLogisticsUiLabels" map-name="uiLabelMap"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                   		<platform-specific>
+							<html>
+								<html-template location="component://basesalesmtl/webapp/basesalesmtl/supervisor/listCostsGeneral.ftl"/>
+							</html>
+						</platform-specific>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="ImportDataAgentsFromExcel">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="retailOutlet"/>
+				<set field="selectedSubMenuItem" value="ImportDataAgentsFromExcel"/>
+				<set field="titleProperty" value="BCRMImportDataFromExcel" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<screenlet title="${uiLabelMap.BCRMImportDataFromExcel}">
+									<platform-specific>
+										<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/supervisor/createAgent/importDataAgentsFromExcel.ftl"/></html>
+									</platform-specific>
+								</screenlet>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotCreatePermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EndCustomerTitle">
+		<section>
+			<condition>
+				<not><if-empty field="partyCustomer"/></not>
+			</condition>
+			<actions>
+			</actions>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text="${uiLabelMap.DAId}: "></label>
+				<link url-mode="plain" target="${link}?partyId=${endCustomerInfo.partyId}" text="${endCustomerInfo.partyCode}"></link>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="AddEndCustomer">
+		<section>
+			<actions>
+				<set field="link" value="AddEndCustomer"/>
+				<set field="titleHeaderValue" value="EndCustomerTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://basesalesmtl/widget/SupervisorScreens.xml" global="true"/>
+				<set field="selectedMenuItem" value="endCustomer"/>
+				<set field="selectedSubMenuItem" value="AddEndCustomer"/>
+				<set field="titleProperty" value="BSAddCustomer" global="true"/>
+				<set field="linkDetail" value="EndCustomerDetail"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<screenlet title="${uiLabelMap.BSAddEndCustomer}" navigation-menu-name="CommonBackToDetail">
+									<include-menu name="CommonBackToDetail" location="component://basesalesmtl/widget/BaseSalesMtlMenus.xml" />
+									<platform-specific>
+										<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/end_customer/endCustomerNewTotal.ftl"/></html>
+									</platform-specific>
+								</screenlet>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotCreatePermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EndCustomerDetail">
+		<section>
+			<actions>
+				<set field="link" value="EndCustomerDetail"/>
+				<set field="selectedMenuItem" value="endCustomer"/>
+				<set field="selectedSubMenuItem" value=""/>
+				<set field="titleHeaderValue" value="EndCustomerTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://basesalesmtl/widget/SupervisorScreens.xml" global="true"/>
+				<entity-one value-field="partyCustomer" entity-name="Party">
+					<field-map field-name="partyId" from-field="parameters.partyId"/>
+				</entity-one>
+				<set field="titleProperty" value="BSEndCustomerDetail" global="true"/>
+				<set field="permission" value="PARTY_END_CUSTOMER_UPDATE"/>
+				<set field="linkEdit" value="addEndCustomer"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not><if-empty field="partyCustomer"/></not>
+					</condition>
+					<actions>
+						<service service-name="loadEndCustomerInfo" result-map="resultValueEndCustomerInfo">
+							<field-map field-name="partyId" from-field="parameters.partyId"/>
+							<field-map field-name="detail" value="Y"/>
+						</service>
+						<set field="endCustomerInfo" from-field="resultValueEndCustomerInfo.EndCustomerInfo"/>
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<section>
+									<condition>
+										<if-olbius-has-permission/>
+									</condition>
+									<widgets>
+										<platform-specific>
+											<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/end_customer/endCustomerViewDetail.ftl"/></html>
+										</platform-specific>
+									</widgets>
+									<fail-widgets>
+										<container style="alert alert-info">
+											<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+										</container>
+									</fail-widgets>
+								</section>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSCustomerNoOrderFound}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EndCustomer">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="endCustomer"/>
+				<set field="selectedSubMenuItem" value="ListEndCustomer"/>
+				<set field="titleProperty" value="BSEndCustomer" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/end_customer/endCustomer.ftl"/></html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+</screens>

@@ -1,0 +1,809 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-screen.xsd">        
+	
+   	<screen name="FacilityCommonDecorator">
+		<section>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+                    	<decorator-section-include name="body"/>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ListFacilities">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="Facility"/>
+                <set field="selectedSubMenuItem" value="ListFacility"/>
+                <set field="titleProperty" value="ListFacility" global="true"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission/>
+					</condition>
+					<widgets>
+						<decorator-screen name="FacilityCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<platform-specific>
+									<html>
+										<html-template location="component://baselogistics/webapp/baselogistics/facility/listFacility.ftl"/>
+									</html>
+								</platform-specific>
+		    				</decorator-section>
+		    			</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="FacilityCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+		    				</decorator-section>
+		    			</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+       </section>
+    </screen>
+    
+	<screen name="DepositFacilities">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="Facility"/>
+                <set field="selectedSubMenuItem" value="DepositFacilities"/>
+                <set field="titleProperty" value="BSDepositFacilities"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission/>
+					</condition>
+					<widgets>
+						<decorator-screen name="FacilityCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<platform-specific>
+									<html>
+										<html-template location="component://baselogistics/webapp/baselogistics/facility/depositFacilities.ftl"/>
+									</html>
+								</platform-specific>
+		    				</decorator-section>
+		    			</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="FacilityCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+		    				</decorator-section>
+		    			</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+       </section>
+    </screen>
+	
+	<screen name="InventoryServiceFaclity">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="ServiceFacility"/>
+                <set field="selectedSubMenuItem" value="ListFacility"/>
+                <set field="tabBarName" value="FacilityTabBar" global="true" />
+			    <set field="tabBarLocation" value="component://baselogistics/widget/BaseLogisticsMenus.xml" global="true"/>
+		     	<set field="tabButtonItem" value="Inventory" global="true"/>
+			    <set field="printTabBar" value="true" />
+			    <set field="facilityId" from-field="parameters.facilityId"/>
+			    <entity-one value-field="facility" entity-name="Facility"/>
+			    <set field="titleHeaderValue" value="FacilityTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/FacilityScreens.xml" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="FacilityCommonDecorator">
+                    <decorator-section name="body">
+                    	<platform-specific>
+							<html>
+								<html-template location="component://dms/webapp/dms/logistics/facility/listInventory.ftl"/>
+							</html>
+						</platform-specific>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="FacilityTitle">
+		<section>
+			<condition>
+				<not><if-empty field="parameters.facilityId"/></not>
+			</condition>
+			<actions>
+				<entity-one value-field="facility" entity-name="Facility"></entity-one>
+			</actions>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text=" ${uiLabelMap.Facility}: "></label>
+				<link url-mode="plain" target="detailFacility?facilityId=${parameters.facilityId}" text="${facility.facilityCode}"></link>
+			</widgets>
+		</section>
+	</screen>
+	
+    <screen name="DetailFacility">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="Facility"/>
+                <set field="tabBarName" value="FacilityTabBar" global="true" />
+			    <set field="tabBarLocation" value="component://baselogistics/widget/BaseLogisticsMenus.xml" global="true"/>
+		     	<set field="tabButtonItem" value="Facility" global="true"/>
+			    <set field="printTabBar" value="true" />
+			    <set field="facilityId" from-field="parameters.facilityId"/>
+			    <entity-one value-field="facility" entity-name="Facility"/>
+			    <set field="titleHeaderValue" value="FacilityTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/FacilityScreens.xml" global="true"/>
+			    <set field="titleProperty" value="Facility"/>
+			    <set field="selectedSubMenuItem" from-field="parameters.sub" default-value="ListFacility"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission/>
+					</condition>
+					<widgets>
+						<decorator-screen name="FacilityCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<screenlet title="${uiLabelMap.DetailFacilityInfo}" navigation-menu-name="FacilityGeneralMenu">
+			                    	<include-menu location="component://baselogistics/widget/BaseLogisticsMenus.xml" name="FacilityGeneralMenu"/>
+			                    	<platform-specific>
+										<html>
+											<html-template location="component://baselogistics/webapp/baselogistics/facility/detailFacility.ftl"/>
+										</html>
+									</platform-specific>
+								</screenlet>
+		    				</decorator-section>
+		    			</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="FacilityCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+		    				</decorator-section>
+		    			</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+       </section>
+    </screen>
+	
+	 <screen name="ListLocations">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="Facility"/>
+                <set field="selectedSubMenuItem" value="ListFacility"/>
+                <set field="tabBarName" value="FacilityTabBar" global="true" />
+			    <set field="tabBarLocation" value="component://baselogistics/widget/BaseLogisticsMenus.xml" global="true"/>
+		     	<set field="tabButtonItem" value="Location" global="true"/>
+			    <set field="printTabBar" value="true" />
+			    <set field="facilityId" from-field="parameters.facilityId"/>
+			    <set field="titleProperty" value=""/>
+			    <entity-one value-field="facility" entity-name="Facility"/>
+			    <set field="titleProperty" value="ManagerLocation" global="true"/>
+			    <set field="titleHeaderValue" value="FacilityTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/FacilityScreens.xml" global="true"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission/>
+					</condition>
+					<widgets>
+						<decorator-screen name="FacilityCommonDecorator">
+		                    <decorator-section name="body">
+		                   	 	<screenlet title="${uiLabelMap.ManagerLocation}" navigation-menu-name="LocationSubTabBar" id="abc">
+		                  			<include-menu location="component://baselogistics/widget/BaseLogisticsMenus.xml" name="LocationSubTabBar"/>
+			                    	<platform-specific>
+										<html>
+											<html-template location="component://baselogistics/webapp/baselogistics/facility/listLocations.ftl"/>
+										</html>
+									</platform-specific>
+								</screenlet>
+		    				</decorator-section>
+		    			</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="FacilityCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+		    				</decorator-section>
+		    			</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+       </section>
+    </screen>
+	
+	<screen name="LocationTypes">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="Configuration"/>
+                <set field="selectedSubMenuItem" value="LocationType"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="FacilityCommonDecorator">
+                    <decorator-section name="body">
+         	            <screenlet title="${uiLabelMap.LocationTypes}" navigation-menu-name="LocationTypeSubTabbar">
+	         	            <include-menu location="component://baselogistics/widget/BaseLogisticsMenus.xml" name="LocationTypeSubTabbar"/>
+	                   		<platform-specific>
+								<html>
+									<html-template location="component://baselogistics/webapp/baselogistics/facility/listLocationTypes.ftl"/>
+								</html>
+							</platform-specific>
+						</screenlet>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+       </section>
+    </screen>
+    
+	<screen name="ViewContactMechInfo">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="Facility"/>
+                <set field="selectedSubMenuItem" value="ListFacility"/>
+                <set field="facilityId" from-field="parameters.facilityId"/>
+                <entity-one entity-name="Facility" value-field="facility"/>
+                <set field="titleProperty" value="FacilityContactMechanism"/>
+               	<entity-one value-field="facility" entity-name="Facility"/>
+			    <set field="titleHeaderValue" value="FacilityTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/FacilityScreens.xml" global="true"/>
+                <entity-condition list="listContactMechType" entity-name="ContactMechType">
+                	<condition-list combine="or">
+                		<condition-expr field-name="contactMechTypeId" value="POSTAL_ADDRESS" />
+                		<condition-expr field-name="contactMechTypeId" value="EMAIL_ADDRESS" />
+                		<condition-expr field-name="contactMechTypeId" value="TELECOM_NUMBER" />
+                	</condition-list>
+                </entity-condition>
+            </actions>
+            <widgets>
+            	<section>
+                	<actions>
+					    <set field="tabBarName" value="FacilityTabBar" global="true" />
+					    <set field="tabBarLocation" value="component://baselogistics/widget/BaseLogisticsMenus.xml" global="true"/>
+				     	<set field="tabButtonItem" value="ContactMech" global="true"/>
+					    <set field="printTabBar" value="true" />
+				    </actions>
+				    <widgets>
+				    	<section>
+				    		 <actions>
+						      <set field="printTabBar" value="true" />
+						     </actions>
+						     <widgets>
+						     	<container></container>
+						     </widgets>
+				    	</section>
+				    </widgets>
+                  </section>
+                <decorator-screen name="FacilityCommonDecorator">
+                    <decorator-section name="body">
+                         <section>
+                             <condition>
+                                 <not><if-empty field="facilityId"/></not>
+                             </condition>
+                             <widgets>
+                                 <section>
+                                     <widgets>
+				                            <platform-specific><html><html-template location="component://baselogistics/webapp/baselogistics/facility/contactMechDetails.ftl"/></html></platform-specific>
+                                     </widgets>
+                                 </section>
+                             </widgets>
+                         </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+	
+	<screen name="ViewContactMechPostalAddressInfo">
+         <section>
+         	 <actions>
+                <script location="component://baselogistics/webapp/baselogistics/WEB-INF/actions/contactMech/ViewContactMechs.groovy"/>
+                <set field="facilityId" from-field="parameters.facilityId"/>
+                <set field="contactMechTypeId" from-field="parameters.contactMechTypeId"/>
+                <property-map resource="DmsUiLabels" map-name="uiLabelMap"/>
+                <property-map resource="BaseLogisticsUiLabels" map-name="uiLabelMap"/>
+                <property-map resource="PartyUiLabels" map-name="uiLabelMap"/>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap"/>
+                <property-map resource="WidgetUiLabels" map-name="uiLabelMap"/>
+                
+             </actions>
+             <widgets>
+        			<platform-specific>
+        				<html>
+        					<html-template location="component://baselogistics/webapp/baselogistics/facility/createContectMectPostalAddress.ftl"/>
+        				</html>
+        			</platform-specific>
+             </widgets>
+         </section>
+    </screen>
+    
+    <screen name="RentFacility">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="RentFacility"/>
+                <set field="selectedSubMenuItem" value="ListFacilityRent"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="FacilityCommonDecorator">
+                    <decorator-section name="body">
+                   		<platform-specific>
+							<html>
+								<html-template location="component://dms/webapp/dms/logistics/facility/listFacilityRent.ftl"/>
+							</html>
+						</platform-specific>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="RentFacility">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="RentFacility"/>
+                <set field="selectedSubMenuItem" value="ListAgreementRent"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="FacilityCommonDecorator">
+                    <decorator-section name="body">
+                   		<platform-specific>
+							<html>
+								<html-template location="component://dms/webapp/dms/logistics/facility/listFacilityRentAgreement.ftl"/>
+							</html>
+						</platform-specific>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="ListServiceFacility">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="ServiceFacility"/>
+                <set field="selectedSubMenuItem" value="ListServiceFacility"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="FacilityCommonDecorator">
+                    <decorator-section name="body">
+                   		<platform-specific>
+							<html>
+								<html-template location="component://dms/webapp/dms/logistics/facility/listServiceFacility.ftl"/>
+							</html>
+						</platform-specific>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="PurchaseOrderToAgent">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="ServiceFacility"/>
+                <set field="selectedSubMenuItem" value="Receive"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="FacilityCommonDecorator">
+                    <decorator-section name="body">
+                   		<platform-specific>
+							<html>
+								<html-template location="component://dms/webapp/dms/logistics/facility/listPurchaseOrderToAgent.ftl"/>
+							</html>
+						</platform-specific>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="ListDeliverers">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="DeliveryEntry"/>
+                <set field="selectedSubMenuItem" value="Deliverers"/>
+                <set field="parameters.roleTypeId" value="LOG_DELIVERER"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="FacilityCommonDecorator">
+                    <decorator-section name="body">
+                   		<platform-specific>
+							<html>
+								<html-template location="component://dms/webapp/dms/logistics/facility/listFacilityParty.ftl"/>
+							</html>
+						</platform-specific>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="ListVehicles">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="DeliveryEntry"/>
+                <set field="selectedSubMenuItem" value="Vehicles"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="FacilityCommonDecorator">
+                    <decorator-section name="body">
+                   		<platform-specific>
+							<html>
+								<html-template location="component://dms/webapp/dms/logistics/facility/listVehicles.ftl"/>
+							</html>
+						</platform-specific>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="DetailFacilityPublic">
+    	<section>
+			<widgets>
+				<decorator-screen name="FacilityCommonDecorator">
+                    <decorator-section name="body">
+                    	<screenlet title="${uiLabelMap.DetailFacilityInfo}" navigation-menu-name="FacilityGeneralMenu">
+	                    	<include-menu location="component://baselogistics/widget/BaseLogisticsMenus.xml" name="FacilityGeneralMenu"/>
+	                    	<platform-specific>
+								<html>
+									<html-template location="component://baselogistics/webapp/baselogistics/facility/detailFacility.ftl"/>
+								</html>
+							</platform-specific>
+						</screenlet>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="ListLocationsPublic">
+    	<section>
+			<widgets>
+               	<platform-specific>
+					<html>
+						<html-template location="component://baselogistics/webapp/baselogistics/facility/listLocations.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="LocationTypesPublic">
+    	<section>
+			<widgets>
+             	<platform-specific>
+					<html>
+						<html-template location="component://baselogistics/webapp/baselogistics/facility/listLocationTypes.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="ListDeliverersPublic">
+    	<section>
+			<widgets>
+				<platform-specific>
+					<html><html-template location="component://baselogistics/webapp/baselogistics/facility/listFacilityParty.ftl"/></html>
+				</platform-specific>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="ListVehiclesPublic">
+    	<section>
+			<widgets>
+				<platform-specific>
+					<html><html-template location="component://baselogistics/webapp/baselogistics/facility/listVehicles.ftl"/></html>
+				</platform-specific>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="StockInFacility">
+    	<section>
+    		<actions>
+               <set field="activeTab" from-field="parameters.activeTab" default-value=""/>
+    		</actions>
+    		
+			<widgets>
+             	<platform-specific>
+					<html><html-template location="component://baselogistics/webapp/baselogistics/facility/stockInFacility.ftl"/></html>
+				</platform-specific>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="ListFacilityPartyRole">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="Facility"/>
+                <set field="tabBarName" value="FacilityTabBar" global="true" />
+			    <set field="tabBarLocation" value="component://baselogistics/widget/BaseLogisticsMenus.xml" global="true"/>
+		     	<set field="tabButtonItem" value="Role" global="true"/>
+			    <set field="printTabBar" value="true" />
+			    <set field="facilityId" from-field="parameters.facilityId"/>
+			    <entity-one value-field="facility" entity-name="Facility"/>
+			    <set field="titleHeaderValue" value="FacilityTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/FacilityScreens.xml" global="true"/>
+			    <set field="titleProperty" value="BLRoles"/>
+			    <set field="selectedSubMenuItem" from-field="parameters.sub" default-value="ListFacility"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="FacilityCommonDecorator">
+                    <decorator-section name="body">
+                    	<platform-specific>
+							<html>
+								<html-template location="component://baselogistics/webapp/baselogistics/facility/listFacilityPartyRole.ftl"/>
+							</html>
+						</platform-specific>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="PrepareCreateFacility">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="Facility"/>
+                <set field="selectedSubMenuItem" value="AddNew"/>
+			    <set field="titleHeaderValue" value="FacilityTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/FacilityScreens.xml" global="true"/>
+			    <set field="titleProperty" value="AddFacility"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission/>
+					</condition>
+					<widgets>
+						<decorator-screen name="FacilityCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<platform-specific>
+									<html>
+										<html-template location="component://baselogistics/webapp/baselogistics/facility/facilityNewFacilityTemplate.ftl"/>
+									</html>
+								</platform-specific>
+		    				</decorator-section>
+		    			</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="FacilityCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+		    				</decorator-section>
+		    			</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+       </section>
+    </screen>
+    
+   	<screen name="FacilityNewFacilityInfo">
+    	<section>
+			<widgets>
+                <platform-specific>
+					<html>
+						<html-template location="component://baselogistics/webapp/baselogistics/facility/facilityNewFacilityInfo.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="FacilityNewFacilityRole">
+    	<section>
+			<widgets>
+                <platform-specific>
+					<html>
+						<html-template location="component://baselogistics/webapp/baselogistics/facility/facilityNewFacilityRole.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="FacilityNewFacilityAddress">
+    	<section>
+			<widgets>
+                <platform-specific>
+					<html>
+						<html-template location="component://baselogistics/webapp/baselogistics/facility/facilityNewFacilityAddress.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="FacilityParty">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="Facility"/>
+                <set field="selectedSubMenuItem" value="FacilityRole"/>
+			    <set field="titleHeaderValue" value="FacilityTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/FacilityScreens.xml" global="true"/>
+			    <set field="titleProperty" value="FacilityRoleManagerment"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="FacilityCommonDecorator">
+                    <decorator-section name="body">
+                    	<platform-specific>
+							<html>
+								<html-template location="component://baselogistics/webapp/baselogistics/facility/listAllFacilityPartyRole.ftl"/>
+							</html>
+						</platform-specific>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="DetailDepositFacility">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="Facility"/>
+                <set field="tabBarName" value="DepositFacilityTabBar" global="true" />
+			    <set field="tabBarLocation" value="component://baselogistics/widget/BaseLogisticsMenus.xml" global="true"/>
+		     	<set field="tabButtonItem" value="Facility" global="true"/>
+			    <set field="printTabBar" value="true" />
+			    <set field="facilityId" from-field="parameters.facilityId"/>
+			    <entity-one value-field="facility" entity-name="Facility"/>
+			    <set field="titleHeaderValue" value="FacilityTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/FacilityScreens.xml" global="true"/>
+			    <set field="titleProperty" value="Facility"/>
+			    <set field="selectedSubMenuItem" from-field="parameters.sub" default-value="DepositFacilities"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission/>
+					</condition>
+					<widgets>
+						<decorator-screen name="FacilityCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<screenlet title="${uiLabelMap.DetailFacilityInfo}" navigation-menu-name="FacilityGeneralMenu">
+			                    	<include-menu location="component://baselogistics/widget/BaseLogisticsMenus.xml" name="FacilityGeneralMenu"/>
+			                    	<platform-specific>
+										<html>
+											<html-template location="component://baselogistics/webapp/baselogistics/facility/detailFacility.ftl"/>
+										</html>
+									</platform-specific>
+								</screenlet>
+		    				</decorator-section>
+		    			</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="FacilityCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+		    				</decorator-section>
+		    			</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+       </section>
+    </screen>
+    
+    
+    <screen name="ViewContactMechInfoDeposit">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="Facility"/>
+                <set field="selectedSubMenuItem" value="DepositFacilities"/>
+                <set field="facilityId" from-field="parameters.facilityId"/>
+                <entity-one entity-name="Facility" value-field="facility"/>
+                <set field="titleProperty" value="FacilityContactMechanism"/>
+               	<entity-one value-field="facility" entity-name="Facility"/>
+			    <set field="titleHeaderValue" value="FacilityTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/FacilityScreens.xml" global="true"/>
+                <entity-condition list="listContactMechType" entity-name="ContactMechType">
+                	<condition-list combine="or">
+                		<condition-expr field-name="contactMechTypeId" value="POSTAL_ADDRESS" />
+                		<condition-expr field-name="contactMechTypeId" value="EMAIL_ADDRESS" />
+                		<condition-expr field-name="contactMechTypeId" value="TELECOM_NUMBER" />
+                	</condition-list>
+                </entity-condition>
+            </actions>
+            <widgets>
+            	<section>
+                	<actions>
+					    <set field="tabBarName" value="DepositFacilityTabBar" global="true" />
+					    <set field="tabBarLocation" value="component://baselogistics/widget/BaseLogisticsMenus.xml" global="true"/>
+				     	<set field="tabButtonItem" value="ContactMech" global="true"/>
+					    <set field="printTabBar" value="true" />
+				    </actions>
+				    <widgets>
+				    	<section>
+				    		 <actions>
+						      <set field="printTabBar" value="true" />
+						     </actions>
+						     <widgets>
+						     	<container></container>
+						     </widgets>
+				    	</section>
+				    </widgets>
+                  </section>
+                <decorator-screen name="FacilityCommonDecorator">
+                    <decorator-section name="body">
+                         <section>
+                             <condition>
+                                 <not><if-empty field="facilityId"/></not>
+                             </condition>
+                             <widgets>
+                                 <section>
+                                     <widgets>
+				                            <platform-specific><html><html-template location="component://baselogistics/webapp/baselogistics/facility/contactMechDetails.ftl"/></html></platform-specific>
+                                     </widgets>
+                                 </section>
+                             </widgets>
+                         </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="ListLogFacilityPartyRoleDeposit">
+    	<section>
+            <actions>
+				<set field="selectedMenuItem" value="Facility"/>
+                <set field="selectedSubMenuItem" value="DepositFacilities"/>
+                <set field="facilityId" from-field="parameters.facilityId"/>
+                <set field="titleProperty" value="BLRoles"/>
+			    <set field="titleHeaderValue" value="FacilityTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/FacilityScreens.xml" global="true"/>
+			</actions>
+			<widgets>
+				<section>
+                	<actions>
+					    <set field="tabBarName" value="DepositFacilityTabBar" global="true" />
+					    <set field="tabBarLocation" value="component://baselogistics/widget/BaseLogisticsMenus.xml" global="true"/>
+				     	<set field="tabButtonItem" value="Role" global="true"/>
+					    <set field="printTabBar" value="true" />
+				    </actions>
+				    <widgets>
+				    	<section>
+				    		 <actions>
+						      <set field="printTabBar" value="true" />
+						     </actions>
+						     <widgets>
+						     	<container></container>
+						     </widgets>
+				    	</section>
+				    </widgets>
+                </section>
+				<decorator-screen name="FacilityCommonDecorator">
+                    <decorator-section name="body">
+                    	<platform-specific>
+							<html>
+								<html-template location="component://baselogistics/webapp/baselogistics/facility/listFacilityPartyRole.ftl"/>
+							</html>
+						</platform-specific>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+       </section>
+    </screen>
+    
+</screens>

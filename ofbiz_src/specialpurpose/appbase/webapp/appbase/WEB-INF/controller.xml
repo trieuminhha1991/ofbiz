@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/site-conf.xsd">
+    <!-- The controller elements that are common to all OFBiz components
+         can be found in the following xml file. A component can override the
+         elements found in the common-controller.xml file. -->
+    <include location="component://common/webcommon/WEB-INF/common-controller.xml"/>
+    <include location="component://Notification/webapp/notification/WEB-INF/controller.xml"/>
+    <include location="component://appbase/webapp/appbase/WEB-INF/controller_sales.xml"/>
+    <include location="component://appbase/webapp/appbase/WEB-INF/controller_po.xml"/>
+    <include location="component://appbase/webapp/appbase/WEB-INF/controller_logistics.xml"/>
+    <include location="component://baseaccounting/webapp/baseaccounting/WEB-INF/controller.xml"/>
+    <include location="component://basehr/webapp/basehr/WEB-INF/controller.xml"/>
+    <include location="component://bi-x/webapp/bi-controller.xml"/>
+    <include location="component://administration/webapp/administration/WEB-INF/controller.xml"/>
+	<include location="component://basecrm/webapp/basecrm/WEB-INF/controller.xml"/>
+	<include location="component://baseecommerce/webapp/baseecommerce/WEB-INF/controller_backend.xml"/>
+	<include location="component://basepos/webapp/basepos/WEB-INF/controller_settings.xml"/>
+	<include location="component://appbase/webapp/appbase/WEB-INF/controller_wizard.xml"/>
+	
+    <description>AppBase Component Site Configuration File</description>
+
+    <!-- Events to run on every request before security (chains exempt) -->
+    <!--
+    <preprocessor>
+    </preprocessor>
+    -->
+    <!-- Events to run on every request after all other processing (chains exempt) -->
+    <!--
+    <postprocessor>
+        <event name="test" type="java" path="org.ofbiz.webapp.event.TestEvent" invoke="test"/>
+    </postprocessor>
+    -->
+
+    <!-- Request Mappings -->
+    <request-map uri="checkLogin" edit="false">
+        <description>Verify a user is logged in.</description>
+        <security https="true" auth="false"/>
+        <event type="java" path="org.ofbiz.webapp.control.LoginWorker" invoke="extensionCheckLogin"/>
+        <response name="success" type="view" value="main"/>
+        <response name="error" type="request" value="checkWizardSystem"/>
+    </request-map>
+    <request-map uri="checkWizardSystem">
+    	<security https="true" auth="false"/>
+        <event type="java" path="com.olbius.appbase.common.OlbLoginWorker" invoke="checkWizardSystem"/>
+        <response name="success" type="view" value="login"/>
+        <response name="error" type="view" value="wizardSystem"/>
+    </request-map>
+    <request-map uri="login">
+        <security https="true" auth="false"/>
+        <event type="java" path="org.ofbiz.webapp.control.LoginWorker" invoke="login"/>
+        <response name="success" type="request-redirect" value="main"/>
+        <response name="requirePasswordChange" type="view" value="requirePasswordChange"/>
+        <response name="error" type="view" value="login"/>
+    </request-map>
+    
+    <request-map uri="jqxGeneralServicer">
+        <event type="java" invoke="jqxEventProcessor" path="com.olbius.events.JqxEvents" global-transaction="false"/>
+        <response name="success" type="none" />
+        <response name="error" type="none" />
+    </request-map>
+    <!-- <request-map uri="wizardSystem">
+    	<security https="true" auth="true"/>
+        <response name="success" type="view" value="wizardSystem"/>
+    </request-map> -->
+    
+    <request-map uri="main"><security https="true" auth="true"/><response name="success" type="view" value="main"/></request-map>
+    <request-map uri="mainSales"><security https="true" auth="true"/><response name="success" type="view" value="mainSales"/></request-map>
+    
+    <!-- View Mappings -->
+    <view-map name="wizardSystem" type="screen" page="component://appbase/widget/CommonScreens.xml#WizardSystem"/>
+    <view-map name="main" type="screen" page="component://appbase/widget/AppBaseScreens.xml#dashboard"/>
+    <view-map name="mainSales" type="screen" page="component://appbase/widget/AppBaseMenuScreens.xml#mainSales"/>
+</site-conf>

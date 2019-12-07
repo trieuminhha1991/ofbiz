@@ -1,0 +1,742 @@
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+	<!-- ========================================================= -->
+	<!-- ======================== Defaults ======================= -->
+	<!-- ========================================================= -->
+	<title>Entity of an Open For Business Project Component</title>
+	<description>None</description>
+	<version>1.0</version>
+	<entity entity-name="PosTerminal" package-name="org.ofbiz.specialpurpose.pos"
+		title="Pos Terminal">
+		<field name="posTerminalId" type="id-ne"></field>
+		<field name="facilityId" type="id"></field>
+		<field name="pushEntitySyncId" type="id"></field>
+		<field name="terminalName" type="name"></field>
+		<prim-key field="posTerminalId" />
+	</entity>
+	<entity entity-name="PosTerminalLog" package-name="org.ofbiz.specialpurpose.pos"
+		title="Pos Terminal Log">
+		<field name="posTerminalLogId" type="id-ne"></field>
+		<field name="posTerminalId" type="id-ne"></field>
+		<field name="transactionId" type="id"></field>
+		<field name="itemCount" type="numeric"></field>
+		<field name="orderId" type="id"></field>
+		<field name="returnId" type="id"></field>
+		<field name="userLoginId" type="id" />
+		<field name="statusId" type="id"></field>
+		<field name="logStartDateTime" type="date-time" />
+		<field name="logEndDateTime" type="date-time" />
+		<!-- edit by hoandv -->
+		<field name="posTerminalStateId" type="id"></field>
+		<prim-key field="posTerminalLogId" />
+		<relation type="one" fk-name="POS_LOG_POS" rel-entity-name="PosTerminal">
+			<key-map field-name="posTerminalId" />
+		</relation>
+		<relation type="one" fk-name="POS_LOG_ORDER" rel-entity-name="OrderHeader">
+			<key-map field-name="orderId" />
+		</relation>
+		<relation type="one" fk-name="POS_LOG_RETURN"
+			rel-entity-name="ReturnHeader">
+			<key-map field-name="returnId" />
+		</relation>
+		<relation type="one" fk-name="POS_LOG_STTS" rel-entity-name="StatusItem">
+			<key-map field-name="statusId" />
+		</relation>
+		<relation rel-entity-name="PosTerminalState" type="one"
+			fk-name="POS_LOG_STATE">
+			<key-map field-name="posTerminalStateId" />
+		</relation>
+        <index name="PosTerminalLog_transactionId">
+            <index-field name="transactionId"/>
+        </index>
+	</entity>
+	<entity entity-name="PosTerminalState" package-name="org.ofbiz.specialpurpose.pos"
+		title="Pos Terminal State">
+		<field name="posTerminalStateId" type="id-ne"></field>
+		<field name="posTerminalId" type="id-ne"></field>
+		<field name="openedDate" type="date-time"></field>
+		<field name="closedDate" type="date-time"></field>
+		<field name="startingTxId" type="id-long"></field>
+		<field name="endingTxId" type="id-long"></field>
+		<field name="openedByUserLoginId" type="id-vlong"></field>
+		<field name="closedByUserLoginId" type="id-vlong"></field>
+		<field name="startingDrawerAmount" type="currency-amount"></field>
+		<field name="actualEndingCash" type="currency-amount"></field>
+		<field name="actualEndingCheck" type="currency-amount"></field>
+		<field name="actualEndingCc" type="currency-amount"></field>
+		<field name="actualEndingGc" type="currency-amount"></field>
+		<field name="actualEndingOther" type="currency-amount"></field>
+		<prim-key field="posTerminalStateId" />
+		<relation type="one" fk-name="POS_STATE_POS" rel-entity-name="PosTerminal">
+			<key-map field-name="posTerminalId" />
+		</relation>
+	</entity>
+	<entity entity-name="PosTerminalInternTx" package-name="org.ofbiz.specialpurpose.pos"
+		title="Pos Terminal Internal Transaction">
+		<field name="posTerminalLogId" type="id-ne"></field>
+		<field name="paidAmount" type="currency-amount"></field>
+		<field name="reasonComment" type="comment" />
+		<field name="reasonEnumId" type="id" />
+		<field name="invoiceItemTypeId" type="id"></field>
+		<prim-key field="posTerminalLogId" />
+		<relation type="one" fk-name="POS_TRA_POS" rel-entity-name="PosTerminalLog">
+			<key-map field-name="posTerminalLogId" />
+		</relation>
+		<relation type="one" fk-name="POS_TRA_PAYENUM"
+			rel-entity-name="Enumeration">
+			<key-map field-name="reasonEnumId" rel-field-name="enumId" />
+		</relation>
+		<relation rel-entity-name="InvoiceItemType" type="one"
+			fk-name="POS_TRA_INVITEMTYPE">
+			<key-map field-name="invoiceItemTypeId" />
+		</relation>
+	</entity>
+	<extend-entity entity-name="Timesheet">
+		<field name="facilityId" type="id"></field>
+		<relation type="one" fk-name="TIME_SHEET_FACILITY_01"
+			rel-entity-name="Facility">
+			<key-map field-name="facilityId" />
+		</relation>
+	</extend-entity>
+	<extend-entity entity-name="Product">
+		<field name="warningExpireDateBefore" type="numeric"></field>
+		<field name="salesUomId" type="id"></field> <!--default uom when sale -->
+		<field name="purchaseUomId" type="id"></field> <!-- default uom when purchase -->
+		<field name="productNameSimple" type="long-varchar"></field>
+		<field name="pickStandard" type="fixed-point"></field> <!-- qui cach dong goi cua product -->
+		<field name="alterLookup" type="id"></field>
+	</extend-entity>
+	<extend-entity entity-name="PortalPage">
+		<field name="moduleId" type="id"></field>
+	</extend-entity>
+	<entity entity-name="ProductFacilitySaleHistory" package-name="org.ofbiz.webpos"
+		never-cache="true" title="Product facility sale history">
+		<field name="productId" type="id-ne"></field>
+		<field name="facilityId" type="id-ne"></field>
+		<field name="orderDate" type="date"></field>
+		<field name="quantityOrdered" type="fixed-point"></field>
+		<prim-key field="productId" />
+		<prim-key field="facilityId" />
+		<prim-key field="orderDate" />
+		<relation rel-entity-name="Product" type="one" fk-name="PRO_FA_PRO">
+			<key-map field-name="productId" />
+		</relation>
+		<relation rel-entity-name="Facility" type="one" fk-name="PRO_FA_FAC">
+			<key-map field-name="facilityId" />
+		</relation>
+	</entity>
+	<extend-entity entity-name="ProductFacility">
+		<field name="qpd" type="fixed-point"></field> <!-- quantity per day -->
+		<field name="lastSold" type="date-time"></field>
+		<field name="lastReceived" type="date-time"></field>
+		<field name="qoo" type="fixed-point"></field> <!-- quantity on order -->
+		<field name="unitCost" type="fixed-point"></field>
+	</extend-entity>
+	<extend-entity entity-name="ReturnHeader">
+		<field name="productStoreId" type="id"></field>
+		<field name="grandTotal" type="currency-amount"></field>
+		<field name="taxTotal" type="currency-amount"></field>
+		<relation type="one" fk-name="RETURN_HDR_PDSTR_01"
+			rel-entity-name="ProductStore">
+			<key-map field-name="productStoreId" />
+		</relation>
+	</extend-entity>
+	<entity entity-name="ConfigPrintOrder" package-name="org.ofbiz.webpos"
+		title="Config print order">
+		<field name="productStoreId" type="id-ne"></field>
+		<field name="printType" type="name"></field>
+		<field name="fontFamily" type="name"></field>
+		<field name="headerFontSize" type="fixed-point"></field>
+		<field name="infoFontSize" type="fixed-point"></field>
+		<field name="contentFontSize" type="fixed-point"></field>
+		<field name="isPrintBeforePayment" type="indicator"></field>
+		<field name="logo" type="url"></field>
+		<field name="isDirectPrint" type="indicator"></field>
+		<prim-key field="productStoreId" />
+		<relation rel-entity-name="ProductStore" type="one"
+			fk-name="PRINT_ORDER_PS">
+			<key-map field-name="productStoreId" />
+		</relation>
+	</entity>
+	<extend-entity entity-name="OrderHeader">
+		<field name="planPOId" type="id"></field>
+		<relation rel-entity-name="PlanPurchaseOrder" type="one"
+			fk-name="FK_ORDERHD_PLANPO">
+			<key-map field-name="planPOId" />
+		</relation>
+	</extend-entity>
+	<!-- 
+	<extend-entity entity-name="OrderHeaderPass">
+		<field name="planPOId" type="id"></field>
+		<relation rel-entity-name="PlanPurchaseOrder" type="one"
+			fk-name="FK_ORDERHD_PLANPO_PASS">
+			<key-map field-name="planPOId" />
+		</relation>
+	</extend-entity>
+	 -->
+	<entity entity-name="PlanPurchaseOrder" package-name="org.ofbiz.webpos"
+		never-cache="true" title="Plan Purchase Oreder Entity">
+		<field name="planPOId" type="id-ne"></field>
+		<field name="facilityId" type="id"></field>
+		<field name="createdDate" type="date-time"></field>
+		<field name="createdBy" type="id"></field>
+		<field name="currencyUom" type="id"></field>
+		<field name="supplierId" type="id"></field>
+		<field name="grandTotal" type="currency-amount"></field>
+		<prim-key field="planPOId" />
+
+		<relation rel-entity-name="Party" type="one" fk-name="Plan_PO_Party">
+			<key-map field-name="supplierId" rel-field-name="partyId" />
+		</relation>
+		<relation type="one" rel-entity-name="Uom" fk-name="Plan_PO_CUOM">
+			<key-map field-name="currencyUom" rel-field-name="uomId" />
+		</relation>
+		<relation type="one" rel-entity-name="UserLogin" fk-name="Plan_PO_CBUL"
+			title="CreatedBy">
+			<key-map field-name="createdBy" rel-field-name="userLoginId" />
+		</relation>
+		<relation rel-entity-name="Facility" type="one" fk-name="Plan_PO_Facility">
+			<key-map field-name="facilityId" />
+		</relation>
+	</entity>
+	<entity entity-name="PlanPurchaseOrderItem" package-name="org.ofbiz.webpos"
+		never-cache="true" title="Plan Purchase Order Item Entity">
+		<field name="planPOId" type="id-ne"></field>
+		<field name="planPOItemSeqId" type="id-ne"></field>
+		<field name="productId" type="id"></field>
+		<field name="productName" type="name"></field>
+		<field name="qpd" type="fixed-point"></field> <!-- quantity per day -->
+		<field name="qoh" type="fixed-point"></field> <!-- quantity on hand -->
+		<field name="qoo" type="fixed-point"></field> <!-- quantity on order -->
+		<field name="pickStandard" type="fixed-point"></field> <!-- qui cach dong goi cua product -->
+		<field name="unitCost" type="fixed-point"></field>
+		<field name="lastSold" type="date-time"></field>
+		<field name="lastReceived" type="date-time"></field>
+		<field name="qtyBox" type="fixed-point"></field> <!-- quantity box -->
+		<field name="qtyPic" type="fixed-point"></field> <!-- quantity pic -->
+		<field name="quantityUomId" type="id"></field> <!-- quantity uom id of product -->
+		<field name="purchaseUomId" type="id"></field> <!-- default quantity uom id when purchase -->
+		<prim-key field="planPOId" />
+		<prim-key field="planPOItemSeqId" />
+		<relation type="one" fk-name="PLANPO_ITEM_PLANPO"
+			rel-entity-name="PlanPurchaseOrder">
+			<key-map field-name="planPOId" />
+		</relation>
+		<relation type="one" fk-name="PLANPO_ITEM_UOM" title="Quantity"
+			rel-entity-name="Uom">
+			<key-map field-name="quantityUomId" rel-field-name="uomId" />
+		</relation>
+		<relation type="one" fk-name="PLANPO_ITEM_POUOM" title="purchase"
+			rel-entity-name="Uom">
+			<key-map field-name="purchaseUomId" rel-field-name="uomId" />
+		</relation>
+		<relation type="one" fk-name="PLANPO_ITEM_PRODUCT"
+			rel-entity-name="Product">
+			<key-map field-name="productId" />
+		</relation>
+	</entity>
+	<entity entity-name="PlanPurchaseOrderItemFacility"
+		package-name="org.ofbiz.webpos" never-cache="true"
+		title="Plan Purchase Order Item Entity">
+		<field name="productId" type="id-ne"></field>
+		<field name="facilityId" type="id-ne"></field>
+		<field name="facilityName" type="name"></field>
+		<field name="planPOId" type="id-ne"></field>
+		<field name="qpd" type="fixed-point"></field> <!-- quantity per day -->
+		<field name="qoh" type="fixed-point"></field> <!-- quantity on hand -->
+		<field name="qpo" type="fixed-point"></field> <!-- quantity purchase order -->
+		<prim-key field="productId" />
+		<prim-key field="facilityId" />
+		<prim-key field="planPOId" />
+		<relation type="one" fk-name="PLANPO_ITEM_FACILITY_PRODUCT"
+			rel-entity-name="Product">
+			<key-map field-name="productId" />
+		</relation>
+		<relation type="one" fk-name="PLANPOFA_ITEM_PLANPO"
+			rel-entity-name="PlanPurchaseOrder">
+			<key-map field-name="planPOId" />
+		</relation>
+	</entity>
+	<extend-entity entity-name="ShipmentItem">
+		<field name="quantityUomId" type="id"></field>
+		<relation type="one" fk-name="SHIPMENT_ITEM_UOM_01" title="shipmentItemUom"
+			rel-entity-name="Uom">
+			<key-map field-name="quantityUomId" rel-field-name="uomId" />
+		</relation>
+	</extend-entity>
+	<extend-entity entity-name="ReturnItem">
+		<field name="quantityUomId" type="id"></field>
+		<field name="alternativeQuantity" type="fixed-point"></field>
+    	<field name="alternativePrice" type="currency-precise"></field>
+		<relation type="one" fk-name="RETURN_ITEM_UOM_01" title="returnItemUom"
+			rel-entity-name="Uom">
+			<key-map field-name="quantityUomId" rel-field-name="uomId" />
+		</relation>
+	</extend-entity>
+	<extend-entity entity-name="PosTerminalState">
+		<field name="actualReceivedAmount" type="currency-amount"></field>
+		<field name="currency" type="id"></field>
+		<field name="differenceAmount" type="currency-amount"></field>
+		<field name="amountBalance" type="currency-amount"></field>
+		<field name="acctgTransId" type="id-ne"></field>
+		<relation type="one" fk-name="POSTER_ST_UOM" rel-entity-name="Uom">
+			<key-map field-name="currency" rel-field-name="uomId" />
+		</relation>
+	</extend-entity>
+
+	<extend-entity entity-name="OrderHeader">
+		<field name="planId" type="id"></field>
+		<relation rel-entity-name="PlanHeader" type="one" fk-name="ORDER_HDR_PLAN">
+			<key-map field-name="planId" />
+		</relation>
+	</extend-entity>
+	<!-- 
+	<extend-entity entity-name="OrderHeaderPass">
+		<field name="planId" type="id"></field>
+		<relation rel-entity-name="PlanHeader" type="one" fk-name="ORDER_HDR_PLAN_PASS">
+			<key-map field-name="planId" />
+		</relation>
+	</extend-entity>
+	 -->
+	<entity entity-name="PlanType" package-name="org.ofbiz.webpos.server"
+		title="Plan Type Entity">
+		<field name="planTypeId" type="id-ne"></field>
+		<field name="parentTypeId" type="id-ne"></field>
+		<field name="hasTable" type="indicator"></field>
+		<field name="description" type="description"></field>
+		<prim-key field="planTypeId" />
+		<relation type="one" fk-name="PLAN_TYPE_PAR" title="Parent"
+			rel-entity-name="PlanType">
+			<key-map field-name="parentTypeId" rel-field-name="planTypeId" />
+		</relation>
+	</entity>
+	<entity entity-name="PlanHeader" package-name="org.ofbiz.webpos.server"
+		title="Plan header">
+		<field name="planId" type="id-ne"></field>
+		<field name="planTypeId" type="id"></field>
+		<field name="facilityId" type="id"></field>
+		<field name="partyId" type="id"></field>
+		<field name="grandTotal" type="currency-amount"></field>
+		<field name="currencyUomId" type="id"></field>
+		<field name="createdDate" type="date-time"></field>
+		<field name="createdBy" type="id"></field>
+		<prim-key field="planId" />
+		<relation rel-entity-name="PlanType" type="one" fk-name="PLAN_HR_PLAN_TYPE">
+			<key-map field-name="planTypeId" />
+		</relation>
+		<relation rel-entity-name="Facility" type="one" fk-name="PLAN_FACILITY">
+			<key-map field-name="facilityId" />
+		</relation>
+		<relation rel-entity-name="Party" type="one" fk-name="PLAN_PARTY">
+			<key-map field-name="partyId" />
+		</relation>
+		<relation rel-entity-name="Uom" type="one" fk-name="PLAN_HDR_CUOM">
+			<key-map field-name="currencyUomId" rel-field-name="uomId" />
+		</relation>
+	</entity>
+	<entity entity-name="PlanItem" package-name="org.ofbiz.webpos.server"
+		title="Plan Item">
+		<field name="planId" type="id-ne"></field>
+		<field name="planItemSeqId" type="id-ne"></field>
+		<field name="productId" type="id"></field>
+		<field name="facilityId" type="id"></field>
+		<field name="quantity" type="fixed-point"></field>
+		<field name="quantityUomId" type="id"></field>
+		<field name="unitCost" type="currency-amount"></field>
+		<field name="comments" type="comment"></field>
+		<field name="qoh" type="fixed-point"></field> <!-- quantity on hand -->
+		<field name="qoo" type="fixed-point"></field> <!-- quantity on order -->
+		<field name="qpdL" type="fixed-point"></field> <!-- quantity per day on long period time -->
+		<field name="qpdS" type="fixed-point"></field> <!-- quantity per day on short period time -->
+		<prim-key field="planId" />
+		<prim-key field="planItemSeqId" />
+		<relation rel-entity-name="PlanHeader" type="one" fk-name="PLAN_ITEM_HDR">
+			<key-map field-name="planId" />
+		</relation>
+		<relation rel-entity-name="Product" type="one" fk-name="PLAN_ITEM_PRODUCT">
+			<key-map field-name="productId" />
+		</relation>
+		<relation rel-entity-name="Facility" type="one"
+			fk-name="PLAN_ITEM_FACILITY">
+			<key-map field-name="facilityId" />
+		</relation>
+		<relation rel-entity-name="Uom" type="one" fk-name="PLAN_ITEM_UOM">
+			<key-map field-name="quantityUomId" rel-field-name="uomId" />
+		</relation>
+	</entity>
+	<entity entity-name="Formular" package-name="org.ofbiz.webpos.server">
+		<field name="formularId" type="id-ne"></field>
+		<field name="name" type="name"></field>
+		<field name="formular" type="description"></field>
+		<field name="description" type="description"></field>
+		<!-- <field name="statusId" type="id"></field> -->
+		<field name="createdDate" type="date-time"></field>
+		<field name="createdBy" type="id"></field>
+		<prim-key field="formularId" />
+		<!-- <relation rel-entity-name="StatusItem" type="one" fk-name="FORM_STATUS"> 
+			<key-map field-name="statusId"/> </relation> -->
+	</entity>
+
+	<entity entity-name="ProductFacilitySale" package-name="org.ofbiz.webpos.server">
+		<field name="productId" type="id-ne"></field>
+		<field name="facilityId" type="id-ne"></field>
+		<field name="periodTypeId" type="id-ne"></field>
+		<field name="quantity" type="fixed-point"></field>
+		<field name="qpd" type="fixed-point"></field>
+		<prim-key field="productId" />
+		<prim-key field="facilityId" />
+		<prim-key field="periodTypeId" />
+		<relation rel-entity-name="Product" type="one" fk-name="PRO_FASA_PRO">
+			<key-map field-name="productId" />
+		</relation>
+		<relation rel-entity-name="Facility" type="one" fk-name="PRO_FASA_FA">
+			<key-map field-name="facilityId" />
+		</relation>
+		<relation rel-entity-name="PeriodType" type="one" fk-name="PRO_FASA_PT">
+			<key-map field-name="periodTypeId" />
+		</relation>
+	</entity>
+
+	<!-- <extend-entity entity-name="PostalAddress"> <field name="stateProvinceGeoId" 
+		type="id"></field> <field name="districtGeoId" type="id"></field> <field 
+		name="wardGeoId" type="id"></field> <field name="roadGeoId" type="id"></field> 
+		<relation type="one" fk-name="POST_ADDR_SPGEO" title="StateProvince" rel-entity-name="Geo"> 
+		<key-map field-name="stateProvinceGeoId" rel-field-name="geoId"/> </relation> 
+		<relation type="one" fk-name="POST_ADDR_CNTG" title="County" rel-entity-name="Geo"> 
+		<key-map field-name="districtGeoId" rel-field-name="geoId"/> </relation> 
+		<relation type="one" fk-name="POST_ADDR_SPGEO_NEW1" title="StateProvince" 
+		rel-entity-name="Geo"> <key-map field-name="wardGeoId" rel-field-name="geoId"/> 
+		</relation> <relation type="one" fk-name="POST_ADDR_ROGEO_NEW2" title="Road" 
+		rel-entity-name="Geo"> <key-map field-name="roadGeoId" rel-field-name="geoId"/> 
+		</relation> </extend-entity> -->
+	<entity entity-name="ProductSummaryServices" package-name="org.ofbiz.webpos.client">
+		<field name="service" type="name" />
+		<field name="status" type="name" />
+		<field name="lastUpdated" type="date-time" />
+		<field name="formular" type="description"></field>
+		<prim-key field="service" />
+	</entity>
+	<entity entity-name="ProductSummary" package-name="org.ofbiz.webpos.client">
+		<field name="productId" type="id-ne"></field>
+		<field name="productName" type="description"></field>
+		<field name="quantityUomId" type="id"></field>
+		<field name="qoh" type="fixed-point"></field>
+		<field name="qoo" type="fixed-point"></field>
+		<field name="qtyL" type="fixed-point"></field>
+		<field name="qtyS" type="fixed-point"></field>
+		<field name="qpdL" type="fixed-point"></field>
+		<field name="qpdS" type="fixed-point"></field>
+		<field name="lidL" type="fixed-point"></field>
+		<field name="lidS" type="fixed-point"></field>
+		<field name="lastSold" type="date-time"></field>
+		<field name="unitCost" type="fixed-point"></field>
+		<field name="status" type="very-short"></field>
+		<field name="lastReceived" type="date-time"></field>
+		<prim-key field="productId" />
+	</entity>
+	<entity entity-name="ProductFacilitySummary" package-name="org.ofbiz.webpos.client">
+		<field name="productId" type="id-ne"></field>
+		<field name="facilityId" type="id-ne"></field>
+		<field name="productName" type="description"></field>
+		<field name="quantityUomId" type="id"></field>
+		<field name="qoh" type="fixed-point"></field>
+		<field name="qoo" type="fixed-point"></field>
+		<field name="qtyL" type="fixed-point"></field> <!-- so luong hang ban duoc trong chu ki dai -->
+		<field name="qtyS" type="fixed-point"></field> <!-- so luong hang ban duoc trong chu ki ngan -->
+		<field name="qpdL" type="fixed-point"></field>
+		<field name="qpdS" type="fixed-point"></field>
+		<field name="qodS" type="fixed-point"></field>
+		<field name="lidL" type="fixed-point"></field>
+		<field name="lidS" type="fixed-point"></field>
+		<field name="unitCost" type="fixed-point"></field>
+		<field name="lastSold" type="date-time"></field>
+		<field name="lastReceived" type="date-time"></field>
+		<field name="status" type="very-short"></field>
+		<prim-key field="productId" />
+		<prim-key field="facilityId" />
+	</entity>
+	
+	<entity entity-name="PosHistory" package-name="org.ofbiz.webpos.client">
+	    <field name="statusIdPTL" type="id-ne"></field> <!-- PosTerminalLog -->
+	    <field name="posTerminalLogId" type="id-ne"></field> <!-- PosTerminalLog -->
+	    <field name="entryDate" type="date-time"></field> <!-- OrderDate or ReturnDate -->
+	    <field name="returnId" type="id-ne"></field> <!-- ReturnHeader -->
+	    <field name="orderId" type="id-ne"></field> <!-- OrderHeader -->
+	    <field name="returnDate" type="date-time"></field> <!-- ReturnHeader -->
+	    <field name="grandTotal" type="fixed-point"></field> <!-- ReturnHeader -->
+	    <field name="returnGrandTotal" type="fixed-point"></field> <!-- ReturnHeader -->
+	    <field name="createdBy" type="id-ne"></field> <!-- OrderHeader -->
+	    <field name="returnCreatedBy" type="id-ne"></field> <!-- ReturnHeader -->
+	    <field name="transactionType" type="description"></field> <!-- Person -->
+	    <field name="firstName" type="description"></field> <!-- Person -->
+	    <field name="middleName" type="description"></field> <!-- Person -->
+	    <field name="lastName" type="description"></field> <!-- Person -->
+	    <field name="partyId" type="description"></field> <!-- Person -->
+	    <field name="orderDate" type="date-time"></field> <!-- OrderHeader -->
+	    <prim-key field="posTerminalLogId"/>
+	    <prim-key field="statusIdPTL"/>
+	    <index name="PosHistory_posTerminalLogId">
+	        <index-field name="posTerminalLogId"/>
+	    </index>
+	    <index name="PosHistory_orderId">
+	        <index-field name="orderId"/>
+	    </index>
+	    <index name="PosHistory_returnDate">
+	        <index-field name="returnDate"/>
+	    </index>
+	    <index name="PosHistory_orderDate">
+	        <index-field name="orderDate"/>
+	    </index>
+	    <index name="PosHistory_createdBy">
+	        <index-field name="createdBy"/>
+	    </index>
+	    <index name="PosHistory_returnCreatedBy">
+	        <index-field name="returnCreatedBy"/>
+	    </index>
+	</entity>
+	
+	<entity entity-name="SgcOrder" package-name="org.ofbiz.webpos.client">
+	    <field name="sgcOrderId" type="id-ne"></field>
+	    <field name="productStoreId" type="id-ne"></field>
+	    <field name="orderId" type="id-ne"></field>
+	    <field name="returnId" type="id-ne"></field>
+	    <field name="sequenceValue" type="id-ne"></field>
+	    <prim-key field="sgcOrderId"/>
+	    <index name="SgcOrdersgcOrderId" >
+	        <index-field name="sgcOrderId"/>
+        </index>
+	</entity>
+	<entity entity-name="SgcOrderNegative" package-name="org.ofbiz.webpos.client">
+	    <field name="sgcOrderNegId" type="id-ne"></field>
+	    <field name="productStoreId" type="id-ne"></field>
+	    <field name="orderId" type="id-ne"></field>
+	    <field name="returnId" type="id-ne"></field>
+	    <field name="sequenceValue" type="id-ne"></field>
+	    <field name="txNo" type="id"></field>
+    	<field name="orderDate" type="date-time"></field>
+    	<field name="orderTime" type="time"></field>
+	    <prim-key field="sgcOrderNegId"/>
+	</entity>
+	
+	<entity entity-name="SgcOrderSequence" package-name="org.ofbiz.webpos.client">
+	    <field name="sgcOrderSequenceId" type="id-ne"></field>
+	    <field name="productStoreId" type="id-ne"></field>
+	    <field name="orderId" type="id-ne"></field>
+	    <field name="returnId" type="id-ne"></field>
+	    <field name="sequenceValue" type="id-ne"></field>
+	    <prim-key field="sgcOrderSequenceId"/>
+	</entity>
+	
+	<entity entity-name="SgcConnectDataCenterKhttLog" package-name="org.ofbiz.webpos.client">
+		<description>SGC connect to the data center KHTT log</description>
+	    <field name="connectId" type="id-ne"></field>
+	    <field name="entryDate" type="date-time"></field>
+	    <field name="statusId" type="id-ne"></field>
+	    <field name="productStoreId" type="id"><description>Insert product store id when lost internet</description></field>
+	    <prim-key field="connectId"/>
+	</entity>
+	<entity entity-name="SgcOrderOffline" package-name="org.ofbiz.webpos.client">
+		<description>SGC order offline</description>
+	    <field name="sgcOrderOfflineId" type="id-ne"></field>
+	    <field name="entryDate" type="date-time"></field>
+	    <field name="pushDate" type="date-time"></field>
+	    <field name="orderId" type="id"></field>
+	    <field name="returnId" type="id"></field>
+	    <field name="sgcCustomerId" type="id"></field>
+	    <field name="isPush" type="indicator"><description>Was pushed to online or not? Default with offline mode is "N"</description></field>
+	    <field name="comments" type="comment"></field>
+	    <field name="runResult" type="value"></field>
+	    <prim-key field="sgcOrderOfflineId"/>
+	</entity>
+	
+	<!-- Shopping Cart log -->
+	<entity entity-name="ShoppingCartLogLite" package-name="org.ofbiz.webpos">
+		<field name="transactionId" type="id-long-ne"></field>
+		<field name="orderId" type="id"></field>
+		<field name="statusId" type="id"><description>Status is CANCELLED, COMPLETED</description></field>
+		<field name="terminalId" type="id"></field>
+		<field name="facilityId" type="id"></field>
+		<field name="productStoreId" type="id"></field>
+		<field name="salesChannelEnumId" type="id"></field>
+		<field name="salesMethodChannelEnumId" type="id"></field>
+		<field name="partyId" type="id"><description>Customer id</description></field>
+		<field name="startDate" type="date-time"></field>
+		<field name="finishDate" type="date-time"></field>
+		<field name="createdByPartyId" type="id"><description>Party id of seller</description></field>
+		<field name="createdByUserLogin" type="id"><description>User login id of seller</description></field>
+		<field name="createdDate" type="date-time"></field>
+		<prim-key field="transactionId"/>
+	</entity>
+	<entity entity-name="ShoppingCartItemLogLite" package-name="org.ofbiz.webpos">
+		<field name="transactionId" type="id-long-ne"></field>
+		<field name="itemSeqId" type="id-ne"><description>Sequence log item: 00001, 00002</description></field>
+		<field name="itemIndex" type="numeric"><description>Cart item index: 1, 2</description></field>
+		<field name="statusId" type="id"><description>ADD, DELETE, MODIFY</description></field>
+		<field name="productId" type="id"></field>
+		<field name="quantity" type="fixed-point"></field>
+		<field name="amount" type="fixed-point"></field>
+		<field name="unitPrice" type="currency-precise"></field>
+		<field name="alternativeQuantity" type="fixed-point"></field>
+		<field name="alternativeUnitPrice" type="currency-precise"></field>
+		<field name="quantityUomId" type="id"></field>
+		<field name="amountUomId" type="id"></field>
+		<field name="itemQuantityTotal" type="id"><description>Quantity of ShoppingCartItem (= Old quantity +/- new quantity)</description></field>
+		<field name="itemAmountTotal" type="id"><description>Selected amount of ShoppingCartItem (= Old amount +/- new amount)</description></field>
+		<field name="itemTaxTotal" type="currency-amount"><description>Tax amount of ShoppingCartItem</description></field>
+		<field name="itemDiscountTotal" type="currency-amount"><description>Discount amount of ShoppingCartItem</description></field>
+		<field name="itemRemainingSubTotal" type="currency-amount"><description>Sub total amount of ShoppingCartItem (without tax)</description></field>
+		<field name="itemGrandTotal" type="currency-amount"><description>Total amount of ShoppingCartItem (with tax)</description></field>
+		<field name="createdDate" type="date-time"></field>
+		<prim-key field="transactionId"/>
+		<prim-key field="itemSeqId"/>
+	</entity>
+	
+	<entity entity-name="ShoppingCartLog" package-name="org.ofbiz.webpos">
+		<field name="transactionId" type="id-long-ne"></field>
+		<field name="orderId" type="id"></field>
+		<field name="statusId" type="id"><description>Status is CANCELLED, COMPLETED</description></field>
+		<field name="terminalId" type="id"></field>
+		<field name="facilityId" type="id"></field>
+		<field name="productStoreId" type="id"></field>
+		<field name="salesChannelEnumId" type="id"></field>
+		<field name="salesMethodChannelEnumId" type="id"></field>
+		<field name="partyId" type="id"><description>Customer id</description></field>
+		<field name="startDate" type="date-time"></field>
+		<field name="finishDate" type="date-time"></field>
+		<field name="createdByPartyId" type="id"><description>Party id of seller</description></field>
+		<field name="createdByUserLogin" type="id"><description>User login id of seller</description></field>
+		<field name="createdDate" type="date-time"></field>
+		<prim-key field="transactionId"/>
+	</entity>
+	<entity entity-name="ShoppingCartItemLog" package-name="org.ofbiz.webpos">
+		<field name="transactionId" type="id-long-ne"></field>
+		<field name="itemSeqId" type="id-ne"><description>Sequence log item: 00001, 00002</description></field>
+		<field name="itemIndex" type="numeric"><description>Cart item index: 1, 2</description></field>
+		<field name="statusId" type="id"><description>ADD, DELETE, MODIFY</description></field>
+		<field name="productId" type="id"></field>
+		<field name="quantity" type="fixed-point"></field>
+		<field name="amount" type="fixed-point"></field>
+		<field name="unitPrice" type="currency-precise"></field>
+		<field name="alternativeQuantity" type="fixed-point"></field>
+		<field name="alternativeUnitPrice" type="currency-precise"></field>
+		<field name="quantityUomId" type="id"></field>
+		<field name="amountUomId" type="id"></field>
+		<field name="itemQuantityTotal" type="id"><description>Quantity of ShoppingCartItem (= Old quantity +/- new quantity)</description></field>
+		<field name="itemAmountTotal" type="id"><description>Selected amount of ShoppingCartItem (= Old amount +/- new amount)</description></field>
+		<field name="itemTaxTotal" type="currency-amount"><description>Tax amount of ShoppingCartItem</description></field>
+		<field name="itemDiscountTotal" type="currency-amount"><description>Discount amount of ShoppingCartItem</description></field>
+		<field name="itemRemainingSubTotal" type="currency-amount"><description>Sub total amount of ShoppingCartItem (without tax)</description></field>
+		<field name="itemGrandTotal" type="currency-amount"><description>Total amount of ShoppingCartItem (with tax)</description></field>
+		<field name="createdDate" type="date-time"></field>
+		<prim-key field="transactionId"/>
+		<prim-key field="itemSeqId"/>
+	</entity>
+	
+	<!-- Extend entity -->
+	<extend-entity entity-name="Visit">
+		<field name="posTerminalId" type="id"></field>
+	</extend-entity>
+	
+	 <extend-entity entity-name="EntitySync">
+    	<field name="posTerminalId" type="id"></field>
+    	<field name="facilityId" type="id"></field>
+    </extend-entity>
+    
+	 <extend-entity entity-name="OrderHeader">
+		<field name="SGCCustomerId" type="id"></field>
+	</extend-entity>
+	<!-- 
+	 <extend-entity entity-name="OrderHeaderPass">
+		<field name="SGCCustomerId" type="id"></field>
+	</extend-entity>
+	 -->
+	<entity entity-name="OrderInvoiceNote" package-name="org.ofbiz.webpos">
+		<field name="orderId" type="id-ne"></field>
+		<field name="customerName" type="long-varchar"></field>
+		<field name="companyName" type="long-varchar"></field>
+		<field name="taxInfoId" type="long-varchar"></field>
+		<field name="address" type="description"></field>
+		<field name="paymentMethod" type="long-varchar"></field>
+		<field name="bankId" type="long-varchar"></field>
+		<field name="isCreatedVatInv" type="boolean"></field>
+		<field name="isCreatedInSale" type="boolean"></field>
+		<field name="invoiceId" type="id-ne"></field>
+		<field name="orderInvoiceNoteId" type="id-ne"></field>
+		<prim-key field="orderId" />
+	</entity>
+	
+	<extend-entity entity-name="OrderAdjustment">
+		<field name="productId" type="id-ne"></field>
+		<relation rel-entity-name="Product" type="one" fk-name="ORDER_ADJ_PRO">
+			<key-map field-name="productId" />
+		</relation>	
+	</extend-entity>
+	
+	<!-- WorkShiftList -->
+	<entity entity-name="WorkShiftJobScheduleConfig" package-name="org.ofbiz.webpos">
+		<field name="configName" type="id"></field>
+		<field name="value" type="id"></field>
+		<prim-key field="configName"/>
+	</entity>	
+	
+	<entity entity-name="ListWorkShift" package-name="org.ofbiz.webpos">
+		<description>Used for aggregating ListWorkShift's data</description>
+		<field name="actualEndingCash" type="currency-amount"></field>
+		<field name="actualEndingCc" type="currency-amount"></field>
+		<field name="actualEndingCheck" type="currency-amount"></field>
+		<field name="actualEndingGc" type="currency-amount"></field>
+		<field name="actualEndingOther" type="currency-amount"></field>
+		<field name="actualReceivedAmount" type="currency-amount"></field>
+		<field name="amountCard" type="currency-amount"></field>
+		<field name="amountCash" type="currency-amount"></field>
+		<field name="amountTotal" type="currency-amount"></field>
+		<field name="closedByUserLoginId" type="id-vlong"></field>
+		<field name="closedDate" type="date-time"></field>
+		<field name="currency" type="id-ne"></field>
+		<field name="differenceAmount" type="currency-amount"></field>
+		<field name="endingTxId" type="id-long"></field>
+		<field name="facilityName" type="id-long"></field>
+		<field name="fullName" type="id-long"></field>
+		<field name="openedByUserLoginId" type="id-vlong"></field>
+		<field name="openedDate" type="date-time"></field>
+		<field name="openedUserId" type="id-ne"></field>
+		<field name="orderTotal" type="currency-amount"></field>
+		<field name="organizationPartyId" type="id-ne"></field>
+		<field name="otherCost" type="currency-amount"></field>
+		<field name="otherInCome" type="currency-amount"></field>
+		<field name="paymentId" type="id-vlong"></field>
+		<field name="posTerminalId" type="id-ne"></field>
+		<field name="posTerminalStateId" type="id-ne"></field>
+		<field name="returnTotal" type="currency-amount"></field>
+		<field name="returnTotalDirectly" type="currency-amount"></field>
+		<field name="startingDrawerAmount" type="currency-amount"></field>
+		<field name="startingTxId" type="id-long"></field>
+		<field name="terminalName" type="id-long"></field>
+		<field name="acctgTransId" type="id-ne"></field>
+		<field name="amountBalance" type="currency-amount"></field>
+		<prim-key field="posTerminalStateId"/>
+	</entity>
+	
+	<entity entity-name="PosTerminalBank" package-name="org.ofbiz.specialpurpose.pos"
+		title="Pos Terminal Bank">
+		<field name="posTerminalId" type="id-ne"></field>
+		<field name="partyId" type="id"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<prim-key field="posTerminalId" />
+		<prim-key field="partyId" />
+		<prim-key field="fromDate" />
+	</entity>
+	
+	<entity entity-name="OrderReceiptNote" package-name="org.ofbiz.webpos">
+		<field name="orderId" type="id-ne"></field>
+		<field name="invoiceId" type="id-ne"></field>
+		<field name="receiptId" type="long-varchar"></field>
+		<field name="statusId" type="id"></field>
+		<field name="bankId" type="id-ne"></field>
+		<field name="posTerminalStateId" type="id-ne"></field>
+		<field name="amount" type="currency-amount"></field>
+		<field name="amountApplied" type="currency-amount"></field>
+		<prim-key field="orderId" />
+	</entity>	
+</entitymodel>

@@ -1,0 +1,1098 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Licensed to the Apache Software Foundation (ASF) under one or more contributor 
+	license agreements. See the NOTICE file distributed with this work for additional 
+	information regarding copyright ownership. The ASF licenses this file to 
+	you under the Apache License, Version 2.0 (the "License"); you may not use 
+	this file except in compliance with the License. You may obtain a copy of 
+	the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required 
+	by applicable law or agreed to in writing, software distributed under the 
+	License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS 
+	OF ANY KIND, either express or implied. See the License for the specific 
+	language governing permissions and limitations under the License. -->
+
+<site-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/site-conf.xsd">
+	<!-- The controller elements that are common to all OFBiz components can 
+		be found in the following xml file. A component can override the elements 
+		found in the common-controller.xml file. -->
+	<include location="component://common/webcommon/WEB-INF/common-controller.xml"/> 
+	<!-- 	<include location="component://common/webcommon/WEB-INF/portal-controller.xml"/> -->
+
+	<description>Mobile Services Component Site Configuration File</description>
+
+	<handler name="java" type="request"
+		class="org.ofbiz.webapp.event.JavaEventHandler" />
+	<handler name="bsf" type="request"
+		class="org.ofbiz.webapp.event.BsfEventHandler" />
+	<handler name="soap" type="request"
+		class="org.ofbiz.webapp.event.SOAPEventHandler" />
+	<handler name="service" type="request"
+		class="org.ofbiz.webapp.event.ServiceEventHandler" />
+	<handler name="service-multi" type="request"
+		class="org.ofbiz.webapp.event.ServiceMultiEventHandler" />
+	<handler name="simple" type="request"
+		class="org.ofbiz.webapp.event.SimpleEventHandler" />
+	<handler name="rome" type="request"
+		class="org.ofbiz.webapp.event.RomeEventHandler" />
+
+	<handler name="jsp" type="view" class="org.ofbiz.webapp.view.JspViewHandler" />
+	<handler name="http" type="view"
+		class="org.ofbiz.webapp.view.HttpViewHandler" />
+	<handler name="screen" type="view"
+		class="org.ofbiz.widget.screen.MacroScreenViewHandler" />
+	<handler name="simplecontent" type="view"
+		class="org.ofbiz.content.view.SimpleContentViewHandler" />
+	<handler name="screenfop" type="view"
+		class="org.ofbiz.widget.screen.ScreenFopViewHandler" />
+
+	<!-- Events run from here for the first hit in a visit -->
+	<firstvisit>
+		<event name="autoLoginCheck" type="java"
+			path="org.ofbiz.webapp.control.LoginWorker" invoke="autoLoginCheck" />
+		<event name="checkTrackingCodeCookies" type="java"
+			path="org.ofbiz.marketing.tracking.TrackingCodeEvents" invoke="checkTrackingCodeCookies" />
+		<event name="setDefaultStoreSettings" type="java"
+			path="org.ofbiz.product.product.ProductEvents" invoke="setDefaultStoreSettings" />
+		<!-- <event name="createGuestShoppingListCookies" type="java" path="org.ofbiz.order.shoppinglist.ShoppingListEvents" 
+			invoke="createGuestShoppingListCookies"/> <event name="restoreAutoSaveList" 
+			type="java" path="org.ofbiz.order.shoppinglist.ShoppingListEvents" invoke="restoreAutoSaveList"/> -->
+	</firstvisit>
+
+	<!-- Events to run on every request before security (chains exempt) -->
+	<preprocessor>
+		<!-- This event allows affilate/distributor entry on any page -->
+		<event name="check509CertLogin" type="java"
+			path="org.ofbiz.webapp.control.LoginWorker" invoke="check509CertLogin" />
+		<event name="checkRequestHeaderLogin" type="java"
+			path="org.ofbiz.webapp.control.LoginWorker" invoke="checkRequestHeaderLogin" />
+		<event name="checkServletRequestRemoteUserLogin" type="java"
+			path="org.ofbiz.webapp.control.LoginWorker" invoke="checkServletRequestRemoteUserLogin" />
+		<event name="checkExternalLoginKey" type="java"
+			path="org.ofbiz.webapp.control.LoginWorker" invoke="checkExternalLoginKey" />
+		<event name="checkProtectedView" type="java"
+			path="org.ofbiz.webapp.control.ProtectViewWorker" invoke="checkProtectedView" />
+		<event name="extensionConnectLogin" type="java"
+			path="org.ofbiz.webapp.control.LoginWorker" invoke="extensionConnectLogin" />
+	</preprocessor>
+
+	<!-- Events to run on every request after all other processing (chains exempt) -->
+	<!-- <postprocessor> <event name="test" type="java" path="org.ofbiz.webapp.event.TestEvent" 
+		invoke="test"/> </postprocessor> -->
+	<!-- default request; call into CMS -->
+	<default-request request-uri="cms" />
+
+	<!-- Common json reponse events, chain these after events to send json reponses -->
+	<!-- Standard json response, uses all compatible request attributes -->
+	
+	<request-map uri="json">
+		<security direct-request="false" />
+		<event type="java" path="org.ofbiz.common.CommonEvents" invoke="jsonResponseFromRequestAttributes" />
+		<response name="success" type="none" />
+	</request-map>
+	<request-map uri="checkLogin" edit="false">
+		<description>Verify a user is logged in.</description>
+		<security https="true" auth="false" />
+		<event type="java" path="org.ofbiz.webapp.control.LoginWorker" invoke="extensionCheckLogin" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+
+	<request-map uri="dologin" edit="false">
+		<security https="true" auth="false" />
+		<event type="java" path="org.ofbiz.mobileservices.LoginMobileServices"
+			invoke="dologin" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="mobilelogin" edit="false">
+		<security https="true" auth="false"/>
+        <event type="java" path="org.ofbiz.webapp.control.LoginWorker" invoke="login"/>
+        <response name="success" type="request" value="json" />
+        <response name="requirePasswordChange" type="request" value="json"/>
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="mGetCustomers" edit="false">
+		<security https="true" auth="true" />
+		<event type="service" invoke="mGetCustomers" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	
+	
+	<request-map uri="loginSup">
+		<security https="true" auth="false" />
+		<event type="service" invoke="loginSup"></event>	
+		<response name="success" type="request" value="json" />
+		<response name="requirePasswordChange" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	
+	<request-map uri="logout">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.webapp.control.LoginWorker"
+			invoke="logout" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+
+	<!-- Order request -->
+	<request-map uri="submitOrder">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.mobileservices.OrderEvents" invoke="submitOrder" global-transaction="true"/>
+		<response name="success" type="request" value="emptycart" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="createCart">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.mobileservices.OrderEvents" invoke="createCart" global-transaction="true"/>
+		<response name="success" type="request" value="getCartInfo"/>
+		<response name="error" type="request" value="emptycart"/>
+		<!-- <response name="success" type="request" value="addProductsToOrder" />
+		<response name="modifycart" type="request" value="modifyCart" />
+		<response name="error" type="request" value="emptycart" /> -->
+	</request-map>
+	<request-map uri="modifyCart">
+		<security https="true" auth="true" />
+		<!-- <event type="java" path="org.ofbiz.mobileservices.OrderEvents" invoke="modifyCart"/> -->
+		<event type="java" path="com.olbius.basesales.shoppingcart.ShoppingCartEvents" invoke="modifyCart"/>
+		<response name="success" type="request" value="calcShipping" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="addProductsToOrder">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.mobileservices.OrderEvents"
+			invoke="addProductsToOrder"/>
+		<response name="success" type="request" value="calcShipping" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+
+	<request-map uri="calcShipping">
+		<security direct-request="false" />
+		<event type="java"
+			path="org.ofbiz.order.shoppingcart.shipping.ShippingEvents" invoke="getShipEstimate" />
+		<response name="success" type="request" value="calcTax" />
+		<response name="error" type="request" value="getCartInfo" />
+	</request-map>
+	<request-map uri="calcTax">
+		<security direct-request="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.CheckOutEvents"
+			invoke="calcTax" />
+		<response name="success" type="request" value="getCartInfo" />
+		<response name="error" type="request" value="getCartInfo" />
+	</request-map>
+	<request-map uri="getCartInfo">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.mobileservices.OrderEvents"
+			invoke="getCartInfo" global-transaction="true"/>
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="emptycart">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.ShoppingCartEvents" invoke="destroyCart" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="getOrderDetail">
+		<security https="true" auth="true" />
+		<event type="java" invoke="getOrderDetail"
+			path="org.ofbiz.mobileservices.OrderServices"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="getOrderItemsBeingTransfer">
+		<security https="true" auth="true" />
+		<event type="service" invoke="getOrderItemsBeingTransfer"/>
+		<response name="success" type="request" value="json"/>
+		<response name="error" type="request" value="json"/>
+	</request-map>
+
+	<!-- payment finish -->
+	<request-map uri="paymentFinish">
+		<security https="true" auth="true" />
+		<event type="java" invoke="paymentFinish"
+			path="org.ofbiz.mobileservices.OrderServices" />
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<!-- end payment finish -->
+	<request-map uri="orderAmountPerMonth">
+		<event type="java" path="org.ofbiz.mobileservices.OrderServices"
+			invoke="getOrderAmount" />
+		<response name="success" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="orderHeaderListView">
+		<security https="true" auth="true" />
+		<event type="service" invoke="getOrderHeaderListView" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="orderstatus">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.mobileservices.OrderServices"
+			invoke="getOrderStatus" />
+		<response name="success" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="changeOrderStatus">
+		<security https="true" auth="true" />
+		<event type="service" invoke="changeOrderStatusDelys" />
+		<response name="success" type="request" value="json"></response>
+	</request-map>
+	<!-- end order request -->
+	<request-map uri="getProductStore">
+		<security https="true" auth="true" />
+		<event type="service" invoke="getProductStore" />
+		<response name="success" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="getPriceTax">
+	    <security https="true" auth="true" />
+		<event type="service" invoke="getPriceTax" />
+		<response name="success" type="request" value="json"/>
+		<response name="error" type="request" value="json"/>
+	</request-map>
+	<request-map uri="getProductDetail">
+	    <security https="true" auth="true" />
+		<event type="service" invoke="getProductDetail" />
+		<response name="success" type="request" value="json"/>
+		<response name="error" type="request" value="json"/>
+	</request-map>
+	<request-map uri="getProductList">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.mobileservices.OrderServices"
+			invoke="getProductList" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	
+	<request-map uri="getAllStore">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.mobileservices.MobileServices"
+			invoke="getAllStore" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+
+    <request-map uri="getStoreByRoadNew">
+        <security https="true" auth="true" />
+        <event type="service" invoke="getStoreByRoadNew"></event>
+        <response name="success" type="request" value="json" />
+        <response name="error" type="request" value="json" />
+    </request-map>
+	<request-map uri="getStore">
+		<security https="true" auth="true" />
+		<event type="service" invoke="getStore"></event>
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+
+
+
+	<request-map uri="getNotification">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.mobileservices.MobileServices"
+			invoke="getNotification" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="taskView">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.mobileservices.MobileServices"
+			invoke="getProjectTask" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="productPromos">
+		<event type="java" path="org.ofbiz.mobileservices.MobileServices"
+			invoke="getAllProductPromotion" />
+		<response name="success" type="request" value="json" />
+	</request-map>
+	<request-map uri="getListPromosRuleByProduct">
+	    <event type="service" invoke="getListPromosRuleByProduct"/>
+	    <response name="success" type="request" value="json"/>
+	    <response name="error" type="request" value="json"/>
+	</request-map>
+	<!-- update salesman's name -->
+	<request-map uri="updatePerson">
+		<security https="true" auth="true" />
+		<event type="service" path="" invoke="updatePersonSalesman" />
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<!-- end update -->
+
+	<!-- edit salesman's avatar -->
+	<request-map uri="editAvatarSalesman">
+		<security https="true" auth="true" />
+		<event type="service" invoke="editAvatarSalesmanMobiles" />
+		<response name="success" type="request" value="json"></response>
+	</request-map>
+	<!-- end edit -->
+
+	<!-- update password -->
+	<request-map uri="updatePassword">
+		<security https="true" auth="true" />
+		<event type="service" invoke="updatePasswordMobile"/>
+		<response name="success" type="request" value="json"/>
+		<response name="error" type="request" value="json"/>
+	</request-map>
+	<!-- end update password -->
+	<!-- report -->
+	<request-map uri="getSalesReportDataWithTime">
+		<security https="true" auth="true" />
+		<event type="service" invoke="getSalesReportDataWithTime"/>
+		<response name="success" type="request" value="json"/>
+		<response name="error" type="request" value="json"/>
+	</request-map>
+	<request-map uri="getOrderTotalReport">
+		<security https="true" auth="true" />
+		<event type="service" invoke="getOrderTotalReport"/>
+		<response name="success" type="request" value="json"/>
+		<response name="error" type="request" value="json"/>
+	</request-map>
+	<request-map uri="getSalesmanTopReport">
+		<security https="true" auth="true" />
+		<event type="service" invoke="getSalesmanTopReport"/>
+		<response name="success" type="request" value="json"/>
+		<response name="error" type="request" value="json"/>
+	</request-map>
+
+	<!-- end report -->
+	<request-map uri="purchaseReportProduct">
+		<event type="java" invoke="getReportProduct" path="org.ofbiz.mobileservices.MobileServices"></event>
+			<response name="success" type="request" value="json" />
+	</request-map>
+
+	<request-map uri="productSalesSum">
+		<event type="service" invoke="bestProductInMonthMobile" />
+		<response name="success" type="request" value="json" />
+	</request-map>
+
+	<request-map uri="customerSumAmount">
+		<event type="service" invoke="customersSumAmount" />
+		<response name="success" type="request" value="json" />
+	</request-map>
+	<request-map uri="getAllCategories">
+		<event type="java" path="org.ofbiz.mobileservices.MobileServices"
+			invoke="getAllCategories" />
+		<response name="success" type="request" value="json" />
+	</request-map>
+	<request-map uri="getAllProducts">
+		<event type="java" path="org.ofbiz.mobileservices.MobileServices"
+			invoke="getAllProducts" global-transaction="false"/>
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="getProductOfCat">
+		<event type="java" path="org.ofbiz.mobileservices.MobileServices"
+			invoke="getProductOfCat" />
+		<response name="success" type="request" value="json"></response>
+	</request-map>
+
+	<request-map uri="customerInfoDetail">
+		<event type="java" path="org.ofbiz.mobileservices.MobileServices"
+			invoke="getCustomerDetailInfo" />
+		<response name="success" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="editGroupNameCus">
+		<security https="true" auth="true" />
+		<event type="service" path="" invoke="updatePartyGroup" />
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="updateCusOrder">
+		<event type="java" path="org.ofbiz.mobileservices.MobileServices"
+			invoke="getCusOrderInfo" />
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="updateProductQtyInfo">
+		<event type="java" path="org.ofbiz.mobileservices.MobileServices"
+			invoke="getCusQtyProductInfo" />
+		<response name="success" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="updatePostalAddress">
+		<security https="true" auth="true" />
+		<event type="service" invoke="updatePartyPostalAddress" />
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<!-- trigger event create customer after that call to create party group 
+		-> update address customer -->
+	<request-map uri="updateAddressCus">
+		<security https="true" auth="true" direct-request="false" />
+		<event type="service" path="" invoke="updateAddressCusMobile"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="getImageAvatar">
+		<event type="java" path="org.ofbiz.mobileservices.MobileServices"
+			invoke="getImageAvatar"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+
+	<!-- get new product -->
+	<request-map uri="getNewProducts">
+		<event type="java" path="org.ofbiz.mobileservices.MobileServices"
+			invoke="getNewProducts"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<!-- end get new product -->
+	<!-- get event by day not used -->
+	<request-map uri="getCalEventByDay">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.mobileservices.MobileServices"
+			invoke="getCalendarEventByDay" />
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<!-- end get event by day -->
+	<!-- get event by month -->
+	<request-map uri="getCalEventByMonth">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.mobileservices.MobileServices"
+			invoke="getCalendarEventByMonth" />
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<!-- end get event by month -->
+
+	<!-- create calendar event -->
+	<request-map uri="createWorkEffortAndPartyAssign">
+		<security https="true" auth="true" />
+		<event type="service" invoke="createWorkEffortAndPartyAssign" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<!-- end create calendar event -->
+
+	<!-- update/delete calendar event -->
+	<request-map uri="updateWorkEffort">
+		<security https="true" auth="true" />
+		<event type="service" invoke="updateWorkEffort" />
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+
+	<!-- end update calendar -->
+
+	<!-- delete calendar event -->
+	<request-map uri="deleteWorkEffort">
+		<security https="true" auth="true" />
+		<event type="service" invoke="deleteWorkEffort" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<!-- end delete calendar event -->
+
+	<request-map uri="getInventoryCusInfo">
+		<security https="true" auth="true" />
+		<event type="service" invoke="getInventoryOfCusInfo" global-transaction="false"></event>
+		<response name="success" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="getStoreInventories">
+		<security https="true" auth="true" />
+		<event type="java" invoke="getStoreInventoriesStatus"
+			path="org.ofbiz.mobileservices.InventoryServices"/>
+		<response name="success" type="request" value="json"/>
+		<response name="error" type="request" value="json"/>
+	</request-map>
+	<!-- get detail information of an order -->
+	<request-map uri="updateInventoryCus">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.mobileservices.InventoryServices"
+			invoke="updateInventoryCus"></event>
+		<response name="success" type="request" value="json"></response>
+	</request-map>
+
+	<!-- employeeLeaveType, employeeLeaveReason- xin nghi phep salesman -->
+	<request-map uri="getEmployeeLeaveType">
+		<security https="true" auth="true" />
+		<event type="service" invoke="getEmployeeLeaveType" />
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="getEmployeeLeaveReason">
+		<security https="true" auth="true" />
+		<event type="service" invoke="getEmployeeLeaveReason" />
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="getWorkingShift">
+		<security https="true" auth="true" />
+		<event type="service" invoke="getWorkingShift" />
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="getEmployeeInfo">
+		<security https="true" auth="true" />
+		<event type="service" invoke="getEmployeeInfo" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="updateProfileMobile">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="updateProfileMobile"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="geoGeo">
+		<security https="false" auth="true" />
+		<event type="service" invoke="autoCompleteGeoAjax"/>
+		<response name="success" type="request" value="json"></response>
+        <response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="getCurrentKpi">
+		<security https="false" auth="true" />
+		<event type="service" invoke="getCurrentKpi"/>
+		<response name="success" type="request" value="json"></response>
+        <response name="error" type="request" value="json"></response>
+	</request-map>
+	<!-- end -->
+	<!-- end employeeLeaveType, employeeLeaveReason salesman xin nghi phep -->
+	<!-- createEmplLeave -->
+	<request-map uri="createEmplLeaveMobile">
+		<security https="true" auth="true" />
+		<event type="service" invoke="createEmplLeaveMobile" />
+		<response name="success" type="request" value="json"/>
+		<response name="error" type="request" value="json"/>
+	</request-map>
+	<!-- end createEmplLeave -->
+
+	<!-- get status emlLeave -->
+	<request-map uri="getEmpLeaveStatus">
+		<security https="true" auth="true" />
+		<event type="service" invoke="getEmpLeaveStatus"/>
+		<response name="success" type="request" value="json"/>
+		<response name="error" type="request" value="json"/>
+	</request-map>
+	<request-map uri="getEmplLeaveInfo">
+		<security https="true" auth="true" />
+		<event type="service" invoke="getEmplLeaveInfo"/>
+		<response name="success" type="request" value="json"/>
+		<response name="error" type="request" value="json"/>
+	</request-map>
+	
+	<!-- end get status emlLeave -->
+	<!-- get Detail Order -->
+	<request-map uri="getDetailTotalOrder">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="getTotalOrderDetail"></event>
+<!-- 		<event type="java" invoke="getTotalOrderDetail" path="org.ofbiz.mobileservices.MobileServices"></event> -->
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	
+	<!--  -->
+	<!-- get Product detail for Customer -->
+
+	<request-map uri="getAllRoute">
+	    <security auth="true" https="true" />
+	    <event type="service" invoke="getAllRouteOwnedBy" />
+	    <response name="success" type="request" value="json" />
+	    <response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="getRouteDetail">
+	    <security auth="true" https="true" />
+	    <event type="service" invoke="getRouteDetail" />
+	    <response name="success" type="request" value="json" />
+	    <response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="getOrderProductDetailOfCustomer">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="getOrderProductDetailOfCustomer"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	<!-- update Location Customer -->
+	<request-map uri="updateLocationCustomer">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="updateLocationCustomer"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="createCustomerAgent">
+		<security https="true" auth="true" />
+		<event type="service" invoke="createCustomerAgent" />
+		<response name="success" type="request" value="json"/>
+		<response name="error" type="request" value="json"/>
+	</request-map>
+	<request-map uri="updateCustomerAgent">
+		<security https="true" auth="true" />
+		<event type="service" invoke="updateCustomerAgentMobile" />
+		<response name="success" type="request" value="json"/>
+		<response name="error" type="request" value="json"/>
+	</request-map>
+	<request-map uri="getCustomerInfo">
+	    <security https="true" auth="true"/>
+	    <event type="service" invoke="loadAgentInfo"/>
+	    <response name="success" type="request" value="json"/>
+	    <response name="error" type="request" value="json"/>
+	</request-map>
+	<!-- update customer info -->
+	<request-map uri="updateCustomer">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="updateCustomer"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	<!-- Test -->
+
+	<request-map uri="getPromotions">
+		<security https="true" auth="true" />
+		<event type="service" invoke="getPromotions" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="getOrderPromotions">
+	    <security https="true" auth="true"/>
+	    <event type="service" invoke="getOrderPromotions"/>
+	    <response name="success" type="request" value="json"/>
+	    <response name="error" type="request" value="json"/>
+	</request-map>
+	<request-map uri="submitFbCustomer">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="submitFbCustomer"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="submitInfoOpponent">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="submitInfoOpponent"/>
+	    <response name="success" type="request" value="json"/>
+	    <response name="error" type="request" value="json"/>
+	</request-map>
+	<request-map uri="getListOpponent">
+	    <security auth="true" https="true"/>
+		<event type="service" invoke="getOpponents"/>
+		<response name="success" type="request" value="json"/>
+		<response name="error" type="request" value="json"/>
+	</request-map>
+	<!-- get list promotions event display -->
+	<request-map uri="getPromotionsByType">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="getPromotionsByType"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="getPromotionTypes">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="getPromotionTypes"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+
+	<request-map uri="getPromotionDetail">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="getPromotionDetail"></event>
+	    <response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+
+	<request-map uri="getOrderPromotion">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="getOrderPromotion"></event>
+	    <response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+
+	<request-map uri="createRegistrationPromotion">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="createRegistrationPromotion"></event>
+	    <response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="createRegistrationEvaluation">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="createRegistrationEvaluation"></event>
+	    <response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+
+	<request-map uri="getCustomerRegistered">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="getCustomerRegistered"></event>
+	    <response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="getPromotionRegistered">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="getPromotionRegistered"></event>
+	    <response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+
+	<request-map uri="uploadImage">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="jackrabbitUploadFile"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="uploadImageWithContent">
+		<security https="true" auth="true" />
+		<event type="service" invoke="updatePersonalImage"></event>
+		<response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+	</request-map>
+	<request-map uri="getInfo">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="getInfoSalesMan"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	<!-- end -->
+	<!-- update Password Salesman -->
+	<request-map uri="updatePasswordSalesMan">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="updatePasswordSalesMan"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	
+	<!-- uri SUP -->
+		
+	<request-map uri="getListRouteBySup">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="getListRouteBySup"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	
+	<request-map uri="getInfoProfile">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="getInfoProfile"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	
+	<request-map uri="getListOrgManagedByParty">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="getListOrgManagedByParty"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	
+	<request-map uri="getEmplLeaveList">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="getEmplLeaveList"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	
+	 <request-map uri="approvalEmplLeaveBySup">
+    	<security https="true" auth="true"/>
+    	<event type="service" invoke="approvalEmplLeave"></event>
+    	<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+    </request-map>
+	
+  	<request-map uri="changePromoExtStatus">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="updateProductPromoExtStatus"/>
+        <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+    </request-map>
+    
+    <request-map uri="getOrderCancel">
+	    <security https="true" auth="true"/>
+	    <event type="service" invoke="getOrderCancel"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	
+	<request-map uri="getOrderComplete">
+	    <security https="true" auth="true"/>
+	    <event type="service" invoke="getOrderComplete"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	
+	<request-map uri="getOrderIntransit">
+	    <security https="true" auth="true"/>
+	    <event type="service" invoke="getOrderIntransit"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	
+	<request-map uri="getTurnOver">
+	    <security https="true" auth="true"/>
+	    <event type="service" invoke="getValueSalesman"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	
+	<request-map uri="getTurnOverChart">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="evaluateTopSalesmanv2"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    
+   	<request-map uri="getCustomerRatingChart">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="evaluateTopCustomerv2"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+	
+	<request-map uri="getAddressRoute">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="getAddressRoute"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	
+	<request-map uri="deleteRoute">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="deleteRoute"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	
+	<request-map uri="getListMarkedBySalesMan">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="getListMarkedBySalesMan"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	
+	<request-map uri="createRoute">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="createRoute"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	
+	<request-map uri="updateRoute">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="updateRoute"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	
+	<request-map uri="getListSalerBySup">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="getListSalerBySup"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	
+	<request-map uri="getListExhAcc">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="getListExhAcc"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	
+	<request-map uri="getListCheckInventoryAgent">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="getListCheckInventoryAgent"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	
+	<request-map uri="getInventoryList">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="getInventoryList"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	
+	<request-map uri="getStoresList">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="getStoresList"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	
+	<request-map uri="getDetailProgramExhAcc">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="getDetailProgramExhAcc"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	
+	<request-map uri="getListRouteAndSalesMan">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="getListRouteAndSalesMan"></event>
+	    <response name="success" type="request" value="json"></response>
+	    <response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="createOpponent">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="createOpponent" />
+	    <response name="success" type="request" value="json"/>
+	    <response name="error" type="request" value="json"/>
+	</request-map>
+	<request-map uri="createRouteHistory">
+	    <security auth="true" https="true"/>
+	    <event type="service" invoke="createRouteHistory"/>
+	    <response name="success" type="request" value="json"/>
+	    <response name="error" type="request" value="json"/>
+	</request-map>
+	<request-map uri="getServerTimestampAsLong">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="getServerTimestampAsLong"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    
+    <request-map uri="salesmanCheckIn">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="salesmanCheckIn"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+	<request-map uri="salesmanCheckOut">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="salesmanCheckOut"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    <request-map uri="getTodayCheckedInCustomers">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="getTodayCheckedInCustomers"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+
+    <!--API new-->
+    <request-map uri="mGetCheckinStatus">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="mGetCheckinStatus"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    <request-map uri="mGetCustomerRegistration">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="mGetCustomerRegistration"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    <request-map uri="mGetSalesOrders">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="mGetSalesOrders"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    <request-map uri="mGetSalesOrderDetails">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="mGetSalesOrderDetails"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    <request-map uri="mGetCustomerReports">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="mGetCustomerReports"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    <request-map uri="mGetTurnoverBySalesmanReports">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="mGetTurnoverBySalesmanReports"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    <request-map uri="mSubmitFeedback">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="mSubmitFeedback"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    <request-map uri="mCreateOpponent">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="mCreateOpponent"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    <request-map uri="mGetOpponents">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="mGetOpponents"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    <request-map uri="mSubmitInfoOpponent">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="mSubmitInfoOpponent"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+	<request-map uri="mGetListPriceChange">
+		<security https="true" auth="true"/>
+		<event type="service" invoke="mGetListPriceChange"/>
+		<response name="success" type="request" value="json"/>
+		<response name="error" type="request" value="json"/>
+	</request-map>
+	<request-map uri="mGetProductInfoDetail">
+		<security https="true" auth="true"/>
+		<event type="service" invoke="mGetProductInfoDetail"/>
+		<response name="success" type="request" value="json"/>
+		<response name="error" type="request" value="json"/>
+	</request-map>
+	<request-map uri="mGetListPromotionExt">
+		<security https="true" auth="true"/>
+		<event type="service" invoke="mGetListPromotionExt"/>
+		<response name="success" type="request" value="json"/>
+		<response name="error" type="request" value="json"/>
+	</request-map>
+	<request-map uri="mGetPromotionExtInfoDetail">
+		<security https="true" auth="true"/>
+		<event type="service" invoke="mGetPromotionExtInfoDetail"/>
+		<response name="success" type="request" value="json"/>
+		<response name="error" type="request" value="json"/>
+	</request-map>
+	<request-map uri="mcreateRegistrationPromotion">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="mcreateRegistrationPromotion"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="mgetProductPromoExtRegisterMark">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="mgetProductPromoExtRegisterMark"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="mgetProductPromoExtAccepted">
+		<security auth="true" https="true"/>
+		<event type="service" invoke="mgetProductPromoExtAccepted"></event>
+		<response name="success" type="request" value="json"></response>
+		<response name="error" type="request" value="json"></response>
+	</request-map>
+	<request-map uri="mUpdatePassWordMobilemcs">
+		<security https="true" auth="true"/>
+		<event type="service" invoke="mUpdatePassWordMobilemcs"/>
+		<response name="success" type="request" value="json"/>
+		<response name="error" type="request" value="json"/>
+	</request-map>
+    <request-map uri="mSubmitDeviceId">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="mSubmitDeviceId"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    <request-map uri="mUpdateQtyProductExpInvent">
+        <security auth="true" https="true"/>
+        <event type="service" invoke="mUpdateQtyProductExpInvent"></event>
+        <response name="success" type="request" value="json"></response>
+        <response name="error" type="request" value="json"></response>
+    </request-map>
+    <request-map uri="mGetListProductExpRecent">
+        <security https="true" auth="true"/>
+        <event type="service" invoke="mGetListProductExpRecent"/>
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    <request-map uri="mGetProductByInfoSearch">
+        <security https="true" auth="true" />
+        <event type="service" invoke="mGetProductByInfoSearch" />
+        <response name="success" type="request" value="json"/>
+        <response name="error" type="request" value="json"/>
+    </request-map>
+    <!--end API new-->
+
+	<view-map name="main" type="screen"
+		page="component://mobileservices/widget/CommonScreens.xml#main" />
+
+</site-conf>

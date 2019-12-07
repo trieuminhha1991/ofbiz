@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../framework/service/dtd/services.xsd">
+    <description>BaseSalesMtl Services</description>
+    <vendor></vendor>
+    <version>1.0</version>
+
+    <service name="noSyntaxError" engine="interface">
+        <description>
+            Dummy service to prevent empty files and syntax error - Remove when the 1st real service will be added here 
+        </description>
+    </service>
+    
+   	<service name="JQGetListSalesmanByDist" engine="java" invoke="listSalesmanByDist" location="com.olbius.salesmtl.SalesmtlServices">
+        <implements service="jqxGetListInterface"/>
+		<override name="listIterator" optional="true"></override>
+   	</service>
+   	
+   	<service name="getGeneralInformationOfParty" engine="java" invoke="getGeneralInformationOfParty" location="com.olbius.salesmtl.SalesmtlServices">
+   		<attribute name="partyId" mode="INOUT" type="String" optional="false"></attribute>
+   		<attribute name="partyNameView" mode="OUT" type="org.ofbiz.entity.GenericValue" optional="true"/>
+   		<attribute name="postalAddress" mode="OUT" type="java.util.List" optional="true"/>
+   		<attribute name="phone" mode="OUT" type="String" optional="true"/>
+   		<attribute name="email" mode="OUT" type="String" optional="true"/>
+   	</service>
+    
+    <!-- sales statement -->
+    <service name="JQListSalesStatement" engine="java" invoke="jqGetListSalesStatement" location="com.olbius.salesmtl.SalesStatementServices">
+		<implements service="jqxGetListInterface"/>
+   	</service>
+    <service name="JQListSalesStatementType" engine="java" invoke="jqGetListSalesStatementType" location="com.olbius.salesmtl.SalesStatementServices">
+		<implements service="jqxGetListInterface"/>
+   	</service>
+   	
+   	<service name="createSalesStatement" engine="java" default-entity-name="SalesStatement"
+            invoke="createSalesStatement" location="com.olbius.salesmtl.SalesStatementServices" auth="true">
+       <description>Creates a Sales Statement for the userLogin. Requires CREATE permission.</description>
+        <required-permissions join-type="AND">
+            <olbius-permission/>
+        </required-permissions>
+        <auto-attributes mode="INOUT" include="pk" optional="true"/>
+        <auto-attributes mode="INOUT" include="nonpk" optional="true"/>
+    </service>
+   	<service name="createPromoSettlement" engine="java" default-entity-name="ProductPromoSettlement"
+            invoke="createPromoSettlement" location="com.olbius.salesmtl.product.ProductPromoServices" auth="true">
+       <description>Creates a Product promotion settlement for the userLogin. Requires CREATE permission.</description>
+        <required-permissions join-type="AND">
+            <olbius-permission/>
+        </required-permissions>
+        <auto-attributes mode="INOUT" include="pk" optional="true"/>
+        <auto-attributes mode="INOUT" include="nonpk" optional="true"/>
+        <override name="fromDate" type="String" mode="IN"/>
+        <override name="thruDate" type="String" mode="IN"/>
+    </service>
+    
+    <service name="JQListOrganizationUnitManager" engine="java" invoke="jqGetOrganizationUnitManager2" location="com.olbius.salesmtl.SalesStatementServices">
+		<implements service="jqxGetListInterface"/>
+		<attribute name="TotalRows" mode="OUT" type="String" optional="true"/>
+   		<override name="listIterator" mode="OUT" type="java.util.List" optional="true"/>
+   	</service>
+    <service name="JQListOrganizationUnitManagerReport" engine="java" invoke="jqGetOrganizationUnitManagerReport" location="com.olbius.salesmtl.SalesStatementServices">
+		<implements service="jqxGetListInterface"/>
+		<attribute name="TotalRows" mode="OUT" type="String" optional="true"/>
+   		<override name="listIterator" mode="OUT" type="java.util.List" optional="true"/>
+   	</service>
+   	<service name="removeStatementOfDisabledNPP" engine="java" invoke="removeStatementOfDisabledNPP" location="com.olbius.salesmtl.SalesStatementServices" auth="true">
+		<attribute name="salesStatementId" mode="INOUT" type="String" optional="false"></attribute>
+	</service>
+    <!-- end sales statement -->
+    
+    <service name="getListCatalogAndCategory" engine="java" invoke="getListCatalogAndCategory" location="com.olbius.basesales.product.ProductServices">
+   		<attribute name="results" mode="OUT" type="java.util.List" optional="true"/>
+   	</service>
+    <service name="getListProductIdByCatalogOrCategory" engine="java" invoke="getListProductIdByCatalogOrCategory" location="com.olbius.basesales.product.ProductServices">
+   		<attribute name="catalogIds" mode="IN" type="java.util.List" optional="true"/>
+   		<attribute name="categoryIds" mode="IN" type="java.util.List" optional="true"/>
+   		<attribute name="listProductIds" mode="OUT" type="java.util.List" optional="true"/>
+   	</service>
+    <service name="getListProductIdAdvanceByCatalogOrCategory" engine="java" invoke="getListProductIdAdvanceByCatalogOrCategory" location="com.olbius.basesales.product.ProductServices">
+   		<attribute name="catalogIds" mode="IN" type="java.util.List" optional="true"/>
+   		<attribute name="categoryIds" mode="IN" type="java.util.List" optional="true"/>
+   		<attribute name="listProductIds" mode="OUT" type="java.util.List" optional="true"/>
+   	</service>
+    <service name="getListProductIdNameAdvanceByCatalogOrCategory" engine="java" invoke="getListProductIdNameAdvanceByCatalogOrCategory" location="com.olbius.basesales.product.ProductServices">
+        <attribute name="catalogIds" mode="IN" type="java.util.List" optional="true"/>
+        <attribute name="categoryIds" mode="IN" type="java.util.List" optional="true"/>
+        <attribute name="listProductIds" mode="OUT" type="java.util.List" optional="true"/>
+    </service>
+    <service name="calculateSalesStatement" engine="java" invoke="calculateSalesStatement" location="com.olbius.salesmtl.SalesStatementServices">
+   		<attribute name="salesStatementId" mode="INOUT" type="String" optional="true"/>
+   	</service>
+    <service name="runSalesStatementReport" engine="java" invoke="runSalesStatementReport" location="com.olbius.salesmtl.SalesStatementServices" auth="true">
+   		<attribute name="salesStatementId" mode="INOUT" type="String" optional="true"/>
+   	</service>
+   	
+    <service name="getListDistributorIdBySup" engine="java" invoke="getListDistributorIdBySup" location="com.olbius.salesmtl.party.PartyServices">
+   		<attribute name="partyId" mode="IN" type="String" optional="false"/>
+   		<attribute name="listDistributorIds" mode="OUT" type="java.util.List" optional="true"/>
+   	</service>
+   	
+   	<service name="getListPromoRulePkByProdId" engine="java" invoke="getListPromoRulePkByProdId" location="com.olbius.salesmtl.product.ProductPromoServices">
+   		<attribute name="productId" mode="IN" type="String" optional="false"/>
+   		<attribute name="listPromotionRulePk" mode="OUT" type="java.util.List" optional="true"/>
+   	</service>
+   	
+   	<service name="JQGetPartyAddress" engine="java" invoke="partyAddress" location="com.olbius.salesmtl.party.PartyServices">
+		<implements service="jqxGetListInterface"/>
+   	</service>
+   	
+   	<service name="deletePartyContactMechAndPurpose" engine="java"
+            location="com.olbius.salesmtl.party.PartyServices" invoke="deletePartyContactMechAndPurpose" auth="true">
+        <description>Delete a Party ContactMech Purpose</description>
+        <attribute name="partyId" type="String" mode="IN" optional="false"/>
+        <attribute name="contactMechId" type="String" mode="IN" optional="false"/>
+    </service>
+   	
+   	<service name="pushSalesStatementToCriteria" engine="java" invoke="pushSalesStatementToCriteria" location="com.olbius.salesmtl.SalesStatementServices">
+   		<attribute name="salesStatementId" mode="IN" type="String" optional="false"/>
+   		<attribute name="criteriaId" mode="IN" type="String" optional="false"/>
+   	</service>
+   	<service name="pushSalesStatementToCriteriaTarget" engine="java" invoke="pushSalesStatementToCriteriaTarget" location="com.olbius.salesmtl.SalesStatementServices">
+   		<attribute name="salesStatementId" mode="IN" type="String" optional="false"/>
+   	</service>
+   	
+   	<service name="JQGetListOrderNeedDelivery" engine="java" invoke="jqGetListOrderNeedDelivery" location="com.olbius.salesmtl.order.OrderServices">
+		<implements service="jqxGetListInterface"/>
+		<override name="listIterator" type="java.util.List" optional="true"></override>
+   	</service>
+   	<service name="JQGetListOrderReqDelivery" engine="java" invoke="jqGetListOrderReqDelivery" location="com.olbius.salesmtl.requirement.RequirementServices">
+		<implements service="jqxGetListInterface"/>
+		<override name="listIterator" type="java.util.List" optional="true"></override>
+   	</service>
+   	<service name="JQGetListOrderItemReqDelivery" engine="java" invoke="jqGetListOrderItemReqDelivery" location="com.olbius.salesmtl.requirement.RequirementServices">
+		<implements service="jqxGetListInterface"/>
+		<override name="listIterator" type="java.util.List" optional="true"></override>
+   	</service>
+   	<service name="JQGetListReqDeliveryOrder" engine="java" invoke="jqGetListReqDeliveryOrder" location="com.olbius.salesmtl.requirement.RequirementServices">
+		<implements service="jqxGetListInterface"/>
+   	</service>
+   	<service name="JQGetListReqSalesTransfer" engine="java" invoke="jqGetListReqSalesTransfer" location="com.olbius.salesmtl.requirement.RequirementServices">
+		<implements service="jqxGetListInterface"/>
+   	</service>
+   	<service name="JQGetListFacilityByOwner" engine="java" invoke="jqGetListFacilityByOwner" location="com.olbius.salesmtl.requirement.RequirementServices">
+		<implements service="jqxGetListInterface"/>
+   	</service>
+   	<service name="JQGetListFacilityByAdmin" engine="java" invoke="jqGetListFacilityByAdmin" location="com.olbius.salesmtl.requirement.RequirementServices">
+		<implements service="jqxGetListInterface"/>
+   	</service>
+   	<service name="JQGetListReasonEnumReqForSales" engine="java" invoke="jqGetListReasonEnumReqForSales" location="com.olbius.salesmtl.requirement.RequirementServices">
+		<implements service="jqxGetListInterface"/>
+   	</service>
+   	<service name="JQGetPartiesDistributor" engine="java" invoke="jqGetPartiesDistributor" location="com.olbius.salesmtl.party.PartyServices">
+   		<implements service="jqxGetListInterface"/>
+   	</service>
+   	<service name="JQGetListCheckInHistory" engine="java" invoke="listCheckInHistory" location="com.olbius.salesmtl.party.PartyServices">
+   		<implements service="jqxGetListInterface"/>
+   	</service>
+   	
+   	<service name="createReqDeliveryOrder" engine="java" invoke="createReqDeliveryOrder" location="com.olbius.salesmtl.requirement.RequirementServices">
+   		<required-permissions join-type="AND">
+   			<olbius-permission/>
+   		</required-permissions>
+		<attribute name="description" mode="IN" type="String" optional="true" allow-html="safe"/>
+		<attribute name="requirementStartDate" mode="IN" type="String" optional="true"/>
+		<attribute name="orderList" mode="IN" type="java.util.List" optional="true"/>
+		<attribute name="requirementId" mode="OUT" type="String" optional="false"/>
+   	</service>
+   	<service name="sendNotifyWhenCreateReqSalesTransfer" engine="java" invoke="sendNotifyWhenCreateReqSalesTransfer" location="com.olbius.salesmtl.requirement.RequirementServices">
+		<description>Create a notify when requirement sales transfer created</description>
+		<attribute name="requirementId" mode="IN" type="String" optional="false"/>
+	</service>
+	<service name="jqGetListProductInventoryCustomerOlap" engine="java" location="com.olbius.salesmtl.report.ReportServices" invoke="jqGetListProductInventoryCustomerOlap">
+  		<implements service="olapGridInterface"/>
+  		<attribute name="timePeriod" type="String" mode="IN" optional="false"/>
+  		<attribute name="fromDate" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="thruDate" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="productId[]" type="List" mode="IN" optional="true"/>
+        <attribute name="categoryId[]" type="List" mode="IN" optional="true"/>
+  	</service>
+  	
+  	<service name="createPartyPostalAddressWithOutAddress" engine="simple"
+            location="component://basesalesmtl/script/com/olbius/party/contact/PartyContactMechServices.xml" invoke="createPartyPostalAddress" auth="true">
+        <description>Create a Postal Address</description>
+        <permission-service service-name="partyContactMechPermissionCheck" main-action="CREATE"/>
+        <auto-attributes entity-name="PartyContactMech" include="all" mode="IN" optional="true"/>
+        <auto-attributes entity-name="PostalAddress" include="nonpk" mode="IN" optional="true"/>
+        <attribute name="paymentMethodId" type="String" mode="IN" optional="true"/>
+        <attribute name="contactMechPurposeTypeId" type="String" mode="IN" optional="true"/>
+        <attribute name="contactMechId" type="String" mode="OUT" optional="false"/>
+    </service>
+    <service name="createPostalAddressWithOutAddress" engine="simple"
+            location="component://party/script/org/ofbiz/party/contact/ContactMechServices.xml" invoke="createPostalAddress" auth="true">
+        <description>Create a Postal Address</description>
+        <auto-attributes entity-name="PostalAddress" include="all" mode="IN" optional="true"/>
+        <attribute name="contactMechId" type="String" mode="OUT" optional="false"/>
+        <override name="address1" allow-html="safe"/>
+        <override name="postalCode" optional="true"/>
+    </service>
+    <service name="updatePartyPostalAddressWithOutAddress" engine="simple"
+            location="component://basesalesmtl/script/com/olbius/party/contact/PartyContactMechServices.xml" invoke="updatePartyPostalAddress" auth="true">
+        <description>Update a Postal Address</description>
+        <permission-service service-name="partyContactMechPermissionCheck" main-action="UPDATE"/>
+        <auto-attributes entity-name="PartyContactMech" include="all" mode="IN" optional="true"/>
+        <auto-attributes entity-name="PostalAddress" include="nonpk" mode="IN" optional="true"/>
+        <attribute name="contactMechId" type="String" mode="INOUT" optional="false"/>
+        <attribute name="directions" type="String" mode="IN" optional="true"/> <!-- ?? -->
+        <override name="address1" allow-html="safe"/>
+    </service>
+    <service name="updatePostalAddressWithOutAddress" engine="simple"
+            location="component://party/script/org/ofbiz/party/contact/ContactMechServices.xml" invoke="updatePostalAddress" auth="true">
+        <description>Update a Postal Address</description>
+        <auto-attributes entity-name="PostalAddress" include="nonpk" mode="IN" optional="true"/>
+        <attribute name="contactMechId" type="String" mode="INOUT" optional="false"/> <!-- the out paramater is the id of the new address -->
+        <attribute name="directions" type="String" mode="IN" optional="true"/> <!-- ?? -->
+        <attribute name="oldContactMechId" type="String" mode="OUT" optional="false"/> <!-- this is the id of the old address -->
+        <attribute name="partyId" type="String" mode="IN" optional="true"/>
+        <override name="address1" allow-html="safe"/>
+    </service>
+    
+    <service name="jqGetCostByDepartment" engine="java" invoke="getCostByDepartment" location="com.olbius.salesmtl.SalesmtlServices">
+		<implements service="jqxGetListInterface"/>
+	</service>
+	
+    <service name="getListDepartmentOfEmployee" engine="java" invoke="departmentOfEmployee" location="com.olbius.salesmtl.SalesmtlServices">
+		<attribute name="listDepartment" mode="OUT" type="List"></attribute>
+	</service>
+    <service name="jqGetListDepartmentOfEmployee" engine="java" invoke="listDepartmentOfEmployee" location="com.olbius.salesmtl.SalesmtlServices">
+		<implements service="jqxGetListInterface"/>
+	</service>
+	
+    <service name="getProductStatusByDepartment" engine="java" invoke="getProductStatusByDepartment" location="com.olbius.salesmtl.SalesmtlServices">
+		<attribute name="productId" mode="IN" type="String"></attribute>
+		<attribute name="status" mode="OUT" type="String" optional="true"></attribute>
+	</service>
+	
+	<service name="changeSalesStatementStatus" engine="java" auth="true" location="com.olbius.salesmtl.SalesStatementServices" invoke="setSalesStatementStatus">
+        <description>Change the status of an existing sales statement</description>
+        <attribute name="salesStatementId" type="String" mode="INOUT"/>
+        <attribute name="statusId" type="String" mode="IN"/>
+        <attribute name="changeReason" type="String" mode="IN" optional="true"/>
+        <attribute name="oldStatusId" type="String" mode="OUT" optional="false"/>
+    </service>
+    
+
+	<!-- service by PQD -->
+	<service name="updateCoordinateCustomer" engine="java" auth="true" 
+		location="com.olbius.salesmtl.party.CustomerServices" invoke="updateCoordinateCustomer">
+        <description> </description>
+        <attribute name="partyId" type="String" mode="INOUT"/>
+		<attribute name="postalAddressId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="geoPointId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="lat" mode="IN" type="String" />
+		<attribute name="lng" mode="IN" type="String" />
+		<attribute name="dataSourceId" mode="IN" type="String" />
+		
+		<attribute name="message" mode="OUT" type="String"/>
+    </service>
+    
+	<service name="getOutletAddressGeoLocation" engine="java" auth="true" 
+		location="com.olbius.salesmtl.party.CustomerServices" invoke="getOutletAddressGeoLocation">
+        <description>return the list of geo location of a given outlet</description>
+        <attribute name="partyId" type="String" mode="INOUT"/>
+        <attribute name="outlets" mode="OUT" type="List"></attribute>
+    </service>
+
+	<service name="computeOptimalSequence" engine="java" auth="false" 
+		location="com.olbius.salesmtl.route.RoutingAlgorithm" invoke="computeShortestTour">
+        <description>return the optimal sequence of outlets visited by the given salesman on each day</description>
+        <attribute name="customers" type="List" mode="IN"/>
+        <attribute name="route" mode="OUT" type="List"></attribute>
+    </service>
+    
+	<service name="computeOptimalSequencePoints" engine="java" auth="false" 
+		location="com.olbius.salesmtl.route.RoutingAlgorithm" invoke="computeOptimalSequencePoints">
+        <description>
+        	return the optimal sequence of points optionally start, end points
+        	input: customers = [0,1,2,3,4]
+        	output: route = [2,3,1,0,4] sequence of indices of customers
+        </description>
+        <attribute name="customers" type="List" mode="IN"/>
+        <attribute name="start" type="Map" mode="IN" optional="true"/>
+        <attribute name="end" type="Map" mode="IN" optional="true"/>
+        <attribute name="timeLimit" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="route" mode="OUT" type="List"></attribute>
+        <attribute name="msg" mode="OUT" type="String"></attribute>
+    </service>
+    
+    <service name="getListAgent" engine="java" auth="true" 
+		location="com.olbius.salesmtl.party.CustomerServices" invoke="getListAgent">
+        <description>Get list agents</description>
+   
+		<attribute name="totalRows" mode="OUT" type="String"/>
+		<attribute name="results" mode="OUT" type="List"/>
+    </service>
+    
+    <service name="getListCustomerOfSalesSup" engine="java" auth="true" 
+		location="com.olbius.salesmtl.party.CustomerServices" invoke="getListCustomerOfSalesSup">
+        <description>Get list agents</description>
+   		<attribute name="supId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="totalRows" mode="OUT" type="String"/>
+		<attribute name="results" mode="OUT" type="List"/>
+    </service>
+
+    <service name="getListPartyCustomers" engine="java" auth="true" 
+		location="com.olbius.salesmtl.party.CustomerServices" invoke="getListPartyCustomers">
+        <description>Get list agents</description>
+   		<attribute name="partyId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="totalRows" mode="OUT" type="String"/>
+		<attribute name="results" mode="OUT" type="List"/>
+    </service>
+    
+    <service name="getVisitingRoutesOfACustomer" engine="java" auth="true" 
+		location="com.olbius.salesmtl.route.RouteService" invoke="getVisitingRoutesOfACustomer">
+        <description>Get list of visiting routes (and day) of a given outlet</description>
+		<attribute name="partyId" mode="IN" type="String"/>
+		<attribute name="routes" mode="OUT" type="List"/>
+    </service>
+    
+    <service name="getCustomersOfASalesman" engine="java" auth="true" 
+		location="com.olbius.salesmtl.route.RouteService" invoke="getCustomersOfASalesman">
+        <description>Get list of visiting routes (and day) of a given outlet</description>
+		<attribute name="partyId" mode="IN" type="String"/>
+		<attribute name="customers" mode="OUT" type="List"/>
+    </service>
+    
+    <service name="getCustomerNoneRoute" engine="java" auth="true" 
+		location="com.olbius.salesmtl.route.RouteService" invoke="getCustomerNoneRoute">
+        <description>Get list of visiting routes (and day) of a given outlet</description>
+		<attribute name="salesmanId" mode="IN" type="String"/>
+		<attribute name="customers" mode="OUT" type="List"/>
+    </service>
+    
+
+    <service name="correctCoordinateGeoPointVN" engine="java" auth="true" 
+		location="com.olbius.salesmtl.route.RouteService" invoke="correctCoordinateGeoPointVN">
+        <description> correct latitude, longitude of geo point in Vietnam</description>
+    </service>
+
+	<service name="getSalesmanOfASalesSup" engine="java" auth="true" 
+		location="com.olbius.salesmtl.party.SalesmanService" invoke="getSalesmanOfASalesSup">
+        <description>return the list of salesmen supervised by a given sales-sup</description>
+        <attribute name="salesSupId" type="String" mode="IN"/>
+        <attribute name="salesman" mode="OUT" type="List"></attribute>
+    </service>
+    
+    <service name="getListOrderNeedDelivery" engine="java" invoke="getListOrderNeedDelivery" 
+    
+    	location="com.olbius.salesmtl.order.OrderServices">
+		<attribute name="listIterator" mode="OUT" type="List" optional="true"></attribute>
+   	</service>
+
+	<service name="generateSaleRouteScheduleDetailDate" engine="java"
+		location="com.olbius.salesmtl.SupServices" invoke="generateSaleRouteScheduleDetailDate">
+		<attribute name="routeId" mode="IN" type="String"></attribute>	
+		<attribute name="fromDate" mode="IN" type="String"></attribute>
+		<attribute name="thruDate" mode="IN" type="String"></attribute>
+		<attribute name="message" mode="OUT" type="String" optional="true"></attribute>
+	</service>
+	<service name="generateCustomerSequenceOfRoute" engine="java"
+		location="com.olbius.salesmtl.SupServices" invoke="generateCustomerSequenceOfRoute">
+		<attribute name="routeId" mode="IN" type="String"></attribute>	
+	</service>	
+	<service name="removeSaleRouteScheduleAndDetailDate" engine="java"
+		location="com.olbius.salesmtl.SupServices" invoke="removeSaleRouteScheduleAndDetailDate">
+		<attribute name="routeId" mode="IN" type="String"></attribute>	
+	</service>
+
+    <service name="removeRouteScheduleDetailDate" engine="java"
+		location="com.olbius.salesmtl.SupServices" invoke="removeRouteScheduleDetailDate">
+		<attribute name="routeId" mode="IN" type="String"></attribute>
+	</service>
+	
+	<service name="addSaleRouteScheduleDate" engine="java"
+		location="com.olbius.salesmtl.SupServices" invoke="addSaleRouteScheduleDate">
+		<attribute name="routeId" mode="IN" type="String"></attribute>	
+		<attribute name="scheduleDates" mode="IN" type="List"></attribute>
+	</service>
+	
+	<service name="JQGetScheduleDatesOfCustomer" engine="java"
+		location="com.olbius.salesmtl.SupServices" invoke="getScheduleDatesOfCustomer">
+        <implements service="jqxGetListInterface"/>
+	</service>
+    <service name="JQGetRoutesOfACustomer" engine="java"
+		location="com.olbius.salesmtl.SupServices" invoke="getRoutesOfACustomer">
+        <implements service="jqxGetListInterface"/>
+	</service>
+
+	<service name="updateCustomerSalesmanWithNewEntityModelDB" engine="java"
+		location="com.olbius.salesmtl.SupServices" invoke="updateCustomerSalesmanWithNewEntityModelDB" transaction-timeout="10000000">
+			
+	</service>
+	
+	<!-- end of PQD -->
+	
+	<service name="JQGetProductStoreForRequestNewCustomer" engine="java" location="com.olbius.salesmtl.product.ProductStoreServices" invoke="jqGetProductStoreForRequestNewCustomer">
+        <implements service="jqxGetListInterface"/>
+        <override name="TotalRows" mode="OUT" type="String" optional="true"/>
+   		<override name="listIterator" mode="OUT" type="java.util.List" optional="true"/>
+	</service>
+	<service name="JQGetPartyTypeByChannel" engine="java" location="com.olbius.salesmtl.party.PartyServices" invoke="jqGetPartyTypeByChannel">
+        <implements service="jqxGetListInterface"/>
+        <override name="TotalRows" mode="OUT" type="String" optional="true"/>
+   		<override name="listIterator" mode="OUT" type="java.util.List" optional="true"/>
+	</service>
+	<service name="JQGetSalesmanByProductStore" engine="java" location="com.olbius.salesmtl.party.PartyServices" invoke="jqGetSalesmanByProductStore">
+        <implements service="jqxGetListInterface"/>
+        <override name="TotalRows" mode="OUT" type="String" optional="true"/>
+   		<override name="listIterator" mode="OUT" type="java.util.List" optional="true"/>
+	</service>
+	
+	<!-- request new customer -->
+	<service name="JQGetCustomerRegistration" engine="java" location="com.olbius.salesmtl.party.CustomerServices" invoke="jqGetCustomerRegistration">
+        <implements service="jqxGetListInterface"/>
+        <attribute name="TotalRows" mode="OUT" type="String" optional="true"></attribute>
+        <attribute name="isRes" mode="IN" type="String" optional="true"></attribute>
+		<override name="listIterator" mode="OUT" optional="true" type="List"></override>
+	</service>
+	<service name="approveRequestNewCustomer" engine="java" auth="true" location="com.olbius.salesmtl.party.CustomerServices" invoke="approveRequestNewCustomer">
+	    <attribute name="customerId" mode="IN" type="String"/>
+	    <attribute name="partyId" mode="OUT" type="String" optional="true"/>
+	</service>
+	<service name="approveRequestRegisterMobileCustomer" engine="java" auth="true" location="com.olbius.salesmtl.party.CustomerServices" invoke="approveRequestNewMobileCustomer">
+	    <attribute name="customerId" mode="IN" type="String"/>
+	    <attribute name="partyId" mode="OUT" type="String" optional="true"/>
+	</service>
+	<!-- replace updateCustomerAgent -->
+	<service name="updateRequestNewCustomer" engine="java" auth="true" location="com.olbius.salesmtl.party.CustomerServices" 
+			invoke="updateRequestNewCustomer" default-entity-name="TemporaryParty">
+	    <description>Update info in Temporary party table</description>
+	    <auto-attributes include="pk" mode="INOUT"/>
+	    <auto-attributes include="nonpk" mode="IN" optional="true"/>
+	</service>
+	<!-- end request new customer -->
+	
+	
+</services>

@@ -1,0 +1,584 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-screen.xsd">
+	<screen name="OrderCommonDecorator">
+		<section>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+                    	<decorator-section-include name="body"/>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ListOrder">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="order"/>
+                <set field="selectedSubMenuItem" value="salesOrderList"/>
+				<set field="titleProperty" value="BSListOrder" global="true"/>
+				<script location="component://basesales/webapp/basesales/WEB-INF/actions/navigator/nav_orderList.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<include-screen name="OrderListInner"/>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    <screen name="OrderListInner">
+    	<section>
+    		<widgets>
+    			<platform-specific>
+					<html>
+						<html-template location="component://basesales/webapp/basesales/order/orderList.ftl"/>
+					</html>
+				</platform-specific>
+    		</widgets>
+    	</section>
+    </screen>
+    <!-- <screen name="NewSalesOrderInfo">
+    	<section>
+    		<actions>
+    			<set field="productStores" from-field="productStores"/>
+    		</actions>
+    		<widgets>
+    			<platform-specific>
+    				<html><html-template location="component://basesales/webapp/basesales/order/orderNewInfo.ftl"/></html>
+    			</platform-specific>
+    		</widgets>
+    	</section>
+    </screen> -->
+    <screen name="NewSalesOrderCheckoutOption">
+    	<section>
+    		<actions>
+    			<set field="enableCheckLiability" from-field="enableCheckLiability" default-value="false" type="Boolean"/>
+    			<set field="enableDropShip" from-field="enableDropShip" default-value="true" type="Boolean"/>
+    			<set field="enableFacilityConsign" from-field="enableFacilityConsign" default-value="true" type="Boolean"/>
+    			<set field="enableSalesExecutive" from-field="enableSalesExecutive" default-value="true" type="Boolean"/>
+    			<script location="component://basesales/webapp/basesales/WEB-INF/actions/order/CheckoutInits.groovy"/>
+    		</actions>
+    		<widgets>
+    			<platform-specific>
+    				<html><html-template location="component://basesales/webapp/basesales/order/orderNewCheckoutOption.ftl"/></html>
+    			</platform-specific>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="NewSalesOrderDropShip">
+    	<section>
+    		<actions>
+    			<set field="enableDropShip" from-field="enableDropShip" default-value="true" type="Boolean"/>
+    		</actions>
+    		<widgets>
+    			<platform-specific>
+    				<html><html-template location="component://basesales/webapp/basesales/order/orderNewDropShip.ftl"/></html>
+    			</platform-specific>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="NewSalesOrderFacilityConsign">
+    	<section>
+    		<actions>
+    			<set field="enableFacilityConsign" from-field="enableFacilityConsign" default-value="true" type="Boolean"/>
+    		</actions>
+    		<widgets>
+    			<platform-specific>
+    				<html><html-template location="component://basesales/webapp/basesales/order/orderNewFacilityConsign.ftl"/></html>
+    			</platform-specific>
+    		</widgets>
+    	</section>
+    </screen>
+    
+    <screen name="NewSalesOrder">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="order"/>
+				<set field="selectedSubMenuItem" value="newSalesOrder"/>
+				<set field="titleProperty" value="BSCreateNewOrder"/>
+				<set field="layoutSettings.javaScripts[+0]" value="/aceadmin/jqw/jqwidgets/olbMain.js" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="OrderCommonDecorator">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								 <if-olbius-has-permission/>
+							</condition>
+							<actions>
+								<script location="component://basesales/webapp/basesales/WEB-INF/actions/order/GetProductStores.groovy"/>
+								<script location="component://basesales/webapp/basesales/WEB-INF/actions/order/CheckInits.groovy"/>
+								<entity-condition list="listPackingUom" entity-name="Uom">
+									<condition-expr field-name="uomTypeId" value="PRODUCT_PACKING"/>
+								</entity-condition>
+								
+								<set field="enableCheckLiability" from-field="enableCheckLiability" default-value="true" type="Boolean"/>
+								<set field="enableCheckInventory" from-field="enableCheckInventory" default-value="false" type="Boolean"/>
+								<set field="enableSalesExecutive" from-field="enableSalesExecutive" default-value="true" type="Boolean"/>
+								<set field="enableDropShip" from-field="enableDropShip" default-value="false" type="Boolean"/>
+								<set field="enableFacilityConsign" from-field="enableFacilityConsign" default-value="false" type="Boolean"/>
+								<entity-one value-field="orderNewSPSGV" entity-name="SystemConfig">
+									<field-map field-name="systemConfigId" value="orderNewSearchProductSplit"/>
+								</entity-one>
+								<set field="orderNewSearchProductSplit" from-field="orderNewSPSGV.systemValue" type="Boolean"/>
+							</actions>
+							<widgets>
+								<section>
+									<condition>
+										<not><if-empty field="productStores"/></not>
+									</condition>
+									<widgets>
+										<section>
+											<condition>
+												<and>
+													<not><if-empty field="openChooseProductStore"/></not>
+													<if-compare operator="equals" value="true" field="openChooseProductStore" type="Boolean"/>
+												</and>
+											</condition>
+											<widgets>
+												<platform-specific>
+													<html><html-template location="component://basesales/webapp/basesales/order/orderNewInitEntry.ftl"/></html>
+												</platform-specific>
+											</widgets>
+											<fail-widgets>
+												<platform-specific>
+													<html>
+														<html-template location="component://widget/templates/jqwLibraryUiLabel.ftl"/>
+														<html-template location="component://basesales/webapp/basesales/order/orderNewTotal.ftl"/>
+													</html>
+												</platform-specific>
+											</fail-widgets>
+										</section>
+									</widgets>
+									<fail-widgets>
+										<container style="alert alert-info">
+											<container>
+												<label text="${uiLabelMap.BSYouNotHavePermissionSellerPerAnyProductStoreYet}!"/>
+											</container>
+											<include-screen name="InnerLinkToSettingProductStore"/>
+										</container>
+									</fail-widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-danger">
+									<label text="${uiLabelMap.BSYouHavenotCreatePermission}"/>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="InnerLinkToSettingProductStore">
+		<section>
+			<condition>
+				<if-olbius-has-permission/>
+			</condition>
+			<widgets>
+				<container style="margin-top10">
+					<link target="listProductStore" url-mode="plain" text=">> ${uiLabelMap.BSSetting}"></link>
+				</container>
+			</widgets>
+			<fail-widgets>
+				<label text="${uiLabelMap.BSPleaseContactWithSalesAdminManagerOrSalesManager}."/>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="NewSalesOrderConfirmAjax">
+    	<section>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="WidgetUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="CommonUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="OrderUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="BaseSalesUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="BaseSalesErrorUiLabels" global="true"/>
+                <set field="stepTitleId" value="OrderOrderConfirmation"/>
+                <set field="stepLabelId" value="OrderReviewOrder"/>
+                <set field="headerItem" value="orderentry"/>
+                <property-to-field resource="order" property="orderPreference.giftEnable" field="giftEnable" default="Y"/>
+                <!-- <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetShoppingCart.groovy"/> -->
+                <!-- <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetCheckOutTabBar.groovy"/> -->
+                <script location="component://basesales/webapp/basesales/WEB-INF/actions/order/CheckoutReviewCart.groovy"/>
+                <script location="component://basesales/webapp/basesales/WEB-INF/actions/order/ConfirmOrderCart.groovy"/>
+                <script location="component://basesales/webapp/basesales/WEB-INF/actions/order/ConfirmOrderPromo.groovy"/>
+            </actions>
+            <widgets>
+                <platform-specific>
+            		<html><html-template location="component://basesales/webapp/basesales/order/orderNewConfirmOrder.ftl"/></html>
+            	</platform-specific>
+            </widgets>
+		</section>
+    </screen>
+    <screen name="PromoUseDetailsInline">
+    	<section>
+    		<widgets>
+    			<platform-specific>
+    				<html><html-template location="component://basesales/webapp/basesales/order/orderNewPromoUseDetailsInline.ftl"/></html>
+    			</platform-specific>
+    		</widgets>
+    	</section>
+    </screen>
+	<screen name="orderTitle">
+		<section>
+			<condition>
+				<not><if-empty field="orderHeader"/></not>
+			</condition>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text="${uiLabelMap.BSId}: "></label>
+				<link url-mode="plain" target="viewOrder?orderId=${orderHeader.orderId}" text="${orderHeader.orderId}"></link>
+				<label text=" [${orderStatusMgs}]"></label>
+			</widgets>
+		</section>
+	</screen>
+    <screen name="ViewOrderDetail">
+		<section>
+			<actions>
+				<!-- <script location="component://basesales/webapp/basesales/WEB-INF/actions/navigator/nav_orderList.groovy"/> -->
+				<set field="selectedMenuItem" from-field="selectedMenuItem" default-value="order" global="true"/>
+				<set field="selectedSubMenuItem" from-field="selectedSubMenuItem" default-value="salesOrderList" global="true"/>
+				<entity-one value-field="orderHeader" entity-name="OrderHeader">
+					<field-map field-name="orderId" from-field="parameters.orderId"/>
+				</entity-one>
+				<set field="titleProperty" value="OrderViewOrder"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not><if-empty field="orderHeader"/></not>
+					</condition>
+					<actions>
+						<script location="component://basesales/webapp/basesales/WEB-INF/actions/permission/orderView.groovy"/>
+					</actions>
+					<widgets>
+						<section>
+							<condition>
+								<and>
+									<not><if-empty field="checkPermissionSuccess"/></not>
+									<if-compare field="checkPermissionSuccess" operator="equals" value="true" type="Boolean"/>
+								</and>
+							</condition>
+							<widgets>
+								<section>
+									<actions>
+										<set field="enablePendingFunction" from-field="enablePendingFunction" default-value="false" type="Boolean"/>
+										<set field="shipFromVendor" from-field="shipFromVendor" default-value="false" type="Boolean"/>
+										<set field="titleHeaderValue" value="orderTitle" global="true"/>
+										<set field="titleHeaderLocation" value="component://basesales/widget/OrderScreens.xml" global="true"/>
+										<!-- <script location="component://basesales/webapp/basesales/WEB-INF/actions/order/OrderViewSimple.groovy"/>
+										<script location="component://basesales/webapp/basesales/WEB-INF/actions/order/OrderViewGeneral.groovy"/> -->
+										<script location="component://basesales/webapp/basesales/WEB-INF/actions/order/OrderViewTotal.groovy"/>
+										<script location="component://basesales/webapp/basesales/WEB-INF/actions/order/OrderViewCustomStatus.groovy"/>
+										<set field="layoutSettings.javaScripts[+0]" value="/salesresources/js/order/order.view.js" global="true" />
+										<set field="activeTab" from-field="parameters.activeTab" default-value=""/>
+										<set field="orderRH" from-field="orderReadHelper" global="true" />
+										<set field="orderH" from-field="orderHeader" global="true" />
+										<set field="orderPayPref" from-field="orderPaymentPreferences" global="true" />
+										<set field="paramStr" from-field="paramString" global="true" />
+										<set field="ordId" from-field="orderId" global="true" />
+										<set field="invoices" from-field="invoices" global="true" />
+										<set field="currentStatus" from-field="currentStatus" global="true"/>
+                                        <set field="amountPaid" from-field="amountPaid" global="true"/>
+                                        <set field="grandTotal" from-field="grandTotal" global="true"/>
+                                        <set field="paymentListAppl" from-field="paymentListAppl" global="true"/>
+									</actions>
+									<widgets>
+										<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+											<decorator-section name="body">
+												<platform-specific><html><html-template location="component://basesales/webapp/basesales/order/orderViewDetailOpen.ftl"/></html></platform-specific>
+												<include-screen name="OrderDetailContainer"/>
+												<decorator-section-include name="container"/>
+												<platform-specific><html><html-template location="component://basesales/webapp/basesales/order/orderViewDetailClose.ftl"/></html></platform-specific>
+											</decorator-section>
+										</decorator-screen>
+									</widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+									<decorator-section name="body">
+										<container style="alert alert-danger">
+											<label text="${uiLabelMap.BSYouHavenotViewPermission}"/>
+										</container>
+									</decorator-section>
+								</decorator-screen>
+							</fail-widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.OrderNoOrderFound}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="OrderDetailContainer">
+		<section>
+			<widgets>
+				<include-screen name="OrderViewGeneral"/>
+				<include-screen name="OrderInfo"/>
+				<include-screen name="OrderViewSettlementPromo"/>
+				<include-screen name="OrderItems"/>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="OrderViewGeneral">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html><html-template location="component://basesales/webapp/basesales/order/orderViewGeneral.ftl" /></html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="OrderViewSettlementPromo">
+		<section>
+			<condition>
+				<if-has-permission permission="PROMOSETTLEMENT_ORDER" action="_VIEW"/>
+			</condition>
+			<widgets>
+				<platform-specific>
+					<html><html-template location="component://basesales/webapp/basesales/order/orderViewSettlementPromo.ftl" /></html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="OrderInfo">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html><html-template location="component://basesales/webapp/basesales/order/orderViewInfo.ftl" /></html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="OrderItems">
+		<section>
+			<widgets>
+				<platform-specific>
+					<!-- <html><html-template location="component://basesales/webapp/basesales/order/orderItems.ftl" /></html> -->
+					<html><html-template location="component://basesales/webapp/basesales/order/orderViewItems.ftl" /></html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="OrderNoteAjax">
+		<section>
+			<condition>
+				<!-- DEL<if-has-permission permission="SALESORDER" action="_NOTE" /> -->
+				<if-olbius-has-permission/>
+			</condition>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="BaseSalesUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="OrderUiLabels" global="true"/>
+				<set field="requestNameScreen" from-field="requestNameScreen" default-value="" global="true"/>
+				<set field="titleProperty" value="OrderAddNote" />
+				<set field="headerItem" value="findorders" />
+				<script location="component://basesales/webapp/basesales/WEB-INF/actions/order/GetOrderNotes.groovy"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html><html-template location="component://basesales/webapp/basesales/order/orderViewNotes.ftl"/></html>
+				</platform-specific>
+			</widgets>
+			<!-- <fail-widgets>
+				<container style="alert alert-info">
+					<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+				</container>
+			</fail-widgets> -->
+		</section>
+	</screen>
+	
+	<screen name="EditSalesOrder">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="order"/>
+				<set field="selectedSubMenuItem" value="salesOrderList"/>
+				<set field="titleProperty" value="BSEditOrderFormTitle"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission/>
+					</condition>
+					<actions>
+						<entity-one value-field="orderHeader" entity-name="OrderHeader">
+							<field-map field-name="orderId" from-field="parameters.orderId"/>
+						</entity-one>
+					</actions>
+					<widgets>
+						<section>
+							<condition>
+								<not><if-empty field="orderHeader"/></not>
+							</condition>
+							<actions>
+								<set field="titleHeaderValue" value="orderTitle" global="true"/>
+								<set field="titleHeaderLocation" value="component://basesales/widget/OrderScreens.xml" global="true"/>
+							<script location="component://basesales/webapp/basesales/WEB-INF/actions/order/OrderViewCustomStatus.groovy"/>
+							</actions>
+							<widgets>
+								<section>
+									<condition>
+
+
+										<or>
+											<not>
+												<or>
+													<if-compare operator="equals" value="ORDER_COMPLETED" field="orderHeader.statusId"/>
+													<if-compare operator="equals" value="ORDER_CANCELLED" field="orderHeader.statusId"/>
+
+												</or>
+											</not>
+											<if-empty field="editLogAllow"/>
+											<if-compare operator="not-equals" value="true" type="Boolean" field="editLogAllow"/>
+										</or>
+									</condition>
+									<widgets>
+										<section>
+											<actions>
+												<script location="component://basesales/webapp/basesales/WEB-INF/actions/order/OrderViewSimple.groovy"/>
+											</actions>
+											<widgets>
+												<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+													<decorator-section name="body">
+														<platform-specific><html><html-template location="component://basesales/webapp/basesales/order/orderEditSalesOrder.ftl"/></html></platform-specific>
+													</decorator-section>
+												</decorator-screen>
+											</widgets>
+										</section>
+									</widgets>
+									<fail-widgets>
+										<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+											<decorator-section name="body">
+												<platform-specific><html><html-template location="component://basesales/webapp/basesales/order/orderEditSalesOrderNotify.ftl"/></html></platform-specific>
+											</decorator-section>
+										</decorator-screen>
+									</fail-widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+									<decorator-section name="body">
+										<container style="alert alert-info">
+											<label text="${uiLabelMap.OrderNoOrderFound}"></label>
+										</container>
+									</decorator-section>
+								</decorator-screen>
+							</fail-widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="OrderCommonDecorator">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotUpdatePermission}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="OrderEditConfirmAjax">
+    	<section>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="WidgetUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="CommonUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="OrderUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="BaseSalesUiLabels" global="true"/>
+                <set field="stepTitleId" value="OrderOrderConfirmation"/>
+                <set field="stepLabelId" value="OrderReviewOrder"/>
+                <set field="headerItem" value="orderentry"/>
+                <property-to-field resource="order" property="orderPreference.giftEnable" field="giftEnable" default="Y"/>
+                <!-- <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetShoppingCart.groovy"/> -->
+                <!-- <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetCheckOutTabBar.groovy"/> -->
+                <script location="component://basesales/webapp/basesales/WEB-INF/actions/order/OrderEditCheckoutReviewCart.groovy"/>
+                <script location="component://basesales/webapp/basesales/WEB-INF/actions/order/OrderEditConfirmOrderCart.groovy"/>
+                <script location="component://basesales/webapp/basesales/WEB-INF/actions/order/OrderEditConfirmOrderPromo.groovy"/>
+            </actions>
+            <widgets>
+            	<section>
+            		<condition>
+            			<not><if-empty field="shoppingCart"/></not>
+            		</condition>
+            		<widgets>
+		                <platform-specific>
+		            		<html><html-template location="component://basesales/webapp/basesales/order/orderEditConfirmOrder.ftl"/></html>
+		            	</platform-specific>
+		            </widgets>
+            		<fail-widgets>
+            			<container style="alert alert-info">
+							<label text="${uiLabelMap.BSHaveAErrorWhenProcessing}. ${uiLabelMap.BSPleaseTryAgainLater}!"></label>
+						</container>
+            		</fail-widgets>
+            	</section>
+            </widgets>
+		</section>
+    </screen>
+    
+    <screen name="OrderViewPaymentOrderAllAjax">
+    	<section>
+    		<actions>
+				<property-map map-name="uiLabelMap" resource="CommonUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="BaseSalesUiLabels" global="true"/>
+    			<entity-one value-field="orderHeader" entity-name="OrderHeader">
+    				<field-map field-name="orderId" from-field="parameters.orderId"/>
+    			</entity-one>
+    		</actions>
+    		<widgets>
+    			<platform-specific>
+            		<html><html-template location="component://basesales/webapp/basesales/order/orderViewFilePaymentOrder.ftl"/></html>
+            	</platform-specific>
+    		</widgets>
+    	</section>
+    </screen>
+    
+    <screen name="ViewDetailOrderItemAjax">
+    	<section>
+    		<actions>
+    			<property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+				<property-map resource="OrderErrorUiLabels" map-name="uiLabelMap" global="true"/>
+				<property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+				<property-map resource="BaseSalesUiLabels" map-name="uiLabelMap" global="true"/>
+				<property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+				
+				<set field="orderId" from-field="parameters.orderId"/>
+				<set field="orderItemSeqId" from-field="parameters.orderItemSeqId"/>
+				<entity-one value-field="orderHeader" entity-name="OrderHeader"></entity-one>
+				<entity-one value-field="orderItem" entity-name="OrderItem"></entity-one>
+				<!-- <set field="orderReadHelper" value="${groovy: return new org.ofbiz.order.order.OrderReadHelper(orderHeader)}"/> -->
+				<set field="orderReadHelper" value="${groovy: return new com.olbius.basesales.order.OrderReadHelper(orderHeader)}"/>
+				<set field="isViewAtpQoh" value="false" type="Boolean"/>
+				<set field="currencyUomId" from-field="orderHeader.currencyUom"/>
+    		</actions>
+    		<widgets>
+    			<platform-specific>
+            		<html><html-template location="component://basesales/webapp/basesales/order/orderViewItemsDetail.ftl"/></html>
+            	</platform-specific>
+    		</widgets>
+    	</section>
+    </screen>
+</screens>

@@ -1,0 +1,42 @@
+<ion-view view-title="{{header}}">
+	<ion-nav-buttons side="left">
+        <button class="button back-button buttons button-clear" ng-click="$ionicGoBack()" ng-if="back">
+            <i class='icon ion-ios-arrow-back'>&nbsp;</i>
+        </button>
+    </ion-nav-buttons>
+	<ion-content scroll="false" >
+		<search-input class='search' search="self.search"></search-input>
+		<ion-scroll direction="y" class="search-container" >
+			<ion-refresher
+		    pulling-text="{{getLabel('PullToRefresh')}}"
+		    on-refresh="reloadStore(true)"></ion-refresher>
+			<ion-list>
+				<ion-item ng-repeat="obj in datarenderer | filter:search track by $index"
+	            class="item item-thumbnail-left item-text-wrap" ng-if="$index < lastIndex">
+					<img src="assets/images/default.jpg" ng-if="!obj.logoImageUrl" on-double-tap="getPartyDetail(obj.partyIdTo)">
+					<img ng-src="{{imageUrl}}{{obj.logoImageUrl}}" on-double-tap="getPartyDetail(obj.partyIdTo)" ng-if="obj.logoImageUrl"/>
+					<h2 ng-click="toStore(obj)"><a ng-class="{'balanced' : obj.isInventory}">{{obj.groupName}}</a></h2>
+					<p>
+						<b><i class='fa fa-map-marker'></i>&nbsp;{{getLabel('Address')}}: </b>
+						{{obj.address1}} &nbsp; {{obj.city}}
+					</p>
+					<p>
+						<b><i class='fa fa-phone'></i> {{getLabel('Phone')}}: </b>
+						<a href="tel:{{obj.phoneNumber.contactNumber}}" ng-if="obj.phoneNumber.contactNumber">{{obj.phoneNumber.contactNumber}}</a>
+					</p>
+					<p>
+						<b><i class='fa fa-bicycle'></i> {{getLabel('Distance')}}: </b>
+						<a ng-click="updateLocation(obj)">{{obj.distance.text}}</a>
+					</p>
+					<div class='inven-order'>
+						<div class='signal-icon' ng-if="obj.isInventory"><i class='fa fa-check-square-o positive'>&nbsp;</i></div>
+						<div class='signal-icon' ng-if="obj.isRegistered"><i class='fa fa-tag royal'>&nbsp;</i></div>
+						<div class='signal-icon' ng-if="obj.isOrder"><i class='fa fa-cart-plus assertive'>&nbsp;</i></div>
+						<div class='signal-icon' ng-if="obj.isBirthDateToday"><i class='fa fa-birthday-cake balanced'>&nbsp;</i></div>
+					</div>
+				</ion-item>
+			</ion-list>
+			<ion-infinite-scroll distance="1" on-infinite="loadMoreData()"/>
+		</ion-scroll>
+	</ion-content>
+</ion-view>

@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+    <!-- ========================================================= -->
+    <!-- ======================== Defaults ======================= -->
+    <!-- ========================================================= -->
+    <title>Entity of BaseAccounting Component</title>
+    <description>None</description>
+    <copyright></copyright>
+    <version></version>
+	<entity entity-name="Equipment" package-name="com.olbius.bacc.equipment"
+            title="Equipment Entity">
+      <field name="equipmentId" type="id-ne"></field>
+      <field name="equipmentTypeId" type="id-ne"></field>
+      <field name="equipmentName" type="id-ne"></field>
+      <!-- <field name="partyId" type="id"></field>
+      <field name="roleTypeId" type="id"></field> 
+      <field name="dateAcquired" type="date-time"></field>-->
+      <field name="currencyUomId" type="id"></field>
+      <field name="quantityUom" type="name"></field>
+      <field name="quantity" type="fixed-point"></field>
+      <field name="unitPrice" type="fixed-point"></field>
+      <field name="statusId" type="id"></field>
+      <field name="description" type="description"></field>
+      <prim-key field="equipmentId"/>
+      <!--<relation type="one" fk-name="EQUIP_PARTY" rel-entity-name="Party">-->
+            <!--<key-map field-name="partyId"/>-->
+        <!--</relation>-->
+        <!--<relation type="one" fk-name="EQUIP_ROLETYP" rel-entity-name="RoleType">-->
+            <!--<key-map field-name="roleTypeId"/>-->
+        <!--</relation>-->
+        <!--<relation type="one-nofk" rel-entity-name="PartyRole" fk-name="EQUIP_PARTYROLE">-->
+            <!--<key-map field-name="partyId"/>-->
+            <!--<key-map field-name="roleTypeId"/>-->
+        <!--</relation>-->
+        <relation type="one" fk-name="EQUIP_CURRENCY_UOM" rel-entity-name="Uom">
+            <key-map field-name="currencyUomId" rel-field-name="uomId"/>
+        </relation>
+        <!-- <relation type="one" fk-name="EQUIP_QUAN_UOM" rel-entity-name="Uom">
+            <key-map field-name="quantityUomId" rel-field-name="uomId"/>
+        </relation> -->
+        <relation type="one" fk-name="EQUIP_TYPE" rel-entity-name="EquipmentType">
+            <key-map field-name="equipmentTypeId"/>
+        </relation>
+        <relation rel-entity-name="StatusItem" type="one" fk-name="EQUIP_STT">
+    		<key-map field-name="statusId"/>
+    	</relation>
+    </entity>
+    
+    <entity entity-name="EquipmentParty" package-name="com.olbius.bacc.equipment">
+    	<field name="equipmentId" type="id-ne"></field>
+    	<field name="partyId" type="id-ne"></field>
+    	<field name="fromDate" type="date-time"></field>
+      	<field name="thruDate" type="date-time"></field>
+    	<field name="quantity" type="int"></field>
+    	<prim-key field="equipmentId"/>
+    	<prim-key field="partyId"/>
+    	<prim-key field="fromDate"/>
+    	<relation rel-entity-name="Equipment" type="one" fk-name="EQUIP_PTY_EQUIP">
+    		<key-map field-name="equipmentId"/>
+    	</relation>
+    	<relation rel-entity-name="Party" type="one" fk-name="EQUIP_PTY_PTY">
+    		<key-map field-name="partyId"/>
+    	</relation>
+    </entity>
+    
+    <entity entity-name="EquipmentProductStore" package-name="com.olbius.bacc.equipment">
+    	<field name="equipmentId" type="id-ne"></field>
+    	<field name="productStoreId" type="id-ne"></field>
+    	<field name="fromDate" type="date-time"></field>
+      	<field name="thruDate" type="date-time"></field>
+    	<field name="quantity" type="int"></field>
+    	<prim-key field="equipmentId"/>
+    	<prim-key field="productStoreId"/>
+    	<prim-key field="fromDate"/>
+    	<relation rel-entity-name="Equipment" type="one" fk-name="EQUIP_STORE_EQUIP">
+    		<key-map field-name="equipmentId"/>
+    	</relation>
+    	<relation rel-entity-name="ProductStore" type="one" fk-name="EQUIP_STORE_STORE">
+    		<key-map field-name="productStoreId"/>
+    	</relation>
+    </entity>
+    
+    <entity entity-name="EquipmentType" package-name="com.olbius.bacc.equipment"
+      		title="Equipment Type Entity">
+      <field name="equipmentTypeId" type="id-ne"></field>
+      <field name="parentTypeId" type="id"></field>
+      <field name="hasTable" type="id-ne"></field>
+      <field name="description" type="description"></field>
+      <prim-key field="equipmentTypeId"/>
+      <relation type="one" fk-name="EQUIP_TYPE_PARENT" rel-entity-name="EquipmentType">
+          <key-map field-name="parentTypeId" rel-field-name="equipmentTypeId"/>
+      </relation>
+    </entity>
+    
+    <entity entity-name="EquipmentIncrease" package-name="com.olbius.bacc.equipment">
+    	<field name="equipmentIncreaseId" type="id-ne"></field>
+    	<field name="dateArising" type="date-time">
+    		<description>Ngay phat sinh</description>
+    	</field>
+    	<field name="supplierId" type="id-ne"></field>
+    	<field name="address" type="long-varchar"></field>
+    	<field name="receiver" type="name"></field>
+    	<field name="voucherNbr" type="short-varchar"></field>
+    	<field name="comment" type="comment"></field>
+    	<field name="isPosted" type="boolean"></field>
+    	<field name="acctgTransId" type="id-ne"></field>
+    	<prim-key field="equipmentIncreaseId"/>
+	<relation rel-entity-name="AcctgTrans" type="one" fk-name="FK_EQUIP_INCR_ACCTG">
+    		<key-map field-name="acctgTransId"/>
+    	</relation>
+    	<relation rel-entity-name="Party" type="one" fk-name="FK_EQUIP_INCR_PTY">
+    		<key-map field-name="supplierId" rel-field-name="partyId"/>
+    	</relation>
+    </entity>
+    
+    <entity entity-name="EquipmentIncreaseItem" package-name="com.olbius.bacc.equipment">
+    	<field name="equipmentIncreaseId" type="id-ne"></field>
+    	<field name="equipmentId" type="id-ne"></field>
+    	<field name="allocationTimes" type="int"></field>
+    	<field name="debitGlAccountId" type="id-ne"></field>
+    	<field name="costGlAccountId" type="id-ne"></field>
+    	<field name="depAmount" type="fixed-point"></field>
+    	<prim-key field="equipmentIncreaseId"/>
+    	<prim-key field="equipmentId"/>
+    	<relation rel-entity-name="EquipmentIncrease" type="one" fk-name="EQUIP_INCR_ITEM_EQUIP_INCR">
+    		<key-map field-name="equipmentIncreaseId"/>
+    	</relation>
+    	<relation rel-entity-name="Equipment" type="one" fk-name="EQUIP_INCR_ITEM_EQUIP">
+    		<key-map field-name="equipmentId"/>
+    	</relation>
+	<relation rel-entity-name="GlAccount" type="one" title="debit" fk-name="EQUIP_INCR_ITEM_DEBIT_GLA">
+    		<key-map field-name="debitGlAccountId" rel-field-name="glAccountId"/>
+    	</relation>
+	<relation rel-entity-name="GlAccount" type="one" title="cost" fk-name="EQUIP_INCR_ITEM_COST_GLA">
+    		<key-map field-name="costGlAccountId" rel-field-name="glAccountId"/>
+    	</relation>
+    </entity>
+    
+    <entity entity-name="EquipmentDecrease" package-name="com.olbius.bacc.equipment">
+    	<field name="equipmentDecreaseId" type="id-ne"></field>
+    	<field name="dateArising" type="date-time">
+    		<description>Ngay phat sinh</description>
+    	</field>
+    	<field name="voucherNbr" type="short-varchar"></field>
+    	<field name="comment" type="comment"></field>
+    	<field name="isPosted" type="boolean"></field>
+    	<field name="acctgTransId" type="id-ne"></field>
+    	<prim-key field="equipmentDecreaseId"/>
+	<relation rel-entity-name="AcctgTrans" type="one" fk-name="EQUIP_DEC_ACC_TRANS">
+    		<key-map field-name="acctgTransId"/>
+    	</relation>
+    </entity>
+    
+    <entity entity-name="EquipmentDecreaseItem" package-name="com.olbius.bacc.equipment">
+    	<field name="equipmentDecreaseId" type="id-ne"></field>
+    	<field name="equipmentId" type="id-ne"></field>
+    	<field name="quantityDecrease" type="int"></field>
+    	<field name="quantityInUse" type="int"></field>
+    	<field name="decreaseReason" type="comment"></field>
+    	<field name="lossGlAccountId" type="id-ne"></field>
+    	<field name="remainValue" type="fixed-point"></field>
+    	<prim-key field="equipmentDecreaseId"/>
+    	<prim-key field="equipmentId"/>
+    	<relation rel-entity-name="EquipmentDecrease" type="one" fk-name="EQUIP_DECR_ITEM_DECR">
+    		<key-map field-name="equipmentDecreaseId"/>
+    	</relation>
+    	<relation rel-entity-name="Equipment" type="one" fk-name="EQUIP_DECR_ITEM_EQUIP">
+    		<key-map field-name="equipmentId"/>
+    	</relation>
+    	<relation rel-entity-name="GlAccount" type="one" fk-name="EQUIP_DECR_ITEM_LOSS_GLA">
+    		<key-map field-name="lossGlAccountId" rel-field-name="glAccountId"/>
+    	</relation>
+    </entity>
+    
+    <entity entity-name="EquipmentAllocate" package-name="com.olbius.bacc.equipment">
+    	<field name="equipmentAllocateId" type="id-ne"></field>
+    	<field name="month" type="int"></field>
+    	<field name="year" type="int"></field>
+    	<field name="voucherDate" type="date-time"></field>
+    	<field name="voucherNbr" type="short-varchar"></field>
+    	<field name="comment" type="comment"></field>
+    	<field name="isPosted" type="boolean"></field>
+    	<field name="acctgTransId" type="id-ne"></field>
+    	<prim-key field="equipmentAllocateId"/>
+    	<relation rel-entity-name="AcctgTrans" type="one">
+    		<key-map field-name="acctgTransId"/>
+    	</relation>
+    </entity>
+    <entity entity-name="EquipmentAllocItem" package-name="com.olbius.bacc.equipment">
+    	<field name="equipmentAllocateId" type="id-ne"></field>
+    	<field name="equipmentId" type="id-ne"></field>
+    	<field name="allocatedAmount" type="currency-amount">
+    		<description>Tong so tien PB</description>
+    	</field>
+    	<field name="allocationAmountUsing" type="currency-amount">
+    		<description>So tien PB CCDC dang dung</description>
+    	</field>
+    	<prim-key field="equipmentAllocateId"/>
+    	<prim-key field="equipmentId"/>
+    	<relation rel-entity-name="Equipment" type="one" fk-name="EQP_ALLOC_ITEM_EQUIP">
+    		<key-map field-name="equipmentId"/>
+    	</relation>
+    	<relation rel-entity-name="EquipmentAllocate" type="one" fk-name="EQP_ALLOC_ITEM_EQP_ALLOC">
+    		<key-map field-name="equipmentAllocateId"/>
+    	</relation>
+    </entity>
+    <entity entity-name="EquipmentAllocItemParty" package-name="com.olbius.bacc.equipment">
+    	<field name="equipmentAllocateId" type="id-ne"></field>
+    	<field name="equipmentId" type="id-ne"></field>
+    	<field name="partyId" type="id-ne"></field>
+    	<field name="allocatedPercent" type="floating-point"></field>
+    	<field name="costGlAccountId" type="id-ne"></field>
+    	<field name="creditGlAccountId" type="id-ne"></field>
+    	<field name="debitGlAccountId" type="id-ne"></field>
+    	<prim-key field="equipmentAllocateId"/>
+    	<prim-key field="equipmentId"/>
+    	<prim-key field="partyId"/>
+    	<relation rel-entity-name="EquipmentAllocItem" type="one" fk-name="EQP_ITEM_PTY_EQP_ITEM">
+    		<key-map field-name="equipmentAllocateId"/>
+    		<key-map field-name="equipmentId"/>
+    	</relation>
+    	<relation rel-entity-name="Party" type="one" fk-name="EQP_ITEM_PTY_PTY">
+    		<key-map field-name="partyId"/>
+    	</relation>
+	<relation rel-entity-name="GlAccount" type="one" title="cost" fk-name="EQP_ITEM_PTY_COST">
+    		<key-map field-name="costGlAccountId" rel-field-name="glAccountId"/>
+    	</relation>
+	<relation rel-entity-name="GlAccount" type="one" title="credit" fk-name="EQP_ITEM_PTY_CRE">
+    		<key-map field-name="creditGlAccountId" rel-field-name="glAccountId"/>
+    	</relation>
+	<relation rel-entity-name="GlAccount" type="one" title="debit" fk-name="EQP_ITEM_PTY_DEBIT">
+    		<key-map field-name="debitGlAccountId" rel-field-name="glAccountId"/>
+    	</relation>
+    </entity>
+    <entity entity-name="EquipmentAllocItemStore" package-name="com.olbius.bacc.equipment">
+    	<field name="equipmentAllocateId" type="id-ne"></field>
+    	<field name="equipmentId" type="id-ne"></field>
+    	<field name="productStoreId" type="id-ne"></field>
+    	<field name="allocatedPercent" type="floating-point"></field>
+    	<field name="costGlAccountId" type="id-ne"></field>
+    	<field name="creditGlAccountId" type="id-ne"></field>
+    	<field name="debitGlAccountId" type="id-ne"></field>
+    	<prim-key field="equipmentAllocateId"/>
+    	<prim-key field="equipmentId"/>
+    	<prim-key field="productStoreId"/>
+    	<relation rel-entity-name="EquipmentAllocItem" type="one" fk-name="EQP_ITEM_STORE_EQP_ITEM">
+    		<key-map field-name="equipmentAllocateId"/>
+    		<key-map field-name="equipmentId"/>
+    	</relation>
+    	<relation rel-entity-name="ProductStore" type="one" fk-name="EQP_ITEM_STORE_STORE">
+    		<key-map field-name="productStoreId"/>
+    	</relation>
+		<relation rel-entity-name="GlAccount" type="one" title="cost" fk-name="EQP_ITEM_STORE_COST">
+    		<key-map field-name="costGlAccountId" rel-field-name="glAccountId"/>
+    	</relation>
+	<relation rel-entity-name="GlAccount" type="one" title="credit" fk-name="EQP_ITEM_STORE_CREDIT">
+    		<key-map field-name="creditGlAccountId" rel-field-name="glAccountId"/>
+    	</relation>
+	<relation rel-entity-name="GlAccount" type="one" title="debit" fk-name="EQP_ITEM_STORE_DEBIT">
+    		<key-map field-name="debitGlAccountId" rel-field-name="glAccountId"/>
+    	</relation>    	
+    </entity>
+    <!-- <entity entity-name="EquipmentDecrementItem" package-name="com.olbius.bacc.equip">
+      <field name="decrementId" type="id-ne"></field>
+      <field name="equipmentId" type="id-ne"></field>
+      <field name="amount" type="fixed-point"></field>
+      <prim-key field="decrementId"/>
+      <prim-key field="equipmentId"/>
+      <relation type="one" fk-name="EQUIPMENT_ITEM" rel-entity-name="Equipment">
+        <key-map field-name="equipmentId"/>
+      </relation>
+      <relation type="one" fk-name="FIXED_ASSET_DEC_ITEM" rel-entity-name="Decrement">
+        <key-map field-name="decrementId"/>
+      </relation>
+    </entity> -->
+    
+    <entity entity-name="EquipmentAllocation" package-name="com.olbius.bacc.equipment"
+      		title="Equipment Allocation Entity">
+      <field name="equipAllocationId" type="id-ne"></field>
+      <field name="equipmentId" type="id-ne"></field>
+	  <field name="alloTimes" type="fixed-point"></field>
+	  <field name="preAllocationDate" type="date-time"></field>
+	  <field name="amount" type="fixed-point"></field>
+	  <field name="allocatedAmount" type="fixed-point"></field>
+	  <field name="remainingValue" type="fixed-point"></field>
+	  <field name="monthlyAllocAmount" type="fixed-point"></field>    
+      <prim-key field="equipAllocationId"/>
+      <relation type="one" fk-name="EQUIP_ALLO" rel-entity-name="Equipment">
+        <key-map field-name="equipmentId"/>
+      </relation>
+    </entity>
+    
+    <entity entity-name="EquipmentPartyAlloc" package-name="com.olbius.bacc.equipment"
+      		title="Equipment Party Allocation Entity">
+      <field name="equipmentId" type="id-ne"></field>
+      <field name="seqId" type="id-ne"></field>
+      <field name="allocPartyId" type="id-ne"></field>
+      <field name="allocRate" type="fixed-point"></field>
+      <field name="allocGlAccountId" type="id-ne"></field>
+      <prim-key field="equipmentId"/>
+      <prim-key field="seqId"/>
+      <relation rel-entity-name="GlAccount" type="one" fk-name="EPA_GLACCOUNT">
+      	<key-map field-name="allocGlAccountId" rel-field-name="glAccountId"/>
+      </relation>
+      <relation rel-entity-name="Party" type="one" fk-name="EPA_PARTY">
+      	<key-map field-name="allocPartyId" rel-field-name="partyId"/>
+      </relation>
+    </entity>
+    
+    <!-- maybe delete -->
+    <!-- <entity entity-name="EquipmentCustomTimePeriod" package-name="com.olbius.bacc.equipment"
+            title="EquipmentCustomTimePeriod Entity">
+      <field name="equipmentId" type="id-ne"></field>
+      <field name="customTimePeriodId" type="id-ne"></field>
+      <field name="amount" type="fixed-point"></field>
+      <prim-key field="equipmentId"/>
+      <prim-key field="customTimePeriodId"/>
+      <relation type="one" fk-name="EQUIP_CUST_TIME_PERIOD_EQUIP" rel-entity-name="Equipment">
+        <key-map field-name="equipmentId"/>
+      </relation>
+      <relation type="one" fk-name="EQUIP_CUSTOM_TIME_PERIOD" rel-entity-name="CustomTimePeriod">
+        <key-map field-name="customTimePeriodId"/>
+      </relation>
+    </entity> -->
+    
+</entitymodel>

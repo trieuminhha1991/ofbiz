@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-screen.xsd">
+	<screen name="SalesStatementCommonDecorator">
+		<section>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+                    	<decorator-section-include name="body"/>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ListSalesStatement">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="salesStatement"/>
+				<set field="selectedSubMenuItem" value="${groovy: return 'salesList' + parameters.tid}"/>
+				<set field="titleProperty" value="BSList"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="SalesStatementCommonDecorator">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/sales_statement/salesStatementList.ftl"/></html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="salesStatementTitle">
+		<section>
+			<condition>
+				<not><if-empty field="salesStatement"/></not>
+			</condition>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text="${uiLabelMap.BSId}: "></label>
+				<link url-mode="plain" target="viewSalesStatementDetail?salesStatementId=${salesStatement.salesStatementId}" text="${salesStatement.salesStatementId}"></link>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="NewSalesStatementDetail">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="salesStatement"/>
+				<set field="selectedSubMenuItem" value="salesStatementList"/>
+                <set field="titleProperty" value="BSEditReport"/>
+                <entity-one value-field="salesStatement" entity-name="SalesStatement">
+					<field-map field-name="salesStatementId" from-field="parameters.salesStatementId"/>
+				</entity-one>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not><if-empty field="salesStatement"/></not>
+					</condition>
+					<actions>
+						<set field="selectedSubMenuItem" value="${groovy: return 'salesList' + salesStatement.salesStatementTypeId}"/>
+						<set field="titleHeaderValue" value="salesStatementTitle" global="true"/>
+						<set field="titleHeaderLocation" value="component://basesalesmtl/widget/SalesStatementScreens.xml" global="true"/>
+						<entity-one value-field="salesStatementType" entity-name="SalesStatementType">
+							<field-map field-name="salesStatementTypeId" from-field="salesStatement.salesStatementTypeId"/>
+						</entity-one>
+					</actions>
+					<widgets>
+						<decorator-screen name="SalesStatementCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<section>
+		                    		<widgets>
+		                    			<platform-specific>
+			                            	<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/sales_statement/salesStatementDetailNewGrid.ftl"/></html>
+			                            </platform-specific>
+		                    		</widgets>
+		                    	</section>
+		                    </decorator-section>
+		                </decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="SalesStatementCommonDecorator">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSNoSalesForecastFound}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewSalesStatementDetail">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="salesStatement"/>
+				<set field="selectedSubMenuItem" value="salesStatementList"/>
+                <set field="titleProperty" value="BSViewSalesStatement"/>
+                <entity-one value-field="salesStatement" entity-name="SalesStatement">
+					<field-map field-name="salesStatementId" from-field="parameters.salesStatementId"/>
+				</entity-one>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not><if-empty field="salesStatement"/></not>
+					</condition>
+					<actions>
+						<set field="selectedSubMenuItem" value="${groovy: return 'salesList' + salesStatement.salesStatementTypeId}"/>
+						<set field="titleHeaderValue" value="salesStatementTitle" global="true"/>
+						<set field="titleHeaderLocation" value="component://basesalesmtl/widget/SalesStatementScreens.xml" global="true"/>
+						<entity-one value-field="salesStatementType" entity-name="SalesStatementType">
+							<field-map field-name="salesStatementTypeId" from-field="salesStatement.salesStatementTypeId"/>
+						</entity-one>
+					</actions>
+					<widgets>
+						<decorator-screen name="SalesStatementCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<section>
+		                    		<widgets>
+		                    			<platform-specific>
+			                            	<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/sales_statement/salesStatementDetailView.ftl"/></html>
+			                            </platform-specific>
+		                    		</widgets>
+		                    	</section>
+		                    </decorator-section>
+		                </decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="SalesStatementCommonDecorator">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSNoSalesForecastFound}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+</screens>

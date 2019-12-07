@@ -1,0 +1,500 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	<screen name="QuotationList">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="product" />
+				<set field="selectedSubMenuItem" value="listQuotation" />
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/product/GetListQuotationJQ.groovy"/>
+				<entity-condition list="quotations" entity-name="ProductQuotation"></entity-condition>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<screenlet title="${uiLabelMap.DAQuotationList}" navigation-menu-name="NewQuotationButton">
+							<include-menu name="NewQuotationButton" location="component://delys/widget/sales/SalesMenus.xml" />
+							<platform-specific>
+								<html>
+									<html-template location="component://delys/webapp/delys/sales/product/quotationList.ftl"/>
+								</html>
+							</platform-specific>
+						</screenlet>
+						
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="NewQuotation">
+		<section>
+			<condition>
+				<if-has-permission permission="DELYS_QUOTATION" action="_CREATE"/>
+			</condition>
+			<actions>
+				<set field="selectedMenuItem" value="product" />
+				<set field="selectedSubMenuItem" value="newQuotation" />
+				
+				<entity-condition list="currencies" entity-name="Uom" use-cache="true">
+					<condition-expr field-name="uomTypeId" value="CURRENCY_MEASURE"/>
+				</entity-condition>
+				<entity-condition list="roleTypes" entity-name="RoleType" use-cache="true" />
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/product/GetCatalogDefault.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<platform-specific>
+							<html><html-template location="component://delys/webapp/delys/sales/product/newQuotation.ftl"/></html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+            		<decorator-section name="body">
+            			<screenlet title="${uiLabelMap.DACreateQuotationForProduct}">
+            				<container style="alert alert-info">
+	            				<label text="${uiLabelMap.DACreatePermissionError}"/>
+	            			</container>
+            			</screenlet>
+            		</decorator-section>
+            	</decorator-screen>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="ViewQuotationRuleAjax">
+		<section>
+			<condition>
+				<if-empty field="parameters.productQuotationId"/>
+			</condition>
+			<actions>
+				<set field="parameters.productQuotationId" value="${parameters.productQuotationId}"/>
+			</actions>
+			<widgets>
+				<section>
+					<actions>
+						<set field="selectedMenuItem" value="product" />
+						<set field="selectedSubMenuItem" value="newQuotation" />
+						
+						<property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true" />
+						<property-map resource="DelysAdminUiLabels" map-name="uiLabelMap" global="true" />
+						<set field="messagesTemplateLocation" from-field="layoutSettings.VT_MSG_TMPLT_LOC[0]" default-value="component://common/webcommon/includes/messages.ftl"/>  
+						
+						<entity-one value-field="quotationSelected" entity-name="ProductQuotation">
+							<field-map field-name="productQuotationId" value="${parameters.productQuotationId}"/>
+						</entity-one>
+						<entity-condition list="productPriceRules" entity-name="ProductQuotationAndPriceRCA" use-cache="false" distinct="true">
+							<condition-list>
+								<condition-expr field-name="pq_ProductQuotationId" value="${parameters.productQuotationId}"/>
+								<condition-expr field-name="inputParamEnumId" value="PRIP_PRODUCT_ID"/>
+								<condition-expr field-name="productPriceActionTypeId" value="PRICE_FLAT"/>
+							</condition-list>
+						</entity-condition>
+					</actions>
+					<widgets>
+						<!-- render messages -->
+						<platform-specific>
+							<html>
+								<html-template location="${messagesTemplateLocation}" />
+							</html>
+						</platform-specific>
+						<platform-specific>
+							<html>
+								<html-template location="component://delys/webapp/delys/sales/product/addQuotationItemAjax.ftl"/>
+							</html>
+						</platform-specific>
+					</widgets>
+				</section>
+			</widgets>
+			<fail-widgets>
+				<section>
+					<actions>
+						<set field="selectedMenuItem" value="product" />
+						<set field="selectedSubMenuItem" value="newQuotation" />
+						
+						<property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true" />
+						<property-map resource="DelysAdminUiLabels" map-name="uiLabelMap" global="true" />
+						<set field="messagesTemplateLocation" from-field="layoutSettings.VT_MSG_TMPLT_LOC[0]" default-value="component://common/webcommon/includes/messages.ftl"/>  
+						
+						<entity-one value-field="quotationSelected" entity-name="ProductQuotation">
+							<field-map field-name="productQuotationId" value="${parameters.productQuotationId}"/>
+						</entity-one>
+						<entity-condition list="productPriceRules" entity-name="ProductQuotationAndPriceRCA" use-cache="false" distinct="true">
+							<condition-list>
+								<condition-expr field-name="pq_ProductQuotationId" value="${parameters.productQuotationId}"/>
+								<condition-expr field-name="inputParamEnumId" value="PRIP_PRODUCT_ID"/>
+								<condition-expr field-name="productPriceActionTypeId" value="PRICE_FLAT"/>
+							</condition-list>
+						</entity-condition>
+					</actions>
+					<widgets>
+						<!-- render messages -->
+						<platform-specific>
+							<html>
+								<html-template location="${messagesTemplateLocation}" />
+							</html>
+						</platform-specific>
+						<platform-specific>
+							<html>
+								<html-template location="component://delys/webapp/delys/sales/product/addQuotationItemAjax.ftl"/>
+							</html>
+						</platform-specific>
+					</widgets>
+				</section>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="ViewQuotationRuleAjaxMT">
+		<section>
+			<condition>
+				<if-empty field="parameters.productQuotationId"/>
+			</condition>
+			<actions>
+				<set field="parameters.productQuotationId" value="${parameters.productQuotationId}"/>
+			</actions>
+			<widgets>
+				<section>
+					<actions>
+						<set field="selectedMenuItem" value="product" />
+						<set field="selectedSubMenuItem" value="newQuotation" />
+						
+						<property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true" />
+						<property-map resource="DelysAdminUiLabels" map-name="uiLabelMap" global="true" />
+						<set field="messagesTemplateLocation" from-field="layoutSettings.VT_MSG_TMPLT_LOC[0]" default-value="component://common/webcommon/includes/messages.ftl"/>  
+						
+						<entity-one value-field="quotationSelected" entity-name="ProductQuotation">
+							<field-map field-name="productQuotationId" value="${parameters.productQuotationId}"/>
+						</entity-one>
+						<entity-condition list="productPriceRules" entity-name="ProductQuotationAndPriceRCA" use-cache="false" distinct="true">
+							<condition-list>
+								<condition-expr field-name="pq_ProductQuotationId" value="${parameters.productQuotationId}"/>
+								<condition-expr field-name="inputParamEnumId" value="PRIP_PRODUCT_ID"/>
+								<condition-expr field-name="productPriceActionTypeId" value="PRICE_FLAT"/>
+							</condition-list>
+						</entity-condition>
+					</actions>
+					<widgets>
+						<!-- render messages -->
+						<platform-specific>
+							<html>
+								<html-template location="${messagesTemplateLocation}" />
+							</html>
+						</platform-specific>
+						<platform-specific>
+							<html>
+								<html-template location="component://delys/webapp/delys/sales/product/addQuotationItemAjaxMT.ftl"/>
+							</html>
+						</platform-specific>
+					</widgets>
+				</section>
+			</widgets>
+			<fail-widgets>
+				<section>
+					<actions>
+						<set field="selectedMenuItem" value="product" />
+						<set field="selectedSubMenuItem" value="newQuotation" />
+						
+						<property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true" />
+						<property-map resource="DelysAdminUiLabels" map-name="uiLabelMap" global="true" />
+						<set field="messagesTemplateLocation" from-field="layoutSettings.VT_MSG_TMPLT_LOC[0]" default-value="component://common/webcommon/includes/messages.ftl"/>  
+						
+						<entity-one value-field="quotationSelected" entity-name="ProductQuotation">
+							<field-map field-name="productQuotationId" value="${parameters.productQuotationId}"/>
+						</entity-one>
+						<entity-condition list="productPriceRules" entity-name="ProductQuotationAndPriceRCA" use-cache="false" distinct="true">
+							<condition-list>
+								<condition-expr field-name="pq_ProductQuotationId" value="${parameters.productQuotationId}"/>
+								<condition-expr field-name="inputParamEnumId" value="PRIP_PRODUCT_ID"/>
+								<condition-expr field-name="productPriceActionTypeId" value="PRICE_FLAT"/>
+							</condition-list>
+						</entity-condition>
+					</actions>
+					<widgets>
+						<!-- render messages -->
+						<platform-specific>
+							<html>
+								<html-template location="${messagesTemplateLocation}" />
+							</html>
+						</platform-specific>
+						<platform-specific>
+							<html>
+								<html-template location="component://delys/webapp/delys/sales/product/addQuotationItemAjaxMT.ftl"/>
+							</html>
+						</platform-specific>
+					</widgets>
+				</section>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="ViewQuotation">
+		<section>
+			<condition>
+				<not><if-empty field="parameters.productQuotationId"/></not>
+			</condition>
+			<actions>
+				<set field="selectedMenuItem" value="product" />
+				<set field="selectedSubMenuItem" value="" />
+				
+				<entity-condition list="currencies" entity-name="Uom" use-cache="true">
+					<condition-expr field-name="uomTypeId" value="CURRENCY_MEASURE"/>
+				</entity-condition>
+				<entity-condition list="roleTypes" entity-name="RoleType" use-cache="true" />
+				<entity-one value-field="quotationSelected" entity-name="ProductQuotation">
+					<field-map field-name="productQuotationId" value="${parameters.productQuotationId}"/>
+				</entity-one>
+				<entity-condition list="roleTypesSelected" entity-name="ProductQuotationRoleTypeAndRoleType">
+					<condition-expr field-name="productQuotationId" value="${parameters.productQuotationId}"/>
+				</entity-condition>
+				<entity-condition list="productPriceRules" entity-name="ProductQuotationAndPriceRCA" use-cache="false" distinct="true">
+					<condition-list>
+						<condition-expr field-name="pq_ProductQuotationId" value="${parameters.productQuotationId}"/>
+						<condition-expr field-name="inputParamEnumId" value="PRIP_PRODUCT_ID"/>
+						<condition-expr field-name="productPriceActionTypeId" value="PRICE_FLAT"/>
+					</condition-list>
+				</entity-condition>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-compare operator="equals" value="SALES_MT_CHANNEL" field="quotationSelected.salesChannel"/>
+					</condition>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<section>
+									<condition>
+										<not><if-empty field="quotationSelected"/></not>
+									</condition>
+									<actions><set field="currentStatusId" from-field="quotationSelected.statusId"/></actions>
+									<widgets>
+										<screenlet title="${uiLabelMap.DAViewQuotation}: ${quotationSelected.quotationName} (${quotationSelected.productQuotationId})" navigation-menu-name="ViewQuotationSubTabBar">
+											<include-menu name="ViewQuotationSubTabBar" location="component://delys/widget/sales/SalesMenus.xml" />
+											<platform-specific>
+												<html>
+													<html-template location="component://delys/webapp/delys/sales/product/viewQuotationMT.ftl"/>
+												</html>
+											</platform-specific>
+										</screenlet>
+									</widgets>
+									<fail-widgets>
+										<screenlet title="${uiLabelMap.DAViewQuotation}: ${quotationSelected.quotationName}" navigation-menu-name="ViewQuotationSubTabBar">
+							   				 <include-menu name="ViewQuotationSubTabBar" location="component://delys/widget/sales/SalesMenus.xml" />
+							   				 <platform-specific>
+												<html>
+													<html-template location="component://delys/webapp/delys/sales/product/viewQuotationMT.ftl"/>
+												</html>
+											</platform-specific>
+							   			</screenlet>
+									</fail-widgets>
+								</section>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<section>
+									<condition>
+										<not><if-empty field="quotationSelected"/></not>
+									</condition>
+									<actions><set field="currentStatusId" from-field="quotationSelected.statusId"/></actions>
+									<widgets>
+										<screenlet title="${uiLabelMap.DAViewQuotation}: ${quotationSelected.quotationName} (${quotationSelected.productQuotationId})" navigation-menu-name="ViewQuotationSubTabBar">
+											<include-menu name="ViewQuotationSubTabBar" location="component://delys/widget/sales/SalesMenus.xml" />
+											<platform-specific>
+												<html>
+													<html-template location="component://delys/webapp/delys/sales/product/viewQuotation.ftl"/>
+												</html>
+											</platform-specific>
+										</screenlet>
+									</widgets>
+									<fail-widgets>
+										<screenlet title="${uiLabelMap.DAViewQuotation}: ${quotationSelected.quotationName}" navigation-menu-name="ViewQuotationSubTabBar">
+								   			<include-menu name="ViewQuotationSubTabBar" location="component://delys/widget/sales/SalesMenus.xml" />
+							   				<platform-specific>
+												<html>
+													<html-template location="component://delys/webapp/delys/sales/product/viewQuotation.ftl"/>
+												</html>
+											</platform-specific>
+							   			</screenlet>
+									</fail-widgets>
+								</section>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+			<fail-widgets>
+				<include-screen name="NewQuotation"/>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="EditQuotationAjax">
+		<section>
+			<actions>
+				<property-map resource="DelysAdminUiLabels" map-name="uiLabelMap" global="true" />
+				<set field="messagesTemplateLocation" from-field="layoutSettings.VT_MSG_TMPLT_LOC[0]" default-value="component://common/webcommon/includes/messages.ftl"/>  
+				<set field="ERROR_MESSAGE_RENDER" value="OFBIZ_ERROR_MESSAGE_RENDER"/>
+			</actions>
+			<widgets>
+				<label text="${ERROR_MESSAGE_RENDER}" style="hidden" />
+				<platform-specific>
+					<html>
+						<html-template location="${messagesTemplateLocation}" />
+					</html>
+				</platform-specific>
+				<platform-specific>
+					<html>
+						<html-template location="component://delys/webapp/delys/sales/product/editQuotationAjax.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EditQuotationAjaxMT">
+		<section>
+			<actions>
+				<property-map resource="DelysAdminUiLabels" map-name="uiLabelMap" global="true" />
+				<set field="messagesTemplateLocation" from-field="layoutSettings.VT_MSG_TMPLT_LOC[0]" default-value="component://common/webcommon/includes/messages.ftl"/>  
+				<set field="ERROR_MESSAGE_RENDER" value="OFBIZ_ERROR_MESSAGE_RENDER"/>
+			</actions>
+			<widgets>
+				<label text="${ERROR_MESSAGE_RENDER}" style="hidden" />
+				<platform-specific>
+					<html>
+						<html-template location="${messagesTemplateLocation}" />
+					</html>
+				</platform-specific>
+				<platform-specific>
+					<html>
+						<html-template location="component://delys/webapp/delys/sales/product/editQuotationAjaxMT.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="InnerEditQuotationOld">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="product" />
+				<set field="selectedSubMenuItem" value="" />
+				
+				<entity-condition list="currencies" entity-name="Uom" use-cache="true">
+					<condition-expr field-name="uomTypeId" value="CURRENCY_MEASURE"/>
+				</entity-condition>
+				<entity-condition list="roleTypes" entity-name="RoleType" use-cache="true" />
+				<entity-one value-field="quotationSelected" entity-name="ProductQuotation">
+					<field-map field-name="productQuotationId" value="${parameters.productQuotationId}"/>
+				</entity-one>
+				<entity-condition list="roleTypesSelected" entity-name="ProductQuotationRoleType">
+					<condition-expr field-name="productQuotationId" value="${parameters.productQuotationId}"/>
+				</entity-condition>
+				<entity-condition list="productPriceRules" entity-name="ProductQuotationAndPriceRCA" use-cache="false" distinct="true">
+					<condition-list>
+						<condition-expr field-name="pq_ProductQuotationId" value="${parameters.productQuotationId}"/>
+						<condition-expr field-name="inputParamEnumId" value="PRIP_PRODUCT_ID"/>
+						<condition-expr field-name="productPriceActionTypeId" value="PRICE_FLAT"/>
+					</condition-list>
+				</entity-condition>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-compare operator="equals" value="SALES_MT_CHANNEL" field="quotationSelected.salesChannel"/>
+					</condition>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<section>
+									<condition>
+										<not><if-empty field="quotationSelected"/></not>
+									</condition>
+									<actions><set field="currentStatusId" from-field="quotationSelected.statusId"/></actions>
+									<widgets>
+										<screenlet title="${uiLabelMap.DAEditQuotation}: ${quotationSelected.quotationName} (${quotationSelected.productQuotationId})" navigation-menu-name="EditQuotationSubTabBar">
+											<include-menu name="EditQuotationSubTabBar" location="component://delys/widget/sales/SalesMenus.xml" />
+											<platform-specific>
+												<html>
+													<html-template location="component://delys/webapp/delys/sales/product/editQuotationMT.ftl"/>
+												</html>
+											</platform-specific>
+										</screenlet>
+									</widgets>
+									<fail-widgets>
+										<screenlet title="${uiLabelMap.DAEditQuotation}: ${quotationSelected.quotationName}" navigation-menu-name="EditQuotationSubTabBar">
+								   			<include-menu name="EditQuotationSubTabBar" location="component://delys/widget/sales/SalesMenus.xml" />
+							   				<platform-specific>
+												<html>
+													<html-template location="component://delys/webapp/delys/sales/product/editQuotationMT.ftl"/>
+												</html>
+											</platform-specific>
+							   			</screenlet>
+									</fail-widgets>
+								</section>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<section>
+									<condition>
+										<not><if-empty field="quotationSelected"/></not>
+									</condition>
+									<actions><set field="currentStatusId" from-field="quotationSelected.statusId"/></actions>
+									<widgets>
+										<screenlet title="${uiLabelMap.DAEditQuotation}: ${quotationSelected.quotationName} (${quotationSelected.productQuotationId})" navigation-menu-name="EditQuotationSubTabBar">
+											<include-menu name="EditQuotationSubTabBar" location="component://delys/widget/sales/SalesMenus.xml" />
+											<platform-specific>
+												<html>
+													<html-template location="component://delys/webapp/delys/sales/product/editQuotation.ftl"/>
+												</html>
+											</platform-specific>
+										</screenlet>
+									</widgets>
+									<fail-widgets>
+										<screenlet title="${uiLabelMap.DAEditQuotation}: ${quotationSelected.quotationName}" navigation-menu-name="EditQuotationSubTabBar">
+								   			<include-menu name="EditQuotationSubTabBar" location="component://delys/widget/sales/SalesMenus.xml" />
+							   				<platform-specific>
+												<html>
+													<html-template location="component://delys/webapp/delys/sales/product/editQuotation.ftl"/>
+												</html>
+											</platform-specific>
+							   			</screenlet>
+									</fail-widgets>
+								</section>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EditQuotation">
+		<section>
+			<condition>
+				<if-has-permission permission="DELYS_QUOTATION" action="_UPDATE"/>
+			</condition>
+			<widgets>
+				<section>
+					<condition>
+						<not><if-empty field="parameters.productQuotationId"/></not>
+					</condition>
+					<widgets>
+						<include-screen name="InnerEditQuotationOld"/>
+					</widgets>
+					<fail-widgets>
+						<include-screen name="NewQuotationOld"/>
+					</fail-widgets>
+				</section>	
+			</widgets>
+			<fail-widgets>
+				<container style="alert alert-info">
+               		<label text="${uiLabelMap.DAUpdatePermissionError}"></label>
+               	</container>
+			</fail-widgets>
+		</section>
+	</screen>
+</screens>

@@ -1,0 +1,645 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-screen.xsd">
+	<screen name="RequirementCommonDecorator">
+		<section>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+                    	<decorator-section-include name="body"/>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="NewRequirementInfo">
+    	<section>
+			<widgets>
+                <platform-specific>
+					<html>
+						<html-template location="component://baselogistics/webapp/baselogistics/requirement/reqNewRequirementInfo.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+       </section>
+    </screen>
+	
+	<screen name="CreateNewRequirement">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="LogRequirement"/>
+                <set field="selectedSubMenuItem" value="NewRequirement"/>
+                <set field="titleProperty" value="CreateNewRequirement" global="true"/>
+                <set field="displayCost" value="Y"/>
+                <set field="displayQOH" value="N"/>
+                <set field="fixUrl" value="N"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission/>
+					</condition>
+					<widgets>
+						<decorator-screen name="RequirementCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<platform-specific>
+									<html>
+										<html-template location="component://baselogistics/webapp/baselogistics/requirement/reqNewRequirementTotal.ftl"/>
+									</html>
+								</platform-specific>
+		    				</decorator-section>
+		    			</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="RequirementCommonDecorator">
+		                    <decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</decorator-section>
+		    			</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+       </section>
+    </screen>  
+    
+    <screen name="ListEnumerationInvoiceItemType">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="Configuration"/>
+                <set field="selectedSubMenuItem" value="EnumerationInvoiceItemType"/>
+                <set field="titleProperty" value="LogConfigImportExportOther" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="RequirementCommonDecorator">
+					<decorator-section name="body">
+						<platform-specific>
+							<html>
+								<html-template location="component://baselogistics/webapp/baselogistics/settings/listEnumerationInvoiceItemType.ftl"/>
+							</html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>      
+    
+    <screen name="RequirementTitle">
+		<section>
+			<condition>
+				<not><if-empty field="parameters.requirementId"/></not>
+			</condition>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text=" ${uiLabelMap.Requirement}: "></label>
+				<link url-mode="plain" target="viewRequirementDetail?requirementId=${parameters.requirementId}" text="${parameters.requirementId}"></link>
+			</widgets>
+		</section>
+	</screen>
+	
+    <screen name="RequirementDetail">
+    	<section>
+            <actions>
+            	<script location="component://baselogistics/webapp/baselogistics/WEB-INF/actions/requirement/navMenu.groovy"/>
+                <set field="selectedMenuItem" from-field="parameters.selectedMenuItem" default-value="LogRequirement"/>
+                <set field="selectedSubMenuItem" from-field="parameters.selectedSubMenuItem" default-value="ListRequirement"/>
+                <set field="titleProperty" value="RequirementInformation" global="true"/>
+                <set field="titleHeaderValue" value="RequirementTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/RequirementScreens.xml" global="true"/>
+				<set field="activeTab" from-field="parameters.activeTab" default-value="general-tab"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission/>
+					</condition>
+					<actions>
+						<entity-one value-field="requirement" entity-name="Requirement"/>
+					</actions>
+					<widgets>
+						<section>
+							<condition>
+								<not>
+									<if-empty field="requirement"/>
+								</not>
+							</condition>
+							<widgets>
+								<section>
+									<widgets>
+										<decorator-screen name="RequirementCommonDecorator">
+						                    <decorator-section name="body">
+							                    <platform-specific>
+													<html>
+														<html-template location="component://baselogistics/webapp/baselogistics/requirement/requirementDetailBegin.ftl"/>
+													</html>
+												</platform-specific>
+												<include-screen name="RequirementDetailContainer"/>
+												<platform-specific>
+													<html>
+														<html-template location="component://baselogistics/webapp/baselogistics/requirement/requirementDetailEnd.ftl"/>
+													</html>
+												</platform-specific>
+						    				</decorator-section>
+						    			</decorator-screen>
+									</widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<decorator-screen name="RequirementCommonDecorator">
+				                    <decorator-section name="body">
+										<container style="alert alert-info">
+											<label text="${uiLabelMap.BLRequirementIdNotExisted}"></label>
+										</container>
+									</decorator-section>
+				    			</decorator-screen>
+							</fail-widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="RequirementCommonDecorator">
+		                    <decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</decorator-section>
+		    			</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="RequirementEditTitle">
+		<section>
+			<condition>
+				<not><if-empty field="parameters.requirementId"/></not>
+			</condition>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text=" ${uiLabelMap.EditRequirement}: "></label>
+				<link url-mode="plain" target="viewRequirementDetail?requirementId=${parameters.requirementId}" text="${parameters.requirementId}"></link>
+			</widgets>
+		</section>
+	</screen>
+    
+    <screen name="RequirementEdit">
+    	<section>
+            <actions>
+            	<script location="component://baselogistics/webapp/baselogistics/WEB-INF/actions/requirement/navMenu.groovy"/>
+                <set field="selectedMenuItem" from-field="parameters.selectedMenuItem" default-value="LogRequirement"/>
+                <set field="selectedSubMenuItem" from-field="parameters.selectedSubMenuItem" default-value="ListRequirement"/>
+                <set field="titleProperty" value="RequirementInformation" global="true"/>
+                <set field="titleHeaderValue" value="RequirementEditTitle" global="true"/>
+                <set field ="requirementId" value="parameters.requirementId" />
+                <entity-one entity-name="Requirement" value-field="requirement">
+                	<field-map field-name="requirementId" from-field="parameters.requirementId"/>
+                </entity-one>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/RequirementScreens.xml" global="true"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<or>
+							<if-compare operator="equals" value="REQ_PROPOSED" field="requirement.statusId"/>
+							<if-compare operator="equals" value="REQ_CREATED" field="requirement.statusId"/>
+						</or>
+					</condition>
+					<widgets>
+						<decorator-screen name="RequirementCommonDecorator">
+				    		<decorator-section name="body">
+								<include-screen name="EditRequirementInfo"/>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-danger">
+									<label text="${requirement.statusId}" />
+								</container>
+							</decorator-section>
+		    			</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+			<fail-widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<container style="alert alert-danger">
+							<label text="${uiLabelMap.ReportCheckNotData}" />
+						</container>
+					</decorator-section>
+		    </decorator-screen>
+			</fail-widgets>
+       </section>
+    </screen>
+    
+    <screen name="EditRequirementInfo">
+    	<section>
+    		<widgets>
+    			<platform-specific>
+					<html>
+						<html-template location="component://baselogistics/webapp/baselogistics/requirement/reqEditRequirementTotal.ftl"/>
+					</html>
+				</platform-specific>
+    		</widgets>
+    		<fail-widgets>
+				<decorator-screen name="RequirementCommonDecorator">
+				    <decorator-section name="body">
+						<container style="alert alert-info">
+							<label text="${uiLabelMap.BLRequirementIdNotExisted}"></label>
+						</container>
+					</decorator-section>
+				</decorator-screen>
+			</fail-widgets>
+    	</section>
+    </screen>
+    
+    <screen name="RequirementDetailContainer">
+		<section>
+			<widgets>
+				<include-screen name="RequirementInfo"/>
+				<include-screen name="RequirementTransfer"/>
+				<include-screen name="RequirementDelivery"/>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="RequirementInfo">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baselogistics/webapp/baselogistics/requirement/detailRequirement.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="RequirementDelivery">
+		<section>
+			<actions>
+				<set field="activeTab" from-field="parameters.activeTab"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baselogistics/webapp/baselogistics/requirement/listRequirementDelivery.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="RequirementTransfer">
+		<section>
+			<actions>
+				<set field="activeTab" from-field="parameters.activeTab"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baselogistics/webapp/baselogistics/requirement/listTransferRequirement.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	
+    <screen name="ListRequirements">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="LogRequirement"/>
+                <set field="selectedSubMenuItem" value="ListRequirement"/>
+                <set field="titleProperty" value="ListRequirements" global="true"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission/>
+					</condition>
+					<widgets>
+						<decorator-screen name="RequirementCommonDecorator">
+		                   <decorator-section name="body">
+		                   	<platform-specific>
+								<html>
+									<html-template location="component://baselogistics/webapp/baselogistics/requirement/listRequirements.ftl"/>
+								</html>
+							</platform-specific>
+		   				</decorator-section>
+		   			</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="RequirementCommonDecorator">
+		                    <decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</decorator-section>
+		    			</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="ListReceiveRequirements">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="StockIn"/>
+                <set field="selectedSubMenuItem" value="ReceiveRequirement"/>
+                <set field="titleProperty" value="ListRequirements" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="RequirementCommonDecorator">
+                    <decorator-section name="body">
+                    	<platform-specific>
+							<html>
+								<html-template location="component://baselogistics/webapp/baselogistics/requirement/listRequirements.ftl"/>
+							</html>
+						</platform-specific>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+       </section>
+    </screen>
+    
+     <screen name="ListExportRequirements">
+    	<section>
+    		<condition>
+    			<not>
+    				<if-empty field="parameters.requirementTypeId"/>
+    			</not>
+    		</condition>
+            <actions>
+                <set field="selectedMenuItem" value="StockOut"/>
+                <set field="selectedSubMenuItem" value="ExportRequirement"/>
+                <set field="titleProperty" value="ListRequirements" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="RequirementCommonDecorator">
+                    <decorator-section name="body">
+                    	<platform-specific>
+							<html>
+								<html-template location="component://baselogistics/webapp/baselogistics/requirement/listRequirements.ftl"/>
+							</html>
+						</platform-specific>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<section>
+					 <actions>
+		                <set field="selectedMenuItem" value="StockIn"/>
+		                <set field="selectedSubMenuItem" value="ReceiveRequirement"/>
+		                <set field="titleProperty" value="ListRequirements" global="true"/>
+					</actions>
+					<widgets>
+						<decorator-screen name="RequirementCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<label>${uiLabelMap.NoDataToDisplay}</label>
+		    				</decorator-section>
+		    			</decorator-screen>
+					</widgets>
+				</section>
+			</fail-widgets>
+       </section>
+    </screen>
+    
+    <screen name="PrepareReceiveProductFromRequirement">
+    	<section>
+            <actions>
+                <set field="selectedMenuItem" value="LogRequirement"/>
+                <set field="selectedSubMenuItem" value="ListRequirement"/>
+                <set field="titleProperty" value="ReceiveProduct" global="true"/>
+                <set field="titleHeaderValue" value="RequirementTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/RequirementScreens.xml" global="true"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission/>
+					</condition>
+					<widgets>
+						<decorator-screen name="RequirementCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<platform-specific>
+									<html>
+										<html-template location="component://baselogistics/webapp/baselogistics/requirement/reqReceiveRequirementTotal.ftl"/>
+									</html>
+								</platform-specific>
+		    				</decorator-section>
+		    			</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="RequirementCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+		    				</decorator-section>
+		    			</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="PrepareExportProductFromRequirement">
+    	<section>
+            <actions>
+               	<set field="selectedMenuItem" value="LogRequirement"/>
+                <set field="selectedSubMenuItem" value="ListRequirement"/>
+                <set field="titleProperty" value="ExportProduct" global="true"/>
+                <set field="titleHeaderValue" value="RequirementTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/RequirementScreens.xml" global="true"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission/>
+					</condition>
+					<widgets>
+						<decorator-screen name="RequirementCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<platform-specific>
+									<html>
+										<html-template location="component://baselogistics/webapp/baselogistics/requirement/reqExportRequirementTotal.ftl"/>
+									</html>
+								</platform-specific>
+		    				</decorator-section>
+		    			</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="RequirementCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+		    				</decorator-section>
+		    			</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="PrepareInventoryToChangePurpose">
+    	<section>
+            <actions>
+               	<set field="selectedMenuItem" value="LogRequirement"/>
+                <set field="selectedSubMenuItem" value="ListRequirement"/>
+                <set field="titleProperty" value="RequirementInformation" global="true"/>
+                <set field="titleHeaderValue" value="RequirementTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/RequirementScreens.xml" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="RequirementCommonDecorator">
+                    <decorator-section name="body">
+                    	<platform-specific>
+							<html>
+								<html-template location="component://baselogistics/webapp/baselogistics/requirement/inventoryItems.ftl"/>
+							</html>
+						</platform-specific>
+    				</decorator-section>
+    			</decorator-screen>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="ListDeliveryRequirements">
+    	<section>
+            <actions>
+               	<set field="selectedMenuItem" value="DeliveryEntry"/>
+                <set field="selectedSubMenuItem" value="reqDeliveryOrderList"/>
+                <set field="titleProperty" value="ListDeliveryRequirements" global="true"/>
+                <set field="titleHeaderValue" value="RequirementTitle" global="true"/>
+				<set field="titleHeaderLocation" value="component://baselogistics/widget/RequirementScreens.xml" global="true"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission/>
+					</condition>
+					<widgets>
+						<decorator-screen name="RequirementCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<platform-specific>
+									<html>
+										<html-template location="component://basesalesmtl/webapp/basesalesmtl/requirement/reqDeliveryOrderList.ftl"/>
+									</html>
+								</platform-specific>
+		    				</decorator-section>
+		    			</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="RequirementCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+		    				</decorator-section>
+		    			</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+       </section>
+    </screen>
+    
+    <screen name="ListInventoryItemByLabelFrom">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baselogistics/webapp/baselogistics/requirement/inventoryOriginalCombineRequirement.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ListInventoryItemByLabelTo">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baselogistics/webapp/baselogistics/requirement/inventoryAttachedCombineRequirement.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="RequirementPDFDecorator">
+		<section>
+			<actions>
+				<property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true" />
+				<set field="defaultFontFamily" value="Arial" />
+				<script location="component://baselogistics/webapp/baselogistics/WEB-INF/actions/common/companyInfo.groovy"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<xsl-fo>
+						<html-template location="component://baselogistics/webapp/baselogistics/requirement/fo/requirementPDFTemplate.fo.ftl" />
+					</xsl-fo>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="RequirementPDF">
+        <section>
+        	<actions>
+        		<property-map map-name="uiLabelMap" resource="BaseLogisticsUiLabels" global="true"/>
+       		 	<set field="requirementId" from-field="parameters.requirementId"/>
+        		<entity-one entity-name="Requirement" value-field="requirement">
+                    <field-map field-name="requirementId" from-field="parameters.requirementId"/>
+                </entity-one>
+               	<script location="component://baselogistics/webapp/baselogistics/WEB-INF/actions/requirement/detailRequirement.groovy"/>
+        	</actions>
+        	<widgets>
+        		<section>
+        			<widgets>
+        				<decorator-screen name="RequirementPDFDecorator">
+		                    <decorator-section name="body1">
+		                        <section>
+		                            <widgets>
+		                                <platform-specific>
+										     <xsl-fo><html-template location="component://baselogistics/webapp/baselogistics/requirement/fo/requirementPDFFirstInstance.fo.ftl"/></xsl-fo>
+										</platform-specific>
+		                            </widgets>
+		                        </section>
+		                    </decorator-section>
+<!-- 		                    <decorator-section name="body2"> -->
+<!-- 		                        <section> -->
+<!-- 		                            <widgets> -->
+<!-- 		                                <platform-specific> -->
+<!-- 										     <xsl-fo><html-template location="component://baselogistics/webapp/baselogistics/requirement/fo/requirementPDFSecondInstance.fo.ftl"/></xsl-fo> -->
+<!-- 										</platform-specific> -->
+<!-- 		                            </widgets> -->
+<!-- 		                        </section> -->
+<!-- 		                    </decorator-section> -->
+<!-- 		                    <decorator-section name="body3"> -->
+<!--                                 <platform-specific> -->
+<!-- 								     <xsl-fo><html-template location="component://baselogistics/webapp/baselogistics/requirement/fo/requirementPDFThirdInstance.fo.ftl"/></xsl-fo> -->
+<!-- 								</platform-specific> -->
+<!-- 		                    </decorator-section> -->
+		                    <decorator-section name="footer">
+		                        <section>
+		                            <widgets>
+		                                <platform-specific>
+										     <xsl-fo><html-template location="component://baselogistics/webapp/baselogistics/requirement/fo/requirementPDFFooter.fo.ftl"/></xsl-fo>
+										</platform-specific>
+		                            </widgets>
+		                        </section>
+		                    </decorator-section>
+		                </decorator-screen>
+        			</widgets>
+        			<fail-widgets>
+        			</fail-widgets>
+        		</section>
+            </widgets>
+       	</section>
+    </screen>
+</screens>

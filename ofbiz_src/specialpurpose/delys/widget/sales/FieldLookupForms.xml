@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd"><!-- http://ofbiz.apache.org/dtds/widget-form.xsd - ../../widget/dtd/widget-form.xsd -->
+	<form name="lookupSalesOrderHeaderAndShipInfo" target="LookupSalesOrderHeaderAndShipInfo" title="" type="single"
+        header-row-style="header-row" default-table-style="basic-table" style="form-horizontal-mini">
+        <auto-fields-entity entity-name="OrderHeaderAndShipGroups" default-field-type="hidden" map-name="parameters"/>
+        <field name="orderTypeId"><hidden value="SALES_ORDER"/></field>
+        <field name="roleTypeId"><hidden value="SHIP_TO_CUSTOMER"/></field>
+        <field name="productStoreId"><hidden value=""/></field>
+        <field name="productStoreId_op"><hidden value="in"/></field>
+		<field name="orderId" title="${uiLabelMap.DAOrderId}"><text-find/></field>        
+        <field name="productStoreId_value" title="${uiLabelMap.DAProductStore}">
+        	<drop-down allow-multiple="true" selected-all="true">
+				<entity-options key-field-name="productStoreId" description="${storeName}" entity-name="ProductStoreRoleDetail">
+					<entity-constraint name="partyId" value="${userLogin.partyId}"/>
+					<entity-constraint name="roleTypeId" value="MANAGER"/>
+				</entity-options>
+           	</drop-down>
+        </field>
+        <field name="partyId" title="${uiLabelMap.DACustomerId}"><text-find/></field>
+        <field name="estimatedDeliveryDate" title="${uiLabelMap.DADesiredDeliveryDate}" widget-style-row="timestamp-lookup"><date-find type="timestamp"/></field>
+        <field name="city"><text-find/></field>
+        <field name="stateProvinceGeoId" title="${uiLabelMap.DAStateProvinceGeo}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="Geo" description="${geoName}" key-field-name="geoId">
+                    <entity-constraint name="geoTypeId" value="STATE"/>
+                </entity-options>
+             </drop-down>
+        </field>
+        <field name="grandTotal"><range-find/></field>
+        <field name="productId" title="${uiLabelMap.DAProductId}"><text-find/></field>
+<!--         <field name="shipmentMethodTypeId"> -->
+<!--             <drop-down allow-empty="true"> -->
+<!--                 <entity-options entity-name="ShipmentMethodType" description="${description}"> -->
+<!--                 </entity-options> -->
+<!--              </drop-down> -->
+<!--         </field> -->
+<!--         <field name="carrierPartyId"><text-find/></field> -->
+<!--         <field name="shipAfterDate"><date-find type="date"/></field> -->
+<!--         <field name="shipByDate"><date-find type="date"/></field> -->
+<!--         <field name="postalCode"><text-find/></field> -->
+<!--         <field name="countryGeoId"> -->
+<!--             <drop-down allow-empty="true"> -->
+<!--                 <entity-options entity-name="Geo" description="${geoName}" key-field-name="geoId"> -->
+<!--                     <entity-constraint name="geoTypeId" value="COUNTRY"/> -->
+<!--                 </entity-options> -->
+<!--              </drop-down> -->
+<!--         </field> -->
+<!--         <field name="brandName"><text-find/></field> -->
+<!--         <field name="internalName"><text-find/></field> -->
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-small btn-info"><submit button-type="button"/></field>
+    </form>
+    
+    <form name="ListLookupSalesOrderHeaderAndShipInfo" list-name="listIt" title="" type="list"
+        odd-row-style="alternate-row" default-table-style="table table-striped table-bordered table-hover dataTable" paginate-target="LookupOrderHeaderAndShipInfo">
+        <actions>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="OrderHeaderAndShipGroupsByProduct"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <auto-fields-entity entity-name="OrderHeaderAndShipGroups" default-field-type="hidden"/>
+        <field name="index" title="${uiLabelMap.DANo}"><display description="${itemIndex + 1}" /></field>
+        <field name="orderId" title="${uiLabelMap.DAOrderId}" widget-style="btn btn-mini btn-primary">
+            <hyperlink also-hidden="false" target-type="plain" description="${orderId}" target="javascript:set_value('${orderId}')"/>
+        </field>
+        <field name="partyId" title="${uiLabelMap.DACustomerId}"><display/></field>
+        <field name="estimatedDeliveryDate"><display/></field>
+        <field name="city"><display/></field>
+        <field name="stateProvinceGeoId" title="${uiLabelMap.DAStateProvinceGeo}"><display/></field>
+        <field name="grandTotal" title="${uiLabelMap.DAGrandTotal}"><display type="currency" currency="${currencyUom}"/></field>
+        <field name="productId" title="${uiLabelMap.DAProductId}"><display/></field>
+        
+        <sort-order>
+        	<sort-field name="index"/>
+        	<sort-field name="orderId"/>
+        	<sort-field name="productId"/>
+        	<sort-field name="partyId"/>
+        	<sort-field name="estimatedDeliveryDate"/>
+        	<sort-field name="city"/>
+        	<sort-field name="stateProvinceGeoId"/>
+        	<sort-field name="grandTotal"/>
+        </sort-order>
+<!--         <field name="orderTypeId"><display-entity entity-name="OrderType"/></field> -->
+<!--         <field name="shipmentMethodTypeId"><display-entity entity-name="ShipmentMethodType"/></field> -->
+<!--         <field name="carrierPartyId"><display/></field> -->
+<!--         <field name="shipAfterDate"><display/></field> -->
+<!--         <field name="shipByDate"><display/></field> -->
+<!--         <field name="postalCode"><display/></field> -->
+<!--         <field name="countryGeoId"><display/></field> -->
+<!--         <field name="brandName"><display/></field> -->
+<!--         <field name="internalName"><display/></field> -->
+    </form>
+    
+    <form name="lookupSalesOrderHeaderAndShipInfoMini" target="LookupSalesOrderHeaderAndShipInfoMini" title="" type="single"
+        header-row-style="header-row" default-table-style="basic-table" style="form-horizontal-mini">
+        <auto-fields-entity entity-name="OrderHeader" default-field-type="hidden" map-name="parameters"/>
+        <field name="orderTypeId"><hidden value="SALES_ORDER"/></field>
+        <field name="productStoreId"><hidden value=""/></field>
+        <field name="productStoreId_op"><hidden value="in"/></field>
+		<field name="orderId" title="${uiLabelMap.DAOrderId}"><text-find/></field>        
+        <field name="productStoreId_value" title="${uiLabelMap.DAProductStore}">
+        	<drop-down allow-multiple="true" selected-all="true">
+				<entity-options key-field-name="productStoreId" description="${storeName}" entity-name="ProductStoreRoleDetail">
+					<entity-constraint name="partyId" value="${userLogin.partyId}"/>
+					<entity-constraint name="roleTypeId" value="MANAGER"/>
+				</entity-options>
+           	</drop-down>
+        </field>
+        <field name="orderName" title="${uiLabelMap.DAOrderName}"><text-find/></field>
+        <field name="orderDate" title="${uiLabelMap.DAOrderDate}" widget-style-row="timestamp-lookup"><date-find type="timestamp"/></field>
+        <field name="priority"><text-find/></field>
+        <field name="statusId" title="${uiLabelMap.DAStatus}">
+            <drop-down allow-empty="true">
+                <entity-options entity-name="StatusItem" description="${description}" key-field-name="statusId">
+                    <entity-constraint name="statusTypeId" value="ORDER_STATUS"/>
+                </entity-options>
+             </drop-down>
+        </field>
+        <field name="grandTotal"><range-find/></field>
+        <field name="isViewed"><text-find/></field>
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-small btn-info"><submit button-type="button"/></field>
+    </form>
+    
+    <form name="ListLookupSalesOrderHeaderAndShipInfoMini" list-name="listIt" title="" type="list"
+        odd-row-style="alternate-row" default-table-style="table table-striped table-bordered table-hover dataTable" paginate-target="LookupOrderHeaderAndShipInfoMini">
+        <actions>
+        	<set field="parameters.orderTypeId" value="SALES_ORDER"/>
+        	<set field="parameters.statusId" value="ORDER_APPROVED"/>
+        	<set field="parameters.createdBy" value="${userLogin.userLoginId}"/>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="OrderHeader"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+            </service>
+        </actions>
+        <field name="index" title="${uiLabelMap.DANo}"><display description="${itemIndex + 1}" /></field>
+        <field name="orderId" title="${uiLabelMap.DAOrderId}">
+        	<hyperlink also-hidden="false" target-type="plain" description="${orderId}" target="javascript:set_value('${orderId}')"/>
+        </field>
+        <field name="orderName" title="${uiLabelMap.DAOrderName}"><display></display></field>
+        <field name="orderDate" title="${uiLabelMap.DAOrderDate}"><display type="date-time"></display></field>
+        <field name="priority"><display></display></field>
+        <field name="statusId" title="${uiLabelMap.DAStatus}">
+        	<display-entity entity-name="StatusItem" description="${description}"></display-entity>
+        </field>
+        <field name="grandTotal"><display type="currency" currency="${currencyUom}"></display></field>
+      	<field name="isViewed"><display></display></field>
+      	
+        <sort-order>
+        	<sort-field name="index"/>
+        	<sort-field name="orderId"/>
+        	<sort-field name="orderName"/>
+        	<sort-field name="orderDate"/>
+        	<sort-field name="priority"/>
+        	<sort-field name="statusId"/>
+        	<sort-field name="grandTotal"/>
+        	<sort-field name="isViewed"/>
+        </sort-order>
+    </form>
+</forms>

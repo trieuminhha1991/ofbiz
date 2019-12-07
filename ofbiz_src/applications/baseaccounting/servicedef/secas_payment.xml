@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service-eca xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/service-eca.xsd">
+	<eca service="setPaymentStatus" event="invoke">
+        <condition operator="equals" field-name="statusId" value="PMNT_RECEIVED"/>
+        <action service="checkPaymentInvoiceAppr" mode="sync"/>
+    </eca>
+
+    <eca service="setPaymentStatus" event="invoke">
+        <condition operator="equals" field-name="statusId" value="PMNT_SENT"/>
+        <action service="checkPaymentInvoiceAppr" mode="sync"/>
+    </eca>
+
+    <eca service="setPaymentStatus" event="commit">
+        <condition operator="equals" field-name="statusId" value="PMNT_CONFIRMED"/>
+        <action service="createAcctgTransAndEntriesForOutgoingPaymentDiff" mode="sync"/>
+    </eca>
+    
+    <eca service="createPaymentApplication" event="return">
+        <action service="addAmountAppliedPayment" mode="sync"/>
+    </eca> 
+    
+    <eca service="updatePaymentApplication" event="return">
+        <action service="addAmountAppliedPayment" mode="sync"/>
+    </eca> 
+    
+    <eca service="removePaymentApplication" event="return">
+        <action service="removeAmountAppliedPayment" mode="sync"/>
+    </eca> 
+    
+    <eca service="voidPayment" event="return">
+        <action service="updateAmountPosTerminalState" mode="sync"/>
+    </eca>
+    
+    <eca service="voidPayment" event="return">
+        <action service="updateOrderReceiptNote" mode="sync"/>
+    </eca>      
+</service-eca>        

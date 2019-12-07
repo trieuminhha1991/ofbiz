@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+	<simple-method method-name="ntfAPPLRetirePPSL">
+		<!-- <log message="ntfAPPLRetirePPSL"  level="info"/> -->
+		<entity-one value-field="empTerminal" entity-name="EmplTerminationProposal"></entity-one>
+		<set field="statusId" from-field="empTerminal.statusId"/>
+		<set field="partyId" from-field="empTerminal.partyId"/>	
+		<call-class-method method-name="getHrmAdmin" class-name="com.olbius.util.PartyUtil" ret-field="headOfHrId">
+			<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+		</call-class-method>
+		<call-class-method method-name="getManagerOfEmpl" class-name="com.olbius.util.PartyUtil" ret-field="mgrOfEmpl">
+			<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+			<field field="empTerminal.partyId" type="String"/>
+		</call-class-method>
+		<call-class-method method-name="getCEO" class-name="com.olbius.util.PartyUtil" ret-field="ceoId">
+			<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+		</call-class-method>
+		<call-bsh>
+			<![CDATA[
+			import org.ofbiz.base.util.UtilProperties;
+			import org.ofbiz.base.util.UtilMisc;
+			import org.ofbiz.party.party.PartyHelper;
+			partyName = PartyHelper.getPartyName(delegator, empTerminal.getString("partyId"), false);
+			ntfHeaderAccepted = UtilProperties.getMessage("EmployeeUiLabels", "ntfRetireProposalAccepted", UtilMisc.toMap("partyName", partyName), locale);
+			ntfHeaderRejected = UtilProperties.getMessage("EmployeeUiLabels", "ntfRetireProposalRejected", UtilMisc.toMap("partyName", partyName), locale);
+			ntfHeader = UtilProperties.getMessage("EmployeeUiLabels", "EmplRetiredProposal", UtilMisc.toMap("partyName", partyName), locale);			
+			parameters.put("ntfHeader", ntfHeader);
+			parameters.put("ntfHeaderAccepted", ntfHeaderAccepted);
+			parameters.put("ntfHeaderRejected", ntfHeaderRejected);
+			]]>
+		</call-bsh>
+		
+		<set field="ntfCtx.header" from-field="parameters.ntfHeader"/>
+		<set field="ntfCtx.state" value="open"/>
+		<set field="ntfCtx.action" value="ApprovalRetireProposal"/>
+		<set field="ntfCtx.targetLink" value="emplTerminationProposalId=${empTerminal.emplTerminationProposalId}"/>
+		<now field="ntfCtx.dateTime" type="java.sql.Timestamp"/>
+		<if-compare operator="equals" value="RETIRE_MGR_A" field="statusId">
+			<set field="partyIds" value="${groovy: return org.ofbiz.base.util.UtilMisc.toSet(headOfHrId)}" type="java.util.Set"/>
+			<else>
+				<if-compare operator="equals" value="RETIRE_MGR_R" field="statusId">
+					<set field="ntfCtx.header" from-field="parameters.ntfHeaderRejected"/>
+					<set field="partyIds" value="${groovy: return org.ofbiz.base.util.UtilMisc.toSet(partyId)}" type="java.util.Set"/>
+				</if-compare>
+			</else>
+		</if-compare>
+		<if-compare operator="equals" value="RETIRE_HOHR_A" field="statusId">
+			<set field="partyIds" value="${groovy: return org.ofbiz.base.util.UtilMisc.toSet(ceoId)}" type="java.util.Set"/>
+			<else>
+				<if-compare operator="equals" value="RETIRE_HOHR_R" field="statusId">
+					<set field="ntfCtx.header" from-field="parameters.ntfHeaderRejected"/>
+					<set field="partyIds" value="${groovy: return org.ofbiz.base.util.UtilMisc.toSet(mgrOfEmpl, partyId)}" type="java.util.Set"/>
+				</if-compare>
+			</else>
+		</if-compare>
+		<if-compare operator="equals" value="RETIRE_CEO_A" field="statusId">
+			<set field="ntfCtx.header" from-field="parameters.ntfHeaderAccepted"/>	
+			<set field="partyIds" value="${groovy: return org.ofbiz.base.util.UtilMisc.toSet(mgrOfEmpl, partyId, headOfHrId)}" type="java.util.Set"/>
+			<else>
+				<if-compare operator="equals" value="RETIRE_CEO_R" field="statusId">
+					<set field="ntfCtx.header" from-field="parameters.ntfHeaderRejected"/>	
+					<set field="partyIds" value="${groovy: return org.ofbiz.base.util.UtilMisc.toSet(mgrOfEmpl, partyId, headOfHrId)}" type="java.util.Set"/>
+				</if-compare>
+			</else>
+		</if-compare>
+		<iterate entry="tempPartyId" list="partyIds">
+			<set field="ntfCtx.partyId" from-field="tempPartyId"/>
+			<call-service service-name="createNotification" in-map-name="ntfCtx" require-new-transaction="true"></call-service>
+		</iterate>
+	</simple-method>
+	<simple-method method-name="ntfAPPLResignPPSL">
+		<entity-one value-field="empTerminal" entity-name="EmplTerminationProposal"></entity-one>
+		<set field="partyId" from-field="empTerminal.partyId"/>
+		<call-class-method method-name="getHrmAdmin" class-name="com.olbius.util.PartyUtil" ret-field="headOfHrId">
+			<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+		</call-class-method>
+		<call-class-method method-name="getManagerOfEmpl" class-name="com.olbius.util.PartyUtil" ret-field="mgrOfEmpl">
+			<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+			<field field="empTerminal.partyId" type="String"/>
+		</call-class-method>
+		<call-class-method method-name="getCEO" class-name="com.olbius.util.PartyUtil" ret-field="ceoId">
+			<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+		</call-class-method>
+		<call-bsh>
+			<![CDATA[
+			import org.ofbiz.base.util.UtilProperties;
+			import org.ofbiz.base.util.UtilMisc;
+			import org.ofbiz.party.party.PartyHelper;
+			partyName = PartyHelper.getPartyName(delegator, empTerminal.getString("partyId"), false);
+			ntfHeaderAccepted = UtilProperties.getMessage("EmployeeUiLabels", "ntfResignProposalAccept", UtilMisc.toMap("partyName", partyName), locale);
+			ntfHeaderRejected = UtilProperties.getMessage("EmployeeUiLabels", "ntfResignProposalReject", UtilMisc.toMap("partyName", partyName), locale);
+			ntfHeader = UtilProperties.getMessage("EmployeeUiLabels", "ntfResignationProposal", UtilMisc.toMap("partyName", partyName), locale);			
+			parameters.put("ntfHeader", ntfHeader);
+			parameters.put("ntfHeaderAccepted", ntfHeaderAccepted);
+			parameters.put("ntfHeaderRejected", ntfHeaderRejected);
+			]]>
+		</call-bsh>
+		
+		<set field="statusId" from-field="empTerminal.statusId"/>
+		<!-- <set field="partyId" from-field="empTerminal.partyId"/> -->
+		<set field="ntfCtx.header" from-field="parameters.ntfHeader"/>
+		<set field="ntfCtx.state" value="open"/>
+		<set field="ntfCtx.action" value="ApprovalResignationProposal"/>
+		<set field="ntfCtx.targetLink" value="emplTerminationProposalId=${empTerminal.emplTerminationProposalId}"/>
+		<now field="ntfCtx.dateTime" type="java.sql.Timestamp"/>
+		<if-compare operator="equals" value="RESIGN_MGR_A" field="statusId">
+			<set field="partyIds" value="${groovy: return org.ofbiz.base.util.UtilMisc.toSet(headOfHrId)}" type="java.util.Set"/>
+			<else>
+				<if-compare operator="equals" value="RESIGN_MGR_R" field="statusId">
+					<set field="ntfCtx.header" from-field="parameters.ntfHeaderRejected"/>
+					<set field="partyIds" value="${groovy: return org.ofbiz.base.util.UtilMisc.toSet(partyId)}" type="java.util.Set"/>
+				</if-compare>
+			</else>
+		</if-compare>
+		<if-compare operator="equals" value="RESIGN_HOHR_A" field="statusId">
+			<set field="partyIds" value="${groovy: return org.ofbiz.base.util.UtilMisc.toSet(ceoId)}" type="java.util.Set"/>
+			<else>
+				<if-compare operator="equals" value="RESIGN_HOHR_R" field="statusId">
+					<set field="ntfCtx.header" from-field="parameters.ntfHeaderRejected"/>
+					<set field="partyIds" value="${groovy: return org.ofbiz.base.util.UtilMisc.toSet(mgrOfEmpl, partyId)}" type="java.util.Set"/>
+				</if-compare>
+			</else>
+		</if-compare>
+		<if-compare operator="equals" value="RESIGN_CEO_A" field="statusId">
+			<set field="ntfCtx.header" from-field="parameters.ntfHeaderAccepted"/>	
+			<set field="partyIds" value="${groovy: return org.ofbiz.base.util.UtilMisc.toSet(mgrOfEmpl, partyId, headOfHrId)}" type="java.util.Set"/>
+			<else>
+				<if-compare operator="equals" value="RESIGN_CEO_R" field="statusId">
+					<set field="ntfCtx.header" from-field="parameters.ntfHeaderRejected"/>	
+					<set field="partyIds" value="${groovy: return org.ofbiz.base.util.UtilMisc.toSet(mgrOfEmpl, partyId, headOfHrId)}" type="java.util.Set"/>
+				</if-compare>
+			</else>
+		</if-compare>
+		<iterate entry="tempPartyId" list="partyIds">
+			<set field="ntfCtx.partyId" from-field="tempPartyId"/>
+			<call-service service-name="createNotification" in-map-name="ntfCtx" require-new-transaction="true"></call-service>
+		</iterate>
+	</simple-method>		
+	<simple-method method-name="ntfAPPLSackingPPSL">
+		<entity-one value-field="empTerminal" entity-name="EmplTerminationProposal"></entity-one>
+		<entity-one value-field="sackingProposal" entity-name="SackingProposal"></entity-one>
+		<call-class-method method-name="getHrmAdmin" class-name="com.olbius.util.PartyUtil" ret-field="headOfHrId">
+			<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+		</call-class-method>
+		<call-class-method method-name="getCEO" class-name="com.olbius.util.PartyUtil" ret-field="ceoId">
+			<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+		</call-class-method>
+		<call-bsh>
+			<![CDATA[
+			import org.ofbiz.base.util.UtilProperties;
+			import org.ofbiz.base.util.UtilMisc;
+			import org.ofbiz.party.party.PartyHelper;
+			partyName = PartyHelper.getPartyName(delegator, empTerminal.getString("partyId"), false);
+			ntfHeaderAccepted = UtilProperties.getMessage("EmployeeUiLabels", "ntfSackingProposalAccept", UtilMisc.toMap("partyName", partyName), locale);
+			ntfHeaderRejected = UtilProperties.getMessage("EmployeeUiLabels", "ntfSackingProposalReject", UtilMisc.toMap("partyName", partyName), locale);
+			ntfHeader = UtilProperties.getMessage("EmployeeUiLabels", "employeeSackingProposal", UtilMisc.toMap("partyName", partyName), locale);			
+			parameters.put("ntfHeader", ntfHeader);
+			parameters.put("ntfHeaderAccepted", ntfHeaderAccepted);
+			parameters.put("ntfHeaderRejected", ntfHeaderRejected);
+			]]>
+		</call-bsh>
+		
+		<set field="statusId" from-field="empTerminal.statusId"/>
+		<set field="partyId" from-field="empTerminal.partyId"/>
+		<set field="proposerId" from-field="sackingProposal.proposerId"/>
+		
+		<set field="ntfCtx.header" from-field="parameters.ntfHeader"/>
+		<set field="ntfCtx.state" value="open"/>
+		<set field="ntfCtx.action" value="ApprovalSackingProposal"/>
+		<set field="ntfCtx.targetLink" value="emplTerminationProposalId=${empTerminal.emplTerminationProposalId}"/>
+		<now field="ntfCtx.dateTime" type="java.sql.Timestamp"/>
+		<if-compare operator="equals" value="SACKING_HOHR_A" field="statusId">
+			<set field="partyIds" value="${groovy: return org.ofbiz.base.util.UtilMisc.toSet(ceoId)}" type="java.util.Set"/>
+			<log message="partyIds: ${partyIds}" level="info"/>
+			<else>
+				<if-compare operator="equals" value="SACKING_HOHR_R" field="statusId">
+					<set field="ntfCtx.header" from-field="parameters.ntfHeaderRejected"/>
+					<set field="partyIds" value="${groovy: return org.ofbiz.base.util.UtilMisc.toSet(proposerId, partyId)}" type="java.util.Set"/>
+				</if-compare>
+			</else>
+		</if-compare>
+		<if-compare operator="equals" value="SACKING_CEO_A" field="statusId">
+			<set field="ntfCtx.header" from-field="parameters.ntfHeaderAccepted"/>	
+			<set field="partyIds" value="${groovy: return org.ofbiz.base.util.UtilMisc.toSet(proposerId, partyId, headOfHrId)}" type="java.util.Set"/>
+			<else>
+				<if-compare operator="equals" value="SACKING_CEO_R" field="statusId">
+					<set field="ntfCtx.header" from-field="parameters.ntfHeaderRejected"/>	
+					<set field="partyIds" value="${groovy: return org.ofbiz.base.util.UtilMisc.toSet(proposerId, partyId, headOfHrId)}" type="java.util.Set"/>
+				</if-compare>
+			</else>
+		</if-compare>
+		<iterate entry="tempPartyId" list="partyIds">
+			<set field="ntfCtx.partyId" from-field="tempPartyId"/>
+			<call-service service-name="createNotification" in-map-name="ntfCtx" require-new-transaction="true"></call-service>
+		</iterate>
+	</simple-method>
+	
+	<simple-method method-name="ntfAPPLPositionTransPPSL">
+		<entity-one value-field="jobTransferProposal" entity-name="JobTransferProposal" auto-field-map="true"></entity-one>
+		<set field="partyIdTransfer" from-field="jobTransferProposal.partyIdTransfer"/>
+		<set field="statusId" from-field="jobTransferProposal.statusId"/>
+				
+		<call-class-method method-name="getHrmAdmin" class-name="com.olbius.util.PartyUtil" ret-field="headOfHrId">
+			<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+		</call-class-method>
+		<call-class-method method-name="getManagerOfEmpl" class-name="com.olbius.util.PartyUtil" ret-field="mgrOfEmplId">
+			<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+			<field field="partyIdTransfer" type="String"/>
+		</call-class-method>
+		<call-class-method method-name="getCEO" class-name="com.olbius.util.PartyUtil" ret-field="ceoId">
+			<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+		</call-class-method>
+		<call-bsh>
+			<![CDATA[
+			import org.ofbiz.base.util.UtilProperties;
+			import org.ofbiz.base.util.UtilMisc;
+			import org.ofbiz.party.party.PartyHelper;
+			partyName = PartyHelper.getPartyName(delegator, partyIdTransfer, false);			
+			ntfHeaderReject = UtilProperties.getMessage("EmployeeUiLabels", "ntfTransferPositionProposalReject", UtilMisc.toMap("partyName", partyName), locale);
+			ntfHeaderAccept = UtilProperties.getMessage("EmployeeUiLabels", "ntfTransferPositionProposalAccept", UtilMisc.toMap("partyName", partyName), locale);
+			ntfHeader = UtilProperties.getMessage("EmployeeUiLabels", "ntfTransferPositionProposal", UtilMisc.toMap("partyName", partyName), locale);
+			parameters.put("ntfHeader", ntfHeader);
+			parameters.put("ntfHeaderReject", ntfHeaderReject);
+			parameters.put("nffHeaderAccept", ntfHeaderAccept);
+			]]>
+		</call-bsh>
+		<set field="ntfCtx.state" value="open"/>
+		<set field="ntfCtx.header" from-field="parameters.ntfHeader"/>
+		<set field="ntfCtx.action" value="JobTransProposalApproval"/>
+		<set field="ntfCtx.targetLink" value="jobTransferProposalId=${jobTransferProposal.jobTransferProposalId}"/>
+		<now field="ntfCtx.dateTime" type="java.sql.Timestamp"/>
+		<if-compare operator="equals" value="JTP_CREATED" field="statusId">
+			<set field="partyIds" value="${groovy: return org.ofbiz.base.util.UtilMisc.toSet(mgrOfEmplId)}" type="java.util.Set"/>			
+		</if-compare>
+		
+		<if-compare operator="equals" value="TRANS_POS_MGR_A" field="statusId">
+			<set field="partyIds" value="${groovy: return org.ofbiz.base.util.UtilMisc.toSet(headOfHrId)}" type="java.util.Set"/>			
+		<else>
+			<if-compare operator="equals" value="TRANS_POS_MGR_R" field="statusId">
+				<set field="partyIds" value="${groovy: return org.ofbiz.base.util.UtilMisc.toSet(partyIdTransfer)}" type="java.util.Set"/>
+				<set field="ntfCtx.header" from-field="parameters.ntfHeaderReject"/>				
+			</if-compare>
+		</else>	
+		</if-compare>
+		<if-compare operator="equals" value="TRANS_POS_HHR_A" field="statusId">
+			<set field="partyIds" value="${groovy: return org.ofbiz.base.util.UtilMisc.toSet(ceoId)}" type="java.util.Set"/>			
+		<else>
+			<if-compare operator="equals" value="TRANS_POS_HHR_R" field="statusId">
+				<set field="partyIds" value="${groovy: return org.ofbiz.base.util.UtilMisc.toSet(mgrOfEmplId, partyIdTransfer)}" type="java.util.Set"/>
+				<set field="ntfCtx.header" from-field="parameters.ntfHeaderReject"/>
+			</if-compare>
+		</else>	
+		</if-compare>
+		
+		<if-compare operator="equals" value="TRANS_DEPT_CEO_A" field="statusId">
+			<set field="partyIds" value="${groovy: return org.ofbiz.base.util.UtilMisc.toSet(headOfHrId, mgrOfEmplId, partyIdTransfer)}" type="java.util.Set"/>
+			<set field="ntfCtx.header" from-field="parameters.ntfHeaderAccept"/>
+		<else>
+			<if-compare operator="equals" value="TRANS_DEPT_CEO_R" field="statusId">
+				<set field="partyIds" value="${groovy: return org.ofbiz.base.util.UtilMisc.toSet(headOfHrId, mgrOfEmplId, partyIdTransfer)}" type="java.util.Set"/>
+				<set field="ntfCtx.header" from-field="parameters.ntfHeaderReject"/>
+			</if-compare>
+		</else>	
+		</if-compare>
+		<iterate entry="tempPartyId" list="partyIds">
+			<set field="ntfCtx.partyId" from-field="tempPartyId"/>
+			<call-service service-name="createNotification" in-map-name="ntfCtx" require-new-transaction="true"></call-service>
+		</iterate>
+	</simple-method>
+</simple-methods>	

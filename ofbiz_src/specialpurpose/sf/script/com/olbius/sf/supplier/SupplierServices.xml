@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+	<simple-method method-name="createSupplier">
+		<entity-one value-field="tmpParty" entity-name="Party">
+			<field-map field-name="partyId" from-field="parameters.partyId"/>
+	        </entity-one>
+
+	        <if-not-empty field="tmpParty">
+			<add-error><fail-message message="PartyId existed!"/></add-error>
+	        </if-not-empty>
+		<make-value value-field="newEntity" entity-name="SellerFriend"/>
+		<set-nonpk-fields map="parameters" value-field="newEntity"/>
+
+		<if-empty field="parameters.partyId">
+	            <sequenced-id sequence-name="SellerFriend" field="newEntity.partyId"/>
+	        <else>
+	            <set field="newEntity.partyId" from-field="parameters.partyId"/>
+	            <check-id field="newEntity.partyId"/>
+	            <check-errors/>
+	        </else>
+	        </if-empty>
+	        <make-value value-field="newPartyEntity" entity-name="Party"/>
+	        <set field="newPartyEntity.partyId" from-field="newEntity.partyId"/>
+	        <now field="newPartyEntity.createdDate" type="java.sql.Timestamp"/>
+	        <set field="newPartyEntity.partyTypeId" value="SUPPLIER"/>
+	        <set field="newPartyEntity.statusId" value="PARTY_ENABLED"/>
+	        <set field="newPartyEntity.preferredCurrencyUomId" value="VND"/>
+	        <set field="newPartyEntity.createdByUserLogin" value="admin"/>
+	        <create-value value-field="newPartyEntity"/>
+
+	        <field-to-result field="newPartyEntity.partyId" result-name="partyId"/>
+		<create-value value-field="newEntity"/>
+		<call-bsh>
+				import org.ofbiz.base.util.UtilProperties;
+				import org.ofbiz.service.ServiceUtil;
+				resourceError = "sfNotifitionUILabels";
+				ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceError, "sfCreateSuccessfully", locale));
+			</call-bsh>
+	</simple-method>
+	<simple-method method-name="updateSupplier">
+		<make-value value-field="newEntity" entity-name="SellerFriend"/>
+		<set-nonpk-fields map="parameters" value-field="newEntity"/>
+		<set-pk-fields value-field="newEntity" map="parameters"/>
+		<store-value value-field="newEntity"/>
+		<field-to-result field="newEntity.partyId" result-name="partyId"/>
+		<call-bsh>
+				import org.ofbiz.base.util.UtilProperties;
+				import org.ofbiz.service.ServiceUtil;
+				resourceError = "sfNotifitionUILabels";
+				ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceError, "sfUpdateSuccessfully", locale));
+			</call-bsh>
+	</simple-method>
+	<simple-method method-name="regisToSupply">
+		<make-value value-field="newEntity" entity-name="ProductSellerFriend"/>
+		<set-nonpk-fields map="parameters" value-field="newEntity"/>
+		<set-pk-fields value-field="newEntity" map="parameters"/>
+
+		<entity-one value-field="product" entity-name="Product">
+			<field-map field-name="productId" from-field="parameters.productId"/>
+		</entity-one>
+		<if-compare operator="equals" value="${product.createdByUserLogin}" field="parameters.partyId">
+			<set field="newEntity.productPartyLinkTypeId" value="USER"/>
+		<else>
+			<set field="newEntity.productPartyLinkTypeId" value="SYSTEM"/>
+		</else>
+		</if-compare>
+		<create-value value-field="newEntity"/>
+		<call-bsh>
+				import org.ofbiz.base.util.UtilProperties;
+				import org.ofbiz.service.ServiceUtil;
+				resourceError = "sfNotifitionUILabels";
+				ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceError, "sfCreateSuccessfully", locale));
+			</call-bsh>
+			<field-to-result field="newEntity.productId" result-name="productId"/>
+	</simple-method>
+	<simple-method method-name="unRegisToSupply">
+		<make-value value-field="newEntity" entity-name="ProductSellerFriend"/>
+		<set-nonpk-fields map="parameters" value-field="newEntity"/>
+		<set-pk-fields value-field="newEntity" map="parameters"/>
+
+		<entity-one value-field="product" entity-name="ProductSellerFriend">
+			<field-map field-name="productId" from-field="parameters.productId"/>
+			<field-map field-name="partyId" from-field="parameters.partyId"/>
+			<field-map field-name="fromDate" from-field="parameters.fromDate"/>
+		</entity-one>
+		<now field="newEntity.thruDate" type="java.sql.Timestamp"/>
+		<store-value value-field="newEntity"/>
+		<call-bsh>
+				import org.ofbiz.base.util.UtilProperties;
+				import org.ofbiz.service.ServiceUtil;
+				resourceError = "sfNotifitionUILabels";
+				ServiceUtil.returnSuccess(UtilProperties.getMessage(resourceError, "sfUpdateSuccessfully", locale));
+			</call-bsh>
+			<field-to-result field="newEntity.productId" result-name="productId"/>
+	</simple-method>
+</simple-methods>

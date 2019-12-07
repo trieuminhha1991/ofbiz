@@ -1,0 +1,1084 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	<!-- maybe delete -->
+	<screen name="ViewTempPayrollTable">
+		<section>
+			<actions>
+				<script
+					location="component://basehr/webapp/basehr/WEB-INF/actions/getPayrollFormula.groovy" />
+				<set field="titleProperty" value="PayrollTableCalcResults" />
+				<set field="selectedMenuItem" value="payroll"/>
+				<set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId" />
+				<set field="selectedSubMenuItem" value="payrollmain" />
+				
+				<set field="tabBarName" value="PayrollTableListSubTarBar" global="true" />
+				<set field="tabBarLocation" value="component://basehr/widget/menus/PayrollMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+				<set field="tabButtonItem" value="listTemporaryPayroll" global="true"/>
+				<property-to-field field="defaultCurrencyUomId" resource="general" property="currency.uom.id.default" default="VND"/>
+				<entity-one value-field="payrollTableRecord" entity-name="PayrollTableRecord"></entity-one>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://basehr/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="HR_MGRPAYROLL" action="_CREATE"/>
+							</condition>
+							<widgets>
+								<section>
+									<condition>
+										<if-compare operator="not-equals" value="PYRLL_TABLE_CREATED" field="payrollTableRecord.statusId"/>
+									</condition>
+									<actions>
+										<service service-name="getPayrollTableRecordTimestamp" result-map="payrollTimestampResult">
+											<field-map field-name="payrollTableId" from-field="parameters.payrollTableId"/>
+										</service>										
+									</actions>
+									<widgets>
+										<platform-specific>
+											<html>
+												<html-template
+													location="component://basehr/webapp/basehr/payroll/ViewTempPayrollTable.ftl" />
+											</html>
+										</platform-specific>
+									</widgets>
+									<fail-widgets>
+										<container style="alert alert-info">
+											<label>${uiLabelMap.PayrollTableNotCalculated}</label>
+										</container>
+									</fail-widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.ScreenNoPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+						
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<!-- maybe delete -->
+	<screen name="PayrollTableRecord">
+		<section>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="BaseHREmployeeUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="BaseHRDirectoryUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="WidgetUiLabels" global="true"/>	
+				<set field="tempFromDate" value="${groovy: if(parameters.fromDate) return new java.sql.Timestamp(Long.parseLong(parameters.fromDate))}" type="Timestamp"/>
+				<entity-condition list="payrollCharList" entity-name="PayrollCharacteristic">
+					<order-by field-name="sequenceNum"/>
+				</entity-condition>
+				<!-- <entity-condition list="payrollItemTypeList" entity-name="PayrollItemType"></entity-condition> -->
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://basehr/webapp/basehr/payroll/payrollTableRecord2.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ViewEmplSalaryPayroll">
+		<section>
+			<actions>
+				<script location="component://basehr/webapp/basehr/WEB-INF/actions/getCustomTimePeriod.groovy"/>
+				<set field="titleProperty" value="PayrollReport" />
+				<set field="selectedMenuItem" value="payroll" />
+				<set field="selectedSubMenuItem" value="payrollmain" />
+				<set field="tabBarName" value="PayrollTableListSubTarBar" global="true" />
+				<set field="tabBarLocation" value="component://basehr/widget/menus/PayrollMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+				<set field="tabButtonItem" value="ViewEmplSalaryPayroll" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator" location="component://basehr/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<widgets>
+								<section>
+									<condition>
+										<if-olbius-has-permission/>
+									</condition>
+									<actions>
+										<entity-condition list="customTimePeriodYear" entity-name="CustomTimePeriod">
+											<condition-expr field-name="periodTypeId" value="YEARLY"/>
+											<order-by field-name="-fromDate"/>
+										</entity-condition>
+										<entity-condition list="statusList" entity-name="StatusItem">
+											<condition-expr field-name="statusTypeId" value="PAYROLL_PAID_STTS"/>
+											<order-by field-name="sequenceId"/>
+										</entity-condition>
+										<!-- <script location="component://dms/webapp/dms/WEB-INF/actions/hr/party/getPartyGroupTree.groovy"/> -->
+									</actions>
+									<widgets>
+										<platform-specific>
+											<html>
+												<html-template location="component://basehr/webapp/basehr/payroll/ViewEmplSalaryItemHistory.ftl"/>
+											</html>
+										</platform-specific>
+									</widgets>
+									<fail-widgets>
+										<container style="alert alert-info">
+											<label text="${uiLabelMap.ScreenNoPermission}"></label>
+										</container>
+									</fail-widgets>
+								</section>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<!-- <screen name="ViewTempPayrollTableList">
+		<section>
+			<actions>
+				<script location="component://basehr/webapp/basehr/WEB-INF/actions/getPayrollFormula.groovy" />
+				<script location="component://basehr/webapp/basehr/WEB-INF/actions/getCustomTimePeriod.groovy"/>
+				<set field="titleProperty" value="PayrollTableListTemporary" />
+				<set field="selectedMenuItem" value="payroll" />
+				<set field="selectedSubMenuItem" value="payrollmain" />
+				
+				<set field="tabBarName" value="PayrollTableListSubTarBar" global="true" />
+				<set field="tabBarLocation" value="component://basehr/widget/menus/PayrollMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+				<set field="tabButtonItem" value="listTemporaryPayroll" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://basehr/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="HR_MGRPAYROLL" action="_CREATE"/>
+							</condition>
+							<widgets>
+								<section>
+									<actions>
+										<set field="defaultPeriodType" value="MONTHLY"/>
+										<entity-condition list="customTimePeriodYear" entity-name="CustomTimePeriod">
+											<condition-expr field-name="periodTypeId" value="YEARLY"/>
+											<order-by field-name="-fromDate"/>
+										</entity-condition>
+										<entity-condition list="periodTypes" entity-name="PeriodType"> 
+											<condition-list combine="or">
+												<condition-expr field-name="periodTypeId" operator="equals" value="DAILY"/>
+												<condition-expr field-name="periodTypeId" operator="equals" value="WEEKLY"/>
+												<condition-expr field-name="periodTypeId" operator="equals" value="MONTHLY"/>
+												<condition-expr field-name="periodTypeId" operator="equals" value="QUARTERLY"/>
+												<condition-expr field-name="periodTypeId" operator="equals" value="YEARLY"/>
+											</condition-list>
+										</entity-condition>
+										<entity-condition list="statuses" entity-name="StatusItem">
+											<condition-expr field-name="statusTypeId" operator="equals" value="PAYROLL_TABLE"/>
+											<order-by field-name="sequenceId"/>
+										</entity-condition>
+										<entity-condition list="payrollChar" entity-name="PayrollCharacteristic">
+											<condition-expr field-name="payrollCharacteristicId" operator="in" value="INCOME,DEDUCTION,TAX_DEDUCTION"/>
+											<order-by field-name="payrollCharacteristicId"/>
+										</entity-condition>
+										<entity-condition list="payrollFormula" entity-name="PayrollFormula">
+											<condition-expr field-name="payrollCharacteristicId" operator="in" value="INCOME,DEDUCTION,TAX_DEDUCTION"/>
+											<order-by field-name="code"/>				
+										</entity-condition>
+										<script location="component://dms/webapp/dms/WEB-INF/actions/hr/party/getPartyGroupTree.groovy"/>
+									</actions>
+									<widgets>
+										<platform-specific>
+											<html>
+												<html-template location="component://basehr/webapp/basehr/payroll/ViewTempPayrollTableList.ftl"/>
+											</html>
+										</platform-specific>	
+									</widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.ScreenNoPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>		
+			</widgets>
+		</section>
+	</screen> -->
+	<screen name="ViewListFormulaIncome">
+		<section>
+			<actions>
+				<set field="titleProperty" value="FormulaIncomeList" />
+				<set field="selectedMenuItem" value="payroll"/>
+				<set field="selectedSubMenuItem" value="formula" />
+				<set field="tabBarName" value="PayrollFormulaSubTarBar" global="true" />
+				<set field="tabBarLocation" value="component://basehr/widget/menus/PayrollMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+				<set field="tabButtonItem" value="ViewListFormulaIncome" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://basehr/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<section>
+									<actions>
+										<entity-condition list="payrollCharacteristic" entity-name="PayrollCharacteristic"></entity-condition>
+										<entity-condition list="payrollItemType" entity-name="PayrollItemType"></entity-condition>
+										<entity-condition list="taxableType" entity-name="TaxableType"></entity-condition>
+										<entity-condition list="periodTypes" entity-name="PeriodType"> 
+											<condition-list combine="or">
+												<condition-expr field-name="periodTypeId" operator="equals" value="DAILY"/>
+												<condition-expr field-name="periodTypeId" operator="equals" value="WEEKLY"/>
+												<condition-expr field-name="periodTypeId" operator="equals" value="MONTHLY"/>
+												<condition-expr field-name="periodTypeId" operator="equals" value="QUARTERLY"/>
+												<condition-expr field-name="periodTypeId" operator="equals" value="YEARLY"/>
+												<condition-expr field-name="periodTypeId" operator="equals" value="NA"/>
+											</condition-list>
+										</entity-condition>
+										<entity-condition list="allParameterType" entity-name="PayrollEmplParameterType">
+											<condition-expr field-name="code" operator="not-equals" value="GENERAL"/>
+										</entity-condition>
+										<entity-condition list="paramCharacteristicList" entity-name="PayrollParamCharacteristic"></entity-condition>
+									</actions>
+									<widgets>
+										<platform-specific>
+											<html>
+												<html-template location="component://basehr/webapp/basehr/payroll/ViewListFormulaIncome.ftl"/>
+											</html>
+										</platform-specific>	
+									</widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.ScreenNoPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="CreateNewFormula">
+		<section>
+			<actions></actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://basehr/webapp/basehr/payroll/CreateNewFormula.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewListFormulaDeduction">
+		<section>
+			<actions>
+				<set field="titleProperty" value="FormulaDeduction" />
+				<set field="selectedMenuItem" value="payroll"/>
+				<set field="selectedSubMenuItem" value="formula" />
+				<set field="tabBarName" value="PayrollFormulaSubTarBar" global="true" />
+				<set field="tabBarLocation" value="component://basehr/widget/menus/PayrollMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+				<set field="tabButtonItem" value="ViewListFormulaDeduction" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://basehr/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<section>
+									<actions>
+										<entity-condition list="payrollCharacteristic" entity-name="PayrollCharacteristic"></entity-condition>
+										<entity-condition list="periodTypes" entity-name="PeriodType"> 
+											<condition-list combine="or">
+												<condition-expr field-name="periodTypeId" operator="equals" value="DAILY"/>
+												<condition-expr field-name="periodTypeId" operator="equals" value="WEEKLY"/>
+												<condition-expr field-name="periodTypeId" operator="equals" value="MONTHLY"/>
+												<condition-expr field-name="periodTypeId" operator="equals" value="QUARTERLY"/>
+												<condition-expr field-name="periodTypeId" operator="equals" value="YEARLY"/>
+												<condition-expr field-name="periodTypeId" operator="equals" value="NA"/>
+											</condition-list>
+										</entity-condition>
+										<entity-condition list="allParameterType" entity-name="PayrollEmplParameterType">
+											<condition-expr field-name="code" operator="not-equals" value="GENERAL"/>
+										</entity-condition>
+										<entity-condition list="paramCharacteristicList" entity-name="PayrollParamCharacteristic"></entity-condition>
+									</actions>
+									<widgets>
+										<platform-specific>
+											<html>
+												<html-template location="component://basehr/webapp/basehr/payroll/ViewListFormulaDeduction.ftl"/>
+											</html>
+										</platform-specific>
+									</widgets>
+								</section>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ViewListFormulaOther">
+		<section>
+			<actions>
+				<set field="titleProperty" value="FormulaOtherList" />
+				<set field="selectedMenuItem" value="payroll"/>
+				<set field="selectedSubMenuItem" value="formula" />
+				<set field="tabBarName" value="PayrollFormulaSubTarBar" global="true" />
+				<set field="tabBarLocation" value="component://basehr/widget/menus/PayrollMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+				<set field="tabButtonItem" value="ViewListFormulaOther" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://basehr/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<section>
+									<actions>
+										<entity-condition list="payrollCharacteristic" entity-name="PayrollCharacteristic"></entity-condition>
+										<entity-condition list="paramCharacteristicList" entity-name="PayrollParamCharacteristic"></entity-condition>
+										<entity-condition list="allParameterType" entity-name="PayrollEmplParameterType">
+											<condition-expr field-name="code" operator="not-equals" value="GENERAL"/>
+										</entity-condition>
+										<entity-condition list="periodTypes" entity-name="PeriodType"> 
+											<condition-list combine="or">
+												<condition-expr field-name="periodTypeId" operator="equals" value="DAILY"/>
+												<condition-expr field-name="periodTypeId" operator="equals" value="WEEKLY"/>
+												<condition-expr field-name="periodTypeId" operator="equals" value="MONTHLY"/>
+												<condition-expr field-name="periodTypeId" operator="equals" value="QUARTERLY"/>
+												<condition-expr field-name="periodTypeId" operator="equals" value="YEARLY"/>
+												<condition-expr field-name="periodTypeId" operator="equals" value="NA"/>
+											</condition-list>
+										</entity-condition>
+									</actions>
+									<widgets>
+										<platform-specific>
+											<html>
+												<html-template location="component://basehr/webapp/basehr/payroll/ViewListFormulaOther.ftl"/>
+											</html>
+										</platform-specific>	
+									</widgets>
+								</section>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewPartyFormulaInvoiceItemType">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="payroll"/>
+				<set field="selectedSubMenuItem" value="formula" />
+				<set field="tabBarName" value="PayrollFormulaSubTarBar" global="true" />
+				<set field="tabBarLocation" value="component://basehr/widget/menus/PayrollMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+				<set field="tabButtonItem" value="ViewFormulaInvoiceItemType" global="true"/>
+				
+				<set field="titleProperty" value="ListPartyFormulaInvoiceItemType"/>
+				
+				<script location="component://basehr/webapp/basehr/WEB-INF/actions/getInvoiceItemTypeFormula.groovy"/>
+				<entity-condition list="formulaList" entity-name="PayrollFormula"></entity-condition>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://basehr/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<section>
+									<actions>										
+									</actions>
+									<widgets>
+										<platform-specific>
+											<html>
+												<html-template location="component://basehr/webapp/basehr/payroll/ViewListPartyFormulaIIType.ftl"/>
+											</html>
+										</platform-specific>
+									</widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.ScreenNoPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewListParameters">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="payroll"/>
+				<set field="selectedSubMenuItem" value="parameters" />
+				<!-- <set field="tabBarName" value="PayrollParametersSubTarBar" global="true" />
+				<set field="tabBarLocation" value="component://basehr/widget/menus/PayrollMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+				<set field="tabButtonItem" value="listParameters" global="true"/> -->
+				
+				<set field="titleProperty" value="FindParameters" />
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://basehr/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<actions>
+								<entity-condition list="periodTypes" entity-name="PeriodType"> 
+									<condition-list combine="or">
+										<condition-expr field-name="periodTypeId" operator="equals" value="DAILY"/>
+										<condition-expr field-name="periodTypeId" operator="equals" value="WEEKLY"/>
+										<condition-expr field-name="periodTypeId" operator="equals" value="MONTHLY"/>
+										<condition-expr field-name="periodTypeId" operator="equals" value="QUARTERLY"/>
+										<condition-expr field-name="periodTypeId" operator="equals" value="YEARLY"/>
+										<condition-expr field-name="periodTypeId" operator="equals" value="NA"/>
+									</condition-list>
+								</entity-condition>
+								<entity-condition list="allParameterType" entity-name="PayrollEmplParameterType">
+									<condition-expr field-name="code" operator="not-equals" value="GENERAL"/>
+								</entity-condition>
+								<entity-condition list="paramCharacteristicList" entity-name="PayrollParamCharacteristic"></entity-condition>
+								<entity-condition entity-name="PayrollEmplParameterType" list="parameterTypes" >
+									<condition-list>
+										<condition-expr field-name="code" operator="not-equals" value="REF"/>
+										<condition-expr field-name="parentTypeId" operator="not-equals" value="REF"/>
+										<condition-expr field-name="code" operator="not-equals" value="GENERAL"/>
+									</condition-list>
+									<order-by field-name="code" />
+								</entity-condition>
+							</actions>
+							<widgets>
+								<section>
+									<widgets>
+										<platform-specific>
+											<html>
+												<html-template location="component://basehr/webapp/basehr/payroll/ViewListParameters.ftl"/>
+											</html>
+										</platform-specific>
+									</widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.ScreenNoPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewListEmplAllowances">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="payroll"/>
+				<set field="selectedSubMenuItem" value="EmplAllowances" />
+				<set field="titleProperty" value="EmplAllowancesList"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://basehr/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<section>
+									<actions>
+										<entity-condition list="allowancesParamList" entity-name="PayrollParameters">
+											<condition-expr field-name="paramCharacteristicId" value="PHU_CAP"/>
+											<order-by field-name="name"/>
+										</entity-condition>
+										<entity-condition list="periodTypeList" entity-name="PeriodType">
+											<condition-list combine="or">
+												<condition-expr field-name="periodTypeId" value="MONTHLY"/>
+												<condition-expr field-name="periodTypeId" value="YEARLY"/>
+												<condition-expr field-name="periodTypeId" value="DAILY"/>
+											</condition-list>
+										</entity-condition>
+										<script location="component://basehr/webapp/basehr/WEB-INF/actions/getPartyGroupTree.groovy"/>
+									</actions>
+									<widgets>
+										<platform-specific>
+											<html>
+												<html-template location="component://basehr/webapp/basehr/payroll/ViewListEmplAllowances.ftl"/>
+											</html>
+										</platform-specific>
+									</widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.ScreenNoPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	
+	<!-- maybe delete, include delete *.ftl, *.js, service-->
+	<screen name="ViewListEmplPayrollParameters">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="payroll"/>
+				<!-- <set field="tabButtonItemTop" value="parameters" /> -->
+				<set field="titleProperty" value="ListEmplPayrollParameters" />
+				<set field="selectedSubMenuItem" value="parameters" />
+				<set field="tabBarName" value="PayrollParametersSubTarBar" global="true" />
+				<set field="tabBarLocation" value="component://basehr/widget/menus/PayrollMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+				<set field="tabButtonItem" value="SetPayrollParameters" global="true"/>
+				<set field="tabSubButtonItem" value="EmplPayrollParameters" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://basehr/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<section>
+									<actions>
+										<entity-condition list="emplPosType" entity-name="EmplPositionType">
+											<condition-expr field-name="emplPositionTypeId" operator="not-equals" value="_NA_"/>
+											<order-by field-name="emplPositionTypeId"/>
+										</entity-condition>
+										<entity-condition list="periodTypeList" entity-name="PeriodType">
+											<condition-list combine="or">
+												<condition-expr field-name="groupPeriodTypeId" value="BASIC_PERIOD"/>
+											</condition-list>
+										</entity-condition>
+										<entity-condition list="payrollParam" entity-name="PayrollParametersAndType">
+											<condition-list>
+												<condition-list combine="or">
+													<condition-expr field-name="paramCharacteristicId" value="THUONG"/>
+													<condition-expr field-name="paramCharacteristicId" value="PHU_CAP"/>
+												</condition-list>
+												<condition-expr field-name="parentTypeId" operator="not-equals" value="REF"/>
+											</condition-list>
+											<order-by field-name="paramCharacteristicId"/>
+										</entity-condition>
+										<script location="component://basehr/webapp/basehr/WEB-INF/actions/getPartyGroupTree.groovy"/>
+									</actions>
+									<widgets>
+										<platform-specific>
+											<html>
+												<html-template location="component://basehr/webapp/basehr/payroll/ViewListEmplPayrollParameters.ftl"/>
+											</html>
+										</platform-specific>
+									</widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.ScreenNoPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	
+	<!-- maybe delete, include delete *.ftl, *.js, service, entitymodel-->
+	<screen name="ViewListPayrollParamPosType">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="payroll"/>
+				<set field="titleProperty" value="PayrollPosTypeContactMechParamList" />
+				<set field="selectedSubMenuItem" value="parameters" />
+				<set field="tabBarName" value="PayrollParametersSubTarBar" global="true" />
+				<set field="tabBarLocation" value="component://basehr/widget/menus/PayrollMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+				<set field="tabButtonItem" value="SetPayrollParameters" global="true"/>
+				<set field="tabSubButtonItem" value="PayrollPositionTypeContactMechParam" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://basehr/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<widgets>
+								<section>
+									<condition>
+										<if-has-permission permission="HR_PAYROLL" action="_CREATE"/>
+									</condition>
+									<actions>
+										<entity-condition list="emplPosType" entity-name="EmplPositionType">
+											<condition-expr field-name="emplPositionTypeId" operator="not-equals" value="_NA_"/>
+											<order-by field-name="emplPositionTypeId"/>
+										</entity-condition>
+										<set field="defaultPeriodTypeId" value="MONTHLY"/>
+										<entity-condition list="periodTypeList" entity-name="PeriodType">
+											<condition-list combine="or">
+												<condition-expr field-name="groupPeriodTypeId" value="BASIC_PERIOD"/>
+											</condition-list>
+										</entity-condition>		
+										<entity-condition entity-name="Uom" list="uomList">
+											<condition-expr field-name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+										</entity-condition>
+										<entity-condition list="roleTypeGroupList" entity-name="RoleTypeGroup">
+											<condition-list combine="or">
+												<condition-expr field-name="primaryParentGroupId" value="SALES_ROLE"/>
+												<condition-expr field-name="roleTypeGroupId" value="OFFICE_ROLE"/>									
+											</condition-list>
+										</entity-condition>
+										<property-to-field resource="general" property="country.geo.id.default" field="defaultGeoId"/>
+										<entity-condition list="geoRegionList" entity-name="GeoAssocAndGeoTo">
+											<condition-list>
+												<condition-expr field-name="geoTypeId" operator="equals" value="REGION"/>
+												<condition-expr field-name="geoIdFrom" from-field="defaultGeoId"/>
+											</condition-list>
+										</entity-condition>
+										<entity-condition list="geoAreaList" entity-name="Geo">
+											<condition-list>
+												<condition-expr field-name="geoTypeId" operator="equals" value="PROVINCE"/>
+											</condition-list>
+										</entity-condition>
+										<entity-condition list="payrollParametersList" entity-name="PayrollParametersAndType">
+											<condition-list combine="and">
+												<condition-list>
+													<condition-expr field-name="type" operator="not-equals" value="REF"/>
+													<condition-expr field-name="parentTypeId" operator="not-equals" value="REF"/>
+												</condition-list>
+												<condition-list combine="or">
+													<condition-expr field-name="paramCharacteristicId" value="THUONG"/>
+												<condition-expr field-name="paramCharacteristicId" value="PHU_CAP"/>
+												</condition-list>
+											</condition-list>
+											<order-by field-name="paramCharacteristicId"/>
+										</entity-condition>
+										<set field="useRoleTypeGroup" value="false"/>
+									</actions>
+									<widgets>
+										<platform-specific>
+											<html>
+												<html-template location="component://basehr/webapp/basehr/payroll/ViewListPayrollParamPosType.ftl"/>
+											</html>
+										</platform-specific>
+									</widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.ScreenNoPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewListEmplSalaryBaseFlat">
+		<section>
+			<actions>
+				<set field="titleProperty" value="EmplSalaryBaseFlatList" />
+				<set field="selectedMenuItem" value="payroll"/>
+				<set field="selectedSubMenuItem" value="SalaryBaseFlat" />
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://basehr/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<section>
+									<actions>
+										<property-to-field resource="general" property="currency.uom.id.default" field="rateCurrencyUomId"/>
+										<set field="defaultPeriodTypeId" value="MONTHLY"/>
+										<entity-condition list="emplPosType" entity-name="EmplPositionType">
+											<condition-expr field-name="emplPositionTypeId" operator="not-equals" value="_NA_"/>
+											<order-by field-name="emplPositionTypeId"/>
+										</entity-condition>
+										<entity-condition list="periodTypeList" entity-name="PeriodType">
+											<condition-list combine="or">
+												<condition-expr field-name="periodTypeId" value="DAILY"/>
+												<condition-expr field-name="periodTypeId" value="MONTHLY"/>
+												<!-- <condition-expr field-name="periodTypeId" value="QUARTERLY"/> -->
+												<condition-expr field-name="periodTypeId" value="YEARLY"/>
+											</condition-list>
+										</entity-condition>
+										<entity-condition entity-name="Uom" list="uomList">
+											<condition-expr field-name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+										</entity-condition>
+										<property-to-field resource="general" property="ORGANIZATION_PARTY" field="partyIdDefault"/>
+										<script location="component://basehr/webapp/basehr/WEB-INF/actions/getPartyGroupTree.groovy"/>
+									</actions>
+									<widgets>
+										<platform-specific>
+											<html>
+												<html-template location="component://basehr/webapp/basehr/payroll/ViewListEmplSalaryBaseFlat.ftl"/>
+											</html>
+										</platform-specific>
+									</widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.ScreenNoPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewListEmpPosTypeSalary">
+		<section>
+			<actions>
+				<set field="titleProperty" value="SettingEmpPosTypeSalary" />
+				<!-- <set field="tabButtonItem" value="SalaryBaseFlat" />
+				<set field="tabSubButtonItem" value="SettingEmpPosTypeSalary"/> -->
+				<set field="selectedMenuItem" value="payroll"/>
+				<set field="selectedSubMenuItem" value="SalaryBaseFlat" />
+				<set field="tabBarName" value="PayrollSalaryBaseSubTarBar" global="true" />
+				<set field="tabBarLocation" value="component://basehr/widget/menus/PayrollMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+				<set field="tabButtonItem" value="SettingEmpPosTypeSalary" global="true"/>				
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://basehr/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="HR_MGRPAYROLL" action="_CREATE"/>
+							</condition>
+							<actions>
+								<set field="setupByGeo" value="false" type="Boolean"/>
+							</actions>
+							<widgets>
+								<section>
+									<actions>
+										<property-to-field resource="general" property="currency.uom.id.default" field="rateCurrencyUomId"/>
+										<set field="defaultPeriodTypeId" value="MONTHLY"/>
+										<entity-condition list="emplPosType" entity-name="EmplPositionType">
+											<condition-expr field-name="emplPositionTypeId" operator="not-equals" value="_NA_"/>
+											<order-by field-name="emplPositionTypeId"/>
+										</entity-condition>
+										<entity-condition list="periodTypeList" entity-name="PeriodType">
+											<condition-list combine="or">
+												<condition-expr field-name="periodTypeId" value="DAILY"/>
+												<condition-expr field-name="periodTypeId" value="MONTHLY"/>
+												<condition-expr field-name="periodTypeId" value="QUARTERLY"/>
+												<condition-expr field-name="periodTypeId" value="YEARLY"/>
+											</condition-list>
+										</entity-condition>
+										<entity-condition entity-name="Uom" list="uomList">
+											<condition-expr field-name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+										</entity-condition>
+										<!-- <entity-condition list="roleTypeGroupList" entity-name="RoleTypeGroup">
+											<condition-list combine="or">
+												<condition-expr field-name="primaryParentGroupId" value="SALES_ROLE"/>
+												<condition-expr field-name="roleTypeGroupId" value="OFFICE_ROLE"/>									
+											</condition-list>
+										</entity-condition> -->
+										<property-to-field resource="general" property="country.geo.id.default" field="defaultGeoId"/>
+										<entity-condition list="geoRegionList" entity-name="GeoAssocAndGeoTo">
+											<condition-list>
+												<condition-expr field-name="geoTypeId" operator="equals" value="REGION"/>
+												<condition-expr field-name="geoIdFrom" from-field="defaultGeoId"/>
+											</condition-list>
+										</entity-condition>
+										<entity-condition list="geoAreaList" entity-name="Geo">
+											<condition-list>
+												<condition-expr field-name="geoTypeId" operator="equals" value="PROVINCE"/>
+											</condition-list>
+										</entity-condition>
+										<set field="useRoleTypeGroup" value="false"/>
+									</actions>
+									<widgets>
+										<platform-specific>
+											<html>
+												<html-template location="component://basehr/webapp/basehr/payroll/ViewListEmpPosTypeSalary.ftl"/>
+											</html>
+										</platform-specific>
+									</widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.ScreenNoPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewListEmployeeBonus">
+		<section>
+			<actions>
+				<set field="titleProperty" value="ListEmployeeBonus" />
+				<set field="selectedMenuItem" value="payroll"/>
+				<set field="selectedSubMenuItem" value="BonusEmployee" />
+				<set field="tabBarName" value="BonusEmplSubTarBar" global="true" />
+				<set field="tabBarLocation" value="component://basehr/widget/menus/PayrollMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+				<set field="tabButtonItem" value="ListEmployeeBonus" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://basehr/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="HR_MGRPAYROLL" action="_ADMIN"/>
+							</condition>
+							<widgets>
+								<section>
+									<actions>
+										<entity-condition list="payrollParamBonus" entity-name="PayrollParameters">
+											<condition-expr field-name="paramCharacteristicId" value="THUONG"/>
+										</entity-condition>
+										<!-- <script location="component://dms/webapp/dms/WEB-INF/actions/hr/party/getPartyGroupTree.groovy"/> -->
+									</actions>
+									<widgets>
+										<platform-specific>
+											<html>
+												<html-template location="component://basehr/webapp/basehr/payroll/ViewListEmployeeBonus.ftl"/>
+											</html>
+										</platform-specific>
+									</widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.ScreenNoPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+						
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>		
+	</screen>
+	<screen name="ViewBonusSalesEmployee">
+		<section>
+			<actions>
+				<set field="titleProperty" value="ConfirmBonusEmplInSales" />
+				<set field="selectedMenuItem" value="payroll"/>
+				<set field="selectedSubMenuItem" value="BonusEmployee" />
+				<set field="tabBarName" value="BonusEmplSubTarBar" global="true" />
+				<set field="tabBarLocation" value="component://basehr/widget/menus/PayrollMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+				<set field="tabButtonItem" value="ConfirmBonusEmplInSales" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://basehr/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="HR_MGRPAYROLL" action="_ADMIN"/>
+							</condition>
+							<widgets>
+								<section>
+									<actions>
+										<entity-condition list="statusList" entity-name="StatusItem">
+											<condition-expr field-name="statusTypeId" value="SALES_COMM_STATUS"/>
+										</entity-condition>
+										<script location="component://basehr/webapp/basehr/WEB-INF/actions/getSalesOrganization.groovy"/>
+										<!-- <script location="component://dms/webapp/dms/WEB-INF/actions/hr/party/getPartyGroupTree.groovy"/> -->
+									</actions>
+									<widgets>
+										<platform-specific>
+											<html>
+												<html-template location="component://basehr/webapp/basehr/payroll/ViewBonusSalesEmployee.ftl"/>
+											</html>
+										</platform-specific>
+									</widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.ScreenNoPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	<!-- ========================== ./ ======================================-->
+	
+	<screen name="ViewListPayrollTableRecord">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PayrollTableRecordTitle" />
+				<set field="selectedMenuItem" value="payroll" />
+				<set field="selectedSubMenuItem" value="payrollmain" />
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator" location="component://basehr/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<actions>
+								<entity-condition list="statuses" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" operator="equals" value="PAYROLL_TABLE"/>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://basehr/webapp/basehr/payroll/ViewListPayrollTableRecord.ftl"/>
+									</html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.ScreenNoPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewPayrollTableRecordDetail">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PayrollTableRecordTitle" global="true"/>
+				<set field="selectedMenuItem" value="payroll" />
+				<set field="selectedSubMenuItem" value="payrollmain" />
+				<entity-one value-field="payrollTableRecord" entity-name="PayrollTableRecord"></entity-one>
+				<set field="payrollTableId" from-field="parameters.payrollTableId"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator" location="component://basehr/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<section>
+									<condition>
+										<not>
+											<if-empty field="payrollTableRecord"/>
+										</not>
+									</condition>
+									<actions>
+										<set field="month" value="${groovy: return (payrollTableRecord.month + 1)}" global="true"/>
+										<set field="year" value="${groovy: return String.valueOf(payrollTableRecord.getLong(&quot;year&quot;))}" global="true"/>
+										<set field="titleProperty" value="PayrollTableRecordPartyListTitle" global="true"/>
+										<set field="fromDate" from-field="payrollTableRecord.fromDate" type="Timestamp"/>
+										<set field="thruDate" from-field="payrollTableRecord.thruDate" type="Timestamp"/>
+										<entity-condition list="allPayrollItemTypeList" entity-name="PayrollItemType">
+											<order-by field-name="sequenceNum"/>
+										</entity-condition>
+										<entity-condition list="payrollItemTypeList" entity-name="PayrollItemType">
+											<condition-expr field-name="parentTypeId" value=""/>
+											<order-by field-name="sequenceNum"/>
+										</entity-condition>
+										<entity-condition list="taxableTypeList" entity-name="TaxableType"></entity-condition>
+										<entity-condition list="listFormulaIncome" entity-name="PayrollFormula">
+											<condition-expr field-name="payrollCharacteristicId" value="INCOME"/>
+										</entity-condition>
+										<entity-condition list="listFormulaDeduction" entity-name="PayrollFormula">
+											<condition-expr field-name="payrollCharacteristicId" value="DEDUCTION"/>
+										</entity-condition>
+										<entity-one value-field="orgPaidChar" entity-name="PayrollCharacteristic">
+											<field-map field-name="payrollCharacteristicId" value="ORG_PAID"/>
+										</entity-one>
+										<entity-one value-field="deductionChar" entity-name="PayrollCharacteristic">
+											<field-map field-name="payrollCharacteristicId" value="DEDUCTION"/>
+										</entity-one>
+										<entity-condition list="orgPaidFormulaList" entity-name="PayrollFormulaAndCharAndPyllItemType">
+											<condition-expr field-name="payrollCharacteristicId" value="ORG_PAID"/>
+											<order-by field-name="abbreviation"/>
+										</entity-condition>
+										<entity-condition list="deductionFormulaList" entity-name="PayrollFormulaAndCharAndPyllItemType">
+											<condition-expr field-name="payrollCharacteristicId" value="DEDUCTION"/>
+											<order-by field-name="abbreviation"/>
+										</entity-condition>
+										<entity-one value-field="payrollTableRecordStatus" entity-name="StatusItem">
+											<field-map field-name="statusId" from-field="payrollTableRecord.statusId"/>
+										</entity-one>
+										<entity-condition list="payrollTableAndSumList" entity-name="PayrollTableRecordAndSum">
+											<condition-expr field-name="payrollTableId" from-field="payrollTableId"/>
+										</entity-condition>
+										<set field="payrollTableAndSum" from-field="payrollTableAndSumList[0]"/>
+									</actions>
+									<widgets>
+										<platform-specific>
+											<html>
+												<html-template location="component://basehr/webapp/basehr/payroll/ViewPayrollTableRecordDetail.ftl"/>
+											</html>
+										</platform-specific>
+									</widgets>
+									<fail-widgets>
+										<container style="alert alert-info">
+											<label text="${uiLabelMap.CannotFindPayrollTableRecord}"></label>
+										</container>
+									</fail-widgets>
+								</section>
+							</widgets>	
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.ScreenNoPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>				
+		</section>
+	</screen>
+</screens>

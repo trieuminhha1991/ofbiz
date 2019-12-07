@@ -1,0 +1,1973 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	<screen name="AjaxGlobalDecorator">
+		<section>
+			<actions>
+				<property-map resource="DelysUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="CommonUiLabels" map-name="uiLabelMap"
+					global="true" />
+				<property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+				<property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>	
+			</actions>
+			<widgets>
+				<decorator-section-include name="body"/>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="CommonPromoDecorator">
+		<section>
+			<condition>
+				<if-has-permission permission="DELYS_PROMOS" action="_VIEW"/>
+			</condition>
+			<actions>
+				<set field="tabBarName" value="PromoTabBar" global="true" />
+				<set field="tabBarLocation" value="component://delys/widget/sales/promotions/PromotionMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+			</actions>
+			<widgets>
+				<decorator-screen name="DelysCommonDecorator" location="${parameters.mainDecoratorLocation}">                     
+                    <decorator-section name="body">
+                        <section>
+                            <!-- do check for DELYS_PROMOS, _VIEW permission -->
+                            <condition>
+                                <if-has-permission permission="DELYS_PROMOS" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                               	<decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.DelysPromoViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="CommonPromoFindOptionsDecorator">
+		<section>
+			<condition>
+				<if-has-permission permission="DELYS_PROMOS" action="_VIEW"/>
+			</condition>
+			<actions>
+				<set field="tabBarName" value="PromoTabBar" global="true" />
+				<set field="tabBarLocation" value="component://delys/widget/sales/promotions/PromotionMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+			</actions>
+			<widgets>
+				<decorator-screen name="DelysCommonDecorator" location="${parameters.mainDecoratorLocation}">                     
+                    <decorator-section name="body">
+                        <section>
+                            <!-- do check for DELYS_PROMOS, _VIEW permission -->
+<!--                             <actions> -->
+<!--                             	ListProductPromoSubTabBar" location="component://delys/widget/sales/promotions/PromotionMenus.xml"/> -->
+<!--                             </actions> -->
+                            <widgets>
+                               	<decorator-screen name="FindOptionsScreenDecorator" location="component://delys/widget/sales/CommonScreens.xml">
+							 		<decorator-section name="search-options">
+							 			<decorator-section-include name="search-options"/>
+		                            </decorator-section>
+		                            <decorator-section name="search-results">
+		                            	<decorator-section-include name="search-results"/>
+		                            </decorator-section>
+								</decorator-screen>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<container style="alert alert-danger">
+							<label text="${uiLabelMap.DelysListPromoViewPermissionError}"/>
+						</container>
+                    </decorator-section>
+               	</decorator-screen>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="CommonEditPromoDecorator">
+		<section>
+			<widgets>
+            	<section>
+            		<condition>
+						<or>
+							<if-has-permission permission="DELYS_PROMOS" action="_ADMIN"/>
+							<if-has-permission permission="DELYS_PROMOS" action="_CREATE"/>
+							<!-- <if-has-permission permission="DELYS_PROMOS" action="_UPDATE" />
+							<if-has-permission permission="DELYS_PROMOS" action="_VIEW" /> -->
+						</or>
+					</condition>
+					<actions>
+						<!-- <set field="layoutSettings.javaScripts[]" value="/delys/images/js/chosen.jquery.min.js" global="true"/>
+	                	<set field="layoutSettings.styleSheets[]" value="/delys/images/css/chosen.css" global="true"/> -->
+	                	<set field="tabBarName" value="EditPromoTabBar" global="true" />
+						<set field="tabBarLocation" value="component://delys/widget/sales/promotions/PromotionMenus.xml" global="true" />
+						<set field="titleHeaderValue" value="promotitle" global="true" />
+						<set field="titleHeaderLocation" value="component://delys/widget/sales/promotions/SalesPromotionScreens.xml" global="true" />
+					</actions>
+              		<widgets>
+                  		<!-- <section>
+                      		<condition><not><if-empty field="productPromoId"/></not></condition>
+                      		<actions>
+								<set field="printTabBar" value="true"/>
+							</actions>
+							<widgets></widgets>
+						</section> -->
+						<section>
+                      		<widgets>
+                      			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    				<decorator-section name="body">
+                    					<decorator-section-include name="body"/>
+                    				</decorator-section>
+                    			</decorator-screen>
+                      		</widgets>
+                  		</section>
+              		</widgets>
+              		<fail-widgets>
+              			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                			<decorator-section name="body">
+                 				<container style="alert alert-info">
+		              				<label text="${uiLabelMap.DAYouHavenotCreatePermission}"></label>
+		              			</container>
+                 			</decorator-section>
+                		</decorator-screen>
+                	</fail-widgets>
+          		</section>
+            </widgets>
+		</section>
+	</screen>
+	<screen name="CommonEditBudgetPromoDecorator">
+		<section>
+			<widgets>
+            	<section>
+					<!-- do check for CATALOG, _VIEW permission -->
+					<condition>
+						<if-has-permission permission="DELYS_PROMOS" action="_VIEW"/>
+					</condition>
+					<actions>
+						<set field="tabBarName" value="EditBudgetPromoTabBar" global="true" />
+						<set field="tabBarLocation" value="component://delys/widget/sales/promotions/PromotionMenus.xml" global="true" />
+						<set field="titleHeaderValue" value="promotitle" global="true" />
+						<set field="titleHeaderLocation" value="component://delys/widget/sales/promotions/SalesPromotionScreens.xml" global="true" />						
+					</actions>
+              		<widgets>
+                  		<section>
+                      		<condition><not><if-empty field="budgetId"/></not></condition>
+                      		<actions>
+								<set field="printTabBar" value="true" />
+							</actions>
+                      		<widgets></widgets>
+                  		</section>
+              		</widgets>
+          		</section>
+                <decorator-screen name="DelysCommonDecorator" location="${parameters.mainDecoratorLocation}">                     
+                    <decorator-section name="body">
+                        <section>
+                            <!-- do check for CATALOG, _VIEW permission -->
+                            <condition>
+                                <if-has-permission permission="DELYS_PROMOS" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                                 <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.DelysPromoViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+		</section>
+	</screen>
+	<screen name="promotitle">
+    	<section>
+    		<condition>
+    			<not>
+    				<if-empty field="productPromo"/>
+    			</not>
+    		</condition>
+    		<widgets>
+    			<platform-specific>
+    				<html><html-template location="component://product/webapp/catalog/promotitle.ftl"/></html>
+   				</platform-specific>
+    		</widgets>
+    	</section>
+    </screen>
+	<screen name="editProductPromotion">
+		<section>
+			<actions>
+				<set field="tabButtonItem" value="EditProductPromo"/>
+				<set field="headerItem" value="promos"/>
+				<set field="layoutSettings.javaScripts[]" value="/aceadmin/assets/js/jquery.autosize-min.js" global="true"/>
+				<set field="layoutSettings.javaScripts[]" value="/aceadmin/assets/js/jquery.inputlimiter.1.3.1.min.js" global="true"/>
+				<set field="layoutSettings.javaScripts[]" value="/aceadmin/assets/js/jquery.maskedinput.min.js" global="true"/>
+				<set field="layoutSettings.javaScripts[]" value="/aceadmin/assets/js/bootstrap-tag.min.js" global="true"/>
+				<set field="layoutSettings.styleSheets[]" value="/delys/images/css/sales/bootstrap-tag-cloud.css" global="true"/>								
+				<entity-condition list="promoTypes" entity-name="ProductPromoType"></entity-condition>
+				<entity-condition list="productStores" entity-name="ProductStore"></entity-condition>
+				<entity-condition list="roleTypeList" entity-name="RoleType"></entity-condition>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/sales/promotions/EditProductPromotion.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonEditPromoDecorator">
+					<decorator-section name="body">
+						<platform-specific>
+							<html><html-template location="component://delys/webapp/delys/sales/promotions/editProductPromotion.ftl"/></html>
+						</platform-specific>											
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<!-- edited 14/05/2015 -->
+	<screen name="EditProductPromotion">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="promosProgramme"/>
+				<set field="selectedSubMenuItem" value="newPromo"/>
+				<!-- <set field="tabButtonItem" value="EditProductPromo"/>
+				<set field="titleProperty" value="DACreatePromotionProgram"/>
+				<set field="headerItem" value="promos"/> -->
+				<set field="titleProperty" value="DAAbbPromotionInfomation"/>
+				<set field="layoutSettings.javaScripts[]" value="/aceadmin/assets/js/jquery.autosize-min.js" global="true"/>
+				<set field="layoutSettings.javaScripts[]" value="/aceadmin/assets/js/jquery.inputlimiter.1.3.1.min.js" global="true"/>
+				<set field="layoutSettings.javaScripts[]" value="/aceadmin/assets/js/jquery.maskedinput.min.js" global="true"/>
+				<set field="layoutSettings.javaScripts[]" value="/aceadmin/assets/js/bootstrap-tag.min.js" global="true"/>
+				<set field="layoutSettings.styleSheets[]" value="/delys/images/css/sales/bootstrap-tag-cloud.css" global="true"/>
+				
+				<set field="productPromoId" from-field="parameters.productPromoId"/>
+				<!-- <entity-condition list="promoTypes" entity-name="ProductPromoType">
+					<condition-expr field-name="productPromoTypeGroupId" value="SALES_GT_CHANNEL"/>
+				</entity-condition> -->
+				<!-- <entity-condition list="productStores" entity-name="ProductStore"></entity-condition> -->
+				<!-- <entity-condition list="roleTypeList" entity-name="RoleType"></entity-condition>
+				<entity-one value-field="productPromo" entity-name="ProductPromo">
+					<field-map field-name="productPromoId" from-field="productPromoId"/>
+				</entity-one>
+				<entity-condition list="productStorePromoAppl" entity-name="ProductStorePromoAppl">
+					<condition-expr field-name="productPromoId" value="productPromoId"/>
+				</entity-condition>
+				<entity-condition list="promoRoleTypeApply" entity-name="ProductPromoRoleTypeAppl">
+					<condition-expr field-name="productPromoId" value="productPromoId"/>
+				</entity-condition> -->
+				<entity-condition list="productList" entity-name="Product"></entity-condition>
+				<entity-condition list="productCategoryList" entity-name="ProductCategory">
+					<condition-expr field-name="productCategoryTypeId" value="CATALOG_CATEGORY"/>
+				</entity-condition>
+				<entity-condition entity-name="Enumeration" list="inputParamEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="PROD_PROMO_IN_PARAM"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+                <entity-condition entity-name="Enumeration" list="condOperEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="PROD_PROMO_COND"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+				<entity-condition entity-name="Enumeration" list="productPromoActionEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="PROD_PROMO_ACTION"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/sales/promotions/EditProductPromotionAdvance.groovy"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition><not><if-empty field="parameters.productPromoId"/></not></condition>
+					<actions><set field="selectedSubMenuItem" value="promosList"/></actions>
+					<widgets></widgets>
+				</section>
+				<decorator-screen name="CommonEditPromoDecorator">
+					<decorator-section name="body">
+						<platform-specific>
+							<html><html-template location="component://delys/webapp/delys/sales/promotions/editProductPromotionJQ.ftl"/></html>
+						</platform-specific>											
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewProductPromo">
+		<section>
+			<condition>
+				<not><if-empty field="parameters.productPromoId"/></not>
+			</condition>
+			<actions>
+				<set field="selectedMenuItem" value="promosProgramme"/>
+				<set field="selectedSubMenuItem" value="promosList"/>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/nav_promoView.groovy"/>
+				<set field="productPromoId" from-field="parameters.productPromoId"/>
+				<set field="tabBarName" value="EditPromoTabBar" global="true" />
+				<set field="tabBarLocation" value="component://delys/widget/sales/promotions/PromotionMenus.xml" global="true" />
+				<set field="titleHeaderValue" value="promotitle" global="true" />
+				<set field="titleHeaderLocation" value="component://delys/widget/sales/promotions/SalesPromotionScreens.xml" global="true" />
+				<set field="titleProperty" value="DelysPromoViewPromotion"/>
+                <!-- Data Related to the Promo -->
+                <entity-condition entity-name="ProductStorePromoAppl" list="productStorePromoAppls">
+                    <condition-expr field-name="productPromoId" from-field="productPromoId"/>
+                    <order-by field-name="sequenceNum"/>
+                    <order-by field-name="productPromoId"/>
+                </entity-condition>
+                <entity-condition list="productPromoRoleTypeList" entity-name="ProductPromoRoleTypeAppl">
+                	<condition-list combine="and">
+                		<condition-expr field-name="productPromoId" from-field="productPromoId"/>
+                	</condition-list>
+                </entity-condition>
+                <entity-condition entity-name="ProductPromoRule" list="productPromoRules">
+                    <condition-expr field-name="productPromoId" from-field="productPromoId"/>
+                    <order-by field-name="ruleName"/>
+                </entity-condition>
+                <entity-condition entity-name="ProductPromoCategory" list="promoProductPromoCategories">
+                    <condition-list>
+                        <condition-expr field-name="productPromoId" from-field="productPromoId"/>
+                        <condition-expr field-name="productPromoRuleId" value="_NA_"/>
+                        <condition-expr field-name="productPromoActionSeqId" value="_NA_"/>
+                        <condition-expr field-name="productPromoCondSeqId" value="_NA_"/>
+                    </condition-list>
+                </entity-condition>
+                <entity-condition entity-name="ProductPromoProduct" list="promoProductPromoProducts">
+                    <condition-list>
+                        <condition-expr field-name="productPromoId" from-field="productPromoId"/>
+                        <condition-expr field-name="productPromoRuleId" value="_NA_"/>
+                        <condition-expr field-name="productPromoActionSeqId" value="_NA_"/>
+                        <condition-expr field-name="productPromoCondSeqId" value="_NA_"/>
+                    </condition-list>
+                </entity-condition>
+                <entity-condition list="productPromoRoleTypeList" entity-name="ProductPromoRoleTypeAppl">
+                	<condition-list>
+                		<condition-expr field-name="productPromoId" from-field="productPromoId"/>
+                	</condition-list>
+                </entity-condition>
+                <!-- budget -->
+				<!-- <entity-condition list="budgetTotalList" entity-name="ProductPromoBudget">
+					<condition-list combine="and">
+						<condition-expr field-name="productPromoId" from-field="productPromoId"/>
+						<condition-expr field-name="budgetTypeId" value="PROMO_BUDGET_DIS"/>
+					</condition-list>
+				</entity-condition>
+				<entity-condition list="miniRevenueList" entity-name="ProductPromoBudget">
+					<condition-list combine="and">
+						<condition-expr field-name="productPromoId" from-field="productPromoId"/>
+						<condition-expr field-name="budgetTypeId" value="PROMO_MINI_REVENUE"/>
+					</condition-list>
+				</entity-condition> -->
+                <!-- General Data for Drop-downs, etc -->
+                <!-- <entity-condition entity-name="Enumeration" list="inputParamEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="PROD_PROMO_IN_PARAM"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+                <entity-condition entity-name="CarrierShipmentMethod" list="carrierShipmentMethods" use-cache="true">
+                    <order-by field-name="shipmentMethodTypeId"/>
+                </entity-condition>
+                <entity-condition entity-name="Enumeration" list="condOperEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="PROD_PROMO_COND"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+                <entity-condition entity-name="Enumeration" list="productPromoActionEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="PROD_PROMO_ACTION"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+                <entity-condition entity-name="Enumeration" list="productPromoApplEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="PROD_PROMO_PCAPPL"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition> -->
+
+                <!-- <entity-condition entity-name="OrderAdjustmentType" list="orderAdjustmentTypes" use-cache="true">
+                    <order-by field-name="description"/>
+                </entity-condition>
+                <entity-condition entity-name="ProductCategory" list="productCategories">
+                    <condition-expr field-name="showInSelect" operator="not-equals" value="N"/>
+                    <order-by field-name="description"/>
+                </entity-condition>
+                <entity-condition list="productList" entity-name="Product"></entity-condition> -->
+				
+				<!-- <entity-condition list="currencies" entity-name="Uom" use-cache="true">
+					<condition-expr field-name="uomTypeId" value="CURRENCY_MEASURE"/>
+				</entity-condition> -->
+				<entity-condition list="productStores" entity-name="ProductStore"></entity-condition>
+				<entity-condition list="roleTypes" entity-name="RoleType" use-cache="true" />
+				<script location="component://delys/webapp/delys/WEB-INF/actions/sales/promotions/EditProductPromotion.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<screenlet title="${uiLabelMap.DelysPromoViewPromotion}: ${productPromo.promoName} (${productPromo.productPromoId})" navigation-menu-name="PromoViewMenuBar">
+							<include-menu name="PromoViewMenuBar" location="component://delys/widget/sales/promotions/PromotionMenus.xml"/>
+							<platform-specific>
+								<html><html-template location="component://delys/webapp/delys/sales/promotions/viewProductPromo.ftl"/></html>
+							</platform-specific>
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<include-screen name="EditProductPromotion"/>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="lookupBudgetPromotion">
+		<section>
+			<actions>
+				<set field="queryString" from-field="result.queryString"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                
+                <!-- entries needed for lookup ajax auto completer -->
+                <!-- required: entity to search in -->
+                <set field="entityName" value="Budget"/>
+                
+                <!-- required: fields to search a match -->
+                <!-- the first element from searchFields is returned after user selection --> 
+                <!-- it might be hidden based on widget.autocompleter.displayReturnField property in widget.properties -->                
+                <set field="searchFields" value="[budgetId, comments]"/>
+ 
+                <!-- optional: fields to display in the given order, default is searchFields -->
+                <set field="displayFields" value="[budgetId, budgetTypeId, comments]"/>
+                <!-- <set field="budgetTypeId" value="PROMO_BUDGET_DIS"/> -->
+                <script location="component://delys/webapp/delys/WEB-INF/actions/sales/promotions/StatusCondition.groovy"/>                
+				<script location="component://delys/webapp/delys/WEB-INF/actions/sales/promotions/FindBudgetLookup.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="search-options">
+                        <include-form name="lookupBudgetPromo" location="component://delys/widget/sales/promotions/SalesPromotionForms.xml"/>
+                    </decorator-section>
+                    <decorator-section name="search-results">
+                        <!-- <include-form name="listLookupBudgetPromo" location="component://delys/widget/sales/promotions/SalesPromotionForms.xml"/> -->
+                        <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/sales/promotions/listLookupBudgetPromo.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+			</widgets>
+		</section>
+	</screen>	
+	<screen name="EditProductPromoRoleApply"><!-- edited -->
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="promosProgramme"/>
+				<set field="selectedSubMenuItem" value="promosList"/>
+				<set field="tabButtonItem" value="EditProductPromoRoleApply"/>
+				<set field="headerItem" value="promos"/>
+				<set field="productPromoId" from-field="parameters.productPromoId"/>
+				<entity-one entity-name="ProductPromo" value-field="productPromo" auto-field-map="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonEditPromoDecorator">
+					<decorator-section name="body">
+						<screenlet title="${uiLabelMap.DelysProductPromoRoleList}">
+							<include-form name="EditProductPromoRole" location="component://delys/widget/sales/promotions/SalesPromotionForms.xml" />
+						</screenlet>
+						<screenlet title="${uiLabelMap.DelysAddProductPromoRole}">
+							<include-form name="AddProductPromoRole" location="component://delys/widget/sales/promotions/SalesPromotionForms.xml"/>
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<!-- edited 15/05/2015 -->
+	<screen name="EditProductPromoRules">
+		<section>
+			<condition>
+				<if-has-permission permission="DELYS_PROMOS" action="_VIEW"/>
+			</condition>
+			<actions>
+				<set field="selectedMenuItem" value="promosProgramme"/>
+				<set field="selectedSubMenuItem" value="promosList"/>
+				<set field="titleProperty" value="PageTitleEditProductPromoRules"/>
+                <set field="headerItem" value="promos"/>
+                <set field="tabButtonItem" value="EditProductPromoRules"/>
+                <set field="labelTitleProperty" value="ProductRules"/>
+                <set field="productPromoId" from-field="parameters.productPromoId"/>
+                <set field="productPromoRuleId" from-field="parameters.productPromoRuleId"/>
+                <set field="productPromoCondSeqId" from-field="parameters.productPromoCondSeqId"/>
+                <set field="productPromoActionSeqId" from-field="parameters.productPromoActionSeqId"/>
+                <entity-one entity-name="ProductPromo" value-field="productPromo" auto-field-map="true"/>
+				<entity-one value-field="productPromoRule" entity-name="ProductPromoRule" auto-field-map="true"/>
+                <!-- <entity-one value-field="promoCondition" entity-name="ProductPromoCond" auto-field-map="true"></entity-one> -->	
+                <!-- <entity-one value-field="promoAction" entity-name="ProductPromoAction" auto-field-map="true"></entity-one> -->
+                <!-- Data Related to the Promo -->
+                <entity-condition list="productList" entity-name="Product"></entity-condition>
+                <entity-condition list="productCategoryList" entity-name="ProductCategory"></entity-condition>
+                <entity-condition entity-name="ProductStorePromoAppl" list="productStorePromoAppls">
+                    <condition-expr field-name="productPromoId" from-field="productPromoId"/>
+                    <order-by field-name="sequenceNum"/>
+                    <order-by field-name="productPromoId"/>
+                </entity-condition>
+                <entity-condition list="productPromoRoleTypeList" entity-name="ProductPromoRoleTypeAppl">
+                	<condition-list combine="and">
+                		<condition-expr field-name="productPromoId" from-field="productPromoId"/>
+                	</condition-list>                	
+                </entity-condition>
+                <entity-condition entity-name="ProductPromoRule" list="productPromoRules">
+                    <condition-expr field-name="productPromoId" from-field="productPromoId"/>
+                    <order-by field-name="ruleName"/>
+                </entity-condition>
+                <entity-condition entity-name="ProductPromoCategory" list="promoProductPromoCategories">
+                    <condition-list>
+                        <condition-expr field-name="productPromoId" from-field="productPromoId"/>
+                        <condition-expr field-name="productPromoRuleId" value="_NA_"/>
+                        <condition-expr field-name="productPromoActionSeqId" value="_NA_"/>
+                        <condition-expr field-name="productPromoCondSeqId" value="_NA_"/>
+                    </condition-list>
+                </entity-condition>
+                <entity-condition entity-name="ProductPromoProduct" list="promoProductPromoProducts">
+                    <condition-list>
+                        <condition-expr field-name="productPromoId" from-field="productPromoId"/>
+                        <condition-expr field-name="productPromoRuleId" value="_NA_"/>
+                        <condition-expr field-name="productPromoActionSeqId" value="_NA_"/>
+                        <condition-expr field-name="productPromoCondSeqId" value="_NA_"/>
+                    </condition-list>
+                </entity-condition>
+                <entity-condition list="productPromoRoleTypeList" entity-name="ProductPromoRoleTypeAppl">
+                	<condition-list>
+                		<condition-expr field-name="productPromoId" from-field="productPromoId"/>
+                	</condition-list>
+                </entity-condition>
+                <!-- budget -->
+				<entity-condition list="budgetTotalList" entity-name="ProductPromoBudget">
+					<condition-list combine="and">
+						<condition-expr field-name="productPromoId" from-field="productPromoId"/>
+						<condition-expr field-name="budgetTypeId" value="PROMO_BUDGET_DIS"/>
+					</condition-list>
+				</entity-condition>
+				<entity-condition list="miniRevenueList" entity-name="ProductPromoBudget">
+					<condition-list combine="and">
+						<condition-expr field-name="productPromoId" from-field="productPromoId"/>
+						<condition-expr field-name="budgetTypeId" value="PROMO_MINI_REVENUE"/>
+					</condition-list>
+				</entity-condition>
+                <!-- General Data for Drop-downs, etc -->
+                <entity-condition entity-name="Enumeration" list="inputParamEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="PROD_PROMO_IN_PARAM"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+                <entity-condition entity-name="CarrierShipmentMethod" list="carrierShipmentMethods" use-cache="true">
+                    <order-by field-name="shipmentMethodTypeId"/>
+                </entity-condition>
+                <entity-condition entity-name="Enumeration" list="condOperEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="PROD_PROMO_COND"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+                <entity-condition entity-name="Enumeration" list="productPromoActionEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="PROD_PROMO_ACTION"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+                <entity-condition entity-name="Enumeration" list="productPromoApplEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="PROD_PROMO_PCAPPL"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+
+                <entity-condition entity-name="OrderAdjustmentType" list="orderAdjustmentTypes" use-cache="true">
+                    <order-by field-name="description"/>
+                </entity-condition>
+                <entity-condition entity-name="ProductCategory" list="productCategories">
+                    <condition-expr field-name="showInSelect" operator="not-equals" value="N"/>
+                    <order-by field-name="description"/>
+                </entity-condition>
+                <entity-condition list="productList" entity-name="Product"></entity-condition>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonEditPromoDecorator">
+					<decorator-section name="body">
+<!-- 						<screenlet navigation-menu-name="" title="${uiLabelMap.DelysCreateProductPromo} - ${uiLabelMap.DelysStep} 2: ${uiLabelMap.DelysCreateRulePromotion}"> -->
+							<platform-specific>
+								<html><html-template location="component://delys/webapp/delys/sales/promotions/editProductPromoRules.ftl"/></html><!--backupEditProductPromotionRules editProductPromoRules.ftl -->
+							</platform-specific>
+<!-- 						</screenlet> -->
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<decorator-screen name="DelysCommonDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<label style="h3" text="${uiLabelMap.DelysViewPermissionError}"/>						
+					</decorator-section>
+				</decorator-screen>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="createUpdateRuleCond">
+		<section>
+			<condition>
+				<or>
+					<if-has-permission permission="DELYS_PROMOS" action="_CREATE"/>
+					<if-has-permission permission="DELYS_PROMOS" action="_UPDATE"/>
+				</or>
+			</condition>
+			<actions>
+				<set field="productPromoId" from-field="parameters.productPromoId"/>
+                <set field="productPromoRuleId" from-field="parameters.productPromoRuleId"/>
+                <set field="productPromoCondSeqId" from-field="parameters.productPromoCondSeqId"/>
+                <set field="productPromoActionSeqId" from-field="parameters.productPromoActionSeqId"/>
+				<property-map map-name="uiLabelMap" resource="DelysPromoUiLabels" global="true"/>
+				<entity-one value-field="promoCondition" entity-name="ProductPromoCond" auto-field-map="true"></entity-one>
+				<!-- General Data for Drop-downs, etc -->               
+                <entity-condition entity-name="Enumeration" list="inputParamEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="PROD_PROMO_IN_PARAM"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+                <entity-one value-field="productPromo" entity-name="ProductPromo" auto-field-map="true"></entity-one>
+                <entity-condition entity-name="CarrierShipmentMethod" list="carrierShipmentMethods" use-cache="true">
+                    <order-by field-name="shipmentMethodTypeId"/>
+                </entity-condition>
+                <entity-condition entity-name="Enumeration" list="condOperEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="PROD_PROMO_COND"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+                <entity-condition entity-name="Enumeration" list="productPromoActionEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="PROD_PROMO_ACTION"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+                <entity-condition entity-name="Enumeration" list="productPromoApplEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="PROD_PROMO_PCAPPL"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+                <entity-condition entity-name="OrderAdjustmentType" list="orderAdjustmentTypes" use-cache="true">
+                    <order-by field-name="description"/>
+                </entity-condition>
+                <entity-condition entity-name="ProductCategory" list="productCategories">
+                    <condition-expr field-name="showInSelect" operator="not-equals" value="N"/>
+                    <order-by field-name="description"/>
+                </entity-condition>
+                <entity-condition list="productList" entity-name="Product"></entity-condition>
+			</actions>
+			<widgets>
+				<decorator-screen name="AjaxGlobalDecorator">
+					<decorator-section name="body">
+						<platform-specific>
+							<html>
+								<html-template location="component://delys/webapp/delys/sales/promotions/createUpdateRuleCond.ftl"/>
+							</html>
+						</platform-specific>	
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<decorator-screen name="DelysCommonDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<label style="h3" text="${uiLabelMap.DelysViewPermissionError}"/>											
+					</decorator-section>
+				</decorator-screen>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="createUpdateRuleAction">
+		<section>
+			<condition>
+				<or>
+					<if-has-permission permission="DELYS_PROMOS" action="_CREATE"/>
+					<if-has-permission permission="DELYS_PROMOS" action="_UPDATE"/>
+				</or>
+			</condition>
+			<actions>
+				<set field="productPromoId" from-field="parameters.productPromoId"/>
+                <set field="productPromoRuleId" from-field="parameters.productPromoRuleId"/>
+                <set field="productPromoCondSeqId" from-field="parameters.productPromoCondSeqId"/>
+                <set field="productPromoActionSeqId" from-field="parameters.productPromoActionSeqId"/>
+                <property-map map-name="uiLabelMap" resource="DelysPromoUiLabels" global="true"/>
+				<entity-one value-field="promoAction" entity-name="ProductPromoAction" auto-field-map="true"></entity-one>
+				<!-- General Data for Drop-downs, etc -->				              
+                <entity-condition entity-name="Enumeration" list="inputParamEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="PROD_PROMO_IN_PARAM"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+                <entity-one value-field="productPromo" entity-name="ProductPromo" auto-field-map="true"></entity-one>
+                <entity-condition entity-name="CarrierShipmentMethod" list="carrierShipmentMethods" use-cache="true">
+                    <order-by field-name="shipmentMethodTypeId"/>
+                </entity-condition>
+                <entity-condition entity-name="Enumeration" list="condOperEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="PROD_PROMO_COND"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+                <entity-condition entity-name="Enumeration" list="productPromoActionEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="PROD_PROMO_ACTION"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+                <entity-condition entity-name="Enumeration" list="productPromoApplEnums" use-cache="true">
+                    <condition-expr field-name="enumTypeId" value="PROD_PROMO_PCAPPL"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+
+                <entity-condition entity-name="OrderAdjustmentType" list="orderAdjustmentTypes" use-cache="true">
+                    <order-by field-name="description"/>
+                </entity-condition>
+                <entity-condition entity-name="ProductCategory" list="productCategories">
+                    <condition-expr field-name="showInSelect" operator="not-equals" value="N"/>
+                    <order-by field-name="description"/>
+                </entity-condition>
+                <entity-condition list="productList" entity-name="Product"></entity-condition>
+			</actions>
+			<widgets>
+				<decorator-screen name="AjaxGlobalDecorator">
+					<decorator-section name="body">
+						<platform-specific>
+							<html>
+								<html-template 
+									location="component://delys/webapp/delys/sales/promotions/createUpdateRuleAction.ftl"/>
+							</html>
+						</platform-specific>	
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<decorator-screen name="DelysCommonDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<label style="h3" text="${uiLabelMap.DelysViewPermissionError}"/>											
+					</decorator-section>
+				</decorator-screen>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="RegisterPromotionProgram">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="exhibitedProgramme" />
+				<set field="selectedSubMenuItem" value="registerPromotionProgram" />
+				<set field="tabButtonItem" value="registerPromotionProgram"/>
+				<set field="headerItem" value="promos"/>
+				<set field="productPromoId" from-field="parameters.productPromoId"/>
+				<entity-one value-field="productPromo" entity-name="ProductPromo" auto-field-map="true"></entity-one>	
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonPromoDecorator">
+					<decorator-section name="body">
+						<include-form  name="registerPromotionSearch" 
+							location="component://delys/widget/sales/promotions/SalesPromotionForms.xml"/>
+						<include-form name="registerPromotionForm" 
+							location="component://delys/widget/sales/promotions/SalesPromotionForms.xml"/>											
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ExhibitedMarkingList">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="exhibitedProgramme" />
+				<set field="selectedSubMenuItem" value="exhibitedMarkingList" />
+				<set field="tabButtonItem" value="exhibitedMarkingList"/>
+				<set field="headerItem" value="promos"/>
+				<set field="promoMarkingStatus" from-field="parameters.promoMarkingStatus"/>
+				<set field="productPromoId" from-field="parameters.productPromoId"/>
+				<set field="partyId" from-field="parameters.partyId"/>
+				<set field="registerStatus" from-field="parameters.registerStatus" default-value="REG_ACCEPTED"/>
+				<!-- <entity-condition list="exhMarkingList" entity-name="ProductPromoRegister">
+					<condition-list combine="and">
+						<condition-expr field-name="promoMarkingStatus" from-field="promoMarkingStatus" ignore-if-empty="true"/>
+						<condition-expr field-name="productPromoId" from-field="productPromoId" ignore-if-empty="true"/>
+						<condition-expr field-name="partyId" from-field="partyId" ignore-if-empty="true"/>
+						<condition-expr field-name="registerStatus" from-field="registerStatus" ignore-if-empty="true"/>
+					</condition-list>
+				</entity-condition> -->
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonPromoDecorator">
+					<decorator-section name="body">
+						<include-form name="exhibitedMarkingSearch"
+							location="component://delys/widget/sales/promotions/SalesPromotionForms.xml" />
+						<include-form name="exhibitedMarkingList" 
+							location="component://delys/widget/sales/promotions/SalesPromotionForms.xml"/>											
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="editMarkingExhParty">
+		<section>
+			<actions>
+				<set field="partyId" from-field="parameters.partyId"/>
+				<set field="productPromoId" from-field="parameters.productPromoId"/>
+				<set field="productPromoContentTypeId" value="EXH_MARK_IMG"/>
+				<entity-one value-field="productPromo" entity-name="ProductPromo" auto-field-map="true"></entity-one>
+				
+				<entity-one value-field="productPromoPartyReg" entity-name="ProductPromoRegister">
+					<field-map field-name="partyId" from-field="parameters.partyId"/>
+					<field-map field-name="productPromoId" from-field="parameters.productPromoId"/>
+				</entity-one>
+				
+				<entity-condition entity-name="ProductPromoRule" list="productPromoRules">
+                    <condition-expr field-name="productPromoId" from-field="productPromoId"/>
+                    <order-by field-name="ruleName"/>
+                </entity-condition>
+				<entity-condition list="exhMarkingSTT" entity-name="StatusItem">
+					<condition-list combine="and">
+						<condition-expr field-name="statusTypeId" value="EXH_MARKING_STTS"/>
+						<condition-expr field-name="statusId" operator="not-equals" value="NOT_MARKING"/>
+					</condition-list>
+				</entity-condition>
+				<entity-and list="promoExhContentList" entity-name="PromoExhibitedContent">
+					<field-map field-name="partyId" from-field="parameters.partyId"/>
+					<field-map field-name="productPromoId" from-field="parameters.productPromoId"/>
+                    <field-map field-name="productPromoContentTypeId" value="EXH_MARK_IMG"/>
+                    <order-by field-name="-fromDate"/>
+				</entity-and>
+				<set field="exhContentId" from-field="promoExhContentList[0].contentId"/>
+                <set field="exhContent" value="${groovy: exhContentId!=null?&quot;/content/control/stream?contentId=&quot; + exhContentId : &quot;&quot;}"/>
+                <set field="exhImgUrl" from-field="exhContent" global="true"/>
+                <set field="layoutSettings.javaScripts[]" 
+					value="/aceadmin/assets/js/jquery.colorbox-min.js" global="true"/>
+				<set field="layoutSettings.styleSheets[]" 
+					value="/aceadmin/assets/css/colorbox.css" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="DelysCommonDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<platform-specific>
+							<html>
+								<html-template location="component://delys/webapp/delys/sales/promotions/editMarkingExhParty.ftl"/>
+							</html>
+						</platform-specific>												
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="FindExhibitedPromo">
+		<section>
+			<condition>
+				<if-has-permission permission="DELYS_PROMOS" action="_VIEW"/>
+			</condition>
+			<actions>
+				<set field="selectedMenuItem" value="exhibitedProgramme" />
+				<set field="selectedSubMenuItem" value="exhibitedList" />
+				<set field="navMenuName" value="ListProductPromoSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/sales/promotions/PromotionMenus.xml" />
+				<set field="titleProperty" value="ProductProductPromotionsList" />
+				<set field="tabButtonItem" value="FindProductPromo"/>
+				<set field="headerItem" value="promos"/>							
+				<set field="productPromoId" from-field="parameters.productPromoId"/>
+				<set field="promoName" from-field="parameters.promoName"/>
+				<set field="productPromoStatusId" from-field="parameters.productPromoStatusId" />
+				<set field="productPromoTypeId" value="EXHIBITED"/>
+				<set field="parameters.productPromoTypeId" from-field="productPromoTypeId"/>
+				<entity-condition list="promoStatus" entity-name="StatusItem">
+					<condition-list combine="and">
+						<condition-expr field-name="statusTypeId" value="PROMO_STATUS"/>
+					</condition-list>
+					<order-by field-name="sequenceId"/>
+				</entity-condition>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonPromoFindOptionsDecorator">
+					<decorator-section name="search-options">						
+						<include-form name="FindExhibitedPromoSearch" location="component://delys/widget/sales/promotions/SalesPromotionForms.xml"/>
+					</decorator-section>
+					<decorator-section name="search-results">
+						<include-form name="FindProductPromo" location="component://delys/widget/sales/promotions/SalesPromotionForms.xml" />
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<decorator-screen name="DelysCommonDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<label style="h3" text="${uiLabelMap.DelysViewPermissionError}"/>											
+					</decorator-section>
+				</decorator-screen>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="FindAccumulatePromo">
+		<section>
+			<condition>
+				<if-has-permission permission="DELYS_PROMOS" action="_VIEW"/>
+			</condition>
+			<actions>
+				<set field="selectedMenuItem" value="accumulateProgramme" />
+				<set field="selectedSubMenuItem" value="accumulateList" />
+				<set field="navMenuName" value="ListProductPromoSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/sales/promotions/PromotionMenus.xml" />
+				<set field="titleProperty" value="ProductProductPromotionsList" />
+				<set field="tabButtonItem" value="FindProductPromo"/>
+				<set field="headerItem" value="promos"/>							
+				<set field="productPromoId" from-field="parameters.productPromoId"/>
+				<set field="promoName" from-field="parameters.promoName"/>
+				<set field="productPromoStatusId" from-field="parameters.productPromoStatusId" />
+				<set field="productPromoTypeId" value="ACCUMULATE"/>
+				<set field="parameters.productPromoTypeId" from-field="productPromoTypeId"/>
+				<entity-condition list="promoStatus" entity-name="StatusItem">
+					<condition-list combine="and">
+						<condition-expr field-name="statusTypeId" value="PROMO_STATUS"/>
+					</condition-list>
+					<order-by field-name="sequenceId"/>
+				</entity-condition>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonPromoFindOptionsDecorator">
+					<decorator-section name="search-options">						
+						<include-form name="FindExhibitedPromoSearch" location="component://delys/widget/sales/promotions/SalesPromotionForms.xml"/>
+					</decorator-section>
+					<decorator-section name="search-results">
+						<include-form name="FindProductPromo" location="component://delys/widget/sales/promotions/SalesPromotionForms.xml" />
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<decorator-screen name="DelysCommonDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<label style="h3" text="${uiLabelMap.DelysViewPermissionError}"/>											
+					</decorator-section>
+				</decorator-screen>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="FindOrderPromo">
+		<section>
+			<condition>
+				<if-has-permission permission="DELYS_PROMOS" action="_VIEW"/>
+			</condition>
+			<actions>
+				<set field="selectedMenuItem" value="orderPromoProgramme" />
+				<set field="selectedSubMenuItem" value="orderPromoList" />
+				<set field="navMenuName" value="ListProductPromoSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/sales/promotions/PromotionMenus.xml" />
+				<set field="titleProperty" value="ProductProductPromotionsList" />
+				<set field="tabButtonItem" value="FindProductPromo"/>
+				<set field="headerItem" value="promos"/>							
+				<set field="productPromoId" from-field="parameters.productPromoId"/>
+				<set field="promoName" from-field="parameters.promoName"/>
+				<set field="productPromoStatusId" from-field="parameters.productPromoStatusId" />
+				<set field="productPromoTypeId" value="PROMOTION"/>
+				<set field="parameters.productPromoTypeId" from-field="productPromoTypeId"/>
+				<entity-condition list="promoStatus" entity-name="StatusItem">
+					<condition-list combine="and">
+						<condition-expr field-name="statusTypeId" value="PROMO_STATUS"/>
+					</condition-list>
+					<order-by field-name="sequenceId"/>
+				</entity-condition>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonPromoFindOptionsDecorator">
+					<decorator-section name="search-options">						
+						<include-form name="FindExhibitedPromoSearch" location="component://delys/widget/sales/promotions/SalesPromotionForms.xml"/>
+					</decorator-section>
+					<decorator-section name="search-results">
+						<include-form name="FindProductPromo" location="component://delys/widget/sales/promotions/SalesPromotionForms.xml" />
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<decorator-screen name="DelysCommonDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<label style="h3" text="${uiLabelMap.DelysViewPermissionError}"/>											
+					</decorator-section>
+				</decorator-screen>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="FindOtherPromo">
+		<section>
+			<condition>
+				<if-has-permission permission="DELYS_PROMOS" action="_VIEW"/>
+			</condition>
+			<actions>
+				<set field="selectedMenuItem" value="" />
+				<set field="selectedSubMenuItem" value="" />
+				<set field="navMenuName" value="ListProductPromoSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/sales/promotions/PromotionMenus.xml" />
+				<set field="titleProperty" value="ProductProductPromotionsList" />
+				<set field="tabButtonItem" value="FindProductPromo"/>
+				<set field="headerItem" value="promos"/>							
+				<set field="productPromoId" from-field="parameters.productPromoId"/>
+				<set field="promoName" from-field="parameters.promoName"/>
+				<set field="productPromoStatusId" from-field="parameters.productPromoStatusId" />
+				<set field="productPromoTypeId" value="OTHER"/>
+				<set field="parameters.productPromoTypeId" from-field="productPromoTypeId"/>
+				<entity-condition list="promoStatus" entity-name="StatusItem">
+					<condition-list combine="and">
+						<condition-expr field-name="statusTypeId" value="PROMO_STATUS"/>
+					</condition-list>
+					<order-by field-name="sequenceId"/>
+				</entity-condition>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonPromoFindOptionsDecorator">
+					<decorator-section name="search-options">						
+						<include-form name="FindExhibitedPromoSearch" location="component://delys/widget/sales/promotions/SalesPromotionForms.xml"/>
+					</decorator-section>
+					<decorator-section name="search-results">
+						<include-form name="FindProductPromo" location="component://delys/widget/sales/promotions/SalesPromotionForms.xml" />
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<decorator-screen name="DelysCommonDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<label style="h3" text="${uiLabelMap.DelysViewPermissionError}"/>											
+					</decorator-section>
+				</decorator-screen>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="FindProductPromo">
+		<section>
+			<condition>
+				<if-has-permission permission="DELYS_PROMOS" action="_VIEW"/>
+			</condition>
+			<actions>
+				<set field="selectedMenuItem" value="promosProgramme" />
+				<set field="selectedSubMenuItem" value="promosList" />
+				<set field="navMenuName" value="ListProductPromoSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/sales/promotions/PromotionMenus.xml" />
+				<set field="titleProperty" value="ProductProductPromotionsList" />
+				<set field="tabButtonItem" value="FindProductPromo"/>
+				<set field="headerItem" value="promos"/>
+				<set field="productPromoId" from-field="parameters.productPromoId"/>
+				<set field="promoName" from-field="parameters.promoName"/>
+				<set field="productPromoStatusId" from-field="parameters.productPromoStatusId" />
+				<set field="productPromoTypeId" from-field="parameters.productPromoTypeId"/>
+				<entity-condition list="listProductPromoTypeGT" entity-name="ProductPromoType">
+					<condition-list combine="and">
+						<condition-expr field-name="productPromoTypeGroupId" value="SALES_GT_CHANNEL"/>
+						<condition-list combine="or">
+							<condition-expr field-name="productPromoTypeId" value="EXHIBITED"/>
+							<condition-expr field-name="productPromoTypeId" value="ACCUMULATE"/>
+							<condition-expr field-name="productPromoTypeId" value="PROMOTION"/>
+							<condition-expr field-name="productPromoTypeId" value="OTHER"/>
+						</condition-list>
+					</condition-list>
+					<select-field field-name="productPromoTypeId"/>
+				</entity-condition>
+				<entity-condition list="promoStatus" entity-name="StatusItem">
+					<condition-list combine="and">
+						<condition-expr field-name="statusTypeId" value="PROMO_STATUS"/>
+					</condition-list>
+					<order-by field-name="sequenceId"/>
+				</entity-condition>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-empty field="productPromoTypeId"/>
+					</condition>
+					<actions>
+						<set field="parameters.productPromoTypeId" value=""/>
+			      		<set field="parameters.productPromoTypeId_op" value="in"/>
+			      		<set field="parameters.productPromoTypeId_value" value="${groovy: return com.olbius.format.FormatList.formatListGenericValueToListString(listProductPromoTypeGT, 'productPromoTypeId')}" />
+					</actions>
+					<widgets>
+						<decorator-screen name="CommonPromoFindOptionsDecorator">
+							<decorator-section name="search-options">						
+								<include-form name="FindProductPromoSearch" location="component://delys/widget/sales/promotions/SalesPromotionForms.xml"/>
+							</decorator-section>
+							<decorator-section name="search-results">
+								<include-form name="FindProductPromo" location="component://delys/widget/sales/promotions/SalesPromotionForms.xml" />
+							</decorator-section>
+						</decorator-screen>
+						<!-- 
+						<decorator-screen name="CommonPromoFindOptionsDecorator">
+							<decorator-section name="search-options">
+								<screenlet title="${uiLabelMap.DAProductPromoSearch}" navigation-menu-name="ListProductPromoSubTabBar">
+									<include-menu name="ListProductPromoSubTabBar" location="component://delys/widget/sales/promotions/PromotionMenus.xml"/>
+								</screenlet>
+								<screenlet title="${uiLabelMap.ProductProductPromotionsList}">
+								</screenlet>
+							</decorator-section>
+						</decorator-screen>
+						 -->
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="CommonPromoFindOptionsDecorator">
+							<decorator-section name="search-options">						
+								<include-form name="FindProductPromoSearch" location="component://delys/widget/sales/promotions/SalesPromotionForms.xml"/>
+							</decorator-section>
+							<decorator-section name="search-results">
+								<include-form name="FindProductPromo" location="component://delys/widget/sales/promotions/SalesPromotionForms.xml" />
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+			<fail-widgets>
+				<decorator-screen name="DelysCommonDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<label style="h3" text="${uiLabelMap.DelysViewPermissionError}"/>											
+					</decorator-section>
+				</decorator-screen>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="ListProductPromo">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="findPromoDis"/>
+				<set field="titleProperty" value="DAProductPromotionsList"/>
+				<set field="tabButtonItem" value="FindProductPromo"/>
+				<set field="headerItem" value="promos"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="DelysCommonDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<or>
+									<if-has-permission permission="DELYS_PROMOS" action="_VIEW"/>
+									<if-has-permission permission="PROMOS_ROLE" action="_VIEW"/>
+								</or>
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html><html-template location="component://delys/webapp/delys/sales/promotions/listProductPromoJQ.ftl"/></html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.DelysViewPermissionError}"/>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EditProductPromoStores"><!-- edited -->
+		<section>
+			<condition>
+				<if-has-permission permission="DELYS_PROMOS" action="_VIEW"/>
+			</condition>
+			<actions>
+				<set field="selectedMenuItem" value="promosProgramme"/>
+				<set field="selectedSubMenuItem" value="promosList"/>
+				<set field="titleProperty" value="PageTitleEditProductPromoStores"/>
+                <set field="headerItem" value="promos"/>
+                <set field="tabButtonItem" value="EditProductPromoStores"/>
+                <set field="labelTitleProperty" value="ProductStores"/>
+
+                <set field="productPromoId" from-field="parameters.productPromoId"/>
+                <entity-one entity-name="ProductPromo" value-field="productPromo" auto-field-map="true"/>
+                <entity-condition entity-name="ProductStorePromoAppl" list="productStorePromoAppls">
+                    <condition-expr field-name="productPromoId" from-field="productPromoId"/>
+                    <order-by field-name="sequenceNum"/>
+                    <order-by field-name="productPromoId"/>
+                </entity-condition>
+                <entity-condition list="productStores" entity-name="ProductStoreRoleDetail" filter-by-date="true">
+                	<condition-list>
+                		<condition-expr field-name="partyId" from-field="userLogin.partyId"/>
+                		<condition-expr field-name="roleTypeId" value="MANAGER"/>
+                	</condition-list>
+                	<select-field field-name="productStoreId"/>
+                	<select-field field-name="storeName"/>
+                </entity-condition>
+<!--                 <entity-condition entity-name="ProductStore" list="productStores"> -->
+<!--                     <order-by field-name="storeName"/> -->
+<!--                 </entity-condition> -->
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonEditPromoDecorator">
+					<decorator-section name="body">
+						<platform-specific>
+                            <html><html-template location="component://delys/webapp/delys/sales/promotions/editProductPromoStores.ftl"/></html>
+                        </platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<decorator-screen name="DelysCommonDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<label style="h3" text="${uiLabelMap.DelysViewPermissionError}"/>
+					</decorator-section>
+				</decorator-screen>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="ProductPromoOverview"><!-- edited -->
+		<section>
+			<condition>
+				<if-has-permission permission="DELYS_PROMOS" action="_VIEW"/>
+			</condition>
+			<actions>
+				<set field="selectedMenuItem" value="promosProgramme"/>
+				<set field="selectedSubMenuItem" value="promosList"/>
+				<set field="headerItem" value="promos"/>
+                <set field="tabButtonItem" value="productPromoOverview"/>
+				<set field="productPromoId" from-field="parameters.productPromoId"/>
+				<entity-one value-field="productPromo" entity-name="ProductPromo">
+					<field-map field-name="productPromoId" from-field="productPromoId"/>
+				</entity-one>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonEditPromoDecorator">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<not>
+									<if-empty field="productPromo"/>
+								</not>
+							</condition>
+							<actions>
+								<entity-condition list="productPromoStatus" entity-name="StatusItem">
+									<condition-list combine="and">
+										<condition-expr field-name="statusTypeId" operator="equals" value="PROMO_STATUS"/>						
+									</condition-list>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>
+								<entity-one value-field="productPromo" entity-name="ProductPromo" auto-field-map="true"></entity-one>				
+								<entity-condition list="productPromoStores" entity-name="ProductStorePromoAppl">
+									<condition-list combine="and">
+										<condition-expr field-name="productPromoId" operator="equals" from-field="parameters.productPromoId"/>
+									</condition-list>
+									<order-by field-name="-fromDate"/>
+								</entity-condition>
+								<entity-condition list="productPromoRoleTypeApplys" entity-name="ProductPromoRoleTypeAppl">
+									<condition-expr field-name="productPromoId" from-field="parameters.productPromoId"/>
+								</entity-condition>
+								<script location="component://delys/webapp/delys/WEB-INF/actions/sales/promotions/productPromoBudgetInfo.groovy"/>
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://delys/webapp/delys/sales/promotions/productPromoOverview.ftl"/>
+									</html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label>${uiLabelMap.DAProductPromoNotAvaiable}</label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<decorator-screen name="CommonEditPromoDecorator">
+					<decorator-section name="body">
+						<container style="alert alert-info">
+							<label>${uiLabelMap.DelysViewPermissionError}</label>
+						</container>
+					</decorator-section>
+				</decorator-screen>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="lookupRoleType">		
+		<section>			
+			<actions>
+			</actions>
+			<widgets>
+				<decorator-screen name="LookupDecorator" location="component://common/widget/CommonScreens.xml">
+                    <decorator-section name="search-options">
+                        <include-form name="lookupRoleType" location="component://delys/widget/sales/promotions/SalesPromotionForms.xml"/>
+                    </decorator-section>
+                    <decorator-section name="search-results">
+                        <include-form name="listLookupRoleType" location="component://delys/widget/sales/promotions/SalesPromotionForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>											
+			</widgets>
+		</section>
+	</screen>
+	
+	<!-- budget screen -->
+	<screen name="FindBudgetPromo">
+		<section>
+			<actions>
+				<entity-condition list="budgetPromoList" entity-name="Budget">
+				</entity-condition>	
+			</actions>
+			<widgets>
+				<decorator-screen name="DelysCommonDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">						
+						<screenlet title="${uiLabelMap.BudgetPromoList}" navigation-menu-name="BudgetPromoListSubMenuBar">
+							<include-menu  name="BudgetPromoListSubMenuBar" 
+								location="component://delys/widget/sales/promotions/PromotionMenus.xml"/>
+							<include-form  name="FindBudgetPromo"
+								location="component://delys/widget/sales/promotions/SalesPromotionForms.xml"/>
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="editBudgetPromo">
+		<section>
+			<actions>
+				<set field="headerItem" value="promoBuget"/>
+                <set field="tabButtonItem" value="editBudgetPromo"/>
+                <set field="budgetId" from-field="parameters.budgetId"/>
+                <entity-one value-field="budget" entity-name="Budget" auto-field-map="true"></entity-one>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonEditBudgetPromoDecorator">
+					<decorator-section name="body">
+						<include-form name="editBudgetPromo" 
+							location="component://delys/widget/sales/promotions/SalesPromotionForms.xml"/>													
+					</decorator-section>
+				</decorator-screen>					
+			</widgets>
+		</section>
+	</screen>
+	<screen name="editBudgetItemPromo">
+		<section>
+			<actions>
+				<set field="headerItem" value="promoBuget"/>
+                <set field="tabButtonItem" value="editBudgetItemPromo"/>
+                <set field="budgetId" from-field="parameters.budgetId"/>                
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonEditBudgetPromoDecorator">
+					<decorator-section name="body">
+						<include-form location="component://delys/widget/sales/promotions/SalesPromotionForms.xml"
+							 name="addBudgetItemPromo"/>
+						<include-form location="component://delys/widget/sales/promotions/SalesPromotionForms.xml" 
+							name="listBudgetItem"/>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="OrderItemPromoList">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="promoFinalCost" />
+				<set field="selectedSubMenuItem" value="orderItemPromoList" />
+				<set field="navMenuName" value="SearchOrderSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/DelysMenus.xml" />
+				<set field="titleProperty" value="DAOrderItemPromoList" />
+				<service service-name="listAllStoreNameByUserLogin" result-map="mapAllStoreNameByUserLogin"></service>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not><if-empty field="mapAllStoreNameByUserLogin.listAllStoreNameByUserLogin"/></not>
+					</condition>
+					<actions>
+						<entity-condition list="orderItemPromoList" entity-name="OrderHeaderItemsPromosAndItemIssuance">
+							<condition-list>
+								<condition-expr field-name="orderTypeId" value="SALES_ORDER"/>
+								<condition-expr field-name="productStoreId" operator="in" from-field="mapAllStoreNameByUserLogin.listAllStoreNameByUserLogin"/>
+							</condition-list>
+						</entity-condition>
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<decorator-screen name="FindOptionsScreenDecorator" location="component://delys/widget/sales/CommonScreens.xml">
+									<decorator-section name="search-options">						
+										<include-form name="FindProductPromoSearch" location="component://delys/widget/sales/promotions/SalesPromotionForms.xml"/>
+									</decorator-section>
+									<decorator-section name="search-results">
+										<include-form name="OrderItemPromoList" location="component://delys/widget/sales/promotions/SalesPromotionForms.xml" />
+									</decorator-section>
+								</decorator-screen>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</widgets>
+			<fail-widgets>
+				<decorator-screen name="DelysCommonDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<label style="h3" text="${uiLabelMap.DANotData}"/>
+					</decorator-section>
+				</decorator-screen>
+			</fail-widgets>
+		</section>
+	</screen>
+	<screen name="CheckInitsPayPromo">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="promoFinalCost" />
+				<set field="selectedSubMenuItem" value="newPayPromoOrder" />
+				<set field="titleProperty" value="PageTitleOrderInits"/>
+				<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/CheckInits.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<platform-specific>
+							<html>
+								<html-template location="component://delys/webapp/delys/sales/promotions/checkInitsPayPromo.ftl"/>
+							</html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ShowCartPayPromo">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="promoFinalCost" />
+				<set field="selectedSubMenuItem" value="newPayPromoOrder" />
+			    <set field="titleProperty" value="PageTitleOrderShowCart"/>
+                <set field="productsummaryScreen" value="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml#productsummary"/>
+                <property-to-field resource="order" property="orderPreference.giftEnable" field="giftEnable" default="Y"/>
+                <set field="promoUseDetailsInlineScreen" value="component://order/widget/ordermgr/OrderEntryCartScreens.xml#promoUseDetailsInline"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/ShowCart.groovy"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/ShowPromoText.groovy"/>
+                <entity-condition entity-name="ProductStorePromoAndAppl" list="allProductPromos" filter-by-date="true">
+                    <condition-list combine="and">
+                        <condition-expr field-name="manualOnly" value="Y"/>
+                        <condition-expr field-name="productStoreId" from-field="productStoreId"/>
+                    </condition-list>
+                    <order-by field-name="productPromoId"/>
+                </entity-condition>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetShoppingCart.groovy"/>
+            </actions>
+            <widgets>
+            	<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<platform-specific><html><html-template location="component://delys/webapp/delys/sales/promotions/OrderEntryTabBar.ftl"/></html></platform-specific>
+						<platform-specific><html><html-template location="component://delys/webapp/delys/sales/promotions/showCartPayPromo.ftl"/></html></platform-specific>
+						
+						<platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/javascript.ftl"/></html></platform-specific>
+<!-- 	                    <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/addItemsToShoppingList.ftl"/></html></platform-specific> -->
+	                    <platform-specific><html><html-template location="component://delys/webapp/delys/sales/promotions/showCartItemsPayPromo.ftl"/></html></platform-specific>
+<!-- 	                    <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/manualPromotions.ftl"/></html></platform-specific> -->
+<!-- 	                    <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/promoText.ftl"/></html></platform-specific> -->
+<!-- 	                    <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/associatedProducts.ftl"/></html></platform-specific> -->
+	                    <platform-specific><html><html-template location="component://order/webapp/ordermgr/entry/cart/promotionsApplied.ftl"/></html></platform-specific>
+					</decorator-section>
+				</decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="LookupBulkAddOrderItem">
+     	<section>
+            <actions>
+            	<set field="selectedMenuItem" value="promoFinalCost" />
+				<set field="selectedSubMenuItem" value="newPayPromoOrder" />
+                <set field="titleProperty" value="PageTitleLookupBulkAddProduct"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="10"/> <!-- 10 rows seems more appropriate given screen size, etc. -->
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/LookupBulkAddOrderItem.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrderCatalogDecorator" location="component://delys/widget/sales/OrderScreens.xml">
+                    <decorator-section name="body">
+                        <include-form name="LookupBulkAddOrderItem" location="component://delys/widget/sales/OrderForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="LookupBulkAddOrderItem2">
+     	<section>
+            <actions>
+            	<set field="selectedMenuItem" value="promoFinalCost" />
+				<set field="selectedSubMenuItem" value="newPayPromoOrder" />
+                <set field="titleProperty" value="PageTitleLookupBulkAddProduct"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="10"/> <!-- 10 rows seems more appropriate given screen size, etc. -->
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/LookupBulkAddOrderItem.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrderCatalogDecorator" location="component://delys/widget/sales/OrderScreens.xml">
+                    <decorator-section name="body">
+                        <include-form name="LookupBulkAddOrderItem2" location="component://delys/widget/sales/OrderForms.xml"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="QuickFinalizeOrder">
+        <section>
+        	<actions>
+        		<set field="selectedMenuItem" value="promoFinalCost" />
+				<set field="selectedSubMenuItem" value="newPayPromoOrder" />
+        		<set field="shoppingCartSession" value="${groovy:session.getAttribute(&quot;shoppingCart&quot;)}" />
+        	</actions>
+        	<widgets>
+        		<section>
+        			<condition>
+        				<not>
+        					<if-empty field="shoppingCartSession"/>
+        				</not>
+        			</condition>
+        			<actions>
+		                <set field="headerItem" value="orderentry"/>
+		                <set field="titleProperty" value="PageTitleCheckoutOptions"/>
+		                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/CheckoutPayment.groovy"/>
+		                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/CheckoutOptions.groovy"/>
+		                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/StorePaymentOptions.groovy"/>
+		                <property-to-field resource="order" property="orderPreference.giftEnable" field="giftEnable" default="Y"/>
+		            </actions>
+		            <widgets>
+		                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+		                    <decorator-section name="body">
+		                        <platform-specific><html><html-template location="component://delys/webapp/delys/sales/promotions/checkOutOptions.ftl"/></html></platform-specific>
+		                    </decorator-section>
+		                </decorator-screen>
+		            </widgets>
+		            <fail-widgets>
+		            	<include-screen name="CheckInits"/>
+		            </fail-widgets>
+        		</section>
+        	</widgets>
+        </section>
+    </screen>
+    <screen name="CommonOrderCheckoutDecorator">
+        <section>
+            <actions>
+                <set field="headerItem" value="orderentry"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetShoppingCart.groovy"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/order/SetCheckoutTabBar.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <platform-specific>
+                                    <html><html-template location="component://delys/webapp/delys/sales/promotions/OrderEntryCheckoutTabBar.ftl"/></html>
+                                </platform-specific>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ConfirmOrder">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="promoFinalCost" />
+				<set field="selectedSubMenuItem" value="newPayPromoOrder" />
+                <set field="stepTitleId" value="OrderOrderConfirmation"/>
+                <set field="stepLabelId" value="OrderReviewOrder"/>
+                <property-to-field resource="order" property="orderPreference.giftEnable" field="giftEnable" default="Y"/>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/entry/SetShoppingCart.groovy"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/CheckoutReview.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonOrderCheckoutDecorator">
+                    <decorator-section name="body">
+                    	<platform-specific>
+                            <html><html-template location="component://delys/webapp/delys/sales/promotions/reviewOrder.ftl"/></html>
+                        </platform-specific>
+                        <!-- 
+                        <horizontal-separator />
+                        <platform-specific>
+                            <html><html-template location="component://order/webapp/ordermgr/entry/order/orderheaderinfo.ftl"/></html>
+                        </platform-specific>
+                        <platform-specific>
+                            <html><html-template location="component://order/webapp/ordermgr/entry/order/orderpaymentinfo.ftl"/></html>
+                        </platform-specific>
+                        <platform-specific>
+                            <html><html-template location="component://order/webapp/ordermgr/entry/order/shipGroupConfirmSummary.ftl"/></html>
+                        </platform-specific>
+                        <platform-specific>
+                            <html><html-template location="component://order/webapp/ordermgr/entry/order/orderitems.ftl"/></html>
+                        </platform-specific>
+                         -->
+                    </decorator-section>
+                  </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="ListPromoSettlementRecord">
+    	<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="accApprovement" />
+				<set field="selectedSubMenuItem" value="closingOfSettlementPromo"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<screenlet title="${uiLabelMap.DAListKeyTimesOfTheSettlementPromotions}" navigation-menu-name="PromoSettlementRecordSubTabBar">
+							<include-menu name="PromoSettlementRecordSubTabBar" location="component://delys/widget/sales/promotions/PromotionMenus.xml"/>
+                    		<platform-specific>
+                    			<html><html-template location="component://delys/webapp/delys/sales/promotions/listPromoSettlementRecordJQ.ftl"/></html>
+                    		</platform-specific>
+                    	</screenlet>
+                    </decorator-section>
+                </decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="NewSettlementRecord">
+    	<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="promoFinalCost" />
+				<set field="selectedSubMenuItem" value="closingOfSettlementPromo"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                   		<platform-specific>
+                   			<html><html-template location="component://delys/webapp/delys/sales/promotions/newSettlementRecord.ftl"/></html>
+                   		</platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="ViewSettlementRecord">
+    	<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="promoFinalCost" />
+				<set field="selectedSubMenuItem" value="closingOfSettlementPromo"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+    				<decorator-section name="body">
+    					<section>
+    						<condition><not><if-empty field="${parameters.promoSettleRecordId}"/></not></condition>
+    						<widgets>
+    							<screenlet title="${uiLabelMap.DAListSettlementItem}. ${uiLabelMap.DAPromoSettleRecordId}: [${parameters.promoSettleRecordId}]" navigation-menu-name="PromoSettleGroupMenu">
+		    						<include-menu location="component://delys/widget/sales/SalesMenus.xml" name="PromoSettleGroupMenu"/>
+		    						<platform-specific>
+			                   			<html><html-template location="component://delys/webapp/delys/sales/promotions/viewSettlementRecordJQ.ftl"/></html>
+			                   		</platform-specific>
+		    					</screenlet>
+    						</widgets>
+    					</section>
+    				</decorator-section>
+    			</decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="ViewPromoSettlementGroup">
+    	<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="promoFinalCost" />
+				<set field="selectedSubMenuItem" value="closingOfSettlementPromo"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+    				<decorator-section name="body">
+    					<section>
+    						<condition><not><if-empty field="${parameters.promoSettleRecordId}"/></not></condition>
+    						<widgets>
+		    					<screenlet title="${uiLabelMap.DAListPromoSettlementGroup}. ${uiLabelMap.DAPromoSettleRecordId}: [${parameters.promoSettleRecordId}]">
+		    						<platform-specific>
+			                   			<html><html-template location="component://delys/webapp/delys/sales/promotions/viewPromoSettleGroupJQ.ftl"/></html>
+			                   		</platform-specific>
+		    					</screenlet>
+		    				</widgets>
+		    			</section>
+    				</decorator-section>
+    			</decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="ViewPromoSettlementGroupItem">
+    	<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="promoFinalCost" />
+				<set field="selectedSubMenuItem" value="closingOfSettlementPromo"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+    				<decorator-section name="body">
+    					<section>
+    						<condition><not><if-empty field="${parameters.promoSettleGroupId}"/></not></condition>
+    						<actions>
+    							<entity-one value-field="promoSettleGroup" entity-name="PromoSettleGroup">
+    								<field-map field-name="promoSettleGroupId" from-field="parameters.promoSettleGroupId"/>
+    							</entity-one>
+    						</actions>
+    						<widgets>
+    							<section>
+    								<condition><not><if-empty field="promoSettleGroup"/></not></condition>
+    								<widgets>
+    									<screenlet title="${uiLabelMap.DAListSettlementGroupItem}. ${uiLabelMap.DAPromoSettleGroupId}: [${parameters.promoSettleGroupId} - ${promoSettleGroup.partyId}]" navigation-menu-name="PromoSettleGroupItemMenu">
+		    								<include-menu location="component://delys/widget/sales/SalesMenus.xml" name="PromoSettleGroupItemMenu"/>
+				    						<platform-specific>
+					                   			<html><html-template location="component://delys/webapp/delys/sales/promotions/viewSettlementGroupItemJQ.ftl"/></html>
+					                   		</platform-specific>
+				    					</screenlet>
+    								</widgets>
+    							</section>
+    						</widgets>
+    					</section>
+    				</decorator-section>
+    			</decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="EditPromoSettleGroupItems">
+    	<section>
+    		<condition>
+    			<if-has-permission permission="PSETTLE_ROLE" action="_UPDATE"/>
+    		</condition>
+    		<actions>
+    			<set field="selectedMenuItem" value="promoFinalCost" />
+				<set field="selectedSubMenuItem" value="closingOfSettlementPromo"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+    				<decorator-section name="body">
+    					<section>
+    						<condition><not><if-empty field="${parameters.promoSettleGroupId}"/></not></condition>
+    						<actions>
+    							<entity-one value-field="promoSettleGroup" entity-name="PromoSettleGroup">
+    								<field-map field-name="promoSettleGroupId" from-field="parameters.promoSettleGroupId"/>
+    							</entity-one>
+    						</actions>
+    						<widgets>
+    							<section>
+    								<condition><not><if-empty field="promoSettleGroup"/></not></condition>
+    								<widgets>
+    									<screenlet title="${uiLabelMap.DAEditListSettlementGroupItem}. ${uiLabelMap.DAPromoSettleGroupId}: [${parameters.promoSettleGroupId} - ${promoSettleGroup.partyId}]" navigation-menu-name="EditPromoSettleGroupItemMenu">
+		    								<include-menu location="component://delys/widget/sales/SalesMenus.xml" name="EditPromoSettleGroupItemMenu"/>
+				    						<platform-specific>
+					                   			<html><html-template location="component://delys/webapp/delys/sales/promotions/editSettlementGroupItemJQ.ftl"/></html>
+					                   		</platform-specific>
+				    					</screenlet>
+    								</widgets>
+    							</section>
+    						</widgets>
+    					</section>
+    				</decorator-section>
+    			</decorator-screen>
+    		</widgets>
+    		<fail-widgets>
+    			<section>
+    				<actions>
+		    			<set field="selectedMenuItem" value="promoFinalCost" />
+						<set field="selectedSubMenuItem" value="closingOfSettlementPromo"/>
+		    		</actions>
+		    		<widgets>
+		    			<container style="alert alert-info">
+		    				<label text="${uiLabelMap.DAQuotationUpdatePermissionError}"/>
+		    			</container>
+		    		</widgets>
+    			</section>
+    		</fail-widgets>
+    	</section>
+    </screen>
+    
+    <screen name="ListExhibitedRegister">
+    	<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="salessupCustomer" />
+				<set field="selectedSubMenuItem" value="listExhibitedRegister"/>
+				<set field="titleProperty" value="DAListExhibitedRegister"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+    				<decorator-section name="body">
+    					<section>
+    						<condition>
+    							<if-has-permission permission="REGPROMO_ROLE" action="_VIEW"/>
+    						</condition>
+    						<widgets>
+    							<platform-specific>
+		                   			<html><html-template location="component://delys/webapp/delys/sales/promotions/listExhibitedRegisterJQ.ftl"/></html>
+		                   		</platform-specific>
+    						</widgets>
+    						<fail-widgets>
+    							<container style="alert alert-info">
+				    				<label text="${uiLabelMap.DAYouHavenotViewPermission}"/>
+				    			</container>
+    						</fail-widgets>
+    					</section>
+    				</decorator-section>
+    			</decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="ListExhibitedRegisterUpdate">
+    	<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="salessupCustomer" />
+				<set field="selectedSubMenuItem" value="listExhibitedRegister"/>
+				<set field="titleProperty" value="DAListExhibitedRegister"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+    				<decorator-section name="body">
+    					<section>
+    						<condition>
+    							<if-has-permission permission="REGPROMO_ROLE" action="_VIEW"/>
+    						</condition>
+   							<actions>
+    							<script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/checkRolePermissionPerson.groovy"/>
+    						</actions>
+    						<widgets>
+    							<platform-specific>
+		                   			<html><html-template location="component://delys/webapp/delys/sales/promotions/listExhibitedRegisterUpdateJQ.ftl"/></html>
+		                   		</platform-specific>
+    						</widgets>
+    						<fail-widgets>
+    							<container style="alert alert-info">
+				    				<label text="${uiLabelMap.DAYouHavenotViewPermission}"/>
+				    			</container>
+    						</fail-widgets>
+    					</section>
+    				</decorator-section>
+    			</decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="ListExhibitedMark">
+    	<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="salessupCustomer" />
+				<set field="selectedSubMenuItem" value="listExhibitedRegister"/>
+				<set field="titleProperty" value="DAListExhibitedMark"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+    				<decorator-section name="body">
+    					<section>
+    						<condition>
+    							<if-has-permission permission="MARKEXH_ROLE" action="_VIEW"/>
+    						</condition>
+    						<widgets>
+    							<platform-specific>
+		                   			<html><html-template location="component://delys/webapp/delys/sales/promotions/listExhibitedMarkJQ.ftl"/></html>
+		                   		</platform-specific>
+    						</widgets>
+    						<fail-widgets>
+    							<container style="alert alert-info">
+				    				<label text="${uiLabelMap.DAYouHavenotViewPermission}"/>
+				    			</container>
+    						</fail-widgets>
+    					</section>
+    				</decorator-section>
+    			</decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="ExhibitedRegisterMark">
+    	<section>
+    		<actions>
+    			<set field="selectedMenuItem" value="salessupCustomer" />
+				<set field="selectedSubMenuItem" value="listExhibitedRegister"/>
+				<set field="titleProperty" value="DAExhibitedRegisterMark"/>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+    				<decorator-section name="body">
+    					<section>
+    						<condition>
+    							<if-has-permission permission="MARKEXH_ROLE" action="_VIEW"/>
+    						</condition>
+    						<widgets>
+    							<platform-specific>
+		                   			<html><html-template location="component://delys/webapp/delys/sales/promotions/listExhibitedRegisterMarkJQ.ftl"/></html>
+		                   		</platform-specific>
+    						</widgets>
+    						<fail-widgets>
+    							<container style="alert alert-info">
+				    				<label text="${uiLabelMap.DAYouHavenotViewPermission}"/>
+				    			</container>
+    						</fail-widgets>
+    					</section>
+    				</decorator-section>
+    			</decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="agreementTitle">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://delys/webapp/delys/sales/title/agreementTitle.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+    <screen name="CommonAgreementDecorator">
+        <section>
+            <actions>
+                <set field="selectedMenuItem" value="salessupCustomer" />
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="WorkEffortUiLabels" map-name="uiLabelMap" global="true"/>
+            </actions>
+            <widgets>
+            	<section>
+                    <condition>
+                        <and>
+                            <or>
+                            	<if-has-permission permission="AGREPROMO_ROLE" action="_VIEW"/>
+                            </or>
+                            <not><if-empty field="agreement"/></not>
+                        </and>
+                    </condition>
+                    <actions>
+						<set field="tabBarName" value="AgreementTabBar" global="true" />
+						<set field="tabBarLocation" value="component://delys/widget/accounting/accounting/AccAgAccountingMenus.xml" global="true" />
+						<!-- <set field="titleHeaderContent" value="[${agreement.agreementId}]" global="true" /> -->
+						<set field="titleHeaderValue" value="agreementTitle" global="true" />
+						<set field="titleHeaderLocation" value="component://delys/widget/sales/promotions/SalesPromotionScreens.xml" global="true" />
+						<set field="linkPreviousUiLabel" value="DAAbbListExhibitedAgreement"/>
+						<set field="linkPreviousUrl" value="listExhibitedAgreement"/>
+				  </actions>
+                    <widgets>
+                    	<section>
+		                	<actions>
+								<set field="printTabBar" value="true" />
+							</actions>
+		                    <widgets>
+
+		                    </widgets>
+		                </section>
+                    </widgets>
+                </section>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <or>
+                                	<if-has-permission permission="AGREPROMO_ROLE" action="_VIEW"/>
+                                </or>
+                            </condition>
+                            <widgets>
+                                <section>
+                                    <condition>
+                                        <not><if-empty field="agreement"/></not>
+                                    </condition>
+                                    <widgets>
+                                        <container	style="smaller lighter blue">
+                                        </container>
+                                    </widgets>
+                                </section>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                            	<container style="smaller blue lighter">
+                                <label style="h3" text="${uiLabelMap.AccountingViewPermissionError}"></label>
+                                </container>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <!-- list all assets in a tabular format -->       
+    <screen name="ListExhibitedAgreement">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="salessupCustomer" global="true"/>
+				<set field="selectedSubMenuItem" value="listExhibitedAgreement" global="true"/>
+                <set field="titleProperty" value="DAListExhibitedAgreement"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonAgreementDecorator">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-has-permission permission="AGREPROMO_ROLE" action="_VIEW"/>
+                            </condition>
+                            <widgets>
+                                <platform-specific>
+                               		<html><html-template location="component://delys/webapp/delys/sales/promotions/listExhibitedAgreementJQ.ftl"/></html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+                            	<container style="alert alert-info">
+                                	<label text="${uiLabelMap.DAYouHavenotViewPermission}"></label>
+                                </container>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+         </section>
+    </screen>
+</screens>

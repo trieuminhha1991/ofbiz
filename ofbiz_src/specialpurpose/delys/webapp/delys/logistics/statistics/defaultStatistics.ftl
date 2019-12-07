@@ -1,0 +1,1 @@
+<#if uiLabelMap?exists>${uiLabelMap.DefaultPortlet}<#else>Default portlet</#if>

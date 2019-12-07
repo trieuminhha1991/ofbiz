@@ -1,0 +1,531 @@
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+      <screen name="PartyAcctgPreference">
+        <section>
+            <actions>
+                <set field="titleProperty" value="AccountingPreference"/>
+                <set field="tabButtonItem" value="PartyAcctgPreference"/>
+                <set field="tabSubButtonItem" value="PartyAcctgPreference"  global="true"/>
+                <set field="selectedMenuItem" value="accSetting"/>
+                <set field="selectedSubMenuItem" value="accOrganizationSetting"/>  
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <property-to-field field="defaultCurrencyUomId" resource="general" property="currency.uom.id.default" default="USD"/>
+                <set field="partyId" from-field="parameters.organizationPartyId"/>
+                <entity-one entity-name="PartyAcctgPreference" value-field="partyAcctgPreference"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="OlbiusCommonGlSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                            <screenlet title="${uiLabelMap.AccountingPreference}">
+<!--                             	<include-form location="component://delys/widget/accounting/accounting/DelysAccountForms.xml" name="PartyAcctgPreference"/> -->
+                            	<platform-specific>
+                            	    <html>
+                            	        <html-template location="component://delys/webapp/delys/accounting/setting/organization/listPartyAcctgPreference.ftl"/>
+                            	    </html>
+                            	</platform-specific>
+                            	<!-- <include-form name="PartyAcctgPreference" location="component://delys/widget/DelysAccountForms.xml"/> -->
+                      		 </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ListGlAccountOrganizationJQ">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PageTitleListAccounts"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId" global="true"/>
+                <set field="tabButtonItem" value="ListGlAccountOrganizationJQ"/>
+                <set field="tabSubButtonItem" value="ListGlAccountOrganizationJQ"  global="true"/>
+                <set field="selectedMenuItem" value="accSetting" global="true"/>
+                <set field="selectedSubMenuItem" value="accOrganizationSetting" global="true"/> 
+                
+                <entity-one entity-name="PartyAcctgPreference" value-field="partyAcctgPreference" auto-field-map="false">
+                    <field-map field-name="partyId" from-field="parameters.organizationPartyId"/>
+                </entity-one>                
+				<entity-condition list="listGlAccountType" entity-name="GlAccountType">
+					<order-by field-name="description"/>
+				</entity-condition>            
+				<entity-condition list="listGlAccountClass" entity-name="GlAccountClass">
+					<order-by field-name="description"/>
+				</entity-condition>
+				<entity-condition list="listGlResourceType" entity-name="GlResourceType">
+					<order-by field-name="description"/>
+				</entity-condition>
+				<entity-condition list="listGlXbrlClass" entity-name="GlXbrlClass">
+					<order-by field-name="description"/>
+				</entity-condition>				
+				<entity-condition list="listGlAccount" entity-name="GlAccount">
+					<condition-expr field-name="glTaxFormId" operator="equals" value="${partyAcctgPreference.taxFormId}"/>
+					<order-by field-name="description"/>
+				</entity-condition>
+				<entity-condition list="listTaxFormId" entity-name="Enumeration">
+					<condition-expr field-name="enumTypeId" operator="equals" value="TAX_FORMS"/>
+					<order-by field-name="enumId"/>
+				</entity-condition>				
+            </actions>
+			<widgets>					
+				<decorator-screen name="OlbiusCommonGlSetupDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+                        <section>
+                            <widgets>	
+                            	<platform-specific>
+                            		<html><html-template location="component://delys/webapp/delys/accounting//setting/organization/listGlAccountOrganizationJQ.ftl"/></html>
+                            	</platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="SetupGlJournalsJQ">
+        <section>
+            <actions>
+                <set field="titleProperty" value="AccountingGlJournals"/>
+                <set field="tabButtonItem" value="SetupGlJournalsJQ" />
+                <set field="tabSubButtonItem" value="SetupGlJournalsJQ"  global="true"/>
+                <set field="selectedMenuItem" value="accSetting" global="true"/>
+                <set field="selectedSubMenuItem" value="accOrganizationSetting" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <entity-one entity-name="GlJournal" value-field="glJournal"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="OlbiusCommonGlSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<section>
+                            <widgets>	
+		                       	<platform-specific>
+		                       		<html>
+		                       			<html-template location="component://delys/webapp/delys/accounting//setting/organization/listGlJournalsJQ.ftl"/>
+		                       		</html>
+		                       	</platform-specific>
+		                        </widgets>
+		                </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="TimePeriods">
+        <section>
+            <actions>
+                <set field="titleProperty" value="AccountingTimePeriod"/>
+<!--                 <set field="labelTitleProperty" value="${uiLabelMap.AccountingTimePeriod}"/> -->
+                <set field="tabButtonItem" value="TimePeriods" />
+                <set field="tabSubButtonItem" value="TimePeriods"  global="true"/>
+                <set field="selectedMenuItem" value="accSetting" global="true"/>
+                <set field="selectedSubMenuItem" value="accOrganizationSetting" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <entity-condition entity-name="CustomTimePeriod" list="openTimePeriods">
+                    <condition-list>
+                        <condition-expr field-name="organizationPartyId" operator="equals" from-field="organizationPartyId"/>
+                        <condition-expr field-name="isClosed" operator="equals" value="N"/>
+                    </condition-list>
+                    <order-by field-name="thruDate"/>
+                </entity-condition>
+                <entity-condition entity-name="CustomTimePeriod" list="closedTimePeriods">
+                    <condition-list>
+                        <condition-expr field-name="organizationPartyId" operator="equals" from-field="organizationPartyId"/>
+                        <condition-expr field-name="isClosed" operator="equals" value="Y"/>
+                    </condition-list>
+                    <order-by field-name="periodTypeId"/>
+                    <order-by field-name="periodNum"/>
+                    <order-by field-name="thruDate"/>
+                </entity-condition>
+                <entity-condition list="listPeriodType" entity-name="PeriodType"></entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="OlbiusCommonGlSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="">
+                            <platform-specific>
+		                       		<html>
+		                       			<html-template location="component://delys/webapp/delys/accounting//setting/organization/listOpenTimePeriods.ftl"/>
+		                       		</html>
+		                       	</platform-specific>
+                        </screenlet>
+                        <screenlet title="">
+                            <platform-specific>
+		                       		<html>
+		                       			<html-template location="component://delys/webapp/delys/accounting//setting/organization/listClosedTimePeriods.ftl"/>
+		                       		</html>
+		                       	</platform-specific>
+                        </screenlet>
+                        
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="GlAccountTypeDefaults">
+        <section>
+            <actions>
+                <set field="titleProperty" value="AccountingGlAccountTypeDefaults"/>
+                <set field="labelTitleProperty" value="${uiLabelMap.AccountingGlAccountTypeDefaults}"/>
+                <set field="tabSubButtonItem" value="GlAccountAssignment"/>
+                <set field="tabButtonItem" value="GlAccountAssignment"/>
+                <set field="selectedMenuItem" value="accSetting" global="true"/>
+                <set field="selectedSubMenuItem" value="accOrganizationSetting" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <set field="tabBarButtonItem2" value="GlAccountTypeDefaults"/>
+				<!-- <set field="tabBarButtonItem2" value=""/> -->
+                <entity-condition entity-name="GlAccountTypeDefault" list="glAccountTypeDefaults">
+	                <condition-list>
+	                    <condition-expr field-name="organizationPartyId" operator="equals" from-field="organizationPartyId"/>
+	                </condition-list>
+	                <order-by field-name="glAccountTypeId"/>
+	            </entity-condition>
+	            <entity-condition entity-name="GlAccountType" list="glAccountTypeDefaults">
+                    <order-by field-name="description"/>
+                </entity-condition>
+                <entity-condition entity-name="GlAccountOrganizationAndClass" list="glAccountOrganizationAndClass">
+                	<condition-expr field-name="organizationPartyId" from-field="organizationPartyId"/>
+                    <order-by field-name="accountCode"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="OlbiusCommonGlSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/setting/organization/listGLAccTypeDefault.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="FinAccountTypeGlAccount">
+        <section>
+            <actions>
+            	<set field="titleProperty" value="AccountTypeGlAccount"/>
+                <set field="tabSubButtonItem" value="GlAccountAssignment"/>
+                <set field="tabButtonItem" value="GlAccountAssignment"/>
+                <set field="selectedMenuItem" value="accSetting" global="true"/>
+                <set field="selectedSubMenuItem" value="accOrganizationSetting" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <set field="tabBarButtonItem2" value="FinAccountTypeGlAccounts"/>
+                <entity-condition entity-name="FinAccountTypeGlAccount" list="finAccountTypeGlAccounts">
+                    <condition-expr field-name="organizationPartyId" operator="equals" from-field="organizationPartyId"/>
+                    <order-by field-name="finAccountTypeId"/>
+                </entity-condition>
+                <entity-condition entity-name="FinAccountType" list="finAccountTypes" use-cache="true">
+                    <order-by field-name="finAccountTypeId"/>
+                </entity-condition>
+                <entity-condition list="listGlAccountOrganizationAndClass" entity-name="GlAccountOrganizationAndClass">
+                	<condition-expr field-name="organizationPartyId" operator="equals" from-field="organizationPartyId"/>
+                	<order-by field-name="accountCode"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="OlbiusCommonGlSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/setting/organization/listFinAccountTypeGlAccounts.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="GlAccountSalInvoice">
+        <section>
+            <actions>
+            	<set field="titleProperty" value="AccountingInvoiceSales"/>
+            	<set field="tabSubButtonItem" value="GlAccountAssignment"/>
+                <set field="tabButtonItem" value="GlAccountAssignment"/>
+                <set field="selectedMenuItem" value="accSetting" global="true"/>
+                <set field="selectedSubMenuItem" value="accOrganizationSetting" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <set field="tabBarButtonItem2" value="GlAccountSalInvoice"/>
+	            <entity-one entity-name="GlAccountClass" value-field="revenueGlAccountClass">
+	                <field-map field-name="glAccountClassId" value="REVENUE"/>
+	            </entity-one>
+	            <set field="revenueAccountClassIds" value="${bsh:org.ofbiz.accounting.util.UtilAccounting.getDescendantGlAccountClassIds(revenueGlAccountClass)}" type="List"/>
+	            <entity-condition list="listInvoiceItemType" entity-name="InvoiceItemType">
+	            	<condition-expr field-name="invoiceItemTypeId" operator="like" value="INV_%"/>
+	            	<order-by field-name="description"/>
+	            </entity-condition>
+	            <entity-condition list="listGlAccountOrganizationAndClass" entity-name="GlAccountOrganizationAndClass">
+	            	<condition-list combine="and">
+	            		<condition-expr field-name="organizationPartyId" operator="equals" from-field="organizationPartyId" />
+	            		<condition-expr field-name="glAccountClassId" operator="in" from-field="revenueAccountClassIds" />
+	            	</condition-list>
+	            	<order-by field-name="accountCode"/>
+	            </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="OlbiusCommonGlSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">                    	                      
+                        <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/setting/organization/listGlAccountSalInvoice.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>   
+    <screen name="GlAccountPurInvoice">
+        <section>
+            <actions>
+            	<set field="titleProperty" value="AccountingInvoicePurchase"/>
+            	<set field="tabSubButtonItem" value="GlAccountAssignment"/>
+                <set field="tabButtonItem" value="GlAccountAssignment"/>
+                <set field="selectedMenuItem" value="accSetting" global="true"/>
+                <set field="selectedSubMenuItem" value="accOrganizationSetting" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <set field="tabBarButtonItem2" value="GlAccountPurInvoice"/>
+                <set field="invItemTypePrefix" value="PINV"/>
+	            <entity-one entity-name="GlAccountClass" value-field="expenseGlAccountClass">
+	                <field-map field-name="glAccountClassId" value="EXPENSE"/>
+	            </entity-one>
+	            <set field="expenseAccountClassIds" value="${bsh:org.ofbiz.accounting.util.UtilAccounting.getDescendantGlAccountClassIds(expenseGlAccountClass)}" type="List"/>
+	            <entity-condition list="listInvoiceItemType" entity-name="InvoiceItemType">
+	            	<condition-expr field-name="invoiceItemTypeId" operator="like" value="PINV%"/>
+	            	<order-by field-name="description"/>
+	            </entity-condition>
+	            <entity-condition list="listGlAccountOrganizationAndClass" entity-name="GlAccountOrganizationAndClass">
+	            	<condition-list combine="and">
+	            		<condition-expr field-name="organizationPartyId" operator="equals" from-field="organizationPartyId" />
+	            		<condition-expr field-name="glAccountClassId" operator="in" from-field="expenseAccountClassIds" />
+	            	</condition-list>
+	            	<order-by field-name="accountCode"/>
+	            </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="OlbiusCommonGlSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/setting/organization/listGlAccountPOInvoice.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="GlAccountNrPaymentMethod">
+        <section>
+            <actions>
+            	<set field="titleProperty" value="AccountingPaymentMethodId"/>
+            	<set field="tabSubButtonItem" value="GlAccountAssignment"/>
+                <set field="tabButtonItem" value="GlAccountAssignment"/>
+                <set field="selectedMenuItem" value="accSetting" global="true"/>
+                <set field="selectedSubMenuItem" value="accOrganizationSetting" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <set field="tabBarButtonItem2" value="GlAccountNrPaymentMethod"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/accounting/setting/organization/PaymentMethodType.groovy"/>
+	            
+	            <entity-condition list="listGlAccountOrganizationAndClass" entity-name="GlAccountOrganizationAndClass">
+	            	<condition-expr field-name="organizationPartyId" operator="equals" from-field="organizationPartyId"/>
+	            	<order-by field-name="accountCode"/>
+	            </entity-condition>
+
+            </actions>
+            <widgets>
+                <decorator-screen name="OlbiusCommonGlSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/setting/organization/listGlAccountNrPaymentMethod.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="GlAccountTypePaymentType">
+        <section>
+            <actions>
+                <set field="titleProperty" value="AccountingPaymentType"/>
+            	<set field="tabSubButtonItem" value="GlAccountAssignment"/>
+                <set field="tabButtonItem" value="GlAccountAssignment"/>
+                <set field="selectedMenuItem" value="accSetting" global="true"/>
+                <set field="selectedSubMenuItem" value="accOrganizationSetting" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <set field="tabBarButtonItem2" value="GlAccountTypePaymentType"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/accounting/setting/organization/GlAccountTypePaymentType.groovy"/>
+                <!-- <entity-condition list="listPaymentType" entity-name="PaymentType">
+                	<order-by field-name="description"/>
+                </entity-condition> -->
+				<entity-condition list="listGlAccountType" entity-name="GlAccountType">
+                	<order-by field-name="description"/>
+                </entity-condition>
+       
+            </actions>
+            <widgets>
+                <decorator-screen name="OlbiusCommonGlSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/setting/organization/listGlAccountTypePaymentType.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen> 
+    <screen name="VarianceReasonGlAccounts">
+        <section>
+            <actions>
+            	<set field="titleProperty" value="VarianceReasonGlAccounts"/>
+                <set field="tabSubButtonItem" value="GlAccountAssignment"/>
+                <set field="tabButtonItem" value="GlAccountAssignment"/>
+                <set field="selectedMenuItem" value="accSetting" global="true"/>
+                <set field="selectedSubMenuItem" value="accOrganizationSetting" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <set field="tabBarButtonItem2" value="VarianceReasonGlAccounts"/>
+				
+                <entity-condition entity-name="VarianceReasonGlAccount" list="varianceReasonGlAccounts">
+                    <condition-expr field-name="organizationPartyId" from-field="organizationPartyId"/>
+                    <order-by field-name="glAccountId"/>
+                </entity-condition>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/accounting/setting/organization/VarianceReason.groovy"/>
+                <entity-condition entity-name="GlAccountOrganizationAndClass" list="glAccountOrganizationAndClasses"> 
+                	<condition-expr field-name="organizationPartyId" operator="equals" value="${organizationPartyId}"/>
+                    <order-by field-name="accountCode"/>
+                </entity-condition>
+                
+            </actions>
+            <widgets>
+                <decorator-screen name="OlbiusCommonGlSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                         
+                    	<platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/setting/organization/listVarianceReasonGlAccounts.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="CreditCardTypeGlAccounts">
+        <section>
+            <actions>
+            	<set field="titleProperty" value="AccountingCreditCardTypeGlAccount"/>
+                <set field="tabSubButtonItem" value="GlAccountAssignment"/>
+                <set field="tabButtonItem" value="GlAccountAssignment"/>
+                <set field="selectedMenuItem" value="accSetting" global="true"/>
+                <set field="selectedSubMenuItem" value="accOrganizationSetting" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <set field="tabBarButtonItem2" value="CreditCardTypeGlAccount"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/accounting/setting/organization/CreditCardTypeGlAccounts.groovy"/>
+                <entity-condition list="listGlAccountOrganizationAndClass" entity-name="GlAccountOrganizationAndClass">
+                	<condition-expr field-name="organizationPartyId" operator="equals" from-field="organizationPartyId"/>
+                	<order-by field-name="accountCode"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="OlbiusCommonGlSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/setting/organization/listCreditCardTypeGlAccounts.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="OrganizationTaxAuthorityGlAccounts">
+        <section>
+            <actions>
+                <set field="tabSubButtonItem" value="GlAccountAssignment"/>
+                <set field="titleProperty" value="AccountingTaxAuthorityGlAccounts"/>
+                <set field="tabButtonItem" value="GlAccountAssignment"/>
+                <set field="selectedMenuItem" value="accSetting" global="true"/>
+                <set field="selectedSubMenuItem" value="accOrganizationSetting" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <set field="tabBarButtonItem2" value="TaxAuthorityGlAccounts"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <entity-condition entity-name="TaxAuthorityGlAccount" list="taxAuthorityGlAccounts">
+                    <condition-expr field-name="organizationPartyId" from-field="organizationPartyId"/>
+                    <order-by field-name="taxAuthGeoId"/>
+                    <order-by field-name="taxAuthPartyId"/>
+                </entity-condition>
+                <entity-condition list="listGlAccountOrganizationAndClass" entity-name="GlAccountOrganizationAndClass">
+                    <condition-expr field-name="organizationPartyId" operator="equals" from-field="parameters.organizationPartyId"/>
+                    <order-by field-name="accountCode"/>
+                </entity-condition>
+                <entity-condition list="listGeo" entity-name="Geo"></entity-condition>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/chartofaccounts/TaxAuthorityGlAccounts.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="OlbiusCommonGlSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                     
+                    <decorator-section name="body">
+                       
+                        <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/setting/organization/listTaxAuthorityGLAccounts.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="FixedAssetTypeGlAccounts">
+        <section>
+            <actions>
+                <set field="titleProperty" value="AccountingFixedAssetTypeGlAccounts"/>
+                <set field="tabSubButtonItem" value="GlAccountAssignment"/>
+                <set field="tabButtonItem" value="GlAccountAssignment"/>
+                <set field="selectedMenuItem" value="accSetting" global="true"/>
+                <set field="selectedSubMenuItem" value="accOrganizationSetting" global="true"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <set field="tabBarButtonItem2" value="FixedAssetTypeGlAccounts"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <entity-condition list="listFixedAssetType" entity-name="FixedAssetType">
+               		<order-by field-name="description"/>
+                </entity-condition>
+                <entity-condition list="listFixedAsset" entity-name="FixedAsset">
+                	<condition-expr field-name="partyId" operator="equals" from-field="organizationPartyId"/>
+                	<order-by field-name="fixedAssetId"/>
+                </entity-condition>
+               <script location="component://delys/webapp/delys/WEB-INF/actions/accounting/setting/organization/FixedAssetTypeGlAccounts.groovy"/>
+               <entity-condition list="listProfitGlAccount" entity-name="GlAccountOrganizationAndClass">
+                	<condition-list>
+                		<condition-expr field-name="glAccountClassId" operator="equals" value="CASH_INCOME"/>
+                		<condition-expr field-name="organizationPartyId" operator="equals" from-field="organizationPartyId"/>
+                	</condition-list>
+                </entity-condition>
+                <entity-condition list="listLossGlAccount" entity-name="GlAccountOrganizationAndClass">
+                	<condition-list >
+                		<condition-expr field-name="organizationPartyId" operator="equals" from-field="organizationPartyId"/>
+                		<condition-expr field-name="glAccountClassId" operator="equals" value="SGA_EXPENSE"/>
+                	</condition-list>
+                </entity-condition>
+                
+                
+            </actions>
+            <widgets>
+                <decorator-screen name="OlbiusCommonGlSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                     
+                    <decorator-section name="body">
+                       
+                        <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/setting/organization/listFixedAssetTypeGlAccounts.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+</screens>        

@@ -1,0 +1,1480 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site-conf xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/site-conf.xsd">
+	<description>OFBiz: flatsomeStore Controller Configuration File</description>
+	<errorpage>/error/error.jsp</errorpage>
+
+	<handler name="java" type="request" class="org.ofbiz.webapp.event.JavaEventHandler"/>
+    <handler name="bsf" type="request" class="org.ofbiz.webapp.event.BsfEventHandler"/>
+    <handler name="soap" type="request" class="org.ofbiz.webapp.event.SOAPEventHandler"/>
+    <handler name="service" type="request" class="org.ofbiz.webapp.event.ServiceEventHandler"/>
+    <handler name="service-multi" type="request" class="org.ofbiz.webapp.event.ServiceMultiEventHandler"/>
+    <handler name="simple" type="request" class="org.ofbiz.webapp.event.SimpleEventHandler"/>
+    <handler name="rome" type="request" class="org.ofbiz.webapp.event.RomeEventHandler"/>
+
+    <handler name="jsp" type="view" class="org.ofbiz.webapp.view.JspViewHandler"/>
+    <handler name="http" type="view" class="org.ofbiz.webapp.view.HttpViewHandler"/>
+    <handler name="screen" type="view" class="org.ofbiz.widget.screen.MacroScreenViewHandler"/>
+    <handler name="simplecontent" type="view" class="org.ofbiz.content.view.SimpleContentViewHandler"/>
+    <handler name="screenfop" type="view" class="org.ofbiz.widget.screen.ScreenFopViewHandler"/>
+
+
+	<!-- Events run from here for the first hit in a visit -->
+	<firstvisit>
+		<event name="autoLoginCheck" type="java"
+			path="org.ofbiz.webapp.control.LoginWorker" invoke="autoLoginCheck" />
+		<event name="checkTrackingCodeCookies" type="java"
+			path="org.ofbiz.marketing.tracking.TrackingCodeEvents" invoke="checkTrackingCodeCookies" />
+		<event name="setDefaultStoreSettings" type="java"
+			path="org.ofbiz.product.product.ProductEvents" invoke="setDefaultStoreSettings" />
+		<event name="createGuestShoppingListCookies" type="java"
+			path="org.ofbiz.order.shoppinglist.ShoppingListEvents" invoke="createGuestShoppingListCookies" />
+		<event name="restoreAutoSaveList" type="java"
+			path="org.ofbiz.order.shoppinglist.ShoppingListEvents" invoke="restoreAutoSaveList" />
+	</firstvisit>
+
+	<!-- Events to run on every request before security (chains exempt) -->
+	<preprocessor>
+		<!-- This event allows affilate/distributor entry on any page -->
+		<event name="checkExternalLoginKey" type="java"
+			path="org.ofbiz.webapp.control.LoginWorker" invoke="checkExternalLoginKey" />
+		<event name="setAssociationId" type="java"
+			path="com.olbius.obb.misc.ThirdPartyEvents" invoke="setAssociationId" />
+		<event name="checkTrackingCodeUrlParam" type="java"
+			path="org.ofbiz.marketing.tracking.TrackingCodeEvents" invoke="checkTrackingCodeUrlParam" />
+		<event name="checkPartnerTrackingCodeUrlParam" type="java"
+			path="org.ofbiz.marketing.tracking.TrackingCodeEvents" invoke="checkPartnerTrackingCodeUrlParam" />
+		<event name="keepCartUpdated" type="java"
+			path="org.ofbiz.order.shoppingcart.ShoppingCartEvents" invoke="keepCartUpdated" />
+	</preprocessor>
+
+	<!-- Events to run on every request after all other processing (chains exempt) -->
+	<!-- <postprocessor> <event name="test" type="java" path="org.ofbiz.webapp.event.TestEvent"
+		invoke="test"/> </postprocessor> -->
+
+	<after-login>
+		<event name="updateAssociatedDistributor" type="java"
+			path="com.olbius.obb.misc.ThirdPartyEvents" invoke="updateAssociatedDistributor" />
+		<event name="keepCartUpdated" type="java"
+			path="org.ofbiz.order.shoppingcart.ShoppingCartEvents" invoke="keepCartUpdated" />
+		<!-- after login, get everything from the auto-save list -->
+		<event name="restoreAutoSaveList" type="java"
+			path="org.ofbiz.order.shoppinglist.ShoppingListEvents" invoke="restoreAutoSaveList" />
+		<!-- after login and restoring from the auto-save list, save everything
+			to the auto-save list to handle anything that may have already been in the
+			cart before login -->
+		<event name="saveCartToAutoSaveList" type="java"
+			path="org.ofbiz.order.shoppinglist.ShoppingListEvents" invoke="saveCartToAutoSaveList" />
+		<event name="clearGuestShoppingListCookies" type="java"
+			path="org.ofbiz.order.shoppinglist.ShoppingListEvents" invoke="clearGuestShoppingListCookies" />
+	</after-login>
+
+	<!-- default request; call into CMS -->
+<!-- 	<default-request request-uri="PageNotFound" /> -->
+
+	<!-- facebook tracking -->
+	<request-map uri="createFacebookInteraction" edit="false">
+		<description>Verify a user is logged in.</description>
+		<security https="false" auth="false" />
+		<event type="java" path="com.olbius.obb.facebook.ProductSocial"
+			invoke="addInteraction" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<!-- Security Request Mappings -->
+	<request-map uri="PageNotFound">
+		<security https="false" auth="false" />
+		<response name="success" type="view" value="PageNotFound" />
+		<response name="error" type="view" value="PageNotFound" />
+	</request-map>
+	<request-map uri="signin">
+		<security https="true" auth="true" />
+		<response name="success" type="request-redirect" value="main" />
+		<response name="error" type="request-redirect" value="main" />
+	</request-map>
+	<request-map uri="checkLogin" edit="false">
+		<description>Verify a user is logged in.</description>
+		<security https="true" auth="false" />
+		<event type="java" path="org.ofbiz.securityext.login.LoginEvents"
+			invoke="storeCheckLogin" />
+		<response name="success" type="request-redirect" value="main" />
+		<response name="error" type="request-redirect" value="login" />
+	</request-map>
+	<request-map uri="login">
+		<security https="true" auth="false" />
+		<event type="java" path="com.olbius.baseecommerce.user.EcommerceLogin" invoke="storeLogin" />
+		<response name="success" type="request-redirect" value="main" />
+		<response name="requirePasswordChange" type="view" value="requirePasswordChange" />
+		<response name="error" type="view" value="login" />
+	</request-map>
+	<request-map uri="logout">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.webapp.control.LoginWorker"
+			invoke="logout" />
+		<response name="success" type="request-redirect" value="main" />
+		<response name="error" type="view" value="main" />
+	</request-map>
+	<request-map uri="autoLogout">
+		<security https="true" auth="false" />
+		<event type="java" path="org.ofbiz.webapp.control.LoginWorker"
+			invoke="autoLoginRemove" />
+		<response name="success" type="request-redirect" value="main" />
+		<response name="error" type="view" value="main" />
+	</request-map>
+	<request-map uri="viewcontent">
+		<security https="false" auth="false" />
+		<response name="success" type="view" value="viewcontent" />
+		<response name="error" type="view" value="viewcontent" />
+	</request-map>
+	<request-map uri="contentcategory">
+		<security https="false" auth="false" />
+		<response name="success" type="view" value="contentcategory" />
+		<response name="error" type="view" value="contentcategory" />
+	</request-map>
+	<request-map uri="forgotpassword">
+		<security https="true" auth="false" />
+		<event type="java" path="org.ofbiz.securityext.login.LoginEvents"
+			invoke="forgotPassword" />
+		<response name="success" type="request-redirect" value="resetPasswordSuccess" />
+		<response name="error" type="request-redirect" value="login" />
+	</request-map>
+	<request-map uri="resetPasswordSuccess">
+		<security https="true" auth="false" />
+		<response name="success" type="view" value="resetPasswordSuccess" />
+		<response name="error" type="request-redirect" value="login" />
+	</request-map>
+	<!-- End of Security Mappings -->
+
+	<!-- General Request Mappings -->
+	<request-map uri="cms">
+		<event type="java" path="org.ofbiz.content.cms.CmsEvents"
+			invoke="cms" />
+		<response name="success" type="none" />
+		<response name="error" type="view" value="error" />
+	</request-map>
+
+	<request-map uri="view">
+		<security https="false" auth="false" />
+		<response name="success" type="view" value="main" />
+	</request-map>
+
+	<request-map uri="main">
+		<security https="false" auth="false" />
+		<response name="success" type="view" value="main" />
+		<response name="error" type="view" value="main" />
+	</request-map>
+	<request-map uri="orderhistory">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="orderhistory" />
+	</request-map>
+	<request-map uri="policies">
+		<security https="false" auth="false" />
+		<response name="success" type="view" value="policies" />
+	</request-map>
+
+	<!-- TO BE REMOVED <request-map uri="passwordemail"><security https="false"
+		auth="false"/><response name="success" type="view" value="passwordemail"/></request-map> -->
+
+	<!-- Session Setting Requests -->
+	<request-map uri="setSessionLocale">
+		<security https="false" auth="false" />
+		<event type="java" path="org.ofbiz.common.CommonEvents" invoke="setSessionLocale" />
+		<response name="success" type="request-redirect" value="fromSetSessionLocale" />
+		<response name="error" type="view" value="main" />
+	</request-map>
+	<request-map uri="categoryAjaxFired">
+		<security https="false" auth="false" />
+		<response name="success" type="view" value="productCategoryList"
+			save-current-view="true" />
+	</request-map>
+	<request-map uri="categoryAjaxFiredSecure">
+		<security https="true" auth="false" />
+		<response name="success" type="view" value="productCategoryList"
+			save-current-view="true" />
+	</request-map>
+	<request-map uri="fromSetSessionLocale">
+		<event type="simple"
+			path="component://baseecommerce/script/com/baseecommerce/ecommerce/customer/CustomerEvents.xml"
+			invoke="fromSetSessionLocale" />
+		<response name="success" type="view" value="main" />
+		<response name="error" type="view" value="main" />
+	</request-map>
+
+	<request-map uri="setSessionCurrencyUom">
+		<security https="false" auth="false" />
+		<event type="java" path="org.ofbiz.common.CommonEvents" invoke="setSessionCurrencyUom" />
+		<response name="success" type="view-last" value="main" />
+		<response name="error" type="view" value="main" />
+	</request-map>
+
+	<request-map uri="setSessionProductStore">
+		<security https="false" auth="false" />
+		<event type="java"
+			path="org.ofbiz.order.shoppingcart.product.ProductStoreCartAwareEvents"
+			invoke="setSessionProductStore" />
+		<response name="success" type="view-last" value="main" />
+		<response name="error" type="view" value="main" />
+	</request-map>
+
+	<request-map uri="setdistributor">
+		<security https="true" auth="false" />
+		<event type="java" path="com.olbius.obb.misc.ThirdPartyEvents"
+			invoke="setAssociationId" />
+		<response name="success" type="view" value="main" />
+		<response name="error" type="view" value="main" />
+	</request-map>
+
+	<!-- Common json reponse events, chain these after events to send json reponses -->
+	<!-- Standard json response, uses all compatible request attributes -->
+	<request-map uri="json">
+		<security direct-request="false" />
+		<event type="java" path="org.ofbiz.common.CommonEvents" invoke="jsonResponseFromRequestAttributes" />
+		<response name="success" type="none" />
+	</request-map>
+	<request-map uri="getAssociatedStateList">
+		<security https="true" auth="false" />
+		<event type="service" invoke="getAssociatedStateList" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<!-- ======================= Customer Profile Requests ======================= -->
+	<request-map uri="viewprofile">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="viewprofile" />
+	</request-map>
+	<request-map uri="addressbook">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="addressbook" />
+	</request-map>
+	<request-map uri="dashboard">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="dashboard" />
+	</request-map>
+	<request-map uri="editcontactmech">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="editcontactmech" />
+	</request-map>
+	<request-map uri="editcontactmechnosave">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="editcontactmech" />
+	</request-map>
+	<request-map uri="changepassword">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="changepassword" />
+	</request-map>
+	<request-map uri="setprofiledefault">
+		<security https="true" auth="true" />
+		<event type="service" invoke="setPartyProfileDefaults" />
+		<response name="success" type="view" value="dashboard" />
+		<response name="error" type="view" value="dashboard" />
+	</request-map>
+	<request-map uri="createContactMech">
+		<security https="true" auth="true" />
+		<event type="service" invoke="createPartyContactMech" />
+		<response name="success" type="view" value="editcontactmech" />
+		<response name="error" type="view" value="editcontactmech" />
+	</request-map>
+	<request-map uri="updateContactMech">
+		<security https="true" auth="true" />
+		<event type="service" invoke="updatePartyContactMech" />
+		<response name="success" type="view" value="editcontactmech" />
+		<response name="error" type="view" value="editcontactmech" />
+	</request-map>
+	<request-map uri="deleteContactMech">
+		<security https="true" auth="true" />
+		<event type="service" invoke="deletePartyContactMech" />
+		<response name="success" type="view" value="editcontactmech" />
+		<response name="error" type="view" value="editcontactmech" />
+	</request-map>
+	<request-map uri="createPostalAddressAndPurpose">
+		<security https="true" auth="true" />
+		<event type="service" invoke="createPartyPostalAddress" />
+		<response name="success" type="view" value="editcontactmech" />
+		<response name="error" type="view" value="editcontactmech" />
+	</request-map>
+	<request-map uri="createPostalAddress">
+		<security https="true" auth="true" />
+		<event type="service" invoke="createPartyPostalAddress" />
+		<response name="success" type="view" value="editcontactmech" />
+		<response name="error" type="view" value="editcontactmech" />
+	</request-map>
+	<request-map uri="updatePostalAddress">
+		<security https="true" auth="true" />
+		<event type="service" invoke="updatePartyPostalAddress" />
+		<response name="success" type="view" value="editcontactmech" />
+		<response name="error" type="view" value="editcontactmech" />
+	</request-map>
+
+	<request-map uri="createTelecomNumber">
+		<security https="true" auth="true" />
+		<event type="service" invoke="createPartyTelecomNumber" />
+		<response name="success" type="view" value="editcontactmech" />
+		<response name="error" type="view" value="editcontactmech" />
+	</request-map>
+	<request-map uri="updateTelecomNumber">
+		<security https="true" auth="true" />
+		<event type="service" invoke="updatePartyTelecomNumber" />
+		<response name="success" type="view" value="editcontactmech" />
+		<response name="error" type="view" value="editcontactmech" />
+	</request-map>
+
+	<request-map uri="createEmailAddress">
+		<security https="true" auth="true" />
+		<event type="service" invoke="createPartyEmailAddress" />
+		<response name="success" type="view" value="editcontactmech" />
+		<response name="error" type="view" value="editcontactmech" />
+	</request-map>
+	<request-map uri="updateEmailAddress">
+		<security https="true" auth="true" />
+		<event type="service" invoke="updatePartyEmailAddress" />
+		<response name="success" type="view" value="editcontactmech" />
+		<response name="error" type="view" value="editcontactmech" />
+	</request-map>
+
+	<request-map uri="createPartyContactMechPurpose">
+		<security https="true" auth="true" />
+		<event type="service" invoke="createPartyContactMechPurpose" />
+		<response name="success" type="view" value="editcontactmech" />
+		<response name="error" type="view" value="editcontactmech" />
+	</request-map>
+	<request-map uri="deletePartyContactMechPurpose">
+		<security https="true" auth="true" />
+		<event type="service" invoke="deletePartyContactMechPurpose" />
+		<response name="success" type="view" value="editcontactmech" />
+		<response name="error" type="view" value="editcontactmech" />
+	</request-map>
+
+	<request-map uri="updatePassword">
+		<security https="true" auth="true" />
+		<event type="simple"
+			path="component://securityext/script/org/ofbiz/securityext/login/LoginSimpleEvents.xml"
+			invoke="updatePassword" />
+		<response name="success" type="view" value="changepassword" />
+		<response name="error" type="view" value="changepassword" />
+	</request-map>
+	<!-- ======================= Survey Requests ======================= -->
+
+	<request-map uri="takesurvey">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="profilesurvey" />
+	</request-map>
+	<request-map uri="profilesurvey">
+		<security https="true" auth="true" />
+		<event type="java" invoke="createSurveyResponseAndRestoreParameters"
+			path="org.ofbiz.content.survey.SurveyEvents" />
+		<response name="success" type="view" value="profilesurvey" />
+		<response name="error" type="view" value="profilesurvey" />
+	</request-map>
+	<request-map uri="minipoll">
+		<security https="false" auth="false" />
+		<event type="java" invoke="createSurveyResponseAndRestoreParameters"
+			path="org.ofbiz.content.survey.SurveyEvents" />
+		<response name="success" type="view" value="main" />
+		<response name="error" type="view" value="main" />
+	</request-map>
+	<!-- Cart -->
+	<request-map uri="showcart">
+		<security https="false" auth="false" />
+<!-- 		<response name="success" type="view" value="showcart" /> -->
+		<response name="success" type="request-redirect" value="checkoutorder" />
+		<response name="error" type="request-redirect" value="checkoutorder" />
+	</request-map>
+	<request-map uri="modifycart">
+		<security https="false" auth="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.ShoppingCartEvents"
+			invoke="modifyCart" />
+		<response name="success" type="request-redirect" value="checkoutorder" />
+		<response name="error" type="request-redirect" value="checkoutorder" />
+	</request-map>
+	<request-map uri="emptycart">
+		<security https="false" auth="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.ShoppingCartEvents" invoke="clearCart" />
+		<response name="success" type="view" value="checkoutorder" />
+		<response name="error" type="view" value="checkoutorder" />
+	</request-map>
+	<request-map uri="removeCartByCartIndex">
+		<security https="false" auth="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.ShoppingCartEvents" invoke="removeCartByCartIndex" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="removeCartByCartIndexSe">
+		<security https="true" auth="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.ShoppingCartEvents" invoke="removeCartByCartIndex" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="UpdateCart">
+		<security https="false" auth="false" />
+		<response name="success" type="view" value="UpdateCart" />
+	</request-map>
+
+	<!-- Product -->
+	<request-map uri="category">
+		<security https="false" auth="false" />
+		<response name="success" type="view" value="category" />
+	</request-map>
+	<request-map uri="product">
+		<security https="false" auth="false" />
+		<response name="success" type="view" value="product" />
+	</request-map>
+	<request-map uri="productmaindetail">
+		<security https="false" auth="false" />
+		<response name="success" type="view" value="productmaindetail"
+			save-current-view="true" />
+	</request-map>
+
+	<!-- category -->
+	<request-map uri="productCategoryList">
+		<security https="false" auth="false" />
+		<response name="success" type="view" value="productCategoryList" />
+	</request-map>
+	<request-map uri="supplierdetail">
+		<security https="false" auth="false" />
+		<response name="success" type="view" value="supplierdetail" />
+	</request-map>
+	<request-map uri="keywordsearch">
+		<security https="false" auth="false" />
+		<!-- <event type="java" path="org.ofbiz.product.product.ProductSearchSession"
+			invoke="checkDoKeywordOverride" /> -->
+		<event type="java" path="com.olbius.product.product.ProductSearchElastic" invoke="searchKeyword"/>
+		<response name="success" type="view" value="keywordsearch" />
+		<response name="none" type="none" value="" />
+	</request-map>
+
+	<!-- Cart -->
+	<request-map uri="additem">
+		<security https="false" auth="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.ShoppingCartEvents" invoke="addToCart"/>
+		<response name="success" type="request-redirect" value="checkoutorder" />
+		<response name="survey" type="request-redirect" value="survey" />
+		<response name="product" type="request-redirect" value="productmaindetail" />
+		<response name="viewcart" type="request-redirect" value="checkoutorder" />
+		<response name="error" type="request-redirect" value="checkoutorder" />
+	</request-map>
+
+	<!-- Promotion -->
+	<request-map uri="showAllPromotions">
+		<security https="false" auth="false" />
+		<response name="success" type="view" value="showAllPromotions" />
+	</request-map>
+	<request-map uri="showPromotionDetails">
+		<security https="false" auth="false" />
+		<response name="success" type="view" value="showPromotionDetails" />
+	</request-map>
+	<request-map uri="removePromotion">
+		<security https="true" auth="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.ShoppingCartEvents"
+			invoke="removePromotion" />
+		<response name="success" type="view" value="checkoutorder" />
+		<response name="error" type="view" value="checkoutorder" />
+	</request-map>
+	<!-- Product Tags -->
+	<request-map uri="addProductTags">
+		<security https="false" auth="false" />
+		<event type="java" path="org.ofbiz.product.product.ProductEvents"
+			invoke="addProductTags" />
+		<response name="success" type="view-last" save-current-view="true" />
+		<response name="error" type="view-last" save-current-view="true" />
+	</request-map>
+
+	<!-- Customer -->
+	<request-map uri="newcustomer">
+		<security https="true" auth="false" />
+		<response name="success" type="view" value="newcustomer" />
+	</request-map>
+	<request-map uri="createCustomerProfile">
+		<security https="true" auth="false" />
+		<event type="java" path="com.olbius.baseecommerce.party.ProfileEvents" invoke="createCustomerProfile" />
+		<response name="success" type="request-redirect" value="dashboard" />
+		<response name="error" type="request-redirect" value="checkLogin" />
+	</request-map>
+	<request-map uri="editperson">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="editperson" />
+	</request-map>
+	<request-map uri="updatePerson">
+		<security https="true" auth="true" />
+		<event type="service" invoke="updatePerson" />
+		<response name="success" type="view" value="editperson" />
+		<response name="error" type="view" value="editperson" />
+	</request-map>
+
+	<!-- ======================= Communication Event Based Messaging ======================= -->
+
+	<request-map uri="messagelist">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="messagelist" />
+	</request-map>
+	<request-map uri="readmessage">
+		<security https="true" auth="true" />
+		<event type="service" invoke="setCommEventRoleToRead" />
+		<response name="success" type="view" value="messagedetail" />
+		<response name="error" type="view" value="messagedetail" />
+	</request-map>
+	<request-map uri="newmessage">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="messagecreate" />
+	</request-map>
+	<request-map uri="sendmessage">
+		<security https="true" auth="true" />
+		<event type="service" invoke="createCommunicationEventWithoutPermission" />
+		<response name="success" type="view" value="messagelist" />
+		<response name="error" type="view" value="messagecreate" />
+	</request-map>
+	<!-- Checkout -->
+<!-- 	<request-map uri="checkoutoptions"> -->
+<!-- 		<security https="true" auth="true" /> -->
+<!-- 		<event type="java" path="org.ofbiz.order.shoppingcart.CheckOutEvents" -->
+<!-- 			invoke="setCheckOutPages" /> -->
+<!-- 		<response name="shippingaddress" type="view" -->
+<!-- 			value="checkoutshippingaddress" save-current-view="true" /> -->
+<!-- 		<response name="shippingoptions" type="request" -->
+<!-- 			value="setOrderCurrencyAgreementShipDates" /> -->
+<!-- 		<response name="payment" type="request" value="setPoNumber" /> -->
+<!-- 		<response name="confirm" type="request" value="calcShipping" /> -->
+<!-- 		<response name="success" type="view" value="checkoutshippingaddress" /> -->
+<!-- 		<response name="error" type="request" value="checkoutorder" /> -->
+<!-- 	</request-map> -->
+	<request-map uri="checkoutoptions">
+		<security https="false" auth="false"/>
+		<response name="success" type="request-redirect" value="checkoutorder"/>
+		<response name="error" type="request-redirect" value="checkoutorder"/>
+	</request-map>
+	<request-map uri="addpromocode">
+        <security https="false" auth="false"/>
+        <event type="java" path="org.ofbiz.order.shoppingcart.ShoppingCartEvents" invoke="addProductPromoCode"/>
+        <response name="success" type="request-redirect" value="checkoutorder"/>
+        <response name="error" type="request-redirect" value="checkoutorder"/>
+    </request-map>
+	<request-map uri="checkoutorder">
+      <security https="true" auth="false"/>
+      <event type="java" path="com.olbius.baseecommerce.cart.CartEvents" invoke="setCheckOutPages"/>
+      <response name="confirm" type="request" value="calcShipping" save-current-view="true"/>
+<!--       <response name="success" type="request" value="checkoutstatus" save-current-view="true"/> -->
+      <response name="success" type="request" value="processpayment"/>
+      <response name="login" type="request" value="chooseuserprofile" save-current-view="true"/>
+      <response name="shippinginfo" type="request" value="checkoutuserinfo" save-current-view="true"/>
+      <response name="error" type="request-redirect" value="main"/>
+    </request-map>
+    <request-map uri="chooseuserprofile">
+      <security https="true" auth="false"/>
+      <response name="success" type="view" value="chooseuserprofile" save-current-view="true"/>
+      <response name="error" type="request" value="checkoutorder"/>
+    </request-map>
+    <request-map uri="checkoutstatus">
+      <security https="true" auth="false"/>
+      <event type="java" path="com.olbius.baseecommerce.cart.CartEvents" invoke="checkOrderInformation"/>
+      <response name="success" type="view" value="checkoutstatus" save-current-view="false"/>
+      <response name="error" type="request-redirect" value="main"/>
+    </request-map>
+    <request-map uri="checkoutpayment">
+      <security https="true" auth="false"/>
+      <response name="success" type="view" value="checkoutpayment"/>
+      <response name="error" type="request" value="checkoutorder"/>
+    </request-map>
+	<request-map uri="checkoutuserinfo">
+      <security https="true" auth="false"/>
+      <response name="success" type="view" value="checkoutuserinfo" save-current-view="true"/>
+      <response name="error" type="request-redirect" value="checkoutorder"/>
+    </request-map>
+    <request-map uri="submitUserInfo">
+      <security https="true" auth="false"/>
+      <event type="java" path="com.olbius.baseecommerce.party.ProfileEvents" invoke="createAndUpdateUserInformation"/>
+      <response name="success" type="request-redirect" value="checkoutorder"/>
+      <response name="error" type="request-redirect" value="checkoutorder"/>
+    </request-map>
+    <request-map uri="checkoutlogin">
+      <security https="true" auth="false" />
+		<!-- <event type="java" path="org.ofbiz.mobileservices.LoginEventsMobile"
+			invoke="storeLogin"/> -->
+		<event type="java" path="org.ofbiz.securityext.login.LoginEvents"
+			invoke="storeLogin" />
+		<response name="success" type="request-redirect" value="checkoutorder" />
+		<response name="requirePasswordChange" type="request-redirect" value="checkoutorder" />
+		<response name="error" type="request-redirect" value="checkoutorder" />
+    </request-map>
+	<request-map uri="calcShipping">
+		<security direct-request="false" />
+		<event type="java"
+			path="org.ofbiz.order.shoppingcart.shipping.ShippingEvents" invoke="getShipEstimate" />
+		<response name="success" type="request" value="calcTax" />
+		<response name="error" type="request" value="checkoutorder" />
+	</request-map>
+	<request-map uri="calcTax">
+		<security direct-request="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.CheckOutEvents"
+			invoke="calcTax" />
+		<response name="success" type="request" value="validatePaymentMethods" />
+		<response name="error" type="request" value="checkoutorder" />
+	</request-map>
+	<request-map uri="validatePaymentMethods">
+		<security direct-request="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.CheckOutEvents"
+			invoke="checkPaymentMethods" />
+		<response name="success" type="request" value="checkoutpayment" />
+		<response name="error" type="request" value="checkoutorder" />
+	</request-map>
+	<request-map uri="quickcheckout">
+		<security https="true" auth="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.CheckOutEvents"
+			invoke="cartNotEmpty" />
+		<response name="success" type="view" save-current-view="true"
+			value="quickcheckout" />
+		<response name="error" type="view" value="main" />
+	</request-map>
+	<request-map uri="setPoNumber">
+		<security direct-request="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.ShoppingCartEvents"
+			invoke="setPoNumber" />
+		<response name="success" type="request" value="calcShippingBeforePayment" />
+	</request-map>
+
+	<request-map uri="checkouterror">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.CheckOutEvents"
+			invoke="setCheckOutError" />
+		<response name="shippingaddress" type="view"
+			value="checkoutshippingaddress" />
+		<response name="shippingoptions" type="view"
+			value="checkoutshippingoptions" />
+		<response name="payment" type="view" value="checkoutpayment" />
+		<response name="confirm" type="request" value="calcShipping" />
+		<response name="quick" type="view" value="quickcheckout" />
+		<response name="error" type="view" value="checkoutshippingaddress" />
+		<response name="success" type="view" value="checkoutshippingaddress" />
+	</request-map>
+	<request-map uri="setOrderCurrencyAgreementShipDates">
+		<description>Handles setting the currency, agreement and shipment dates of an order.</description>
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.ShoppingCartEvents"
+			invoke="setOrderCurrencyAgreementShipDates" />
+		<response name="success" type="view" value="checkoutshippingoptions" />
+		<response name="error" type="request" value="checkoutorder" />
+	</request-map>
+	<request-map uri="updateCheckoutOptions">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.CheckOutEvents"
+			invoke="setPartialCheckOutOptions" />
+		<response name="success" type="view" value="checkoutshippingaddress" />
+		<response name="error" type="request" value="checkoutorder" />
+	</request-map>
+	<request-map uri="calcShippingBeforePayment">
+		<security direct-request="false" />
+		<event type="java"
+			path="org.ofbiz.order.shoppingcart.shipping.ShippingEvents" invoke="getShipEstimate" />
+		<response name="success" type="request" value="calcTaxBeforePayment" />
+		<response name="error" type="request" value="checkoutorder" />
+	</request-map>
+	<request-map uri="calcTaxBeforePayment">
+		<security direct-request="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.CheckOutEvents"
+			invoke="calcTax" />
+		<response name="success" type="request"
+			value="validatePaymentMethodsBeforePayment" />
+		<response name="error" type="request" value="checkoutorder" />
+	</request-map>
+	<request-map uri="validatePaymentMethodsBeforePayment">
+		<security direct-request="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.CheckOutEvents"
+			invoke="checkPaymentMethods" />
+		<response name="success" type="view" value="checkoutpayment" />
+		<response name="error" type="request" value="checkoutorder" />
+	</request-map>
+	<request-map uri="checkBlacklist">
+		<security direct-request="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.CheckOutEvents"
+			invoke="checkOrderBlacklist" />
+		<response name="success" type="request" value="processpayment" />
+		<response name="failed" type="request" value="failedBlacklist" />
+		<response name="error" type="view" value="checkoutreview" />
+	</request-map>
+	<request-map uri="failedBlacklist">
+		<security direct-request="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.CheckOutEvents"
+			invoke="failedBlacklistCheck" />
+		<response name="success" type="view" value="main" />
+		<response name="error" type="view" value="error" />
+	</request-map>
+	<request-map uri="editeftaccount">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="editeftaccount" />
+	</request-map>
+	<request-map uri="createEftAccount">
+		<security https="true" auth="true" />
+		<event type="simple"
+			path="component://accounting/script/org/ofbiz/accounting/payment/PaymentMethodEvents.xml"
+			invoke="createEftAccount" />
+		<response name="success" type="view" value="editeftaccount" />
+		<response name="error" type="view" value="editeftaccount" />
+	</request-map>
+	<request-map uri="updateEftAccount">
+		<security https="true" auth="true" />
+		<event type="simple"
+			path="component://accounting/script/org/ofbiz/accounting/payment/PaymentMethodEvents.xml"
+			invoke="updateEftAccount" />
+		<response name="success" type="view" value="editeftaccount" />
+		<response name="error" type="view" value="editeftaccount" />
+	</request-map>
+	<request-map uri="processorder">
+		<security https="true" auth="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.CheckOutEvents"
+			invoke="createOrder" />
+		<response name="sales_order" type="request" value="checkBlacklist" />
+		<response name="work_order" type="request" value="checkBlacklist" />
+		<response name="error" type="view" value="checkoutreview" />
+	</request-map>
+	<request-map uri="processpayment">
+		<security https="true" direct-request="false" />
+		<event type="java" path="com.olbius.baseecommerce.cart.CartEvents"
+			invoke="processPayment" />
+		<response name="success" type="request" value="clearcartfororder" />
+		<response name="fail" type="request" value="checkoutstatus" save-current-view="false"/>
+		<response name="error" type="request" value="checkoutstatus" save-current-view="false"/>
+	</request-map>
+	<request-map uri="clearcartfororder">
+		<security direct-request="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.ShoppingCartEvents"
+			invoke="clearCart" />
+		<response name="success" type="request" value="checkExternalPayment" />
+		<response name="error" type="request" value="checkoutorder" />
+	</request-map>
+	<request-map uri="checkExternalPayment">
+		<security https="true" direct-request="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.CheckOutEvents"
+			invoke="checkExternalPayment" />
+		<response name="none" type="request" value="emailorder" />
+		<response name="offline" type="request" value="emailorder" />
+		<response name="worldpay" type="request" value="callWorldPay" />
+		<response name="paypal" type="request" value="callPayPal" />
+		<response name="billact" type="request" value="emailorder" />
+		<response name="cod" type="request" value="emailorder" />
+		<response name="ideal" type="request" value="callIdeal" />
+		<response name="error" type="request" value="checkoutorder" />
+	</request-map>
+	<request-map uri="emailorder">
+		<security https="true" direct-request="false" />
+		<event type="service" path="async" invoke="sendOrderConfirmation" />
+		<response name="success" type="request-redirect" value="checkoutstatus" save-current-view="false"/>
+		<response name="error" type="request-redirect" value="checkoutstatus" save-current-view="false"/>
+	</request-map>
+
+	<request-map uri="callWorldPay">
+		<security https="true" direct-request="false" />
+		<event type="java"
+			path="org.ofbiz.accounting.thirdparty.worldpay.WorldPayEvents"
+			invoke="worldPayRequest" />
+		<response name="success" type="none" />
+		<response name="error" type="view" value="checkoutreview" />
+	</request-map>
+	<request-map uri="worldPayNotify">
+		<security https="false" />
+		<event type="java"
+			path="org.ofbiz.accounting.thirdparty.worldpay.WorldPayEvents"
+			invoke="worldPayNotify" />
+		<response name="success" type="none" />
+		<response name="error" type="view" value="checkoutreview" />
+	</request-map>
+
+	<request-map uri="callPayPal">
+		<security https="true" direct-request="false" />
+		<event type="java"
+			path="org.ofbiz.accounting.thirdparty.paypal.PayPalEvents" invoke="callPayPal" />
+		<response name="success" type="none" />
+		<response name="error" type="view" value="checkoutreview" />
+	</request-map>
+	<request-map uri="payPalNotify">
+		<security https="false" />
+		<event type="java"
+			path="org.ofbiz.accounting.thirdparty.paypal.PayPalEvents" invoke="payPalIPN" />
+		<response name="success" type="none" />
+		<response name="error" type="none" />
+	</request-map>
+	<request-map uri="payPalCancel">
+		<security https="true" />
+		<event type="java"
+			path="org.ofbiz.accounting.thirdparty.paypal.PayPalEvents" invoke="cancelPayPalOrder" />
+		<response name="success" type="view" value="main" />
+		<response name="error" type="view" value="main" />
+	</request-map>
+	<request-map uri="callIdeal">
+		<security https="true" direct-request="false" />
+		<event type="java" path="org.ofbiz.accounting.thirdparty.ideal.IdealEvents"
+			invoke="callIdeal" />
+		<response name="success" type="none" />
+		<response name="error" type="view" value="checkoutreview" />
+	</request-map>
+	<request-map uri="idealNotify">
+		<security https="false" />
+		<event type="java" path="org.ofbiz.accounting.thirdparty.ideal.IdealEvents"
+			invoke="idealNotify" />
+		<response name="success" type="view" value="ordercomplete" />
+		<response name="error" type="view" value="checkoutreview" />
+	</request-map>
+	<request-map uri="orderstatus">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="orderstatus" />
+	</request-map>
+	<request-map uri="cancelOrderItem">
+		<security https="true" auth="true" />
+		<event type="service" invoke="cancelOrderItem" />
+		<response name="success" type="view" value="orderstatus" />
+		<response name="error" type="view" value="orderstatus" />
+	</request-map>
+	<request-map uri="addordertocart">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.ShoppingCartEvents"
+			invoke="addToCartFromOrder" />
+		<response name="success" type="view" value="checkoutorder" />
+		<response name="error" type="view" value="orderstatus" />
+	</request-map>
+	<!-- ============== One Page Checkout Requests ============== -->
+	<request-map uri="onePageCheckout">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.CheckOutEvents"
+			invoke="cartNotEmpty" />
+		<response name="success" type="view" value="OnePageCheckout" />
+		<response name="error" type="view" value="main" />
+	</request-map>
+
+	<request-map uri="anonOnePageCheckout">
+		<security https="true" auth="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.CheckOutEvents"
+			invoke="cartNotEmpty" />
+		<response name="success" type="view" value="OnePageCheckout" />
+		<response name="error" type="view" value="main" />
+	</request-map>
+	<request-map uri="getShoppingCartItemIndex">
+		<security https="false" auth="false" />
+		<event type="service" invoke="getShoppingCartItemIndex" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+
+	<request-map uri="onePageProcessOrder">
+		<security https="true" auth="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.CheckOutEvents"
+			invoke="createOrder" />
+		<response name="sales_order" type="request" value="onePageCheckBlacklist" />
+		<response name="work_order" type="request" value="onePageCheckBlacklist" />
+		<response name="error" type="view" value="OnePageCheckout" />
+	</request-map>
+
+	<request-map uri="onePageCheckBlacklist">
+		<security direct-request="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.CheckOutEvents"
+			invoke="checkOrderBlacklist" />
+		<response name="success" type="request" value="onePageProcessPayment" />
+		<response name="failed" type="request" value="failedBlacklist" />
+		<response name="error" type="view" value="OnePageCheckout" />
+	</request-map>
+
+	<request-map uri="onePageProcessPayment">
+		<security https="true" direct-request="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.CheckOutEvents"
+			invoke="processPayment" />
+		<response name="success" type="request" value="onePageClearCartForOrder" />
+		<response name="fail" type="request" value="checkoutorder" />
+		<response name="error" type="view" value="OnePageCheckout" />
+	</request-map>
+
+	<request-map uri="onePageClearCartForOrder">
+		<security direct-request="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.ShoppingCartEvents"
+			invoke="clearCart" />
+		<response name="success" type="request" value="onePageCheckExternalPayment" />
+		<response name="error" type="view" value="OnePageCheckout" />
+	</request-map>
+
+	<request-map uri="onePageCheckExternalPayment">
+		<security https="true" direct-request="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.CheckOutEvents"
+			invoke="checkExternalPayment" />
+		<response name="none" type="request" value="emailorder" />
+		<!-- these are not yet supported <response name="offline" type="request"
+			value="emailorder"/> <response name="worldpay" type="request" value="callWorldPay"/>
+			<response name="paypal" type="request" value="callPayPal"/> <response name="billact"
+			type="request" value="emailorder"/> <response name="cod" type="request" value="emailorder"/> -->
+		<response name="error" type="view" value="OnePageCheckout" />
+	</request-map>
+	<!-- ShoppingList Requests -->
+	<request-map uri="editShoppingList">
+		<security auth="true" https="false" />
+		<response name="success" type="view" value="editShoppingList" />
+	</request-map>
+	<request-map uri="createCustRequestFromShoppingList">
+		<security https="true" auth="true" />
+		<event type="service" invoke="createCustRequestFromShoppingList" />
+		<response name="success" type="request" value="ViewRequest" />
+		<response name="error" type="request" value="orderentry" />
+	</request-map>
+	<request-map uri="createQuoteFromShoppingList">
+		<security https="true" auth="true" />
+		<event type="service" invoke="createQuoteFromShoppingList" />
+		<response name="success" type="request" value="ViewQuote" />
+		<response name="error" type="request" value="orderentry" />
+	</request-map>
+	<request-map uri="createEmptyShoppingList">
+		<security auth="true" https="false" />
+		<event type="service" invoke="createShoppingList" />
+		<response name="success" type="view" value="editShoppingList" />
+		<response name="error" type="view" value="editShoppingList" />
+	</request-map>
+
+	<request-map uri="createShoppingListFromOrder">
+		<security auth="true" https="false" />
+		<event type="service" invoke="makeShoppingListFromOrder" />
+		<response name="success" type="view" value="editShoppingList" />
+		<response name="error" type="view" value="orderstatus" />
+	</request-map>
+
+	<request-map uri="updateShoppingList">
+		<security auth="true" https="false" />
+		<event type="service" invoke="updateShoppingList" />
+		<response name="success" type="view" value="editShoppingList" />
+		<response name="error" type="view" value="editShoppingList" />
+	</request-map>
+
+	<request-map uri="addItemToShoppingList">
+		<security auth="true" https="false" />
+		<event type="service" invoke="createShoppingListItem" />
+		<response name="success" type="view" value="editShoppingList" />
+		<response name="error" type="view" value="editShoppingList" />
+	</request-map>
+
+	<request-map uri="addBulkToShoppingList">
+		<security auth="true" https="false" />
+		<event type="java" path="org.ofbiz.order.shoppinglist.ShoppingListEvents"
+			invoke="addBulkFromCart" />
+		<response name="success" type="view" value="editShoppingList" />
+		<response name="error" type="view" value="checkoutorder" />
+	</request-map>
+
+	<request-map uri="addListToCart">
+		<security auth="true" https="false" />
+		<event type="java" path="org.ofbiz.order.shoppinglist.ShoppingListEvents"
+			invoke="addListToCart" />
+		<response name="success" type="view" value="checkoutorder" />
+		<response name="error" type="view" value="editShoppingList" />
+	</request-map>
+
+	<request-map uri="updateShoppingListItem">
+		<security auth="true" https="false" />
+		<event type="service" invoke="updateShoppingListItem" />
+		<response name="success" type="view" value="editShoppingList" />
+		<response name="error" type="view" value="editShoppingList" />
+	</request-map>
+
+	<request-map uri="removeFromShoppingList">
+		<security auth="true" https="false" />
+		<event type="service" invoke="removeShoppingListItem" />
+		<response name="success" type="view" value="editShoppingList" />
+		<response name="error" type="view" value="editShoppingList" />
+	</request-map>
+
+	<request-map uri="replaceShoppingListItem">
+		<security auth="true" https="false" />
+		<event type="java" path="org.ofbiz.order.shoppinglist.ShoppingListEvents"
+			invoke="replaceShoppingListItem" />
+		<response name="success" type="view" value="editShoppingList" />
+		<response name="error" type="view" value="editShoppingList" />
+	</request-map>
+
+	<request-map uri="tagsearch">
+		<security https="false" auth="false" />
+		<event type="java" path="org.ofbiz.product.product.ProductSearchSession"
+			invoke="checkDoKeywordOverride" />
+		<response name="success" type="view" value="tagsearch" />
+		<response name="none" type="none" value="" />
+	</request-map>
+
+	<request-map uri="signUpForContactList">
+		<security https="false" auth="true" />
+		<event type="service" invoke="signUpForContactList" />
+		<response name="success" type="view" value="main" />
+		<response name="error" type="view" value="main" />
+	</request-map>
+	<request-map uri="unsubscribeContactListParty">
+		<security https="false" auth="false" />
+		<event type="service" invoke="unsubscribeContactListParty" />
+		<response name="success" type="view" value="main" />
+		<response name="error" type="view" value="main" />
+	</request-map>
+	<request-map uri="unsubscribeContactListPartyContachMech">
+		<security https="false" auth="false" />
+		<event type="service" invoke="unsubscribeContactListPartyContachMech" />
+		<response name="success" type="view" value="main" />
+		<response name="error" type="view" value="main" />
+	</request-map>
+	<request-map uri="contactListOptOut" track-serverhit="false"
+		track-visit="false">
+		<security https="false" auth="false" />
+		<event type="service" invoke="updateContactListPartyNoUserLogin" />
+		<response name="success" type="view" value="ContactListOptOut" />
+	</request-map>
+	<request-map uri="createContactListParty">
+		<security https="true" auth="true" />
+		<event type="service" invoke="createContactListParty" />
+		<response name="success" type="view" value="dashboard" />
+		<response name="error" type="view" value="dashboard" />
+	</request-map>
+	<request-map uri="updateContactListParty">
+		<security https="true" auth="true" />
+		<event type="service" invoke="updateContactListParty" />
+		<response name="success" type="view" value="dashboard" />
+		<response name="error" type="view" value="dashboard" />
+	</request-map>
+	<request-map uri="updateContactListPartyNoUserLogin">
+		<security https="false" auth="false" />
+		<event type="service" invoke="updateContactListPartyNoUserLogin" />
+		<response name="success" type="view" value="main" />
+		<response name="error" type="view" value="main" />
+	</request-map>
+	<request-map uri="createUpdateShippingAddress">
+		<security https="true" auth="false" />
+		<event type="service" invoke="createUpdateCustomerAndShippingAddress" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="getShipOptions">
+		<security https="true" auth="false" />
+		<event type="simple"
+			path="component://baseecommerce/script/com/baseecommerce/baseecommerce/customer/CustomerEvents.xml"
+			invoke="getShipOptions" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+	<request-map uri="setShippingOption">
+		<security https="true" auth="false" />
+		<event type="simple"
+			path="component://baseecommerce/script/com/baseecommerce/baseecommerce/customer/CustomerEvents.xml"
+			invoke="setShippingOption" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+
+	<request-map uri="createUpdateBillingAndPayment">
+		<security https="true" auth="false" />
+		<event type="service" invoke="createUpdateBillingAddressAndPaymentMethod" />
+		<response name="success" type="request" value="json" />
+		<response name="error" type="request" value="json" />
+	</request-map>
+
+	<request-map uri="editcreditcard">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="editcreditcard" />
+	</request-map>
+	<request-map uri="createCreditCard">
+		<security https="true" auth="true" />
+		<event type="simple"
+			path="component://accounting/script/org/ofbiz/accounting/payment/PaymentMethodEvents.xml"
+			invoke="createCreditCard" />
+		<response name="success" type="view" value="editcreditcard" />
+		<response name="address" type="view" value="editcontactmech" />
+		<response name="error" type="view" value="editcreditcard" />
+	</request-map>
+	<request-map uri="updateCreditCard">
+		<security https="true" auth="true" />
+		<event type="simple"
+			path="component://accounting/script/org/ofbiz/accounting/payment/PaymentMethodEvents.xml"
+			invoke="updateCreditCard" />
+		<response name="success" type="view" value="editcreditcard" />
+		<response name="address" type="view" value="editcontactmech" />
+		<response name="error" type="view" value="editcreditcard" />
+	</request-map>
+	<request-map uri="setBilling">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="billsetting" />
+	</request-map>
+	<request-map uri="enterCreditCardAndBillingAddress">
+		<security https="true" auth="false" />
+		<event type="service" invoke="createCreditCardAndAddress" />
+		<response name="success" type="request" value="processPaymentSettings" />
+		<response name="error" type="view" value="paymentinformation" />
+	</request-map>
+	<request-map uri="processPaymentSettings">
+		<security https="true" auth="false" />
+		<event type="bsf"
+			invoke="component://baseecommerce/script/org/ofbiz/baseecommerce/order/ProcessPaymentSettings.groovy" />
+		<response name="success" type="request" value="reviewOrder" />
+		<response name="error" type="view" value="paymentinformation" />
+	</request-map>
+	<request-map uri="reviewOrder">
+		<security https="true" auth="false" />
+		<response name="success" type="view" value="orderreview" />
+	</request-map>
+	<!-- Start Anonymous checkout requests -->
+	<request-map uri="setCustomer">
+		<security https="true" auth="false" />
+		<response name="success" type="view" value="custsetting" />
+	</request-map>
+	<request-map uri="processCustomerSettings">
+		<security https="true" auth="false" />
+		<event type="simple"
+			path="component://baseecommerce/script/com/baseecommerce/baseecommerce/customer/CustomerEvents.xml"
+			invoke="processCustomerSettings" />
+		<response name="success" type="request" value="anonCheckShipmentNeeded" />
+		<response name="error" type="view" value="custsetting" />
+	</request-map>
+	<request-map uri="anonCheckShipmentNeeded">
+		<security direct-request="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.CheckOutEvents"
+			invoke="checkShipmentNeeded" />
+		<response name="shipmentNeeded" type="request" value="setShipping" />
+		<!-- NOTE: it seems like setTaxBeforePayment would be the best here, but
+			without an address it doesn't work -->
+		<response name="shipmentNotNeeded" type="request" value="setPaymentOption" />
+		<response name="error" type="view" value="custsetting" />
+	</request-map>
+	<request-map uri="setShipping">
+		<security https="true" auth="false" />
+		<response name="success" type="view" value="shipsetting" />
+	</request-map>
+	<request-map uri="processShipSettings">
+		<security https="true" auth="false" />
+		<event type="simple"
+			path="component://baseecommerce/script/com/baseecommerce/baseecommerce/customer/CustomerEvents.xml"
+			invoke="processShipSettings" />
+		<response name="success" type="request" value="setShipOptions" />
+		<response name="error" type="view" value="shipsetting" />
+	</request-map>
+
+	<request-map uri="setShipOptions">
+		<security https="true" auth="false" />
+		<response name="success" type="view" value="optionsetting" />
+	</request-map>
+
+	<request-map uri="processShipOptions">
+		<security https="true" auth="false" />
+		<event type="simple"
+			path="component://baseecommerce/script/com/baseecommerce/baseecommerce/customer/CustomerEvents.xml"
+			invoke="processShipOptions" />
+		<response name="success" type="request" value="setShippingBeforePayment" />
+		<response name="error" type="view" value="optionsetting" />
+	</request-map>
+	<request-map uri="setShippingBeforePayment">
+		<security direct-request="false" />
+		<event type="java"
+			path="org.ofbiz.order.shoppingcart.shipping.ShippingEvents" invoke="getShipEstimate" />
+		<response name="success" type="request" value="setTaxBeforePayment" />
+		<response name="error" type="view" value="optionsetting" />
+	</request-map>
+	<request-map uri="setTaxBeforePayment">
+		<security direct-request="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.CheckOutEvents"
+			invoke="calcTax" />
+		<response name="success" type="request" value="setPaymentOption" />
+		<response name="error" type="view" value="optionsetting" />
+	</request-map>
+
+	<request-map uri="setPaymentOption">
+		<security https="true" auth="false" />
+		<response name="success" type="view" value="paymentoptions" />
+	</request-map>
+	<request-map uri="setPaymentInformation">
+		<security https="true" auth="false" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.CheckOutEvents"
+			invoke="checkExternalCheckout" />
+		<response name="success" type="view" value="paymentinformation" />
+		<response name="paypal" type="request" value="setPayPalCheckout" />
+	</request-map>
+	<request-map uri="contactus">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="contactus" />
+	</request-map>
+	<request-map uri="AnonContactus">
+		<security https="true" auth="false" />
+		<response name="success" type="view" value="AnonContactus" />
+	</request-map>
+	<request-map uri="SiteMap">
+		<security https="true" auth="false" />
+		<response name="success" type="view" value="SiteMap" />
+	</request-map>
+	<request-map uri="contactsubmit">
+		<security https="true" auth="true" />
+		<event type="service" invoke="createCommunicationEventWithoutPermission" />
+		<response name="success" type="view" value="contactus" />
+		<response name="error" type="view" value="contactus" />
+	</request-map>
+	<request-map uri="submitAnonContact">
+		<security https="true" auth="false" />
+		<event type="simple" invoke="createAnonContact"
+			path="component://baseecommerce/script/com/baseecommerce/baseecommerce/customer/CustomerEvents.xml" />
+		<response name="success" type="request-redirect" value="main" />
+		<response name="error" type="request" value="AnonContactus" />
+	</request-map>
+
+	<request-map uri="reviewProduct">
+		<security https="false" auth="true" />
+		<response name="success" type="view" value="productReview" />
+	</request-map>
+	<request-map uri="createProductReview">
+		<security https="false" auth="true"/>
+		<event type="service" invoke="createProductReview" />
+		<response name="success" type="request-redirect" value="main"/>
+		<response name="error" type="request-redirect" value="main" />
+	</request-map>
+	<request-map uri="createProductReviewAjax">
+		<security https="false" auth="true"/>
+		<event type="service" invoke="createProductReview" />
+		<response name="success" type="view" value="productReviews"/>
+		<response name="error" type="view" value="productReviews" />
+	</request-map>
+	<request-map uri="updateShippingAddress">
+		<security https="true" auth="true" />
+		<event type="service" invoke="setCartShippingAddress" />
+		<response name="success" type="view" value="splitship" />
+		<response name="error" type="request" value="splitship" />
+	</request-map>
+	<request-map uri="updateShippingOptions">
+		<security https="true" auth="true" />
+		<event type="service" invoke="setCartShippingOptions" />
+		<response name="success" type="view" value="splitship" />
+		<response name="error" type="request" value="splitship" />
+	</request-map>
+	
+	<request-map uri="checkUserLoginId">
+        <security https="true" auth="false"/>
+        <event type="service" invoke="checkUserLoginId"/>
+        <response name="success" type="request" value="json"></response>
+        <response name="error" type="request" value="json"></response>
+    </request-map>
+	<!-- Captcha: Image request, the captcha code is stored in the session using
+		_CAPTCHA_CODE_ as the key -->
+	<request-map uri="captcha.jpg">
+		<security https="true" auth="false" />
+		<event type="java" path="org.ofbiz.common.CommonEvents" invoke="getCaptcha" />
+		<response name="success" type="none" />
+	</request-map>
+	<request-map uri="ProductUomDropDownOnly">
+		<security auth="false" https="false" />
+		<response name="success" type="view" value="ProductUomDropDownOnly"
+			save-last-view="true" />
+	</request-map>
+	<!-- PDFs -->
+	<request-map uri="order.pdf">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="OrderPDF" />
+	</request-map>
+	<request-map uri="invoice.pdf">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="InvoicePDF" />
+	</request-map>
+
+	<request-map uri="ViewQuote">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="ViewQuote" />
+	</request-map>
+
+	<request-map uri="orderentry">
+		<security https="true" auth="true" />
+		<event type="java" path="org.ofbiz.order.shoppingcart.ShoppingCartEvents"
+			invoke="routeOrderEntry" />
+		<response name="init" type="view" value="checkinits" />
+		<response name="agreements" type="view" value="orderagreements" />
+		<response name="cart" type="view" value="checkoutorder" />
+		<response name="error" type="view" value="checkinits" />
+	</request-map>
+	<request-map uri="checkinits">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="checkinits" />
+	</request-map>
+	<request-map uri="splitship">
+		<security https="true" auth="true" />
+		<response name="success" type="view" value="splitship" />
+	</request-map>
+	<request-map uri="updatesplit">
+		<security https="true" auth="true" />
+		<event type="service" invoke="assignItemShipGroup" />
+		<response name="success" type="view" value="splitship" />
+		<response name="error" type="view" value="splitship" />
+	</request-map>
+	
+	<request-map uri="autoCompleteGeoAjax">
+		<security https="false" auth="false"/>
+		<event type="service" invoke="autoCompleteGeoAjax"/>
+		<response name="success" type="request" value="json"></response>
+        <response name="error" type="request" value="json"></response>
+	</request-map>
+	
+	<request-map uri="addToCompare">
+        <security https="false" auth="false"/>
+        <event type="java" path="org.ofbiz.product.product.ProductEvents" invoke="addProductToComparisonList"/>
+        <response name="success" type="view-last" value="main"/>
+    </request-map>
+    <request-map uri="removeFromCompare">
+        <security https="false" auth="false"/>
+        <event type="java" path="org.ofbiz.product.product.ProductEvents" invoke="removeProductFromComparisonList"/>
+        <response name="success" type="view-last"/>
+    </request-map>
+    <request-map uri="clearCompareList">
+        <security https="false" auth="false"/>
+        <event type="java" path="org.ofbiz.product.product.ProductEvents" invoke="clearProductComparisonList"/>
+        <response name="success" type="view-last"/>
+    </request-map>
+    <request-map uri="compareProducts">
+        <security https="false" auth="false"/>
+        <response name="success" type="view" value="compareProducts" save-last-view="true"/>
+    </request-map>
+    
+    <request-map uri="setNewLocation">
+        <security https="false" auth="false"/>
+        <event type="java" path="com.olbius.product.product.ProductEvents" invoke="setNewLocation"/>
+        <response name="success" type="request-redirect-noparam" value="main"/>
+		<response name="error" type="request-redirect-noparam" value="main" />
+    </request-map>
+    
+    
+	<!-- View Mappings -->
+	<view-map name="compareProducts" type="screen" page="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml#compareProducts"/>
+	
+	<view-map name="error" page="/error/error.jsp" />
+	<view-map name="main" type="screen"
+		page="component://obb/widget/CommonScreens.xml#main" />
+	<view-map name="login" type="screen"
+		page="component://obb/widget/CommonScreens.xml#login" />
+	<view-map name="resetPasswordSuccess" type="screen"
+		page="component://obb/widget/CommonScreens.xml#resetPasswordSuccess" />
+	<view-map name="requirePasswordChange" type="screen"
+		page="component://obb/widget/CommonScreens.xml#requirePasswordChange" />
+
+	<view-map name="OnePageCheckout" type="screen"
+		page="component://obb/widget/OrderScreens.xml#OnePageCheckout" />
+	<!-- Product views -->
+	<view-map name="category" type="screen"
+		page="component://obb/widget/CatalogScreens.xml#category" />
+	<view-map name="product" type="screen"
+		page="component://obb/widget/CatalogScreens.xml#product" />
+	<view-map name="productmaindetail" type="screen"
+		page="component://obb/widget/CatalogScreens.xml#productmaindetail" />
+	<view-map name="productReview" type="screen"
+		page="component://obb/widget/CatalogScreens.xml#productreview" />
+	<!-- Category views -->
+	<view-map name="productCategoryList" type="screen"
+		page="component://obb/widget/CatalogScreens.xml#productCategoryList" />
+	<view-map name="supplierdetail" type="screen"
+		page="component://obb/widget/CatalogScreens.xml#supplierdetail" />
+	<view-map name="keywordsearch" type="screen"
+		page="component://obb/widget/CatalogScreens.xml#keywordsearch" />
+	<view-map name="tagsearch" type="screen"
+		page="component://obb/widget/CatalogScreens.xml#tagsearch" />
+	<!-- Cart views -->
+<!-- 	<view-map name="showcart" type="screen" -->
+<!-- 		page="component://obb/widget/CartScreens.xml#showcart" /> -->
+	<view-map name="checkinits" type="screen"
+		page="component://order/widget/ordermgr/OrderEntryScreens.xml#CheckInits" />
+	<view-map name="showAllPromotions" type="screen"
+		page="component://obb/widget/CartScreens.xml#showAllPromotions" />
+	<view-map name="showPromotionDetails" type="screen"
+		page="component://obb/widget/CartScreens.xml#showPromotionDetails" />
+	<view-map name="editShoppingList" type="screen"
+		page="component://obb/widget/ShoppingListScreens.xml#editShoppingList" />
+	<!-- Customer Info Views -->
+	<view-map name="viewprofile" type="screen"
+		page="component://obb/widget/CustomerScreens.xml#viewprofile" />
+	<view-map name="addressbook" type="screen"
+		page="component://obb/widget/CustomerScreens.xml#addressbook" />
+	<view-map name="editcontactmech" type="screen"
+		page="component://obb/widget/CustomerScreens.xml#editcontactmech" />
+	<view-map name="dashboard" type="screen"
+		page="component://obb/widget/CustomerScreens.xml#dashboard" />
+	<view-map name="newcustomer" type="screen"
+		page="component://obb/widget/CustomerScreens.xml#newcustomer" />
+	<view-map name="changepassword" type="screen"
+		page="component://obb/widget/CustomerScreens.xml#changepassword" />
+	<view-map name="editperson" type="screen"
+		page="component://obb/widget/CustomerScreens.xml#editperson" />
+	<!-- check out new user -->
+
+	<view-map name="messagelist" type="screen"
+		page="component://obb/widget/CustomerScreens.xml#messagelist" />
+	<view-map name="messagedetail" type="screen"
+		page="component://obb/widget/CustomerScreens.xml#messagedetail" />
+	<view-map name="messagecreate" type="screen"
+		page="component://obb/widget/CustomerScreens.xml#messagecreate" />
+	<view-map name="checkoutuserinfo" type="screen"
+		page="component://obb/widget/OrderScreens.xml#checkoutuserinfo" />
+	<view-map name="checkoutshippingaddress" type="screen"
+		page="component://obb/widget/OrderScreens.xml#checkoutshippingaddress" />
+	<view-map name="checkoutshippingoptions" type="screen"
+		page="component://obb/widget/OrderScreens.xml#checkoutshippingoptions" />
+
+	<view-map name="chooseuserprofile" type="screen"
+		page="component://obb/widget/OrderScreens.xml#chooseuserprofile" />
+	<view-map name="checkoutpayment" type="screen"
+		page="component://obb/widget/OrderScreens.xml#checkoutpayment" />
+	<view-map name="checkoutstatus" type="screen" page="component://obb/widget/OrderScreens.xml#checkoutstatus"/>
+	<view-map name="splitship" type="screen"
+		page="component://obb/widget/OrderScreens.xml#splitship" />
+<!-- 	<view-map name="quickcheckout" type="screen" -->
+<!-- 		page="component://obb/widget/OrderScreens.xml#checkoutoptions" /> -->
+	<view-map name="quickcheckout" type="screen" page="component://obb/widget/OrderScreens.xml#checkoutoptions"/>
+    <view-map name="checkout" type="screen" page="component://obb/widget/OrderScreens.xml#checkoutorder"/>
+	<view-map name="checkoutreview" type="screen"
+		page="component://obb/widget/OrderScreens.xml#checkoutreview" />
+	<view-map name="ordercomplete" type="screen"
+		page="component://obb/widget/OrderScreens.xml#ordercomplete" />
+
+	<view-map name="profilesurvey" type="screen"
+		page="component://obb/widget/CustomerScreens.xml#customersurvey" />
+
+	<view-map name="orderhistory" type="screen"
+		page="component://obb/widget/OrderScreens.xml#orderhistory" />
+	<view-map name="orderstatus" type="screen"
+		page="component://obb/widget/OrderScreens.xml#orderstatus" />
+	<view-map name="requestreturn" type="screen"
+		page="component://obb/widget/OrderScreens.xml#requestreturn" />
+
+	<view-map name="editcreditcard" type="screen"
+		page="component://obb/widget/CustomerScreens.xml#editcreditcard" />
+	<view-map name="editeftaccount" type="screen"
+		page="component://obb/widget/CustomerScreens.xml#editeftaccount" />
+	<view-map name="billsetting" type="screen"
+		page="component://obb/widget/OrderScreens.xml#billsettings" />
+	<view-map name="orderreview" type="screen"
+		page="component://obb/widget/OrderScreens.xml#orderreview" />
+	<view-map name="paymentinformation" type="screen"
+		page="component://obb/widget/OrderScreens.xml#paymentinformation" />
+
+	<view-map name="ContactListOptOut" type="screen"
+		page="component://marketing/widget/ContactListScreens.xml#OptOutResponse" />
+	<view-map name="custsetting" type="screen"
+		page="component://obb/widget/OrderScreens.xml#custsettings" />
+	<view-map name="shipsetting" type="screen"
+		page="component://obb/widget/OrderScreens.xml#shipsettings" />
+	<view-map name="optionsetting" type="screen"
+		page="component://obb/widget/OrderScreens.xml#optionsettings" />
+	<view-map name="paymentoptions" type="screen"
+		page="component://obb/widget/OrderScreens.xml#paymentoptions" />
+
+	<view-map name="contactus" type="screen"
+		page="component://obb/widget/CustomerScreens.xml#contactus" />
+	<view-map name="AnonContactus" type="screen"
+		page="component://obb/widget/CustomerScreens.xml#AnonContactus" />
+	<view-map name="SiteMap" type="screen"
+		page="component://obb/widget/CustomerScreens.xml#SiteMap" />
+
+	<view-map name="ProductUomDropDownOnly" type="screen"
+		page="component://order/widget/ordermgr/OrderEntryCatalogScreens.xml#ProductUomDropDownOnly" />
+	<!-- PDFs -->
+	<view-map name="OrderPDF" type="screenfop"
+		page="component://order/widget/ordermgr/OrderPrintScreens.xml#OrderPDF"
+		content-type="application/pdf" encoding="none" />
+	<view-map name="InvoicePDF" type="screenfop"
+		page="component://accounting/widget/AccountingPrintScreens.xml#InvoicePDF"
+		content-type="application/pdf" encoding="none" />
+	<!-- End of View Mappings -->
+	<!-- Content views -->
+	<view-map name="ViewQuote" type="screen"
+		page="component://order/widget/ordermgr/QuoteScreens.xml#ViewQuote" />
+
+	<view-map name="viewcontent" type="screen"
+		page="component://obb/widget/ContentScreens.xml#viewcontent" />
+	<view-map name="contentcategory" type="screen"
+		page="component://obb/widget/ContentScreens.xml#contentcategory" />
+	<view-map name="productReviews" type="screen"
+		page="component://obb/widget/CatalogScreens.xml#productReviews" />
+	<view-map name="PageNotFound" type="screen"
+		page="component://obb/widget/CommonScreens.xml#PageNotFound" />
+
+</site-conf>

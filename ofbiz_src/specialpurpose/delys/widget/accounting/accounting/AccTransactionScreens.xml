@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+   
+    <screen name="main-decorator">
+        <section>
+            <actions>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="DelysAccGlUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ManufacturingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="layoutSettings.companyName" from-field="uiLabelMap.AccountingApCompanyName" global="true"/>
+                <set field="layoutSettings.companySubtitle" from-field="uiLabelMap.AccountingCompanySubtitle" global="true"/>
+                <set field="applicationMenuName" value="ApAppBar" global="true"/>
+                <set field="applicationMenuLocation" value="component://delys/widget/accounting/ap/ApMenus.xml" global="true"/>
+                <set field="applicationTitle" value="${uiLabelMap.AccountingApManagerApplication}" global="true"/>
+                <set field="invoiceMenuLocation" value="component://delys/widget/accounting/ap/ApInvoiceMenus.xml" global="true"/>       
+                <set field="selectedMenuItem" value="accGeneralLedger"/>
+                <set field="selectedSubMenuItem" value="accTransactions"/>            
+            </actions>
+            <widgets>
+                <include-screen name="ApplicationDecorator" location="component://commonext/widget/CommonScreens.xml"/>
+            </widgets>
+        </section>
+    </screen>   
+   
+     <screen name="CommonTransactionDecorator">
+        <section>
+            <actions>
+                <set field="headerItem" value="accAccTrans"/>
+                <set field="selectedMenuItem" value="accGeneralLedger"/>
+                <set field="selectedSubMenuItem" value="accTransactions"/>                  
+            </actions>
+            <widgets>
+               <section>
+                     <condition>
+                         <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
+                     </condition>
+<!--                      <actions> -->
+<!-- 						<set field="tabBarName" value="AccTransTabBar" global="true" /> -->
+<!-- 						<set field="tabBarLocation" value="component://delys/widget/accounting/accounting/AccAccountingMenus.xml" global="true" /> -->
+<!-- 					 </actions> -->
+					 <widgets>
+						<section>
+							<actions>
+								<set field="printTabBar" value="true" />
+							</actions>
+							<widgets></widgets>
+						</section>
+					</widgets>
+                </section>
+                <decorator-screen name="main-decorator" location="component://delys/widget/accounting/accounting/AccTransactionScreens.xml">
+                    <decorator-section name="pre-body">
+                        <section>
+                            <condition>
+                                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
+                            </condition>
+                            <widgets>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <!-- do check for ACCOUNTING, _VIEW permission -->
+                            <condition>
+                                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
+                            </condition>
+                            <widgets>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="alert alert-info" text="${uiLabelMap.AccountingViewPermissionError}"/>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="EditTransactionDecorator">
+        <section>
+            <actions>
+                <set field="headerItem" value="accAccTrans"/>
+                <set field="tabBarName" value="AccEditTransTabBar" global="true" />
+				<set field="tabBarLocation" value="component://delys/widget/accounting/accounting/AccAccountingMenus.xml" global="true" />
+				<set field="subTabBarName" value="AccEditTransTabBarAdvance" global="true" />
+				<set field="subTabBarLocation" value="component://delys/widget/accounting/accounting/AccAccountingMenus.xml" global="true" />
+            </actions>
+            <widgets>
+               <section>
+                     <condition>
+                         <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
+                     </condition>
+                     <actions>
+						<set field="tabBarName" value="AccEditTransTabBar" global="true" />
+						<set field="tabBarLocation" value="component://delys/widget/accounting/accounting/AccAccountingMenus.xml" global="true" />
+					 </actions>
+					 <widgets>
+						<section>
+							<actions>
+								<set field="printTabBar" value="true" />
+							</actions>
+							<widgets></widgets>
+						</section>
+					</widgets>
+                </section>
+                <decorator-screen name="main-decorator" location="component://delys/widget/accounting/accounting/AccTransactionScreens.xml">
+                    <decorator-section name="pre-body">
+                        <section>
+                            <condition>
+                                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
+                            </condition>
+                            <widgets>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <!-- do check for ACCOUNTING, _VIEW permission -->
+                            <condition>
+                                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
+                            </condition>
+                            <widgets>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="alert alert-info" text="${uiLabelMap.AccountingViewPermissionError}"/>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="CreateAccTrans">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindTransaction"/>
+            	<set field="tabButtonItem" value="accCreateAccTrans" />
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonTransactionDecorator" location="component://delys/widget/accounting/accounting/AccTransactionScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets >
+                            	<platform-specific>
+                                  	<html><html-template location="component://delys/webapp/delys/accounting/listAccTransactions.ftl"/></html>
+                            	</platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="CreateQuickAccTrans">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindTransaction"/>
+            	<set field="tabButtonItem" value="accQuickCreateAccTrans" />
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonTransactionDecorator" location="component://delys/widget/accounting/accounting/AccTransactionScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                            	<platform-specific>
+                                  	<html><html-template location="component://delys/webapp/delys/accounting/listAccQuickTransactions.ftl"/></html>
+                            	</platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="ListUnpostAccTrans">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindTransaction"/>
+            	<set field="tabButtonItem" value="accListUnpostAccTrans" />
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonTransactionDecorator" location="component://delys/widget/accounting/accounting/AccTransactionScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                            	<platform-specific>
+                                  	<html><html-template location="component://delys/webapp/delys/accounting/listAccUnpostAccTrans.ftl"/></html>
+                            	</platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="EditAccTrans">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindTransaction"/>
+            	<set field="tabButtonItem" value="EditAccountingTransaction" />
+            	<set field="acctgTransId" from-field="parameters.acctgTransId" />
+            	<entity-one entity-name="AcctgTrans" value-field="acctgTrans"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="EditTransactionDecorator" location="component://delys/widget/accounting/accounting/AccTransactionScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                        	<condition >
+                        		 <if-compare field="acctgTrans.isPosted" operator="equals" value="N"/>
+                        	</condition>
+                            <widgets>
+                            	<platform-specific>
+                                  	<html><html-template location="component://delys/webapp/delys/accounting/editAccTransaction.ftl"/></html>
+                            	</platform-specific>
+                            </widgets>
+                            <fail-widgets >
+                            	<platform-specific>
+                                  	<html><html-template location="component://delys/webapp/delys/accounting/viewAccTransaction.ftl"/></html>
+                            	</platform-specific>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="EditAccTransEntries">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindTransaction"/>
+            	<set field="tabButtonItem" value="EditAccTransEntries" />
+            	<set field="acctgTransId" from-field="parameters.acctgTransId" />
+            	<entity-one entity-name="AcctgTrans" value-field="acctgTrans"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="EditTransactionDecorator" location="component://delys/widget/accounting/accounting/AccTransactionScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                        	<condition >
+                        		 <if-compare field="acctgTrans.isPosted" operator="equals" value="N"/>
+                        	</condition>
+                            <widgets>
+                            	<platform-specific>
+                                  	<html><html-template location="component://delys/webapp/delys/accounting/listAccTransEntries.ftl"/></html>
+                            	</platform-specific>
+                            </widgets>
+                            <fail-widgets>
+                            	<platform-specific>
+                                  	<html><html-template location="component://delys/webapp/delys/accounting/viewListAccTransEntries.ftl"/></html>
+                            	</platform-specific>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="AcctgTransDetailReportPdf">
+        <section>
+            <actions>
+                <set field="acctgTransId" from-field="parameters.acctgTransId"/>
+                <entity-one entity-name="AcctgTrans" value-field="acctgTrans"/>
+                <entity-and entity-name="AcctgTransAndEntriesDetail" list="acctgTransEntries">
+                    <field-map field-name="acctgTransId"/>
+                    <order-by field-name="acctgTransEntrySeqId"/>
+                </entity-and>
+                <property-map resource="CommonUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="OrderUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ManufacturingUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="DelysUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="DelysAccGlUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-map resource="WorkEffortUiLabels" map-name="uiLabelMap" global="true"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/accounting/transactions/getDescriptionTrans.groovy"/>
+            </actions>
+            <widgets>
+                <platform-specific>
+                    <xsl-fo>
+                        <html-template location="component://delys/webapp/delys/accounting/fo/AcctgTransDetail.fo.ftl"/>
+                    </xsl-fo>
+                </platform-specific>
+            </widgets>
+        </section>
+    </screen>
+</screens>

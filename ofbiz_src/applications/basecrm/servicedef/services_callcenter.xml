@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+	<description>CRM Call center Services</description>
+	<vendor></vendor>
+	<version>1.0</version>
+
+	<service name="getContacts" engine="java" invoke="getContacts" location="com.olbius.crm.CallcenterServices">
+		<attribute name="searchKey" mode="IN" type="String" optional="true" />
+		<attribute name="conditions" mode="IN" type="String" optional="true" />
+		<attribute name="results" mode="OUT" type="List" optional="true" />
+	</service>
+
+	<service name="JqxGetListCommunication" engine="java" invoke="listCommunications" location="com.olbius.crm.CallcenterServices">
+		<implements service="jqxGetListInterface" />
+	</service>
+
+	<service name="raiseCustomerIssue" engine="java" invoke="raiseCustomerIssue" location="com.olbius.crm.CallcenterServices" default-entity-name="CommunicationEvent">
+		<auto-attributes mode="INOUT" optional="true" />
+		<auto-attributes mode="IN" include="pk" entity-name="PartyCampaignRelationship" optional="true"></auto-attributes>
+		<attribute name="partyId" mode="IN" type="String" />
+		<attribute name="type" mode="IN" type="String" />
+		<attribute name="status" mode="OUT" type="String" optional="true" />
+		<attribute name="nextCallSchedule" mode="IN" type="Long" optional="true" />
+		<attribute name="subjectSchedule" mode="IN" type="String" optional="true" />
+		<override name="content" mode="IN" type="String" optional="true" allow-html="any" />
+		<override name="fromDate" type="Long" optional="true"></override>
+	</service>
+
+	<service name="scheduleCommunication" engine="java" invoke="scheduleCommunication" location="com.olbius.crm.CallcenterServices"
+		default-entity-name="CommunicationEvent">
+		<attribute name="partyId" mode="IN" type="String" />
+		<attribute name="entryDate" mode="IN" type="Timestamp" />
+		<attribute name="subjectEnumId" mode="IN" type="String" />
+		<attribute name="communicationEventTypeId" mode="IN" type="String" optional="true" />
+		<attribute name="communicationEventId" mode="OUT" type="String" />
+	</service>
+
+	<service name="checkCallSchedule" engine="java" invoke="checkCallSchedule" location="com.olbius.crm.CallcenterServices">
+		<attribute name="result" mode="OUT" type="String" />
+	</service>
+
+	<service name="createCommunicationCRM" engine="java" invoke="createCommunication" location="com.olbius.crm.CallcenterServices"
+		default-entity-name="CommunicationEvent">
+		<auto-attributes mode="INOUT" optional="true" />
+		<override name="content" mode="IN" type="String" optional="true" allow-html="any" />
+	</service>
+
+	<service name="updateCommunicationCRM" engine="java" invoke="updateCommunication" location="com.olbius.crm.CallcenterServices"
+		default-entity-name="CommunicationEvent">
+		<auto-attributes include="pk" mode="IN" />
+		<auto-attributes include="nonpk" mode="IN" optional="true" />
+		<override name="content" allow-html="any" />
+	</service>
+
+	<service name="getUserInfoEditable" engine="java" invoke="getUserInfoEditable" location="com.olbius.crm.CallcenterServices">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="results" mode="OUT" type="Map"></attribute>
+	</service>
+
+	<service name="getLiabilityAgreementCustomer" engine="java" invoke="getLiabilityAgreementCustomer" location="com.olbius.crm.CallcenterServices">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="results" mode="OUT" type="List" optional="true"></attribute>
+	</service>
+
+	<service name="searchProductDiscuss" engine="java" invoke="searchProducts" location="com.olbius.crm.CallcenterServices">
+		<attribute name="query" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="results" mode="OUT" type="List" optional="true"></attribute>
+	</service>
+
+	<service name="contactInterface" engine="interface">
+		<required-permissions join-type="AND">
+			<check-permission permission="PARTYMGR" action="_CREATE" />
+		</required-permissions>
+		<auto-attributes mode="IN" entity-name="Person" optional="true"></auto-attributes>
+		<auto-attributes mode="IN" entity-name="PartyGroup" optional="true"></auto-attributes>
+		<attribute name="partyCode" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="fullName" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="phoneHome" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="officeHome" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="mobilePhone" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="primaryPhone" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="shippingPhone" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="email" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="staffContract" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="contactAddress" mode="IN" type="String" optional="true" />
+		<attribute name="facebook" mode="IN" type="String" optional="true" />
+		<attribute name="facebookId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="dataSourceId" mode="IN" type="String" optional="true" />
+		<attribute name="emailAddressId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="phoneHomeId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="phoneWorkId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="phoneMobileId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="ownerEmployee" mode="IN" type="String" optional="true"></attribute>
+		<override name="birthDate" type="Long" optional="true"></override>
+		<override name="idIssueDate" type="Long" optional="true"></override>
+	</service>
+
+	<service name="updateContactSchool" engine="java" invoke="updateContactSchool" location="com.olbius.crm.CallcenterServices">
+		<implements service="contactInterface" />
+		<attribute name="sdt" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="numberTeacher" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="numberStudent" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="representativeMemberId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="representativeMemberPhoneId" mode="IN" type="String" optional="true"></attribute>
+	</service>
+
+	<service name="createContactSchool" engine="java" invoke="createContactSchool" location="com.olbius.crm.CallcenterServices">
+		<implements service="contactInterface" />
+		<attribute name="sdt" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="numberTeacher" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="numberStudent" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="partyId" mode="OUT" type="String"></attribute>
+	</service>
+
+	<service name="updateContactBusiness" engine="java" invoke="updateContactBusiness" location="com.olbius.crm.CallcenterServices">
+		<implements service="contactInterface" />
+		<attribute name="sdt" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="representativeMemberId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="representativeMemberPhoneId" mode="IN" type="String" optional="true"></attribute>
+	</service>
+
+	<service name="createContactBusiness" engine="java" invoke="createContactBusiness" location="com.olbius.crm.CallcenterServices">
+		<implements service="contactInterface" />
+		<attribute name="sdt" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="partyId" mode="OUT" type="String"></attribute>
+	</service>
+
+	<service name="updateContactFamily" engine="java" invoke="updateContactFamily" location="com.olbius.crm.CallcenterServices">
+		<implements service="contactInterface" />
+		<attribute name="familyId" mode="IN" type="String"></attribute>
+		<attribute name="children" mode="IN" type="String" optional="true" />
+	</service>
+
+	<service name="createContactFamily" engine="java" invoke="createContactFamily" location="com.olbius.crm.CallcenterServices">
+		<implements service="contactInterface" />
+		<attribute name="isCustomerPOS" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="children" mode="IN" type="String" optional="true" />
+		<attribute name="partyId" mode="OUT" type="String"></attribute>
+		<attribute name="familyId" mode="OUT" type="String"></attribute>
+	</service>
+
+	<service name="updateContactPersonal" engine="java" invoke="updateContactPersonal" location="com.olbius.crm.CallcenterServices">
+		<implements service="contactInterface" />
+	</service>
+
+	<service name="createContactPersonal" engine="java" invoke="createContactPersonal" location="com.olbius.crm.CallcenterServices">
+		<implements service="contactInterface" />
+		<attribute name="isCustomerPOS" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="partyId" mode="OUT" type="String"></attribute>
+	</service>
+
+	<service name="importCustomer" engine="java" invoke="importCustomer" location="com.olbius.crm.CallcenterServices" transaction-timeout="7200">
+		<attribute name="size" mode="OUT" type="String" optional="true"></attribute>
+	</service>
+
+	<service name="JQGetListTempCustomer" engine="java" invoke="listTempCustomers" location="com.olbius.crm.CallcenterServices">
+		<implements service="jqxGetListInterface" />
+	</service>
+
+	<service name="updateTempCustomer" engine="java" invoke="updateTempCustomer" location="com.olbius.crm.CallcenterServices" default-entity-name="TempCustomer">
+		<auto-attributes mode="IN" include="pk"></auto-attributes>
+		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+	</service>
+
+	<service name="deleteTempCustomer" engine="java" invoke="deleteTempCustomer" location="com.olbius.crm.CallcenterServices" default-entity-name="TempCustomer">
+		<auto-attributes mode="IN" include="pk"></auto-attributes>
+	</service>
+
+	<service name="deleteAllTempCustomer" engine="java" invoke="deleteAllTempCustomer" location="com.olbius.crm.CallcenterServices">
+	</service>
+
+	<service name="saveMember" engine="java" invoke="saveMember" location="com.olbius.crm.CallcenterServices">
+		<attribute name="representativeMemberId" mode="IN" type="String" />
+		<attribute name="familyId" mode="IN" type="String" />
+		<attribute name="children" mode="IN" type="String" optional="true" />
+	</service>
+
+	<service name="createOrStoreMemberStep2" engine="java" invoke="createOrStoreMemberStep2" location="com.olbius.crm.CallcenterServices">
+		<attribute name="partyId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="familyId" mode="IN" type="String"></attribute>
+		<attribute name="partyFullName" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="gender" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="roleTypeIdFrom" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="birthDate" mode="IN" type="Long" optional="true"></attribute>
+		<attribute name="partyId" mode="OUT" type="String"></attribute>
+	</service>
+
+	<service name="checkDuplicateNumberPhone" engine="java" invoke="checkDuplicateNumberPhone" location="com.olbius.crm.CallcenterServices">
+		<attribute name="contactNumber" mode="IN" type="String" optional="true" />
+		<attribute name="isDuplicate" mode="OUT" type="Boolean" optional="true" />
+		<attribute name="partyId" mode="OUT" type="String" optional="true" />
+		<attribute name="familyId" mode="OUT" type="String" optional="true" />
+		<attribute name="partyFullName" mode="OUT" type="String" optional="true" />
+		<attribute name="partyInfo" mode="OUT" type="Map" optional="true" />
+	</service>
+
+	<service name="createProductUsingHistory" engine="java" invoke="createUsingHistory" location="com.olbius.crm.CallcenterServices"
+		default-entity-name="ProductUsingHistory">
+		<auto-attributes mode="IN" optional="true" include="nonpk" />
+		<auto-attributes mode="IN" optional="true" include="pk" />
+		<auto-attributes mode="OUT" optional="true" include="pk" />
+	</service>
+
+	<service name="checkPermissionWithCustomer" engine="java" invoke="checkPermissionWithCustomer" location="com.olbius.crm.CallcenterServices">
+		<attribute name="partyId" mode="IN" type="String" optional="true" />
+		<attribute name="permission" mode="OUT" type="Map" optional="true" />
+	</service>
+
+	<service name="JqxGetScheduleCommunication" engine="java" invoke="JqxGetScheduleCommunication" location="com.olbius.crm.CallcenterServices">
+		<implements service="jqxGetListInterface" />
+	</service>
+
+	<service name="jqxGetChildrenInFamily" engine="java" invoke="listChildrenInFamily" location="com.olbius.crm.CallcenterServices">
+		<attribute name="partyId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="includeRepresentative" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="listChildren" mode="OUT" type="List" optional="true"></attribute>
+	</service>
+
+	<service name="jqxGetAddressFamily" engine="java" invoke="jqxGetAddressFamily" location="com.olbius.crm.CallcenterServices">
+		<attribute name="partyId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="listAddress" mode="OUT" type="List" optional="true"></attribute>
+	</service>
+
+	<service name="getListMemberInFamilyDropdown" engine="java" invoke="listMemberInFamilyDropdown" location="com.olbius.crm.CallcenterServices">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="listMemberInFamilyDropdown" mode="OUT" type="List"></attribute>
+	</service>
+
+	<service name="getContactMechOfParty" engine="java" invoke="getContactMechOfParty" location="com.olbius.crm.CallcenterServices">
+		<attribute name="partyId" mode="IN" type="String" />
+		<attribute name="infoContactMechParty" mode="OUT" type="Map" optional="true" />
+	</service>
+
+	<service name="addMemberToFamily" engine="java" invoke="addMemberToFamily" location="com.olbius.crm.CallcenterServices">
+		<attribute name="familyId" mode="IN" type="String"></attribute>
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="roleTypeIdFrom" mode="IN" type="String"></attribute>
+	</service>
+
+	<service name="loadReasonListByReasonTypeId" engine="java" invoke="loadReasonListByReasonTypeId" location="com.olbius.crm.CallcenterServices"
+		default-entity-name="EnumTypeChildAndEnum">
+		<attribute name="resultEnumId" type="String" mode="IN" optional="true" />
+		<attribute name="listReasonClaim" mode="OUT" type="List" optional="true"></attribute>
+	</service>
+
+	<service name="getProductBySupplierClaim" engine="java" invoke="getProductBySupplier" location="com.olbius.crm.CallcenterServices">
+		<attribute name="partyId" mode="IN" type="String" />
+		<attribute name="results" mode="OUT" type="List" optional="true" />
+	</service>
+
+	<service name="JQGetListPayment" engine="java" invoke="jqGetListPayment" location="com.olbius.crm.CallcenterServices">
+		<implements service="jqxGetListInterface" />
+		<attribute name="organizationPartyId" type="String" mode="IN" optional="true" />
+		<attribute name="partyId" type="String" mode="IN" optional="true" />
+	</service>
+
+	<service name="JQGetListInvoice" engine="java" invoke="jqGetListInvoice" location="com.olbius.crm.CallcenterServices">
+		<implements service="jqxGetListInterface" />
+		<attribute name="organizationPartyId" type="String" mode="IN" optional="true" />
+		<attribute name="partyId" type="String" mode="IN" optional="true" />
+	</service>
+
+	<service name="getLoyaltyPoint" engine="java" location="com.olbius.crm.CallcenterServices" invoke="getLoyaltyPoint">
+		<attribute name="partyId" mode="IN" type="String" />
+		<attribute name="loyaltyPoint" mode="OUT" type="BigDecimal" optional="true" />
+	</service>
+
+	<service name="getPartyClassificationGroup" engine="java" location="com.olbius.crm.CallcenterServices" invoke="getPartyClassificationGroup">
+		<attribute name="partyId" mode="IN" type="String" />
+		<attribute name="value" mode="OUT" type="String" optional="true" />
+	</service>
+
+	<service name="checkPartyCode" engine="java" invoke="checkPartyCode" location="com.olbius.crm.CallcenterServices">
+		<attribute name="partyId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="partyCode" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="check" mode="OUT" type="String"></attribute>
+	</service>
+
+	<service name="fixPartyCode" engine="java" invoke="fixPartyCode" location="com.olbius.crm.CallcenterServices">
+	</service>
+
+	<service name="JQGetListProductDiscuss" engine="java" invoke="listProductDiscuss" location="com.olbius.crm.CallcenterServices">
+		<implements service="jqxGetListInterface" />
+	</service>
+
+	<service name="JQGetListPurchaseHistory" engine="java" invoke="listPurchaseHistory" location="com.olbius.crm.CallcenterServices">
+		<implements service="jqxGetListInterface" />
+	</service>
+
+	<service name="loadPartiesAndConsideration" engine="java" invoke="loadPartiesAndConsideration" location="com.olbius.crm.CallcenterServices">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="info" mode="OUT" type="List"></attribute>
+	</service>
+
+</services>

@@ -1,0 +1,994 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>hrolbius Services</description>
+    <vendor></vendor>
+    <version>1.0</version>
+	<service name="createPartySkill" engine="simple" default-entity-name="PartySkill"
+             location="component://hrolbius/script/com/olbius/services/CommonServices.xml" invoke="createPartySkill" auth="true">
+        <description>Create Skill for a Party</description>
+        <permission-service service-name="hrGenericPermission" main-action="CREATE"/>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+
+    <service name="updatePartySkill" engine="simple" default-entity-name="PartySkill"
+             location="component://hrolbius/script/com/olbius/services/CommonServices.xml" invoke="updatePartySkill" auth="true">
+        <description>Update a PartySkill</description>
+        <permission-service service-name="hrGenericPermission" main-action="UPDATE"/>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+
+    <service name="deletePartySkill" engine="simple" default-entity-name="PartySkill"
+             location="component://hrolbius/script/com/olbius/services/CommonServices.xml" invoke="deletePartySkill" auth="true">
+        <description>Delete a PartySkill</description>
+        <permission-service service-name="hrGenericPermission" main-action="DELETE"/>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+    </service>
+    
+    <service name="createPartyQual" engine="simple" default-entity-name="PartyQual"
+            location="component://hrolbius/script/com/olbius/services/CommonServices.xml" invoke="createPartyQual" auth="true">
+        <description>Create a Party Qualification entry</description>
+        <permission-service service-name="hrGenericPermission" main-action="CREATE"/>
+        <auto-attributes mode="INOUT" include="pk" optional="true"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+        <override name="partyId" optional="false"/>
+        <override name="partyQualTypeId" optional="false"/>
+        <override name="fromDate" optional="true"/>
+    </service>
+
+    <service name="updatePartyQual" engine="simple" default-entity-name="PartyQual"
+             location="component://hrolbius/script/com/olbius/services/CommonServices.xml" invoke="updatePartyQual" auth="true">
+        <description>Update Qualification of Party</description>
+        <permission-service service-name="hrGenericPermission" main-action="UPDATE"/>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+
+    <service name="deletePartyQual" engine="simple" default-entity-name="PartyQual"
+             location="component://hrolbius/script/com/olbius/services/CommonServices.xml" invoke="deletePartyQual" auth="true">
+        <description>Delete Qualification of Party</description>
+        <permission-service service-name="hrGenericPermission" main-action="DELETE"/>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+    </service>
+    
+    <service name="createPartyResume" engine="simple" default-entity-name="PartyResume"
+             location="component://hrolbius/script/com/olbius/services/CommonServices.xml" invoke="createPartyResume" auth="true">
+        <description>Create Resume for a Party</description>
+        <permission-service service-name="hrGenericPermission" main-action="CREATE"/>
+        <auto-attributes mode="IN" include="pk" optional="true"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+
+    <service name="updatePartyResume" engine="simple" default-entity-name="PartyResume"
+             location="component://hrolbius/script/com/olbius/services/CommonServices.xml" invoke="updatePartyResume" auth="true">
+        <description>Update a Resume of Party</description>
+        <permission-service service-name="hrGenericPermission" main-action="UPDATE"/>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service>
+
+    <service name="deletePartyResume" engine="simple" default-entity-name="PartyResume"
+             location="component://hrolbius/script/com/olbius/services/CommonServices.xml" invoke="deletePartyResume" auth="true">
+        <description>Delete a Resume of Party</description>
+        <permission-service service-name="hrGenericPermission" main-action="DELETE"/>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+    </service>
+
+    <service name="updateEmplLeaveApproval" engine="java" 
+             location="com.olbius.employee.services.EmployeeServices" invoke="updateEmplLeaveApproval" auth="true">
+        <description>Update a Employee Leave</description>
+        <required-permissions join-type="AND">
+        	<check-permission permission="HR_EMPLEAVE" action="_UPDATE"/>
+        </required-permissions>
+        <attribute name="emplLeaveId" mode="IN" type="String"></attribute>
+        <attribute name="fromDate" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="thruDate" mode="IN" type="String" optional="true"></attribute>
+        <!-- <attribute name="workingShiftList" mode="IN" type="List"></attribute> -->
+        <attribute name="ntfId" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="approvalStatusId" mode="IN" type="String"></attribute>
+    </service>
+    
+    <service name="updateEmplLeaveStatusHr" engine="java" invoke="updateEmplLeaveStatus" 
+    	location="com.olbius.employee.services.EmployeeServices" auth="true">
+    	<required-permissions join-type="AND">
+        	<check-permission permission="HR_EMPLEAVE" action="_UPDATE"/>
+        </required-permissions>
+    	<attribute name="approvalStatusId" mode="IN" type="String"></attribute>
+    	<!-- <attribute name="partyIdLeave" mode="IN" type="String"></attribute>
+    	<attribute name="leaveTypeId" mode="IN" type="String"></attribute>
+    	<attribute name="leaveFromDate" mode="IN" type="java.sql.Timestamp"></attribute> -->
+    	<attribute name="emplLeaveId" mode="IN" type="String"></attribute>	
+   	</service>
+    <service name="preProcessCreateEmplLeave" engine="java" invoke="preProcessCreateEmplLeave" auth="true"
+    	location="com.olbius.employee.services.EmployeeServices">
+    	<attribute name="partyId" mode="IN" type="String"></attribute>
+    	<attribute name="fromDate" mode="IN" type="String"></attribute>
+    	<attribute name="thruDate" mode="IN" type="String"></attribute>
+    	<attribute name="emplLeaveReasonTypeId" mode="IN" type="String"></attribute>
+    	<attribute name="leaveUnpaid" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="workingShift" mode="IN" type="String"></attribute>	
+   	</service>
+    <service name="createEmplLeave" engine="java" default-entity-name="EmplLeave"
+             location="com.olbius.employee.services.EmployeeServices" invoke="createEmplLeave" auth="true">
+        <description>Create a Employee Leave</description>
+        <required-permissions join-type="AND">
+        	<check-permission permission="HR_EMPLEAVE" action="_CREATE"/>
+        </required-permissions>
+        <auto-attributes mode="OUT" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+        <attribute name="workingShiftList" mode="IN" type="List" optional="true"></attribute>
+        <attribute name="roleTypeIdNtf" mode="OUT" type="String" optional="true"></attribute>
+    </service>
+    <service name="deletePartyContact" engine="java" invoke="deletePartyContact" auth="true"
+		location="com.olbius.employee.services.EmployeeServices">
+		<attribute name="partyId" mode="IN" type="String"/>
+		<attribute name="contactMechId" mode="IN" type="String"/>
+		<attribute name="contactMechPurposeTypeId" mode="IN" type="String"/>
+		<attribute name="fromDate" mode="IN" type="Timestamp"/>
+	</service>
+    <service name="createEmplLeaveApprRoleType" engine="java" invoke="createEmplLeaveApprRoleType" default-entity-name="EmplLeaveApprovalRoleType"
+    	location="com.olbius.employee.services.EmployeeServices" auth="true">
+    	<auto-attributes mode="IN" include="pk" optional="false"></auto-attributes>
+    	<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>	
+    	<override name="fromDate" optional="true"></override>
+   	</service>
+    
+    <service name="createNtfToApprEmplLeave" engine="java" invoke="createNtfToApprEmplLeave" default-entity-name="EmplLeave"
+    	location="com.olbius.employee.services.EmployeeServices" auth="true">
+    	<auto-attributes mode="IN" include="pk" optional="false"></auto-attributes>	    	
+   		<attribute name="roleTypeId" mode="IN" type="String"></attribute>
+   	</service>
+    
+    <!-- <service name="updateEmplLeaveStatus" engine="simple" default-entity-name="EmplLeave"
+             location="component://hrolbius/script/com/olbius/services/CommonServices.xml" invoke="updateEmplLeaveStatus" auth="true">
+        <description>Update a Employee Leave status</description>
+        <required-permissions join-type="AND">
+        	<check-permission permission="HR_EMPLEAVE" action="_UPDATE"/>
+        </required-permissions>
+        <auto-attributes mode="IN" include="pk" optional="false"/>
+        <auto-attributes mode="IN" include="nonpk" optional="true"/>
+    </service> -->
+    
+    <service name="approveEmplLeave" engine="simple" default-entity-name="EmplLeave" location="component://hrolbius/script/com/olbius/services/CommonServices.xml" 
+    	invoke="approveEmplLeave" auth="true">
+    	<description>Approve a Employee Leave</description>
+    	<required-permissions join-type="AND">
+        	<check-permission permission="HR_EMPLEAVE" action="_UPDATE"/>
+        </required-permissions>
+    	<auto-attributes mode="IN" include="pk" optional="false"></auto-attributes >
+    	<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes >
+    </service>
+    
+    <service name="createEmployee" engine="java" invoke="createEmployee" location="com.olbius.employee.services.EmployeeServices" auth="true">
+    	<description>Create a Employee</description>
+    	<auto-attributes mode="IN" include="all" optional="true" entity-name="Person"></auto-attributes>
+    	<!-- <auto-attributes mode="IN" include="all" entity-name="PostalAddress" optional="true"></auto-attributes>
+    	<auto-attributes mode="IN" include="all" entity-name="TelecomNumber" optional="true"></auto-attributes> -->
+    	<auto-attributes mode="IN" include="all" entity-name="UserLogin" optional="true"></auto-attributes>
+    	<attribute name="firstName" mode="IN" type="String" optional="false"></attribute>
+    	<attribute name="lastName" mode="IN" type="String" optional="false"></attribute>
+    	<!-- <attribute name="emailAddress" mode="IN" type="String" optional="true"></attribute> -->
+    	<attribute name="currentPasswordVerify" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="emplPositionTypeId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="actualFromDate" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>
+    	<attribute name="actualThruDate" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>
+    	<attribute name="userLoginId" mode="OUT" type="String" optional="true"></attribute>
+    	<attribute name="currentPassword" mode="OUT" type="String" optional="true"></attribute>
+    	<attribute name="currentPasswordVerify" mode="OUT" type="String" optional="true"></attribute>
+    	<attribute name="requirePasswordChange" mode="OUT" type="String" optional="true"></attribute>
+    	<attribute name="passwordHint" mode="OUT" type="String" optional="true"></attribute>
+    	<attribute name="enabled" mode="OUT" type="String" optional="true"></attribute>
+    	<attribute name="externalAuthId" mode="OUT" type="String" optional="true"></attribute>
+    	<attribute name="partyId" mode="OUT" type="String" optional="false"></attribute>
+    	<attribute name="success" mode="OUT" type="String" optional="true"></attribute>
+    	
+    </service>
+    
+    <service name="createEmplContactInfo" engine="java" invoke="createEmplContactInfo" 
+    	location="com.olbius.employee.services.EmployeeServices" auth="true">
+    	<attribute name="partyId" mode="IN" type="String" optional="false"></attribute>
+    	<attribute name="phone_mobile" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="phone_work" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="phone_home" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="primaryEmailAddress" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="personalEmailAddress" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="otherEmailAddress" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="address1_PermanentResidence" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="permanentResidence_countryGeoId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="permanentResidence_stateProvinceGeoId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="permanentResidence_districtGeoId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="permanentResidence_wardGeoId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="address1_CurrResidence" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="currResidence_countryGeoId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="currResidence_stateProvinceGeoId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="currResidence_districtGeoId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="currResidence_wardGeoId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="internalOrgId" mode="IN" type="String" optional="true"></attribute>
+    	
+    	<attribute name="PERMANENT_RESIDENCE" mode="OUT" type="String" optional="true"></attribute>
+    	<attribute name="CURRENT_RESIDENCE" mode="OUT" type="String" optional="true"></attribute>
+    	<attribute name="PHONE_MOBILE" mode="OUT" type="String" optional="true"></attribute>
+    	<attribute name="PHONE_WORK" mode="OUT" type="String" optional="true"></attribute>
+    	<attribute name="PHONE_HOME" mode="OUT" type="String" optional="true"></attribute>
+    	<attribute name="PRIMARY_EMAIL" mode="OUT" type="String" optional="true"></attribute>
+    	<attribute name="PERSONAL_EMAIL" mode="OUT" type="String" optional="true"></attribute>
+    	<attribute name="OTHER_EMAIL" mode="OUT" type="String" optional="true"></attribute>
+   	</service>
+    
+    <service name="createEmplPositionAndFulfillment" engine="java" default-entity-name="EmplPosition" 
+    	location="com.olbius.employee.services.EmployeeServices" invoke="createEmplPositionAndFulfillment">
+    	<auto-attributes mode="INOUT" include="all" optional="true"></auto-attributes>
+    	<attribute name="internalOrgId" mode="IN" type="String" optional="false"></attribute>
+    	<attribute name="fromDate" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>
+    	<attribute name="thruDate" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>
+    	<override mode="INOUT" name="emplPositionId"/>
+    </service>
+    
+    <service name="createHrmUserLogin" engine="simple" auth="false"
+        location="component://hrolbius/script/com/olbius/services/CommonServices.xml" invoke="createHrmUserLogin">
+        <description>Create a UserLogin for HRM</description>
+        <implements service="createUserLogin"/>
+        <attribute name="fromDate" mode="OUT" type="Timestamp" optional="false"></attribute>
+    </service>
+    
+    <service name="addUserLoginToSecurityGroup" engine="entity-auto" invoke="create" default-entity-name="UserLoginSecurityGroup" auth="true">
+        <description>Add a UserLogin to a SecurityGroup</description>
+        <attribute name="userLoginId" type="String" mode="IN" optional="false"/>
+        <attribute name="groupId" type="String" mode="IN" optional="false"/>
+        <attribute name="fromDate" type="Timestamp" mode="IN" optional="false"/>
+        <attribute name="thruDate" type="Timestamp" mode="IN" optional="true"/>
+    </service>
+    
+    <service name="removeInternalPerson" engine="java" location="com.olbius.event.services.RemoveInternalPerson" invoke="removeInternalPerson">
+    	<description> remove a person from</description>
+    	<required-permissions join-type="AND">
+    		<check-permission permission="HR_DIRECTORY" action="_UPDATE"/>
+    	</required-permissions>
+    	<attribute name="partyIdFrom" mode="IN" type="String" optional="false"/>
+    	<attribute name="partyIdTo" mode="IN" type="String" optional="false"/>
+    	<attribute name="roleTypeIdTo" mode="IN" type="String" optional="false"/>
+    	<attribute name="roleTypeIdFrom" mode="IN" type="String" optional="false"/>
+    </service>
+    <service name="createNtfUpdateEmplLeave" engine="simple" invoke="createNtfUpdateEmplLeave" default-entity-name="EmplLeave"
+    	location="component://hrolbius/script/com/olbius/services/employees/EmployeeServices.xml">
+    	<attribute name="ntfId" mode="IN" type="String" optional="false"></attribute>
+    	<auto-attributes mode="IN" include="pk" optional="true"/>
+    </service>  
+    
+    <service name="createJobTransProposal" engine="java" invoke="createJobTransProposal" default-entity-name="EmplProposal"
+    	location="com.olbius.employee.services.EmployeeServices" auth="true">
+    	<required-permissions join-type="AND">
+    		<check-permission permission="HR_JOB_TRANS" action="_CREATE"/>
+    	</required-permissions>
+    	<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+    	<auto-attributes mode="OUT" include="pk" optional="false"></auto-attributes>	
+    	<attribute name="internalOrgUnitToId" mode="IN" type="String" optional="false"></attribute>
+    	<attribute name="emplPositionTypeFromId" mode="IN" type="String"></attribute>
+    	<attribute name="emplPositionTypeToId" mode="IN" type="String"></attribute>
+    	<attribute name="partyIdTransfer" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="dateMoveTo" mode="IN" type="java.sql.Timestamp" optional="false"></attribute>
+    	<attribute name="dateLeave" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>
+    	<attribute name="reason" mode="IN" type="String" optional="true"></attribute>
+   	</service> 
+    <!-- <service name="createDeptTransferProposal" engine="java" invoke="createDeptTransferProposal" default-entity-name="TransferDeptProposal"
+    	location="com.olbius.employee.services.EmployeeServices" auth="true">    	
+    	<description>create transfer department proposal</description>
+    	<required-permissions join-type="AND">
+    		<check-permission permission="HR_JOB_TRANS" action="_CREATE"/>
+    	</required-permissions>
+    	<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>    
+    	<auto-attributes mode="OUT" include="pk" optional="false"></auto-attributes>
+    	<auto-attributes mode="IN" optional="true" include="nonpk" entity-name="JobTransferProposal"></auto-attributes>
+    	<attribute name="headerNtf" mode="OUT" type="String" optional="true"></attribute>
+    	<override name="departmentToId" mode="IN" optional="false"></override>
+    	<override name="emplPositionTypeToId" optional="false"></override>
+    	<override name="dateMoveTo" optional="false"></override>
+    	<override name="partyIdTransfer" mode="IN" optional="false"></override>
+   	</service> -->   
+   <!-- 	<service name="createJobTransferApproval" engine="java" invoke="createJobTransferApproval"
+   		location="com.olbius.employee.services.EmployeeServices" auth="true" default-entity-name="JobTransferApproval">
+   		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+   		<auto-attributes mode="OUT" include="pk"></auto-attributes>
+   		<override name="jobTransferProposalId" optional="false"></override>
+   		<override name="partyId" optional="false"></override>	
+   		<override name="roleTypeId" optional="false"></override>
+   		<override name="approvalStatusId" optional="false"></override>
+ 	</service>	 -->
+ 	<!-- <service name="updateJobTransferProposalStatus" engine="java" invoke="updateJobTransferProposalStatus"
+ 		location="com.olbius.employee.services.EmployeeServices" auth="true" default-entity-name="JobTransferApproval">
+ 		<auto-attributes mode="IN" include="all" optional="true"></auto-attributes> 		
+ 		<override name="jobTransferProposalId" optional="false"></override>
+ 		<override name="roleTypeId" optional="false"></override>	
+	</service> -->
+	<service name="updateEmplDeptAndEmplPosition" engine="java" invoke="updateEmplDeptAndEmplPosition"
+		location="com.olbius.employee.services.EmployeeServices" auth="true">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="emplPositionTypeOldId" mode="IN" type="String"></attribute>
+		<attribute name="newInternalOrgId" mode="IN" type="String"></attribute>
+		<attribute name="emplPositionTypeNewId" mode="IN" type="String"></attribute>
+		<attribute name="dateMoveTo" mode="IN" type="java.sql.Timestamp"></attribute>
+		<attribute name="dateLeave" mode="IN" type="java.sql.Timestamp"></attribute>	
+	</service>
+   <!-- 	<service name="createNtfToApprJobTransPropl" engine="java" invoke="createNtfToApprJobTransPropl" default-entity-name="TransferDeptProposal"
+   		location="com.olbius.employee.services.EmployeeServices" auth="true">   		
+   		<auto-attributes mode="IN" include="pk" optional="false"></auto-attributes>	
+   		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+   		<attribute name="headerNtf" mode="IN" type="String" optional="true"></attribute>
+   		<attribute name="roleTypeId" mode="IN" type="String"></attribute>
+	</service> -->
+   	
+   	<!-- <service name="createTransPositionProposal" engine="simple" default-entity-name="TransferPositionProposal" invoke="createTransPositionProposal"
+   		location="component://hrolbius/script/com/olbius/services/employees/EmployeeServices.xml">
+   		<description>create transfer position proposal</description>
+   		<required-permissions join-type="AND">
+    		<check-permission permission="HR_JOB_TRANS" action="_CREATE"/>
+    	</required-permissions>
+   		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>    
+    	<auto-attributes mode="OUT" include="pk" optional="false"></auto-attributes>
+    	<auto-attributes mode="IN" optional="true" include="nonpk" entity-name="JobTransferProposal"></auto-attributes>
+    	<override name="emplPositionTypeToId" optional="false"></override>
+    	<override name="partyIdTransfer" mode="IN" optional="false"></override>
+    	<override name="emplPositionTypeFromId" mode="IN" optional="false"></override>
+   	</service> -->
+    
+   <!--  <service name="createJobTransferApprovalRoleType" engine="java" invoke="createJobTransferApprovalRoleType"
+    	location="com.olbius.employee.services.EmployeeServices" auth="true">
+    	<attribute name="jobTransferProposalId" mode="IN" type="String"></attribute>
+    	<attribute name="partyId" mode="IN" type="String"></attribute>
+    	<attribute name="roleTypeId" mode="IN" type="String"></attribute>	
+   	</service> -->
+ 	<service name="getPositionTypeOfDept" engine="simple" invoke="getPositionTypeOfDept"
+ 		location="component://hrolbius/script/com/olbius/services/employees/EmployeeServices.xml">
+ 		<attribute name="departmentId" mode="IN" type="String" optional="true"></attribute>
+ 		<attribute name="positionTypeList" mode="OUT" type="java.util.List" optional="true"></attribute>	
+	</service>
+	
+	<service name="getPositionTypeOfEmpl" engine="simple" invoke="getPositionTypeOfEmpl"
+		location="component://hrolbius/script/com/olbius/services/employees/EmployeeServices.xml">
+		<attribute name="employeeId" mode="IN" type="String" optional="true"></attribute>
+ 		<attribute name="positionTypeList" mode="OUT" type="java.util.List" optional="true"></attribute>
+	</service>
+	
+	<!-- replace with updatePartyApprovalJobTransfer-->
+	<!-- <service name="updateTransferDeptProposal" engine="simple" invoke="updateTransDeptProposalStt" default-entity-name="JobTransferProposal"
+		location="component://hrolbius/script/com/olbius/services/employees/EmployeeServices.xml">
+		<required-permissions join-type="AND">
+			<check-permission permission="HR_JOB_TRANS" action="_UPDATE"/>
+		</required-permissions>
+		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+		<auto-attributes mode="INOUT" include="pk" optional="false"></auto-attributes>
+		<attribute name="ntfId" mode="IN" type="String" optional="true"></attribute>
+	</service> -->
+	<service name="updatePartyApprovalJobTransfer" engine="java" invoke="updatePartyApprovalJobTransfer" default-entity-name="EmplProposalApproval" auth="true"
+		location="com.olbius.employee.services.EmployeeServices">
+		<required-permissions join-type="AND">
+			<check-permission permission="HR_JOB_TRANS" action="_UPDATE"/>
+		</required-permissions>
+		<!-- <auto-attributes mode="INOUT" include="pk" optional="false"></auto-attributes> -->
+		<auto-attributes mode="IN" include="all" optional="true"></auto-attributes>
+		<attribute name="ntfId" mode="IN" type="String" optional="true"></attribute>
+		<override name="emplProposalId" optional="false"></override>	
+		<override name="approvalStatusId" optional="false"></override>
+	</service>
+	<service name="updateTransPositionProposal" engine="simple" invoke="updateTransPositionProposal" default-entity-name="JobTransferProposal"
+		location="component://hrolbius/script/com/olbius/services/employees/EmployeeServices.xml">
+		<required-permissions join-type="AND">
+			<check-permission permission="HR_JOB_TRANS" action="_UPDATE"/>
+		</required-permissions>
+		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+		<auto-attributes mode="INOUT" include="pk" optional="false"></auto-attributes>
+		<attribute name="ntfId" mode="IN" type="String" optional="true"></attribute>
+	</service>
+	<service name="findEmployeeByManager" engine="java" invoke="findEmployeeByManager" 
+		location="com.olbius.employee.services.EmployeeServices">
+		<required-permissions join-type="AND">
+			<check-role-member role-type="MANAGER"/>
+		</required-permissions>
+		<attribute name="lastName" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="firstName" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="listIt" mode="OUT" type="java.util.List" optional="false"></attribute>	
+	</service>
+	<service name="updateEmplPunishment" engine="java" invoke="updateEmplPunishment" default-entity-name="PartyPunishment"
+		location="com.olbius.employee.services.EmployeeServices">
+		<required-permissions join-type="AND">
+			<check-permission permission="HR_PUNISHMENT_MGR" action="_UPDATE"/>
+		</required-permissions>
+		<auto-attributes mode="IN" include="pk" optional="false"></auto-attributes>
+		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>	
+	</service>
+	<!--================================== work overtime service================================= -->
+	<service name="createWorkOvertimeRegis" engine="java" invoke="createWorkOvertimeRegis" default-entity-name="WorkOvertimeRegistration"
+		location="com.olbius.employment.services.EmploymentServices">
+		<required-permissions join-type="AND">
+			<check-permission permission="HR_WORK_OVERTIME" action="_CREATE"/>
+		</required-permissions>
+		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+		<auto-attributes mode="OUT" include="pk" optional="false"></auto-attributes>
+		<override name="reasonRegister" allow-html="safe"></override>	
+	</service>
+	<service name="updateWorkOvertimeApproval" engine="simple" invoke="updateWorkOvertimeApproval"  default-entity-name="WorkOvertimeRegistration"
+		location="component://hrolbius/script/com/olbius/services/employees/EmployeeServices.xml">
+		<required-permissions join-type="AND">
+			<check-permission permission="HR_WORK_OVERTIME" action="_UPDATE"/>
+		</required-permissions>
+		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+		<auto-attributes mode="IN" include="pk" optional="false"></auto-attributes>
+		<attribute name="ntfToHeadOfHR" mode="IN" type="String" optional="true"></attribute>
+	</service>
+	<service name="JQGetEmplWorkOvertimeRegis" engine="java" invoke="getEmplWorkOvertimeRegis" auth="true"
+		location="com.olbius.employment.services.EmploymentServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List"
+			optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List"
+			optional="false"></attribute>
+		<attribute name="opts" mode="IN"
+			type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map"
+			optional="false"></attribute>
+		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator"
+			optional="false"></attribute>
+		<attribute name="TotalRows" mode="OUT" type="String"
+			optional="true"></attribute>	
+	</service>
+	<!-- =============================== ./end work overtime service ===================================-->
+	
+	<service name="createEmplWorkingLateExt" engine="java" invoke="createEmplWorkingLateExt" auth="true"
+		location="com.olbius.employment.services.EmploymentServices">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="dateWorkingLate" mode="IN" type="String"></attribute>
+		<attribute name="delayTime" mode="IN" type="String"></attribute>
+		<attribute name="statusId" mode="IN" type="String"></attribute>
+		<attribute name="reason" mode="IN" type="String" optional="true"></attribute>
+	</service>
+	
+	<service name="createEmplWorkingLate" engine="java" invoke="createEmplWorkingLate" default-entity-name="EmplWorkingLate" auth="true"
+		location="com.olbius.employment.services.EmploymentServices">
+		<required-permissions join-type="AND">
+			<check-permission permission="HR_WORK_LATE" action="_CREATE"/>
+		</required-permissions>
+		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+		<auto-attributes mode="OUT" include="pk" optional="false"></auto-attributes>
+		<override name="partyId" optional="false"></override>
+		<override name="dateWorkingLate" optional="false"></override>
+		<override name="delayTime" optional="false"></override>
+	</service>
+	<service name="deleteEmplWorkingLate" engine="java" invoke="deleteEmplWorkingLate" auth="true" default-entity-name="EmplWorkingLate"
+		location="com.olbius.employment.services.EmploymentServices">
+		<auto-attributes mode="IN" include="pk" optional="false"></auto-attributes>
+	</service>
+
+	<!-- service resign employee -->
+	<service name="createEmplTerminationProposal" engine="simple" invoke="createEmplTerminationProposal" 
+		default-entity-name="EmplTerminationProposal"
+		location="component://hrolbius/script/com/olbius/services/employees/EmployeeServices.xml">
+		<required-permissions join-type="AND">
+			<check-permission permission="HR_TERMINATION" action="_CREATE"/>
+		</required-permissions>
+		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+		<auto-attributes mode="OUT" include="pk" optional="false"></auto-attributes>
+	</service>
+	<!-- <service name="createEmplRetireProposal" engine="simple" invoke="createEmplRetireProposal" 
+		default-entity-name="EmplTerminationProposal"
+		location="component://hrolbius/script/com/olbius/services/employees/EmployeeServices.xml">
+		<required-permissions join-type="AND">
+			<check-permission permission="HR_TERMINATION" action="_CREATE"/>
+		</required-permissions>
+		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+		<auto-attributes mode="OUT" include="pk" optional="false"></auto-attributes>
+	</service>
+	<service name="approvalRetireProposal" engine="simple" invoke="approvalRetireProposal" 
+		default-entity-name="EmplTerminationProposal"
+		location="component://hrolbius/script/com/olbius/services/employees/EmployeeServices.xml">
+		<required-permissions join-type="AND">
+			<check-permission permission="HR_TERMINATION" action="_UPDATE"/>
+		</required-permissions>
+		<auto-attributes mode="INOUT" include="nonpk" optional="true"></auto-attributes>
+		<auto-attributes mode="IN" include="pk" optional="false"></auto-attributes>
+		<override name="statusId" mode="INOUT"></override>
+	</service>
+	<service name="checkRetireStatusApproval" engine="simple" invoke="checkRetireStatusApproval" 
+		location="component://hrolbius/script/com/olbius/services/employees/checkStatusUpdateProposalServices.xml">		
+		<auto-attributes mode="IN" include="pk" optional="false" entity-name="EmplTerminationProposal"></auto-attributes>		
+		<attribute name="statusId" mode="IN" type="String" optional="true"></attribute>		
+	</service>-->
+	<!-- <service name="checkResignStatusApproval" engine="simple" invoke="checkResignStatusApproval" default-entity-name="EmplTerminationProposal"
+		location="component://hrolbius/script/com/olbius/services/employees/checkStatusUpdateProposalServices.xml">
+		<auto-attributes mode="IN" include="pk" optional="false"></auto-attributes>
+		<attribute name="statusId" mode="IN" type="String" optional="true"></attribute>	
+	</service> -->
+	<!-- <service name="createResignationProposal" engine="simple" invoke="createResignationProposal" 
+		default-entity-name="EmplTerminationProposal"
+		location="component://hrolbius/script/com/olbius/services/employees/EmployeeServices.xml">
+		<required-permissions join-type="AND">
+			<check-permission permission="HR_TERMINATION" action="_CREATE"/>
+		</required-permissions>
+		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+		<auto-attributes mode="OUT" include="pk" optional="false"></auto-attributes>			
+	</service> -->
+	<!-- <service name="createWorkOffProposal" engine="simple" invoke="createWorkOffProposal" 
+		default-entity-name="EmplTerminationProposal"
+		location="component://hrolbius/script/com/olbius/services/employees/EmployeeServices.xml">
+		<required-permissions join-type="AND">
+			<check-permission permission="HR_TERMINATION" action="_CREATE"/>
+		</required-permissions>
+		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+		<auto-attributes mode="OUT" include="pk" optional="true"></auto-attributes>	
+		<override name="partyId" optional="false"></override>		
+	</service> -->
+	<!-- <service name="updateResignationProposal" engine="simple" invoke="updateResignationProposal" default-entity-name="EmplTerminationProposal"
+		location="component://hrolbius/script/com/olbius/services/employees/EmployeeServices.xml">
+		<required-permissions join-type="AND">
+			<check-permission permission="HR_TERMINATION" action="_UPDATE"/>
+		</required-permissions>
+		<auto-attributes mode="INOUT" include="pk" optional="false"></auto-attributes>
+		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+		<attribute name="ntfId" mode="IN" type="String" optional="true"></attribute>
+	</service> -->
+	<service name="getPartyFixedAssetAssignment" engine="java" invoke="getPartyFixedAssetAssignment" auth="true"
+		location="com.olbius.employee.services.EmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+   		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+   		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+   		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+   		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>	
+   		<attribute name="request" mode="IN" type="javax.servlet.http.HttpServletRequest"></attribute>
+	</service>
+	
+	<service name="getPartyTerminationAssetAssignment" engine="java" invoke="getPartyTerminationAssetAssignment" auth="true"
+		location="com.olbius.employee.services.EmployeeServices">
+		<attribute name="pagenum" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="pagesize" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="emplTerminationProposalId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="listReturn" mode="OUT" type="List"></attribute>	
+		<attribute name="TotalRows" mode="OUT" type="String" optional="true"></attribute>	
+	</service>
+	
+	<service name="getPartyInvoiceAR" engine="java" invoke="getPartyInvoiceAR" auth="true"
+		location="com.olbius.employee.services.EmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+   		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+   		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+   		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+   		<attribute name="listIterator" mode="OUT" type="List" optional="false"></attribute>
+   		<attribute name="TotalRows" mode="OUT" type="String" optional="true"></attribute>	
+   		<attribute name="request" mode="IN" type="javax.servlet.http.HttpServletRequest"></attribute>	
+	</service>
+	<service name="getPartyTerminationInvoicePaid" engine="java" invoke="getPartyTerminationInvoicePaid" auth="true"
+		location="com.olbius.employee.services.EmployeeServices">
+		<attribute name="pagenum" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="pagesize" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="emplTerminationProposalId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="listReturn" mode="OUT" type="List"></attribute>	
+		<attribute name="TotalRows" mode="OUT" type="String" optional="true"></attribute>	
+	</service>
+	
+	<service name="getPartyPaymentAR" engine="java" invoke="getPartyPaymentAR" auth="true"
+		location="com.olbius.employee.services.EmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+   		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+   		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+   		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+   		<attribute name="listIterator" mode="OUT" type="List" optional="false"></attribute>
+   		<attribute name="TotalRows" mode="OUT" type="String" optional="true"></attribute>	
+   		<attribute name="request" mode="IN" type="javax.servlet.http.HttpServletRequest"></attribute>	
+	</service>
+	
+	<service name="getPartyTerminationPaymentPaid" engine="java" invoke="getPartyTerminationPaymentPaid" auth="true"
+		location="com.olbius.employee.services.EmployeeServices">
+		<attribute name="pagenum" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="pagesize" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="emplTerminationProposalId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="listReturn" mode="OUT" type="List"></attribute>	
+		<attribute name="TotalRows" mode="OUT" type="String" optional="true"></attribute>	
+	</service>
+	<!--  -->
+	
+	<service name="createEmplTerminationPpsl" engine="java" invoke="createEmplTerminationPpsl" auth="true"
+		location="com.olbius.employee.services.EmployeeServices" default-entity-name="EmplTerminationProposal">
+		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+		<auto-attributes mode="OUT" include="pk" optional="false"></auto-attributes>
+		<override name="comment" allow-html="safe"></override>
+		<override name="partyId" optional="false"></override>
+		<override name="dateTermination" optional="false"></override>	
+	</service>
+	<service name="createWorkFlowApprTermination" engine="java" invoke="createWorkFlowApprTermination" auth="true"
+		location="com.olbius.employee.services.EmployeeServices">
+		<attribute name="emplTerminationProposalId" mode="IN" type="String"></attribute>	
+	</service>
+	<service name="getEmplTerminationPpslList" engine="java" invoke="getEmplTerminationPpslList" auth="true"
+		location="com.olbius.employee.services.EmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+   		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+   		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+   		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+   		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>	
+   		<attribute name="request" mode="IN" type="javax.servlet.http.HttpServletRequest"></attribute>	
+	</service>
+	<service name="expireEmplRelationship" engine="java" invoke="expireEmplRelationship" auth="true">
+		<attribute name="emplTerminationProposalId" mode="IN" type="String"></attribute>
+	</service>
+	
+	<!-- <service name="createWorkOffProposal" engine="java" invoke="createWorkOffProposal" 
+		default-entity-name="EmplTerminationProposal"
+		location="com.olbius.employee.services.EmployeeServices" auth="true">
+		<required-permissions join-type="AND">
+			<check-permission permission="HR_TERMINATION" action="_CREATE"/>
+		</required-permissions>
+		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+		<auto-attributes mode="OUT" include="pk" optional="true"></auto-attributes>	
+		<attribute name="ntfHeader" mode="OUT" type="String" optional="true"></attribute>
+		<override name="partyId" optional="false"></override>		
+	</service>
+	
+	<service name="createEmplTerminationApprRoleType" engine="java" invoke="createEmplTerminationApprRoleType" auth="true"
+		location="com.olbius.employee.services.EmployeeServices" default-entity-name="EmplTerminationApprovalRoleType">
+		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+		<auto-attributes mode="IN" include="pk" optional="false"></auto-attributes>
+		<override name="fromDate" optional="true"></override>	
+	</service>
+	
+	<service name="createNtfToApprTermPropl" engine="java" invoke="createNtfToApprTermPropl" auth="true"
+		location="com.olbius.employee.services.EmployeeServices">
+		<attribute name="emplTerminationProposalId" mode="IN" type="String"></attribute>
+		<attribute name="headerNtf" mode="IN" type="String" optional="true"></attribute>
+   		<attribute name="roleTypeId" mode="IN" type="String"></attribute>	
+	</service>
+	
+	<service name="updateEmplTerminationProposal" engine="java" invoke="updateEmplTerminationProposal" auth="true"
+		location="com.olbius.employee.services.EmployeeServices" default-entity-name="EmplTerminationApproval">
+		<auto-attributes mode="IN" include="all" optional="true"></auto-attributes>
+		<override name="emplTerminationProposalId" optional="false"></override>	
+		<override name="approvalStatusId" optional="false"></override>
+	</service>
+	
+	<service name="updateTerminationProposalStatus" engine="java" invoke="updateTerminationProposalStatus" auth="true"
+		location="com.olbius.employee.services.EmployeeServices" default-entity-name="EmplTerminationApproval">
+		<auto-attributes mode="IN" include="all" optional="true"></auto-attributes>
+		<override name="emplTerminationProposalId" optional="false"></override>
+		<override name="roleTypeId" optional="false"></override>
+	</service>
+	<service name="createEmplTerminationApproval" engine="java" invoke="createEmplTerminationApproval" auth="true"
+		location="com.olbius.employee.services.EmployeeServices" default-entity-name="EmplTerminationApproval">
+		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+		<auto-attributes mode="OUT" include="pk" optional="false"></auto-attributes>
+		<override name="emplTerminationProposalId" optional="false"></override>
+		<override name="partyId" optional="false"></override>
+		<override name="roleTypeId" optional="false"></override>
+		<override name="approvalStatusId" optional="false"></override>		
+	</service> -->
+	<!-- ./end -->
+	
+	<!-- sacking service -->
+	<!-- <service name="createSackingProposal" engine="simple" invoke="createSackingProposal" default-entity-name="EmplTerminationProposal"
+		location="component://hrolbius/script/com/olbius/services/employees/EmployeeServices.xml">
+		<required-permissions join-type="AND">
+			<check-permission permission="HR_TERMINATION" action="_CREATE"/>
+		</required-permissions>
+		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+		<auto-attributes mode="OUT" include="pk" optional="false"></auto-attributes>
+		<attribute name="proposerId" optional="false" type="String" mode="IN"></attribute>
+		<override name="partyId" optional="false"></override>
+	</service> -->
+	<service name="createSackingProposal" engine="java" invoke="createSackingProposal" default-entity-name="EmplProposal"
+		location="com.olbius.employment.services.EmploymentServices" auth="true">
+		<required-permissions join-type="AND">
+			<check-permission permission="HR_TERMINATION" action="_CREATE"/>
+		</required-permissions>
+		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+		<auto-attributes mode="OUT" include="pk" optional="false"></auto-attributes>
+		<attribute name="terminationReasonId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="dateTermination" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>		
+		<attribute name="proposedId" mode="IN" type="String"></attribute>	
+	</service>
+	<service name="updateApprovalSackingProposal" engine="java" invoke="updateApprovalSackingProposal" default-entity-name="EmplProposalApproval"
+		location="com.olbius.employment.services.EmploymentServices" auth="true">
+		<auto-attributes mode="IN" include="all" optional="true"></auto-attributes>
+		<attribute name="ntfId" mode="IN" type="String" optional="true"></attribute>
+		<override name="emplProposalId" optional="false"></override>	
+		<override name="approvalStatusId" optional="false"></override>
+	</service>
+	<!-- <service name="approvalSackingProposal" engine="simple" invoke="approvalSackingProposal" default-entity-name="EmplTerminationProposal"
+		location="component://hrolbius/script/com/olbius/services/employees/EmployeeServices.xml">
+		<required-permissions join-type="AND">
+			<check-permission permission="HR_TERMINATION" action="_UPDATE"/>
+		</required-permissions>
+		<auto-attributes mode="INOUT" include="nonpk" optional="true"></auto-attributes>
+		<auto-attributes mode="IN" include="pk" optional="false"></auto-attributes>
+		<attribute name="ntfId" mode="IN" type="String" optional="true"></attribute>
+	</service> -->
+	
+	<service name="checkSackingStatusApproval" engine="simple" invoke="checkSackingStatusApproval" 
+		default-entity-name="EmplTerminationProposal"
+		location="component://hrolbius/script/com/olbius/services/employees/checkStatusUpdateProposalServices.xml">
+		<auto-attributes mode="IN" include="pk" optional="false"></auto-attributes>
+		<attribute name="statusId" mode="IN" type="String" optional="true"></attribute>
+	</service>
+	<!-- ./ end resign service-->
+	
+	<service name="checkTransPositionStatusAppl" engine="simple" default-entity-name="JobTransferProposal" invoke="checkTransPositionStatusAppl"
+		location="component://hrolbius/script/com/olbius/services/employees/checkStatusUpdateProposalServices.xml">
+		<auto-attributes mode="IN" include="pk" optional="false"></auto-attributes>
+	</service>
+	<service name="ntfAPPLPositionTransPPSL" engine="simple" invoke="ntfAPPLPositionTransPPSL" default-entity-name="JobTransferProposal"
+		location="component://hrolbius/script/com/olbius/services/employees/NotificationApprovalServices.xml">
+		<auto-attributes mode="IN" include="pk" optional="false"></auto-attributes>
+	</service>
+	<service name="ntfAPPLResignPPSL" engine="simple" invoke="ntfAPPLResignPPSL" default-entity-name="EmplTerminationProposal"
+		location="component://hrolbius/script/com/olbius/services/employees/NotificationApprovalServices.xml">
+		<auto-attributes mode="IN" include="pk" optional="false"></auto-attributes>
+	</service>
+	<service name="ntfAPPLRetirePPSL" engine="simple" invoke="ntfAPPLRetirePPSL" 
+		location="component://hrolbius/script/com/olbius/services/employees/NotificationApprovalServices.xml">
+		<auto-attributes mode="IN" include="pk" optional="false" entity-name="EmplTerminationProposal"></auto-attributes>				
+	</service>
+	<service name="ntfAPPLSackingPPSL" engine="simple" invoke="ntfAPPLSackingPPSL"
+		location="component://hrolbius/script/com/olbius/services/employees/NotificationApprovalServices.xml">
+		<auto-attributes mode="IN" include="pk" optional="false" entity-name="EmplTerminationProposal"></auto-attributes>
+	</service>	
+	
+	
+	<service name="getGeneralInfoOfEmpl" engine="java" invoke="getGeneralInfoOfEmpl"
+		location="com.olbius.employee.services.EmployeeServices">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="emplRemindCount" mode="OUT" type="Long" optional="true"></attribute>
+		<attribute name="emplPunishmentLevel" mode="OUT" type="Long" optional="true"></attribute>
+		<attribute name="departmentName" mode="OUT" type="String" optional="true"></attribute>	
+		<attribute name="emplPosition" mode="OUT" type="String" optional="true"></attribute>
+	</service>
+	<service name="getNbrDayLeaveEmp" engine="java" invoke="getNbrDayLeaveEmp" 
+		location="com.olbius.employee.services.EmployeeServices">
+		<description>calculate number day leave of employee</description>
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<!-- <attribute name="leaveTypeId" mode="IN" type="String" optional="true"></attribute> -->
+		<!-- <attribute name="parentTypeId" mode="IN" type="String" optional="true"></attribute> -->
+		<attribute name="fromDate" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>
+		<attribute name="thruDate" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>
+		<attribute name="nbrDayLeaveUnPaid" mode="OUT" type="Float"></attribute>
+		<attribute name="nbrDayLeavePaid" mode="OUT" type="Float"></attribute>	
+		<attribute name="nbrDayLeave" mode="OUT" type="Float"></attribute>
+	</service>
+	<service name="getNbrHourWorkOvertime" engine="java" invoke="getNbrHourWorkOvertime"
+		location="com.olbius.employee.services.EmployeeServices" auth="true">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="fromDate" mode="IN" type="java.sql.Timestamp"></attribute>
+		<attribute name="thruDate" mode="IN" type="java.sql.Timestamp"></attribute>
+		<attribute name="statusId" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="hoursRegisWorkOvertime" mode="OUT" type="Float"></attribute>
+		<attribute name="hoursActualWorkOvertime" mode="OUT" type="Float"></attribute>	
+	</service>
+	<service name="getNbrDayLeaveEmplInfo" engine="java" invoke="getNbrDayLeaveEmplInfo" 
+		location="com.olbius.employee.services.EmployeeServices">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="fromDate" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>
+		<attribute name="thruDate" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>
+		<attribute name="nbrDayLeavePaidInMonth" mode="OUT" type="Float"></attribute>
+		<attribute name="nbrDayLeaveUnPaidInMonth" mode="OUT" type="Float"></attribute>
+		<attribute name="nbrDayLeavePaidInYear" mode="OUT" type="Float"></attribute>
+		<attribute name="nbrDayLeaveUnPaidInYear" mode="OUT" type="Float"></attribute>
+		<attribute name="numberDayPaidLeave" mode="OUT" type="Float"></attribute>
+		<attribute name="dayLeaveRegulation" mode="OUT" type="Long" optional="true"></attribute>
+		<attribute name="numberDayLeave" mode="OUT" type="Float" optional="true"></attribute>
+		<attribute name="numberDayLeaveUnPaid" mode="OUT" type="Float" optional="true"></attribute>
+		<attribute name="nbrDayLeaveInYear" mode="OUT" type="Float" optional="true"></attribute>
+		<attribute name="actualLeavePaidInMonth" mode="OUT" type="Float" optional="true"></attribute>
+		<attribute name="actualLeavePaidInYear" mode="OUT" type="Float" optional="true"></attribute>
+	</service>
+	<service name="checkEmplLeaveDayInRegulation" engine="java" invoke="checkEmplLeaveDayInRegulation"
+		location="com.olbius.employee.services.EmployeeServices">
+		<attribute name="fromDate" mode="IN" type="java.sql.Timestamp"></attribute>
+		<attribute name="thruDate" mode="IN" type="java.sql.Timestamp"></attribute>
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="dayLeaveInRegulation" mode="OUT" type="Boolean" optional="true"></attribute>	
+	</service>
+	<service name="getDayLeaveRegulation" engine="java" invoke="getDayLeaveRegulation"
+		location="com.olbius.employee.services.EmployeeServices">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="dayLeaveRegulation" mode="OUT" type="Long"></attribute>	
+	</service>	
+	
+	<service name="createBussinessTripProposal" engine="java" invoke="createBussinessTripProposal"
+		location="com.olbius.employee.services.EmployeeServices" auth="true">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="busTripContent" mode="IN" type="java.util.List" optional="true"></attribute>
+		<attribute name="busDest" mode="IN" type="java.util.List" optional="true"></attribute>
+		<attribute name="busFromDate" mode="IN" type="java.util.List" optional="true"></attribute>
+		<attribute name="busThruDate" mode="IN" type="java.util.List" optional="true"></attribute>
+		<attribute name="busNotes" mode="IN" type="java.util.List" optional="true"></attribute>
+		<attribute name="vehTypeId" mode="IN" type="java.util.List" optional="true"></attribute>
+		<attribute name="journey" mode="IN" type="java.util.List" optional="true"></attribute>
+		<attribute name="dateDeparture" mode="IN" type="java.util.List" optional="true"></attribute>
+		<attribute name="dateArrival" mode="IN" type="java.util.List" optional="true"></attribute>
+		<attribute name="vehNotes" mode="IN" type="java.util.List" optional="true"></attribute>
+		<attribute name="partyBusinessTripId" mode="OUT" type="String"></attribute>
+	</service>
+	<service name="approvalBussTripProposal" engine="java" invoke="approvalBussTripProposal"
+		location="com.olbius.employee.services.EmployeeServices" auth="true">
+		<attribute name="partyBusinessTripId" mode="IN" type="String"></attribute>
+		<attribute name="statusId" mode="IN" type="String"></attribute>
+		<attribute name="approverId" mode="IN" type="String"></attribute>	
+		<attribute name="notes" mode="IN" type="String" optional="true"></attribute>
+		<attribute name="ntfId" mode="IN" type="String" optional="true"></attribute>
+	</service>
+	<service name="updateStatusBussTripProposal" engine="java" invoke="updateStatusBussTripProposal"
+		location="com.olbius.employee.services.EmployeeServices" auth="true">
+		<attribute name="partyBusinessTripId" mode="IN" type="String"></attribute>
+		<attribute name="statusId" mode="IN" type="String"></attribute>	
+	</service>
+	<service name="checkPermissionApproveBussTripProposal" engine="java" invoke="checkPermissionApproveBussTripProposal"
+		location="com.olbius.employee.services.EmployeeServices" auth="true">
+		<attribute name="partyBusinessTripId" mode="IN" type="String"></attribute>
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="isPermisson" mode="OUT" type="Boolean"></attribute>
+		<attribute name="partyBusinessRole" mode="OUT" type="org.ofbiz.entity.GenericValue" optional="true"></attribute>
+		
+	</service>
+	
+	<service name="updateCurrentResidence" engine="java" invoke="updateCurrentResidence"
+		location="com.olbius.employee.services.EmployeeServices" auth="true">
+		<attribute name="address1_CurrResidence" mode="IN" type="String"></attribute>
+    	<attribute name="currResidence_countryGeoId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="currResidence_stateProvinceGeoId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="currResidence_districtGeoId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="currResidence_wardGeoId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="currentResidenceContactmechId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="partyId" mode="IN" type="String"></attribute>
+    	<attribute name="contactMechId" type="String" mode="OUT" optional="false"/>
+	</service>
+	<service name="updatePermanentResidence" engine="java" invoke="updatePermanentResidence"
+		location="com.olbius.employee.services.EmployeeServices" auth="true">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="address1_PermanentResidence" mode="IN" type="String"></attribute>
+    	<attribute name="permanentResidence_countryGeoId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="permanentResidence_stateProvinceGeoId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="permanentResidence_districtGeoId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="permanentResidence_wardGeoId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="permanentResidenceContactmechId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="contactMechId" type="String" mode="OUT" optional="false"/>
+	</service>
+	<service name="updateOtherEmail" engine="java" invoke="updateOtherEmail"
+		location="com.olbius.employee.services.EmployeeServices" auth="true">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+    	<attribute name="otherEmailAddress" mode="IN" type="String" ></attribute>
+    	<attribute name="otherEmailContactmechId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="contactMechId" type="String" mode="OUT" optional="false"/>
+	</service>
+	<service name="updatePrimaryEmail" engine="java" invoke="updatePrimaryEmail"
+		location="com.olbius.employee.services.EmployeeServices" auth="true">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+    	<attribute name="primaryEmailAddress" mode="IN" type="String"></attribute>
+    	<attribute name="primaryEmailContactmechId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="contactMechId" type="String" mode="OUT" optional="false"/>
+	</service>
+	<service name="updateHomeMobile" engine="java" invoke="updateHomeMobile"
+		location="com.olbius.employee.services.EmployeeServices" auth="true">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="phone_home" mode="IN" type="String"></attribute>
+    	<attribute name="homePhoneContactMechId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="contactMechId" type="String" mode="OUT" optional="false"/>
+	</service>
+	<service name="updatePhoneMobile" engine="java" invoke="updatePhoneMobile"
+		location="com.olbius.employee.services.EmployeeServices" auth="true">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+    	<attribute name="phone_mobile" mode="IN" type="String" ></attribute>		
+    	<attribute name="mobilePhoneContactMechId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="contactMechId" type="String" mode="OUT" optional="false"/>
+	</service>
+	<service name="updatePersonalImage" engine="java" invoke="updatePersonalImage" 
+		location="com.olbius.employee.services.EmployeeServices" auth="true">
+		<attribute name="partyId" mode="IN" type="String"></attribute>
+		<attribute name="uploadedFile" type="java.nio.ByteBuffer" mode="IN" optional="false"/>
+		<attribute name="_uploadedFile_fileName" type="String" mode="IN" optional="true"/>
+        <attribute name="_uploadedFile_contentType" type="String" mode="IN" optional="true"/>
+        <attribute name="contentUrl" mode="OUT" type="String" optional="true"></attribute>	
+	</service>	
+	<service name="updatePersonOlbius" engine="java" invoke="updatePersonOlbius" 
+		location="com.olbius.employee.services.EmployeeServices" auth="true" default-entity-name="Person">
+		<auto-attributes mode="IN" include="pk" optional="true"></auto-attributes>
+		<auto-attributes mode="IN" include="nonpk" optional="true"></auto-attributes>
+		<override name="firstName" optional="false"/>
+        <override name="lastName" optional="false"/>
+	</service>
+	
+	<!-- <service name="updatePersonDemo" engine="java" invoke="updatePersonDemo" 
+		location="com.olbius.employee.services.EmployeeServices" auth="true">
+		<attribute name="mail" mode="IN" type="String" optional="false"></attribute>
+		<attribute name="result123" mode="OUT" type="String" optional="false"></attribute>
+	</service> -->
+	
+	<!-- Jqx profile -->
+	<service name="JQGetListEmplNotification" engine="java" invoke="jqGetListEmplNotification" location="com.olbius.employee.services.JQEmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>
+   </service>
+   <service name="JQGetListEmplPayrollParameter" engine="java" invoke="jqGetListEmplPayrollParameter" location="com.olbius.employee.services.JQEmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>
+   </service>
+   <service name="JQGetListEmplLeave" engine="java" invoke="jqGetListEmplLeave" location="com.olbius.employee.services.JQEmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>
+   </service>
+   <service name="JQGetListEmplPosFulfillment" engine="java" invoke="jqGetListEmplPosFulfillment" location="com.olbius.employee.services.JQEmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>
+   </service>
+   <service name="JQGetListEmplSkill" engine="java" invoke="jqGetListEmplSkill" location="com.olbius.employee.services.JQEmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>
+   </service>
+   <service name="JQGetListEmplQual" engine="java" invoke="jqGetListEmplQual" location="com.olbius.employee.services.JQEmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>
+   </service>
+   <service name="JQGetListEmplPayrollHistory" engine="java" invoke="jqGetListEmplPayrollHistory" location="com.olbius.employee.services.JQEmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>
+   </service>
+   <service name="JQGetListEmplPunishment" engine="java" invoke="jqGetListEmplPunishment" location="com.olbius.employee.services.JQEmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>
+   </service>
+   <service name="JQGetListEmplOvertimeHistory" engine="java" invoke="jqGetListEmplOvertimeHistory" location="com.olbius.employee.services.JQEmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>
+   </service>
+   <service name="JQGetListEmplWorkLate" engine="java" invoke="jqGetListEmplWorkLate" location="com.olbius.employee.services.JQEmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>
+   </service>
+   <service name="JQGetListEmplFamily" engine="java" invoke="jqGetListEmplFamily" location="com.olbius.employee.services.JQEmployeeServices" auth="true">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+		<attribute name="listIterator" mode="OUT" type="List" optional="false"></attribute>
+		<attribute name="TotalRows" mode="OUT" type="String" optional="true"></attribute>
+   </service>
+   <service name="JQGetListEmplEducation" engine="java" invoke="jqGetListEmplEducation" location="com.olbius.employee.services.JQEmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>
+   </service>
+   <service name="JQGetListEmplWorkProcess" engine="java" invoke="jqGetListEmplWorkProcess" location="com.olbius.employee.services.JQEmployeeServices">
+		<attribute name="listAllConditions" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="listSortFields" mode="IN" type="java.util.List" optional="false"></attribute>
+		<attribute name="opts" mode="IN" type="org.ofbiz.entity.util.EntityFindOptions" optional="false"></attribute>
+		<attribute name="parameters" mode="IN" type="java.util.Map" optional="false"></attribute>
+		<attribute name="listIterator" mode="OUT" type="org.ofbiz.entity.util.EntityListIterator" optional="false"></attribute>
+   </service>
+   <!-- /Jqx profile -->
+</services>

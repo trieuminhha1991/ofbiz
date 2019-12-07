@@ -1,0 +1,2670 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+	<!-- ========================================================= -->
+	<!-- ======================== Defaults ======================= -->
+	<!-- ========================================================= -->
+	<title>Entity of an Open For Business Project Component</title>
+	<description>None</description>
+	<version>1.0</version>
+
+	<view-entity entity-name="ShipmentAndType" package-name="org.ofbiz.accounting.shipment">
+		<member-entity entity-alias="S" entity-name="Shipment" />
+		<member-entity entity-alias="ST" entity-name="ShipmentType" />
+		<alias-all entity-alias="S" />
+		<alias-all entity-alias="ST" />
+		<view-link entity-alias="S" rel-entity-alias="ST">
+			<key-map field-name="shipmentTypeId" />
+		</view-link>
+	</view-entity>
+
+	<!-- view entity for product -->
+	<view-entity entity-name="PriceAndGoodIdentification" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PP" entity-name="ProductPrice"></member-entity>
+		<member-entity entity-alias="GI" entity-name="GoodIdentification"></member-entity>
+		<alias-all entity-alias="PP"></alias-all>
+		<alias name="uomId" field="uomId" entity-alias="GI"></alias>
+		<alias name="idValue" field="idValue" entity-alias="GI"></alias>
+		<alias name="goodIdentificationTypeId" field="goodIdentificationTypeId" entity-alias="GI"></alias>
+		<view-link rel-entity-alias="GI" entity-alias="PP" rel-optional="true">
+			<key-map field-name="productId" />
+		</view-link>
+		<entity-condition>
+			<condition-list combine="and">
+				<condition-expr field-name="thruDate" operator="equals" value="" entity-alias="PP" />
+				<condition-expr field-name="productPricePurposeId" operator="equals" value="PURCHASE" entity-alias="PP" />
+				<condition-expr field-name="productPriceTypeId" operator="equals" value="DEFAULT_PRICE" entity-alias="PP" />
+				<condition-list combine="or">
+					<condition-expr field-name="idValue" operator="equals" value="" entity-alias="GI" />
+					<condition-expr field-name="goodIdentificationTypeId" operator="equals" value="SKU" entity-alias="GI" />
+				</condition-list>
+			</condition-list>
+		</entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="ProductAndPriceAndGoodIdentification" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PP" entity-name="Product"></member-entity>
+		<member-entity entity-alias="PGI" entity-name="PriceAndGoodIdentification"></member-entity>
+		<alias-all entity-alias="PP" />
+		<alias-all entity-alias="PGI">
+			<exclude field="productId" />
+		</alias-all>
+		<view-link rel-entity-alias="PGI" entity-alias="PP">
+			<key-map field-name="productId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ProductAndPriceAndGoodIdentificationAndFacility" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PPG" entity-name="ProductAndPriceAndGoodIdentification"></member-entity>
+		<member-entity entity-alias="PF" entity-name="ProductFacility"></member-entity>
+		<alias-all entity-alias="PPG">
+			<exclude field="facilityId" />
+		</alias-all>
+		<alias name="qoh" field="lastInventoryCount" entity-alias="PF"></alias>
+		<alias name="facilityId" entity-alias="PF"></alias>
+		<view-link rel-entity-alias="PF" entity-alias="PPG">
+			<key-map field-name="productId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ProductStoreCatalogActive" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PSC" entity-name="ProductStoreCatalog"></member-entity>
+		<alias-all entity-alias="PSC"></alias-all>
+		<entity-condition filter-by-date="true"></entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="ProductPriceDefaultPrice" package-name="com.olbius.product">
+		<member-entity entity-alias="PPRI" entity-name="ProductPrice"/>
+		<alias-all entity-alias="PPRI"/>
+		<entity-condition filter-by-date="true">
+			<condition-list combine="and">
+				<condition-expr field-name="productPricePurposeId" operator="equals" value="PURCHASE" entity-alias="PPRI"/>
+				<condition-expr field-name="productPriceTypeId" operator="equals" value="DEFAULT_PRICE" entity-alias="PPRI"/>
+			</condition-list>
+		</entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="ProductAndPriceAndGoodIds" package-name="com.olbius.product">
+		<member-entity entity-alias="PROD" entity-name="Product"/>
+		<member-entity entity-alias="PPRI" entity-name="ProductPriceDefaultPrice"/>
+		<member-entity entity-alias="SKU" entity-name="ProductIdAndGoodIdSKU"/>
+		<member-entity entity-alias="PLU" entity-name="ProductIdAndGoodIdPLU"/>
+		<alias-all entity-alias="PROD"/>
+		<alias-all entity-alias="PPRI">
+			<exclude field="productId"/>
+		</alias-all>
+		<alias name="idSKU" entity-alias="SKU" field="idValue"/>
+		<alias name="idPLU" entity-alias="PLU" field="idValue"/>
+		<view-link entity-alias="PROD" rel-entity-alias="PPRI" rel-optional="true">
+			<key-map field-name="productId"/>
+		</view-link>
+		<view-link entity-alias="PROD" rel-entity-alias="SKU" rel-optional="true">
+			<key-map field-name="productId"/>
+		</view-link>
+		<view-link entity-alias="PROD" rel-entity-alias="PLU" rel-optional="true">
+			<key-map field-name="productId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ProductAndPriceAndGoodIdentificationAndProStore" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PPG" entity-name="ProductAndPriceAndGoodIds"/>
+		<member-entity entity-alias="PACT" entity-name="ProductAndCatalogTempData"/>
+		<member-entity entity-alias="PSC" entity-name="ProductStoreCatalogActive"/>
+		<member-entity entity-alias="PS" entity-name="ProductStore"/>
+		<alias-all entity-alias="PPG">
+			<exclude field="facilityId"/>
+		</alias-all>
+		<alias name="productStoreId" entity-alias="PSC"/>
+		<alias name="inventoryFacilityId" entity-alias="PS"/>
+		<view-link entity-alias="PS" rel-entity-alias="PSC">
+			<key-map field-name="productStoreId"/>
+		</view-link>
+		<view-link entity-alias="PSC" rel-entity-alias="PACT">
+			<key-map field-name="prodCatalogId"/>
+		</view-link>
+		<view-link entity-alias="PACT" rel-entity-alias="PPG">
+			<key-map field-name="productId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ProductAndPriceAndGoodIdentificationAndFacilityAndProStore" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PPG" entity-name="ProductAndPriceAndGoodIdentificationAndProStore"/>
+		<member-entity entity-alias="PF" entity-name="ProductFacility"/>
+		<alias-all entity-alias="PPG">
+			<exclude field="facilityId"/>
+		</alias-all>
+		<alias name="qoh" entity-alias="PF" field="lastInventoryCount"/>
+		<alias name="facilityId" entity-alias="PF"/>
+		<view-link entity-alias="PPG" rel-entity-alias="PF" rel-optional="true">
+			<key-map field-name="productId"/>
+			<key-map field-name="inventoryFacilityId" rel-field-name="facilityId"/>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="ProductAndPriceAndGoodIdentificationSimple" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PR" entity-name="Product"></member-entity>
+		<member-entity entity-alias="PRG" entity-name="PriceAndGoodIdentification"></member-entity>
+		<alias entity-alias="PR" name="productId" field="productId"></alias>
+		<alias entity-alias="PR" name="internalName" field="internalName"></alias>
+		<alias entity-alias="PR" name="productName" field="productName"></alias>
+		<alias entity-alias="PR" name="productCode" field="productCode"></alias>
+		<alias entity-alias="PR" name="productTypeId" field="productTypeId"></alias>
+		<alias entity-alias="PR" name="description" field="description"></alias>
+		<alias entity-alias="PR" name="productCategoryId" field="primaryProductCategoryId"></alias>
+		<alias entity-alias="PR" name="quantityUomId" field="quantityUomId"></alias>
+		<alias entity-alias="PR" name="salesDiscontinuationDate" field="salesDiscontinuationDate"></alias>
+		<alias entity-alias="PRG" name="idValue" field="idValue"></alias>
+		<alias entity-alias="PRG" name="price" field="price"></alias>
+		<alias entity-alias="PRG" name="uomId" field="uomId"></alias>
+		<alias entity-alias="PRG" name="currencyUomId" field="currencyUomId"></alias>
+		<view-link rel-entity-alias="PRG" entity-alias="PR" rel-optional="true">
+			<key-map field-name="productId" />
+			<key-map field-name="quantityUomId" rel-field-name="uomId" />
+		</view-link>
+		<entity-condition>
+			<condition-expr field-name="productTypeId" entity-alias="PR" operator="equals" value="FINISHED_GOOD" />
+		</entity-condition>
+	</view-entity>
+
+	<!-- view entity for order -->
+	<view-entity entity-name="OrderHeaderAndRoleAndPerson" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="OHAR" entity-name="OrderHeaderAndRoles"></member-entity>
+		<member-entity entity-alias="PER" entity-name="Person"></member-entity>
+		<alias-all entity-alias="OHAR"></alias-all>
+		<alias name="firstName" entity-alias="PER"></alias>
+		<alias name="middleName" entity-alias="PER"></alias>
+		<alias name="lastName" entity-alias="PER"></alias>
+		<view-link rel-entity-alias="OHAR" entity-alias="PER">
+			<key-map field-name="partyId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="OrderHeaderAndUserLogin" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="OH" entity-name="OrderHeader"></member-entity>
+		<member-entity entity-alias="UL" entity-name="UserLogin"></member-entity>
+		<alias-all entity-alias="OH"></alias-all>
+		<alias name="partyId" field="partyId" entity-alias="UL"></alias>
+		<view-link rel-entity-alias="UL" entity-alias="OH" rel-optional="true">
+			<key-map field-name="createdBy" rel-field-name="userLoginId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="OrderHeaderAndParty" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="OHUL" entity-name="OrderHeaderAndUserLogin"></member-entity>
+		<member-entity entity-alias="PNV" entity-name="PartyNameView"></member-entity>
+		<alias-all entity-alias="OHUL"></alias-all>
+		<alias name="firstName" field="firstName" entity-alias="PNV"></alias>
+		<alias name="lastName" field="lastName" entity-alias="PNV"></alias>
+		<alias name="middleName" field="middleName" entity-alias="PNV"></alias>
+		<alias name="fullName">
+			<complex-alias operator="||' '||">
+				<complex-alias-field field="lastName" entity-alias="PNV" default-value="''" />
+				<complex-alias-field field="middleName" entity-alias="PNV" default-value="''" />
+				<complex-alias-field field="firstName" entity-alias="PNV" default-value="''" />
+			</complex-alias>
+		</alias>
+		<view-link rel-entity-alias="PNV" entity-alias="OHUL" rel-optional="true">
+			<key-map field-name="partyId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="OrderItemAndAdjustment" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="OIT" entity-name="OrderItem"></member-entity>
+		<member-entity entity-alias="OAD" entity-name="OrderAdjustment"></member-entity>
+		<alias-all entity-alias="OIT"></alias-all>
+		<alias name="discountAmount" field="amount" entity-alias="OAD"></alias>
+		<view-link rel-entity-alias="OAD" entity-alias="OIT" rel-optional="true">
+			<key-map field-name="orderId" />
+			<key-map field-name="orderItemSeqId" />
+			<entity-condition>
+				<condition-expr field-name="orderItemSeqId" operator="not-equals" value="_NA_" entity-alias="OAD" />
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="OrderHeaderAndRoleCustomer" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="OH" entity-name="OrderHeader"></member-entity>
+		<member-entity entity-alias="ORO" entity-name="OrderRole"></member-entity>
+<!-- 		<alias-all entity-alias="OH"></alias-all> -->
+		<alias name="orderId" field="orderId" entity-alias="OH"></alias>
+		<alias name="orderTypeId" field="orderTypeId" entity-alias="OH"></alias>
+		<alias name="orderDate" field="orderDate" entity-alias="OH"></alias>
+		<alias name="createdBy" field="createdBy" entity-alias="OH"></alias>
+        <alias name="entryDate" field="entryDate" entity-alias="OH"></alias>
+        <alias name="partyId" field="partyId" entity-alias="ORO"></alias>
+		<alias name="roleTypeId" field="roleTypeId" entity-alias="ORO"></alias>
+		<view-link rel-entity-alias="ORO" entity-alias="OH" rel-optional="true">
+			<key-map field-name="orderId" />
+			<entity-condition>
+<!-- 				<condition-list combine="or"> -->
+					<condition-list>
+						<condition-expr field-name="roleTypeId" operator="equals" value="PLACING_CUSTOMER" entity-alias="ORO" />
+						<condition-expr field-name="orderTypeId" operator="equals" value="SALES_ORDER" entity-alias="OH" />
+					</condition-list>
+<!-- 					<condition-list> -->
+<!-- 						<condition-expr field-name="roleTypeId" operator="equals" value="BILL_FROM_VENDOR" entity-alias="ORO" /> -->
+<!-- 						<condition-expr field-name="orderTypeId" operator="equals" value="PURCHASE_ORDER" entity-alias="OH" /> -->
+<!-- 					</condition-list> -->
+<!-- 				</condition-list> -->
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="OrderHeaderAndRoleType" package-name="org.ofbiz.webpos"> <!-- OrderHeaderAndRoleCusAndName -->
+		<member-entity entity-alias="OHRC" entity-name="OrderHeaderAndRoleCustomer"></member-entity>
+		<member-entity entity-alias="PNV" entity-name="PartyNameView"></member-entity>
+		<alias-all entity-alias="OHRC"></alias-all>
+		<alias name="firstName" field="firstName" entity-alias="PNV"></alias>
+		<alias name="lastName" field="lastName" entity-alias="PNV"></alias>
+		<alias name="middleName" field="middleName" entity-alias="PNV"></alias>
+		<view-link rel-entity-alias="PNV" entity-alias="OHRC" rel-optional="true">
+			<key-map field-name="partyId" />
+		</view-link>
+	</view-entity>
+
+<!-- 	<view-entity entity-name="OrderHeaderAndRoleType" package-name="org.ofbiz.webpos"> -->
+<!-- 		<member-entity entity-alias="OHRCN" entity-name="OrderHeaderAndRoleCusAndName"></member-entity> -->
+<!-- 		<member-entity entity-alias="PR" entity-name="PartyRole"></member-entity> -->
+<!-- 		<alias-all entity-alias="OHRCN"></alias-all> -->
+<!-- 		<alias name="roleTypeId" field="roleTypeId" entity-alias="PR"></alias> -->
+<!-- 		<view-link rel-entity-alias="PR" entity-alias="OHRCN" rel-optional="true"> -->
+<!-- 			<key-map field-name="partyId" /> -->
+<!-- 			<entity-condition> -->
+<!-- 				<condition-expr field-name="roleTypeId" operator="equals" value="CUSTOMER" entity-alias="PR" /> -->
+<!-- 			</entity-condition> -->
+<!-- 		</view-link> -->
+<!-- 	</view-entity> -->
+
+	<view-entity entity-name="ReturnHeaderAndItem" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="RI" entity-name="ReturnItem"></member-entity>
+		<member-entity entity-alias="RH" entity-name="ReturnHeader"></member-entity>
+		<alias-all entity-alias="RI"></alias-all>
+		<alias name="returnDate" field="entryDate" entity-alias="RH"></alias>
+		<alias name="createdBy" field="createdBy" entity-alias="RH"></alias>
+		<alias name="grandTotal" field="grandTotal" entity-alias="RH"></alias>
+		<alias name="returnHeaderTypeId" field="returnHeaderTypeId" entity-alias="RH"></alias>
+		<view-link rel-entity-alias="RH" entity-alias="RI">
+			<key-map field-name="returnId" />
+		</view-link>
+	</view-entity>
+
+	<!-- view entity for party -->
+	<view-entity entity-name="PartyNameWithContactPurpose" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PNCM" entity-name="PartyNameContactMechView"></member-entity>
+		<member-entity entity-alias="PCWP" entity-name="PartyContactWithPurpose"></member-entity>
+		<alias entity-alias="PNCM" name="partyId" field="partyId"></alias>
+		<alias entity-alias="PNCM" name="contactMechId" field="contactMechId"></alias>
+		<alias entity-alias="PNCM" name="contactMechTypeId" field="contactMechTypeId"></alias>
+		<alias entity-alias="PCWP" name="contactMechPurposeTypeId" field="contactMechPurposeTypeId"></alias>
+		<alias entity-alias="PCWP" name="contactFromDate" field="contactFromDate"></alias>
+		<alias entity-alias="PCWP" name="contactThruDate" field="contactThruDate"></alias>
+		<view-link rel-entity-alias="PCWP" entity-alias="PNCM">
+			<key-map field-name="contactMechId" />
+			<key-map field-name="partyId" />
+			<key-map field-name="contactMechTypeId" />
+			<entity-condition>
+				<condition-expr field-name="contactThruDate" operator="equals" value="" entity-alias="PCWP" />
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PartyNameAndEmail" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PNWCP" entity-name="PartyNameWithContactPurpose"></member-entity>
+		<member-entity entity-alias="CM" entity-name="ContactMech"></member-entity>
+		<alias-all entity-alias="PNWCP"></alias-all>
+		<alias entity-alias="CM" name="email" field="infoString"></alias>
+		<view-link rel-entity-alias="CM" entity-alias="PNWCP">
+			<key-map field-name="contactMechId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="contactMechTypeId" operator="equals" value="EMAIL_ADDRESS" entity-alias="PNWCP" />
+					<condition-expr field-name="contactMechPurposeTypeId" operator="equals" value="PRIMARY_EMAIL" entity-alias="PNWCP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PartyNameAndPhoneMobile" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PNWCP" entity-name="PartyNameWithContactPurpose"></member-entity>
+		<member-entity entity-alias="TN" entity-name="TelecomNumber"></member-entity>
+		<alias-all entity-alias="PNWCP"></alias-all>
+		<alias entity-alias="TN" name="phoneMobile" field="contactNumber"></alias>
+		<view-link rel-entity-alias="TN" entity-alias="PNWCP">
+			<key-map field-name="contactMechId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="contactMechTypeId" operator="equals" value="TELECOM_NUMBER" entity-alias="PNWCP" />
+					<condition-expr field-name="contactMechPurposeTypeId" operator="equals" value="PHONE_MOBILE" entity-alias="PNWCP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PartyNameAndPhoneWork" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PNWCP" entity-name="PartyNameWithContactPurpose"></member-entity>
+		<member-entity entity-alias="TN" entity-name="TelecomNumber"></member-entity>
+		<alias-all entity-alias="PNWCP"></alias-all>
+		<alias entity-alias="TN" name="phoneWork" field="contactNumber"></alias>
+		<view-link rel-entity-alias="TN" entity-alias="PNWCP">
+			<key-map field-name="contactMechId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="contactMechTypeId" operator="equals" value="TELECOM_NUMBER" entity-alias="PNWCP" />
+					<condition-expr field-name="contactMechPurposeTypeId" operator="equals" value="PHONE_WORK" entity-alias="PNWCP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PartyNameAndPhoneHome" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PNWCP" entity-name="PartyNameWithContactPurpose"></member-entity>
+		<member-entity entity-alias="TN" entity-name="TelecomNumber"></member-entity>
+		<alias-all entity-alias="PNWCP"></alias-all>
+		<alias entity-alias="TN" name="phoneHome" field="contactNumber"></alias>
+		<view-link rel-entity-alias="TN" entity-alias="PNWCP">
+			<key-map field-name="contactMechId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="contactMechTypeId" operator="equals" value="TELECOM_NUMBER" entity-alias="PNWCP" />
+					<condition-expr field-name="contactMechPurposeTypeId" operator="equals" value="PHONE_HOME" entity-alias="PNWCP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PartyNameAndPrimaryPhone" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PNWCP" entity-name="PartyNameWithContactPurpose"></member-entity>
+		<member-entity entity-alias="TN" entity-name="TelecomNumber"></member-entity>
+		<alias-all entity-alias="PNWCP"></alias-all>
+		<alias entity-alias="TN" name="primaryPhone" field="contactNumber"></alias>
+		<view-link rel-entity-alias="TN" entity-alias="PNWCP">
+			<key-map field-name="contactMechId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="contactMechTypeId" operator="equals" value="TELECOM_NUMBER" entity-alias="PNWCP" />
+					<condition-expr field-name="contactMechPurposeTypeId" operator="equals" value="PRIMARY_PHONE" entity-alias="PNWCP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PartyNameAndBillingAddress" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PNWCP" entity-name="PartyNameWithContactPurpose"></member-entity>
+		<member-entity entity-alias="PA" entity-name="PostalAddress"></member-entity>
+		<alias-all entity-alias="PNWCP"></alias-all>
+		<alias entity-alias="PA" name="addressBilling1" field="address1"></alias>
+		<alias entity-alias="PA" name="addressBilling2" field="address2"></alias>
+		<alias entity-alias="PA" name="cityBilling" field="city"></alias>
+		<view-link rel-entity-alias="PA" entity-alias="PNWCP">
+			<key-map field-name="contactMechId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="contactMechTypeId" operator="equals" value="POSTAL_ADDRESS" entity-alias="PNWCP" />
+					<condition-expr field-name="contactMechPurposeTypeId" operator="equals" value="BILLING_LOCATION" entity-alias="PNWCP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PartyNameAndPrimaryAddress" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PNWCP" entity-name="PartyNameWithContactPurpose"></member-entity>
+		<member-entity entity-alias="PA" entity-name="PostalAddress"></member-entity>
+		<alias-all entity-alias="PNWCP"></alias-all>
+		<alias entity-alias="PA" name="addressPrimary1" field="address1"></alias>
+		<alias entity-alias="PA" name="addressPrimary2" field="address2"></alias>
+		<alias entity-alias="PA" name="cityPrimary" field="city"></alias>
+		<view-link rel-entity-alias="PA" entity-alias="PNWCP">
+			<key-map field-name="contactMechId" />
+			<entity-condition distinct="true">
+				<condition-list>
+					<condition-expr field-name="contactMechTypeId" operator="equals" value="POSTAL_ADDRESS" entity-alias="PNWCP" />
+					<condition-expr field-name="contactMechPurposeTypeId" operator="equals" value="PRIMARY_LOCATION" entity-alias="PNWCP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PartyNameAndShippingAddress" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PNWCP" entity-name="PartyNameWithContactPurpose"></member-entity>
+		<member-entity entity-alias="PA" entity-name="PostalAddress"></member-entity>
+		<alias-all entity-alias="PNWCP"></alias-all>
+		<alias entity-alias="PA" name="addressShipping1" field="address1"></alias>
+		<alias entity-alias="PA" name="addressShipping2" field="address2"></alias>
+		<alias entity-alias="PA" name="cityShipping" field="city"></alias>
+		<view-link rel-entity-alias="PA" entity-alias="PNWCP">
+			<key-map field-name="contactMechId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="contactMechTypeId" operator="equals" value="POSTAL_ADDRESS" entity-alias="PNWCP" />
+					<condition-expr field-name="contactMechPurposeTypeId" operator="equals" value="SHIPPING_LOCATION" entity-alias="PNWCP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PartyNameAndGeneralAddress" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PNWCP" entity-name="PartyNameWithContactPurpose"></member-entity>
+		<member-entity entity-alias="PA" entity-name="PostalAddress"></member-entity>
+		<alias-all entity-alias="PNWCP"></alias-all>
+		<alias entity-alias="PA" name="addressGeneral1" field="address1"></alias>
+		<alias entity-alias="PA" name="addressGeneral2" field="address2"></alias>
+		<alias entity-alias="PA" name="cityGeneral" field="city"></alias>
+		<view-link rel-entity-alias="PA" entity-alias="PNWCP">
+			<key-map field-name="contactMechId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="contactMechTypeId" operator="equals" value="POSTAL_ADDRESS" entity-alias="PNWCP" />
+					<condition-expr field-name="contactMechPurposeTypeId" operator="equals" value="GENERAL_LOCATION" entity-alias="PNWCP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PartyPersonAndInfo" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PAP" entity-name="PartyAndPerson"></member-entity>
+		<member-entity entity-alias="PNAPM" entity-name="PartyNameAndPhoneMobile"></member-entity>
+		<member-entity entity-alias="PNAPW" entity-name="PartyNameAndPhoneWork"></member-entity>
+		<member-entity entity-alias="PNAPH" entity-name="PartyNameAndPhoneHome"></member-entity>
+		<member-entity entity-alias="PNAE" entity-name="PartyNameAndEmail"></member-entity>
+		<member-entity entity-alias="PNAPA" entity-name="PartyNameAndPrimaryAddress"></member-entity>
+		<alias entity-alias="PAP" name="partyId" field="partyId"></alias>
+		<alias entity-alias="PAP" name="firstName" field="firstName"></alias>
+		<alias entity-alias="PAP" name="middleName" field="middleName"></alias>
+		<alias entity-alias="PAP" name="lastName" field="lastName"></alias>
+		<alias entity-alias="PNAPM" name="phoneMobile" field="phoneMobile"></alias>
+		<alias entity-alias="PNAPW" name="phoneWork" field="phoneWork"></alias>
+		<alias entity-alias="PNAPH" name="phoneHome" field="phoneHome"></alias>
+		<alias entity-alias="PNAE" name="email" field="email"></alias>
+		<alias entity-alias="PNAPA" name="addressPrimary1" field="addressPrimary1"></alias>
+		<alias entity-alias="PNAPA" name="addressPrimary2" field="addressPrimary2"></alias>
+		<alias entity-alias="PNAPA" name="cityPrimary" field="cityPrimary"></alias>
+		<alias name="middleFirst">
+			<complex-alias operator="||' '||">
+				<complex-alias-field field="middleName" entity-alias="PAP" default-value="''" />
+				<complex-alias-field field="firstName" entity-alias="PAP" default-value="''" />
+			</complex-alias>
+		</alias>
+		<alias name="lastMiddleFirst">
+			<complex-alias operator="||' '||">
+				<complex-alias-field field="lastName" entity-alias="PAP" default-value="''" />
+				<complex-alias-field field="middleName" entity-alias="PAP" default-value="''" />
+				<complex-alias-field field="firstName" entity-alias="PAP" default-value="''" />
+			</complex-alias>
+		</alias>
+		<alias name="lastMiddle">
+			<complex-alias operator="||' '||">
+				<complex-alias-field field="lastName" entity-alias="PAP" default-value="''" />
+				<complex-alias-field field="middleName" entity-alias="PAP" default-value="''" />
+			</complex-alias>
+		</alias>
+		<view-link rel-entity-alias="PNAPM" entity-alias="PAP" rel-optional="true">
+			<key-map field-name="partyId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="partyTypeId" operator="equals" value="PERSON" entity-alias="PAP" />
+					<condition-expr field-name="statusId" operator="equals" value="PARTY_ENABLED" entity-alias="PAP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="PNAPW" entity-alias="PAP" rel-optional="true">
+			<key-map field-name="partyId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="partyTypeId" operator="equals" value="PERSON" entity-alias="PAP" />
+					<condition-expr field-name="statusId" operator="equals" value="PARTY_ENABLED" entity-alias="PAP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="PNAPH" entity-alias="PAP" rel-optional="true">
+			<key-map field-name="partyId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="partyTypeId" operator="equals" value="PERSON" entity-alias="PAP" />
+					<condition-expr field-name="statusId" operator="equals" value="PARTY_ENABLED" entity-alias="PAP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="PNAE" entity-alias="PAP" rel-optional="true">
+			<key-map field-name="partyId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="partyTypeId" operator="equals" value="PERSON" entity-alias="PAP" />
+					<condition-expr field-name="statusId" operator="equals" value="PARTY_ENABLED" entity-alias="PAP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="PNAPA" entity-alias="PAP" rel-optional="true">
+			<key-map field-name="partyId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="partyTypeId" operator="equals" value="PERSON" entity-alias="PAP" />
+					<condition-expr field-name="statusId" operator="equals" value="PARTY_ENABLED" entity-alias="PAP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="CustomerAndStore" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PPI" entity-name="PartyPersonAndInfo"></member-entity>
+		<member-entity entity-alias="PSR" entity-name="ProductStoreRole"></member-entity>
+		<member-entity entity-alias="PST" entity-name="ProductStore"></member-entity>
+		<alias-all entity-alias="PPI"></alias-all>
+		<alias name="productStoreId" field="productStoreId" entity-alias="PSR"></alias>
+		<alias name="payToPartyId" field="payToPartyId" entity-alias="PST"></alias>
+		<alias name="salesMethodChannelEnumId" field="salesMethodChannelEnumId" entity-alias="PST"></alias>
+		<view-link rel-entity-alias="PSR" entity-alias="PPI" rel-optional="true">
+			<key-map field-name="partyId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="roleTypeId" operator="equals" value="CUSTOMER" entity-alias="PSR" />
+					<condition-expr field-name="partyId" operator="not-equals" value="_NA_" entity-alias="PPI" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="PST" entity-alias="PSR" rel-optional="true">
+			<key-map field-name="productStoreId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="EmployeePOSAndInfo" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PUP" entity-name="PartyAndUserLoginAndPerson"></member-entity>
+		<member-entity entity-alias="PNAPP" entity-name="PartyNameAndPrimaryPhone"></member-entity>
+		<member-entity entity-alias="PNAE" entity-name="PartyNameAndEmail"></member-entity>
+		<member-entity entity-alias="PNAGA" entity-name="PartyNameAndGeneralAddress"></member-entity>
+		<alias-all entity-alias="PUP"></alias-all>
+		<alias entity-alias="PNAPP" name="primaryPhone" field="primaryPhone"></alias>
+		<alias entity-alias="PNAE" name="email" field="email"></alias>
+		<alias entity-alias="PNAGA" name="addressGeneral1" field="addressGeneral1"></alias>
+		<alias entity-alias="PNAGA" name="addressGeneral2" field="addressGeneral2"></alias>
+		<alias entity-alias="PNAGA" name="cityGeneral" field="cityGeneral"></alias>
+		<view-link rel-entity-alias="PNAPP" entity-alias="PUP" rel-optional="true">
+			<key-map field-name="partyId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="partyTypeId" operator="equals" value="PERSON" entity-alias="PUP" />
+					<condition-expr field-name="statusId" operator="equals" value="PARTY_ENABLED" entity-alias="PUP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="PNAE" entity-alias="PUP" rel-optional="true">
+			<key-map field-name="partyId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="partyTypeId" operator="equals" value="PERSON" entity-alias="PUP" />
+					<condition-expr field-name="statusId" operator="equals" value="PARTY_ENABLED" entity-alias="PUP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="PNAGA" entity-alias="PUP" rel-optional="true">
+			<key-map field-name="partyId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="partyTypeId" operator="equals" value="PERSON" entity-alias="PUP" />
+					<condition-expr field-name="statusId" operator="equals" value="PARTY_ENABLED" entity-alias="PUP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="EmployeePOSAndRole" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="EPI" entity-name="EmployeePOSAndInfo"></member-entity>
+		<member-entity entity-alias="FPAR" entity-name="FacilityPartyAndRole"></member-entity>
+		<alias-all entity-alias="EPI"></alias-all>
+		<alias-all entity-alias="FPAR"></alias-all>
+		<view-link rel-entity-alias="FPAR" entity-alias="EPI" rel-optional="true">
+			<key-map field-name="partyId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PartyGroupAndInfo" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PAG" entity-name="PartyAndGroup"></member-entity>
+		<member-entity entity-alias="PNAPW" entity-name="PartyNameAndPhoneWork"></member-entity>
+		<member-entity entity-alias="PNAE" entity-name="PartyNameAndEmail"></member-entity>
+		<member-entity entity-alias="PNABA" entity-name="PartyNameAndBillingAddress"></member-entity>
+		<alias entity-alias="PAG" name="partyId" field="partyId"></alias>
+		<alias entity-alias="PNAPW" name="phoneWork" field="phoneWork"></alias>
+		<alias entity-alias="PNAE" name="email" field="email"></alias>
+		<alias entity-alias="PNABA" name="addressBilling1" field="addressBilling1"></alias>
+		<alias entity-alias="PNABA" name="addressBilling2" field="addressBilling2"></alias>
+		<alias entity-alias="PNABA" name="cityBilling" field="cityBilling"></alias>
+		<view-link rel-entity-alias="PNAPW" entity-alias="PAG" rel-optional="true">
+			<key-map field-name="partyId" />
+			<entity-condition>
+				<condition-expr field-name="partyTypeId" operator="equals" value="PARTY_GROUP" entity-alias="PAG" />
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="PNAE" entity-alias="PAG" rel-optional="true">
+			<key-map field-name="partyId" />
+			<entity-condition>
+				<condition-expr field-name="partyTypeId" operator="equals" value="PARTY_GROUP" entity-alias="PAG" />
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="PNABA" entity-alias="PAG" rel-optional="true">
+			<key-map field-name="partyId" />
+			<entity-condition>
+				<condition-expr field-name="partyTypeId" operator="equals" value="PARTY_GROUP" entity-alias="PAG" />
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="FacilityPartyAndRole" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="FP" entity-name="FacilityParty"></member-entity>
+		<member-entity entity-alias="RT" entity-name="RoleType"></member-entity>
+		<member-entity entity-alias="FA" entity-name="Facility"></member-entity>
+		<alias-all entity-alias="FP"></alias-all>
+		<alias name="parentTypeId" field="parentTypeId" entity-alias="RT"></alias>
+		<alias name="description" field="description" entity-alias="RT"></alias>
+		<alias name="facilityName" field="facilityName" entity-alias="FA"></alias>
+		<view-link rel-entity-alias="RT" entity-alias="FP" rel-optional="true">
+			<key-map field-name="roleTypeId" />
+		</view-link>
+		<view-link rel-entity-alias="FA" entity-alias="FP" rel-optional="true">
+			<key-map field-name="facilityId" />
+		</view-link>
+	</view-entity>
+
+	<!-- view entity for config print -->
+	<view-entity entity-name="ConfigPrintOrderAndStore" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PS" entity-name="ProductStore"></member-entity>
+		<member-entity entity-alias="CPO" entity-name="ConfigPrintOrder"></member-entity>
+		<alias-all entity-alias="CPO"></alias-all>
+		<alias name="storeName" field="storeName" entity-alias="PS"></alias>
+		<alias name="companyName" field="companyName" entity-alias="PS"></alias>
+		<alias name="oldHeaderLogo" field="oldHeaderLogo" entity-alias="PS"></alias>
+		<view-link rel-entity-alias="PS" entity-alias="CPO">
+			<key-map field-name="productStoreId" />
+			<entity-condition>
+				<condition-expr field-name="salesMethodChannelEnumId" operator="equals" value="SMCHANNEL_POS" entity-alias="PS" />
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<!-- view entity for facility -->
+	<view-entity entity-name="ProductAndProductFacility" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PR" entity-name="Product"></member-entity>
+		<member-entity entity-alias="PF" entity-name="ProductFacility"></member-entity>
+		<alias-all entity-alias="PR" group-by="true"></alias-all>
+		<alias name="qoh" field="lastInventoryCount" entity-alias="PF" function="sum"></alias>
+		<alias name="qoo" field="qoo" entity-alias="PF" function="sum"></alias>
+		<alias name="lastReceived" field="lastReceived" entity-alias="PF" function="max"></alias>
+		<alias name="lastSold" field="lastSold" entity-alias="PF" function="max"></alias>
+		<view-link rel-entity-alias="PF" entity-alias="PR" rel-optional="true">
+			<key-map field-name="productId" />
+			<entity-condition>
+				<condition-expr field-name="salesDiscontinuationDate" operator="equals" value="" />
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="FacilityAndContactMechAndPostalAddress" package-name="org.ofbiz.product.facility" title="Facility and Contact Mech View Entity">
+		<member-entity entity-alias="FA" entity-name="Facility" />
+		<member-entity entity-alias="FCMP" entity-name="FacilityContactMechPurpose" />
+		<member-entity entity-alias="CM" entity-name="ContactMech" />
+		<member-entity entity-alias="PAS" entity-name="PostalAddress" />
+		<alias-all entity-alias="FA" />
+		<alias-all entity-alias="PAS" />
+		<alias name="contactMechPostalAddressId" field="contactMechId" entity-alias="CM"></alias>
+		<alias name="contactMechTypePostalAddressId" field="contactMechTypeId" entity-alias="CM"></alias>
+		<view-link entity-alias="FA" rel-entity-alias="FCMP">
+			<key-map field-name="facilityId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="contactMechPurposeTypeId" value="PRIMARY_LOCATION" entity-alias="FCMP" />
+					<condition-expr field-name="thruDate" operator="equals" value="" entity-alias="FCMP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+		<view-link entity-alias="FCMP" rel-entity-alias="CM">
+			<key-map field-name="contactMechId" />
+			<entity-condition>
+				<condition-expr field-name="contactMechTypeId" value="POSTAL_ADDRESS" entity-alias="CM" />
+			</entity-condition>
+		</view-link>
+		<view-link entity-alias="CM" rel-entity-alias="PAS">
+			<key-map field-name="contactMechId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="FacilityAndContactmechAndTelecomNumber" package-name="org.ofbiz.product.facility" title="Facility and contact mech and telecom number">
+		<member-entity entity-alias="FA" entity-name="Facility" />
+		<member-entity entity-alias="FCMP" entity-name="FacilityContactMechPurpose" />
+		<member-entity entity-alias="CM" entity-name="ContactMech" />
+		<member-entity entity-alias="TN" entity-name="TelecomNumber" />
+		<alias-all entity-alias="FA"></alias-all>
+		<alias-all entity-alias="FCMP"></alias-all>
+		<alias-all entity-alias="TN"></alias-all>
+		<alias name="contactMechTelecomNumberId" field="contactMechId" entity-alias="CM"></alias>
+		<alias name="contactMechTypeTelecomNumberId" field="contactMechTypeId" entity-alias="CM"></alias>
+		<view-link entity-alias="FA" rel-entity-alias="FCMP">
+			<key-map field-name="facilityId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="contactMechPurposeTypeId" value="PRIMARY_PHONE" entity-alias="FCMP" />
+					<condition-expr field-name="thruDate" operator="equals" value="" entity-alias="FCMP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+		<view-link entity-alias="FCMP" rel-entity-alias="CM">
+			<key-map field-name="contactMechId" />
+			<entity-condition>
+				<condition-expr field-name="contactMechTypeId" value="TELECOM_NUMBER" entity-alias="CM" />
+			</entity-condition>
+		</view-link>
+		<view-link entity-alias="CM" rel-entity-alias="TN">
+			<key-map field-name="contactMechId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="FacilityAndPostalAddressAndTelecomNumber" package-name="org.ofbiz.product.facility">
+		<member-entity entity-alias="FCP" entity-name="FacilityAndContactMechAndPostalAddress"></member-entity>
+		<member-entity entity-alias="FCT" entity-name="FacilityAndContactmechAndTelecomNumber"></member-entity>
+		<alias-all entity-alias="FCP"></alias-all>
+		<alias-all entity-alias="FCT"></alias-all>
+		<view-link entity-alias="FCP" rel-entity-alias="FCT" rel-optional="true">
+			<key-map field-name="facilityId" />
+		</view-link>
+	</view-entity>
+
+	<!-- view entity for pos terminal -->
+	<view-entity entity-name="InvoiceAndApplAndPaymentCashAndOrder" package-name="com.olbius.basepos">
+		<member-entity entity-alias="IAP" entity-name="InvoiceAndApplAndPayment"></member-entity>
+		<member-entity entity-alias="OPP" entity-name="OrderPaymentPreference"></member-entity>
+		<alias name="invoiceId" field="invoiceId" entity-alias="IAP"></alias>
+		<alias name="paymentId" field="paymentId" entity-alias="IAP"></alias>
+		<alias name="amount" field="pmAmount" entity-alias="IAP"></alias>
+		<alias name="orderId" field="orderId" entity-alias="OPP"></alias>
+		<view-link rel-entity-alias="OPP" entity-alias="IAP">
+			<key-map field-name="pmPaymentPreferenceId" rel-field-name="orderPaymentPreferenceId" />
+			<entity-condition distinct="true">
+				<condition-list combine="and">
+					<condition-expr field-name="invoiceTypeId" operator="equals" value="SALES_INVOICE" entity-alias="IAP" />
+					<condition-list combine="or">
+						<condition-expr field-name="statusId" operator="equals" value="INVOICE_IN_PROCESS" entity-alias="IAP" />
+						<condition-expr field-name="statusId" operator="equals" value="INVOICE_READY" entity-alias="IAP" />
+						<condition-expr field-name="statusId" operator="equals" value="INVOICE_PAID" entity-alias="IAP" />
+					</condition-list>
+					<condition-expr field-name="pmPaymentTypeId" operator="equals" value="CUSTOMER_PAYMENT" entity-alias="IAP" />
+					<condition-expr field-name="pmPaymentMethodTypeId" operator="equals" value="CASH" entity-alias="IAP" />
+					<condition-list combine="or">
+						<condition-expr field-name="pmStatusId" operator="equals" value="PMNT_RECEIVED" entity-alias="IAP" />
+						<condition-expr field-name="pmStatusId" operator="equals" value="PMNT_SENT" entity-alias="IAP" />
+						<condition-expr field-name="pmStatusId" operator="equals" value="PMNT_CONFIRMED" entity-alias="IAP" />
+					</condition-list>
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="InvoiceAndApplAndPaymentCardAndOrder" package-name="com.olbius.basepos">
+		<member-entity entity-alias="IAP" entity-name="InvoiceAndApplAndPayment"></member-entity>
+		<member-entity entity-alias="OPP" entity-name="OrderPaymentPreference"></member-entity>
+		<alias name="invoiceId" field="invoiceId" entity-alias="IAP"></alias>
+		<alias name="paymentId" field="paymentId" entity-alias="IAP"></alias>
+		<alias name="amount" field="pmAmount" entity-alias="IAP"></alias>
+		<alias name="orderId" field="orderId" entity-alias="OPP"></alias>
+		<view-link rel-entity-alias="OPP" entity-alias="IAP">
+			<key-map field-name="pmPaymentPreferenceId" rel-field-name="orderPaymentPreferenceId" />
+			<entity-condition distinct="true">
+				<condition-list combine="and">
+					<condition-expr field-name="invoiceTypeId" operator="equals" value="SALES_INVOICE" entity-alias="IAP" />
+					<condition-list combine="or">
+						<condition-expr field-name="statusId" operator="equals" value="INVOICE_IN_PROCESS" entity-alias="IAP" />
+						<condition-expr field-name="statusId" operator="equals" value="INVOICE_READY" entity-alias="IAP" />
+						<condition-expr field-name="statusId" operator="equals" value="INVOICE_PAID" entity-alias="IAP" />
+					</condition-list>
+					<condition-expr field-name="pmPaymentTypeId" operator="equals" value="CUSTOMER_PAYMENT" entity-alias="IAP" />
+					<condition-expr field-name="pmPaymentMethodTypeId" operator="equals" value="COMPANY_CHECK" entity-alias="IAP" />
+					<condition-list combine="or">
+						<condition-expr field-name="pmStatusId" operator="equals" value="PMNT_RECEIVED" entity-alias="IAP" />
+						<condition-expr field-name="pmStatusId" operator="equals" value="PMNT_SENT" entity-alias="IAP" />
+						<condition-expr field-name="pmStatusId" operator="equals" value="PMNT_CONFIRMED" entity-alias="IAP" />
+					</condition-list>
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="OrderAndInvoiceAndPayment" package-name="com.olbius.basepos">
+		<member-entity entity-alias="IPCASH" entity-name="InvoiceAndApplAndPaymentCashAndOrder"></member-entity>
+		<member-entity entity-alias="IPCARD" entity-name="InvoiceAndApplAndPaymentCardAndOrder"></member-entity>
+		<member-entity entity-alias="OH" entity-name="OrderHeader"></member-entity>
+		<alias-all entity-alias="OH"></alias-all>
+		<alias name="amountCash" field="amount" entity-alias="IPCASH"></alias>
+		<alias name="amountCard" field="amount" entity-alias="IPCARD"></alias>
+		<view-link rel-entity-alias="IPCASH" entity-alias="OH" rel-optional="true">
+			<key-map field-name="orderId" />
+		</view-link>
+		<view-link rel-entity-alias="IPCARD" entity-alias="OH" rel-optional="true">
+			<key-map field-name="orderId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="WorkShiftInCome" package-name="com.olbius.basepos">
+		<member-entity entity-alias="PTL" entity-name="PosTerminalLog"></member-entity>
+		<member-entity entity-alias="PTIT" entity-name="PosTerminalInternTx"></member-entity>
+		<member-entity entity-alias="ITT" entity-name="InvoiceItemType"></member-entity>
+		<alias-all entity-alias="PTL"></alias-all>
+		<alias name="paidAmount" field="paidAmount" entity-alias="PTIT" />
+		<alias name="invoiceItemTypeId" field="invoiceItemTypeId" entity-alias="PTIT" />
+		<alias name="description" field="description" entity-alias="ITT" />
+		<view-link rel-entity-alias="PTIT" entity-alias="PTL">
+			<key-map field-name="posTerminalLogId" />
+			<entity-condition>
+				<condition-expr field-name="statusId" value="POSTX_PAID_IN" />
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="ITT" entity-alias="PTIT">
+			<key-map field-name="invoiceItemTypeId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="WorkShiftCost" package-name="com.olbius.basepos">
+		<member-entity entity-alias="PTL" entity-name="PosTerminalLog"></member-entity>
+		<member-entity entity-alias="PTIT" entity-name="PosTerminalInternTx"></member-entity>
+		<member-entity entity-alias="ITT" entity-name="InvoiceItemType"></member-entity>
+		<alias-all entity-alias="PTL"></alias-all>
+		<alias name="paidAmount" field="paidAmount" entity-alias="PTIT" />
+		<alias name="invoiceItemTypeId" field="invoiceItemTypeId" entity-alias="PTIT" />
+		<alias name="description" field="description" entity-alias="ITT" />
+		<view-link rel-entity-alias="PTIT" entity-alias="PTL">
+			<key-map field-name="posTerminalLogId" />
+			<entity-condition>
+				<condition-expr field-name="statusId" value="POSTX_PAID_OUT" />
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="ITT" entity-alias="PTIT">
+			<key-map field-name="invoiceItemTypeId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PosWorkShiftCost" package-name="com.olbius.basepos">
+		<member-entity entity-alias="PTS" entity-name="PosTerminalState"></member-entity>
+		<member-entity entity-alias="WSC" entity-name="WorkShiftCost"></member-entity>
+		<alias-all entity-alias="PTS" group-by="true"></alias-all>
+		<alias name="otherCost" field="paidAmount" entity-alias="WSC" function="sum"></alias>
+		<view-link rel-entity-alias="WSC" entity-alias="PTS" rel-optional="true">
+			<key-map field-name="posTerminalStateId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PosWorkShiftInCome" package-name="com.olbius.basepos">
+		<member-entity entity-alias="PTS" entity-name="PosTerminalState"></member-entity>
+		<member-entity entity-alias="WSI" entity-name="WorkShiftInCome"></member-entity>
+		<alias-all entity-alias="PTS" group-by="true"></alias-all>
+		<alias name="otherInCome" field="paidAmount" entity-alias="WSI" function="sum"></alias>
+		<view-link rel-entity-alias="WSI" entity-alias="PTS" rel-optional="true">
+			<key-map field-name="posTerminalStateId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="ReturnDirectlyPos" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="OH" entity-name="OrderHeader"></member-entity>
+		<member-entity entity-alias="ORR" entity-name="OrderRole"></member-entity>
+		<member-entity entity-alias="PR" entity-name="PartyRole"></member-entity>
+		<alias-all entity-alias="OH"></alias-all>
+		<alias name="partyId" field="partyId" entity-alias="ORR"></alias>
+		<alias name="roleTypeIdOrder" field="roleTypeId" entity-alias="ORR"></alias>
+		<alias name="roleTypeId" field="roleTypeId" entity-alias="PR"></alias>
+		<view-link rel-entity-alias="ORR" entity-alias="OH">
+			<key-map field-name="orderId" />
+			<entity-condition>
+				<condition-list combine="and">
+					<condition-expr field-name="roleTypeId" operator="equals" value="BILL_FROM_VENDOR" entity-alias="ORR" />
+					<condition-expr field-name="orderTypeId" operator="equals" value="PURCHASE_ORDER" entity-alias="OH" />
+					<condition-expr field-name="salesChannelEnumId" operator="equals" value="POS_SALES_CHANNEL" entity-alias="OH" />
+					<condition-expr field-name="statusId" operator="equals" value="ORDER_COMPLETED" entity-alias="OH" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="PR" entity-alias="ORR">
+			<key-map field-name="partyId" />
+			<entity-condition>
+				<condition-list combine="or">
+					<condition-list combine="and">
+						<condition-expr field-name="partyId" operator="equals" value="_NA_" entity-alias="ORR" />
+						<condition-expr field-name="roleTypeId" operator="equals" value="BILL_FROM_VENDOR" entity-alias="PR" />
+					</condition-list>
+					<condition-list combine="and">
+						<condition-expr field-name="partyId" operator="not-equals" value="_NA_" entity-alias="ORR" />
+						<condition-expr field-name="roleTypeId" operator="not-equals" value="SUPPLIER" entity-alias="PR" />
+					</condition-list>
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="ReturnHeaderAndReturnItemBilling" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="RHIB" entity-name="ReturnAndReturnItemBilling"></member-entity>
+		<member-entity entity-alias="RHRA" entity-name="ReturnAndReturnAdjustment"></member-entity>
+		<alias-all entity-alias="RHIB"></alias-all>
+		<alias name="returnAmount" >
+			<complex-alias operator="+">
+				<complex-alias-field entity-alias="RHIB" field="returnAmount" default-value="0" />
+				<complex-alias-field entity-alias="RHRA" field="returnTaxAmount" default-value="0" />
+			</complex-alias>		
+		</alias>
+		<view-link rel-entity-alias="RHIB" entity-alias="RHRA">
+			<key-map field-name="returnId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ReturnAndReturnItemBilling" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="RH" entity-name="ReturnHeader"></member-entity>
+		<member-entity entity-alias="RIB" entity-name="ReturnItemBilling"></member-entity>
+		<alias-all entity-alias="RH" group-by="true"></alias-all>
+<!-- 		<alias name="returnAmount" function="sum" field="amount" entity-alias="RIB"></alias> -->
+		<alias name="returnAmount" function="sum">
+			<complex-alias operator="*">
+				<complex-alias-field field="quantity" entity-alias="RIB" />
+				<complex-alias-field field="amount" entity-alias="RIB" />
+			</complex-alias>
+		</alias>
+		<view-link rel-entity-alias="RIB" entity-alias="RH">
+			<key-map field-name="returnId" />
+			<entity-condition>
+				<condition-list combine="and">
+					<condition-expr field-name="returnHeaderTypeId" operator="equals" value="CUSTOMER_RETURN" entity-alias="RH" />
+					<condition-expr field-name="statusId" operator="equals" value="RETURN_RECEIVED" entity-alias="RH" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ReturnAndReturnAdjustment" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="RH" entity-name="ReturnHeader"></member-entity>
+		<member-entity entity-alias="RIB" entity-name="ReturnAdjustment"></member-entity>
+		<alias-all entity-alias="RH" group-by="true"></alias-all>
+		<alias name="returnTaxAmount" function="sum" field="amount" entity-alias="RIB"></alias>
+		<view-link rel-entity-alias="RIB" entity-alias="RH">
+			<key-map field-name="returnId" />
+			<entity-condition>
+				<condition-list combine="and">
+					<condition-expr field-name="returnHeaderTypeId" operator="equals" value="CUSTOMER_RETURN" entity-alias="RH" />
+					<condition-expr field-name="statusId" operator="equals" value="RETURN_RECEIVED" entity-alias="RH" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>		
+	
+
+	<view-entity entity-name="PosTerminalLogAndOrderHeader" package-name="com.olbius.basepos">
+		<member-entity entity-alias="PTL" entity-name="PosTerminalLog"></member-entity>
+		<member-entity entity-alias="OIP" entity-name="OrderAndInvoiceAndPayment"></member-entity>
+		<alias-all entity-alias="PTL"></alias-all>
+		<alias-all entity-alias="OIP"></alias-all>
+		<view-link rel-entity-alias="OIP" entity-alias="PTL">
+			<key-map field-name="orderId" />
+			<key-map field-name="userLoginId" rel-field-name="createdBy" />
+			<key-map field-name="posTerminalId" rel-field-name="terminalId" />
+			<entity-condition>
+				<condition-list combine="and">
+					<condition-expr field-name="statusId" operator="equals" value="POSTX_SOLD" entity-alias="PTL" />
+					<condition-expr field-name="orderTypeId" operator="equals" value="SALES_ORDER" entity-alias="OIP" />
+					<condition-expr field-name="salesChannelEnumId" operator="equals" value="POS_SALES_CHANNEL" entity-alias="OIP" />
+					<condition-expr field-name="statusId" operator="equals" value="ORDER_COMPLETED" entity-alias="OIP" />
+					<condition-expr field-name="salesMethodChannelEnumId" operator="equals" value="SMCHANNEL_POS" entity-alias="OIP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PosWorkShiftOrder" package-name="com.olbius.basepos">
+		<member-entity entity-alias="PTS" entity-name="PosTerminalState"></member-entity>
+		<member-entity entity-alias="PTLAOH" entity-name="PosTerminalLogAndOrderHeader"></member-entity>
+		<alias-all entity-alias="PTS" group-by="true"></alias-all>
+		<alias name="orderTotal" field="grandTotal" entity-alias="PTLAOH" function="sum"></alias>
+		<alias name="orderAmountCash" field="amountCash" entity-alias="PTLAOH" function="sum"></alias>
+		<alias name="orderAmountCard" field="amountCard" entity-alias="PTLAOH" function="sum"></alias>
+		<view-link rel-entity-alias="PTLAOH" entity-alias="PTS" rel-optional="true">
+			<key-map field-name="posTerminalStateId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PosTerminalLogAndReturnDirectlyPos" package-name="com.olbius.basepos">
+		<member-entity entity-alias="PTL" entity-name="PosTerminalLog"></member-entity>
+		<member-entity entity-alias="RDP" entity-name="ReturnDirectlyPos"></member-entity>
+		<alias-all entity-alias="PTL"></alias-all>
+		<alias-all entity-alias="RDP"></alias-all>
+		<view-link rel-entity-alias="RDP" entity-alias="PTL">
+			<key-map field-name="orderId" />
+			<key-map field-name="userLoginId" rel-field-name="createdBy" />
+			<key-map field-name="posTerminalId" rel-field-name="terminalId" />
+			<entity-condition>
+				<condition-expr field-name="statusId" operator="equals" value="POSTX_RETURNED" entity-alias="PTL" />
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PosWorkShiftReturnDirectly" package-name="com.olbius.basepos">
+		<member-entity entity-alias="PTS" entity-name="PosTerminalState"></member-entity>
+		<member-entity entity-alias="PTLARDP" entity-name="PosTerminalLogAndReturnDirectlyPos"></member-entity>
+		<alias-all entity-alias="PTS" group-by="true"></alias-all>
+		<alias name="returnTotalDirectly" field="grandTotal" entity-alias="PTLARDP" function="sum"></alias>
+		<view-link rel-entity-alias="PTLARDP" entity-alias="PTS" rel-optional="true">
+			<key-map field-name="posTerminalStateId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PosTerminalLogAndPosTerminal" package-name="com.olbius.basepos">
+		<member-entity entity-alias="PTL" entity-name="PosTerminalLog"></member-entity>
+		<member-entity entity-alias="PT" entity-name="PosTerminal"></member-entity>
+		<alias-all entity-alias="PTL"></alias-all>
+		<alias name="facilityId" field="facilityId" entity-alias="PT"></alias>
+		<view-link rel-entity-alias="PT" entity-alias="PTL">
+			<key-map field-name="posTerminalId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PosTerminalLogAndReturnOrder" package-name="com.olbius.basepos">
+		<member-entity entity-alias="PTL" entity-name="PosTerminalLogAndPosTerminal"></member-entity>
+		<member-entity entity-alias="RHARIB" entity-name="ReturnHeaderAndReturnItemBilling"></member-entity>
+		<alias-all entity-alias="PTL"></alias-all>
+		<alias-all entity-alias="RHARIB"></alias-all>
+		<view-link rel-entity-alias="RHARIB" entity-alias="PTL">
+			<key-map field-name="returnId" />
+			<key-map field-name="userLoginId" rel-field-name="createdBy" />
+			<key-map field-name="facilityId" rel-field-name="destinationFacilityId" />
+			<entity-condition>
+				<condition-list combine="and">
+					<condition-expr field-name="statusId" operator="equals" value="POSTX_RETURNED" entity-alias="PTL" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PosWorkShiftReturnOrder" package-name="com.olbius.basepos">
+		<member-entity entity-alias="PTS" entity-name="PosTerminalState"></member-entity>
+		<member-entity entity-alias="PTLARO" entity-name="PosTerminalLogAndReturnOrder"></member-entity>
+		<alias-all entity-alias="PTS" group-by="true"></alias-all>
+		<alias name="returnTotal" field="returnAmount" entity-alias="PTLARO" function="sum"></alias>
+		<view-link rel-entity-alias="PTLARO" entity-alias="PTS" rel-optional="true">
+			<key-map field-name="posTerminalStateId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PosWorkShift" package-name="com.olbius.basepos">
+		<member-entity entity-alias="PWSC" entity-name="PosWorkShiftCost"></member-entity>
+		<member-entity entity-alias="PWSI" entity-name="PosWorkShiftInCome"></member-entity>
+		<member-entity entity-alias="PWSR0" entity-name="PosWorkShiftReturnOrder"></member-entity>
+		<member-entity entity-alias="PWSRD" entity-name="PosWorkShiftReturnDirectly"></member-entity>
+		<member-entity entity-alias="PWSO" entity-name="PosWorkShiftOrder"></member-entity>
+		<alias-all entity-alias="PWSC"></alias-all>
+		<alias name="otherInCome" field="otherInCome" entity-alias="PWSI"></alias>
+		<alias name="returnTotal" field="returnTotal" entity-alias="PWSR0"></alias>
+		<alias name="returnTotalDirectly" field="returnTotalDirectly" entity-alias="PWSRD"></alias>
+		<alias name="orderTotal" field="orderTotal" entity-alias="PWSO"></alias>
+		<alias name="amountCash">
+			<complex-alias operator="-">
+				<complex-alias-field field="orderAmountCash" entity-alias="PWSO" default-value="0" />
+				<complex-alias operator="+">
+					<complex-alias-field entity-alias="PWSR0" field="returnTotal" default-value="0" />
+					<complex-alias-field entity-alias="PWSRD" field="returnTotalDirectly" default-value="0" />
+				</complex-alias>
+			</complex-alias>
+		</alias>
+		<alias name="amountCard" field="orderAmountCard" entity-alias="PWSO"></alias>
+		<alias name="amountTotal">
+			<complex-alias operator="-">
+				<complex-alias-field field="orderTotal" entity-alias="PWSO" default-value="0" />
+				<complex-alias operator="+">
+					<complex-alias-field entity-alias="PWSR0" field="returnTotal" default-value="0" />
+					<complex-alias-field entity-alias="PWSRD" field="returnTotalDirectly" default-value="0" />
+				</complex-alias>
+			</complex-alias>
+		</alias>
+		<view-link rel-entity-alias="PWSI" entity-alias="PWSC" rel-optional="true">
+			<key-map field-name="posTerminalStateId" />
+		</view-link>
+		<view-link rel-entity-alias="PWSR0" entity-alias="PWSI" rel-optional="true">
+			<key-map field-name="posTerminalStateId" />
+		</view-link>
+		<view-link rel-entity-alias="PWSRD" entity-alias="PWSR0" rel-optional="true">
+			<key-map field-name="posTerminalStateId" />
+		</view-link>
+		<view-link rel-entity-alias="PWSO" entity-alias="PWSRD" rel-optional="true">
+			<key-map field-name="posTerminalStateId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="PosTerminalStateAndPaymet" package-name="com.olbius.basepos">
+		<member-entity entity-alias="POSSTATE" entity-name="PosTerminalState"></member-entity>
+		<member-entity entity-alias="PMNT" entity-name="Payment"></member-entity>
+		<alias-all entity-alias="POSSTATE" group-by="true"></alias-all>
+		<alias name="paymentId" function="string-agg" function-params="', '" entity-alias="PMNT"></alias>
+		<view-link rel-entity-alias="PMNT" entity-alias="POSSTATE">
+			<key-map field-name="posTerminalStateId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="PosWorkShiftAndOrg" package-name="com.olbius.basepos">
+		<member-entity entity-alias="PWS" entity-name="PosWorkShift"></member-entity>
+		<member-entity entity-alias="PT" entity-name="PosTerminal"></member-entity>
+		<member-entity entity-alias="FA" entity-name="Facility"></member-entity>
+		<member-entity entity-alias="PNV" entity-name="PartyNameView"></member-entity>
+		<member-entity entity-alias="PMNT" entity-name="PosTerminalStateAndPaymet"></member-entity>
+		<alias-all entity-alias="PWS"></alias-all>
+		<alias name="organizationPartyId" field="ownerPartyId" entity-alias="FA"></alias>
+		<alias name="facilityName" field="facilityName" entity-alias="FA"></alias>
+		<alias name="terminalName" field="terminalName" entity-alias="PT"></alias>
+		<alias name="openedUserId" field="partyId" entity-alias="PNV"></alias>
+		<alias name="paymentId" entity-alias="PMNT"></alias>
+		<alias name="fullName">
+			<complex-alias operator="||' '||">
+				<complex-alias-field field="lastName" entity-alias="PNV" default-value="''" />
+				<complex-alias-field field="middleName" entity-alias="PNV" default-value="''" />
+				<complex-alias-field field="firstName" entity-alias="PNV" default-value="''" />
+			</complex-alias>
+		</alias>		
+		
+		<view-link rel-entity-alias="PNV" entity-alias="PWS">
+			<key-map field-name="openedByUserLoginId" rel-field-name="partyCode" />
+		</view-link>				
+		<view-link rel-entity-alias="PT" entity-alias="PWS">
+			<key-map field-name="posTerminalId" />
+		</view-link>
+		<view-link rel-entity-alias="FA" entity-alias="PT">
+			<key-map field-name="facilityId" />
+		</view-link>
+		<view-link rel-entity-alias="PMNT" entity-alias="PWS" rel-optional="true">
+			<key-map field-name="posTerminalStateId"/>
+		</view-link>
+	</view-entity>
+
+	<!-- view entity for category -->
+	<view-entity entity-name="ProdCatalogCategoryAndProductCategory" package-name="com.olbius.basepos">
+		<member-entity entity-alias="PCC" entity-name="ProdCatalogCategory"></member-entity>
+		<member-entity entity-alias="PC" entity-name="ProductCategory"></member-entity>
+		<alias name="prodCatalogId" entity-alias="PCC"></alias>
+		<alias name="productCategoryId" entity-alias="PCC"></alias>
+		<alias name="prodCatalogCategoryTypeId" entity-alias="PCC"></alias>
+		<alias name="fromDate" entity-alias="PCC"></alias>
+		<alias name="thruDate" entity-alias="PCC"></alias>
+		<alias name="sequenceNum" entity-alias="PCC"></alias>
+		<alias name="productCategoryTypeId" entity-alias="PC"></alias>
+		<alias name="primaryParentCategoryId" entity-alias="PC"></alias>
+		<alias name="categoryName" entity-alias="PC"></alias>
+		<alias name="description" entity-alias="PC"></alias>
+		<view-link rel-entity-alias="PC" entity-alias="PCC" rel-optional="false">
+			<key-map field-name="productCategoryId" rel-field-name="productCategoryId" />
+		</view-link>
+	</view-entity>
+
+	<!-- only for erp -->
+	<view-entity entity-name="InventoryItemProductTotalFacility" package-name="com.olbius.basepos">
+		<member-entity entity-alias="INV" entity-name="InventoryItem" />
+		<member-entity entity-alias="PR" entity-name="Product" />
+		<alias name="availableToPromiseTotal" function="sum" entity-alias="INV" />
+		<alias name="quantityOnHandTotal" function="sum" entity-alias="INV" />
+		<alias name="productId" entity-alias="INV" group-by="true" />
+		<alias name="ownerPartyId" entity-alias="INV" group-by="true" />
+		<alias name="quantityUomId" entity-alias="PR" group-by="true" />
+		<alias name="facilityId" entity-alias="INV" group-by="true" />
+		<view-link rel-entity-alias="PR" entity-alias="INV">
+			<key-map field-name="productId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PaidInOutAndFacility" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PTIT" entity-name="PosTerminalInternTx"></member-entity>
+		<member-entity entity-alias="PTL" entity-name="PosTerminalLog"></member-entity>
+		<member-entity entity-alias="PT" entity-name="PosTerminal"></member-entity>
+		<alias name="posTerminalLogId" entity-alias="PTIT" field="posTerminalLogId"></alias>
+		<alias name="paidAmount" entity-alias="PTIT" field="paidAmount"></alias>
+		<alias name="reasonComment" entity-alias="PTIT" field="reasonComment"></alias>
+		<alias name="createdStamp" entity-alias="PTIT" field="createdStamp"></alias>
+		<alias name="posTerminalId" entity-alias="PTL" field="posTerminalId"></alias>
+		<alias name="statusId" entity-alias="PTL" field="statusId"></alias>
+		<alias name="facilityId" entity-alias="PT" field="facilityId"></alias>
+		<view-link rel-entity-alias="PTL" entity-alias="PTIT">
+			<key-map field-name="posTerminalLogId" />
+		</view-link>
+		<view-link rel-entity-alias="PT" entity-alias="PTL">
+			<key-map field-name="posTerminalId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PartyAndContactMechAndState" package-name="org.ofbiz.party.contact" title="Party and Contact Mech View Entity">
+		<member-entity entity-alias="PTY" entity-name="Party" />
+		<member-entity entity-alias="PCM" entity-name="PartyContactMech" />
+		<member-entity entity-alias="CM" entity-name="ContactMech" />
+		<member-entity entity-alias="PA" entity-name="PostalAddress" />
+		<member-entity entity-alias="TN" entity-name="TelecomNumber" />
+		<member-entity entity-alias="STTG" entity-name="Geo" />
+		<alias-all entity-alias="PTY" />
+		<alias-all entity-alias="PCM" />
+		<alias-all entity-alias="CM" />
+		<alias-all entity-alias="PA" prefix="pa" />
+		<alias-all entity-alias="TN" prefix="tn" />
+		<alias-all entity-alias="STTG" prefix="state" />
+		<view-link entity-alias="PTY" rel-entity-alias="PCM">
+			<key-map field-name="partyId" />
+		</view-link>
+		<view-link entity-alias="PCM" rel-entity-alias="CM">
+			<key-map field-name="contactMechId" />
+		</view-link>
+		<view-link entity-alias="PCM" rel-entity-alias="PA" rel-optional="true">
+			<key-map field-name="contactMechId" />
+		</view-link>
+		<view-link entity-alias="PCM" rel-entity-alias="TN" rel-optional="true">
+			<key-map field-name="contactMechId" />
+		</view-link>
+		<view-link entity-alias="PA" rel-entity-alias="STTG" rel-optional="true">
+			<key-map field-name="stateProvinceGeoId" rel-field-name="geoId" />
+		</view-link>
+		<relation type="many" rel-entity-name="PartyContactMech">
+			<key-map field-name="partyId" />
+			<key-map field-name="contactMechId" />
+		</relation>
+		<relation type="one-nofk" rel-entity-name="Party">
+			<key-map field-name="partyId" />
+		</relation>
+		<relation type="one-nofk" rel-entity-name="ContactMech">
+			<key-map field-name="contactMechId" />
+		</relation>
+		<relation type="one-nofk" rel-entity-name="PostalAddress">
+			<key-map field-name="contactMechId" />
+		</relation>
+		<relation type="one-nofk" rel-entity-name="TelecomNumber">
+			<key-map field-name="contactMechId" />
+		</relation>
+	</view-entity>
+
+	<view-entity entity-name="ProductStoreFacilityTerminal" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PS" entity-name="ProductStore"></member-entity>
+		<member-entity entity-alias="PSF" entity-name="ProductStoreFacility"></member-entity>
+		<member-entity entity-alias="PT" entity-name="PosTerminal"></member-entity>
+		<alias name="productStoreId" field="productStoreId" entity-alias="PS"></alias>
+		<alias name="storeName" field="storeName" entity-alias="PS"></alias>
+		<alias name="payToPartyId" field="payToPartyId" entity-alias="PS"></alias>
+		<alias name="salesMethodChannelEnumId" field="salesMethodChannelEnumId" entity-alias="PS"></alias>
+		<alias name="facilityId" field="facilityId" entity-alias="PSF"></alias>
+		<alias name="fromDate" field="fromDate" entity-alias="PSF"></alias>
+		<alias name="thruDate" field="thruDate" entity-alias="PSF"></alias>
+		<alias name="posTerminalId" field="posTerminalId" entity-alias="PT"></alias>
+		<alias name="terminalName" field="terminalName" entity-alias="PT"></alias>
+		<view-link rel-entity-alias="PSF" entity-alias="PS" rel-optional="true">
+			<key-map field-name="productStoreId" />
+			<entity-condition>
+				<condition-expr field-name="thruDate" operator="equals" value="" entity-alias="PSF" />
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="PT" entity-alias="PSF">
+			<key-map field-name="facilityId" />
+		</view-link>
+	</view-entity>
+
+	<!-- by anhlt -->
+	<view-entity entity-name="TerminalFacilityStore" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PT" entity-name="PosTerminal"></member-entity>
+		<member-entity entity-alias="FA" entity-name="Facility"></member-entity>
+		<member-entity entity-alias="PS" entity-name="ProductStore"></member-entity>
+		<alias name="productStoreId" field="productStoreId" entity-alias="FA"></alias>
+		<alias name="storeName" field="storeName" entity-alias="PS"></alias>
+		<alias name="ownerPartyId" field="ownerPartyId" entity-alias="FA"></alias>
+		<alias name="facilityId" field="facilityId" entity-alias="FA"></alias>
+		<alias name="posTerminalId" field="posTerminalId" entity-alias="PT"></alias>
+		<alias name="terminalName" field="terminalName" entity-alias="PT"></alias>
+		<view-link rel-entity-alias="FA" entity-alias="PT">
+			<key-map field-name="facilityId" />
+			<entity-condition>
+				<condition-expr field-name="closedDate" operator="equals" value="" entity-alias="FA" />
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="PS" entity-alias="FA" rel-optional="true">
+			<key-map field-name="productStoreId"/>
+		</view-link>
+	</view-entity>
+
+	<!-- new hoandv -->
+	<view-entity entity-name="ShipmentItemBillingAndInvoice" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="SIB" entity-name="ShipmentItemBilling"></member-entity>
+		<member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+		<alias name="shipmentId" entity-alias="SIB"></alias>
+		<alias name="invoiceId" entity-alias="INV"></alias>
+		<view-link rel-entity-alias="INV" entity-alias="SIB">
+			<key-map field-name="invoiceId" />
+			<entity-condition distinct="true">
+			</entity-condition>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ShipmentAndShipmentItemBillingAndInvoice" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="SH" entity-name="Shipment"></member-entity>
+		<member-entity entity-alias="SIBAI" entity-name="ShipmentItemBillingAndInvoice"></member-entity>
+		<alias-all entity-alias="SH"></alias-all>
+		<alias name="invoiceId" entity-alias="SIBAI"></alias>
+		<view-link rel-entity-alias="SIBAI" entity-alias="SH">
+			<key-map field-name="shipmentId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="OrderItemBillingAndInvoice" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="OIB" entity-name="OrderItemBilling"></member-entity>
+		<member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+		<alias name="orderId" entity-alias="OIB"></alias>
+		<alias name="invoiceId" entity-alias="INV"></alias>
+		<view-link rel-entity-alias="INV" entity-alias="OIB">
+			<key-map field-name="invoiceId" />
+			<entity-condition distinct="true">
+				<condition-expr field-name="orderId" entity-alias="OIB" operator="not-equals" value="" />
+			</entity-condition>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ShipmentReceiptAndInvoice" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="SR" entity-name="ShipmentReceipt"></member-entity>
+		<member-entity entity-alias="OIBI" entity-name="OrderItemBillingAndInvoice"></member-entity>
+		<alias name="shipmentId" entity-alias="SR"></alias>
+		<alias name="invoiceId" entity-alias="OIBI"></alias>
+		<view-link rel-entity-alias="OIBI" entity-alias="SR">
+			<key-map field-name="orderId" />
+			<entity-condition distinct="true">
+				<condition-expr field-name="invoiceId" operator="not-equals" value="" entity-alias="OIBI" />
+			</entity-condition>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ShipmentAndShipmentReceiveAndOrderItemBillingAndInvoice" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="SH" entity-name="Shipment"></member-entity>
+		<member-entity entity-alias="SRAI" entity-name="ShipmentReceiptAndInvoice"></member-entity>
+		<alias-all entity-alias="SH"></alias-all>
+		<alias name="invoiceId" entity-alias="SRAI"></alias>
+		<view-link rel-entity-alias="SRAI" entity-alias="SH">
+			<key-map field-name="shipmentId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ShipmentAndInvoice" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="SH" entity-name="Shipment"></member-entity>
+		<member-entity entity-alias="SSIBI" entity-name="ShipmentAndShipmentItemBillingAndInvoice"></member-entity>
+		<member-entity entity-alias="SSROIBI" entity-name="ShipmentAndShipmentReceiveAndOrderItemBillingAndInvoice"></member-entity>
+		<alias-all entity-alias="SH"></alias-all>
+		<alias name="invoiceId1" entity-alias="SSIBI" field="invoiceId"></alias>
+		<alias name="invoiceId2" entity-alias="SSROIBI" field="invoiceId"></alias>
+		<alias name="invoiceId">
+			<complex-alias operator="||">
+				<complex-alias-field field="invoiceId" entity-alias="SSIBI" default-value="''" />
+				<complex-alias-field field="invoiceId" entity-alias="SSROIBI" default-value="''" />
+			</complex-alias>
+		</alias>
+		<view-link rel-entity-alias="SSIBI" entity-alias="SH" rel-optional="true">
+			<key-map field-name="shipmentId" />
+			<entity-condition distinct="true">
+				<condition-list combine="and">
+					<condition-expr field-name="statusId" operator="equals" value="PURCH_SHIP_RECEIVED" entity-alias="SH" />
+					<condition-expr field-name="shipmentTypeId" operator="equals" value="PURCHASE_SHIPMENT" entity-alias="SH" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="SSROIBI" entity-alias="SH" rel-optional="true">
+			<key-map field-name="shipmentId" />
+			<entity-condition distinct="true">
+				<condition-list combine="and">
+					<condition-expr field-name="statusId" operator="equals" value="PURCH_SHIP_RECEIVED" entity-alias="SH" />
+					<condition-expr field-name="shipmentTypeId" operator="equals" value="PURCHASE_SHIPMENT" entity-alias="SH" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="InvoiceAndInvoiceItem" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+		<member-entity entity-alias="INVI" entity-name="InvoiceItem"></member-entity>
+		<alias-all entity-alias="INV" group-by="true"></alias-all>
+		<alias name="amount" function="sum">
+			<complex-alias operator="*">
+				<complex-alias-field field="quantity" entity-alias="INVI" />
+				<complex-alias-field field="amount" entity-alias="INVI" />
+			</complex-alias>
+		</alias>
+		<view-link rel-entity-alias="INVI" entity-alias="INV">
+			<key-map field-name="invoiceId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="InvoiceAndPaymentApplied" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+		<member-entity entity-alias="PM" entity-name="Payment"></member-entity>
+		<member-entity entity-alias="PAP" entity-name="PaymentAndApplication"></member-entity>
+		<alias name="invoiceId" entity-alias="INV" group-by="true"></alias>
+		<alias name="amountApplied" entity-alias="PAP" field="amountApplied" function="sum"></alias>
+		<view-link rel-entity-alias="PAP" entity-alias="INV">
+			<key-map field-name="invoiceId" />
+		</view-link>
+		<view-link rel-entity-alias="PM" entity-alias="PAP">
+			<key-map field-name="paymentId" />
+			<entity-condition>
+				<condition-list combine="or">
+					<condition-expr field-name="statusId" entity-alias="PM" operator="equals" value="PMNT_RECEIVED" />
+					<condition-expr field-name="statusId" entity-alias="PM" operator="equals" value="PMNT_CONFIRMED" />
+					<condition-expr field-name="statusId" entity-alias="PM" operator="equals" value="PMNT_SENT" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="InvoiceAndPaymentNotApplied" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="IAII" entity-name="InvoiceAndInvoiceItem"></member-entity>
+		<member-entity entity-alias="IAPA" entity-name="InvoiceAndPaymentApplied"></member-entity>
+		<alias-all entity-alias="IAII"></alias-all>
+		<alias name="amountApplied" entity-alias="IAPA"></alias>
+		<alias name="amountNotApply">
+			<complex-alias operator="-">
+				<complex-alias-field field="amount" entity-alias="IAII" />
+				<complex-alias-field field="amountApplied" entity-alias="IAPA" />
+			</complex-alias>
+		</alias>
+		<view-link rel-entity-alias="IAPA" entity-alias="IAII">
+			<key-map field-name="invoiceId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ShipmentAndInvoiceForReceiving" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="SAI" entity-name="ShipmentAndInvoice"></member-entity>
+		<member-entity entity-alias="IP" entity-name="InvoiceAndPaymentNotApplied"></member-entity>
+		<alias-all entity-alias="SAI"></alias-all>
+		<alias name="amount" entity-alias="IP"></alias>
+		<alias name="amountApplied" entity-alias="IP"></alias>
+		<alias name="amountNotApply" entity-alias="IP"></alias>
+		<view-link rel-entity-alias="IP" entity-alias="SAI">
+			<key-map field-name="invoiceId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ShipmentAndInvoiceForReceivingAndPartyGroup" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="SIFR" entity-name="ShipmentAndInvoiceForReceiving"></member-entity>
+		<member-entity entity-alias="PG" entity-name="PartyGroup"></member-entity>
+		<alias-all entity-alias="SIFR"></alias-all>
+		<alias name="groupName" entity-alias="PG"></alias>
+		<view-link rel-entity-alias="PG" entity-alias="SIFR">
+			<key-map field-name="partyIdFrom" rel-field-name="partyId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="OrderHeaderAndOrderItem" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="ORH" entity-name="OrderHeader"></member-entity>
+		<member-entity entity-alias="ORI" entity-name="OrderItem"></member-entity>
+		<alias-all entity-alias="ORH"></alias-all>
+		<alias-all entity-alias="ORI">
+			<exclude field="orderId" />
+		</alias-all>
+		<view-link rel-entity-alias="ORI" entity-alias="ORH">
+			<key-map field-name="orderId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="SaleOrderItem" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="ORI" entity-name="OrderHeaderAndOrderItem"></member-entity>
+		<alias name="productId" entity-alias="ORI" group-by="true"></alias>
+		<alias name="orderId" entity-alias="ORI" group-by="true"></alias>
+		<alias name="orderDate" entity-alias="ORI" group-by="true"></alias>
+		<alias name="quantity" entity-alias="ORI" function="sum"></alias>
+		<alias name="facilityId" entity-alias="ORI" field="originFacilityId" group-by="true"></alias>
+		<entity-condition>
+			<condition-list combine="and">
+				<condition-expr field-name="orderTypeId" entity-alias="ORI" operator="equals" value="SALES_ORDER" />
+				<condition-expr field-name="statusId" entity-alias="ORI" operator="equals" value="ORDER_COMPLETED" />
+			</condition-list>
+		</entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="PurchaseOrderItem" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="ORI" entity-name="OrderHeaderAndOrderItem"></member-entity>
+		<alias name="productId" entity-alias="ORI" group-by="true"></alias>
+		<alias name="orderId" entity-alias="ORI" group-by="true"></alias>
+		<alias name="orderDate" entity-alias="ORI" group-by="true"></alias>
+		<alias name="quantity" entity-alias="ORI" function="sum"></alias>
+		<alias name="facilityId" entity-alias="ORI" field="originFacilityId" group-by="true"></alias>
+		<entity-condition>
+			<condition-list combine="and">
+				<condition-expr field-name="orderTypeId" entity-alias="ORI" operator="equals" value="PURCHASE_ORDER" />
+				<condition-expr field-name="statusId" entity-alias="ORI" operator="not-equals" value="ORDER_COMPLETED" />
+			</condition-list>
+		</entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="ShipmentReceiptForPO" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="SR" entity-name="ShipmentReceipt"></member-entity>
+		<alias name="productId" entity-alias="SR" group-by="true"></alias>
+		<alias name="orderId" entity-alias="SR" group-by="true"></alias>
+		<alias name="quantity" field="quantityAccepted" entity-alias="SR" function="sum"></alias>
+	</view-entity>
+	
+	<view-entity entity-name="PurchaseOrderItemAndShipmentReceipt" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="POI" entity-name="PurchaseOrderItem"></member-entity>
+		<member-entity entity-alias="SRFP" entity-name="ShipmentReceiptForPO"></member-entity>
+		<alias name="productId" entity-alias="POI"></alias>
+		<alias name="orderId" entity-alias="POI"></alias>
+		<alias name="facilityId" entity-alias="POI"></alias>
+		<alias name="quantity" entity-alias="POI"></alias>
+		<alias name="orderDate" entity-alias="POI"></alias>
+		<alias name="quantityOnOrder">
+			<complex-alias operator="-">
+				<complex-alias-field field="quantity" entity-alias="POI" default-value="0" />
+				<complex-alias-field field="quantity" entity-alias="SRFP" default-value="0" />
+			</complex-alias>
+		</alias>
+		<view-link rel-entity-alias="SRFP" entity-alias="POI" rel-optional="true">
+			<key-map field-name="productId" />
+			<key-map field-name="orderId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ReturnHeaderAndShipmentReceipt" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="RH" entity-name="ReturnHeader"></member-entity>
+		<member-entity entity-alias="SR" entity-name="ShipmentReceipt"></member-entity>
+		<alias name="productId" entity-alias="SR" group-by="true"></alias>
+		<alias name="returnId" entity-alias="SR" group-by="true"></alias>
+		<alias name="quantity" entity-alias="SR" field="quantityAccepted" function="sum"></alias>
+		<alias name="returnDate" entity-alias="SR" field="datetimeReceived" group-by="true"></alias>
+		<alias name="facilityId" entity-alias="RH" field="destinationFacilityId" group-by="true"></alias>
+		<view-link rel-entity-alias="SR" entity-alias="RH">
+			<key-map field-name="returnId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ProductFacilitySummaryAndFacility" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PFS" entity-name="ProductFacilitySummary"></member-entity>
+		<member-entity entity-alias="FA" entity-name="Facility"></member-entity>
+		<alias-all entity-alias="PFS"></alias-all>
+		<alias name="facilityName" entity-alias="FA"></alias>
+		<view-link rel-entity-alias="FA" entity-alias="PFS">
+			<key-map field-name="facilityId" />
+		</view-link>
+	</view-entity>
+
+	<!-- start creat view-entiy to show all information of party -->
+	<view-entity entity-name="PartyNameAndContactMechAndContacMechPurpose" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PNCM" entity-name="PartyNameContactMechView"></member-entity>
+		<member-entity entity-alias="PCWP" entity-name="PartyContactWithPurpose"></member-entity>
+		<alias entity-alias="PNCM" name="partyId" field="partyId"></alias>
+		<alias entity-alias="PNCM" name="partyTypeId" field="partyTypeId"></alias>
+		<alias entity-alias="PNCM" name="statusId" field="statusId"></alias>
+		<alias entity-alias="PNCM" name="firstName" field="firstName"></alias>
+		<alias entity-alias="PNCM" name="middleName" field="middleName"></alias>
+		<alias entity-alias="PNCM" name="lastName" field="lastName"></alias>
+		<alias entity-alias="PNCM" name="personalTitle" field="personalTitle"></alias>
+		<alias entity-alias="PNCM" name="suffix" field="suffix"></alias>
+		<alias entity-alias="PNCM" name="contactMechId" field="contactMechId"></alias>
+		<alias entity-alias="PNCM" name="contactMechTypeId" field="contactMechTypeId"></alias>
+		<alias entity-alias="PCWP" name="contactMechPurposeTypeId" field="contactMechPurposeTypeId"></alias>
+		<alias entity-alias="PCWP" name="contactFromDate" field="contactFromDate"></alias>
+		<alias entity-alias="PCWP" name="contactThruDate" field="contactThruDate"></alias>
+		<view-link rel-entity-alias="PCWP" entity-alias="PNCM">
+			<key-map field-name="contactMechId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PartyNameAndEmail" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PNCMCMP" entity-name="PartyNameAndContactMechAndContacMechPurpose"></member-entity>
+		<member-entity entity-alias="CM" entity-name="ContactMech"></member-entity>
+		<alias entity-alias="PNCMCMP" name="partyId" field="partyId"></alias>
+		<alias entity-alias="PNCMCMP" name="partyTypeId" field="partyTypeId"></alias>
+		<alias entity-alias="PNCMCMP" name="statusId" field="statusId"></alias>
+		<alias entity-alias="PNCMCMP" name="firstName" field="firstName"></alias>
+		<alias entity-alias="PNCMCMP" name="middleName" field="middleName"></alias>
+		<alias entity-alias="PNCMCMP" name="lastName" field="lastName"></alias>
+		<alias entity-alias="PNCMCMP" name="personalTitle" field="personalTitle"></alias>
+		<alias entity-alias="PNCMCMP" name="suffix" field="suffix"></alias>
+		<alias entity-alias="PNCMCMP" name="contactMechId" field="contactMechId"></alias>
+		<alias entity-alias="PNCMCMP" name="contactMechTypeId" field="contactMechTypeId"></alias>
+		<alias entity-alias="PNCMCMP" name="contactMechPurposeTypeId" field="contactMechPurposeTypeId"></alias>
+		<alias entity-alias="PNCMCMP" name="contactFromDate" field="contactFromDate"></alias>
+		<alias entity-alias="PNCMCMP" name="contactThruDate" field="contactThruDate"></alias>
+		<alias entity-alias="CM" name="email" field="infoString"></alias>
+		<view-link rel-entity-alias="CM" entity-alias="PNCMCMP">
+			<key-map field-name="contactMechId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="contactMechTypeId" operator="equals" value="EMAIL_ADDRESS" entity-alias="PNCMCMP" />
+					<condition-expr field-name="contactMechPurposeTypeId" operator="equals" value="PRIMARY_EMAIL" entity-alias="PNCMCMP" />
+					<condition-expr field-name="contactThruDate" operator="equals" value="" entity-alias="PNCMCMP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PartyNameAndMobilePhone" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PNCMCMP" entity-name="PartyNameAndContactMechAndContacMechPurpose"></member-entity>
+		<member-entity entity-alias="TN" entity-name="TelecomNumber"></member-entity>
+		<alias entity-alias="PNCMCMP" name="partyId" field="partyId"></alias>
+		<alias entity-alias="PNCMCMP" name="partyTypeId" field="partyTypeId"></alias>
+		<alias entity-alias="PNCMCMP" name="statusId" field="statusId"></alias>
+		<alias entity-alias="PNCMCMP" name="firstName" field="firstName"></alias>
+		<alias entity-alias="PNCMCMP" name="middleName" field="middleName"></alias>
+		<alias entity-alias="PNCMCMP" name="lastName" field="lastName"></alias>
+		<alias entity-alias="PNCMCMP" name="personalTitle" field="personalTitle"></alias>
+		<alias entity-alias="PNCMCMP" name="suffix" field="suffix"></alias>
+		<alias entity-alias="PNCMCMP" name="contactMechId" field="contactMechId"></alias>
+		<alias entity-alias="PNCMCMP" name="contactMechTypeId" field="contactMechTypeId"></alias>
+		<alias entity-alias="PNCMCMP" name="contactMechPurposeTypeId" field="contactMechPurposeTypeId"></alias>
+		<alias entity-alias="PNCMCMP" name="contactFromDate" field="contactFromDate"></alias>
+		<alias entity-alias="PNCMCMP" name="contactThruDate" field="contactThruDate"></alias>
+		<alias entity-alias="TN" name="phoneMobile" field="contactNumber"></alias>
+		<view-link rel-entity-alias="TN" entity-alias="PNCMCMP">
+			<key-map field-name="contactMechId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="contactMechTypeId" operator="equals" value="TELECOM_NUMBER" entity-alias="PNCMCMP" />
+					<condition-expr field-name="contactMechPurposeTypeId" operator="equals" value="PHONE_MOBILE" entity-alias="PNCMCMP" />
+					<condition-expr field-name="contactThruDate" operator="equals" value="" entity-alias="PNCMCMP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PartyNameAndWorkPhone" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PNCMCMP" entity-name="PartyNameAndContactMechAndContacMechPurpose"></member-entity>
+		<member-entity entity-alias="TN" entity-name="TelecomNumber"></member-entity>
+		<alias entity-alias="PNCMCMP" name="partyId" field="partyId"></alias>
+		<alias entity-alias="PNCMCMP" name="partyTypeId" field="partyTypeId"></alias>
+		<alias entity-alias="PNCMCMP" name="statusId" field="statusId"></alias>
+		<alias entity-alias="PNCMCMP" name="firstName" field="firstName"></alias>
+		<alias entity-alias="PNCMCMP" name="middleName" field="middleName"></alias>
+		<alias entity-alias="PNCMCMP" name="lastName" field="lastName"></alias>
+		<alias entity-alias="PNCMCMP" name="personalTitle" field="personalTitle"></alias>
+		<alias entity-alias="PNCMCMP" name="suffix" field="suffix"></alias>
+		<alias entity-alias="PNCMCMP" name="contactMechId" field="contactMechId"></alias>
+		<alias entity-alias="PNCMCMP" name="contactMechTypeId" field="contactMechTypeId"></alias>
+		<alias entity-alias="PNCMCMP" name="contactMechPurposeTypeId" field="contactMechPurposeTypeId"></alias>
+		<alias entity-alias="PNCMCMP" name="contactFromDate" field="contactFromDate"></alias>
+		<alias entity-alias="PNCMCMP" name="contactThruDate" field="contactThruDate"></alias>
+		<alias entity-alias="TN" name="phoneWork" field="contactNumber"></alias>
+		<view-link rel-entity-alias="TN" entity-alias="PNCMCMP">
+			<key-map field-name="contactMechId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="contactMechTypeId" operator="equals" value="TELECOM_NUMBER" entity-alias="PNCMCMP" />
+					<condition-expr field-name="contactMechPurposeTypeId" operator="equals" value="PHONE_WORK" entity-alias="PNCMCMP" />
+					<condition-expr field-name="contactThruDate" operator="equals" value="" entity-alias="PNCMCMP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PartyNameAndHomePhone" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PNCMCMP" entity-name="PartyNameAndContactMechAndContacMechPurpose"></member-entity>
+		<member-entity entity-alias="TN" entity-name="TelecomNumber"></member-entity>
+		<alias entity-alias="PNCMCMP" name="partyId" field="partyId"></alias>
+		<alias entity-alias="PNCMCMP" name="partyTypeId" field="partyTypeId"></alias>
+		<alias entity-alias="PNCMCMP" name="statusId" field="statusId"></alias>
+		<alias entity-alias="PNCMCMP" name="firstName" field="firstName"></alias>
+		<alias entity-alias="PNCMCMP" name="middleName" field="middleName"></alias>
+		<alias entity-alias="PNCMCMP" name="lastName" field="lastName"></alias>
+		<alias entity-alias="PNCMCMP" name="personalTitle" field="personalTitle"></alias>
+		<alias entity-alias="PNCMCMP" name="suffix" field="suffix"></alias>
+		<alias entity-alias="PNCMCMP" name="contactMechId" field="contactMechId"></alias>
+		<alias entity-alias="PNCMCMP" name="contactMechTypeId" field="contactMechTypeId"></alias>
+		<alias entity-alias="PNCMCMP" name="contactMechPurposeTypeId" field="contactMechPurposeTypeId"></alias>
+		<alias entity-alias="PNCMCMP" name="contactFromDate" field="contactFromDate"></alias>
+		<alias entity-alias="PNCMCMP" name="contactThruDate" field="contactThruDate"></alias>
+		<alias entity-alias="TN" name="phoneHome" field="contactNumber"></alias>
+		<view-link rel-entity-alias="TN" entity-alias="PNCMCMP">
+			<key-map field-name="contactMechId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="contactMechTypeId" operator="equals" value="TELECOM_NUMBER" entity-alias="PNCMCMP" />
+					<condition-expr field-name="contactMechPurposeTypeId" operator="equals" value="PHONE_HOME" entity-alias="PNCMCMP" />
+					<condition-expr field-name="contactThruDate" operator="equals" value="" entity-alias="PNCMCMP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PartyNameAndPrimaryPhone" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PNCMCMP" entity-name="PartyNameAndContactMechAndContacMechPurpose"></member-entity>
+		<member-entity entity-alias="TN" entity-name="TelecomNumber"></member-entity>
+		<alias entity-alias="PNCMCMP" name="partyId" field="partyId"></alias>
+		<alias entity-alias="PNCMCMP" name="partyTypeId" field="partyTypeId"></alias>
+		<alias entity-alias="PNCMCMP" name="statusId" field="statusId"></alias>
+		<alias entity-alias="PNCMCMP" name="firstName" field="firstName"></alias>
+		<alias entity-alias="PNCMCMP" name="middleName" field="middleName"></alias>
+		<alias entity-alias="PNCMCMP" name="lastName" field="lastName"></alias>
+		<alias entity-alias="PNCMCMP" name="personalTitle" field="personalTitle"></alias>
+		<alias entity-alias="PNCMCMP" name="suffix" field="suffix"></alias>
+		<alias entity-alias="PNCMCMP" name="contactMechId" field="contactMechId"></alias>
+		<alias entity-alias="PNCMCMP" name="contactMechTypeId" field="contactMechTypeId"></alias>
+		<alias entity-alias="PNCMCMP" name="contactMechPurposeTypeId" field="contactMechPurposeTypeId"></alias>
+		<alias entity-alias="PNCMCMP" name="contactFromDate" field="contactFromDate"></alias>
+		<alias entity-alias="PNCMCMP" name="contactThruDate" field="contactThruDate"></alias>
+		<alias entity-alias="TN" name="primaryPhone" field="contactNumber"></alias>
+		<view-link rel-entity-alias="TN" entity-alias="PNCMCMP">
+			<key-map field-name="contactMechId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="contactMechTypeId" operator="equals" value="TELECOM_NUMBER" entity-alias="PNCMCMP" />
+					<condition-expr field-name="contactMechPurposeTypeId" operator="equals" value="PRIMARY_PHONE" entity-alias="PNCMCMP" />
+					<condition-expr field-name="contactThruDate" operator="equals" value="" entity-alias="PNCMCMP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PartyNameAndBillingAddress" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PNCMCMP" entity-name="PartyNameAndContactMechAndContacMechPurpose"></member-entity>
+		<member-entity entity-alias="PA" entity-name="PostalAddress"></member-entity>
+		<alias entity-alias="PNCMCMP" name="partyId" field="partyId"></alias>
+		<alias entity-alias="PNCMCMP" name="partyTypeId" field="partyTypeId"></alias>
+		<alias entity-alias="PNCMCMP" name="statusId" field="statusId"></alias>
+		<alias entity-alias="PNCMCMP" name="firstName" field="firstName"></alias>
+		<alias entity-alias="PNCMCMP" name="middleName" field="middleName"></alias>
+		<alias entity-alias="PNCMCMP" name="lastName" field="lastName"></alias>
+		<alias entity-alias="PNCMCMP" name="personalTitle" field="personalTitle"></alias>
+		<alias entity-alias="PNCMCMP" name="suffix" field="suffix"></alias>
+		<alias entity-alias="PNCMCMP" name="contactMechId" field="contactMechId"></alias>
+		<alias entity-alias="PNCMCMP" name="contactMechTypeId" field="contactMechTypeId"></alias>
+		<alias entity-alias="PNCMCMP" name="contactMechPurposeTypeId" field="contactMechPurposeTypeId"></alias>
+		<alias entity-alias="PNCMCMP" name="contactFromDate" field="contactFromDate"></alias>
+		<alias entity-alias="PNCMCMP" name="contactThruDate" field="contactThruDate"></alias>
+		<alias entity-alias="PA" name="addressBilling1" field="address1"></alias>
+		<alias entity-alias="PA" name="addressBilling2" field="address2"></alias>
+		<alias entity-alias="PA" name="cityBilling" field="city"></alias>
+		<view-link rel-entity-alias="PA" entity-alias="PNCMCMP">
+			<key-map field-name="contactMechId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="contactMechTypeId" operator="equals" value="POSTAL_ADDRESS" entity-alias="PNCMCMP" />
+					<condition-expr field-name="contactMechPurposeTypeId" operator="equals" value="BILLING_LOCATION" entity-alias="PNCMCMP" />
+					<condition-expr field-name="contactThruDate" operator="equals" value="" entity-alias="PNCMCMP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PartyNameAndShippingAddress" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PNCMCMP" entity-name="PartyNameAndContactMechAndContacMechPurpose"></member-entity>
+		<member-entity entity-alias="PA" entity-name="PostalAddress"></member-entity>
+		<alias entity-alias="PNCMCMP" name="partyId" field="partyId"></alias>
+		<alias entity-alias="PNCMCMP" name="partyTypeId" field="partyTypeId"></alias>
+		<alias entity-alias="PNCMCMP" name="statusId" field="statusId"></alias>
+		<alias entity-alias="PNCMCMP" name="firstName" field="firstName"></alias>
+		<alias entity-alias="PNCMCMP" name="middleName" field="middleName"></alias>
+		<alias entity-alias="PNCMCMP" name="lastName" field="lastName"></alias>
+		<alias entity-alias="PNCMCMP" name="personalTitle" field="personalTitle"></alias>
+		<alias entity-alias="PNCMCMP" name="suffix" field="suffix"></alias>
+		<alias entity-alias="PNCMCMP" name="contactMechId" field="contactMechId"></alias>
+		<alias entity-alias="PNCMCMP" name="contactMechTypeId" field="contactMechTypeId"></alias>
+		<alias entity-alias="PNCMCMP" name="contactMechPurposeTypeId" field="contactMechPurposeTypeId"></alias>
+		<alias entity-alias="PNCMCMP" name="contactFromDate" field="contactFromDate"></alias>
+		<alias entity-alias="PNCMCMP" name="contactThruDate" field="contactThruDate"></alias>
+		<alias entity-alias="PA" name="addressShipping1" field="address1"></alias>
+		<alias entity-alias="PA" name="addressShipping2" field="address2"></alias>
+		<alias entity-alias="PA" name="cityShipping" field="city"></alias>
+		<view-link rel-entity-alias="PA" entity-alias="PNCMCMP">
+			<key-map field-name="contactMechId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="contactMechTypeId" operator="equals" value="POSTAL_ADDRESS" entity-alias="PNCMCMP" />
+					<condition-expr field-name="contactMechPurposeTypeId" operator="equals" value="SHIPPING_LOCATION" entity-alias="PNCMCMP" />
+					<condition-expr field-name="contactThruDate" operator="equals" value="" entity-alias="PNCMCMP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PartyNameAndGeneralAddress" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PNCMCMP" entity-name="PartyNameAndContactMechAndContacMechPurpose"></member-entity>
+		<member-entity entity-alias="PA" entity-name="PostalAddress"></member-entity>
+		<alias entity-alias="PNCMCMP" name="partyId" field="partyId"></alias>
+		<alias entity-alias="PNCMCMP" name="partyTypeId" field="partyTypeId"></alias>
+		<alias entity-alias="PNCMCMP" name="statusId" field="statusId"></alias>
+		<alias entity-alias="PNCMCMP" name="firstName" field="firstName"></alias>
+		<alias entity-alias="PNCMCMP" name="middleName" field="middleName"></alias>
+		<alias entity-alias="PNCMCMP" name="lastName" field="lastName"></alias>
+		<alias entity-alias="PNCMCMP" name="personalTitle" field="personalTitle"></alias>
+		<alias entity-alias="PNCMCMP" name="suffix" field="suffix"></alias>
+		<alias entity-alias="PNCMCMP" name="contactMechId" field="contactMechId"></alias>
+		<alias entity-alias="PNCMCMP" name="contactMechTypeId" field="contactMechTypeId"></alias>
+		<alias entity-alias="PNCMCMP" name="contactMechPurposeTypeId" field="contactMechPurposeTypeId"></alias>
+		<alias entity-alias="PNCMCMP" name="contactFromDate" field="contactFromDate"></alias>
+		<alias entity-alias="PNCMCMP" name="contactThruDate" field="contactThruDate"></alias>
+		<alias entity-alias="PA" name="addressGeneral1" field="address1"></alias>
+		<alias entity-alias="PA" name="addressGeneral2" field="address2"></alias>
+		<alias entity-alias="PA" name="cityGeneral" field="city"></alias>
+		<view-link rel-entity-alias="PA" entity-alias="PNCMCMP">
+			<key-map field-name="contactMechId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="contactMechTypeId" operator="equals" value="POSTAL_ADDRESS" entity-alias="PNCMCMP" />
+					<condition-expr field-name="contactMechPurposeTypeId" operator="equals" value="GENERAL_LOCATION" entity-alias="PNCMCMP" />
+					<condition-expr field-name="contactThruDate" operator="equals" value="" entity-alias="PNCMCMP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="PartyNameAndPrimaryAddress" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PNCMCMP" entity-name="PartyNameAndContactMechAndContacMechPurpose"></member-entity>
+		<member-entity entity-alias="PA" entity-name="PostalAddress"></member-entity>
+		<alias entity-alias="PNCMCMP" name="partyId" field="partyId"></alias>
+		<alias entity-alias="PNCMCMP" name="partyTypeId" field="partyTypeId"></alias>
+		<alias entity-alias="PNCMCMP" name="statusId" field="statusId"></alias>
+		<alias entity-alias="PNCMCMP" name="firstName" field="firstName"></alias>
+		<alias entity-alias="PNCMCMP" name="middleName" field="middleName"></alias>
+		<alias entity-alias="PNCMCMP" name="lastName" field="lastName"></alias>
+		<alias entity-alias="PNCMCMP" name="personalTitle" field="personalTitle"></alias>
+		<alias entity-alias="PNCMCMP" name="suffix" field="suffix"></alias>
+		<alias entity-alias="PNCMCMP" name="contactMechId" field="contactMechId"></alias>
+		<alias entity-alias="PNCMCMP" name="contactMechTypeId" field="contactMechTypeId"></alias>
+		<alias entity-alias="PNCMCMP" name="contactMechPurposeTypeId" field="contactMechPurposeTypeId"></alias>
+		<alias entity-alias="PNCMCMP" name="contactFromDate" field="contactFromDate"></alias>
+		<alias entity-alias="PNCMCMP" name="contactThruDate" field="contactThruDate"></alias>
+		<alias entity-alias="PA" name="addressPrimary1" field="address1"></alias>
+		<alias entity-alias="PA" name="addressPrimary2" field="address2"></alias>
+		<alias entity-alias="PA" name="cityPrimary" field="city"></alias>
+		<view-link rel-entity-alias="PA" entity-alias="PNCMCMP">
+			<key-map field-name="contactMechId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="contactMechTypeId" operator="equals" value="POSTAL_ADDRESS" entity-alias="PNCMCMP" />
+					<condition-expr field-name="contactMechPurposeTypeId" operator="equals" value="PRIMARY_LOCATION" entity-alias="PNCMCMP" />
+					<condition-expr field-name="contactThruDate" operator="equals" value="" entity-alias="PNCMCMP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PartyNameAndBillingShippingAddressAndMobileAndEmail" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PAP" entity-name="PartyAndPerson"></member-entity>
+		<member-entity entity-alias="PNAMP" entity-name="PartyNameAndMobilePhone"></member-entity>
+		<member-entity entity-alias="PNAWP" entity-name="PartyNameAndWorkPhone"></member-entity>
+		<member-entity entity-alias="PNAHP" entity-name="PartyNameAndHomePhone"></member-entity>
+		<member-entity entity-alias="PNAE" entity-name="PartyNameAndEmail"></member-entity>
+		<member-entity entity-alias="PNABA" entity-name="PartyNameAndBillingAddress"></member-entity>
+		<member-entity entity-alias="PNASA" entity-name="PartyNameAndShippingAddress"></member-entity>
+		<alias entity-alias="PAP" name="partyId" field="partyId"></alias>
+		<alias entity-alias="PAP" name="firstName" field="firstName"></alias>
+		<alias entity-alias="PAP" name="middleName" field="middleName"></alias>
+		<alias entity-alias="PAP" name="lastName" field="lastName"></alias>
+		<alias entity-alias="PAP" name="personalTitle" field="personalTitle"></alias>
+		<alias entity-alias="PAP" name="suffix" field="suffix"></alias>
+		<alias entity-alias="PAP" name="partyTypeId" field="partyTypeId"></alias>
+		<alias entity-alias="PAP" name="statusId" field="statusId"></alias>
+		<alias entity-alias="PNAMP" name="phoneMobile" field="phoneMobile"></alias>
+		<alias entity-alias="PNAWP" name="phoneWork" field="phoneWork"></alias>
+		<alias entity-alias="PNAHP" name="phoneHome" field="phoneHome"></alias>
+		<alias entity-alias="PNAE" name="email" field="email"></alias>
+		<alias entity-alias="PNABA" name="addressBilling1" field="addressBilling1"></alias>
+		<alias entity-alias="PNABA" name="addressBilling2" field="addressBilling2"></alias>
+		<alias entity-alias="PNABA" name="cityBilling" field="cityBilling"></alias>
+		<alias entity-alias="PNASA" name="addressShipping1" field="addressShipping1"></alias>
+		<alias entity-alias="PNASA" name="addressShipping2" field="addressShipping2"></alias>
+		<alias entity-alias="PNASA" name="cityShipping" field="cityShipping"></alias>
+		<view-link rel-entity-alias="PNAMP" entity-alias="PAP" rel-optional="true">
+			<key-map field-name="partyId" />
+		</view-link>
+		<view-link rel-entity-alias="PNAWP" entity-alias="PAP" rel-optional="true">
+			<key-map field-name="partyId" />
+		</view-link>
+		<view-link rel-entity-alias="PNAHP" entity-alias="PAP" rel-optional="true">
+			<key-map field-name="partyId" />
+		</view-link>
+		<view-link rel-entity-alias="PNAE" entity-alias="PAP" rel-optional="true">
+			<key-map field-name="partyId" />
+		</view-link>
+		<view-link rel-entity-alias="PNABA" entity-alias="PAP" rel-optional="true">
+			<key-map field-name="partyId" />
+		</view-link>
+		<view-link rel-entity-alias="PNASA" entity-alias="PAP" rel-optional="true">
+			<key-map field-name="partyId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="PartyNameAndPrimaryAddressAndMobileAndEmail" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PAP" entity-name="PartyAndPerson"></member-entity>
+		<member-entity entity-alias="PNAMP" entity-name="PartyNameAndMobilePhone"></member-entity>
+		<member-entity entity-alias="PNAWP" entity-name="PartyNameAndWorkPhone"></member-entity>
+		<member-entity entity-alias="PNAHP" entity-name="PartyNameAndHomePhone"></member-entity>
+		<member-entity entity-alias="PNAE" entity-name="PartyNameAndEmail"></member-entity>
+		<member-entity entity-alias="PNAPA" entity-name="PartyNameAndPrimaryAddress"></member-entity>
+		<alias entity-alias="PAP" name="partyId" field="partyId"></alias>
+		<alias entity-alias="PAP" name="firstName" field="firstName"></alias>
+		<alias entity-alias="PAP" name="middleName" field="middleName"></alias>
+		<alias entity-alias="PAP" name="lastName" field="lastName"></alias>
+		<alias entity-alias="PAP" name="personalTitle" field="personalTitle"></alias>
+		<alias entity-alias="PAP" name="suffix" field="suffix"></alias>
+		<alias entity-alias="PAP" name="partyTypeId" field="partyTypeId"></alias>
+		<alias entity-alias="PAP" name="statusId" field="statusId"></alias>
+		<alias entity-alias="PNAMP" name="phoneMobile" field="phoneMobile"></alias>
+		<alias entity-alias="PNAWP" name="phoneWork" field="phoneWork"></alias>
+		<alias entity-alias="PNAHP" name="phoneHome" field="phoneHome"></alias>
+		<alias entity-alias="PNAE" name="email" field="email"></alias>
+		<alias entity-alias="PNAPA" name="addressPrimary1" field="addressPrimary1"></alias>
+		<alias entity-alias="PNAPA" name="addressPrimary2" field="addressPrimary2"></alias>
+		<alias entity-alias="PNAPA" name="cityPrimary" field="cityPrimary"></alias>
+		<view-link rel-entity-alias="PNAMP" entity-alias="PAP" rel-optional="true">
+			<key-map field-name="partyId" />
+		</view-link>
+		<view-link rel-entity-alias="PNAWP" entity-alias="PAP" rel-optional="true">
+			<key-map field-name="partyId" />
+		</view-link>
+		<view-link rel-entity-alias="PNAHP" entity-alias="PAP" rel-optional="true">
+			<key-map field-name="partyId" />
+		</view-link>
+		<view-link rel-entity-alias="PNAE" entity-alias="PAP" rel-optional="true">
+			<key-map field-name="partyId" />
+		</view-link>
+		<view-link rel-entity-alias="PNAPA" entity-alias="PAP" rel-optional="true">
+			<key-map field-name="partyId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="PartyNameAndPrimaryAddressAndMobileAndEmailAndUserLogin" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="UL" entity-name="UserLogin"></member-entity>
+		<member-entity entity-alias="PNPAME" entity-name="PartyNameAndPrimaryAddressAndMobileAndEmail"></member-entity>
+		<alias-all entity-alias="PNPAME"></alias-all>
+		<alias-all entity-alias="UL"></alias-all>
+		<view-link rel-entity-alias="PNPAME" entity-alias="UL" rel-optional="true">
+			<key-map field-name="partyId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PartyNameAndBillingShippingAddressAndMobileAndEmailAndRole" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PNBSAME" entity-name="PartyNameAndBillingShippingAddressAndMobileAndEmail"></member-entity>
+		<member-entity entity-alias="PR" entity-name="PartyRole"></member-entity>
+		<alias entity-alias="PNBSAME" name="partyId" field="partyId"></alias>
+		<alias entity-alias="PNBSAME" name="partyTypeId" field="partyTypeId"></alias>
+		<alias entity-alias="PNBSAME" name="statusId" field="statusId"></alias>
+		<alias entity-alias="PNBSAME" name="firstName" field="firstName"></alias>
+		<alias entity-alias="PNBSAME" name="middleName" field="middleName"></alias>
+		<alias entity-alias="PNBSAME" name="lastName" field="lastName"></alias>
+		<alias entity-alias="PNBSAME" name="personalTitle" field="personalTitle"></alias>
+		<alias entity-alias="PNBSAME" name="suffix" field="suffix"></alias>
+		<alias entity-alias="PNBSAME" name="phoneMobile" field="phoneMobile"></alias>
+		<alias entity-alias="PNBSAME" name="phoneWork" field="phoneWork"></alias>
+		<alias entity-alias="PNBSAME" name="phoneHome" field="phoneHome"></alias>
+		<alias entity-alias="PNBSAME" name="email" field="email"></alias>
+		<alias entity-alias="PNBSAME" name="addressBilling1" field="addressBilling1"></alias>
+		<alias entity-alias="PNBSAME" name="addressBilling2" field="addressBilling2"></alias>
+		<alias entity-alias="PNBSAME" name="cityBilling" field="cityBilling"></alias>
+		<alias entity-alias="PNBSAME" name="addressShipping1" field="addressShipping1"></alias>
+		<alias entity-alias="PNBSAME" name="addressShipping2" field="addressShipping2"></alias>
+		<alias entity-alias="PNBSAME" name="cityShipping" field="cityShipping"></alias>
+		<alias entity-alias="PR" name="roleTypeId" field="roleTypeId"></alias>
+		<view-link rel-entity-alias="PR" entity-alias="PNBSAME">
+			<key-map field-name="partyId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="roleTypeId" operator="not-equals" value="_NA_" entity-alias="PR" />
+					<condition-expr field-name="partyTypeId" operator="equals" value="PERSON" entity-alias="PNBSAME" />
+					<condition-expr field-name="statusId" operator="equals" value="PARTY_ENABLED" entity-alias="PNBSAME" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="CustomerToSearch" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PNBSAMER" entity-name="PartyNameAndBillingShippingAddressAndMobileAndEmailAndRole"></member-entity>
+		<alias-all entity-alias="PNBSAMER">
+			<exclude field="fistName" />
+			<exclude field="middleName" />
+			<exclude field="lastName" />
+		</alias-all>
+		<alias name="partyName">
+			<complex-alias operator="||' '||">
+				<complex-alias-field entity-alias="PNBSAMER" field="lastName" default-value="''" />
+				<complex-alias-field entity-alias="PNBSAMER" field="middleName" default-value="''" />
+				<complex-alias-field entity-alias="PNBSAMER" field="firstName" default-value="''" />
+			</complex-alias>
+		</alias>
+		<alias name="partyAddress">
+			<complex-alias operator="||">
+				<complex-alias-field entity-alias="PNBSAMER" field="addressBilling1" default-value="''" />
+				<complex-alias-field entity-alias="PNBSAMER" field="cityBilling" default-value="''" />
+			</complex-alias>
+		</alias>
+		<alias name="partyPhone" entity-alias="PNBSAMER" field="phoneMobile"></alias>
+		<alias name="keywordSearch">
+			<complex-alias operator="||">
+				<complex-alias-field entity-alias="PNBSAMER" field="partyId" />
+				<complex-alias-field entity-alias="PNBSAMER" field="lastName" default-value="''" />
+				<complex-alias-field entity-alias="PNBSAMER" field="middleName" default-value="''" />
+				<complex-alias-field entity-alias="PNBSAMER" field="firstName" default-value="''" />
+				<complex-alias-field entity-alias="PNBSAMER" field="addressBilling1" default-value="''" />
+				<complex-alias-field entity-alias="PNBSAMER" field="cityBilling" default-value="''" />
+				<complex-alias-field entity-alias="PNBSAMER" field="phoneMobile" default-value="''" />
+			</complex-alias>
+		</alias>
+		<entity-condition>
+			<condition-list combine="and">
+				<condition-expr field-name="partyTypeId" entity-alias="PNBSAMER" operator="equals" value="PERSON" />
+				<condition-expr field-name="roleTypeId" entity-alias="PNBSAMER" operator="equals" value="CUSTOMER" />
+				<condition-expr field-name="statusId" entity-alias="PNBSAMER" operator="equals" value="PARTY_ENABLED" />
+			</condition-list>
+		</entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="PartyNameAndPrimaryAddressAndMobileAndEmailAndUserLoginAndRole" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PNPAMERU" entity-name="PartyNameAndPrimaryAddressAndMobileAndEmailAndUserLogin"></member-entity>
+		<member-entity entity-alias="PR" entity-name="PartyRole"></member-entity>
+		<alias-all entity-alias="PNPAMERU"></alias-all>
+		<alias entity-alias="PR" name="roleTypeId" field="roleTypeId"></alias>
+		<view-link rel-entity-alias="PR" entity-alias="PNPAMERU">
+			<key-map field-name="partyId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="roleTypeId" operator="not-equals" value="_NA_" entity-alias="PR" />
+					<condition-expr field-name="partyTypeId" operator="equals" value="PERSON" entity-alias="PNPAMERU" />
+					<condition-expr field-name="statusId" operator="equals" value="PARTY_ENABLED" entity-alias="PNPAMERU" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="PartyNameAndPrimaryAddressAndMobileAndEmailAndUserLoginAndRoleAndFacility" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PNPAMEUR" entity-name="PartyNameAndPrimaryAddressAndMobileAndEmailAndUserLoginAndRole"></member-entity>
+		<member-entity entity-alias="FPAR" entity-name="FacilityPartyAndRole"></member-entity>
+		<alias-all entity-alias="PNPAMEUR"></alias-all>
+		<alias-all entity-alias="FPAR"></alias-all>
+		<view-link rel-entity-alias="FPAR" entity-alias="PNPAMEUR" rel-optional="true">
+			<key-map field-name="partyId" />
+		</view-link>
+	</view-entity>
+
+	<!-- entity for show all information of supplier product -->
+	<view-entity entity-name="PartyAndSupplierRelationship" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PNBSAMR" entity-name="PartyNameAndBillingShippingAddressAndMobileAndEmailAndRole"></member-entity>
+		<member-entity entity-alias="PRFO" entity-name="PartyRelationshipFromPartyOlbius"></member-entity>
+		<alias-all entity-alias="PNBSAMR"></alias-all>
+		<alias name="partyGroupId" field="partyIdFrom" entity-alias="PRFO"></alias>
+		<alias name="partyRelationshipTypeId" field="partyRelationshipTypeId" entity-alias="PRFO"></alias>
+		<alias name="groupName" field="groupName" entity-alias="PRFO"></alias>
+		<view-link rel-entity-alias="PRFO" entity-alias="PNBSAMR">
+			<key-map field-name="partyId" rel-field-name="partyIdTo" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="partyRelationshipTypeId" operator="equals" value="EMPLOYMENT" entity-alias="PRFO" />
+					<condition-expr field-name="roleTypeId" operator="equals" value="SUPPLIER_REP" entity-alias="PNBSAMR" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PartyGroupAndPrimaryAddressAndEmailAndMobile" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PAG" entity-name="PartyAndGroup"></member-entity>
+		<member-entity entity-alias="PNAWP" entity-name="PartyNameAndPrimaryPhone"></member-entity>
+		<member-entity entity-alias="PNAE" entity-name="PartyNameAndEmail"></member-entity>
+		<member-entity entity-alias="PNABA" entity-name="PartyNameAndPrimaryAddress"></member-entity>
+		<alias entity-alias="PAG" name="partyId" field="partyId"></alias>
+		<alias entity-alias="PAG" name="partyTypeId" field="partyTypeId"></alias>
+		<alias entity-alias="PAG" name="statusId" field="statusId"></alias>
+		<alias entity-alias="PNAWP" name="primaryPhone" field="primaryPhone"></alias>
+		<alias entity-alias="PNAE" name="email" field="email"></alias>
+		<alias entity-alias="PNABA" name="addressPrimary1" field="addressPrimary1"></alias>
+		<alias entity-alias="PNABA" name="addressPrimary2" field="addressPrimary2"></alias>
+		<alias entity-alias="PNABA" name="cityPrimary" field="cityPrimary"></alias>
+		<view-link rel-entity-alias="PNAWP" entity-alias="PAG" rel-optional="true">
+			<key-map field-name="partyId" />
+		</view-link>
+		<view-link rel-entity-alias="PNAE" entity-alias="PAG" rel-optional="true">
+			<key-map field-name="partyId" />
+		</view-link>
+		<view-link rel-entity-alias="PNABA" entity-alias="PAG" rel-optional="true">
+			<key-map field-name="partyId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PartyGroupAndPrimaryAddressAndEmailAndMobileAndRole" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PGPAEM" entity-name="PartyGroupAndPrimaryAddressAndEmailAndMobile"></member-entity>
+		<member-entity entity-alias="PR" entity-name="PartyRole"></member-entity>
+		<alias entity-alias="PGPAEM" name="partyId" field="partyId"></alias>
+		<alias entity-alias="PGPAEM" name="partyTypeId" field="partyTypeId"></alias>
+		<alias entity-alias="PGPAEM" name="statusId" field="statusId"></alias>
+		<alias entity-alias="PGPAEM" name="primaryPhone" field="primaryPhone"></alias>
+		<alias entity-alias="PGPAEM" name="email" field="email"></alias>
+		<alias entity-alias="PGPAEM" name="addressPrimary1" field="addressPrimary1"></alias>
+		<alias entity-alias="PGPAEM" name="addressPrimary2" field="addressPrimary2"></alias>
+		<alias entity-alias="PGPAEM" name="cityPrimary" field="cityPrimary"></alias>
+		<alias entity-alias="PR" name="roleTypeId" field="roleTypeId"></alias>
+		<view-link rel-entity-alias="PR" entity-alias="PGPAEM">
+			<key-map field-name="partyId" />
+			<entity-condition>
+				<condition-list>
+					<condition-expr field-name="roleTypeId" operator="not-equals" value="_NA_" entity-alias="PR" />
+					<condition-expr field-name="partyTypeId" operator="equals" value="PARTY_GROUP" entity-alias="PGPAEM" />
+					<condition-expr field-name="statusId" operator="equals" value="PARTY_ENABLED" entity-alias="PGPAEM" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+
+	<view-entity entity-name="PartyAndSupplierRelationshipInformation" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PASR" entity-name="PartyAndSupplierRelationship"></member-entity>
+		<member-entity entity-alias="PGPAEM" entity-name="PartyGroupAndPrimaryAddressAndEmailAndMobileAndRole"></member-entity>
+		<alias-all entity-alias="PASR"></alias-all>
+		<alias name="companyPhone" field="primaryPhone" entity-alias="PGPAEM"></alias>
+		<alias name="companyEmail" field="email" entity-alias="PGPAEM"></alias>
+		<alias name="companyAddress" field="addressPrimary1" entity-alias="PGPAEM"></alias>
+		<alias name="companyCity" field="cityPrimary" entity-alias="PGPAEM"></alias>
+		<view-link rel-entity-alias="PGPAEM" entity-alias="PASR">
+			<key-map field-name="partyGroupId" rel-field-name="partyId" />
+			<entity-condition>
+				<condition-expr field-name="roleTypeId" operator="equals" value="SUPPLIER" entity-alias="PGPAEM" />
+			</entity-condition>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="SupplierToSearch" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PSRI" entity-name="PartyAndSupplierRelationshipInformation"></member-entity>
+		<alias-all entity-alias="PSRI">
+			<exclude field="groupName" />
+			<exclude field="companyAddress" />
+			<exclude field="companyPhone" />
+		</alias-all>
+		<alias name="partyName" entity-alias="PSRI" field="groupName"></alias>
+		<alias name="partyAddress" entity-alias="PSRI" field="companyAddress"></alias>
+		<alias name="partyPhone" entity-alias="PSRI" field="companyPhone"></alias>
+		<alias name="keywordSearch">
+			<complex-alias operator="||">
+				<complex-alias-field field="partyGroupId" entity-alias="PSRI" />
+				<complex-alias-field field="groupName" entity-alias="PSRI" default-value="''" />
+				<complex-alias-field field="companyAddress" entity-alias="PSRI" default-value="''" />
+				<complex-alias-field field="companyPhone" entity-alias="PSRI" default-value="''" />
+			</complex-alias>
+		</alias>
+	</view-entity>
+
+	<view-entity entity-name="ProductAndConfigPacking" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PR" entity-name="Product"></member-entity>
+		<member-entity entity-alias="CP" entity-name="ConfigPacking"></member-entity>
+		<alias-all entity-alias="PR"></alias-all>
+		<alias name="quantityConvert" entity-alias="CP"></alias>
+		<view-link rel-entity-alias="CP" entity-alias="PR" rel-optional="true">
+			<key-map field-name="productId" />
+			<key-map field-name="purchaseUomId" rel-field-name="uomFromId" />
+			<key-map field-name="quantityUomId" rel-field-name="uomToId" />
+			<entity-condition>
+				<condition-expr field-name="thruDate" value="" operator="equals" entity-alias="CP" />
+			</entity-condition>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ProductSummaryAndProductConfigPacking" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PS" entity-name="ProductSummary"></member-entity>
+		<member-entity entity-alias="PCP" entity-name="ProductAndConfigPacking"></member-entity>
+		<alias-all entity-alias="PS"></alias-all>
+		<alias name="categoryId" entity-alias="PCP" field="primaryProductCategoryId"></alias>
+		<alias name="quantityConvert" entity-alias="PCP"></alias>
+		<view-link rel-entity-alias="PCP" entity-alias="PS">
+			<key-map field-name="productId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="ProductStoreFacilityAndFacility" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PSF" entity-name="ProductStoreFacility"></member-entity>
+		<member-entity entity-alias="FAC" entity-name="Facility"></member-entity>
+		<alias-all entity-alias="PSF"></alias-all>
+		<alias name="facilityName" field="facilityName" entity-alias="FAC"></alias>
+		<alias name="facilityTypeId" field="facilityTypeId" entity-alias="FAC"></alias>
+		<view-link rel-entity-alias="FAC" entity-alias="PSF">
+			<key-map field-name="facilityId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="ProductStoreFacilityAndStore" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PSF" entity-name="ProductStoreFacility"></member-entity>
+		<member-entity entity-alias="PST" entity-name="ProductStore"></member-entity>
+		<alias-all entity-alias="PSF"></alias-all>
+		<alias name="defaultSalesChannelEnumId" field="defaultSalesChannelEnumId" entity-alias="PST"></alias>
+		<alias name="salesMethodChannelEnumId" field="salesMethodChannelEnumId" entity-alias="PST"></alias>
+		<alias name="storeName" field="storeName" entity-alias="PST"></alias>
+		<alias name="payToPartyId" field="payToPartyId" entity-alias="PST"></alias>
+		<view-link rel-entity-alias="PST" entity-alias="PSF">
+			<key-map field-name="productStoreId" />
+		</view-link>
+	</view-entity>
+
+	<!-- view entity for history login POS -->
+	<view-entity entity-name="VisitAndFacilityAndParty" package-name="com.olbius.party">
+		<member-entity entity-alias="VS" entity-name="Visit"></member-entity>
+		<member-entity entity-alias="PNV" entity-name="PartyNameView"></member-entity>
+		<member-entity entity-alias="FP" entity-name="FacilityParty"></member-entity>
+		<alias name="userLoginId" field="userLoginId" entity-alias="VS"></alias>
+		<alias name="webappName" field="webappName" entity-alias="VS"></alias>
+		<alias name="fromDate" field="fromDate" entity-alias="VS"></alias>
+		<alias name="thruDate" field="thruDate" entity-alias="VS"></alias>
+		<alias name="partyId" field="partyId" entity-alias="VS"></alias>
+		<alias name="fullName">
+			<complex-alias operator="||' '||">
+				<complex-alias-field field="lastName" entity-alias="PNV" default-value="''" />
+				<complex-alias-field field="middleName" entity-alias="PNV" default-value="''" />
+				<complex-alias-field field="firstName" entity-alias="PNV" default-value="''" />
+			</complex-alias>
+		</alias>
+		<alias name="facilityId" field="facilityId" entity-alias="FP"></alias>
+		<view-link rel-entity-alias="PNV" entity-alias="VS">
+			<key-map field-name="partyId" />
+			<entity-condition>
+				<condition-list combine="and">
+					<condition-expr field-name="webappName" operator="equals" value="basepos" entity-alias="VS" />
+					<condition-expr field-name="partyId" operator="not-equals" value="" entity-alias="VS" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="FP" entity-alias="VS">
+			<key-map field-name="partyId" />
+			<entity-condition>
+				<condition-list combine="and">
+					<condition-expr field-name="partyId" operator="not-equals" value="" entity-alias="VS" />
+					<condition-expr field-name="thruDate" operator="equals" value="" entity-alias="FP" />
+					<condition-expr field-name="roleTypeId" operator="equals" value="POS_EMPLOYEE" entity-alias="FP" />
+				</condition-list>
+			</entity-condition>
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="PartyAndUserPOS" package-name="com.olbius.party">
+		<member-entity entity-alias="PTR" entity-name="PartyRole"></member-entity>
+		<member-entity entity-alias="PTY" entity-name="PartyAndPerson"></member-entity>
+		<member-entity entity-alias="ULG" entity-name="UserLogin"></member-entity>
+		<alias name="partyId" entity-alias="PTY"></alias>
+		<alias name="partyCode" entity-alias="PTY"></alias>
+		<alias name="partyName">
+			<complex-alias operator="||' '||">
+				<complex-alias-field field="lastName" entity-alias="PTY" default-value="''" />
+				<complex-alias-field field="middleName" entity-alias="PTY" default-value="''" />
+				<complex-alias-field field="firstName" entity-alias="PTY" default-value="''" />
+			</complex-alias>
+		</alias>
+		<alias name="userLoginId" entity-alias="ULG"></alias>
+		<view-link rel-entity-alias="PTY" entity-alias="PTR">
+			<key-map field-name="partyId" />
+			<entity-condition>
+				<condition-expr field-name="roleTypeId" operator="equals" value="POS_EMPLOYEE" entity-alias="PTR" />
+			</entity-condition>
+		</view-link>
+		<view-link rel-entity-alias="ULG" entity-alias="PTR">
+			<key-map field-name="partyId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="LoginHistoryPOS" package-name="com.olbius.party">
+		<member-entity entity-alias="ULG" entity-name="PartyAndUserPOS"></member-entity>
+		<member-entity entity-alias="VIS" entity-name="Visit"></member-entity>
+		<member-entity entity-alias="TER" entity-name="PosTerminal"></member-entity>
+		<alias-all entity-alias="ULG"></alias-all>
+		<alias-all entity-alias="VIS">
+			<exclude field="partyId" />
+			<exclude field="userLoginId" />
+		</alias-all>
+		<alias-all entity-alias="TER"></alias-all>
+		<view-link entity-alias="ULG" rel-entity-alias="VIS">
+			<key-map field-name="partyId" />
+			<key-map field-name="userLoginId" />
+		</view-link>
+		<view-link entity-alias="VIS" rel-entity-alias="TER">
+			<key-map field-name="posTerminalId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="OrderHeaderAndRoleTypeAndReturn" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="OHART" entity-name="OrderHeaderAndRoleType"></member-entity>
+		<member-entity entity-alias="RHI" entity-name="ReturnHeaderAndItem"></member-entity>
+		<alias-all entity-alias="OHART"></alias-all>
+		<alias name="returnId" field="returnId" entity-alias="RHI"></alias>
+		<alias name="returnDate" field="returnDate" entity-alias="RHI"></alias>
+		<alias name="returnHeaderTypeId" field="returnHeaderTypeId" entity-alias="RHI"></alias>
+		<view-link rel-entity-alias="RHI" entity-alias="OHART" rel-optional="true">
+			<key-map field-name="orderId" />
+		</view-link>
+	</view-entity>
+
+	<view-entity entity-name="OrderHistoryLog" package-name="com.olbius.basepos">
+		<member-entity entity-alias="PTL" entity-name="PosTerminalLog"></member-entity>
+		<member-entity entity-alias="OHART" entity-name="OrderHeaderAndRoleType"></member-entity>
+		<alias-all entity-alias="OHART"></alias-all>
+		<alias name="statusIdPTL" field="statusId" entity-alias="PTL"></alias>
+		<alias name="posTerminalLogId" field="posTerminalLogId" entity-alias="PTL"></alias>
+		<view-link rel-entity-alias="OHART" entity-alias="PTL" rel-optional="true">
+			<key-map field-name="orderId" />
+		</view-link>
+		<entity-condition>
+			<condition-list combine="or">
+				<condition-expr field-name="statusId" entity-alias="PTL" operator="equals" value="POSTX_SOLD" />
+				<condition-expr field-name="statusId" entity-alias="PTL" operator="equals" value="POSTX_RETURNED" />
+			</condition-list>
+		</entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="ReturnHistoryLog" package-name="com.olbius.basepos">
+		<member-entity entity-alias="RHI" entity-name="ReturnHeaderAndItem"></member-entity>
+		<member-entity entity-alias="PTL" entity-name="PosTerminalLog"></member-entity>
+		<alias name="statusIdPTL" field="statusId" entity-alias="PTL"></alias>
+		<alias name="posTerminalLogId" field="posTerminalLogId" entity-alias="PTL"></alias>
+		<alias name="returnId" field="returnId" entity-alias="RHI"></alias>
+		<alias name="createdBy" field="createdBy" entity-alias="RHI"></alias>
+		<alias name="returnDate" field="returnDate" entity-alias="RHI"></alias>
+		<alias name="fromOrderId" field="orderId" entity-alias="RHI"></alias>
+		<alias name="returnGrandTotal" field="grandTotal" entity-alias="RHI"></alias>
+		<alias name="returnHeaderTypeId" field="returnHeaderTypeId" entity-alias="RHI"></alias>
+		<view-link entity-alias="PTL" rel-entity-alias="RHI" rel-optional="true">
+			<key-map field-name="returnId" />
+		</view-link>
+		<entity-condition>
+			<condition-list combine="or">
+				<condition-expr field-name="statusId" entity-alias="PTL" operator="equals" value="POSTX_SOLD" />
+				<condition-expr field-name="statusId" entity-alias="PTL" operator="equals" value="POSTX_RETURNED" />
+			</condition-list>
+		</entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="OrderAndReturnHistoryPOS" package-name="com.olbius.basepos">
+		<member-entity entity-alias="OHL" entity-name="OrderHistoryLog"></member-entity>
+		<member-entity entity-alias="RHL" entity-name="ReturnHistoryLog"></member-entity>
+		<alias-all entity-alias="OHL"></alias-all>
+		<alias name="statusIdPTL" entity-alias="RHL"></alias>
+		<alias name="posTerminalLogId" entity-alias="RHL"></alias>
+		<alias name="returnId" entity-alias="RHL"></alias>
+		<alias name="returnDate" entity-alias="RHL"></alias>
+		<alias name="fromOrderId" entity-alias="RHL"></alias>
+		<alias name="returnHeaderTypeId" entity-alias="RHL"></alias>
+		<alias name="returnGrandTotal" entity-alias="RHL"></alias>
+		<alias name="returnCreatedBy" field="createdBy" entity-alias="RHL"></alias>
+		<view-link rel-entity-alias="OHL" entity-alias="RHL">
+			<key-map field-name="posTerminalLogId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="OrderHistoryPOS" package-name="com.olbius.basepos">
+		<member-entity entity-alias="RHI" entity-name="ReturnHeaderAndItem"></member-entity>
+		<member-entity entity-alias="PTL" entity-name="PosTerminalLog"></member-entity>
+		<member-entity entity-alias="OHART" entity-name="OrderHeaderAndRoleType"></member-entity>
+		<alias-all entity-alias="OHART"></alias-all>
+		<alias name="statusIdPTL" field="statusId" entity-alias="PTL"></alias>
+		<alias name="posTerminalLogId" field="posTerminalLogId" entity-alias="PTL"></alias>
+		<alias name="returnId" field="returnId" entity-alias="RHI"></alias>
+		<alias name="returnDate" field="returnDate" entity-alias="RHI"></alias>
+		<alias name="fromOrderId" field="orderId" entity-alias="RHI"></alias>
+		<alias name="returnHeaderTypeId" field="returnHeaderTypeId" entity-alias="RHI"></alias>
+		<view-link rel-entity-alias="PTL" entity-alias="OHART" rel-optional="true">
+			<key-map field-name="orderId" />
+		</view-link>
+		<view-link rel-entity-alias="RHI" entity-alias="PTL" rel-optional="true">
+			<key-map field-name="returnId" />
+		</view-link>
+		<entity-condition>
+			<condition-list combine="or">
+				<condition-expr field-name="statusId" entity-alias="PTL" operator="equals" value="POSTX_SOLD" />
+				<condition-expr field-name="statusId" entity-alias="PTL" operator="equals" value="POSTX_RETURNED" />
+			</condition-list>
+		</entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="ProductSummaryAndProduct" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PS" entity-name="ProductSummary"></member-entity>
+		<member-entity entity-alias="PRD" entity-name="Product"></member-entity>
+		<alias-all entity-alias="PS"></alias-all>
+		<alias name="productCode" entity-alias="PRD"></alias>
+		<alias name="productTypeId" entity-alias="PRD"></alias>
+		<alias name="isVirtual" entity-alias="PRD"></alias>
+		<alias name="isVariant" entity-alias="PRD"></alias>
+		<alias name="salesDiscontinuationDate" entity-alias="PRD"></alias>
+		<alias name="purchaseDiscontinuationDate" entity-alias="PRD"></alias>
+		<view-link rel-entity-alias="PRD" entity-alias="PS">
+			<key-map field-name="productId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ReturnAdjustmentOrderAdjustment" package-name="org.ofbiz.webpos">
+	    <member-entity entity-alias="RA" entity-name="ReturnAdjustment"></member-entity>
+	    <member-entity entity-alias="OA" entity-name="OrderAdjustment"></member-entity>
+	    <alias name="amount" entity-alias="RA"></alias>
+	    <alias name="orderId" entity-alias="OA"></alias>
+	    <alias name="orderItemSeqId" entity-alias="OA"></alias>
+	    <view-link entity-alias="RA" rel-entity-alias="OA">
+			<key-map field-name="orderAdjustmentId" />
+		</view-link>
+		<entity-condition>
+		    <condition-expr field-name="returnAdjustmentTypeId" entity-alias="RA" operator="equals" value="RET_SALES_TAX_ADJ"/>
+		</entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="OrderAdjustmentReturnAdjustment" package-name="org.ofbiz.webpos">
+	    <member-entity entity-alias="RA" entity-name="ReturnAdjustment"></member-entity>
+	    <member-entity entity-alias="OA" entity-name="OrderAdjustment"></member-entity>
+	    <alias name="orderAdjustmentId" entity-alias="RA"></alias>
+	    <alias name="orderId" entity-alias="OA"></alias>
+	    <view-link entity-alias="RA" rel-entity-alias="OA">
+			<key-map field-name="orderAdjustmentId" />
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ProductPromoReturnItem" package-name="org.ofbiz.webpos">
+	    <member-entity entity-alias="OI" entity-name="OrderItem"></member-entity>
+	    <member-entity entity-alias="OA" entity-name="OrderAdjustment"></member-entity>
+	    <alias name="orderId" entity-alias="OA"></alias>
+	    <alias name="orderAdjustmentId" entity-alias="OA"></alias>
+	    <alias name="productId" entity-alias="OI"></alias>
+	    <alias name="orderItemSeqId" entity-alias="OI"></alias>
+	    <alias name="alternativeQuantity" entity-alias="OI"></alias>
+	    <alias name="alternativeUnitPrice" entity-alias="OI"></alias>
+	    <view-link rel-entity-alias="OA" entity-alias="OI">
+	        <key-map field-name="orderId"/>
+	        <key-map field-name="orderItemSeqId"/>
+	    </view-link>
+	    <entity-condition>
+	        <condition-expr field-name="isPromo" entity-alias="OI" value="Y"/>
+	    </entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="ReturnItemProduct" package-name="org.ofbiz.webpos">
+	    <member-entity entity-alias="RI" entity-name="ReturnItem"></member-entity>
+	    <member-entity entity-alias="PR" entity-name="Product"></member-entity>
+	    <alias name="returnId" entity-alias="RI"></alias>
+	    <alias name="orderId" entity-alias="RI"></alias>
+	    <alias name="returnQuantity" entity-alias="RI"></alias>
+	    <alias name="returnPrice" entity-alias="RI"></alias>
+	    <alias name="productCode" entity-alias="PR"></alias>
+	    <alias name="productName" entity-alias="PR"></alias>
+	    <view-link rel-entity-alias="PR" entity-alias="RI">
+	        <key-map field-name="productId"/>
+	    </view-link>
+	</view-entity>
+	
+	<view-entity entity-name="ProdCatProdCatMem" package-name="org.ofbiz.webpos">
+	    <member-entity entity-alias="PC" entity-name="ProductCategory"></member-entity>
+	    <member-entity entity-alias="PCM" entity-name="ProductCategoryMember"></member-entity>
+	    <alias name="productId" entity-alias="PCM"></alias>
+	    <alias name="fromDate" entity-alias="PCM"></alias>
+	    <alias name="thruDate" entity-alias="PCM"></alias>
+	    <alias name="productCategoryId" entity-alias="PC"></alias>
+	    <alias name="productCategoryTypeId" entity-alias="PC"></alias>
+	    <view-link rel-entity-alias="PC" entity-alias="PCM">
+	        <key-map field-name="productCategoryId"/>
+	    </view-link>
+	</view-entity>
+	
+	<view-entity entity-name="KHTTCheckReturnPromo" package-name="">
+	    <member-entity entity-alias="OI" entity-name="OrderItem"></member-entity>
+	    <member-entity entity-alias="RI" entity-name="ReturnItem"></member-entity>
+	    <alias name="returnId" entity-alias="RI"></alias>
+	    <alias name="returnItemSeqId" entity-alias="RI"></alias>
+	    <alias name="isPromo" entity-alias="OI"></alias>
+	    <view-link rel-entity-alias="OI" entity-alias="RI">
+	        <key-map field-name="orderId"/>
+	        <key-map field-name="orderItemSeqId"/>
+	    </view-link>
+	    <entity-condition>
+	        <condition-expr field-name="isPromo" value="Y" operator="equals" rel-entity-alias="OI"/>
+	    </entity-condition>
+	</view-entity>
+	
+	<view-entity entity-name="OrderItemAndProductTax" package-name="org.ofbiz.webpos">
+        <member-entity entity-alias="ORDI" entity-name="OrderItem"></member-entity>
+        <member-entity entity-alias="PT" entity-name="ProductAndTax"></member-entity>
+        <alias-all entity-alias="ORDI"></alias-all>
+        <alias name="taxPercentage" entity-alias="PT" ></alias>
+        <alias name="productCategoryId" entity-alias="PT" ></alias>
+        <alias name="fromDate" entity-alias="PT" ></alias>
+        <alias name="thruDate" entity-alias="PT" ></alias>
+
+        <view-link rel-entity-alias="PT" entity-alias="ORDI" rel-optional="true">
+            <key-map field-name="productId"/>
+        </view-link>
+	</view-entity>
+
+    <view-entity entity-name="ProductAndTax" package-name="org.ofbiz.webpos">
+        <member-entity entity-alias="PCM" entity-name="ProductCategoryMember"></member-entity>
+        <member-entity entity-alias="PC" entity-name="ProductCategory"></member-entity>
+        <member-entity entity-alias="TARP" entity-name="TaxAuthorityRateProduct"></member-entity>
+        <alias name="productId" entity-alias="PCM" ></alias>
+        <alias name="taxPercentage" entity-alias="TARP" ></alias>
+        <alias name="productCategoryId" entity-alias="PCM" ></alias>
+        <alias name="fromDate" entity-alias="PCM" ></alias>
+        <alias name="thruDate" entity-alias="PCM" ></alias>
+        <view-link rel-entity-alias="PC" entity-alias="PCM" rel-optional="true">
+            <key-map field-name="productCategoryId"/>
+        </view-link>
+        <view-link rel-entity-alias="TARP" entity-alias="PCM" rel-optional="true">
+            <key-map field-name="productCategoryId"/>
+        </view-link>
+        <entity-condition filter-by-date="true">
+            <condition-expr entity-alias="PC" field-name="productCategoryTypeId" operator="equals" value="TAX_CATEGORY"/>
+        </entity-condition>
+    </view-entity>
+	
+	<view-entity entity-name="OrderAdjustmentGroupTax" package-name="org.ofbiz.webpos">
+	    <member-entity entity-alias="ORDA" entity-name="OrderAdjustment"></member-entity>
+	    	    	  
+	    <alias name="orderAdjustmentTypeId" entity-alias="ORDA" group-by="true"></alias>
+	    <alias name="orderId" entity-alias="ORDA" group-by="true"></alias>
+	    <alias name="taxAuthorityRateSeqId" entity-alias="ORDA" group-by="true"></alias>
+	    <alias name="sourcePercentage" entity-alias="ORDA" group-by="true"></alias>
+	    <alias name="amount" entity-alias="ORDA" function="sum"></alias>
+	</view-entity>
+	
+	<view-entity entity-name="ShoppingCartLogLiteDetail" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="SCL" entity-name="ShoppingCartLogLite"></member-entity>
+		<member-entity entity-alias="SCIL" entity-name="ShoppingCartItemLogLite"></member-entity>
+		<member-entity entity-alias="PRD" entity-name="Product"></member-entity>
+		<member-entity entity-alias="QTYUM" entity-name="Uom"></member-entity>
+		<member-entity entity-alias="AMTUM" entity-name="Uom"></member-entity>
+		<alias-all entity-alias="SCL"></alias-all>
+		<alias-all entity-alias="SCIL">
+			<exclude field="transactionId"/>
+			<exclude field="statusId"/>
+		</alias-all>
+		<alias name="itemStatusId" field="statusId" entity-alias="SCIL"></alias>
+		<alias name="productCode" entity-alias="PRD"></alias>
+		<alias name="productName" entity-alias="PRD"></alias>
+		<alias name="requireAmount" entity-alias="PRD"></alias>
+		<alias name="quantityUomName" field="description" entity-alias="QTYUM"></alias>
+		<alias name="amountUomName" field="description" entity-alias="AMTUM"></alias>
+		<view-link rel-entity-alias="SCIL" entity-alias="SCL">
+			<key-map field-name="transactionId"/>
+		</view-link>
+		<view-link rel-entity-alias="PRD" entity-alias="SCIL">
+			<key-map field-name="productId"/>
+		</view-link>
+		<view-link rel-entity-alias="QTYUM" entity-alias="SCIL" rel-optional="true">
+			<key-map field-name="quantityUomId" rel-field-name="uomId"/>
+		</view-link>
+		<view-link rel-entity-alias="AMTUM" entity-alias="SCIL" rel-optional="true">
+			<key-map field-name="amountUomId" rel-field-name="uomId"/>
+		</view-link>
+	</view-entity>
+	<view-entity entity-name="ShoppingCartLogDetail" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="SCL" entity-name="ShoppingCartLog"></member-entity>
+		<member-entity entity-alias="SCIL" entity-name="ShoppingCartItemLog"></member-entity>
+		<member-entity entity-alias="PRD" entity-name="Product"></member-entity>
+		<member-entity entity-alias="QTYUM" entity-name="Uom"></member-entity>
+		<member-entity entity-alias="AMTUM" entity-name="Uom"></member-entity>
+		<alias-all entity-alias="SCL"></alias-all>
+		<alias-all entity-alias="SCIL">
+			<exclude field="transactionId"/>
+			<exclude field="statusId"/>
+		</alias-all>
+		<alias name="itemStatusId" field="statusId" entity-alias="SCIL"></alias>
+		<alias name="productCode" entity-alias="PRD"></alias>
+		<alias name="productName" entity-alias="PRD"></alias>
+		<alias name="requireAmount" entity-alias="PRD"></alias>
+		<alias name="quantityUomName" field="description" entity-alias="QTYUM"></alias>
+		<alias name="amountUomName" field="description" entity-alias="AMTUM"></alias>
+		<view-link rel-entity-alias="SCIL" entity-alias="SCL">
+			<key-map field-name="transactionId"/>
+		</view-link>
+		<view-link rel-entity-alias="PRD" entity-alias="SCIL">
+			<key-map field-name="productId"/>
+		</view-link>
+		<view-link rel-entity-alias="QTYUM" entity-alias="SCIL" rel-optional="true">
+			<key-map field-name="quantityUomId" rel-field-name="uomId"/>
+		</view-link>
+		<view-link rel-entity-alias="AMTUM" entity-alias="SCIL" rel-optional="true">
+			<key-map field-name="amountUomId" rel-field-name="uomId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="PosHistoryProductStore" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PH" entity-name="PosHistory"></member-entity>
+		<member-entity entity-alias="PTL" entity-name="PosTerminalLog"></member-entity>
+		<member-entity entity-alias="PT" entity-name="PosTerminal"></member-entity>
+		<member-entity entity-alias="PSF" entity-name="ProductStoreFacility"></member-entity>
+		<alias-all entity-alias="PH"></alias-all>
+		<alias name="productStoreId" entity-alias="PSF"></alias>
+		<view-link rel-entity-alias="PTL" entity-alias="PH">
+			<key-map field-name="posTerminalLogId"/>
+		</view-link>
+		<view-link rel-entity-alias="PT" entity-alias="PTL">
+			<key-map field-name="posTerminalId"/>
+		</view-link>
+		<view-link rel-entity-alias="PSF" entity-alias="PT">
+			<key-map field-name="facilityId"/>
+		</view-link>
+	</view-entity>
+	
+	<!--Huyendt Show SGCCustomerId in SaleHistory -->
+	<view-entity entity-name="PosHistoryProductStoreAndOrderHeader" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PH" entity-name="PosHistory"></member-entity>
+		<member-entity entity-alias="PTL" entity-name="PosTerminalLog"></member-entity>
+		<member-entity entity-alias="PT" entity-name="PosTerminal"></member-entity>
+		<member-entity entity-alias="PSF" entity-name="ProductStoreFacility"></member-entity>
+		<member-entity entity-alias="OH" entity-name="OrderHeader"></member-entity>
+		<alias-all entity-alias="PH"></alias-all>
+		<alias name="productStoreId" entity-alias="PSF"></alias>
+		<alias name ="SGCCustomerId" entity-alias="OH"></alias>
+		<view-link rel-entity-alias="PTL" entity-alias="PH">
+			<key-map field-name="posTerminalLogId"/>
+		</view-link>
+		<view-link rel-entity-alias="PT" entity-alias="PTL">
+			<key-map field-name="posTerminalId"/>
+		</view-link>
+		<view-link rel-entity-alias="PSF" entity-alias="PT">
+			<key-map field-name="facilityId"/>
+		</view-link>
+		<view-link rel-entity-alias="OH" entity-alias="PH">
+			<key-map field-name="orderId"></key-map>
+		</view-link>
+	</view-entity>
+	
+	<!--/End Huyent -->
+	
+	<view-entity entity-name="PosTerminalStateHasChanged" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PTS" entity-name="PosTerminalState"></member-entity>
+		<member-entity entity-alias="PTL" entity-name="PosTerminalLog"></member-entity>
+		<alias name="posTerminalStateId" entity-alias="PTS"></alias>
+		<alias name="lastStateUpdateTime" field="lastUpdatedStamp" entity-alias="PTS"></alias>
+		<alias name="lastLogUpdateTime" field="lastUpdatedStamp" entity-alias="PTL"></alias>
+		<view-link rel-entity-alias="PTL" entity-alias="PTS">
+			<key-map field-name="posTerminalStateId"/>
+		</view-link>
+	</view-entity>
+	
+	<view-entity entity-name="PosTerminalBankDetail" package-name="org.ofbiz.webpos">
+		<member-entity entity-alias="PTB" entity-name="PosTerminalBank"></member-entity>
+		<member-entity entity-alias="PT" entity-name="PosTerminal"></member-entity>
+		<member-entity entity-alias="PNV" entity-name="PartyFullNameDetailSimple"></member-entity>
+		
+		<alias-all entity-alias="PTB"></alias-all>
+		<alias name="terminalName" entity-alias="PT"></alias>
+		<alias name="partyName" field="fullName" entity-alias="PNV"></alias>
+		
+		<view-link rel-entity-alias="PT" entity-alias="PTB">
+			<key-map field-name="posTerminalId"/>
+		</view-link>
+		
+		<view-link rel-entity-alias="PNV" entity-alias="PTB">
+			<key-map field-name="partyId"/>
+		</view-link>
+	</view-entity>
+</entitymodel>

@@ -1,0 +1,624 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information regarding copyright ownership. The ASF licenses this file to you under
+    the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may
+    obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to
+    in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+    ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under
+    the License. -->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	<screen name="ListInvoices">
+        <section>
+	        <actions>
+	        	<set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+	        </actions>
+	        <widgets>
+	            <decorator-screen name="BaseAccountingCommonDecorator" location="component://baseaccounting/widget/CommonScreens.xml">
+	                <decorator-section name="body">
+	                    <section>
+	                    	<actions>
+	                    		<entity-condition list="newStatusList" entity-name="StatusItem">
+	                    			<condition-expr field-name="statusTypeId" value="INVOICE_NEW_STATUS"/>
+	                    			<order-by field-name="sequenceId"/>
+	                    		</entity-condition>
+	                    	</actions>
+	                        <widgets>
+	                            <platform-specific>
+	                                <html>
+	                      				<html-template location="component://baseaccounting/webapp/baseaccounting/invoice/invoiceList.ftl"/>
+	                      			</html>
+	                            </platform-specific>
+	                        </widgets>
+	                    </section>
+	                </decorator-section>
+	            </decorator-screen>
+	        </widgets>
+	    </section>
+	</screen>
+	
+	<screen name="ViewInvoice">
+        <section>
+	        <actions>
+	        	
+	        	<entity-condition entity-name="InvItemAndOrdItem" list="invItemAndOrdItems">
+                    <condition-expr field-name="invoiceId" operator="equals" from-field="parameters.invoiceId" />
+                    <order-by field-name="invoiceItemSeqId" />
+                </entity-condition>
+	        	<entity-one value-field="invoice" entity-name="Invoice">
+	        		<field-map field-name="invoiceId" from-field="parameters.invoiceId"/>
+	        	</entity-one>
+	        	<entity-condition entity-name="AcctgTrans" list="acctgTrans">                    
+                    <condition-list combine="and">
+                    	<condition-expr field-name="invoiceId" from-field="parameters.invoiceId"/>
+                    	<condition-expr field-name="invoiceId" operator="not-equals" from-field="nullField"/>
+                    </condition-list>
+                    <order-by field-name="acctgTransId"/>
+                </entity-condition>
+                <entity-condition list="voucherTotalList" entity-name="VoucherInvoiceAndTotal">
+					<condition-list combine="and">
+                    	<condition-expr field-name="invoiceId" from-field="parameters.invoiceId"/>
+                    	<condition-expr field-name="invoiceId" operator="not-equals" from-field="nullField"/>
+                    </condition-list>                
+                </entity-condition>
+                <entity-condition list="enumPartyTypeList" entity-name="Enumeration">
+	        		<condition-expr field-name="enumTypeId" value="PARTY_TYPE"/>
+	        		<order-by field-name="sequenceId"/>
+	        	</entity-condition>	
+	        	<property-to-field field="defaultCountryGeoId" resource="general" property="country.geo.id.default" default="VNM"/>
+	        	<property-to-field field="invoiceVoucerDiffValueId" resource="baseaccounting" property="invoice.voucher.diff.value.system.id"/>
+	        	<entity-condition list="countryGeoList" entity-name="Geo">
+	        		<condition-expr field-name="geoTypeId" value="COUNTRY"/>
+	        		<order-by field-name="geoName"/>
+	        	</entity-condition>
+	        	<set field="invoiceAmount" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceTotal(invoice)}" type="BigDecimal" />
+                <set field="payInvoiceAmount" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getPayrollInvoiceTotal(invoice)}" type="BigDecimal" />
+                <set field="notAppliedAmount" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceNotApplied(invoice)}" type="BigDecimal" />
+                <set field="appliedAmount" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceApplied(invoice)}" type="BigDecimal" />
+                <script location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/invoice/getApplicationList.groovy" />
+	        </actions>
+	
+	        <widgets>
+	            <decorator-screen name="BaseAccountingCommonDecorator" location="component://baseaccounting/widget/CommonScreens.xml">
+	                <decorator-section name="body">
+	                    <section>
+	                    	<condition>
+								<not>
+									<if-empty field="invoice" />
+								</not>
+							</condition>	                    
+	                        <widgets>
+	                            <platform-specific>
+	                                <html>
+	                      				<html-template location="component://baseaccounting/webapp/baseaccounting/invoice/invoiceView.ftl"/>
+	                      			</html>
+	                            </platform-specific>
+	                        </widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BACCInvoiceNoInvoiceFound}"></label>
+								</container>
+							</fail-widgets>	                        
+	                    </section>
+	                </decorator-section>
+	            </decorator-screen>
+	        </widgets>
+	    </section>
+	</screen>
+	
+	<screen name="ViewListOrderNotInvoiceVAT">
+		<section>
+			<actions>
+				<set field="titleProperty" value="ViewListOrderNotInvoiceVAT"/>
+				<set field="selectedMenuItem" value="AR" global="true"/>
+	        	<set field="selectedSubMenuItem" value="CreateVATInvoiceNA"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="BaseAccountingCommonDecorator" location="component://baseaccounting/widget/CommonScreens.xml">
+					<decorator-section name="body">
+	                    <section>
+	                    	<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<actions>
+								<entity-condition list="enumPaymentMethodList" entity-name="Enumeration">
+									<condition-expr field-name="enumTypeId" value="POS_NOTE_VAT_INVOICE"/>
+								</entity-condition>
+							</actions>
+	                        <widgets>
+	                            <platform-specific>
+	                                <html>
+	                      				<html-template location="component://baseaccounting/webapp/baseaccounting/invoice/ViewListOrderNotInvoiceVAT.ftl"/>
+	                      			</html>
+	                            </platform-specific>
+	                        </widgets>
+	                        <fail-widgets>
+								<include-screen location="component://baseaccounting/widget/CommonScreens.xml" name="ErrorPermissionAccountingCommonDecorator"/>
+							</fail-widgets>	
+	                    </section>
+	                </decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewOrderRequestVATInv">
+		<section>
+			<actions>
+				<set field="titleProperty" value="ListOrderRequestVATInvoice"/>
+				<set field="selectedMenuItem" value="AR" global="true"/>
+	        	<set field="selectedSubMenuItem" value="ViewOrderRequestVATInv"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="BaseAccountingCommonDecorator" location="component://baseaccounting/widget/CommonScreens.xml">
+					<decorator-section name="body">
+	                    <section>
+	                    	<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<actions>
+								<entity-condition list="enumPaymentMethodList" entity-name="Enumeration">
+									<condition-expr field-name="enumTypeId" value="POS_NOTE_VAT_INVOICE"/>
+								</entity-condition>
+							</actions>
+	                        <widgets>
+	                            <platform-specific>
+	                                <html>
+	                      				<html-template location="component://baseaccounting/webapp/baseaccounting/invoice/ViewOrderRequestVATInv.ftl"/>
+	                      			</html>
+	                            </platform-specific>
+	                        </widgets>
+	                        <fail-widgets>
+								<include-screen location="component://baseaccounting/widget/CommonScreens.xml" name="ErrorPermissionAccountingCommonDecorator"/>
+							</fail-widgets>	
+	                    </section>
+	                </decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ViewListProductStoreManager">
+		<section>
+			<actions>
+				<set field="titleProperty" value="ListProductStoreManagerReceiveCash"/>
+				<set field="selectedMenuItem" value="AR" global="true"/>
+	        	<set field="selectedSubMenuItem" value="CashHandoverBeginShift"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="BaseAccountingCommonDecorator" location="component://baseaccounting/widget/CommonScreens.xml">
+					<decorator-section name="body">
+	                    <section>
+	                    	<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<actions>
+							</actions>
+	                        <widgets>
+	                            <platform-specific>
+	                                <html>
+	                      				<html-template location="component://baseaccounting/webapp/baseaccounting/invoice/ViewListProductStoreManager.ftl"/>
+	                      			</html>
+	                            </platform-specific>
+	                        </widgets>
+	                        <fail-widgets>
+								<include-screen location="component://baseaccounting/widget/CommonScreens.xml" name="ErrorPermissionAccountingCommonDecorator"/>
+							</fail-widgets>	
+	                    </section>
+	                </decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<!-- <screen name="ViewInvoiceDetail">
+        <section>
+	        <actions>
+	        	<property-map resource="BaseAccountingUiLabels" map-name="uiLabelMap" global="true"/>
+	        	<property-map resource="WidgetUiLabels" map-name="uiLabelMap" global="true"/>
+	        	<entity-condition entity-name="InvItemAndOrdItem" list="invItemAndOrdItems">
+                    <condition-expr field-name="invoiceId" operator="equals" from-field="parameters.invoiceId" />
+                    <order-by field-name="invoiceItemSeqId" />
+                </entity-condition>
+	        	<entity-one value-field="invoice" entity-name="Invoice">
+	        		<field-map field-name="invoiceId" from-field="parameters.invoiceId"/>
+	        	</entity-one>
+	        	<set field="invoiceAmount" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceTotal(invoice)}" type="BigDecimal" />
+                <set field="payInvoiceAmount" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getPayrollInvoiceTotal(invoice)}" type="BigDecimal" />
+                <set field="notAppliedAmount" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceNotApplied(invoice)}" type="BigDecimal" />
+                <set field="appliedAmount" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceApplied(invoice)}" type="BigDecimal" />
+	        </actions>
+	
+	        <widgets>
+              <platform-specific>
+                  <html>
+        				<html-template location="component://baseaccounting/webapp/baseaccounting/invoice/invoiceViewDetail.ftl"/>
+        			</html>
+              </platform-specific>
+	        </widgets>
+	    </section>
+	</screen> -->
+	
+	<!-- <screen name="ListInvoiceTrans">
+        <section>
+	        <actions>
+	        	<property-map resource="BaseAccountingUiLabels" map-name="uiLabelMap" global="true"/>
+	        	<property-map resource="WidgetUiLabels" map-name="uiLabelMap" global="true"/>
+	        	<entity-one value-field="invoice" entity-name="Invoice"></entity-one>
+                <entity-condition entity-name="AcctgTrans" list="acctgTrans">
+                    <condition-expr field-name="invoiceId" from-field="parameters.invoiceId"/>
+                    <order-by field-name="acctgTransId"/>
+                </entity-condition>
+	        </actions>
+            <widgets>
+                <platform-specific>
+                    <html>
+          				<html-template location="component://baseaccounting/webapp/baseaccounting/invoice/invoiceViewTrans.ftl"/>
+          			</html>
+                </platform-specific>
+            </widgets>
+	    </section>
+	</screen> -->
+	
+	<!-- <screen name="ListInvoiceAppls">
+        <section>
+	        <actions>
+	        	<property-map resource="BaseAccountingUiLabels" map-name="uiLabelMap" global="true"/>
+	        	<property-map resource="WidgetUiLabels" map-name="uiLabelMap" global="true"/>
+	        	<entity-one value-field="invoice" entity-name="Invoice"></entity-one>
+	        	<set field="invoiceAmount" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceTotal(invoice)}" type="BigDecimal" />
+                <set field="payInvoiceAmount" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getPayrollInvoiceTotal(invoice)}" type="BigDecimal" />
+                <set field="notAppliedAmount" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceNotApplied(invoice)}" type="BigDecimal" />
+                <set field="appliedAmount" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceApplied(invoice)}" type="BigDecimal" />
+	        	<script location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/invoice/getApplicationList.groovy" />
+	        </actions>
+            <widgets>
+                <platform-specific>
+                    <html>
+          				<html-template location="component://baseaccounting/webapp/baseaccounting/invoice/invoiceViewAppl.ftl"/>
+          			</html>
+                </platform-specific>
+            </widgets>
+	    </section>
+	</screen> -->
+	
+	<screen name="NewInvoice">
+        <section>
+	        <actions>
+	        	<property-map resource="BaseAccountingUiLabels" map-name="uiLabelMap" global="true"/>
+	        	<property-map resource="WidgetUiLabels" map-name="uiLabelMap" global="true"/>
+	        	<property-to-field field="defaultCurrencyUomId" resource="general" property="currency.uom.id.default" default="USD"/>
+	        	<property-to-field field="defaultCountryGeoId" resource="general" property="country.geo.id.default" default="VNM"/>
+	        	<set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+	        	<entity-condition list="enumPartyTypeList" entity-name="Enumeration">
+	        		<condition-expr field-name="enumTypeId" value="PARTY_TYPE"/>
+	        		<order-by field-name="sequenceId"/>
+	        	</entity-condition>
+	        	<entity-condition list="uomList" entity-name="Uom">
+	        		<condition-expr field-name="uomTypeId" value="PRODUCT_PACKING"/>
+	        	</entity-condition>
+	        	<entity-condition list="countryGeoList" entity-name="Geo">
+	        		<condition-expr field-name="geoTypeId" value="COUNTRY"/>
+	        		<order-by field-name="geoName"/>
+	        	</entity-condition>
+<!-- 	        	<entity-condition entity-name="InvoiceItemType" list="listInvoiceItemTypes"> -->
+<!-- 	        		<order-by field-name="invoiceItemTypeId"/> -->
+<!-- 	        	</entity-condition> -->
+<!-- 	        	<script location="component://accounting/webapp/accounting/WEB-INF/actions/invoice/GetInvoiceItemTypes.groovy"/> -->
+	        </actions>
+            <widgets>
+            	<decorator-screen name="BaseAccountingCommonDecorator" location="component://baseaccounting/widget/CommonScreens.xml">
+	                <decorator-section name="body">
+	                    <section>
+	                        <widgets>
+	                            <platform-specific>
+	                                <html>
+	                      				<html-template location="component://baseaccounting/webapp/baseaccounting/invoice/invoiceNew.ftl"/>
+	                      			</html>
+	                            </platform-specific>
+	                        </widgets>
+	                    </section>
+	                </decorator-section>
+	            </decorator-screen>
+            </widgets>
+	    </section>
+	</screen>
+	<screen name="InvoiceSpecificationView">
+		<section>
+			<actions>
+				<property-map resource="BaseAccountingUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="WidgetUiLabels" map-name="uiLabelMap" global="true" />
+				<property-map resource="BaseSalesUiLabels" map-name="uiLabelMap" global="true" />
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baseaccounting/webapp/baseaccounting/invoice/invoiceSpecification.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	
+ <screen name="ViewListVoucherInvoice">
+        <section>
+			<actions>
+				<set field="titleProperty" value="ListVouchers"/>
+				<set field="selectedMenuItem" value="Voucher" global="true"/>
+	        	<set field="selectedSubMenuItem" value="voucherList"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="BaseAccountingCommonDecorator" location="component://baseaccounting/widget/CommonScreens.xml">
+					<decorator-section name="body">
+	                    <section>
+	                    	<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<actions>
+								<entity-condition list="statusList" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="INVOICE_NEW_STATUS"/>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>
+								<entity-condition list="paymentARTypeList" entity-name="PaymentType">
+									<condition-expr field-name="parentTypeId" value="RECEIPT"/>
+									<order-by field-name="paymentTypeId"/>
+								</entity-condition>
+								<entity-condition list="paymentAPTypeList" entity-name="PaymentType">
+									<condition-expr field-name="parentTypeId" value="DISBURSEMENT"/>
+									<order-by field-name="paymentTypeId"/>
+								</entity-condition>
+								<entity-condition list="uomList" entity-name="Uom">
+									<condition-expr field-name="uomTypeId" value="CURRENCY_MEASURE"/>
+									<order-by field-name="uomId"/>
+								</entity-condition>
+								<entity-condition list="invoiceTypeList" entity-name="InvoiceType">
+									<order-by field-name="invoiceTypeId"/>
+								</entity-condition>
+								<property-to-field field="defaultCurrencyUomId" resource="general" property="currency.uom.id.default" default="USD"/>
+							</actions>
+	                        <widgets>
+	                            <platform-specific>
+	                                <html>
+	                      				<html-template location="component://baseaccounting/webapp/baseaccounting/invoice/ViewListVoucherInvoice.ftl"/>
+	                      			</html>
+	                            </platform-specific>
+	                        </widgets>
+	                        <fail-widgets>
+								<include-screen location="component://baseaccounting/widget/CommonScreens.xml" name="ErrorPermissionAccountingCommonDecorator"/>
+							</fail-widgets>	
+	                    </section>
+	                </decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="AccPurchaseAgreements">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="accApprovement" />
+				<set field="selectedSubMenuItem" value="accPurchaseAgreement" />
+				<set field="requestParameters.agreementTypeId" value="PURCHASE_AGREEMENT" />
+				<set field="titleProperty" value="PurchaseAgreement" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission />
+					</condition>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<platform-specific>
+									<html>
+										<html-template location="component://baseimex/webapp/baseimex/import/purchaseAgreements.ftl" />
+									</html>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-danger">
+									<label text="${uiLabelMap.DmsNotPermission}" />
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="AgreementTitle">
+		<section>
+			<condition>
+				<not>
+					<if-empty field="parameters.agreementId" />
+				</not>
+			</condition>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text=" ${uiLabelMap.DAAgreementId}: "></label>
+				<link url-mode="plain" target="detailPurchaseAgreement?agreementId=${parameters.agreementId}" text="${parameters.agreementId}"></link>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="AccDetailPurchaseAgreement">
+		<section>
+			<actions>
+				<set field="titleHeaderValue" value="AgreementTitle" global="true" />
+				<set field="titleHeaderLocation" value="component://baseaccounting/widget/InvoiceScreens.xml" global="true" />
+				<set field="titleProperty" value="BIEAgreementDetail" />
+				<set field="selectedMenuItem" value="accApprovement" />
+				<set field="selectedSubMenuItem" value="accPurchaseAgreement" />
+				<set field="tabButtonItem" value="EditAgreement" />
+				<set field="agreementId" from-field="parameters.agreementId" />
+				<entity-one value-field="agreement" entity-name="Agreement"></entity-one>
+				<entity-one value-field="agreementName" entity-name="AgreementAttribute">
+					<field-map field-name="agreementId" from-field="agreementId" />
+					<field-map field-name="attrName" value="AGREEMENT_NAME" />
+				</entity-one>
+				<set field="partyIdFrom" value="${agreement.partyIdFrom}" />
+				<set field="partyIdTo" value="${agreement.partyIdTo}" />
+				<entity-one value-field="purchaser" entity-name="PartyNameView">
+					<field-map field-name="partyId" value="${agreement.partyIdFrom}" />
+				</entity-one>
+				<entity-one value-field="supplier" entity-name="PartyNameView">
+					<field-map field-name="partyId" value="${agreement.partyIdTo}" />
+				</entity-one>
+				<script location="component://baseimex/webapp/baseimex/WEB-INF/actions/import/getAgreementTerms.groovy" />
+				<set field="productPackingUomId" value="${productPackingUomId}" />
+				<set field="currentETDTerm" value="${currentETDTerm}" />
+				<set field="currentETATerm" value="${currentETATerm}" />
+				<set field="currentPortTerm" value="${currentPortTerm}" />
+				<set field="currencyUomId" value="${currencyUomId}" />
+				<set field="listOtherCurrencyTerms" value="${listOtherCurrencyTerms}" />
+				<set field="listFinAccountTos" value="${listFinAccountTos}" />
+				<set field="listFinAccountFroms" value="${listFinAccountFroms}" />
+				<set field="listProducts" value="${listProducts}" />
+				<set field="representPartyId" value="${representPartyId}" />
+				<entity-one value-field="representParty" entity-name="PartyNameView">
+					<field-map field-name="partyId" from-field="representPartyId" />
+				</entity-one>
+				<set field="contactMechPhoneFromId" value="${contactMechPhoneFromId}" />
+				<set field="contactMechFaxFromId" value="${contactMechFaxFromId}" />
+				<set field="contactMechAddressFromId" value="${contactMechAddressFromId}" />
+				<set field="contactMechAddressToId" value="${contactMechAddressToId}" />
+				<set field="contactMechEmailToId" value="${contactMechEmailToId}" />
+				<entity-one value-field="addressFrom" entity-name="PostalAddress">
+					<field-map field-name="contactMechId" from-field="contactMechAddressFromId" />
+				</entity-one>
+				<entity-one value-field="addressTo" entity-name="PostalAddress">
+					<field-map field-name="contactMechId" from-field="contactMechAddressToId" />
+				</entity-one>
+				<entity-one value-field="phoneFrom" entity-name="TelecomNumber">
+					<field-map field-name="contactMechId" from-field="contactMechPhoneFromId" />
+				</entity-one>
+				<entity-one value-field="faxFrom" entity-name="TelecomNumber">
+					<field-map field-name="contactMechId" from-field="contactMechFaxFromId" />
+				</entity-one>
+			 	<set field="activeTab" from-field="parameters.activeTab" default-value="general-tab"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+	                    <platform-specific>
+							<html>
+								<html-template location="component://baseimex/webapp/baseimex/import/agreementDetailBegin.ftl"/>
+							</html>
+						</platform-specific>
+						<include-screen name="AgreementDetailContainer"/>
+						<platform-specific>
+							<html>
+								<html-template location="component://baseimex/webapp/baseimex/detailEnd.ftl"/>
+							</html>
+						</platform-specific>
+    				</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="AgreementDetailContainer">
+		<section>
+			<widgets>
+				<include-screen name="AgreementInfo"/>
+				<include-screen name="AgreementOrder"/>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="AgreementInfo">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baseimex/webapp/baseimex/import/displayPurchaseAgreementENG.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="AgreementOrder">
+		<section>
+			<actions>
+				<set field="activeTab" from-field="parameters.activeTab"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baseimex/webapp/baseimex/import/agreementOrder.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+    <screen name="ListDiscountAndPromotionCustomer">
+        <section>
+            <actions>
+                <set field="titleProperty" value="BACCDiscountAndPromoCustomer"/>
+                <set field="selectedMenuItem" value="DiscountPromo"/>
+                <set field="selectedSubMenuItem" value="ListDiscountAndPromoCustomer"/>
+                <entity-condition list="listStatusItem" entity-name="StatusItem">
+                    <condition-expr field-name="statusTypeId" value="INVOICE_STATUS"/>
+                </entity-condition>
+                <entity-condition list="newStatusList" entity-name="StatusItem">
+                    <condition-expr field-name="statusTypeId" value="INVOICE_NEW_STATUS"/>
+                    <order-by field-name="sequenceId"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="BaseAccountingCommonDecorator" location="component://baseaccounting/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-olbius-has-permission/>
+                            </condition>
+                            <widgets>
+                                <platform-specific>
+                                    <html>
+                                        <html-template location="component://baseaccounting/webapp/baseaccounting/invoice/listDiscountAndPromotionCustomer.ftl"/>
+                                    </html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+                                <include-screen location="component://baseaccounting/widget/CommonScreens.xml" name="ErrorPermissionAccountingCommonDecorator"/>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ViewDetailDiscountAndPromoCustomer">
+        <section>
+            <actions>
+                <set field="titleProperty" value="BACCViewDetailDiscount"/>
+                <set field="selectedMenuItem" value="DiscountPromo"/>
+                <set field="selectedSubMenuItem" value="ListDiscountAndPromoCustomer"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="BaseAccountingCommonDecorator" location="component://baseaccounting/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                            <!--<condition>-->
+                                <!--<if-olbius-has-permission/>-->
+                            <!--</condition>-->
+                            <widgets>
+                                <platform-specific>
+                                    <html>
+                                        <html-template location="component://baseaccounting/webapp/baseaccounting/invoice/viewDetailDiscountAndPromoCustomer.ftl"/>
+                                    </html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+                                <include-screen location="component://baseaccounting/widget/CommonScreens.xml" name="ErrorPermissionAccountingCommonDecorator"/>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+</screens>

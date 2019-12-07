@@ -1,0 +1,560 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-screen.xsd">
+
+	<screen name="PlanTitle">
+		<section>
+			<condition>
+				<not>
+					<if-empty field="parameters.productPlanId" />
+				</not>
+			</condition>
+			<actions>
+				<entity-one value-field="planHeaderTmp" entity-name="ProductPlanHeader"/>
+			</actions>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text=" ${uiLabelMap.POProductPlanID}: "></label>
+				<link url-mode="plain" target="listImExPlanItem?productPlanId=${parameters.productPlanId}"
+					text="${planHeaderTmp.productPlanCode}"></link>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="CreateImExPeriod">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="planImEx" />
+				<set field="selectedSubMenuItem" value="createImExPeriod" />
+				<set field="titleProperty" value="BIECommercePeriod" />
+				<set field="organizationPartyId" from-field="parameters.organizationPartyId" />
+				<script location="component://baseimex/webapp/baseimex/WEB-INF/actions/planImEx/getPeriodYear.groovy" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission />
+					</condition>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<screenlet navigation-menu-name="createCommercialPeriod">
+									<platform-specific>
+										<html>
+											<html-template location="component://baseimex/webapp/baseimex/planImEx/createCommercialPeriod.ftl" />
+										</html>
+									</platform-specific>
+								</screenlet>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-danger">
+									<label text="${uiLabelMap.DmsNotPermission}" />
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="CreateImExPlan">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="planImEx" />
+				<set field="selectedSubMenuItem" value="createImExPlan" />
+				<set field="titleProperty" value="DmsCreatePlan" />
+				<script location="component://baseimex/webapp/baseimex/WEB-INF/actions/planImEx/getPeriodYear.groovy" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission />
+					</condition>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<platform-specific>
+									<html>
+										<html-template location="component://baseimex/webapp/baseimex/planImEx/createImportPlanTotal.ftl" />
+									</html>
+								</platform-specific>
+<!-- 								<platform-specific> -->
+<!-- 									<html> -->
+<!-- 										<html-template location="component://baseimex/webapp/baseimex/planImEx/createImExPlan.ftl" /> -->
+<!-- 									</html> -->
+<!-- 								</platform-specific> -->
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-danger">
+									<label text="${uiLabelMap.DmsNotPermission}" />
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="ListImExPlan">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="planImEx" />
+				<set field="selectedSubMenuItem" value="listImExPlan" />
+				<set field="titleProperty" value="DmsListPlan" />
+				<script location="component://baseimex/webapp/baseimex/WEB-INF/actions/planImEx/getPeriodYear.groovy" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission />
+					</condition>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<platform-specific>
+									<html>
+										<html-template location="component://baseimex/webapp/baseimex/planImEx/listImExPlan.ftl" />
+									</html>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-danger">
+									<label text="${uiLabelMap.DmsNotPermission}" />
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="ListImExPlanItem">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="planImEx" />
+				<set field="selectedSubMenuItem" value="listImExPlan" />
+				<set field="titleProperty" value="DmsListPlan" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission />
+					</condition>
+					<widgets>
+						<section>
+							<actions>
+								<set field="selectedMenuItem" value="planImEx" />
+								<set field="selectedSubMenuItem" value="listImExPlan" />
+								<set field="activeTab" value="imexPlanItemView-tab" />
+								<set field="titleProperty" value="DmsPlanItem" />
+								<set field="titleHeaderValue" value="PlanTitle" global="true" />
+								<set field="titleHeaderLocation" value="component://baseimex/widget/PlanImExScreens.xml" global="true" />
+								<entity-one value-field="planHeader" entity-name="ProductPlanAndCustomTime"></entity-one>
+							</actions>
+							<widgets>
+								<section>
+									<condition>
+										<not>
+											<if-empty field="planHeader" />
+										</not>
+									</condition>
+									<actions>
+										<script location="component://baseimex/webapp/baseimex/WEB-INF/actions/planImEx/getPeriodYear.groovy" />
+									</actions>
+									<widgets>
+										<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+											<decorator-section name="body">
+												<platform-specific>
+													<html>
+														<html-template location="component://baseimex/webapp/baseimex/planImEx/imexPlanTabOpen.ftl"/>
+													</html>
+												</platform-specific>
+												<platform-specific>
+													<html>
+														<html-template location="component://baseimex/webapp/baseimex/planImEx/listImExPlanItem.ftl" />
+													</html>
+												</platform-specific>
+												<platform-specific>
+													<html>
+														<html-template location="component://baseimex/webapp/baseimex/detailEnd.ftl"/>
+													</html>
+												</platform-specific>
+												
+											</decorator-section>
+										</decorator-screen>
+									</widgets>
+									<fail-widgets>
+										<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+											<decorator-section name="body">
+												<container style="alert alert-danger">
+													<label text="${uiLabelMap.DmsNotPermission}" />
+												</container>
+											</decorator-section>
+										</decorator-screen>
+									</fail-widgets>
+								</section>
+							</widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-danger">
+									<label text="${uiLabelMap.DmsNotPermission}" />
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+
+	<screen name="UpdateImExPlan">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="planImEx" />
+				<set field="selectedSubMenuItem" value="listImExPlan" />
+				<set field="titleProperty" value="DmsListPlan" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission />
+					</condition>
+					<widgets>
+						<section>
+							<actions>
+								<set field="selectedMenuItem" value="planImEx" />
+								<set field="selectedSubMenuItem" value="listImExPlan" />
+								<set field="activeTab" value="imexPlanItemView-tab" />
+								<set field="titleProperty" value="DmsPlanItem" />
+								<set field="titleHeaderValue" value="PlanTitle" global="true" />
+								<set field="titleHeaderLocation" value="component://baseimex/widget/PlanImExScreens.xml" global="true" />
+								<entity-one value-field="planHeader" entity-name="ProductPlanAndCustomTime"></entity-one>
+							</actions>
+							<widgets>
+								<section>
+									<condition>
+										<not>
+											<if-empty field="planHeader" />
+										</not>
+									</condition>
+									<widgets>
+										<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+											<decorator-section name="body">
+												<platform-specific>
+													<html>
+														<html-template location="component://baseimex/webapp/baseimex/planImEx/editImportPlanTotal.ftl" />
+													</html>
+												</platform-specific>
+											</decorator-section>
+										</decorator-screen>
+									</widgets>
+									<fail-widgets>
+										<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+											<decorator-section name="body">
+												<container style="alert alert-danger">
+													<label text="${uiLabelMap.DmsNotPermission}" />
+												</container>
+											</decorator-section>
+										</decorator-screen>
+									</fail-widgets>
+								</section>
+							</widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-danger">
+									<label text="${uiLabelMap.DmsNotPermission}" />
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="StockAndPlan">
+		<section>
+			<condition>
+				<if-has-permission permission="PLANIMEX" action="_VIEW" />
+			</condition>
+			<widgets>
+				<section>
+					<widgets>
+						<section>
+							<condition>
+								<not>
+									<if-empty field="parameters.productPlanId" />
+								</not>
+							</condition>
+							<actions>
+								<set field="selectedMenuItem" value="planImEx" />
+								<set field="selectedSubMenuItem" value="listImExPlan" />
+								<set field="activeTab" value="imexPlanItemStock-tab" />
+								<set field="titleProperty" value="DmsPlanItem" />
+								<set field="titleHeaderValue" value="PlanTitle" global="true" />
+								<set field="titleHeaderLocation" value="component://baseimex/widget/PlanImExScreens.xml" global="true" />
+								<entity-one value-field="planHeader" entity-name="ProductPlanHeader"/>
+							</actions>
+							<widgets>
+								<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+									<decorator-section name="body">
+										<include-screen name="ImExPlanTabOpen" />
+										<platform-specific>
+											<html>
+												<html-template location="component://baseimex/webapp/baseimex/planImEx/stockAndPlanImEx.ftl" />
+											</html>
+										</platform-specific>
+									</decorator-section>
+								</decorator-screen>
+							</widgets>
+							<fail-widgets>
+								<include-screen name="ListImExPlan" />
+							</fail-widgets>
+						</section>
+					</widgets>
+				</section>
+			</widgets>
+			<fail-widgets>
+				<section>
+					<actions>
+						<set field="selectedMenuItem" value="planImEx" />
+						<set field="selectedSubMenuItem" value="listImExPlan" />
+						<set field="titleProperty" value="DmsPlanItem" />
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<label text="${uiLabelMap.DmsNotPermission}">
+								</label>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</fail-widgets>
+		</section>
+	</screen>
+
+	<screen name="ImExPlanTabOpen">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="planImEx" />
+				<set field="selectedSubMenuItem" value="listImExPlan" />
+				<!-- <set field="activeTab" from-field="parameters.activeTab" default-value=""/> -->
+				<set field="titleProperty" value="DmsPlanItem" global="true" />
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baseimex/webapp/baseimex/planImEx/imexPlanTabOpen.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="SalesForecastListPO">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="salesForecastPO" />
+				<set field="selectedSubMenuItem" value="salesForecastList" />
+				<set field="titleProperty" value="DAListSalesForecast" />
+			</actions>
+			<widgets>
+				<section>	
+					<condition>
+						<if-olbius-has-permission />
+					</condition>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<section>
+									<widgets>
+										<platform-specific>
+											<html>
+												<html-template location="component://baseimex/webapp/baseimex/salesFC/listSalesForecastPO.ftl" />
+											</html>
+										</platform-specific>
+									</widgets>
+								</section>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-danger">
+									<label text="${uiLabelMap.DmsNotPermission}" />
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="saleFCTabOpen">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="salesForecastPO" />
+				<set field="selectedSubMenuItem" value="salesForecastList" />
+				<!-- <set field="activeTab" from-field="parameters.activeTab" default-value=""/> -->
+				<set field="titleProperty" value="DmsPlanItem" global="true" />
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baseimex/webapp/baseimex/salesFC/salesFCTabOpen.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="ViewSalesForecastDetailByPO">
+		<section>
+			<condition>
+				<if-has-permission permission="SALESFORECAST" action="_VIEW" />
+			</condition>
+			<widgets>
+				<section>
+					<widgets>
+						<section>
+							<condition>
+								<not>
+									<if-empty field="parameters.salesForecastId" />
+								</not>
+							</condition>
+							<actions>
+								<set field="selectedMenuItem" value="salesForecastPO" />
+								<set field="selectedSubMenuItem" value="salesForecastList" />
+								<set field="activeTab" value="salesFCMonth-tab" />
+								<set field="titleProperty" value="PageTitleEditSalesForecast" />
+								<script location="component://basesales/webapp/basesales/WEB-INF/actions/sales_forecast/GetListSalesForecastDetailJQ.groovy" />
+								<!-- <set field="titleHeaderValue" value="PlanTitle" global="true"/> 
+									<set field="titleHeaderLocation" value="component://baseimex/widget/PlanImExScreens.xml" 
+									global="true"/> -->
+							</actions>
+							<widgets>
+								<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+									<decorator-section name="body">
+<!-- 										<include-screen name="saleFCTabOpen" /> -->
+										<platform-specific>
+											<html>
+												<html-template location="component://basesales/webapp/basesales/sales_forecast/salesForecastDetailCreateJQ.ftl" />
+											</html>
+										</platform-specific>
+									</decorator-section>
+								</decorator-screen>
+							</widgets>
+							<fail-widgets>
+								<include-screen name="ListImExPlan" />
+							</fail-widgets>
+						</section>
+					</widgets>
+				</section>
+			</widgets>
+			<fail-widgets>
+				<section>
+					<actions>
+						<set field="selectedMenuItem" value="salesForecastPO" />
+						<set field="selectedSubMenuItem" value="salesForecastList" />
+						<set field="titleProperty" value="PageTitleEditSalesForecast" />
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<label text="${uiLabelMap.DmsNotPermission}">
+								</label>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</fail-widgets>
+		</section>
+	</screen>
+
+	<screen name="ViewSalesForecastWeekByPO">
+		<section>
+			<condition>
+				<if-has-permission permission="SALESFORECAST" action="_VIEW" />
+			</condition>
+			<widgets>
+				<section>
+					<widgets>
+						<section>
+							<condition>
+								<not>
+									<if-empty field="parameters.salesForecastId" />
+								</not>
+							</condition>
+							<actions>
+								<set field="selectedMenuItem" value="salesForecastPO" />
+								<set field="selectedSubMenuItem" value="salesForecastList" />
+								<set field="activeTab" value="salesFCWeek-tab" />
+								<set field="titleProperty" value="PageTitleEditSalesForecast" />
+								<!-- <set field="titleHeaderValue" value="PlanTitle" global="true"/> 
+									<set field="titleHeaderLocation" value="component://baseimex/widget/PlanImExScreens.xml" 
+									global="true"/> -->
+								<script location="component://basepo/webapp/basepo/WEB-INF/actions/agreement/getCurrentOrganization.groovy" />
+							</actions>
+							<widgets>
+								<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+									<decorator-section name="body">
+										<include-screen name="saleFCTabOpen" />
+										<platform-specific>
+											<html>
+												<html-template location="component://baseimex/webapp/baseimex/salesFC/viewSalesForecastWeekByPO.ftl" />
+											</html>
+										</platform-specific>
+									</decorator-section>
+								</decorator-screen>
+							</widgets>
+							<fail-widgets>
+								<include-screen name="ListImExPlan" />
+							</fail-widgets>
+						</section>
+					</widgets>
+				</section>
+			</widgets>
+			<fail-widgets>
+				<section>
+					<actions>
+						<set field="selectedMenuItem" value="salesForecastPO" />
+						<set field="selectedSubMenuItem" value="salesForecastList" />
+						<set field="titleProperty" value="PageTitleEditSalesForecast" />
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<label text="${uiLabelMap.DmsNotPermission}">
+								</label>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</fail-widgets>
+		</section>
+	</screen>
+</screens>

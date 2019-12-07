@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+
+	<entity entity-name="DeliveryEntry" package-name="com.olbius.logistics">
+		<field name="deliveryEntryId" type="id-ne"></field>
+		<field name="description" type="name"></field>
+		<field name="fromDate" type="date-time"></field>
+		<field name="thruDate" type="date-time"></field>
+		<field name="weight" type="fixed-point"></field>
+		<field name="statusId" type="id-ne"></field>
+		<field name="weightUomId" type="id-ne"></field>
+		<field name="facilityId" type="id-ne"></field>
+		<prim-key field="deliveryEntryId" />
+		<relation type="one" fk-name="FK_DE_STAT" rel-entity-name="StatusItem">
+			<key-map field-name="statusId"/>
+		</relation>
+		<relation type="one" fk-name="FK_DE_FA" rel-entity-name="Facility">
+			<key-map field-name="facilityId"></key-map>
+		</relation>
+		<relation fk-name="FK_DE_UOM" rel-entity-name="Uom" type="one">
+			<key-map field-name="weightUomId" rel-field-name="uomId"></key-map>
+		</relation>
+	</entity>
+	<entity entity-name="Vehicle" package-name="org.ofbiz.product.facility">
+    	<description>Vehicles</description>
+    	<field name="vehicleId" type="id-ne"></field>
+  		<field name="shipmentMethodTypeId" type="id-ne" not-null="true"></field>
+  		<field name="vehicleTypeId" type="id-ne" not-null="true"></field>
+  		<field name="vehicleName" type="name"></field>
+  		<field name="ownerPartyId" type="id"></field>
+  		<field name="partyCarrierId" type="id"></field>
+  		<field name="fromDate" type="date-time"></field>
+  		<field name="thruDate" type="date-time"></field>
+  		<field name="maxWeight" type="fixed-point"></field>
+  		<field name="minWeight" type="fixed-point"></field>
+  		<field name="weightUomId" type="id-ne"></field>
+ 		<field name="currencyUomId" type="id-ne"></field>
+ 		<field name="lengthUomId" type="id-ne"></field>
+  		<field name="unitCost" type="fixed-point"></field>
+  		<field name="statusId" type="id-ne"></field>
+  		<field name="description" type="long-varchar"></field>
+  		<prim-key field="vehicleId"/>
+  		<relation rel-entity-name="CarrierShipmentMethod" type="one">
+  			<key-map field-name="shipmentMethodTypeId" rel-field-name="shipmentMethodTypeId"/>
+  			<key-map field-name="partyCarrierId" rel-field-name="partyId"/>
+  		</relation>
+  		<relation rel-entity-name="Party" type="one">
+  			<key-map field-name="ownerPartyId" rel-field-name="partyId"/>
+  		</relation>
+  		<relation rel-entity-name="VehicleType" type="one" fk-name="FK_TV_VERHICLE_TYPE">
+  			<key-map field-name="vehicleTypeId" rel-field-name="vehicleTypeId"/>
+  		</relation>
+  		<relation rel-entity-name="Uom" type="one" fk-name="FK_UOM_NEW1">
+  			<key-map field-name="weightUomId" rel-field-name="uomId"/>
+  		</relation>
+  		<relation rel-entity-name="Uom" type="one" fk-name="FK_UOM_NEW2">
+  			<key-map field-name="currencyUomId" rel-field-name="uomId"/>
+  		</relation>
+  		<relation rel-entity-name="Uom" type="one" fk-name="FK_UOM_NEW3">
+  			<key-map field-name="lengthUomId" rel-field-name="uomId"/>
+  		</relation>
+  		<relation rel-entity-name="StatusItem" type="one" fk-name="FK_VEHICLE_STATUS">
+  			<key-map field-name="statusId" rel-field-name="statusId"/>
+  		</relation>
+  		<index name="vehicleId" unique="true">
+  			<index-field name="vehicleId"/>
+  		</index>
+    </entity>
+    <entity entity-name="DeliveryBoxType" package-name="org.ofbiz.product.facility" title="">
+      <field name="deliveryBoxTypeId" type="id-ne"></field>
+      <field name="description" type="description"></field>
+      <field name="dimensionUomId" type="id"></field>
+      <field name="boxLength" type="fixed-point"></field>
+      <field name="boxWidth" type="fixed-point"></field>
+      <field name="boxHeight" type="fixed-point"></field>
+      <field name="weightUomId" type="id"></field>
+      <field name="boxWeight" type="fixed-point"></field>
+      <prim-key field="deliveryBoxTypeId"/>
+      <relation type="one" fk-name="DLV_BXTP_DUOM" title="Dimension" rel-entity-name="Uom">
+        <key-map field-name="dimensionUomId" rel-field-name="uomId"/>
+      </relation>
+      <relation type="one" fk-name="DLV_BXTP_WUOM" title="Weight" rel-entity-name="Uom">
+        <key-map field-name="weightUomId" rel-field-name="uomId"/>
+      </relation>
+    </entity>
+    <entity entity-name="DeliveryEntryPackage"
+            package-name="org.ofbiz.product.facility"
+            title="Delivery Entry Package Entity">
+      <field name="deliveryEntryId" type="id-ne"></field>
+      <field name="deliveryPackageSeqId" type="id-ne"></field>
+      <field name="deliveryBoxTypeId" type="id"></field>
+      <field name="dateCreated" type="date-time"></field>
+      <field name="boxLength" type="fixed-point"><description></description></field>
+      <field name="boxHeight" type="fixed-point"><description></description></field>
+      <field name="boxWidth" type="fixed-point"><description></description></field>
+      <field name="dimensionUomId" type="id"><description></description></field>
+      <field name="weight" type="fixed-point"></field>
+      <field name="weightUomId" type="id"></field>
+      <prim-key field="deliveryEntryId"/>
+      <prim-key field="deliveryPackageSeqId"/>
+      <relation type="one" fk-name="DEP_DE" rel-entity-name="DeliveryEntry">
+        <key-map field-name="deliveryEntryId"/>
+      </relation>
+      <relation type="one" fk-name="DEP_BXTYP" rel-entity-name="DeliveryBoxType">
+        <key-map field-name="deliveryBoxTypeId"/>
+      </relation>
+      <relation type="one" fk-name="DEP_DUOM" title="Dimension" rel-entity-name="Uom">
+        <key-map field-name="dimensionUomId" rel-field-name="uomId"/>
+      </relation>
+      <relation type="one" fk-name="DEP_WUOM" title="Weight" rel-entity-name="Uom">
+        <key-map field-name="weightUomId" rel-field-name="uomId"/>
+      </relation>
+    </entity>
+    <entity entity-name="DeliveryEntryPackageContent" package-name="org.ofbiz.product.facility" title="Shipment Package Content Entity">
+      <field name="deliveryEntryId" type="id-ne"></field>
+      <field name="deliveryPackageSeqId" type="id-ne"></field>
+      <field name="shipmentId" type="id-ne"></field>
+      <field name="shipmentItemSeqId" type="id-ne"></field>
+      <field name="quantity" type="fixed-point"></field>
+      <prim-key field="deliveryEntryId"/>
+      <prim-key field="deliveryPackageSeqId"/>
+      <prim-key field="shipmentId"/>
+      <prim-key field="shipmentItemSeqId"/>
+      <relation type="one" fk-name="DE_PCK_CNTNT_DEP" rel-entity-name="DeliveryEntryPackage">
+        <key-map field-name="deliveryEntryId"/>
+        <key-map field-name="deliveryPackageSeqId"/>
+      </relation>
+      <relation type="one-nofk" rel-entity-name="Shipment">
+        <key-map field-name="shipmentId"/>
+      </relation>
+      <relation type="one-nofk" rel-entity-name="DeliveryEntry">
+        <key-map field-name="deliveryEntryId"/>
+      </relation>
+      <relation type="one" fk-name="DE_PCK_CNTNT_SHITM" rel-entity-name="ShipmentItem">
+        <key-map field-name="shipmentId"/>
+        <key-map field-name="shipmentItemSeqId"/>
+      </relation>
+    </entity>
+    <entity entity-name="DeliveryEntryVehicle" package-name="com.olbius.logistics">
+		<field name="deliveryEntryId" type="id-ne"></field>
+		<field name="vehicleId" type="id-ne"></field>
+		<field name="statusId" type="id-ne"></field>
+		<field name="weight" type="fixed-point"></field>
+		<field name="fromDate" type="date-time"></field>
+  		<field name="thruDate" type="date-time"></field>
+		<prim-key field="deliveryEntryId" />	
+		<prim-key field="vehicleId" />
+		<relation type="one" fk-name="FK_DE_VEHICLE_DE" rel-entity-name="DeliveryEntry">
+			<key-map field-name="deliveryEntryId"/>
+		</relation>
+		<relation type="one" fk-name="FK_DEVS_VEHICLE" rel-entity-name="Vehicle">
+			<key-map field-name="vehicleId"></key-map>
+		</relation>
+		<relation type="one" fk-name="FK_DEVS_STATUS" rel-entity-name="StatusItem">
+			<key-map field-name="statusId" rel-field-name="statusId"></key-map>
+		</relation>
+	</entity>
+	<entity entity-name="DeliveryEntryVehicleItem" package-name="com.olbius.logistics">
+		<field name="deliveryEntryId" type="id-ne"></field>
+		<field name="vehicleId" type="id-ne"></field>
+		<field name="shipmentId" type="id-ne"></field>
+		<field name="shipmentItemSeqId" type="id-ne"></field>
+		<field name="quantity" type="fixed-point"></field>
+		<field name="statusId" type="id-ne"></field>
+		<prim-key field="deliveryEntryId" />	
+		<prim-key field="vehicleId" />
+		<prim-key field="shipmentId" />
+		<prim-key field="shipmentItemSeqId" />
+		<relation type="one" fk-name="FK_DEV_DELIVERY_ENTRY" rel-entity-name="DeliveryEntry">
+			<key-map field-name="deliveryEntryId"/>
+		</relation>
+		<relation type="one" fk-name="FK_DEV_VEHICLE" rel-entity-name="Vehicle">
+			<key-map field-name="vehicleId"></key-map>
+		</relation>
+		<relation type="one" fk-name="FK_DEV_SHIPMENT_ITEM" rel-entity-name="ShipmentItem">
+			<key-map field-name="shipmentId" rel-field-name="shipmentId"></key-map>
+			<key-map field-name="shipmentItemSeqId" rel-field-name="shipmentItemSeqId"></key-map>
+		</relation>
+		<relation type="one" fk-name="FK_DEV_STATUS" rel-entity-name="StatusItem">
+			<key-map field-name="statusId" rel-field-name="statusId"></key-map>
+		</relation>
+	</entity>
+	<entity entity-name="DeliveryEntryVehicleRole" package-name="com.olbius.logistics">
+		<field name="deliveryEntryId" type="id-ne"></field>
+		<field name="vehicleId" type="id-ne"></field>
+		<field name="partyId" type="id-ne"></field>
+		<field name="roleTypeId" type="id-ne"></field>
+		<prim-key field="deliveryEntryId" />	
+		<prim-key field="vehicleId" />
+		<prim-key field="partyId" />
+		<prim-key field="roleTypeId" />
+		<relation type="one" fk-name="FK_DEVS_DELIVERY_ENTRY" rel-entity-name="DeliveryEntry">
+			<key-map field-name="deliveryEntryId"/>
+		</relation>
+		<relation type="one" fk-name="FK_DEVS_VEHICLE_ID" rel-entity-name="Vehicle">
+			<key-map field-name="vehicleId"></key-map>
+		</relation>
+		<relation type="one" fk-name="FK_DEVS_STATUS" rel-entity-name="StatusItem">
+			<key-map field-name="statusId" rel-field-name="statusId"></key-map>
+		</relation>
+	</entity>
+	<entity entity-name="DeliveryEntryRole" package-name="com.olbius.logistics">
+		<field name="deliveryEntryId" type="id-ne"></field>
+		<field name="partyId" type="id-ne"></field>
+		<field name="roleTypeId" type="id-ne"></field>
+		<prim-key field="deliveryEntryId" />	
+		<prim-key field="partyId" />
+		<prim-key field="roleTypeId" />	
+		<relation type="one" fk-name="FK_DER_DELIVERY_ENTRY" rel-entity-name="DeliveryEntry">
+			<key-map field-name="deliveryEntryId"/>
+		</relation>
+		<relation type="one" fk-name="FK_DER_PARTY" rel-entity-name="Party">
+			<key-map field-name="partyId"></key-map>
+		</relation>
+		<relation type="one" fk-name="FK_DER_PARTY_ROLE" rel-entity-name="PartyRole">
+			<key-map field-name="partyId"></key-map>
+			<key-map field-name="roleTypeId"></key-map>
+		</relation>
+	</entity>
+	
+	<!-- Extend Entity Shipment for Delivery Entry -->
+    <extend-entity entity-name="Shipment">
+        <field name="deliveryEntryId" type="id"></field>
+        <relation type="one" fk-name="FK_SHIP_DE" title="FixedAsset" rel-entity-name="DeliveryEntry">
+            <key-map field-name="deliveryEntryId"/>
+        </relation>
+    </extend-entity>
+    
+    <entity entity-name="FaxNumber" package-name="com.olbius.logistics" title="Fax Number Entity">
+      <field name="contactMechId" type="id-ne"></field>
+      <field name="countryCode" type="very-short"></field>
+      <field name="areaCode" type="very-short"></field>
+      <field name="faxNumber" type="short-varchar"></field>
+      <field name="askForName" type="name"></field>  <!-- person or department to ask for at this number -->
+      <prim-key field="contactMechId"/>
+      <relation type="one" fk-name="FAX_NUM_CMECH" rel-entity-name="ContactMech">
+        <key-map field-name="contactMechId"/>
+      </relation>
+      <index name="COUNTRY_CODE_IDX">
+        <index-field name="countryCode"/>
+      </index>
+      <index name="AREA_CODE_IDX">
+        <index-field name="areaCode"/>
+      </index>
+      <index name="FAX_NUMBER_IDX">
+        <index-field name="faxNumber"/>
+      </index>
+    </entity>
+
+	<extend-entity entity-name="Product">
+        <field name="productCode" type="name"></field>
+    </extend-entity>
+</entitymodel>

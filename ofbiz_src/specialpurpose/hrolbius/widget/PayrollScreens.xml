@@ -1,0 +1,1682 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	<screen name="main">
+		<section>
+			<actions>
+				<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/payroll/getPayrollFormula.groovy" />
+				
+				<!-- <set field="navMenuName" value="FindListFormulaSubTabBar" />
+				<set field="navMenuLocation" value="component://hrolbius/widget/menus/PayrollMenus.xml" /> -->
+				<!-- <set field="tabButtonItem" value="payrollmain" />
+				<set field="tabSubButtonItem" value="PayrollTableList"/> -->
+				<!-- <set field="organizationPartyId" value="DELYS" />
+				<set field="selectedMenuItem" value="payroll"/>
+				<service service-name="getPartyAccountingPreferences"
+					result-map="result" auto-field-map="true" />
+				<set field="partyAcctgPreference" from-field="result.partyAccountingPreference" /> -->
+				<set field="titleProperty" value="PayrollTableCalcResults" />
+				<set field="selectedMenuItem" value="payroll"/>
+				<set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId" />
+				<set field="selectedSubMenuItem" value="payrollmain" />
+				<property-to-field field="defaultCurrencyUomId" resource="general" property="currency.uom.id.default" default="VND"/>
+				<entity-one value-field="payrollTableRecord" entity-name="PayrollTableRecord"></entity-one>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+							<section>
+								<condition>
+									<if-compare operator="not-equals" value="PYRLL_TABLE_CREATED" field="payrollTableRecord.statusId"/>
+								</condition>
+								<actions>
+									<service service-name="getPayrollTableRecordTimestamp" result-map="payrollTimestampResult">
+										<field-map field-name="payrollTableId" from-field="parameters.payrollTableId"/>
+									</service>										
+								</actions>
+								<widgets>
+									<platform-specific>
+										<html>
+											<html-template
+												location="component://hrolbius/webapp/hrolbius/ftl/listSalary.ftl" />
+										</html>
+									</platform-specific>
+								</widgets>
+								<fail-widgets>
+									<container style="alert alert-info">
+										<label>${uiLabelMap.PayrollTableNotCalculated}</label>
+									</container>
+								</fail-widgets>
+							</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="PayrollTableRecord">
+		<section>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="EmployeeUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="DirectoryUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="WidgetUiLabels" global="true"/>	
+				<set field="tempFromDate" value="${groovy: if(parameters.fromDate) return new java.sql.Timestamp(Long.parseLong(parameters.fromDate))}" type="Timestamp"/>
+				<entity-condition list="payrollCharList" entity-name="PayrollCharacteristic">
+					<order-by field-name="sequenceNum"/>
+				</entity-condition>
+				<!-- <entity-condition list="payrollItemTypeList" entity-name="PayrollItemType"></entity-condition> -->
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://hrolbius/webapp/hrolbius/ftl/payroll/payrollTableRecord2.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<!-- <screen name="EditPayrollTable">
+		<section>
+			<actions>
+				<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/payroll/getPayrollFormula.groovy" />
+				<set field="titleProperty" value="EditPayrollTable" />
+				<set field="selectedMenuItem" value="payroll"/>
+				<set field="tabButtonItem" value="payrollmain"/>
+				<set field="tabSubButtonItem" value="EditPayrollTable"/>
+				<set field="layoutSettings.styleSheets[]" value="/aceadmin/assets/css/chosen.css" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<entity-condition list="periodTypes" entity-name="PeriodType">
+									<condition-list combine="or">
+										<condition-expr field-name="periodTypeId" operator="equals" value="DAILY"/>
+										<condition-expr field-name="periodTypeId" operator="equals" value="WEEKLY"/>
+										<condition-expr field-name="periodTypeId" operator="equals" value="MONTHLY"/>
+										<condition-expr field-name="periodTypeId" operator="equals" value="QUARTERLY"/>
+										<condition-expr field-name="periodTypeId" operator="equals" value="YEARLY"/>
+									</condition-list>
+								</entity-condition>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/party/getAllDepartment.groovy"/>
+							</actions>
+							<widgets>
+								<screenlet title="${uiLabelMap.EditPayrollTable}">
+									<platform-specific>
+										<html>
+											<html-template location="component://hrolbius/webapp/hrolbius/ftl/payroll/EditPayrollTable.ftl"/>
+										</html>
+									</platform-specific>
+								</screenlet>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>			
+			</widgets>
+		</section>
+	</screen> -->
+	<screen name="PayrollTableList">
+		<section>
+			<actions>
+				<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/payroll/getPayrollFormula.groovy" />
+				<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/Insurance/getInsuranceCustomTimePeriod.groovy"/>
+				<set field="titleProperty" value="PayrollTableList" />
+				
+				<set field="selectedMenuItem" value="payroll" />
+				<set field="selectedSubMenuItem" value="payrollmain" />
+				
+				<set field="layoutSettings.styleSheets[]" value="/aceadmin/assets/css/chosen.css" global="true"/>
+				<set field="layoutSettings.javaScripts[]" value="/images/jquery/plugins/validate/jquery.validate.min.js" global="true" />
+				<set field="layoutSettings.javaScripts[]" value="/delys/images/js/marketing/utils.js" global="true" />
+				<set field="layoutSettings.styleSheets[]" value="/hrolbius/images/css/styles.css" global="true"/>
+				<set field="defaultPeriodType" value="MONTHLY"/>
+				<entity-condition list="customTimePeriodYear" entity-name="CustomTimePeriod">
+					<condition-expr field-name="periodTypeId" value="YEARLY"/>
+					<order-by field-name="-fromDate"/>
+				</entity-condition>
+				<entity-condition list="periodTypes" entity-name="PeriodType"> 
+					<condition-list combine="or">
+						<condition-expr field-name="periodTypeId" operator="equals" value="DAILY"/>
+						<condition-expr field-name="periodTypeId" operator="equals" value="WEEKLY"/>
+						<condition-expr field-name="periodTypeId" operator="equals" value="MONTHLY"/>
+						<condition-expr field-name="periodTypeId" operator="equals" value="QUARTERLY"/>
+						<condition-expr field-name="periodTypeId" operator="equals" value="YEARLY"/>
+					</condition-list>
+				</entity-condition>
+				<entity-condition list="statuses" entity-name="StatusItem">
+					<condition-expr field-name="statusTypeId" operator="equals" value="PAYROLL_TABLE"/>
+					<order-by field-name="sequenceId"/>
+				</entity-condition>
+				<entity-condition list="payrollChar" entity-name="PayrollCharacteristic">
+					<condition-expr field-name="payrollCharacteristicId" operator="in" value="INCOME,DEDUCTION,TAX_DEDUCTION"/>
+					<order-by field-name="payrollCharacteristicId"/>
+				</entity-condition>
+				<entity-condition list="payrollFormula" entity-name="PayrollFormula">
+					<condition-expr field-name="payrollCharacteristicId" operator="in" value="INCOME,DEDUCTION,TAX_DEDUCTION"/>
+					<order-by field-name="code"/>				
+				</entity-condition>
+				<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/Training/getPartyGroupTree.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<platform-specific>
+							<html>
+								<html-template location="component://hrolbius/webapp/hrolbius/ftl/payroll/ListPayrollJQ.ftl"/>
+							</html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>		
+			</widgets>
+		</section>
+	</screen>
+	<!-- Screens for job analysis -->
+	<screen name="FormulaIncome">
+		<section>
+			<actions>
+				<!-- <set field="navMenuName" value="formulaSubTabBar" />
+				<set field="navMenuLocation" value="component://hrolbius/widget/menus/hrolbiusMenus.xml" />
+				<set field="tabButtonItemTop" value="formula" /> -->
+				<set field="titleProperty" value="FormulaIncomeList" />
+				<set field="selectedMenuItem" value="payroll"/>
+				<set field="selectedSubMenuItem" value="formula" />
+				<set field="tabBarName" value="PayrollFormulaSubTarBar" global="true" />
+				<set field="tabBarLocation" value="component://hrolbius/widget/menus/PayrollMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+				<set field="tabButtonItem" value="formulaList" global="true"/>
+				<!-- <set field="tabButtonItem" value="formula"/>
+				<set field="tabSubButtonItem" value="formulaList"/> -->
+				
+				<set field="layoutSettings.javaScripts[]" value="/images/jquery/plugins/validate/jquery.validate.min.js" global="true" />
+				<set field="layoutSettings.styleSheets[]" value="/hrolbius/images/css/styles.css" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<entity-condition list="payrollCharacteristic" entity-name="PayrollCharacteristic"></entity-condition>
+								<entity-condition list="payrollItemType" entity-name="PayrollItemType"></entity-condition>
+								<entity-condition list="taxableType" entity-name="TaxableType"></entity-condition>
+								<entity-condition list="periodTypes" entity-name="PeriodType"> 
+									<condition-list combine="or">
+										<condition-expr field-name="periodTypeId" operator="equals" value="DAILY"/>
+										<condition-expr field-name="periodTypeId" operator="equals" value="WEEKLY"/>
+										<condition-expr field-name="periodTypeId" operator="equals" value="MONTHLY"/>
+										<condition-expr field-name="periodTypeId" operator="equals" value="QUARTERLY"/>
+										<condition-expr field-name="periodTypeId" operator="equals" value="YEARLY"/>
+										<condition-expr field-name="periodTypeId" operator="equals" value="NA"/>
+									</condition-list>
+								</entity-condition>
+								<entity-condition list="allParameterType" entity-name="PayrollEmplParameterType">
+									<condition-expr field-name="code" operator="not-equals" value="GENERAL"/>
+								</entity-condition>
+								<entity-condition list="paramCharacteristicList" entity-name="PayrollParamCharacteristic"></entity-condition>
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/payroll/ListFormulaIncomeJQ.ftl"/>
+									</html>
+								</platform-specific>	
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="FormulaOther">
+		<section>
+			<actions>
+				<set field="titleProperty" value="FormulaOtherList" />
+				<set field="selectedMenuItem" value="payroll"/>
+				<set field="selectedSubMenuItem" value="formula" />
+				<set field="tabBarName" value="PayrollFormulaSubTarBar" global="true" />
+				<set field="tabBarLocation" value="component://hrolbius/widget/menus/PayrollMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+				<set field="tabButtonItem" value="formulaOtherList" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<entity-condition list="payrollCharacteristic" entity-name="PayrollCharacteristic"></entity-condition>
+								<entity-condition list="paramCharacteristicList" entity-name="PayrollParamCharacteristic"></entity-condition>
+								<entity-condition list="allParameterType" entity-name="PayrollEmplParameterType">
+									<condition-expr field-name="code" operator="not-equals" value="GENERAL"/>
+								</entity-condition>
+								<entity-condition list="periodTypes" entity-name="PeriodType"> 
+									<condition-list combine="or">
+										<condition-expr field-name="periodTypeId" operator="equals" value="DAILY"/>
+										<condition-expr field-name="periodTypeId" operator="equals" value="WEEKLY"/>
+										<condition-expr field-name="periodTypeId" operator="equals" value="MONTHLY"/>
+										<condition-expr field-name="periodTypeId" operator="equals" value="QUARTERLY"/>
+										<condition-expr field-name="periodTypeId" operator="equals" value="YEARLY"/>
+										<condition-expr field-name="periodTypeId" operator="equals" value="NA"/>
+									</condition-list>
+								</entity-condition>
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/payroll/FormulaOtherList.ftl"/>
+									</html>
+								</platform-specific>	
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="FormulaDeduction">
+		<section>
+			<actions>
+				<set field="titleProperty" value="FormulaDeduction" />
+				<set field="selectedMenuItem" value="payroll"/>
+				<set field="selectedSubMenuItem" value="formula" />
+				<set field="tabBarName" value="PayrollFormulaSubTarBar" global="true" />
+				<set field="tabBarLocation" value="component://hrolbius/widget/menus/PayrollMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+				<set field="tabButtonItem" value="formulaDeductionList" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<entity-condition list="payrollCharacteristic" entity-name="PayrollCharacteristic"></entity-condition>
+								<entity-condition list="periodTypes" entity-name="PeriodType"> 
+									<condition-list combine="or">
+										<condition-expr field-name="periodTypeId" operator="equals" value="DAILY"/>
+										<condition-expr field-name="periodTypeId" operator="equals" value="WEEKLY"/>
+										<condition-expr field-name="periodTypeId" operator="equals" value="MONTHLY"/>
+										<condition-expr field-name="periodTypeId" operator="equals" value="QUARTERLY"/>
+										<condition-expr field-name="periodTypeId" operator="equals" value="YEARLY"/>
+										<condition-expr field-name="periodTypeId" operator="equals" value="NA"/>
+									</condition-list>
+								</entity-condition>
+								<entity-condition list="allParameterType" entity-name="PayrollEmplParameterType">
+									<condition-expr field-name="code" operator="not-equals" value="GENERAL"/>
+								</entity-condition>
+								<entity-condition list="paramCharacteristicList" entity-name="PayrollParamCharacteristic"></entity-condition>
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/payroll/FormulaDeduction.ftl"/>
+									</html>
+								</platform-specific>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="EditFormula">
+		<section>
+			<actions>
+				<set field="layoutSettings.javaScripts[]" value="/hrolbius/js/bootbox.min.js" global="true"/>
+				<set field="selectedMenuItem" value="payroll"/>
+				<set field="selectedSubMenuItem" value="formula" />
+				<set field="tabBarName" value="PayrollFormulaSubTarBar" global="true" />
+				<set field="tabBarLocation" value="component://hrolbius/widget/menus/PayrollMenus.xml" global="true" />
+				<set field="tabButtonItem" value="${groovy: if(parameters.payrollCharacteristicId == null) return &quot;formulaOtherList&quot; else if(parameters.payrollCharacteristicId.equals(&quot;DEDUCTION&quot;)) return &quot;formulaDeductionList&quot; else if(parameters.payrollCharacteristicId.equals(&quot;INCOME&quot;)) return &quot;formulaList&quot;}"/>								
+				<set field="layoutSettings.javaScripts[]" value="/hrolbius/js/jquery.hotkeys-0.7.9.min.js" global="true"/>
+				<entity-one entity-name="PayrollFormula" value-field="payrollFormulaGV" auto-field-map="true"/>
+				<entity-condition list="payrollFormula" entity-name="PayrollFormula">
+					<condition-expr field-name="code" operator="not-equals" from-field="parameters.code"/>
+				</entity-condition>
+				<entity-condition list="payrollParameters" entity-name="PayrollParameters"></entity-condition>
+				<set field="titleProperty" value="EditFormula"/>
+				<!-- <entity-condition list="invoiceItemType" entity-name="InvoiceItemType">
+					<condition-expr field-name="invoiceItemTypeId" operator="like" value="PAYROL%"/>
+					<order-by field-name="description"/>
+				</entity-condition> -->
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<entity-condition list="payrollIncome" entity-name="PayrollCharacteristic">
+									<condition-expr field-name="payrollCharacteristicId" value="INCOME"/>
+								</entity-condition>
+								<entity-condition list="payrollDeduction" entity-name="PayrollCharacteristic">
+									<condition-list combine="or">
+										<condition-expr field-name="payrollCharacteristicId" value="TAX_DEDUCTION"/>
+										<condition-expr field-name="payrollCharacteristicId" value="DEDUCTION"/>
+									</condition-list>
+								</entity-condition>
+								<entity-condition list="payrollItemType" entity-name="PayrollItemType"></entity-condition>
+								<entity-condition list="taxableType" entity-name="TaxableType"></entity-condition>
+							</actions>
+							<widgets>
+								<screenlet title="${uiLabelMap.EditFormula}">
+									<!-- <include-form
+										location="component://hrolbius/widget/forms/PayrollForms.xml"
+										name="EditFormula" /> -->
+										<platform-specific>
+											<html>
+												<html-template location="component://hrolbius/webapp/hrolbius/ftl/payroll/EditFormula.ftl"/>
+											</html>
+										</platform-specific>
+								</screenlet>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EditPartyFormulaInvoiceItemType">
+		<section>
+			<actions>
+				<!-- <set field="tabButtonItem" value="formula" />
+				<set field="tabSubButtonItem" value="formulaInvoiceItemType"/> -->
+				<set field="selectedMenuItem" value="payroll"/>
+				<set field="selectedSubMenuItem" value="formula" />
+				<set field="tabBarName" value="PayrollFormulaSubTarBar" global="true" />
+				<set field="tabBarLocation" value="component://hrolbius/widget/menus/PayrollMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+				<set field="tabButtonItem" value="formulaInvoiceItemType" global="true"/>
+				
+				<set field="layoutSettings.styleSheets[]" value="/aceadmin/assets/css/chosen.css" global="true"/>
+				<set field="titleProperty" value="ListPartyFormulaInvoiceItemType"/>
+				
+				<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/payroll/getInvoiceItemTypeFormula.groovy"/>
+				<set field="layoutSettings.styleSheets[]" value="/hrolbius/images/css/styles.css" global="true"/>
+				<entity-condition list="formulaList" entity-name="PayrollFormula"></entity-condition>
+				<set field="createNewLinkId" value="AddFormulaInvoiceItemType"/>
+				<set field="dataToggleModalId" value="AddFormulaInvoiceItemTypePopup"/>
+				<set field="linkUrl" value="createPartyFormulaInvoiceItemType"/>
+				<set field="formId" value="EditPartyFormulaIIT"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/Training/getPartyGroupTree.groovy"/>
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/payroll/ListPartyFormulaInvoiceItemTypeJQ.ftl"/>
+									</html>
+								</platform-specific>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<!-- ===========================timekeeping screen ====================================-->
+	<screen name="EmplTimesheetList">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="EmplTimekeeping" />
+				<set field="selectedSubMenuItem" value="emplTimesheets"/>
+				<set field="titleProperty" value="EmplTimesheetList"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="EmplTimekeepingDecorator" location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<entity-condition list="statusList" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="EMPL_TIME_SHEET_STT"/>
+								</entity-condition>
+								<entity-condition list="listEmplTimekeepingSign" entity-name="EmplTimekeepingSign">
+									<condition-expr field-name="emplTimekeepingSignId" operator="not-equals" value="_NA_"/>
+								</entity-condition>
+								<entity-condition list="statusListWorkOvertime" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="WOT_REGISTER"/>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>
+								<entity-condition list="statusListWorkingLate" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="EMPL_LATE_APPR"/>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>
+								<entity-condition list="emplPosType" entity-name="EmplPositionType">
+									<condition-expr field-name="emplPositionTypeId" operator="not-equals" value="_NA_"/>
+									<order-by field-name="emplPositionTypeId"/>
+								</entity-condition>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/Training/getPartyGroupTree.groovy"/>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/Insurance/getInsuranceCustomTimePeriod.groovy"/>
+								<entity-condition list="customTimePeriodYear" entity-name="CustomTimePeriod">
+									<condition-expr field-name="periodTypeId" value="YEARLY"/>
+									<order-by field-name="-fromDate"/>
+								</entity-condition>
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/payroll/EmplTimesheetList.ftl"/>
+									</html>
+								</platform-specific>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ProposalTimesheet">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="EmplTimekeeping" />
+				<set field="selectedSubMenuItem" value="emplTimesheets"/>
+				<set field="titleProperty" value="EmplTimesheetList"/>
+				<entity-one value-field="emplTimesheet" entity-name="EmplTimesheets"></entity-one>
+			</actions>
+			<widgets>
+				<decorator-screen name="EmplTimekeepingDecorator" location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<not>
+									<if-empty field="emplTimesheet"/>
+								</not>
+							</condition>
+							<actions>
+								<entity-condition list="statusList" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="EMPL_TIME_SHEET_STT"/>
+								</entity-condition>
+								<entity-condition list="listEmplTimekeepingSign" entity-name="EmplTimekeepingSign">
+									<condition-expr field-name="emplTimekeepingSignId" operator="not-equals" value="_NA_"/>
+								</entity-condition>
+								<entity-condition list="statusListWorkOvertime" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="WOT_REGISTER"/>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>
+								<entity-condition list="statusListWorkingLate" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="EMPL_LATE_APPR"/>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>
+								<entity-condition list="emplPosType" entity-name="EmplPositionType">
+									<condition-expr field-name="emplPositionTypeId" operator="not-equals" value="_NA_"/>
+									<order-by field-name="emplPositionTypeId"/>
+								</entity-condition>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/Training/getPartyGroupTree.groovy"/>
+							</actions>
+							<widgets>
+								<screenlet title="${uiLabelMap.ApprovalTimesheets}">
+									<platform-specific>
+										<html>
+											<html-template location="component://hrolbius/webapp/hrolbius/ftl/payroll/ProposalTimesheet.ftl"/>
+										</html>
+									</platform-specific>
+								</screenlet>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ApprovalWorkingOvertimeEmpl">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="EmplTimekeeping" />
+				<set field="selectedSubMenuItem" value="mgrWorkingOvertime"/>
+				<set field="titleProperty" value="ListEmplWorkOvertime"/>
+				<set field="tabButtonItem" value="approvalWorkingOvertime"/>
+				<set field="tabBarName" value="EmplTimeMgrTabBar" global="true" />
+				<set field="tabBarLocation"
+					value="component://hrolbius/widget/menus/PayrollMenus.xml"
+					global="true" />
+			</actions>
+			<widgets>
+				<decorator-screen name="EmplTimekeepingDecorator" location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<entity-condition list="statusListWorkOvertime" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="WOT_REGISTER"/>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/payroll/ApprovalWorkingOvertimeEmpl.ftl"/>
+									</html>
+								</platform-specific>
+							</widgets>						
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EmplTimekeepingReport">
+		<section>
+			<actions>
+				<!-- <set field="tabButtonItem" value="EmplTimekeepingReport" /> -->
+				<!-- <set field="selectedMenuItem" value="EmplTimekeepingReport"/> -->
+				<set field="selectedMenuItem" value="EmplTimekeeping" />
+				<set field="selectedSubMenuItem" value="timeRecorder"/>
+				<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/payroll/EmplTimekeepingReport.groovy"/>
+				<set field="titleProperty" value="DetailEmplTimekeepingReportTiltle" />
+				<set field="navMenuName" value="noneMenu"/>
+				<set field="navMenuLocation" value="component://hrolbius/widget/menus/hrolbiusMenus.xml" />
+				<set field="currentDateTime" value="${groovy: java.util.Calendar.getInstance()}" type="Object"/>
+				<!-- <set field="tabBarName" value="EmplTimekeepingTabBar" global="true" />
+				<set field="tabBarLocation"
+					value="component://hrolbius/widget/menus/PayrollMenus.xml"
+					global="true" /> -->			
+			</actions>
+			<widgets>
+				<decorator-screen name="EmplTimekeepingDecorator" location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/Training/getPartyGroupTree.groovy"/>
+							</actions>
+							<widgets>
+									<platform-specific>
+										<html>
+											<html-template location="component://hrolbius/webapp/hrolbius/ftl/payroll/EmplTimekeepingReportJqx.ftl"/>
+										</html>
+									</platform-specific>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EmplTimekeepingReportOverview">
+		<section>
+			<actions>
+				<set field="tabButtonItem" value="EmplTimekeepingReportOverview" />
+				<set field="selectedMenuItem" value="EmplTimekeeping" />
+				<set field="selectedSubMenuItem" value="timeRecorder" />
+				<!-- <script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/payroll/EmplTimekeepingReport.groovy"/> -->
+				<set field="titleProperty" value="EmplTimekeepingReport" />
+				<set field="navMenuName" value="noneMenu"/>
+				<set field="navMenuLocation" value="component://hrolbius/widget/menus/hrolbiusMenus.xml" />
+				<set field="currentDateTime" value="${groovy: java.util.Calendar.getInstance()}" type="Object"/>
+				<set field="layoutSettings.javaScripts[]" value="/aceadmin/assets/js/fuelux/fuelux.spinner.min.js" global="true"/>
+				<!-- <set field="tabBarName" value="EmplTimekeepingTabBar" global="true" />
+				<set field="tabBarLocation"
+					value="component://hrolbius/widget/menus/PayrollMenus.xml"
+					global="true" /> -->
+			</actions>	
+			<widgets>
+				<decorator-screen name="EmplTimekeepingDecorator" location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>	
+							<actions>
+								<property-to-field resource="general" property="ORGANIZATION_PARTY" field="defaultPartyId"/>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/payroll/getMonthYear.groovy"/>
+								<entity-condition list="emplPosType" entity-name="EmplPositionType">
+									<condition-expr field-name="emplPositionTypeId" operator="not-equals" value="_NA_"/>
+									<order-by field-name="emplPositionTypeId"/>
+								</entity-condition>
+								<entity-condition list="statusList" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="WOT_REGISTER"/>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>
+								<entity-condition list="statusLateList" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="EMPL_LATE_APPR"/>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/Training/getPartyGroupTree.groovy"/>
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/payroll/EmplTimekeepingReportOverview.ftl"/>
+									</html>
+								</platform-specific>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>						
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EmplTimekeepingOverviewInfo">
+		<section>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="HrCommonUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="CommonUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="EmployeeUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="WidgetUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="DelysUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="DirectoryUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="PayrollUiLabels" global="true"/>
+				<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/payroll/getMonthYear.groovy"/>
+				<entity-condition list="emplPosType" entity-name="EmplPositionType">
+					<condition-expr field-name="emplPositionTypeId" operator="not-equals" value="_NA_"/>
+					<order-by field-name="emplPositionTypeId"/>
+				</entity-condition>
+				<set field="currentDateTime" value="${groovy: java.util.Calendar.getInstance()}" type="Object"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://hrolbius/webapp/hrolbius/ftl/payroll/EmplTimekeepingOverviewInfo.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<!-- ===========================./end timekeeping screen -->
+	
+	<screen name="parameters">
+		<section>
+			<actions>
+				<!-- <set field="navMenuName" value="parametersSubTabBar" /> -->
+				<set field="selectedMenuItem" value="payroll"/>
+				<set field="selectedSubMenuItem" value="parameters" />
+				<set field="tabBarName" value="PayrollParametersSubTarBar" global="true" />
+				<set field="tabBarLocation" value="component://hrolbius/widget/menus/PayrollMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+				<set field="tabButtonItem" value="listParameters" global="true"/>
+				<!-- <set field="navMenuLocation" value="component://hrolbius/widget/menus/hrolbiusMenus.xml" /> -->
+				
+				<!-- <set field="tabButtonItemTop" value="parameters" /> -->
+				<set field="titleProperty" value="FindParameters" />
+				<!-- <set field="tabButtonItem" value="parameters" />
+				<set field="tabSubButtonItem" value="listParameters"/> -->
+				<set field="layoutSettings.styleSheets[]" value="/hrolbius/images/css/styles.css" global="true"/>
+				<entity-condition list="periodTypes" entity-name="PeriodType"> 
+					<condition-list combine="or">
+						<condition-expr field-name="periodTypeId" operator="equals" value="DAILY"/>
+						<condition-expr field-name="periodTypeId" operator="equals" value="WEEKLY"/>
+						<condition-expr field-name="periodTypeId" operator="equals" value="MONTHLY"/>
+						<condition-expr field-name="periodTypeId" operator="equals" value="QUARTERLY"/>
+						<condition-expr field-name="periodTypeId" operator="equals" value="YEARLY"/>
+						<condition-expr field-name="periodTypeId" operator="equals" value="NA"/>
+					</condition-list>
+				</entity-condition>
+				<entity-condition list="allParameterType" entity-name="PayrollEmplParameterType">
+					<condition-expr field-name="code" operator="not-equals" value="GENERAL"/>
+				</entity-condition>
+				<entity-condition list="paramCharacteristicList" entity-name="PayrollParamCharacteristic"></entity-condition>
+				<entity-condition entity-name="PayrollEmplParameterType" list="parameterTypes" >
+					<condition-list>
+						<condition-expr field-name="code" operator="not-equals" value="REF"/>
+						<condition-expr field-name="parentTypeId" operator="not-equals" value="REF"/>
+						<condition-expr field-name="code" operator="not-equals" value="GENERAL"/>
+					</condition-list>
+					<order-by field-name="code" />
+				</entity-condition>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+<!-- 						<section> -->
+<!-- 							<widgets> -->
+								<!-- <container style="margin-top5"> -->
+								<!-- <link text="${uiLabelMap.NewParameter}" style="btn btn-primary 
+									btn-mini" -->
+								<!-- target="EditParameter" /> -->
+								<!-- </container> -->
+<!-- 								<decorator-screen name="FindScreenDecorator" -->
+<!-- 									location="component://common/widget/CommonScreens.xml"> -->
+<!-- 									<decorator-section name="search-options"> -->
+<!-- 										<include-form -->
+<!-- 											location="component://hrolbius/widget/forms/PayrollForms.xml" -->
+<!-- 											name="FindParameters" /> -->
+<!-- 									</decorator-section> -->
+<!-- 									<decorator-section name="search-results"> -->
+<!-- 										<include-form -->
+<!-- 											location="component://hrolbius/widget/forms/PayrollForms.xml" -->
+<!-- 											name="ListPayrollParameters" /> -->
+<!-- 									</decorator-section> -->
+<!-- 								</decorator-screen> -->
+<!-- 							</widgets> -->
+<!-- 						</section> -->
+						<platform-specific>
+							<html>
+								<html-template location="component://hrolbius/webapp/hrolbius/ftl/payroll/ListPayrollParametersJQ.ftl"/>
+							</html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="PayrollPosTypeContactMechParam">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="payroll"/>
+				<!-- <set field="tabButtonItemTop" value="parameters" /> -->
+				<set field="titleProperty" value="PayrollPosTypeContactMechParamList" />
+				<!-- <set field="tabButtonItem" value="parameters" />
+				<set field="tabSubButtonItem" value="EmplPayrollParameters"/> -->
+				<set field="selectedSubMenuItem" value="parameters" />
+				<set field="tabBarName" value="PayrollParametersSubTarBar" global="true" />
+				<set field="tabBarLocation" value="component://hrolbius/widget/menus/PayrollMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+				<set field="tabButtonItem" value="SetPayrollParameters" global="true"/>
+				<set field="tabSubButtonItem" value="PayrollPositionTypeContactMechParam" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<entity-condition list="emplPosType" entity-name="EmplPositionType">
+									<condition-expr field-name="emplPositionTypeId" operator="not-equals" value="_NA_"/>
+									<order-by field-name="emplPositionTypeId"/>
+								</entity-condition>
+								<set field="defaultPeriodTypeId" value="MONTHLY"/>
+								<entity-condition list="periodTypeList" entity-name="PeriodType">
+									<condition-list combine="or">
+										<condition-expr field-name="groupPeriodTypeId" value="BASIC_PERIOD"/>
+									</condition-list>
+								</entity-condition>		
+								<entity-condition entity-name="Uom" list="uomList">
+									<condition-expr field-name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+								</entity-condition>
+								<entity-condition list="roleTypeGroupList" entity-name="RoleTypeGroup">
+									<condition-list combine="or">
+										<condition-expr field-name="primaryParentGroupId" value="SALES_ROLE"/>
+										<condition-expr field-name="roleTypeGroupId" value="OFFICE_ROLE"/>									
+									</condition-list>
+								</entity-condition>
+								<property-to-field resource="general" property="country.geo.id.default" field="defaultGeoId"/>
+								<entity-condition list="geoRegionList" entity-name="GeoAssocAndGeoTo">
+									<condition-list>
+										<condition-expr field-name="geoTypeId" operator="equals" value="REGION"/>
+										<condition-expr field-name="geoIdFrom" from-field="defaultGeoId"/>
+									</condition-list>
+								</entity-condition>
+								<entity-condition list="geoAreaList" entity-name="Geo">
+									<condition-list>
+										<condition-expr field-name="geoTypeId" operator="equals" value="PROVINCE"/>
+									</condition-list>
+								</entity-condition>
+								<entity-condition list="payrollParametersList" entity-name="PayrollParametersAndType">
+									<condition-list combine="and">
+										<condition-list>
+											<condition-expr field-name="type" operator="not-equals" value="REF"/>
+											<condition-expr field-name="parentTypeId" operator="not-equals" value="REF"/>
+										</condition-list>
+										<condition-list combine="or">
+											<condition-expr field-name="paramCharacteristicId" value="THUONG"/>
+										<condition-expr field-name="paramCharacteristicId" value="PHU_CAP"/>
+										</condition-list>
+									</condition-list>
+									<order-by field-name="paramCharacteristicId"/>
+								</entity-condition>
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/payroll/PayrollPosTypeContactMechParam.ftl"/>
+									</html>
+								</platform-specific>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ListEmplPayrollParameters">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="payroll"/>
+				<!-- <set field="tabButtonItemTop" value="parameters" /> -->
+				<set field="titleProperty" value="ListEmplPayrollParameters" />
+				<!-- <set field="tabButtonItem" value="parameters" />
+				<set field="tabSubButtonItem" value="EmplPayrollParameters"/> -->
+				<set field="selectedSubMenuItem" value="parameters" />
+				<set field="tabBarName" value="PayrollParametersSubTarBar" global="true" />
+				<set field="tabBarLocation" value="component://hrolbius/widget/menus/PayrollMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+				<set field="tabButtonItem" value="SetPayrollParameters" global="true"/>
+				<set field="tabSubButtonItem" value="EmplPayrollParameters" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<entity-condition list="emplPosType" entity-name="EmplPositionType">
+									<condition-expr field-name="emplPositionTypeId" operator="not-equals" value="_NA_"/>
+									<order-by field-name="emplPositionTypeId"/>
+								</entity-condition>
+								<entity-condition list="periodTypeList" entity-name="PeriodType">
+									<condition-list combine="or">
+										<condition-expr field-name="groupPeriodTypeId" value="BASIC_PERIOD"/>
+									</condition-list>
+								</entity-condition>
+								<entity-condition list="payrollParam" entity-name="PayrollParameters">
+									<condition-list combine="or">
+										<condition-expr field-name="paramCharacteristicId" value="THUONG"/>
+										<condition-expr field-name="paramCharacteristicId" value="PHU_CAP"/>
+									</condition-list>
+									<order-by field-name="paramCharacteristicId"/>
+								</entity-condition>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/party/getAllDepartment.groovy"/>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/Training/getPartyGroupTree.groovy"/>
+								<!-- <entity-condition entity-name="Uom" list="uomList">
+									<condition-expr field-name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+								</entity-condition> -->
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<!-- <html-template location="component://hrolbius/webapp/hrolbius/ftl/payroll/ListEmplPayrollParameters.ftl"/> -->
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/payroll/EmplAllowancesBonus.ftl"/>
+									</html>
+								</platform-specific>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	<screen name="SetEmplPayrollParameter">
+		<section>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="HrCommonUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="CommonUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="PayrollUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="WidgetUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="DelysUiLabels" global="true"/>
+				<set field="defaultPeriodType" value="MONTHLY"/>
+				<entity-condition list="periodTypeList" entity-name="PeriodType">
+					<condition-list combine="or">
+						<condition-expr field-name="periodTypeId" value="DAILY"/>
+						<condition-expr field-name="periodTypeId" value="MONTHLY"/>
+						<condition-expr field-name="periodTypeId" value="QUARTERLY"/>
+						<condition-expr field-name="periodTypeId" value="YEARLY"/>
+					</condition-list>
+				</entity-condition>
+				<entity-one value-field="employee" entity-name="Person" auto-field-map="true"></entity-one>
+				<!-- <script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/payroll/getListParametersNotSetForEmpl.groovy"/> -->
+				<entity-condition list="listParameters" entity-name="PayrollParameters">
+					<condition-list combine="or">
+						<condition-expr field-name="type" operator="equals" value="CONST"/>
+						<condition-expr field-name="type" operator="equals" value="CONSTPERCENT"/>
+						<condition-expr field-name="type" operator="equals" value="QUOTA"/>
+					</condition-list>
+				</entity-condition>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://hrolbius/webapp/hrolbius/ftl/payroll/SetEmplPayrollParameter.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EditParameter">
+		<section>
+			<actions>
+				<set field="tabButtonItem" value="parameters" />
+				<set field="selectedMenuItem" value="payroll"/>
+				<entity-one entity-name="PayrollParameters" value-field="payrollParameters" />
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<not>
+									<if-empty field="parameters.code"/>
+								</not>
+							</condition>
+							<widgets>
+								<screenlet icon-style="icon-edit" title="${uiLabelMap.EditParameters}">
+									<include-form
+										location="component://hrolbius/widget/forms/PayrollForms.xml"
+										name="EditParameters" />
+								</screenlet>
+							</widgets>
+							<fail-widgets>
+								<screenlet icon-style="icon-edit" title="${uiLabelMap.CreateNewParameters}">
+									<include-form
+										location="component://hrolbius/widget/forms/PayrollForms.xml"
+										name="EditParameters" />
+								</screenlet>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="taxAuthority">
+		<section>
+			<actions>
+				<set field="tabButtonItemTop" value="TaxAuthorities" />
+				<set field="tabButtonItem" value="taxAuthority" />
+				<set field="selectedMenuItem" value="payroll"/>
+				<set field="titleProperty" value="AccountingTaxAuthorities" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTaxAuthorityDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<widgets>
+								<!-- <container style="margin-top5"> -->
+								<!-- <link text="${uiLabelMap.NewParameter}" style="btn btn-primary 
+									btn-mini" -->
+								<!-- target="editTaxAuthority" /> -->
+								<!-- </container> -->
+								<screenlet icon-style="icon-table"
+									title="${uiLabelMap.AccountingTaxAuthorities}" navigation-menu-name="taxAuthoritySubTabBar">
+									<include-menu
+										location="component://hrolbius/widget/menus/hrolbiusMenus.xml"
+										name="taxAuthoritySubTabBar" />
+									<include-form
+										location="component://hrolbius/widget/forms/PayrollForms.xml"
+										name="FindTaxAuthority" />
+								</screenlet>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="editTaxAuthority">
+		<section>
+			<actions>
+				<set field="tabButtonItem" value="taxAuthority" />
+				<set field="tabButtonItemTop" value="taxAuthority" />
+				<set field="selectedMenuItem" value="payroll"/>
+				<set field="labelTitleProperty" value="PageTitleEditTaxAuthority" />
+
+				<set field="taxAuthPartyId" from-field="parameters.taxAuthPartyId" />
+				<set field="taxAuthGeoId" from-field="parameters.taxAuthGeoId" />
+				<entity-one entity-name="TaxAuthority" value-field="taxAuthority" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTaxAuthorityDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<not>
+									<if-empty field="taxAuthority"/>
+								</not>
+							</condition>
+							<widgets>
+								<screenlet icon-style="icon-edit"
+									title="${uiLabelMap.PageTitleEditTaxAuthority}">
+									<include-form
+										location="component://hrolbius/widget/forms/PayrollForms.xml"
+										name="EditTaxAuthority" />
+								</screenlet>
+							</widgets>
+							<fail-widgets>
+								<screenlet icon-style="icon-edit"
+									title="${uiLabelMap.AccountingNewTaxAuthority}">
+									<include-form
+										location="component://hrolbius/widget/forms/PayrollForms.xml"
+										name="EditTaxAuthority" />
+								</screenlet>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EditTaxAuthorityAssocs">
+		<section>
+			<actions>
+				<set field="tabButtonItem" value="EditTaxAuthorityAssocs" />
+				<set field="tabButtonItemTop" value="taxAuthority" />
+				<set field="labelTitleProperty" value="PageTitleEditTaxAuthorityAssocs" />
+
+				<set field="taxAuthPartyId" from-field="parameters.taxAuthPartyId" />
+				<set field="taxAuthGeoId" from-field="parameters.taxAuthGeoId" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTaxAuthorityDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<screenlet id="TaxAuthorityAssocsPanel"
+							title="${uiLabelMap.PageTitleAddTaxAuthorityAssoc}" collapsible="true">
+							<include-form name="AddTaxAuthorityAssoc"
+								location="component://accounting/widget/TaxAuthorityForms.xml" />
+						</screenlet>
+						<include-form name="ListTaxAuthorityAssocs"
+							location="component://accounting/widget/TaxAuthorityForms.xml" />
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EditTaxAuthorityGlAccounts">
+		<section>
+			<actions>
+				<set field="tabButtonItem" value="EditTaxAuthorityGlAccounts" />
+				<set field="tabButtonItemTop" value="taxAuthority" />
+				<set field="labelTitleProperty" value="PageTitleEditTaxAuthorityGlAccounts" />
+
+				<set field="taxAuthPartyId" from-field="parameters.taxAuthPartyId" />
+				<set field="taxAuthGeoId" from-field="parameters.taxAuthGeoId" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTaxAuthorityDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<screenlet id="TaxAuthorityGlAccountPanel"
+							title="${uiLabelMap.PageTitleAddTaxAuthorityGlAccount}"
+							collapsible="true">
+							<include-form name="AddTaxAuthorityGlAccount"
+								location="component://accounting/widget/TaxAuthorityForms.xml" />
+						</screenlet>
+						<include-form name="ListTaxAuthorityGlAccounts"
+							location="component://accounting/widget/TaxAuthorityForms.xml" />
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ListTaxAuthorityParties">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PageTitleListTaxAuthorityParties" />
+				<set field="tabButtonItem" value="ListTaxAuthorityParties" />
+				<set field="tabButtonItemTop" value="taxAuthority" />
+				<set field="labelTitleProperty" value="Standard costs" />
+
+				<set field="taxAuthPartyId" from-field="parameters.taxAuthPartyId" />
+				<set field="taxAuthGeoId" from-field="parameters.taxAuthGeoId" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTaxAuthorityDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<screenlet title="${uiLabelMap.PageTitleListTaxAuthorityParties}">
+							<container>
+								<link target="EditTaxAuthorityPartyInfo"
+									text="${uiLabelMap.AccountingNewTaxAuthorityPartyInfo}" style="btn btn-info btn-small margin_top_5">
+									<parameter param-name="taxAuthPartyId" />
+									<parameter param-name="taxAuthGeoId" />
+								</link>
+							</container>
+							<include-form name="FindTaxAuthorityParties"
+								location="component://accounting/widget/TaxAuthorityForms.xml" />
+						</screenlet>
+						<screenlet title="${uiLabelMap.PageTitleListTaxAuthorityParties}">
+							<include-form name="ListTaxAuthorityParties"
+								location="component://accounting/widget/TaxAuthorityForms.xml" />
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EditTaxAuthorityPartyInfo">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PageTitleEditTaxAuthorityPartyInfo" />
+				<set field="tabButtonItem" value="ListTaxAuthorityParties" />
+				<set field="tabButtonItemTop" value="taxAuthority" />
+
+				<set field="taxAuthPartyId" from-field="parameters.taxAuthPartyId" />
+				<set field="taxAuthGeoId" from-field="parameters.taxAuthGeoId" />
+				<set field="partyId" from-field="parameters.partyId" />
+				<set field="fromDate" from-field="parameters.fromDate" />
+
+				<entity-one entity-name="PartyTaxAuthInfo" value-field="partyTaxAuthInfo" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTaxAuthorityDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<screenlet title="${uiLabelMap.PageTitleEditTaxAuthorityPartyInfo}">
+							<container>
+								<link target="EditTaxAuthorityPartyInfo"
+									text="${uiLabelMap.AccountingNewTaxAuthorityPartyInfo}" style="btn btn-primary btn-mini margin_top_5 margin-left6">
+									<parameter param-name="taxAuthPartyId" />
+									<parameter param-name="taxAuthGeoId" />
+								</link>
+							</container>
+							<include-form name="EditTaxAuthorityPartyInfo"
+								location="component://accounting/widget/TaxAuthorityForms.xml" />
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ListTaxAuthorityRate">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PageTitleListTaxAuthorityParties" />
+				<set field="tabButtonItem" value="ListTaxAuthorityRate" />
+				<set field="tabButtonItemTop" value="taxAuthority" />
+				<set field="labelTitleProperty" value="Standard costs" />
+
+				<set field="taxAuthPartyId" from-field="parameters.taxAuthPartyId" />
+				<set field="taxAuthGeoId" from-field="parameters.taxAuthGeoId" />
+
+				<entity-one value-field="paramTARP" entity-name="TaxAuthorityRatePayroll"></entity-one>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTaxAuthorityDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<screenlet title="${uiLabelMap.PageTitleListTaxAuthorityParties}">
+							<include-form name="CreateTaxAuthorityRate"
+								location="component://hrolbius/widget/forms/PayrollForms.xml" />
+						</screenlet>
+						<screenlet title="${uiLabelMap.PageTitleListTaxAuthorityParties}">
+							<include-form name="ListTaxAuthorityRate"
+								location="component://hrolbius/widget/forms/PayrollForms.xml" />
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EditTaxAuthorityRate">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PageTitleListTaxAuthorityParties" />
+				<set field="tabButtonItem" value="ListTaxAuthorityRate" />
+				<set field="tabButtonItemTop" value="taxAuthority" />
+				<set field="labelTitleProperty" value="Standard costs" />
+
+				<set field="taxAuthorityRateSeqId" from-field="parameters.taxAuthorityRateSeqId" />
+				<entity-one value-field="paramTARP" entity-name="TaxAuthorityRatePayroll"></entity-one>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTaxAuthorityDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<screenlet title="${uiLabelMap.PageTitleListTaxAuthorityParties}">
+							<include-form name="CreateTaxAuthorityRate"
+								location="component://hrolbius/widget/forms/PayrollForms.xml" />
+						</screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="ScheduleSalary">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PageTitleScheduleSalary" />
+				<set field="tabButtonItem" value="schedule" />
+				<set field="selectedMenuItem" value="payroll"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<screenlet title="${uiLabelMap.PageTitleScheduleSalary}">
+							<include-form name="ScheduleSalary"
+								location="component://hrolbius/widget/forms/PayrollForms.xml" />
+						</screenlet>
+						<platform-specific>
+							<html>
+								<html-template location="component://hrolbius/webapp/hrolbius/ftl/validate/ScheduleSalaryValidate.ftl"/>
+							</html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="ApprovePayroll">
+		<section>
+			<actions>
+				<service service-name="updateNtfIfExists" auto-field-map="true"></service>
+				<set field="titleProperty" value="PageTitleApprovePayroll" />
+				<set field="tabButtonItem" value="payrollApproval" />
+				<set field="selectedMenuItem" value="payroll"/>
+				<property-to-field field="defaultCurrencyUomId" resource="general" property="currency.uom.id.default" default="VND"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<set field="organizationPartyId" value="${defaultOrganizationPartyId}" />
+								<set field="currencyUomId" value="${defaultOrganizationPartyCurrencyUomId}" />
+							</actions>
+							<widgets>
+<!-- 								<link target="CreatePayrollInvoiceAndPayment" text="${uiLabelMap.InvAndPaym}" -->
+<!-- 									style="btn btn-small btn-primary margin-top10 margin-left6 icon-hand-right"> -->
+<!-- 									<parameter param-name="currencyUomId" value="${currencyUomId}" /> -->
+<!-- 								</link> -->
+								<screenlet title="${uiLabelMap.PageTitleApprovePayroll}" navigation-menu-name="PayrollInvoiceAndPaymentSubTabBar">
+									<include-menu location="component://hrolbius/widget/menus/PayrollMenus.xml" name="PayrollInvoiceAndPaymentSubTabBar"/>
+									<include-form name="ApprovePayroll"
+										location="component://hrolbius/widget/forms/PayrollForms.xml" />
+								</screenlet>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ApprovalPayrollTable">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PageTitleApprovalPayrollTable" />
+				<set field="selectedMenuItem" value="payroll"/>
+				<set field="tabButtonItem" value="payrollmain"/>
+				<set field="tabSubButtonItem" value="PayrollTableList"/>
+				<property-to-field field="defaultCurrencyUomId" resource="general" property="currency.uom.id.default" default="VND"/>
+				<entity-one value-field="payrollTableRecord" entity-name="PayrollTableRecord"></entity-one>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<not>
+									<if-empty field="payrollTableRecord"/>
+								</not>
+								<!-- 	<if-compare operator="not-equals" value="PYRLL_TABLE_CREATED" field="payrollTableRecord.statusId"/> -->
+							</condition>
+							<actions>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/payroll/getPartyPayrollTableRecord.groovy"/>
+								<entity-condition list="statusList" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="PAYROLL_APP_STTS"/>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>
+								<set field="currencyUomId" value="${defaultOrganizationPartyCurrencyUomId}" />
+								
+							</actions>
+							<widgets>
+								<!-- <screenlet title="${uiLabelMap.PageTitleApprovePayroll} ${uiLabelMap.CommonOf} ${payrollTableRecord.payrollTableName} [${parameters.payrollTableId}]"
+									navigation-menu-name="PayrollInvoiceAndPaymentSubTabBar">
+									<include-menu location="component://hrolbius/widget/menus/PayrollMenus.xml" name="PayrollInvoiceAndPaymentSubTabBar"/> -->
+									<platform-specific>
+										<html>
+											<!-- <html-template location="component://hrolbius/webapp/hrolbius/ftl/payroll/ApprovalPayrollTableRecord.ftl"/> -->
+											<html-template location="component://hrolbius/webapp/hrolbius/ftl/payroll/ApprovalPayrollTableRecordJqx.ftl"/>
+										</html>
+									</platform-specific>
+								<!-- </screenlet> -->
+							</widgets>
+							<fail-widgets>
+								<label style="h3">
+									${uiLabelMap.CannotFindPayrollTable}
+								</label>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ListEmplSalary">
+		<section>
+			<actions>
+				<set field="titleProperty" value="PageTitleListEmplSalary" />
+				<set field="tabButtonItem" value="ListEmplSalary" />
+				<set field="selectedMenuItem" value="payroll"/>
+				<property-to-field field="currencyUomId" resource="general" property="currency.uom.id.default" default="VND"/>
+				<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/payroll/getListEmplSalary.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<widgets>
+								<screenlet title="${uiLabelMap.PageTitleListEmplSalary}">
+									<platform-specific>
+										<html>
+											<html-template location="component://hrolbius/webapp/hrolbius/ftl/ListEmplSalary.ftl"/>
+										</html>
+									</platform-specific>
+								</screenlet>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	<screen name="SettingEmpPosTypeSalary">
+		<section>
+			<actions>
+				<set field="titleProperty" value="SettingEmpPosTypeSalary" />
+				<!-- <set field="tabButtonItem" value="SalaryBaseFlat" />
+				<set field="tabSubButtonItem" value="SettingEmpPosTypeSalary"/> -->
+				<set field="selectedMenuItem" value="payroll"/>
+				<set field="selectedSubMenuItem" value="SalaryBaseFlat" />
+				<set field="tabBarName" value="PayrollSalaryBaseSubTarBar" global="true" />
+				<set field="tabBarLocation" value="component://hrolbius/widget/menus/PayrollMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+				<set field="tabButtonItem" value="SettingEmpPosTypeSalary" global="true"/>				
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<property-to-field resource="general" property="currency.uom.id.default" field="rateCurrencyUomId"/>
+								<set field="defaultPeriodTypeId" value="MONTHLY"/>
+								<entity-condition list="emplPosType" entity-name="EmplPositionType">
+									<condition-expr field-name="emplPositionTypeId" operator="not-equals" value="_NA_"/>
+									<order-by field-name="emplPositionTypeId"/>
+								</entity-condition>
+								<entity-condition list="periodTypeList" entity-name="PeriodType">
+									<condition-list combine="or">
+										<condition-expr field-name="periodTypeId" value="DAILY"/>
+										<condition-expr field-name="periodTypeId" value="MONTHLY"/>
+										<condition-expr field-name="periodTypeId" value="QUARTERLY"/>
+										<condition-expr field-name="periodTypeId" value="YEARLY"/>
+									</condition-list>
+								</entity-condition>
+								<entity-condition entity-name="Uom" list="uomList">
+									<condition-expr field-name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+								</entity-condition>
+								<entity-condition list="roleTypeGroupList" entity-name="RoleTypeGroup">
+									<condition-list combine="or">
+										<condition-expr field-name="primaryParentGroupId" value="SALES_ROLE"/>
+										<condition-expr field-name="roleTypeGroupId" value="OFFICE_ROLE"/>									
+									</condition-list>
+								</entity-condition>
+								<property-to-field resource="general" property="country.geo.id.default" field="defaultGeoId"/>
+								<entity-condition list="geoRegionList" entity-name="GeoAssocAndGeoTo">
+									<condition-list>
+										<condition-expr field-name="geoTypeId" operator="equals" value="REGION"/>
+										<condition-expr field-name="geoIdFrom" from-field="defaultGeoId"/>
+									</condition-list>
+								</entity-condition>
+								<entity-condition list="geoAreaList" entity-name="Geo">
+									<condition-list>
+										<condition-expr field-name="geoTypeId" operator="equals" value="PROVINCE"/>
+									</condition-list>
+								</entity-condition>
+								
+								<!-- <entity-condition entity-name="OldEmplPositionTypeRate" filter-by-date="true" list="emplPositionTypeRateList"></entity-condition> -->
+								
+							</actions>
+							<widgets>
+								<!-- <screenlet title="${uiLabelMap.SettingEmpPosTypeSalary}" navigation-menu-name="AddEmpPosTypeSalary">
+									<include-menu location="component://hrolbius/widget/menus/PayrollMenus.xml" name="AddEmpPosTypeSalary"/>
+									<include-form location="component://hrolbius/widget/forms/PayrollForms.xml" name="SettingEmpPosTypeSalary"/>
+								</screenlet> -->
+								<platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/payroll/EmplPositionTypeRate.ftl"/>
+									</html>
+								</platform-specific>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EditEmpPosTypeSalary">
+		<section>
+			<actions>
+				<set field="titleProperty" value="SettingEmpPosTypeSalary" />
+				<set field="tabButtonItem" value="SalaryBaseFlat" />
+				<set field="tabSubButtonItem" value="SettingEmpPosTypeSalary"/>
+				<set field="selectedMenuItem" value="payroll"/>
+				<property-to-field resource="general" property="currency.uom.id.default" field="rateCurrencyUomId"/>
+				<set field="periodTypeId" value="MONTHLY"/>
+				<set field="formName" value="EditEmpPosTypeSalary"/>
+				<set field="currencyField" value="rateAmount"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/js/maskMoneyCurrency.ftl"/>
+									</html>
+								</platform-specific>
+								<screenlet title="${uiLabelMap.EditEmpPosTypeSalary}">
+									<include-form location="component://hrolbius/widget/forms/PayrollForms.xml" name="EditEmpPosTypeSalary"/>
+								</screenlet>
+								
+								<!-- <platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/validate/EditEmpPosTypeSalaryValidate.ftl"/>
+									</html>
+								</platform-specific> -->
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>			
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ConfirmBonusSalesEmployee">
+		<section>
+			<actions>
+				<set field="titleProperty" value="ConfirmBonusEmplInSales" />
+				<set field="selectedMenuItem" value="payroll"/>
+				<set field="selectedSubMenuItem" value="BonusEmployee" />
+				<set field="tabBarName" value="BonusEmplSubTarBar" global="true" />
+				<set field="tabBarLocation" value="component://hrolbius/widget/menus/PayrollMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+				<set field="tabButtonItem" value="ConfirmBonusEmplInSales" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<entity-condition list="statusList" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="SALES_COMM_STATUS"/>
+								</entity-condition>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/party/getSalesOrganization.groovy"/>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/Training/getPartyGroupTree.groovy"/>
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/payroll/ConfirmBonusSalesEmployee.ftl"/>
+									</html>
+								</platform-specific>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ListEmployeeBonus">
+		<section>
+			<actions>
+				<set field="titleProperty" value="ListEmployeeBonus" />
+				<set field="selectedMenuItem" value="payroll"/>
+				<set field="selectedSubMenuItem" value="BonusEmployee" />
+				<set field="tabBarName" value="BonusEmplSubTarBar" global="true" />
+				<set field="tabBarLocation" value="component://hrolbius/widget/menus/PayrollMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+				<set field="tabButtonItem" value="ListEmployeeBonus" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<entity-condition list="payrollParamBonus" entity-name="PayrollParameters">
+									<condition-expr field-name="paramCharacteristicId" value="THUONG"/>
+								</entity-condition>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/Training/getPartyGroupTree.groovy"/>
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/payroll/ListEmployeeBonus.ftl"/>
+									</html>
+								</platform-specific>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>		
+	</screen>
+	
+	<screen name="EmplSalaryBaseFlatList">
+		<section>
+			<actions>
+				<set field="titleProperty" value="EmplSalaryBaseFlatList" />
+				<!-- <set field="tabButtonItem" value="SalaryBaseFlat" />
+				<set field="tabSubButtonItem" value="EmplSalaryBaseFlatList"/> -->
+				<set field="selectedMenuItem" value="payroll"/>
+				<set field="selectedSubMenuItem" value="SalaryBaseFlat" />
+				<set field="tabBarName" value="PayrollSalaryBaseSubTarBar" global="true" />
+				<set field="tabBarLocation" value="component://hrolbius/widget/menus/PayrollMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+				<set field="tabButtonItem" value="EmplSalaryBaseFlatList" global="true"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<property-to-field resource="general" property="currency.uom.id.default" field="rateCurrencyUomId"/>
+								<set field="defaultPeriodTypeId" value="MONTHLY"/>
+								<entity-condition list="emplPosType" entity-name="EmplPositionType">
+									<condition-expr field-name="emplPositionTypeId" operator="not-equals" value="_NA_"/>
+									<order-by field-name="emplPositionTypeId"/>
+								</entity-condition>
+								<entity-condition list="periodTypeList" entity-name="PeriodType">
+									<condition-list combine="or">
+										<condition-expr field-name="periodTypeId" value="DAILY"/>
+										<condition-expr field-name="periodTypeId" value="MONTHLY"/>
+										<condition-expr field-name="periodTypeId" value="QUARTERLY"/>
+										<condition-expr field-name="periodTypeId" value="YEARLY"/>
+									</condition-list>
+								</entity-condition>
+								<entity-condition entity-name="Uom" list="uomList">
+									<condition-expr field-name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+								</entity-condition>
+								<property-to-field resource="general" property="ORGANIZATION_PARTY" field="partyIdDefault"/>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/Training/getPartyGroupTree.groovy"/>
+							</actions>
+							<widgets>
+								<!-- <screenlet title="${uiLabelMap.EmplSalaryBaseFlatList}">
+									<include-form location="component://hrolbius/widget/forms/PayrollForms.xml" name="EmplSalaryBaseFlatList"/>
+								</screenlet> -->
+								<platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/payroll/EmplSalaryBaseFlatList.ftl"/>
+									</html>
+								</platform-specific>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewHistoryPartyPayroll">
+		<section>
+			<actions>
+				<set field="titleProperty" value="EmplSalaryBaseFlatList" />
+				<set field="tabButtonItem" value="SalaryBaseFlat" />
+				<set field="tabSubButtonItem" value="EmplSalaryBaseFlatList"/>
+				<set field="selectedMenuItem" value="payroll"/>
+				<entity-one value-field="employee" entity-name="Person"></entity-one>				
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<not>
+									<if-empty field="employee"/>
+								</not>
+							</condition>
+							<widgets>
+								<screenlet title="${uiLabelMap.ViewHistoryPartyPayroll} ${uiLabelMap.CommonOf} ${employee.firstName} ${employee.middleName} ${employee.lastName}">
+									<include-form location="component://hrolbius/widget/forms/PayrollForms.xml" name="ViewHistoryPartyPayroll"/>
+								</screenlet>
+							</widgets>
+							<fail-widgets>
+								<label style="h2">
+									${uiLabelMap.NotFoundEmployee}
+								</label>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EditPartyRateAmount">
+		<section>
+			<actions>
+				<set field="titleProperty" value="EmplSalaryBaseFlatList" />
+				<set field="tabButtonItem" value="SalaryBaseFlat" />
+				<set field="tabSubButtonItem" value="EmplSalaryBaseFlatList"/>
+				<set field="selectedMenuItem" value="payroll"/>	
+				<set field="formName" value="EditPartyRateAmount"/>
+				<set field="currencyField" value="rateAmount"/>			
+			</actions>
+			<widgets>
+				<decorator-screen name="payrollMainDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/js/maskMoneyCurrency.ftl"/>
+									</html>
+								</platform-specific>
+								<screenlet title="${uiLabelMap.EditPartyRateAmount}">
+									<include-form location="component://hrolbius/widget/forms/PayrollForms.xml" name="EditPartyRateAmount"/>
+								</screenlet>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>		
+		</section>
+	</screen>
+	
+	<!-- End of screens for payroll -->
+</screens>

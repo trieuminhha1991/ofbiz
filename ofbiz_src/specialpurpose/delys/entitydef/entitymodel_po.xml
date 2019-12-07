@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+	<entity entity-name="PurchasingOrderPlan" package-name="com.olbius">
+		<field name="year" type="id-ne"/>
+		<field name="partyId" type="id-ne"/>
+		<field name="statusId" type="id"/>
+		<field name="reason" type="very-long"/>
+		<field name="comment" type="very-long"/>
+		<field name="estimatedCost" type="currency-amount"/>
+		<field name="currencyUomId" type="id"/>
+		<field name="createdByUserLogin" type="id"/>
+		<prim-key field="year" />
+		<prim-key field="partyId" />
+		<relation type="one" fk-name="POPARTYYEAR" title="Purchasing order of department in year"
+			rel-entity-name="PartyGroup">
+			<key-map field-name="partyId" rel-field-name="partyId" />
+		</relation>
+	</entity>
+	<entity entity-name="PurchasingOrderPlanItem" package-name="com.olbius">
+		<field name="year" type="id-ne"/>
+		<field name="partyId" type="id-ne"/>
+		<field name="poPlanSeqId" type="id-ne"/>
+		<field name="productId" type="id"/>
+		<field name="prodCategoryId" type="id"/>
+		<field name="prodCatalogId" type="id"/>
+		<field name="quantity" type="fixed-point"/>
+		<field name="unitCost" type="currency-amount"/>
+		<field name="quantityUomId" type="id"/>
+		<field name="currencyUomId" type="id"/>
+		<field name="reason" type="description"/>
+		<prim-key field="year" />
+		<prim-key field="partyId" />
+		<prim-key field="poPlanSeqId" />
+		<relation type="many" fk-name="POITEM" title="Purchasing item of purchasing order plan"
+			rel-entity-name="PurchasingOrderPlan">
+			<key-map field-name="partyId" rel-field-name="partyId" />
+			<key-map field-name="year" rel-field-name="year" />
+		</relation>
+	</entity>
+	<view-entity entity-name="PurchasingOrderPlanDetail" package-name="com.olbius">
+		<member-entity entity-alias="POP" entity-name="PurchasingOrderPlan"/>
+		<member-entity entity-alias="PG" entity-name="PartyGroup"/>
+		<member-entity entity-alias="PR" entity-name="PartyRole"/>
+	    <alias-all entity-alias="POP"/>
+	    <alias-all entity-alias="PG"/>
+	    <alias-all entity-alias="PR"/>
+	    <view-link entity-alias="POP" rel-entity-alias="PG">
+			<key-map field-name="partyId" />
+		</view-link>
+		<view-link entity-alias="PG" rel-entity-alias="PR">
+			<key-map field-name="partyId" />
+		</view-link>
+	</view-entity>
+	<view-entity entity-name="PurchasingOrderPlanItemDetail" package-name="com.olbius">
+		<member-entity entity-alias="POP" entity-name="PurchasingOrderPlanItem"/>
+		<member-entity entity-alias="PG" entity-name="Product"/>
+	    <alias-all entity-alias="POP"/>
+	    <alias-all entity-alias="PG"/>
+	    <view-link entity-alias="POP" rel-entity-alias="PG" rel-optional="true">
+			<key-map field-name="productId" />
+		</view-link>
+
+	</view-entity>
+	
+	<view-entity entity-name="SupplierProductGroupBy" package-name="com.olbius">
+		<member-entity entity-alias="SUPP" entity-name="SupplierProduct"/>
+	    <alias name="partyId" entity-alias="SUPP" field="partyId" group-by="true"></alias>
+	    <alias name="currencyUomId" entity-alias="SUPP" field="currencyUomId" group-by="true"></alias>
+	</view-entity>
+	
+</entitymodel>

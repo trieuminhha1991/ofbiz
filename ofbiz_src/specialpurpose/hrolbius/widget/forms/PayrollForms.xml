@@ -1,0 +1,944 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
+
+	<!-- Forms for Payroll -->
+	<form name="FindParameters" type="single" target="parameters">
+		<actions>
+		</actions>
+		<auto-fields-entity entity-name="PayrollParameters"
+			default-field-type="find" />
+		<field name="noConditionFind">
+			<hidden value="Y" />
+		</field>
+		<field name="code" title="${uiLabelMap.CommonIdCode}"></field>
+		<field name="defaultValue" title="${uiLabelMap.HrolbiusDefaultValue}"></field>
+		<field name="actualValue" title="${uiLabelMap.HrolbiusActualValue}"></field>
+		<field name="searchButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-search" />
+		</field>
+	</form>
+
+	<form name="ListPayrollParameters" list-name="listIt" type="list"
+		odd-row-style="alternate-row" header-row-style="header-row-2"
+		paginate-target="parameters"
+		default-table-style="table table-hover table-striped table-bordered dataTable">
+		<actions>
+			<set field="entityName" value="PayrollParameters" />
+			<service service-name="performFind" result-map="result"
+				result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="requestParameters" />
+				<field-map field-name="entityName" from-field="entityName" />
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+				<field-map field-name="orderBy" value="-createdStamp"/>
+				<field-map field-name="noConditionFind" value="Y" />
+			</service>
+		</actions>
+		<field name="code" widget-style="" title="${uiLabelMap.CommonIdCode}">
+			<hyperlink target="EditParameter" description="${code}">
+				<parameter param-name="code" />
+			</hyperlink>
+		</field>
+		<field name="partyId" widget-style="btn btn-mini btn-primary">
+			<!-- <hyperlink target="EmployeeProfile" description="${partyId}">
+				<parameter param-name="partyId" />
+			</hyperlink> -->
+			<ignored/>
+		</field>
+		<field name="name">
+			<display></display>
+		</field>
+		<field name="defaultValue" title="${uiLabelMap.HrolbiusDefaultValue}">
+			<display></display>
+		</field>
+		<field name="actualValue" title="${uiLabelMap.HrolbiusActualValue}">
+			<display></display>
+		</field>
+		<field name="description">
+			<display></display>
+		</field>
+		<field name="periodTypeId" title="${uiLabelMap.CommonPeriodType}">
+			<display-entity entity-name="PeriodType" description="${description}"></display-entity>
+		</field>
+	</form>
+	<form name="EditParameters" target="updateParameters" type="single"
+		default-map-name="payrollParameters">
+		<alt-target use-when="payrollParameters==null" target="createParameters" />
+		<field name="code" title="${uiLabelMap.parameterCode}" use-when="payrollParameters==null"
+			title-style="asterisk" required-field="true">
+			<text />
+		</field>
+		<field name="code" title="${uiLabelMap.parameterCode}" use-when="payrollParameters!=null">
+			<display />
+		</field>
+		<field name="name" title="${uiLabelMap.parameterName}"
+			title-style="asterisk" required-field="true">
+			<text />
+		</field>
+		<field name="defaultValue" title="${uiLabelMap.defaultValue}">
+			<text />
+		</field>
+		<field name="periodTypeId" title="${uiLabelMap.PeriodType}">
+			<drop-down>
+				<entity-options description="${description}" entity-name="PeriodType">
+					<entity-constraint name="periodTypeId" operator="in" value="DAILY,MONTHLY,QUARTERLY,YEARLY"/>
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="type" title="${uiLabelMap.parameterType}"
+			title-style="asterisk" required-field="true">
+			<drop-down allow-empty="false">
+				<entity-options description="${name}-(${description})"
+					key-field-name="code" entity-name="PayrollEmplParameterType">
+					<entity-constraint name="code" operator="not-equals" value="NOT_MODIFIED"/>
+					<entity-order-by field-name="code" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="actualValue" title="${uiLabelMap.actualValue}">
+			<text />
+		</field>
+		
+		<field name="description">
+			<text />
+		</field>
+		<field name="submitButton" use-when="payrollParameters==null"
+			title="${uiLabelMap.CommonCreate}" widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+		<field name="submitButton" use-when="payrollParameters!=null"
+			title="${uiLabelMap.CommonUpdate}" widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-ok-circle" />
+		</field>
+	</form>
+
+	<form name="FindFormula" type="single" target="formula">
+		<actions>
+		</actions>
+		<auto-fields-entity entity-name="PayrollFormula"
+			default-field-type="find" />
+		<field name="noConditionFind">
+			<hidden value="Y" />
+		</field>
+		<field name="code" title="${uiLabelMap.formulaCode}"></field>
+		<field name="functionType" title="${uiLabelMap.formulaFunctionType}"></field>
+		<field name="function" title="${uiLabelMap.formulaFunction}"></field>
+		<field name="maxValue" title="${uiLabelMap.HrolbiusMaxValue}"></field>
+		<field name="searchButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-search" />
+		</field>
+	</form>
+	<form name="ListFormula" list-name="listIt" type="list"
+		odd-row-style="alternate-row" header-row-style="header-row-2"
+		paginate-target="formula" default-table-style="table table-striped table-bordered table-hover">
+		<actions>
+			<set field="entityName" value="PayrollFormula" />
+			<service service-name="performFind" result-map="result"
+				result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="requestParameters" />
+				<field-map field-name="entityName" from-field="entityName" />
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+				<field-map field-name="noConditionFind" value="Y" />
+			</service>
+		</actions>
+		<field name="code" title="${uiLabelMap.formulaCode}"
+			widget-style="">
+			<hyperlink target="EditFormula" description="${code}">
+				<parameter param-name="code" />
+			</hyperlink>
+		</field>
+		<field name="name" title="${uiLabelMap.formulaName}">
+			<display></display>
+		</field>
+		<field name="function" title="${uiLabelMap.formulaFunction}">
+			<display></display>
+		</field>
+	</form>
+	<form name="EditFormula" target="updateFormula" type="single"
+		default-map-name="payrollFormula">
+		<alt-target use-when="payrollFormula==null" target="createFormula" />
+		<field name="code" title="${uiLabelMap.formulaCode}" use-when="payrollFormula==null"
+			title-style="asterisk">
+			<text />
+		</field>
+		<field name="code" title="${uiLabelMap.formulaCode}" use-when="payrollFormula!=null">
+			<display />
+		</field>
+		<field name="name" title="${uiLabelMap.formulaName}"
+			title-style="asterisk">
+			<text />
+		</field>
+		<field name="invoiceItemTypeId" title="${uiLabelMap.AccountingInvoicePurchaseItemType}">
+			<drop-down allow-empty="false">
+				<entity-options description="${description}"
+					entity-name="InvoiceItemType">
+					<entity-constraint name="invoiceItemTypeId"
+						operator="like" value="PAYROL%" />
+					<entity-order-by field-name="description" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="function" title="${uiLabelMap.formulaFunction}"
+			title-style="asterisk">
+			<text />
+		</field>
+		<field name="functionType" title="${uiLabelMap.formulaFunctionType}"
+			title-style="asterisk">
+			<drop-down allow-empty="false">
+				<entity-options description="${name}-(${description})"
+					key-field-name="code" entity-name="PayrollFormulaType">
+					<entity-order-by field-name="code" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="maxValue" title="${uiLabelMap.HrolbiusMaxValue}">
+			<text />
+		</field>
+		<field name="description" title="${uiLabelMap.formulaDescription}">
+			<text />
+		</field>
+		<field name="submitButton" use-when="payrollFormula==null"
+			title="${uiLabelMap.CommonCreate}" widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+		<field name="submitButton" use-when="payrollFormula!=null"
+			title="${uiLabelMap.FormFieldTitle_searchButton}" widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-ok-circle" />
+		</field>
+	</form>
+	<!-- End of forms for Payroll -->	
+	<form name="FindPayrollTableRecord" type="single" target="PayrollTableList" header-row-style="header-row"
+		default-table-style="basic-table">
+		<field name="payrollTableName" title="${uiLabelMap.PayrollTableName}">
+			<text-find></text-find>
+		</field>	
+		<field name="fromDate" title="${uiLabelMap.CommonFromDate}">
+			<date-find/>
+		</field>
+		<field name="thruDate" title="${uiLabelMap.CommonThruDate}">
+			<date-find/>
+		</field>
+		<field name="statusId" title="${uiLabelMap.CommonStatus}">
+			<drop-down>
+				<option key=""/>
+				<entity-options description="${description}" entity-name="StatusItem">
+					<entity-constraint name="statusTypeId" value="PAYROLL_TABLE"/>
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+	<form name="PayrollTableRecordList" type="list" list-name="listIt" odd-row-style="alternate-row" header-row-style="header-row-2"
+		paginate-target="PayrollTableList" default-table-style="table table-striped table-bordered table-hover">
+		<actions>
+			<!-- <entity-condition entity-name="PayrollTableRecord" list="listIt">
+				<order-by field-name="-fromDate"/>
+			</entity-condition> -->
+			<service service-name="performFind" result-map-list="listIt">
+				<field-map field-name="entityName" value="PayrollTableRecord"/>
+				<field-map field-name="inputFields" from-field="parameters"/>
+				<field-map field-name="orderBy" value="-fromDate"/>
+				<field-map field-name="noConditionFind" value="Y"/>
+			</service>
+		</actions>
+		<field name="payrollTableName" title="${uiLabelMap.PayrollTableName}">
+			<hyperlink description="${payrollTableName}" target="viewPayrollTable">
+				<parameter param-name="payrollTableId"/>
+			</hyperlink>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.CommonFromDate}" red-when="never">
+			<display type="date"></display>
+		</field>
+		<field name="thruDate" title="${uiLabelMap.CommonThruDate}" red-when="never">
+			<display type="date"></display>
+		</field>
+		<field name="periodTypeId" title="${uiLabelMap.PeriodType}">
+			<display-entity entity-name="PeriodType" description="${description}"></display-entity>
+		</field>
+		<field name="statusId" title="${uiLabelMap.CommonStatus}">
+			<display-entity entity-name="StatusItem" description="${description}"></display-entity>
+		</field>
+		<field name="_calculate"  title="${uiLabelMap.HrolbiusFomular}" widget-style="btn-primary btn-mini icon-play">
+			<hyperlink description=" " target="calcPayroll" also-hidden="false" style="btn-primary btn-mini icon-play">
+				<parameter param-name="payrollTableId" />				
+			</hyperlink>
+		</field>
+		<field name="_createPayrollInvoice" title="${uiLabelMap.CreatePayrollInvoice}" widget-style="icon-file-text" widget-area-style="align-center">
+			<hyperlink description=" " target="ApprovalPayrollTable" also-hidden="false" style="icon-file-text">
+				<parameter param-name="payrollTableId" />				
+			</hyperlink>
+		</field>
+		<field name="_deleteLink" title="${uiLabelMap.CommonDelete}" widget-style="btn-danger btn-mini icon-trash">
+			<hyperlink description=" " target="deletePayrollTable" also-hidden="false" style="btn-danger btn-mini icon-trash">
+				<parameter param-name="payrollTableId" />				
+			</hyperlink>
+		</field>
+	</form>
+	<!-- Payroll's Reports -->
+	<form name="ListPayrollReport" type="single" target="Payroll">
+		<field name="formulaList" field-name="code" title="${uiLabelMap.formulaCode}" >
+			<drop-down allow-multiple="true" allow-empty="false">
+				<entity-options entity-name="PayrollFormula"
+					description="${name}">
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.fromDate}">
+			<date-time />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.thruDate}">
+			<date-time />
+		</field>
+		<field name="search" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-search" />
+		</field>
+	</form>
+	<!-- End of Payroll's Reports -->
+	<!-- Payroll's invoice and payment -->
+	<form name="PayrollInvAndPaym" type="single" target="PayrollInvAndPaym">
+		<field name="formularCode" field-name="code">
+			<hidden value="${parameters.formulaList}"></hidden>
+		</field>
+		<field name="InvAndPaym" title="${uiLabelMap.InvAndPaym}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-hand-right" />
+		</field>
+	</form>
+	<!-- End of Payroll's invoice and payment -->
+	<!-- Payroll's TaxAuthority -->
+	<form name="FindTaxAuthority" type="list" list-name="taxAuthorityList"
+		odd-row-style="alternate-row"
+		default-table-style="table table-hover table-striped table-bordered dataTable">
+		<actions>
+			<script
+				location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/payroll/getPayrollTaxAuthority.groovy" />
+		</actions>
+		<auto-fields-entity entity-name="TaxAuthority"
+			default-field-type="display" />
+
+		<field name="taxAuthGeoId">
+			<display-entity entity-name="Geo" key-field-name="geoId"
+				description="${geoName} [${geoCode}] [${geoId}]" />
+		</field>
+		<field name="taxAuthPartyId">
+			<display-entity entity-name="PartyNameView"
+				key-field-name="partyId" description="${firstName} ${middleName} ${lastName} ${groupName}">
+				<sub-hyperlink description="${taxAuthPartyId}"
+					target="/partymgr/control/viewprofile" target-type="inter-app"
+					link-style="btn btn-primary btn-mini">
+					<parameter param-name="partyId" from-field="taxAuthPartyId" />
+				</sub-hyperlink>
+			</display-entity>
+		</field>
+		<field name="includeTaxInPrice">
+			<hidden />
+		</field>
+		<field name="formulaCode" title="${uiLabelMap.formulaCode}"></field>
+		<field name="taxAuthorityEdit" title="${uiLabelMap.CommonEdit} "
+			widget-style="btn btn-primary btn-mini icon-edit">
+			<hyperlink description="${uiLabelMap.CommonEdit}" target="editTaxAuthority"
+				also-hidden="false">
+				<parameter param-name="taxAuthPartyId" />
+				<parameter param-name="taxAuthGeoId" />
+			</hyperlink>
+		</field>
+	</form>
+	<form name="EditTaxAuthority" type="single" target="updateTaxAuthority"
+		title="" default-map-name="taxAuthority" header-row-style="header-row"
+		default-table-style="basic-table">
+		<alt-target use-when="taxAuthority==null" target="createTaxAuthority" />
+		<auto-fields-service service-name="updateTaxAuthority"
+			map-name="taxAuthority" />
+
+		<field use-when="taxAuthority!=null" name="taxAuthPartyId"
+			title="${uiLabelMap.PartyParty}" tooltip="${uiLabelMap.CommonNotModifRecreat}">
+			<display />
+		</field>
+		<field use-when="taxAuthority==null&amp;&amp;taxAuthPartyId==null"
+			name="taxAuthPartyId" title="${uiLabelMap.PartyParty}">
+			<lookup target-form-name="LookupPartyName" />
+		</field>
+		<field use-when="taxAuthority==null&amp;&amp;taxAuthPartyId!=null"
+			name="taxAuthPartyId" title="${uiLabelMap.PartyParty}"
+			tooltip="${uiLabelMap.CommonCannotBeFound}:[${taxAuthPartyId}]">
+			<lookup target-form-name="LookupPartyName" />
+		</field>
+
+		<field use-when="taxAuthority!=null" name="taxAuthGeoId"
+			title="${uiLabelMap.CommonGeo}" tooltip="${uiLabelMap.CommonNotModifRecreat}">
+			<display />
+		</field>
+		<field use-when="taxAuthority==null&amp;&amp;taxAuthGeoId==null"
+			name="taxAuthGeoId" title="${uiLabelMap.CommonGeo}">
+			<lookup target-form-name="LookupGeo" />
+		</field>
+		<field use-when="taxAuthority==null&amp;&amp;taxAuthGeoId!=null"
+			name="taxAuthGeoId" title="${uiLabelMap.CommonGeo}"
+			tooltip="${uiLabelMap.CommonCannotBeFound}:[${taxAuthGeoId}]">
+			<lookup target-form-name="LookupGeo" />
+		</field>
+
+		<field name="formulaCode" title="${uiLabelMap.formulaCode}">
+			<lookup target-form-name="LookupPayrollFormula" />
+		</field>
+		<field name="requireTaxIdForExemption" widget-style="smallSelect">
+			<drop-down no-current-selected-key="Y">
+				<option key="Y" description="${uiLabelMap.CommonY}" />
+				<option key="N" description="${uiLabelMap.CommonN}" />
+			</drop-down>
+		</field>
+		<field name="includeTaxInPrice" widget-style="smallSelect">
+			<drop-down no-current-selected-key="N">
+				<option key="Y" description="${uiLabelMap.CommonY}" />
+				<option key="N" description="${uiLabelMap.CommonN}" />
+			</drop-down>
+		</field>
+		<field name="taxIdFormatPattern" tooltip="${uiLabelMap.AccountingValidationPattern}"></field>
+
+		<field use-when="taxAuthority==null" name="submitButton"
+			title="${uiLabelMap.CommonCreate}" widget-style="btn btn-small btn-primary">
+			<submit image-location="icon-ok" button-type="button" />
+		</field>
+		<field use-when="taxAuthority!=null" name="submitButton"
+			title="${uiLabelMap.CommonUpdate}" widget-style="btn btn-small btn-primary">
+			<submit image-location="icon-ok-circle" button-type="button" />
+		</field>
+	</form>
+	<form name="ListTaxAuthorityRate" list-name="taxAuthorityPayrollList"
+		type="list" odd-row-style="alternate-row" header-row-style="header-row-2"
+		paginate-target="ListTaxAuthorityRate"
+		default-table-style="table table-hover table-striped table-bordered dataTable">
+		<actions>
+			<entity-condition entity-name="TaxAuthorityRatePayroll"
+				list="taxAuthorityPayrollList">
+				<condition-list combine="and">
+					<condition-expr field-name="taxAuthGeoId"
+						from-field="parameters.taxAuthGeoId" />
+					<condition-expr field-name="taxAuthPartyId"
+						from-field="parameters.taxAuthPartyId" />
+				</condition-list>
+				<order-by field-name="taxAuthorityRateSeqId" />
+			</entity-condition>
+		</actions>
+		<field name="taxAuthorityRateSeqId">
+			<display />
+		</field>
+		<field name="taxAuthGeoId">
+			<display-entity entity-name="Geo" key-field-name="geoId"
+				description="${geoName} [${geoCode}] [${geoId}]" />
+		</field>
+		<field name="taxAuthPartyId">
+			<display-entity entity-name="PartyNameView"
+				key-field-name="partyId" description="${firstName} ${middleName} ${lastName} ${groupName}">
+				<sub-hyperlink description="${taxAuthPartyId}"
+					target="/partymgr/control/viewprofile" target-type="inter-app"
+					link-style="btn btn-primary btn-mini">
+					<parameter param-name="partyId" from-field="taxAuthPartyId" />
+				</sub-hyperlink>
+			</display-entity>
+		</field>
+		<field name="name">
+			<display></display>
+		</field>
+		<field name="fromValue">
+			<display></display>
+		</field>
+		<field name="thruValue">
+			<display></display>
+		</field>
+		<field name="taxPercentage">
+			<display></display>
+		</field>
+		<field name="taxAuthorityRateSeqId" widget-style="btn btn-mini btn-primary">
+			<hyperlink target="EditTaxAuthorityRate" description="${taxAuthorityRateSeqId}">
+				<parameter param-name="taxAuthorityRateSeqId" />
+			</hyperlink>
+		</field>
+	</form>
+	<form name="CreateTaxAuthorityRate" target="CreateTaxAuthorityRate"
+		type="single" default-map-name="paramTARP">
+		<alt-target use-when="paramTARP!=null" target="CreateTaxAuthorityRate" />
+		<field use-when="paramTARP!=null" name="taxAuthorityRateSeqId"
+			title="${uiLabelMap.taxAuthorityRateSeqId}">
+			<display />
+		</field>
+		<field name="taxAuthPartyId" title="${uiLabelMap.parameterCode}">
+			<display />
+		</field>
+		<field name="taxAuthGeoId" title="${uiLabelMap.parameterCode}">
+			<display />
+		</field>
+		<field name="name" title="${uiLabelMap.parameterName}">
+			<text />
+		</field>
+		<field name="fromValue">
+			<text />
+		</field>
+		<field name="thruValue">
+			<text />
+		</field>
+		<field name="taxPercentage">
+			<text />
+		</field>
+		<field name="fromDate" title="${uiLabelMap.fromDate}">
+			<date-time />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.thruDate}">
+			<date-time />
+		</field>
+		<field use-when="paramTARP==null" name="submitButton"
+			title="${uiLabelMap.CommonCreate}" widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+		<field use-when="paramTARP!=null" name="submitButton"
+			title="${uiLabelMap.CommonUpdate}" widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+
+	<!-- End of Payroll's TaxAuthority -->
+
+	<form name="ScheduleSalary" type="single" target="scheduleSalary"
+		header-row-style="header-row" default-table-style="basic-table">
+		<auto-fields-entity entity-name="PayrollScheduleLog" />
+		<field name="formulaList" field-name="code" title="${uiLabelMap.formulaCode}" required-field="true" widget-style="height100">
+			<drop-down allow-multiple="true" allow-empty="false">
+				<entity-options entity-name="PayrollFormula"
+					description="${name}-(${code})">
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="jobName" title-style="asterisk" required-field="true"></field>
+		<field name="startTime" title-style="asterisk" title="${uiLabelMap.HrolbiusStartTime}" required-field="true"></field>
+		<field name="jobFrequency" title="${uiLabelMap.HrolbiusJobFrequency}">
+			 <drop-down>
+                <option key="" description="${uiLabelMap.CommonNone}"/>
+                <option key="4" description="${uiLabelMap.CommonDaily}"/>
+                <option key="5" description="${uiLabelMap.CommonWeekly}"/>
+                <option key="6" description="${uiLabelMap.CommonMonthly}"/>
+                <option key="7" description="${uiLabelMap.CommonYearly}"/>
+                <option key="3" description="${uiLabelMap.CommonHourly}"/>
+                <option key="2" description="${uiLabelMap.CommonMinutely}"/>
+                <option key="1" description="${uiLabelMap.CommonSecondly}"/>
+            </drop-down>
+		</field>
+		<field name="expireTime" title="${uiLabelMap.HrolbiusExpireTime}" title-style="asterisk" required-field="true"></field>
+		<field name="runTime">
+			<hidden />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonSubmit}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+		<sort-order>
+			<field-group style="no-widget-header span6 no-left-margin">
+				<sort-field name="jobName" />
+				<sort-field name="jobFrequency" />
+				<sort-field name="startTime" />
+				<sort-field name="expireTime" />
+				<sort-field name="description" />
+			</field-group>
+			<field-group style="no-widget-header span6">
+				<sort-field name="formulaList" />
+			</field-group>
+			<field-group style="no-widget-header span12 no-left-margin align-center">
+        		<sort-field name="submitButton"/>
+        	</field-group>
+		</sort-order>
+	</form>
+	
+	<form name="ApprovePayroll" type="multi" target="approvePayroll" default-table-style="table table-hover table-striped table-bordered dataTable"
+	odd-row-style="alternate-row" header-row-style="header-row-2">
+		<actions>
+			<entity-condition entity-name="PayrollTable">
+				<condition-list>
+					<condition-list combine="or">
+						<condition-expr field-name="statusId" operator="equals" value="PAYR_APP"/>
+						<condition-expr field-name="statusId" operator="equals" value="PAYR_INIT"/>
+					</condition-list>
+					<condition-expr field-name="code" operator="equals" value="LUONG"/>
+				</condition-list>
+			</entity-condition>
+		</actions>
+		<row-actions>
+			<set field="amountValue" value="${groovy: Float.parseFloat(value)}"/>
+		</row-actions>
+		<field name="payrollTableId" title="${uiLabelMap.PayrollTableName}">
+			<display-entity entity-name="PayrollTableRecord" description="${payrollTableName}"></display-entity>
+		</field>
+		<field name="partyId" title="${uiLabelMap.EmployeeName}">
+			<display-entity entity-name="Person" description="${firstName} ${middleName} ${lastName}" >
+			</display-entity>
+		</field>
+		<field name="code" title="${uiLabelMap.CommonIdCode}">
+			<display-entity entity-name="PayrollFormula" description="${name}"></display-entity>
+		</field>
+		<field name="amountValue" title="${uiLabelMap.HrolbiusAmountValue}">
+			<display currency="${defaultCurrencyUomId}" type="currency"></display>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.CommonFromDate}" red-when="never">
+			<display type="date"></display>
+		</field>
+		<field name="thruDate" title="${uiLabelMap.CommonThruDate}" red-when="never">
+			<display type="date"></display>
+		</field>
+		<field name="statusId" title="${uiLabelMap.CommonStatus}">
+			<drop-down current="selected">
+				<entity-options description="${description}" entity-name="StatusItem">
+					<entity-constraint name="statusTypeId" operator="equals" value="PAYROLL_APP_STTS" />
+					<entity-order-by field-name="sequenceId"/>
+				</entity-options>
+			</drop-down>
+		</field>
+		
+		<field name="submitButton" title="${uiLabelMap.CommonSubmit}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+	
+	<form name="ListPartyFormulaInvoiceItemType" type="list" default-table-style="table table-hover table-striped table-bordered dataTable"
+		odd-row-style="alternate-row" header-row-style="header-row-2" list-name="listIt" paginate-target="EditPartyFormulaInvoiceItemType">
+		<actions>
+			<entity-condition entity-name="PartyPayrollFormulaInvoiceItemType" list="listIt" filter-by-date="true"></entity-condition>
+		</actions>
+		<field name="code" title="${uiLabelMap.PayrollFormulaCode}">
+			<display></display>
+		</field>
+		<field name="partyId" title="${uiLabelMap.Department}">
+			<display-entity entity-name="PartyGroup" description="${groupName}"></display-entity>
+		</field>
+		<field name="invoiceItemTypeId" title="${uiLabelMap.AccountingInvoicePurchaseItemType}">
+			<display-entity entity-name="InvoiceItemType" description="${description}"></display-entity>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.AvailableFromDate}">
+			<display type="date"></display>
+		</field>
+		<field name="_deleteLink" title="${uiLabelMap.CommonDelete}" widget-style="icon-trash">
+			<hyperlink also-hidden="false" target="deletePartyFormulaInvoiceItemType" style="icon-trash" description=" " confirmation-message="${uiLabelMap.NotifyDelete}" request-confirmation="true">
+				<parameter param-name="partyId"/>
+				<parameter param-name="code"/>
+				<parameter param-name="fromDate"/>
+				<parameter param-name="invoiceItemTypeId"/>
+			</hyperlink>
+		</field>
+	</form>
+	
+	<form name="FindPayrollTableParty" type="single" header-row-style="header-row" target="PayrollTablePartyHistory"
+		default-table-style="basic-table">
+		<field name="partyId" title="${uiLabelMap.EmployeeName}">
+			<lookup target-form-name="LookupEmployeeNew"></lookup>
+		</field>
+		<field name="code" title="${uiLabelMap.HRPayrollCode}">
+			<drop-down allow-empty="true">
+				<entity-options description="${name} [$code]" entity-name="PayrollFormula"></entity-options>
+			</drop-down>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.CommonFromDate}">
+			<date-find/>
+		</field>
+		<field name="thruDate" title="${uiLabelMap.CommonThruDate}">
+			<date-find/>
+		</field>
+		<field name="statusId" title="${uiLabelMap.CommonStatus}">
+			<drop-down>
+				<entity-options description="${description}" entity-name="StatusItem">
+					<entity-constraint name="statusTypeId" value="PAYROLL_APP_STTS"/>
+					<entity-order-by field-name="sequenceId"/>
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonSubmit}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+	<form name="ListPayrollTableParty" type="list" list-name="listIt" odd-row-style="alternate-row" header-row-style="header-row-2"
+		paginate-target="PayrollTablePartyHistory" default-table-style="table table-hover table-striped table-bordered dataTable">
+		<actions>
+			<service service-name="performFind" result-map="listIt">
+				<field-map field-name="inputFields" from-field="parameters"/>
+				<field-map field-name="entityName" value="PayrollTable"/>
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+				<field-map field-name="noConditionFind" value="Y" />
+			</service>
+		</actions>
+		<row-actions>
+			<set field="amountValue" value="${groovy: Float.parseFloat(value)}"/>
+		</row-actions>
+		<field name="partyId" title="${uiLabelMap.EmployeeName}">
+			<display-entity entity-name="Person" description="${lastName} ${firstName}"></display-entity>
+		</field>
+		<field name="code" title="${uiLabelMap.HRPayrollCode}">
+			<display-entity entity-name="PayrollFormula" description="${name}"></display-entity>
+		</field>
+		<field name="amountValue" title="${uiLabelMap.CommonAmount}">
+			<display type="currency" currency="${defaultCurrencyUomId}"></display>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.CommonFromDate}" red-when="never">
+			<display type="date-time"></display>
+		</field>
+		<field name="thruDate" title="${uiLabelMap.CommonThruDate}" red-when="never">
+			<display type="date-time"></display>
+		</field>
+		<field name="statusId" title="${uiLabelMap.CommonStatus}">
+			<display-entity entity-name="StatusItem" description="${description}"></display-entity>
+		</field>
+	</form>
+	<form name="ListPayrollTablePartyDir" type="list" list-name="listIt" odd-row-style="alternate-row" header-row-style="header-row-2"
+		paginate-target="ListTaxAuthorityRate" target="PayrollTablePartyHistory"
+		default-table-style="table table-hover table-striped table-bordered dataTable">
+		<actions>
+			<service service-name="performFind" result-map="listIt">
+				<field-map field-name="inputFields" from-field="parameters"/>
+				<field-map field-name="entityName" value="PayrollTable"/>
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+				<field-map field-name="noConditionFind" value="Y" />
+			</service>
+		</actions>
+		<row-actions>
+			<set field="amountValue" value="${groovy: Float.parseFloat(value)}"/>
+		</row-actions>
+		<field name="partyId" title="${uiLabelMap.EmployeeName}">
+			<display-entity entity-name="Person" description="${lastName} ${firstName}"></display-entity>
+		</field>
+		<field name="code" title="${uiLabelMap.HRPayrollCode}">
+			<display-entity entity-name="PayrollFormula" description="${name}"></display-entity>
+		</field>
+		<field name="amountValue" title="${uiLabelMap.CommonAmount}">
+			<display type="currency" currency="${defaultCurrencyUomId}"></display>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.CommonFromDate}">
+			<display></display>
+		</field>
+		<field name="thruDate" title="${uiLabelMap.CommonThruDate}">
+			<display></display>
+		</field>
+		<field name="statusId" title="${uiLabelMap.CommonStatus}">
+			<display-entity entity-name="StatusItem" description="${description}"></display-entity>
+		</field>
+	</form>
+	<form name="EmplSalaryBaseFlatList" type="list" list-name="emplList" paginate-target="EmplSalaryBaseFlatList"
+		odd-row-style="alternate-row" header-row-style="header-row-2"
+		default-table-style="table table-hover table-striped table-bordered dataTable">
+		<actions>
+			<!-- <entity-condition entity-name="RateAmount" list="listIt" filter-by-date="true">
+				<order-by field-name="partyId"/>
+			</entity-condition> -->
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getAllEmpl.groovy"/>
+		</actions>	
+		<row-actions>
+			<set field="emplId" from-field="partyId"/>
+			<service service-name="getSalaryAmountEmpl">
+				<field-map field-name="partyId" from-field="partyId"/>
+			</service>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrDeptEmpl.groovy"/>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getEffectiveDatePayrollSalary.groovy"/>			
+		</row-actions>
+		<field name="partyId" title="${uiLabelMap.EmployeeName}">
+			<display-entity entity-name="Person" description="${firstName} ${middleName} ${lastName} [${partyId}]"></display-entity>
+		</field>
+		<field name="currDept" title="${uiLabelMap.EmployeeCurrentDept}">
+			<display></display>
+		</field>
+		<field name="emplPositionTypeId" title="${uiLabelMap.EmplPositionTypeId}">
+			<display-entity entity-name="EmplPositionType" description="${description}"></display-entity>
+		</field>
+		<field name="dateEffective" title="${uiLabelMap.PayrollFromDate}">
+			<display></display>
+		</field>
+		<field name="rateAmount" title="${uiLabelMap.CommonAmount}" widget-area-style="text-center">
+			<display type="currency" currency="${rateCurrencyUomId}" default-value="-"></display>
+		</field>
+		<field name="periodTypeId" title="${uiLabelMap.PeriodTypePayroll}">
+			<display-entity entity-name="PeriodType" description="${description}"></display-entity>
+		</field>
+		<field name="_editLink" title=" " widget-style="btn btn-mini btn-primary icon-edit">
+			<hyperlink target="editPartyRateAmount" description=" ">
+				<parameter param-name="partyId" />
+				<parameter param-name="rateCurrencyUomId"/>
+				<parameter param-name="emplPositionTypeId"/>
+				<parameter param-name="rateTypeId"/>
+				<parameter param-name="periodTypeId"/>
+				<parameter param-name="workEffortId"/>
+				<parameter param-name="fromDate"/>
+				<parameter param-name="rateAmount"/>
+			</hyperlink>			
+		</field>
+		<field name="_viewHistory" title=" " widget-style="btn btn-mini btn-primary icon-history">
+			<hyperlink target="ViewHistoryPartyPayroll" description=" ">
+				<parameter param-name="partyId" />
+			</hyperlink>
+		</field>
+	</form>
+	<form name="EditPartyRateAmount" type="single" target="updatePartyRateAmount" header-row-style="header-row"
+		default-table-style="basic-table">
+		<actions>
+			<entity-one value-field="rateAmountGv" entity-name="RateAmount"></entity-one>
+			<set field="emplId" from-field="parameters.partyId"/>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrDeptEmpl.groovy"/>
+			<set field="fromDate" from-field="parameters.fromDate" type="Timestamp"/>
+			<!-- <set field="rateAmount" value="${groovy: return new BigDecimal(parameters.rateAmount);}" type="BigDecimal"/> -->
+			<set field="nowTimestamp" value="${groovy: org.ofbiz.base.util.UtilDateTime.nowTimestamp();}" type="Timestamp"/>
+		</actions>	
+		<alt-target use-when="rateAmountGv==null" target="createPartyRateAmount"/>
+		<field name="rateTypeId" use-when="rateAmountGv!=null">
+			<hidden/>
+		</field>
+		<field name="workEffortId" use-when="rateAmountGv!=null">
+			<hidden/>
+		</field>
+		<field name="partyId" title="${uiLabelMap.EmployeeName}">
+			<display-entity entity-name="Person" description="${firstName} ${middleName} ${lastName} [${partyId}]"></display-entity>
+		</field>
+		<field name="currDept" title="${uiLabelMap.EmployeeCurrentDept}" map-name="context">
+			<display></display>
+		</field>
+		<field name="emplPositionTypeId" title="${uiLabelMap.EmplPositionTypeId}">
+			<display-entity entity-name="EmplPositionType" description="${description}"></display-entity>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.PayrollFromDate}" red-when="never">
+			<hidden/>
+		</field>
+		<field name="effectiveFromDate" title="${uiLabelMap.PayrollFromDate}" required-field="true" title-style="asterisk">
+			<date-time type="date" default-value="${nowTimestamp}"/>
+		</field>
+		<field name="rateCurrencyUomId" title="${uiLabelMap.CurrencyUomId}">
+			<drop-down>
+				<entity-options description="${description} [${uomId}]" entity-name="Uom" key-field-name="uomId">
+					<entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="periodTypeId" title="${uiLabelMap.PeriodTypePayroll}">
+			<drop-down>
+				<entity-options description="${description}" entity-name="PeriodType">				
+					<entity-constraint name="periodTypeId" operator="in" value="DAILY,MONTHLY,QUARTERLY,YEARLY"/>					
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="rateAmount" title="${uiLabelMap.CommonAmount}" required-field="true" title-style="asterisk" map-name="rateAmountGv">
+			<text></text>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonCreate}" use-when="rateAmountGv==null" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-ok"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" use-when="rateAmountGv!=null" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-ok"/></field>
+	</form>
+	<form name="ViewHistoryPartyPayroll" type="list" list-name="listIt" paginate-target="ViewHistoryPartyPayroll"
+		odd-row-style="alternate-row" header-row-style="header-row-2"
+		default-table-style="table table-hover table-striped table-bordered dataTable">
+		<actions>
+			<entity-condition entity-name="RateAmount" filter-by-date="false" list="listIt">
+				<condition-expr field-name="partyId" operator="equals" from-field="parameters.partyId"/>
+				<order-by field-name="fromDate"/>
+			</entity-condition>
+		</actions>
+		<field name="fromDate" title="${uiLabelMap.PayrollFromDate}" red-when="never">
+			<display type="date"></display>
+		</field>
+		<field name="thruDate" title="${uiLabelMap.CommonThruDate}" red-when="never">
+			<display type="date"></display>
+		</field>
+		<field name="rateAmount" title="${uiLabelMap.CommonAmount}">
+			<display type="currency" currency="${rateCurrencyUomId}"></display>
+		</field>
+		<field name="periodTypeId" title="${uiLabelMap.PeriodTypePayroll}">
+			<display-entity entity-name="PeriodType" description="${description}"></display-entity>
+		</field>	
+	</form>
+	
+	<!-- maybe delete -->
+	<form name="SettingEmpPosTypeSalary" type="list" paginate-target="SettingEmpPosTypeSalary"
+		odd-row-style="alternate-row" header-row-style="header-row-2" list-name="listIt"
+		default-table-style="table table-hover table-striped table-bordered dataTable">
+		<actions>
+			<entity-condition entity-name="OldEmplPositionTypeRate" filter-by-date="true" list="listIt"></entity-condition>			
+		</actions>			
+		<field name="emplPositionTypeId" title="${uiLabelMap.EmplPositionTypeId}" map-name="emplPosTypeRate">
+			<display-entity entity-name="EmplPositionType" description="${description}"></display-entity>
+		</field>
+		<field name="periodTypeId" title="${uiLabelMap.PeriodTypePayroll}" map-name="emplPosTypeRate">
+			<display-entity entity-name="PeriodType" description="${description}"></display-entity>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.PayrollFromDate}" map-name="emplPosTypeRate">
+			<display type="date"></display>
+		</field>
+		<field name="rateAmount" title="${uiLabelMap.CommonAmount}" map-name="emplPosTypeRate">
+			<display type="currency" currency="${rateCurrencyUomId}" default-value="-"></display>
+		</field>		
+		<field name="_editLink" title="${uiLabelMap.CommonUpdate}" widget-style="btn btn-mini btn-primary icon-edit">
+    		<hyperlink target="EditEmpPosTypeSalary" description=" ">
+				<parameter param-name="emplPositionTypeId" />
+				<parameter param-name="fromDate" />
+				<parameter param-name="periodTypeId" />
+			</hyperlink>
+    	</field>
+    	<field name="deleteLink" title="${uiLabelMap.CommonDelete}"
+			widget-style="btn btn-mini btn-danger icon-trash open-sans">
+			<hyperlink target="deleteEmpPosTypeSalary" description=" " confirmation-message="${uiLabelMap.AreYouSure}" request-confirmation="true" >
+				<parameter param-name="emplPositionTypeId" />
+				<parameter param-name="fromDate" />
+				<parameter param-name="periodTypeId" />
+			</hyperlink>
+		</field>
+	</form>
+	
+	<form name="EditEmpPosTypeSalary" type="single" target="updateEmpPosTypeSalary" header-row-style="header-row"
+		default-table-style="basic-table" default-map-name="emplPosTypeRate">
+		<actions>
+			<entity-one value-field="emplPosTypeRate" entity-name="OldEmplPositionTypeRate"></entity-one>
+			<entity-condition entity-name="OldEmplPositionTypeRate" filter-by-date="true" list="emplPosTypeRates">				
+			</entity-condition>
+			<set field="listEmplPosTypeExists" value="${groovy: return org.ofbiz.entity.util.EntityUtil.getFieldListFromEntityList(emplPosTypeRates, &quot;emplPositionTypeId&quot;, true)}" type="List"/>
+		</actions>	
+		<alt-target use-when="emplPosTypeRate==null" target="createEmpPosTypeSalary"/>
+		<field name="emplPositionTypeId" title="${uiLabelMap.EmplPositionTypeId}" use-when="emplPosTypeRate!=null">
+			<display-entity entity-name="EmplPositionType" description="${description}"></display-entity>
+		</field>
+		<field name="emplPositionTypeId" title="${uiLabelMap.EmplPositionTypeId}" use-when="emplPosTypeRate==null">
+			<drop-down >
+				<entity-options description="${description}" entity-name="EmplPositionType">
+					<entity-constraint name="emplPositionTypeId" operator="not-in" env-name="listEmplPosTypeExists" ignore-if-null="true" ignore-if-empty="true"/>
+					<entity-constraint name="emplPositionTypeId" operator="not-equals" value="_NA_"/>		
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="periodTypeId" title="${uiLabelMap.PeriodTypePayroll}" use-when="emplPosTypeRate!=null">
+			<display-entity entity-name="PeriodType" description="${description}"></display-entity>
+		</field>
+		<field name="periodTypeId" title="${uiLabelMap.PeriodTypePayroll}" use-when="emplPosTypeRate==null">
+			<drop-down>
+				<entity-options description="${description}" entity-name="PeriodType">
+					<entity-constraint name="periodTypeId" operator="in" value="DAILY,MONTHLY,QUARTERLY,YEARLY"/>					
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.PayrollFromDate}" use-when="emplPosTypeRate!=null">
+			<display type="date"></display>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.PayrollFromDate}" use-when="emplPosTypeRate==null">
+			<date-time type="date"/>
+		</field>
+		<field name="rateCurrencyUomId" title="${uiLabelMap.CurrencyUomId}">
+			<drop-down>
+				<entity-options description="${description} [${uomId}]" entity-name="Uom" key-field-name="uomId">
+					<entity-constraint name="uomTypeId" operator="equals" value="CURRENCY_MEASURE"/>
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="rateAmount" title="${uiLabelMap.CommonAmount}" required-field="true" title-style="asterisk" >
+			<text></text>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonCreate}" use-when="emplPosTypeRate==null" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-ok"/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" use-when="emplPosTypeRate!=null" widget-style="btn btn-small btn-primary"><submit button-type="button" image-location="icon-ok"/></field>
+	</form>
+</forms>
+

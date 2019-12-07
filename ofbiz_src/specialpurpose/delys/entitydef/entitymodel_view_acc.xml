@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+	<title>View Entity For Accounting</title>
+	<description>None</description>
+	<copyright></copyright>
+	<version></version>
+<!-- 	<view-entity entity-name="GlAccountAndGlAccountCategoryMember" -->
+<!-- 		package-name="org.ofbiz.delys" title="GlAccount and GlAccountCategoryMember"> -->
+<!-- 		<member-entity entity-alias="GL" entity-name="GlAccount" /> -->
+<!-- 		<member-entity entity-alias="GLCM" entity-name="GlAccountCategoryMember" /> -->
+<!-- 		<alias-all entity-alias="GL" /> -->
+<!-- 		<alias-all entity-alias="GLCM" /> -->
+<!-- 		<view-link entity-alias="GL" rel-entity-alias="GLCM"> -->
+<!-- 			<key-map field-name="glAccountId" /> -->
+<!-- 		</view-link> -->
+<!-- 	</view-entity> -->
+	
+    <view-entity entity-name="PartyNameAllView" 
+            package-name="org.ofbiz.delys"
+            title="Party Name All View Entity">
+      <member-entity entity-alias="PTY" entity-name="Party"/>
+      <member-entity entity-alias="PER" entity-name="Person"/>
+      <member-entity entity-alias="PTYGRP" entity-name="PartyGroup"/>
+      <alias entity-alias="PTY" name="partyId"/>
+      <alias entity-alias="PTY" name="partyTypeId"/>
+      <alias entity-alias="PTY" name="description"/>
+      <alias entity-alias="PTY" name="statusId"/>
+      <alias entity-alias="PER" name="firstName"/>
+      <alias entity-alias="PER" name="middleName"/>
+      <alias entity-alias="PER" name="lastName"/>
+      <alias entity-alias="PER" name="firstNameLocal"/>
+      <alias entity-alias="PER" name="lastNameLocal"/>
+      <alias entity-alias="PER" name="personalTitle"/>
+      <alias entity-alias="PER" name="suffix"/>
+      <alias entity-alias="PTYGRP" name="groupName"/>
+      <alias entity-alias="PTYGRP" name="groupNameLocal"/>      
+      <alias name="fullName">
+	   		<complex-alias operator="||">
+	   			<complex-alias-field entity-alias="PER" field="firstName"/>
+	   			<complex-alias-field entity-alias="PER" field="middleName"/>
+	   			<complex-alias-field entity-alias="PER" field="lastName"/>
+	   			<complex-alias-field entity-alias="PTYGRP" field="groupName"/>
+	   		</complex-alias>
+	   </alias>
+	   <alias name="middleLast">
+	   		<complex-alias operator="||">
+	   			<complex-alias-field entity-alias="PER" field="middleName"/>
+	   			<complex-alias-field entity-alias="PER" field="lastName"/>
+	   		</complex-alias>
+	   </alias>
+	   <alias name="firstLast">
+	   		<complex-alias operator="||">
+	   			<complex-alias-field entity-alias="PER" field="firstName"/>
+	   			<complex-alias-field entity-alias="PER" field="lastName"/>
+	   		</complex-alias>
+	   </alias>
+	   <alias name="firstMiddle">
+	   		<complex-alias operator="||">
+	   			<complex-alias-field entity-alias="PER" field="firstName"/>
+	   			<complex-alias-field entity-alias="PER" field="middleName"/>
+	   		</complex-alias>
+	   </alias>
+    	      
+      <view-link entity-alias="PTY" rel-entity-alias="PER" rel-optional="true">
+        <key-map field-name="partyId"/>
+      </view-link>
+      <view-link entity-alias="PTY" rel-entity-alias="PTYGRP" rel-optional="true">
+        <key-map field-name="partyId"/>
+      </view-link>
+      <relation type="one-nofk" rel-entity-name="Party">
+        <key-map field-name="partyId"/>
+      </relation>
+    </view-entity>
+    <view-entity entity-name="AcctgTransEntryDetail" package-name="com.olbius"
+            title="Acctg trans entry detail">
+    	<member-entity entity-alias="ATE" entity-name="AcctgTransEntry"/>
+    	<member-entity entity-alias="PTG1" entity-name="PartyGroup"/>
+    	<member-entity entity-alias="PTG2" entity-name="PartyGroup"/>
+    	<member-entity entity-alias="PER1" entity-name="Person"/>
+    	<member-entity entity-alias="GLA" entity-name="GlAccount"/>
+    	<member-entity entity-alias="PRD" entity-name="Product"/>
+    	<alias-all entity-alias="ATE"/>
+    	<alias name="accountName" entity-alias="GLA"/>
+    	<alias name="productName" entity-alias="PRD"/>
+    	<alias entity-alias="PTG2" name="groupNameOrganization" field="groupName"/>
+    	<alias name="fullName">
+	   		<complex-alias operator="||' '||">
+	   			<complex-alias-field entity-alias="PER1" field="firstName" default-value="''"/>
+	   			<complex-alias-field entity-alias="PER1" field="middleName" default-value="''"/>
+	   			<complex-alias-field entity-alias="PER1" field="lastName" default-value="''"/>
+	   			<complex-alias-field entity-alias="PTG1" field="groupName" default-value="''"/>
+	   		</complex-alias>
+	   </alias>
+    	<view-link entity-alias="ATE" rel-entity-alias="GLA">
+			<key-map field-name="glAccountId" />
+		</view-link>
+		<view-link entity-alias="ATE" rel-entity-alias="PRD" rel-optional="true">
+			<key-map field-name="productId" />
+		</view-link>
+		<view-link entity-alias="ATE" rel-entity-alias="PTG1" rel-optional="true">
+			<key-map field-name="partyId" rel-field-name="partyId"/>
+		</view-link>
+		<view-link entity-alias="ATE" rel-entity-alias="PER1" rel-optional="true">
+			<key-map field-name="partyId" rel-field-name="partyId"/>
+		</view-link>
+		<view-link entity-alias="ATE" rel-entity-alias="PTG2" rel-optional="true">
+			<key-map field-name="organizationPartyId" rel-field-name="partyId"/>
+		</view-link>
+    </view-entity>
+    <view-entity entity-name="FinAccountDetail" package-name="com.olbius">
+    	<member-entity entity-alias="FA" entity-name="FinAccount"/>
+    	<member-entity entity-alias="PTG" entity-name="PartyGroup"/>
+    	<member-entity entity-alias="PTYGRP" entity-name="PartyGroup"/>
+    	<member-entity entity-alias="PER" entity-name="Person"/>
+    	<alias-all entity-alias="FA"/>
+		<alias entity-alias="PTG" field="groupName" name="groupNameOrganization"/>
+      	<alias entity-alias="PER" name="firstName"/>
+      	<alias entity-alias="PER" name="middleName"/>
+      	<alias entity-alias="PER" name="lastName"/>
+      	<alias entity-alias="PTYGRP" name="groupName"/>
+      	<alias name="fullName">
+	   		<complex-alias operator="||' '||">
+	   			<complex-alias-field entity-alias="PER" field="firstName" default-value="''"/>
+	   			<complex-alias-field entity-alias="PER" field="middleName" default-value="''"/>
+	   			<complex-alias-field entity-alias="PER" field="lastName" default-value="''"/>
+	   			<complex-alias-field entity-alias="PTYGRP" field="groupName" default-value="''"/>
+	   		</complex-alias>
+	   </alias>
+    	<view-link rel-entity-alias="PTG" entity-alias="FA" rel-optional="true">
+    		<key-map field-name="organizationPartyId" rel-field-name="partyId"/>
+    	</view-link>
+    	<view-link rel-entity-alias="PTYGRP" entity-alias="FA" rel-optional="true">
+    		<key-map field-name="ownerPartyId" rel-field-name="partyId"/>
+    	</view-link>
+    	<view-link entity-alias="FA" rel-entity-alias="PER" rel-optional="true">
+        <key-map field-name="ownerPartyId" rel-field-name="partyId"/>
+      </view-link>
+    </view-entity>
+    <view-entity entity-name="OrderHeaderAndRolesDetail" package-name="com.olbius">
+    	<member-entity entity-alias="OHR" entity-name="OrderHeaderAndRoles"/>
+    	<member-entity entity-alias="PTYGRP" entity-name="PartyGroup"/>
+    	<member-entity entity-alias="PER" entity-name="Person"/>
+    	<alias-all entity-alias="OHR"/>
+      	<alias entity-alias="PER" name="firstName"/>
+      	<alias entity-alias="PER" name="middleName"/>
+      	<alias entity-alias="PER" name="lastName"/>
+      	<alias entity-alias="PTYGRP" name="groupName"/>
+      	<alias name="fullName">
+	   		<complex-alias operator="||' '||">
+	   			<complex-alias-field entity-alias="PER" field="firstName" default-value="''"/>
+	   			<complex-alias-field entity-alias="PER" field="middleName" default-value="''"/>
+	   			<complex-alias-field entity-alias="PER" field="lastName" default-value="''"/>
+	   			<complex-alias-field entity-alias="PTYGRP" field="groupName" default-value="''"/>
+	   		</complex-alias>
+	    </alias>
+    	<view-link rel-entity-alias="PTYGRP" entity-alias="OHR" rel-optional="true">
+    		<key-map field-name="partyId"/>
+    	</view-link>
+    	<view-link entity-alias="OHR" rel-entity-alias="PER" rel-optional="true">
+        	<key-map field-name="partyId"/>
+      	</view-link>
+    </view-entity>
+    <extend-entity entity-name="PaymentGroupType" default-resource-name="DelysEntityLabels"/>
+<!--     <view-entity entity-name="PaymentAndTypeAndCreditCardDetail" -->
+<!--             package-name="com.olbius" -->
+<!--             title="Payment, Payment type and CreadiCard View Entity"> -->
+<!--         <member-entity entity-alias="PAT" entity-name="PaymentAndType"/> -->
+<!--         <member-entity entity-alias="CC" entity-name="CreditCard"/> -->
+<!--         <member-entity entity-alias="PTYGRPFROM" entity-name="PartyGroup"/> -->
+<!--     	<member-entity entity-alias="PERFROM" entity-name="Person"/> -->
+<!--     	<member-entity entity-alias="PTYGRPTO" entity-name="PartyGroup"/> -->
+<!--     	<member-entity entity-alias="PERTO" entity-name="Person"/> -->
+<!--         <alias-all entity-alias="PAT"/> -->
+<!--         <alias-all entity-alias="CC"/> -->
+<!--         <alias name="fullNameFrom"> -->
+<!-- 	   		<complex-alias operator="||' '||"> -->
+<!-- 	   			<complex-alias-field entity-alias="PERFROM" field="firstName" default-value="''"/> -->
+<!-- 	   			<complex-alias-field entity-alias="PERFROM" field="middleName" default-value="''"/> -->
+<!-- 	   			<complex-alias-field entity-alias="PERFROM" field="lastName" default-value="''"/> -->
+<!-- 	   			<complex-alias-field entity-alias="PTYGRPFROM" field="groupName" default-value="''"/> -->
+<!-- 	   		</complex-alias> -->
+<!-- 	    </alias> -->
+<!-- 	    <alias name="fullNameTo"> -->
+<!-- 	   		<complex-alias operator="||' '||"> -->
+<!-- 	   			<complex-alias-field entity-alias="PERTO" field="firstName" default-value="''"/> -->
+<!-- 	   			<complex-alias-field entity-alias="PERTO" field="middleName" default-value="''"/> -->
+<!-- 	   			<complex-alias-field entity-alias="PERTO" field="lastName" default-value="''"/> -->
+<!-- 	   			<complex-alias-field entity-alias="PTYGRPTO" field="groupName" default-value="''"/> -->
+<!-- 	   		</complex-alias> -->
+<!-- 	    </alias> -->
+<!-- 	    <view-link entity-alias="PAT" rel-entity-alias="CC" rel-optional="true"> -->
+<!--             <key-map field-name="paymentMethodId" rel-field-name="paymentMethodId"/> -->
+<!--         </view-link> -->
+<!--     	<view-link rel-entity-alias="PTYGRPFROM" entity-alias="PAT" rel-optional="true"> -->
+<!--     		<key-map field-name="partyIdFrom" rel-field-name="partyId"/> -->
+<!--     	</view-link> -->
+<!--     	<view-link entity-alias="PAT" rel-entity-alias="PERFROM" rel-optional="true"> -->
+<!--         	<key-map field-name="partyIdFrom" rel-field-name="partyId"/> -->
+<!--       	</view-link> -->
+<!--       	<view-link rel-entity-alias="PTYGRPTO" entity-alias="PAT" rel-optional="true"> -->
+<!--     		<key-map field-name="partyIdTo" rel-field-name="partyId"/> -->
+<!--     	</view-link> -->
+<!--     	<view-link entity-alias="PAT" rel-entity-alias="PERTO" rel-optional="true"> -->
+<!--         	<key-map field-name="partyIdTo" rel-field-name="partyId"/> -->
+<!--       	</view-link> -->
+<!--     </view-entity>		 -->
+</entitymodel>	
+	

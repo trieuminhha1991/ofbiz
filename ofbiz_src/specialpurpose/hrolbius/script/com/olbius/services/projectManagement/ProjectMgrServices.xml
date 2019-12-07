@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+	<simple-method method-name="getRoleTypeProjectParties">
+		<set field="partyId" from-field="parameters.partyId"/>
+		<set field="roleTypeList" type="List"/>
+		<entity-condition list="roleTypeListGv" entity-name="PartyRoleDetailAndPartyDetail">
+			<condition-list>
+				<condition-expr field-name="parentTypeId" operator="equals" value="PROJECT_TEAM"/>
+				<condition-expr field-name="partyId" operator="equals" from-field="partyId"/>
+			</condition-list>
+		</entity-condition>		
+		<iterate entry="tempList" list="roleTypeListGv">
+			<set field="option" value="${tempList.description}: ${tempList.roleTypeId}"/>
+			<field-to-list list="roleTypeList" field="option"/>
+		</iterate>
+		<field-to-result field="roleTypeList" result-name="roleTypeList"/>
+	</simple-method>        
+	
+	<simple-method method-name="getRoleTypeTaskParties">
+		<set field="partyId" from-field="parameters.partyId"/>
+		<set field="workEffortId" from-field="parameters.workEffortId"/>
+		<set field="roleTypeList" type="List"/>
+		<entity-condition list="roleTypeListGv" entity-name="WorkEffortPartyAssignAndRoleType">
+			<condition-list>
+				<condition-expr field-name="workEffortId" from-field="workEffortId"/>
+				<condition-expr field-name="partyId" from-field="partyId"/>
+			</condition-list>
+		</entity-condition>
+		<iterate entry="tempList" list="roleTypeListGv">
+			<set field="option" value="${tempList.description}: ${tempList.roleTypeId}"/>
+			<field-to-list list="roleTypeList" field="option"/>
+		</iterate>
+		<field-to-result field="roleTypeList" result-name="roleTypeList"/>
+	</simple-method>
+	
+	<simple-method method-name="getRoleTypeInPhase">
+		<set field="workEffortParentId" from-field="parameters.workEffortParentId"/>
+		<set field="partyId" from-field="userLogin.partyId"/>
+		<set field="roleTypeList" type="List"/>
+		<entity-condition list="roleTypeListGv" entity-name="ProjectIdPartyRoleAndPhase">
+			<condition-list>
+				<condition-expr field-name="partyId" from-field="partyId"/>
+				<condition-expr field-name="phaseId" from-field="workEffortParentId"/>
+			</condition-list>
+		</entity-condition>
+		<iterate entry="tempList" list="roleTypeListGv">
+			<set field="option" value="${tempList.description}: ${tempList.roleTypeId}"/>
+			<field-to-list list="roleTypeList" field="option"/>
+		</iterate>
+		<field-to-result field="roleTypeList" result-name="roleTypeList"/>
+	</simple-method>
+</simple-methods>        

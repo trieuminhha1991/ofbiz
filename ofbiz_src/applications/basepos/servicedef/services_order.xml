@@ -1,0 +1,126 @@
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>Web Pos Order Services</description>
+    <vendor>OFBiz</vendor>
+    <version>1.0</version>
+    
+    <service name="getOrderItems" engine="java" auth="true" location="com.olbius.basepos.order.SalesHistory" invoke="getOrderItems">
+    	<description>Get all order item of order that is required</description>
+    	<attribute name="orderId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="returnId" mode="IN" type="String" optional="true"></attribute>
+    	<attribute name="posTerminalLogId" mode="IN" type="String"></attribute>
+    	<attribute name="listOrderItems" mode="OUT" type="java.util.List"></attribute>
+    </service>
+    
+    <service name="getContentPromotion" engine="java" auth="true" location="com.olbius.basepos.order.SalesHistory" invoke="getContentPromotion">
+    	<description>Get all order item of order that is required</description>
+    	<attribute name="productPromoId" mode="IN" type="String"></attribute>
+    	<attribute name="listRuleItems" mode="OUT" type="java.util.List"></attribute>
+    </service>
+    
+   <!--  <service name="updateProductFacilitySaleOrderFromOrder" engine="java" auth="true" location="com.olbius.basepos.order.PosOrderServices" invoke="updateProductFacilitySaleOrderFromOrder">
+    	<description>update product_facility_sale_order entity from order</description>
+    	<attribute name="orderId" mode="IN" type="String"></attribute>
+    </service> -->
+    
+    <service name="storeOrderPos" engine="java" validate="true" auth="true"
+            location="com.olbius.basepos.order.PosOrderServices" invoke="createOrder">
+        <description>Creates order entities</description>
+        <implements service="storeOrder"/>
+    </service>
+    
+    <service name="changeOrderStatusPos" engine="java" auth="true"
+            location="com.olbius.basepos.order.PosOrderServices" invoke="setOrderStatus">
+        <description>Change the status of an existing order</description>
+        <attribute name="orderId" type="String" mode="IN"/>
+        <attribute name="statusId" type="String" mode="IN"/>
+        <attribute name="setItemStatus" type="String" mode="IN" optional="true"/>
+        <attribute name="oldStatusId" type="String" mode="OUT" optional="false"/>
+        <attribute name="orderStatusId" type="String" mode="OUT" optional="true"/>
+        <attribute name="orderTypeId" type="String" mode="OUT" optional="true"/>
+        <attribute name="needsInventoryIssuance" type="String" mode="OUT" optional="true"/>
+        <attribute name="grandTotal" type="BigDecimal" mode="OUT" optional="true"/>
+        <attribute name="changeReason" type="String" mode="IN" optional="true"/>
+    </service>
+
+    <service name="changeOrderItemStatusPos" engine="java" auth="true"
+            location="com.olbius.basepos.order.PosOrderServices" invoke="setItemStatus">
+        <description>Change the status of an existing order item.  If no orderItemSeqId is specified, the status of all order items will be changed.</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="true"/>
+        <attribute name="fromStatusId" type="String" mode="IN" optional="true"/>
+        <attribute name="statusId" type="String" mode="IN" optional="false"/>
+        <attribute name="statusDateTime" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="changeReason" type="String" mode="IN" optional="true"/>
+    </service>
+    
+    <service name="quickReturnOrderPos" engine="simple"
+            location="component://basepos/script/org/ofbiz/webpos/OrderReturnServices.xml" invoke="quickReturnFromOrder">
+        <description>Quick Return Order</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="facilityId" mode="IN" type="String" optional="true"></attribute>
+        <attribute name="returnReasonId" type="String" mode="IN" optional="true"/>
+        <attribute name="returnTypeId" type="String" mode="IN" optional="true"/>
+        <attribute name="returnHeaderTypeId" type="String" mode="IN" optional="false"/>
+        <attribute name="receiveReturn" type="Boolean" mode="IN" optional="true"/>
+        <attribute name="grandTotal" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="taxTotal" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="returnId" type="String" mode="OUT" optional="false"/>
+    </service>
+    
+    <service name="partialReturnFromOrder" engine="simple"
+            location="component://basepos/script/org/ofbiz/webpos/OrderReturnServices.xml" invoke="partialReturnFromOrder">
+        <description>Quick Return Order</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="returnedAdjustment" type="List" mode="IN" optional="true"/>
+        <attribute name="returnOrderItems" mode="IN" type="List" optional="false"></attribute>
+        <attribute name="returnHeaderTypeId" type="String" mode="IN" optional="false"/>
+        <attribute name="receiveReturn" type="Boolean" mode="IN" optional="true"/>
+        <attribute name="grandTotal" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="taxTotal" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="returnId" type="String" mode="OUT" optional="false"/>
+    </service>
+    
+    <service name="getParReturnAbleItems" engine="java" auth="true" location="com.olbius.basepos.order.WebPosReturnOrder" invoke="getParReturnAbleItems">
+        <description>Get returnable items</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="returnItems" type="List" mode="OUT" optional="false"/>
+        <attribute name="returnItemMaps" type="List" mode="OUT" optional="false"/>
+        <attribute name="returnAdjustmentMaps" type="List" mode="OUT" optional="true"/>
+    </service>
+    
+    <service name="returnPartialOrder" engine="java" auth="true" location="com.olbius.basepos.order.WebPosReturnOrder" invoke="returnPartialOrder">
+        <description>Get returnable items</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="grandTotal" type="BigDecimal" mode="IN" optional="false"/>
+        <attribute name="returnItems" type="String" mode="IN" optional="false"/>
+        <attribute name="returnAdjustment" type="String" mode="IN" optional="true"/>
+        <attribute name="result" type="String" mode="OUT" optional="false"/>
+    </service>
+    
+    <service name="getProductAverageCostSimple" engine="simple" 
+            location="component://basepos/script/org/ofbiz/webpos/CostServices.xml" invoke="getProductAverageCostSimple" auth="true">
+        <description>Get Average cost of a product with input : productId, facilityId, ownerPartyId</description>
+        <attribute name="facilityId" type="String" mode="IN" optional="false"/>
+        <attribute name="productId" type="String" mode="IN" optional="false"/>
+        <attribute name="ownerPartyId" type="String" mode="IN" optional="false"/>
+        <attribute name="unitCost" type="BigDecimal" mode="OUT" optional="false"/>
+        <attribute name="currencyUomId" type="String" mode="OUT" optional="true"/>
+    </service>
+    
+    <service name="getPartyPostalAddressAddState" engine="simple"		
+         location="component://basepos/script/org/ofbiz/webpos/PartyServices.xml" invoke="getPartyPostalAddress" auth="false">		
+         <description>Get the party postal address</description>		
+         <attribute name="partyId" type="String" mode="IN" optional="false"/>		
+         <attribute name="contactMechPurposeTypeId" type="String" mode="INOUT" optional="true"/>		
+         <attribute name="contactMechId" type="String" mode="OUT" optional="true"/>		
+         <attribute name="address1" type="String" mode="OUT" optional="true"/>		
+         <attribute name="address2" type="String" mode="OUT" optional="true"/>		
+         <attribute name="directions" type="String" mode="OUT" optional="true"/>		
+         <attribute name="city" type="String" mode="OUT" optional="true"/>		
+         <attribute name="postalCode" type="String" mode="OUT" optional="true"/>		
+         <attribute name="stateProvinceGeoId" type="String" mode="OUT" optional="true"/>		
+         <attribute name="stateProvinceGeoName" mode="OUT" type="String" optional="true" />		
+         <attribute name="districtGeoId" type="String" mode="OUT" optional="true"/>		
+         <attribute name="countryGeoId" type="String" mode="OUT" optional="true"/>		
+     </service>
+</services>

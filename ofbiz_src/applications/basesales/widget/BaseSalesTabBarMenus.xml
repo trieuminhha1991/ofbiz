@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<menus xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-menu.xsd">
+	<menu name="ProductPromoTabBar" extends="CommonTabBarMenu" modelMenu="olbiustab" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="ViewPromotion" title="${uiLabelMap.BSInformation}">
+            <link target="viewPromotion">
+                <parameter param-name="productPromoId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ListPromotionCode" title="${uiLabelMap.BSVoucher}">
+        	<condition>
+        		<and>
+        			<not><if-empty field="productPromo"/></not>
+        			<if-compare field="productPromo.requireCode" operator="equals" value="Y"/>
+        		</and>
+        	</condition>
+            <link target="listPromotionCode">
+                <parameter param-name="productPromoId"/>
+            </link>
+        </menu-item>
+        <!-- <menu-item name="EditProductPromoContent" title="${uiLabelMap.CommonContent}">
+            <link target="EditProductPromoContent">
+                <parameter param-name="productPromoId"/>
+            </link>
+        </menu-item> -->
+    </menu>
+    
+	<menu name="LoyaltyTabBar" extends="CommonTabBarMenu" modelMenu="olbiustab" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="ViewLoyalty" title="${uiLabelMap.BSInformation}">
+            <link target="viewLoyalty">
+                <parameter param-name="loyaltyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ListLoyaltyCode" title="${uiLabelMap.BSVoucher}">
+        	<condition>
+        		<and>
+        			<not><if-empty field="loyalty"/></not>
+        			<if-compare field="loyalty.requireCode" operator="equals" value="Y"/>
+        		</and>
+        	</condition>
+            <link target="listLoyaltyCode">
+                <parameter param-name="loyaltyId"/>
+            </link>
+        </menu-item>
+    </menu>
+	
+	<menu name="ViewPromoSubTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="editPromotion" title="${uiLabelMap.BSEdit}" widget-style="icon-pencil open-sans">
+            <condition>
+            	<and>
+            		<if-olbius-has-permission/>
+            		<not><if-empty field="currentStatusId"></if-empty></not>
+         			<if-compare field="currentStatusId" value="PROMO_CREATED" operator="equals"></if-compare>
+            		<!-- <or>
+            			<if-empty field="currentStatusId"></if-empty>
+            			<and>
+            				<not><if-empty field="currentStatusId"></if-empty></not>
+            				<if-compare field="currentStatusId" value="PROMO_CREATED" operator="equals"></if-compare>
+            			</and>
+            		</or> -->
+            		<or>
+            			<if-empty field="productPromo.thruDate"/>
+            			<if-compare-field operator="greater" field="productPromo.thruDate" to-field="nowTimestamp"/>
+            		</or>
+            	</and>
+          	</condition>
+            <link target="editPromotion">
+            	<parameter param-name="productPromoId" from-field="productPromo.productPromoId"/>
+            </link>
+        </menu-item>
+        <menu-item name="newPromotion" title="${uiLabelMap.BSAddNew}" widget-style="icon-plus open-sans">
+        	<condition>
+				<if-olbius-has-permission/>
+			</condition>
+            <link target="newPromotion"/>
+        </menu-item>
+        <menu-item name="copyPromotion" title="${uiLabelMap.BSCopy}" widget-style="fa fa-files-o open-sans">
+            <condition>
+            	<and>
+            		<if-olbius-has-permission/>
+            		<not>
+	           			<if-empty field="parameters.productPromoId"/>
+	           		</not>
+            	</and>
+          	</condition>
+            <link target="newPromotion">
+            	<parameter param-name="productPromoIdOrg" from-field="parameters.productPromoId"/>
+            </link>
+        </menu-item>
+        <!-- <menu-item name="printQuotation" title="${uiLabelMap.BSPrint}" widget-style="icon-print open-sans">
+        	<condition>
+            	<and>
+            		<not><if-empty field="currentStatusId"></if-empty></not>
+            		<if-compare field="currentStatusId" value="QUOTATION_ACCEPTED" operator="equals" ></if-compare>
+            	</and>
+          	</condition>
+            <link target="printQuotation">
+            	<parameter param-name="productQuotationId" from-field="productQuotation.productQuotationId"/>
+            </link>
+       	</menu-item> -->
+	</menu>
+	
+	<menu name="ViewLoyaltySubTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="editLoyalty" title="${uiLabelMap.BSEdit}" widget-style="icon-pencil open-sans">
+            <condition>
+            	<and>
+            		<if-olbius-has-permission/>
+            		<or>
+            			<if-empty field="currentStatusId"></if-empty>
+            			<and>
+            				<not><if-empty field="currentStatusId"></if-empty></not>
+            				<if-compare field="currentStatusId" value="LOYALTY_CREATED" operator="equals"></if-compare>
+            			</and>
+            		</or>
+            	</and>
+          	</condition>
+            <link target="editLoyalty">
+            	<parameter param-name="loyaltyId" from-field="loyalty.loyaltyId"/>
+            </link>
+        </menu-item>
+        <menu-item name="newLoyalty" title="${uiLabelMap.BSAddNew}" widget-style="icon-plus open-sans">
+        	<condition>
+				<if-olbius-has-permission/>
+			</condition>
+            <link target="newLoyalty"/>
+        </menu-item>
+	</menu>
+	
+	<menu name="CommonSettingSubTabBar" modelMenu="olbiustab" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="commonSetting" title="${uiLabelMap.BSCommonSetting}">
+        	<link target="commonSettingSales"/>
+        </menu-item>
+        <menu-item name="listFeatures" title="${uiLabelMap.BSProductFeature}">
+        	<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="listFeature"/>
+        </menu-item>
+        <!-- <menu-item name="listRoleTypes" title="${uiLabelMap.BSRoleType}">
+        	<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="listRoleType"/>
+        </menu-item> -->
+        <menu-item name="listRoleTypes" title="${uiLabelMap.BSRoleType}">
+        	<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="listRoleTypeProductStore"/>
+        </menu-item>
+        <menu-item name="listCustomTimePeriod" title="${uiLabelMap.BSSalesCustomTimePeriod}">
+        	<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="listCustomTimePeriod"/>
+        </menu-item>
+        <menu-item name="listChannel" title="${uiLabelMap.BSSalesChannelType}">
+        	<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="listChannel"/>
+        </menu-item>
+        <menu-item name="listPrioritys" title="${uiLabelMap.BSPriority}">
+        	<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="listPriority"/>
+        </menu-item>
+        <menu-item name="listCustomerType" title="${uiLabelMap.BSCustomerType}">
+        	<condition>
+				<if-olbius-has-permission/>
+			</condition>
+        	<link target="listCustomerType"/>
+        </menu-item>
+    </menu>
+	
+	<menu name="ViewProductStoreSubTabBar" modelMenu="olbiustab" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+		<!--  id="FindProductStoreRolesSubTabBar"  -->
+        <menu-item name="viewDetail" title="${uiLabelMap.BSViewDetail}">
+        	<link target="viewProductStore">
+        		<parameter param-name="productStoreId"/>
+        	</link>
+        </menu-item>
+        <menu-item name="viewProductStoreRoleTypes" title="${uiLabelMap.BSPartyRoles}">
+        	<link target="viewProductStoreRoleType">
+        		<parameter param-name="productStoreId"/>
+        	</link>
+        </menu-item>
+        <menu-item name="viewProductStoreFacilities" title="${uiLabelMap.LogWarehouse}">
+        	<link target="viewProductStoreFacilities">
+        		<parameter param-name="productStoreId"/>
+        	</link>
+        </menu-item>
+        <menu-item name="viewProductStoreCatalogs" title="${uiLabelMap.BSCatalogs}">
+        	<link target="viewProductStoreCatalog">
+        		<parameter param-name="productStoreId"/>
+        	</link>
+        </menu-item>
+        <menu-item name="viewProductStoreShipmentMethods" title="${uiLabelMap.BSAbbShipmentMethod}">
+        	<link target="viewProductStoreShipmentMethod">
+        		<parameter param-name="productStoreId"/>
+        	</link>
+        </menu-item>
+        <menu-item name="viewProductStorePaymentMethods" title="${uiLabelMap.BSAbbPaymentMethod}">
+        	<link target="viewProductStorePaymentMethod">
+        		<parameter param-name="productStoreId"/>
+        	</link>
+        </menu-item>
+        <!-- <menu-item name="viewProductStoreShipmentCosts" title="${uiLabelMap.BSShipmentCost}">
+        	<link target="viewProductStoreShipmentCost">
+        		<parameter param-name="productStoreId"/>
+        	</link>
+        </menu-item> -->
+	</menu>
+	
+	<menu name="ViewFeatureCategorySubTabBarMTL" modelMenu="olbiustab" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="viewFeature" title="${uiLabelMap.BSFeature}">
+        	<condition>
+				<if-has-permission permission="FEATUREST" action="_VIEW"/>
+			</condition>
+        	<link target="showFeatureDetail">
+        		<parameter param-name="productFeatureCategoryId" from-field="parameters.productFeatureCategoryId"/>
+        	</link>
+        </menu-item>
+        <menu-item name="viewFeatureType" title="${uiLabelMap.BSFeatureType}">
+        	<condition>
+				<if-has-permission permission="FEATUREST" action="_VIEW"/>
+			</condition>
+        	<link target="viewFeatureType">
+        		<parameter param-name="productFeatureCategoryId" from-field="parameters.productFeatureCategoryId"/>
+        	</link>
+        </menu-item>
+	</menu>
+	
+	<menu name="ViewPPSReportSubTabBarMTL" modelMenu="olbiustab" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="viewPPSCompanyMTL" title="${uiLabelMap.BSMByCompany}">
+        	<condition>
+				<if-has-permission permission="MTLPPSREPORT" action="_VIEW"/>
+			</condition>
+        	<link target="viewPPSCompanyMTL"></link>
+        </menu-item>
+        <menu-item name="viewPPSDistributorMTL" title="${uiLabelMap.BSMByDistributor}">
+        	<condition>
+				<if-has-permission permission="MTLPPSREPORT" action="_VIEW"/>
+			</condition>
+        	<link target="viewPSSDistributorMTL"> </link>
+        </menu-item>
+	</menu>
+	
+	<menu name="ViewPCReportSubTabBarMTL" modelMenu="olbiustab" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="viewPCCompanyMTL" title="${uiLabelMap.BSMByCompany}">
+        	<condition>
+				<if-has-permission permission="MTLPCREPORT" action="_VIEW"/>
+			</condition>
+        	<link target="viewPCCompanyMTL"></link>
+        </menu-item>
+        <menu-item name="viewPCDistributorMTL" title="${uiLabelMap.BSMByDistributor}">
+        	<condition>
+				<if-has-permission permission="MTLPCREPORT" action="_VIEW"/>
+			</condition>
+        	<link target="viewPCDistributorMTL"> </link>
+        </menu-item>
+	</menu>
+	
+	<menu name="ViewEvaluateSalesEffectSubTabBar" modelMenu="olbiustab" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="viewEvaluateSalesForecast" title="${uiLabelMap.BSBySalesForecast}">
+        	<condition>
+				<if-has-permission permission="ESREPORT" action="_VIEW"/>
+			</condition>
+        	<link target="viewEvaluateEffectiveSalesReportMTLLink"></link>
+        </menu-item>
+        <menu-item name="viewEvaluateSalesOut" title="${uiLabelMap.BSBySalesOut}">
+        	<condition>
+				<if-has-permission permission="ESREPORT" action="_VIEW"/>
+			</condition>
+        	<link target="viewEvaluateEffectiveSalesOutReportMTLLink"></link>
+        </menu-item>
+        <menu-item name="viewEvaluateSalesIn" title="${uiLabelMap.BSBySalesIn}">
+        	<condition>
+				<if-has-permission permission="ESREPORT" action="_VIEW"/>
+			</condition>
+        	<link target="viewEvaluateEffectiveSalesInReportMTLLink"></link>
+        </menu-item>
+	</menu>
+	
+	<menu name="ViewEvaluateSpecialPromoSubTabBar" modelMenu="olbiustab" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="viewEvaluateDisplayPromo" title="${uiLabelMap.BSByDisplayPromo}">
+        	<condition>
+				<if-has-permission permission="ESREPORT" action="_VIEW"/>
+			</condition>
+        	<link target="viewEvaluateSpecialPromoReportMTLLink"></link>
+        </menu-item>
+        <menu-item name="viewEvaluateAccumulationPromo" title="${uiLabelMap.BSAccumulationPromo}">
+        	<condition>
+				<if-has-permission permission="ESREPORT" action="_VIEW"/>
+			</condition>
+        	<link target="viewEvaluateAccumulationReportMTLLink"></link>
+        </menu-item>
+	</menu>
+	
+	<menu name="ViewQuotationSubTabBar" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+        <menu-item name="editQuotation" title="${uiLabelMap.BSEdit}" widget-style="icon-pencil open-sans">
+            <condition>
+            	<and>
+            		<if-olbius-has-permission/>
+            		<not><if-empty field="allowQuotationEdit"/></not>
+            		<if-compare operator="equals" value="true" field="allowQuotationEdit"/>
+            	</and>
+          	</condition>
+            <link target="editQuotation">
+            	<parameter param-name="productQuotationId" from-field="productQuotation.productQuotationId"/>
+            </link>
+        </menu-item>
+        <menu-item name="newQuotation" title="${uiLabelMap.BSAddNew}" widget-style="icon-plus open-sans">
+        	<condition>
+				<if-olbius-has-permission/>
+			</condition>
+            <link target="newQuotation"/>
+        </menu-item>
+        <menu-item name="copyQuotation" title="${uiLabelMap.BSCopy}" widget-style="fa fa-files-o open-sans">
+			<condition>
+				<and>
+					<if-olbius-has-permission/>
+					<not>
+						<if-empty field="parameters.productQuotationId" />
+					</not>
+				</and>
+			</condition>
+			<link target="newQuotation">
+				<parameter param-name="productQuotationIdOrg" from-field="parameters.productQuotationId" />
+			</link>
+		</menu-item>
+        <menu-item name="printQuotation" title="${uiLabelMap.BSExportPDF}" widget-style="fa fa-file-pdf-o open-sans">
+            <link target="printQuotation">
+            	<parameter param-name="productQuotationId" from-field="productQuotation.productQuotationId"/>
+            </link>
+       	</menu-item>
+	</menu>
+	
+	<!-- parent menu: CommonSettingSubTabBar -->
+	<menu name="SettingRoleTypeTopTabBar" modelMenu="olbiustab" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+         selected-menuitem-context-field-name="tabButtonItemInner">
+        <!-- <menu-item name="fullRoleType" title="${uiLabelMap.BSFullRoleType}">
+            <link target="listRoleType"></link>
+        </menu-item> -->
+        <menu-item name="roleTypeProductStore" title="${uiLabelMap.BSSalesChannel}">
+            <link target="listRoleTypeProductStore"></link>
+        </menu-item>
+        
+    </menu>
+</menus>

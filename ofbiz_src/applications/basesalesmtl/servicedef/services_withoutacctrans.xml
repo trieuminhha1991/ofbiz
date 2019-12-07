@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>BaseSalesMtl Services</description>
+    <vendor></vendor>
+    <version>1.0</version>
+
+	<service name="quickShipEntireOrderWithoutAccTrans" engine="simple"
+            location="component://basesalesmtl/script/com/olbius/shipment/shipment/ShipmentWithoutAccTransServices.xml" invoke="quickShipEntireOrder" auth="true" transaction-timeout="600">
+        <description>Quick Ships An Entire Order Creating One Shipment Per Facility and Ship Group.  All approved order items are
+          automatically issued in full and put into one package.  The shipment is created in the INPUT status and then updated to
+          PACKED and SHIPPED. Without create accounting transaction.
+        </description>
+        <attribute name="orderId" type="String" mode="INOUT" optional="false"/>
+        <attribute name="originFacilityId" type="String" mode="IN" optional="true"/>
+        <attribute name="setPackedOnly" type="String" mode="IN" optional="true"/>
+        <attribute name="eventDate" type="Timestamp" mode="IN" optional="true"/>
+        <!-- A List of Maps, each with a shipmentId,a facilityId, and a shipGroupSeqId for each shipment created -->
+        <attribute name="shipmentShipGroupFacilityList" type="List" mode="OUT" optional="false"/>
+    </service>
+    <service name="facilityGenericPermissionWithoutAccTrans" engine="simple"
+        location="component://basesalesmtl/script/com/olbius/shipment/shipment/ShipmentWithoutAccTransServices.xml" invoke="facilityGenericPermissionWithoutAccTrans">
+        <implements service="permissionInterface"/>
+    </service>
+    <service name="issueOrderItemShipGrpInvResToShipmentWithoutAccTrans" engine="simple"
+            location="component://basesalesmtl/script/com/olbius/shipment/shipment/ShipmentWithoutAccTransServices.xml" invoke="issueOrderItemShipGrpInvResToShipment" auth="true">
+        <description>Add an OrderItemShipGrpInvRes to a Shipment - only for sales orders</description>
+        <required-permissions join-type="AND">
+            <permission-service service-name="facilityGenericPermissionWithoutAccTrans" main-action="CREATE"/>
+            <permission-service service-name="facilityGenericPermissionWithoutAccTrans" main-action="UPDATE"/>
+        </required-permissions>
+        <auto-attributes entity-name="Shipment" include="pk" mode="IN" optional="false"/>
+        <auto-attributes entity-name="OrderItemShipGrpInvRes" include="pk" mode="IN" optional="false"/>
+        <attribute name="quantity" type="BigDecimal" mode="IN" optional="false"/>
+        <attribute name="eventDate" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="shipmentItemSeqId" type="String" mode="OUT" optional="false"/>
+        <attribute name="itemIssuanceId" type="String" mode="OUT" optional="false"/>
+    </service>
+    
+    <service name="changeOrderItemStatusWithoutAccTrans" engine="java" auth="true"
+            location="org.ofbiz.order.order.OrderServices" invoke="setItemStatus">
+        <description>Change the status of an existing order item.  If no orderItemSeqId is specified, the status of all order items will be changed.</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="true"/>
+        <attribute name="fromStatusId" type="String" mode="IN" optional="true"/>
+        <attribute name="statusId" type="String" mode="IN" optional="false"/>
+        <attribute name="statusDateTime" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="changeReason" type="String" mode="IN" optional="true"/>
+    </service>
+    
+    <service name="cancelOrderInventoryReservationWithoutAccTrans" engine="simple"
+                location="component://product/script/org/ofbiz/product/inventory/InventoryReserveServices.xml" invoke="cancelOrderInventoryReservation" auth="true">
+        <description>
+            Iterates through each OrderItemShipGrpInvRes on each OrderItem for the order
+            with the given orderId and cancels the reservation by changing the status
+            of the OrderItemShipGrpInvRes and incrementing the corresponding non-serialized
+            inventoryItem's availableToPromise quantity, or setting the status of the
+            corresponding serialized inventoryItem to available.
+        </description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="true"/>
+        <attribute name="shipGroupSeqId" type="String" mode="IN" optional="true"/>
+    </service>
+    
+    <service name="checkOrderItemStatusWithoutAccTrans" engine="java"
+            location="com.olbius.salesmtl.DistributorServices" invoke="checkItemStatus">
+      <description>Check the status of all items and cancel/approve/complete the order if we can</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+    </service>
+    
+    <service name="createInventoryItemDetailWithoutAccTrans" default-entity-name="InventoryItemDetail" engine="simple"
+                location="component://product/script/org/ofbiz/product/inventory/InventoryServices.xml" invoke="createInventoryItemDetail" auth="true">
+        <description>Create an createInventoryItemDetail - note that the quantityOnHand and availableToPromise are relative (positive or negative) and will be added to the corresponding value on the given InventoryItem</description>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true">
+            <exclude field-name="effectiveDate"/>
+        </auto-attributes>
+        <override name="inventoryItemDetailSeqId" mode="OUT"/>
+    </service>
+    
+    <service name="updateShipmentWithoutAccTrans" default-entity-name="Shipment" engine="simple"
+            location="component://product/script/org/ofbiz/shipment/shipment/ShipmentServices.xml" invoke="updateShipment" auth="true">
+        <description>Update Shipment</description>
+        <!-- <permission-service service-name="facilityGenericPermissionWithoutAccTrans" main-action="UPDATE"/> -->
+        <auto-attributes include="pk" mode="INOUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true">
+            <exclude field-name="shipmentTypeId"/>
+            <exclude field-name="createdDate"/>
+            <exclude field-name="createdByUserLogin"/>
+            <exclude field-name="lastModifiedDate"/>
+            <exclude field-name="lastModifiedByUserLogin"/>
+        </auto-attributes>
+        <attribute name="shipmentTypeId" type="String" mode="INOUT" optional="true"/>
+        <attribute name="eventDate" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="oldStatusId" type="String" mode="OUT" optional="true"/>
+        <attribute name="oldPrimaryOrderId" type="String" mode="OUT" optional="true"/>
+        <attribute name="oldOriginFacilityId" type="String" mode="OUT" optional="true"/>
+        <attribute name="oldDestinationFacilityId" type="String" mode="OUT" optional="true"/>
+    </service>
+    
+    <service name="checkCancelItemIssuanceAndOrderShipmentFromShipmentWithoutAccTrans" engine="simple"
+            location="component://basesalesmtl/script/com/olbius/shipment/shipment/ShipmentWithoutAccTransServices.xml" invoke="checkCancelItemIssuanceAndOrderShipmentFromShipment" auth="true">
+        <description>Check Shipment Items and cancel Item Issuance and Order Shipment</description>
+        <permission-service service-name="facilityGenericPermissionWithoutAccTrans" main-action="UPDATE"/>
+        <attribute name="shipmentId" type="String" mode="IN" optional="false"/>
+    </service>
+    <service name="cancelOrderItemIssuanceFromSalesShipmentWithoutAccTrans" engine="simple"
+            location="component://basesalesmtl/script/com/olbius/shipment/shipment/ShipmentWithoutAccTransServices.xml" invoke="cancelOrderItemIssuanceFromSalesShipment" auth="true">
+        <description>Cancel an ItemIssuance from Sales Shipment</description>
+        <permission-service service-name="facilityGenericPermissionWithoutAccTrans" main-action="UPDATE"/>
+        <attribute name="itemIssuanceId" type="String" mode="IN" optional="false"/>
+        <attribute name="cancelQuantity" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="canceledQuantity" type="BigDecimal" mode="OUT" optional="false"/>
+    </service>
+    <service name="reassignInventoryReservationsWithoutAccTrans" engine="simple" transaction-timeout="600"
+            location="component://basesalesmtl/script/com/olbius/shipment/shipment/ShipmentWithoutAccTransServices.xml" invoke="reassignInventoryReservations" auth="true">
+        <description>Balance inventory reservations for a given product/facility, considering all the reservations with promised date greater than fromDate.</description>
+        <attribute name="productId" type="String" mode="IN" optional="false"/>
+        <attribute name="facilityId" type="String" mode="IN" optional="false"/>
+        <attribute name="fromDate" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="noLongerOnBackOrderIdSet" type="Set" mode="OUT" optional="true"/>
+        <attribute name="priority" type="String" mode="IN"  optional="true"/>
+    </service>
+    <service name="cancelOrderItemShipGrpInvResWithoutAccTrans" engine="simple"
+                location="component://basesalesmtl/script/com/olbius/shipment/shipment/ShipmentWithoutAccTransServices.xml" invoke="cancelOrderItemShipGrpInvRes" auth="true">
+        <description>Cancels an inventory reservation</description>
+        <auto-attributes entity-name="OrderItemShipGrpInvRes" include="pk" mode="IN" optional="false"/>
+        <attribute name="cancelQuantity" type="BigDecimal" mode="IN" optional="true"/>
+    </service>
+    <service name="reserveProductInventoryByFacilityWithoutAccTrans" engine="simple"
+                location="component://basesalesmtl/script/com/olbius/shipment/shipment/ShipmentWithoutAccTransServices.xml" invoke="reserveProductInventory" auth="true">
+        <description>Reserve Inventory for a Product By Facility
+            If requireInventory is Y the quantity not reserved is returned, if N then a negative
+            availableToPromise will be used to track quantity ordered beyond what is in stock.
+        </description>
+        <attribute name="productId" type="String" mode="IN" optional="false"/>
+        <attribute name="facilityId" type="String" mode="IN" optional="false"/>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="shipGroupSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="quantity" type="BigDecimal" mode="IN" optional="false"/>
+        <attribute name="reservedDatetime" type="Timestamp" mode="IN" optional="true"/>
+        <attribute name="requireInventory" type="String" mode="IN" optional="false"/>
+        <attribute name="reserveOrderEnumId" type="String" mode="IN" optional="true"/>
+        <attribute name="sequenceId" type="Long" mode="IN" optional="true"/>
+        <attribute name="quantityNotReserved" type="BigDecimal" mode="OUT" optional="false"/>
+        <attribute name="priority" type="String" mode="IN"  optional="true"/>
+        <attribute name="lotId" type="String" mode="IN" optional="true" />
+    </service>
+    <service name="reserveOrderItemInventoryWithoutAccTrans" engine="simple"
+                location="component://basesalesmtl/script/com/olbius/shipment/shipment/ShipmentWithoutAccTransServices.xml" invoke="reserveOrderItemInventory" auth="true">
+        <description>Create OrderItemShipGrpInvRes or increment existing reserved quantity.</description>
+        <auto-attributes mode="IN" entity-name="OrderItemShipGrpInvRes" include="pk" optional="false"/>
+        <auto-attributes mode="IN" entity-name="OrderItemShipGrpInvRes" include="nonpk" optional="true">
+            <exclude field-name="createdDatetime"/>
+        </auto-attributes>
+        <attribute name="priority" type="String" mode="IN"  optional="true"/>
+        <override name="quantity" optional="false"/>
+    </service>
+    <service name="checkCreateStockRequirementAtpWithoutAccTrans" engine="simple" auth="true"
+            location="component://basesalesmtl/script/com/olbius/shipment/shipment/ShipmentWithoutAccTransServices.xml" invoke="checkCreateStockRequirementAtp">
+        <description>Create a Product Requirement based on ATP inventory</description>
+        <attribute name="orderId" type="String" mode="IN" optional="false"/>
+        <attribute name="shipGroupSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="false"/>
+        <attribute name="inventoryItemId" type="String" mode="IN" optional="true"/>
+        <attribute name="productId" type="String" mode="IN" optional="true"/>
+        <attribute name="quantity" type="BigDecimal" mode="IN" optional="true"/>
+        <attribute name="requirementId" type="String" mode="OUT" optional="true"/>
+    </service>
+    <service name="reserveStoreInventoryWithoutAccTrans" engine="simple"
+            location="component://basesalesmtl/script/com/olbius/shipment/shipment/ShipmentWithoutAccTransServices.xml" invoke="reserveStoreInventory">
+        <description>Reserve Inventory in a Product Store</description>
+        <attribute name="productStoreId" type="String" mode="IN" optional="false"></attribute>
+        <attribute name="productId" type="String" mode="IN" optional="false"></attribute>
+        <attribute name="facilityId" type="String" mode="IN" optional="true"></attribute>
+        <attribute name="quantity" type="BigDecimal" mode="IN" optional="false"></attribute>
+        <attribute name="orderId" type="String" mode="IN" optional="true"></attribute>
+        <attribute name="orderItemSeqId" type="String" mode="IN" optional="true"></attribute>
+        <attribute name="shipGroupSeqId" type="String" mode="IN" optional="true"></attribute>
+        <attribute name="quantityNotReserved" type="BigDecimal" mode="OUT" optional="false"></attribute>
+    </service>
+    
+    <service name="updateItemIssuanceWithoutAccTrans" default-entity-name="ItemIssuance" engine="simple"
+            location="component://product/script/org/ofbiz/shipment/issuance/IssuanceServices.xml" invoke="updateItemIssuance" auth="true">
+        <description>Update ItemIssuance</description>
+        <permission-service service-name="facilityGenericPermissionWithoutAccTrans" main-action="UPDATE"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+    </service>
+    
+    <service name="checkCreateStockRequirementQohWithoutAccTrans" engine="simple" auth="true" default-entity-name="ItemIssuance"
+            location="component://basesalesmtl/script/com/olbius/shipment/shipment/ShipmentWithoutAccTransServices.xml" invoke="checkCreateStockRequirementQoh">
+        <description>Create a Product Requirement based on QOH inventory</description>
+        <auto-attributes include="pk" mode="IN" optional="true"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true">
+            <exclude field-name="issuedDateTime"/>
+        </auto-attributes>
+        <attribute name="requirementId" type="String" mode="OUT" optional="true"/>
+    </service>
+    
+    <!-- ItemIssuance Services -->
+    <service name="createItemIssuanceWithoutAccTrans" default-entity-name="ItemIssuance" engine="simple"
+            location="component://product/script/org/ofbiz/shipment/issuance/IssuanceServices.xml" invoke="createItemIssuance" auth="true">
+        <description>Create ItemIssuance</description>
+        <!-- <permission-service service-name="facilityGenericPermissionWithoutAccTrans" main-action="CREATE"/> -->
+        <auto-attributes include="pk" mode="OUT" optional="false"/>
+        <auto-attributes include="nonpk" mode="IN" optional="true"/>
+        <attribute name="affectAccounting" type="Boolean" mode="OUT" optional="true"/>
+    </service>
+    <service name="changeOrderStatusWithoutAccTrans" engine="java" auth="true"
+            location="org.ofbiz.order.order.OrderServices" invoke="setOrderStatus">
+        <description>Change the status of an existing order</description>
+        <attribute name="orderId" type="String" mode="INOUT"/>
+        <attribute name="statusId" type="String" mode="IN"/>
+        <attribute name="setItemStatus" type="String" mode="IN" optional="true"/>
+        <attribute name="oldStatusId" type="String" mode="OUT" optional="false"/>
+        <attribute name="orderStatusId" type="String" mode="OUT" optional="true"/>
+        <attribute name="orderTypeId" type="String" mode="OUT" optional="true"/>
+        <attribute name="needsInventoryIssuance" type="String" mode="OUT" optional="true"/>
+        <attribute name="grandTotal" type="BigDecimal" mode="OUT" optional="true"/>
+        <attribute name="changeReason" type="String" mode="IN" optional="true"/>
+        <!-- close notify -->
+        <attribute name="ntfId" mode="IN" type="String" optional="true"/>
+    </service>
+</services>

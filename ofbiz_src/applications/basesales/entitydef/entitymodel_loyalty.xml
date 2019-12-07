@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+    <!-- ========================================================= -->
+    <!-- ======================== Defaults ======================= -->
+    <!-- ========================================================= -->
+    <title>Entity of Loyalty Point</title>
+    <description>None</description>
+    <copyright></copyright>
+    <version></version>
+    
+    <entity entity-name="LoyaltyPoint" package-name="com.olbius.loyaltypoint" title="Loyalty Point Entity">
+    	<field name="loyaltyPointId" type="id-ne"></field>
+    	<field name="partyId" type="id"></field>
+    	<field name="ownerPartyId" type="id"></field>
+    	<field name="createdDate" type="date-time"></field>
+    	<field name="productStoreId" type="id"></field>
+    	<field name="comments" type="comment"></field>
+    	<field name="point" type="fixed-point"></field>
+    	<prim-key field="loyaltyPointId"/>
+    	<relation type="one" fk-name="LP_POINT_PARTY" rel-entity-name="Party">
+        	<key-map field-name="partyId"/>
+      	</relation>
+      	<relation type="one" fk-name="LP_POINT_OWNPARTY" title="Owner" rel-entity-name="Party">
+        	<key-map field-name="ownerPartyId" rel-field-name="partyId"/>
+      	</relation>
+      	<relation type="one" fk-name="LP_POINT_STORE" rel-entity-name="ProductStore">
+        	<key-map field-name="productStoreId"/>
+      	</relation>
+    </entity>
+    
+    <entity entity-name="LoyaltyPointDetail" package-name="com.olbius.loyaltypoint" title="Loyalty Point Detail Entity">
+    	<field name="loyaltyPointId" type="id-ne"></field>
+      	<field name="loyaltyPointDetailSeqId" type="id-ne"></field>
+      	<field name="effectiveDate" type="date-time"></field>
+      	<field name="pointDiff" type="fixed-point"></field>
+      	<field name="orderId" type="id"></field>
+      	<field name="returnId" type="id"></field>
+      	<field name="reasonEnumId" type="id"></field>
+     	<field name="description" type="description"></field>
+     	<prim-key field="loyaltyPointId"/>
+      	<prim-key field="loyaltyPointDetailSeqId"/>
+	    <relation type="one" fk-name="LP_ITDTL_LPD" rel-entity-name="LoyaltyPoint">
+	    	<key-map field-name="loyaltyPointId"/>
+	    </relation>
+	    <relation title="Reason" fk-name="LP_ITDTL_REAS" rel-entity-name="Enumeration" type="one">
+        	<key-map field-name="reasonEnumId" rel-field-name="enumId"/>
+      	</relation>
+    </entity>
+    
+    <entity entity-name="LoyaltyStatus" package-name="com.olbius.loyaltypoint" never-cache="true" title="Loyalty Status Entity">
+      	<field name="loyaltyStatusId" type="id-ne"></field>
+      	<field name="statusId" type="id"></field>
+      	<field name="loyaltyId" type="id"></field>
+      	<field name="statusDatetime" type="date-time"></field>
+	<field name="statusUserLogin" type="id"></field>
+      	<field name="changeReason" type="description"></field>
+      	<prim-key field="loyaltyStatusId"/>
+      	<relation type="one" fk-name="LOY_STTS_STTS" rel-entity-name="StatusItem">
+        	<key-map field-name="statusId"/>
+      	</relation>
+      	<relation type="one" fk-name="LOY_STTS_LOY" rel-entity-name="Loyalty">
+        	<key-map field-name="loyaltyId"/>
+      	</relation>
+      	<relation type="one" fk-name="LOY_STTS_USER" rel-entity-name="UserLogin">
+        	<key-map field-name="statusUserLogin" rel-field-name="userLoginId"/>
+      	</relation>
+    </entity>
+    
+    <entity entity-name="LoyaltyRoleTypeAppl" package-name="com.olbius.loyaltypoint">
+    	<field name="loyaltyId" type="id-ne"></field>
+    	<field name="roleTypeId" type="id-ne"></field>
+    	<field name="fromDate" type="date-time"></field>
+    	<field name="thruDate" type="date-time"></field>
+    	<prim-key field="loyaltyId"/>
+    	<prim-key field="roleTypeId"/>
+    	<prim-key field="fromDate"/>
+    	<relation rel-entity-name="Loyalty" type="one" fk-name="LOY_PRROLE_LOY">
+    		<key-map field-name="loyaltyId"/>
+    	</relation>
+    	<relation rel-entity-name="RoleType" type="one" fk-name="LOY_PRROLE_RT">
+    		<key-map field-name="roleTypeId"/>
+    	</relation>
+    </entity>
+    
+    <entity entity-name="Loyalty" package-name="com.olbius.loyaltypoint" title="Loyalty Entity">
+    	<field name="loyaltyId" type="id-ne"></field>
+      	<field name="loyaltyName" type="name"></field>
+      	<field name="loyaltyText" type="description"></field>
+      	<field name="loyaltyTypeId" type="id"></field>
+      	<field name="fromDate" type="date-time"/>
+		<field name="thruDate" type="date-time"/>
+		<field name="statusId" type="id"/>
+      	<field name="organizationId" type="id"></field>
+      	<field name="createdDate" type="date-time"></field>
+	<field name="createdByUserLogin" type="id"></field>
+      	<prim-key field="loyaltyId"/>
+      	<relation type="one" fk-name="LOY_OPT_PARTY" rel-entity-name="Party">
+       		<key-map field-name="organizationId" rel-field-name="partyId"/>
+	  	</relation>
+	   	<relation type="one" fk-name="LOYALTY_CUL" title="CreatedBy" rel-entity-name="UserLogin">
+	        <key-map field-name="createdByUserLogin" rel-field-name="userLoginId"/>
+	    </relation>
+		<relation type="one" fk-name="LOYALTY_STTS" rel-entity-name="StatusItem">
+			<key-map field-name="statusId"/>
+		</relation>
+		<relation type="one" fk-name="LOYALTY_ENUM" rel-entity-name="Enumeration">
+        	<key-map field-name="loyaltyTypeId" rel-field-name="enumId"/>
+      	</relation>
+    </entity>
+    
+    <entity entity-name="LoyaltyAction" package-name="com.olbius.loyaltypoint" title="Loyalty Action Entity">
+    	<field name="loyaltyId" type="id-ne"></field>
+      	<field name="loyaltyRuleId" type="id-ne"></field>
+      	<field name="loyaltyActionSeqId" type="id-ne"></field>
+      	<field name="loyaltyActionEnumId" type="id-ne"></field>
+      	<field name="quantity" type="fixed-point"></field>
+      	<field name="amount" type="fixed-point"></field>
+      	<field name="operatorEnumId" type="id"/>
+      	<field name="actionValue" type="long-varchar"></field>
+      	<prim-key field="loyaltyId"/>
+      	<prim-key field="loyaltyRuleId"/>
+      	<prim-key field="loyaltyActionSeqId"/>
+      	<relation type="one" fk-name="LOY_ACT_ENUM" title="Action" rel-entity-name="Enumeration">
+        	<key-map field-name="loyaltyActionEnumId" rel-field-name="enumId"/>
+      	</relation>
+      	<relation type="one" fk-name="LOY_ACT_LOY" rel-entity-name="Loyalty">
+        	<key-map field-name="loyaltyId"/>
+      	</relation>
+      	<relation type="one" fk-name="LOY_ACT_RL" rel-entity-name="LoyaltyRule">
+        	<key-map field-name="loyaltyId"/>
+        	<key-map field-name="loyaltyRuleId"/>
+      	</relation>
+   		<relation type="one" fk-name="LOY_ACT_ON" title="Operator" rel-entity-name="Enumeration">
+        	<key-map field-name="operatorEnumId" rel-field-name="enumId"/>
+      	</relation>
+    </entity>
+    
+    <entity entity-name="LoyaltyCategory" package-name="com.olbius.loyaltypoint" title="Loyalty Category Entity">
+      	<field name="loyaltyId" type="id-ne"></field>
+      	<field name="loyaltyRuleId" type="id-ne"></field>
+      	<field name="loyaltyCondSeqId" type="id-ne"></field>
+      	<field name="productCategoryId" type="id-ne"></field>
+      	<field name="andGroupId" type="id"></field>
+      	<field name="loyaltyApplEnumId" type="id-ne"></field>
+      	<field name="includeSubCategories" type="indicator"></field>
+      	<prim-key field="loyaltyId"/>
+      	<prim-key field="loyaltyRuleId"/>
+      	<prim-key field="loyaltyCondSeqId"/>
+      	<prim-key field="productCategoryId"/>
+      	<prim-key field="andGroupId"/>
+      	<relation type="one" fk-name="LOY_CAT_LOY" rel-entity-name="Loyalty">
+        	<key-map field-name="loyaltyId"/>
+      	</relation>
+      	<relation type="one" fk-name="LOY_CAT_PRCAT" rel-entity-name="ProductCategory">
+        	<key-map field-name="productCategoryId"/>
+      	</relation>
+      	<relation type="one" fk-name="LOY_CAT_ENUM" title="Appl" rel-entity-name="Enumeration">
+        	<key-map field-name="loyaltyApplEnumId" rel-field-name="enumId"/>
+      	</relation>
+    </entity>
+    
+    <entity entity-name="LoyaltyCondition" package-name="com.olbius.loyaltypoint" title="Loyalty Condition Entity">
+      	<field name="loyaltyId" type="id-ne"></field>
+      	<field name="loyaltyRuleId" type="id-ne"></field>
+      	<field name="loyaltyCondSeqId" type="id-ne"></field>
+      	<field name="inputParamEnumId" type="id"></field>
+      	<field name="operatorEnumId" type="id"></field>
+      	<field name="condValue" type="long-varchar"></field>
+      	<field name="otherValue" type="long-varchar"></field>
+      	<field name="usePriceWithTax" type="id"><description>Calculate loyalty with price has tax if this value is Y</description></field>
+      	<field name="isReturnOrder" type="id"><description>Apply for return order if this value is Y</description></field>
+      	<prim-key field="loyaltyId"/>
+      	<prim-key field="loyaltyRuleId"/>
+      	<prim-key field="loyaltyCondSeqId"/>
+      	<relation type="one" fk-name="LOY_COND_LOY" rel-entity-name="Loyalty">
+        	<key-map field-name="loyaltyId"/>
+      	</relation>
+      	<relation type="one" fk-name="LOY_COND_RULE" rel-entity-name="LoyaltyRule">
+        	<key-map field-name="loyaltyId"/>
+        	<key-map field-name="loyaltyRuleId"/>
+      	</relation>
+      	<relation type="one" fk-name="LOY_COND_INENUM" title="InputParam" rel-entity-name="Enumeration">
+        	<key-map field-name="inputParamEnumId" rel-field-name="enumId"/>
+      	</relation>
+      	<relation type="one" fk-name="LOY_COND_OPENUM" title="Operator" rel-entity-name="Enumeration">
+        	<key-map field-name="operatorEnumId" rel-field-name="enumId"/>
+      	</relation>
+      	<relation type="many" rel-entity-name="LoyaltyCategory">
+        	<key-map field-name="loyaltyId"/>
+        	<key-map field-name="loyaltyRuleId"/>
+        	<key-map field-name="loyaltyCondSeqId"/>
+      	</relation>
+      	<relation type="many" rel-entity-name="LoyaltyProduct">
+        	<key-map field-name="loyaltyId"/>
+        	<key-map field-name="loyaltyRuleId"/>
+        	<key-map field-name="loyaltyCondSeqId"/>
+      	</relation>
+    </entity>
+    
+    <entity entity-name="LoyaltyProduct" package-name="com.olbius.loyaltypoint" title="Loyalty Product Entity">
+      	<field name="loyaltyId" type="id-ne"></field>
+      	<field name="loyaltyRuleId" type="id-ne"></field>
+      	<field name="loyaltyCondSeqId" type="id-ne"></field>
+      	<field name="productId" type="id-ne"></field>
+      	<field name="loyaltyApplEnumId" type="id-ne"></field>
+      	<prim-key field="loyaltyId"/>
+      	<prim-key field="loyaltyRuleId"/>
+      	<prim-key field="loyaltyCondSeqId"/>
+      	<prim-key field="productId"/>
+      	<relation type="one" fk-name="LOY_PRD_LOY" rel-entity-name="Loyalty">
+        	<key-map field-name="loyaltyId"/>
+      	</relation>
+      	<relation type="one" fk-name="LOY_PRD_PROD" rel-entity-name="Product">
+        	<key-map field-name="productId"/>
+      	</relation>
+      	<relation type="one" fk-name="LOY_PRD_ENUM" title="Appl" rel-entity-name="Enumeration">
+        	<key-map field-name="loyaltyApplEnumId" rel-field-name="enumId"/>
+      	</relation>
+    </entity>
+    
+    <entity entity-name="LoyaltyRule" package-name="com.olbius.loyaltypoint" title="Loyalty Rule Entity">
+      	<field name="loyaltyId" type="id-ne"></field>
+      	<field name="loyaltyRuleId" type="id-ne"></field>
+      	<field name="ruleName" type="name"></field>
+      	<prim-key field="loyaltyId"/>
+      	<prim-key field="loyaltyRuleId"/>
+      	<relation type="one" fk-name="LOY_RLE_LOY" rel-entity-name="Loyalty">
+        	<key-map field-name="loyaltyId"/>
+      	</relation>
+    </entity>
+    
+    <entity entity-name="ProductStoreLoyaltyAppl" package-name="com.olbius.loyaltypoint" title="Product Store Loyalty Applicability Entity">
+      	<field name="productStoreId" type="id-ne"></field>
+      	<field name="loyaltyId" type="id-ne"></field>
+      	<field name="fromDate" type="date-time"></field>
+      	<field name="thruDate" type="date-time"></field>
+      	<field name="sequenceNum" type="numeric"></field>
+      	<prim-key field="productStoreId"/>
+      	<prim-key field="loyaltyId"/>
+      	<prim-key field="fromDate"/>
+      	<relation type="one" fk-name="PRDSTRLOY_PRDS" rel-entity-name="ProductStore">
+        	<key-map field-name="productStoreId"/>
+      	</relation>
+      	<relation type="one" fk-name="PRDSTRLOY_LOY" rel-entity-name="Loyalty">
+        	<key-map field-name="loyaltyId"/>
+      	</relation>
+    </entity>
+    
+    <entity entity-name="LoyaltyUse" package-name="com.olbius.loyaltypoint" title="Loyalty Use Entity">
+      	<field name="orderId" type="id-ne"></field>
+      	<field name="loyaltySequenceId" type="id-ne"></field>
+      	<field name="loyaltyId" type="id-ne"></field>
+      	<field name="partyId" type="id-ne"></field>
+      	<field name="totalDiscountAmount" type="currency-amount"></field>
+      	<field name="quantityLeftInActions" type="fixed-point"></field>
+      	<prim-key field="orderId"/>
+      	<prim-key field="loyaltySequenceId"/>
+      	<relation type="one" fk-name="LOY_USE_LOY" rel-entity-name="Loyalty">
+        	<key-map field-name="loyaltyId"/>
+      	</relation>
+      	<relation type="one" fk-name="LOY_USE_ORDR" rel-entity-name="OrderHeader">
+        	<key-map field-name="orderId"/>
+      	</relation>
+      	<relation type="one" fk-name="LOY_USE_PTY" rel-entity-name="Party">
+        	<key-map field-name="partyId"/>
+      	</relation>
+    </entity>
+    
+    <!-- view entity for loyalty -->
+    <view-entity entity-name="ProductStoreLoyaltyApplFilter" package-name="com.olbius.loyaltypoint">
+    	<member-entity entity-alias="PSLA" entity-name="ProductStoreLoyaltyAppl"/>
+    	<member-entity entity-alias="LOY" entity-name="Loyalty"/>
+    	<alias-all entity-alias="PSLA"/>
+    	<alias name="loyaltyName" entity-alias="LOY"/>
+    	<alias name="loyaltyText" entity-alias="LOY"/>
+    	<alias name="loyaltyTypeId" entity-alias="LOY"/>
+    	<view-link rel-entity-alias="LOY" entity-alias="PSLA">
+    		<key-map field-name="loyaltyId"/>
+    	</view-link>
+	<relation type="one" fk-name="PSLAF_PRODS" rel-entity-name="ProductStore">
+	        <key-map field-name="productStoreId"/>
+      	</relation>
+	<relation type="one" fk-name="PSLAF_LOY" rel-entity-name="Loyalty">
+	        <key-map field-name="loyaltyId"/>
+      	</relation>
+      	<entity-condition>
+      		<condition-expr field-name="statusId" entity-alias="LOY" operator="equals" value="LOYALTY_ACCEPTED"/>
+    	</entity-condition>
+    </view-entity>
+    
+    <view-entity entity-name="LoyaltyUseCheck" package-name="com.olbius.loyaltypoint" title="Loyalty Use Check View Entity">
+      	<member-entity entity-alias="LU" entity-name="LoyaltyUse"/>
+      	<member-entity entity-alias="OH" entity-name="OrderHeader"/>
+      	<alias-all entity-alias="LU"/>
+      	<alias entity-alias="OH" name="statusId"/>
+      	<view-link entity-alias="LU" rel-entity-alias="OH">
+        	<key-map field-name="orderId"/>
+      	</view-link>
+    </view-entity>
+    
+    <!-- view entity for party classification -->
+    <view-entity entity-name="PartyClassificationParty" package-name="com.olbius.loyaltypoint">
+    	<member-entity entity-alias="PC" entity-name="PartyClassification"></member-entity>
+    	<member-entity entity-alias="PCG" entity-name="PartyClassificationGroup"></member-entity>
+    	<member-entity entity-alias="PNV" entity-name="PartyNameView"></member-entity>
+    	
+    	<alias-all entity-alias="PC"></alias-all>
+    	<alias name="partyClassificationGroupName" field="description" entity-alias="PCG"></alias>
+    	<alias name="partyName">
+        	<complex-alias operator="||' '||">
+        		<complex-alias-field field="lastName" entity-alias="PNV" default-value="''"/>
+        		<complex-alias-field field="middleName" entity-alias="PNV" default-value="''"/>
+        		<complex-alias-field field="firstName" entity-alias="PNV" default-value="''"/>
+        	</complex-alias>
+        </alias>
+        
+        <view-link rel-entity-alias="PCG" entity-alias="PC">
+        	<key-map field-name="partyClassificationGroupId"/>
+        	<!-- <entity-condition>
+        		<condition-expr field-name="partyClassificationTypeId" operator="equals" value="LOYALTY_POINT" entity-alias="PCG"/>
+        	</entity-condition> -->
+        </view-link>
+        <view-link rel-entity-alias="PNV" entity-alias="PC">
+        	<key-map field-name="partyId"/>
+        </view-link>
+    </view-entity>
+    
+    <view-entity entity-name="LoyaltyCustomer" package-name="com.olbius.loyaltypoint">
+    	<member-entity entity-alias="LP" entity-name="LoyaltyPoint"></member-entity>
+    	<member-entity entity-alias="PCP" entity-name="PartyClassificationParty"></member-entity>
+    	<member-entity entity-alias="PNV" entity-name="PartyNameView"></member-entity>
+    	<member-entity entity-alias="PS" entity-name="ProductStore"></member-entity>
+    	
+    	<alias-all entity-alias="LP"></alias-all>
+    	
+    	<alias name="ratingTypeId" field="partyClassificationGroupId" entity-alias="PCP"></alias>
+    	<alias name="ratingName" field="partyClassificationGroupName" entity-alias="PCP"></alias>
+    	<alias name="fromDate" field="fromDate" entity-alias="PCP"></alias>
+    	<alias name="thruDate" field="thruDate" entity-alias="PCP"></alias>
+    	
+    	<alias name="partyName">
+        	<complex-alias operator="||' '||">
+        		<complex-alias-field field="lastName" entity-alias="PNV" default-value="''"/>
+        		<complex-alias-field field="middleName" entity-alias="PNV" default-value="''"/>
+        		<complex-alias-field field="firstName" entity-alias="PNV" default-value="''"/>
+        	</complex-alias>
+        </alias>
+        
+        <alias name="storeName" field="storeName" entity-alias="PS"></alias>
+        
+        <view-link rel-entity-alias="PCP" entity-alias="LP" rel-optional="true">
+        	<key-map field-name="partyId"/>
+        </view-link>
+        <view-link rel-entity-alias="PNV" entity-alias="LP">
+        	<key-map field-name="partyId"/>
+        </view-link>
+        <view-link rel-entity-alias="PS" entity-alias="LP">
+        	<key-map field-name="productStoreId"/>
+        </view-link>
+    </view-entity>
+    <!-- view entity for party classification -->
+    
+    <view-entity entity-name="LoyaltyPointAndItems" package-name="com.olbius.loyalypoint">
+    	<member-entity entity-alias="LTYP" entity-name="LoyaltyPoint"/>
+    	<member-entity entity-alias="LTYPD" entity-name="LoyaltyPointDetail"/>
+    	<alias-all entity-alias="LTYPD"/>
+    	<alias-all entity-alias="LTYP">
+    		<exclude field="loyaltyPointId"/>
+    	</alias-all>
+    	<view-link entity-alias="LTYP" rel-entity-alias="LTYPD">
+    		<key-map field-name="loyaltyPointId"/>
+    	</view-link>
+    </view-entity>
+</entitymodel>

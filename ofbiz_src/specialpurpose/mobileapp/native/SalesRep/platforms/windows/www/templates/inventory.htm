@@ -1,0 +1,94 @@
+<ion-view view-title="{{getLabel('Inventory')}}">
+	<ion-nav-buttons side="left">
+		<button class="button button-clear" ng-click="showDeleteItem()" ng-if="globalEditable">
+            <i class='icon ion-ios-minus-outline'>&nbsp;</i>
+        </button>
+        <button class="button button-clear" ng-click="undoItem()" ng-if="deleted.length">
+            <i class='icon ion-reply'>&nbsp;</i>
+        </button>
+	</ion-nav-buttons>
+	<ion-nav-buttons side="right">
+		<button class="button buttons" ng-click="createOrder()" ng-if="isInventory && isValidDistance">
+			<i class="icon fa fa-cart-plus"></i>
+		</button>
+		<button class="button buttons" ng-click="buildConfirm(null, getLabel('ConfirmCheckInventory'), checkInventory)" ng-if="isValidDistance && (!currentCustomer.isInventory || !isInventory)">
+			<i class="icon ion-checkmark"></i>
+		</button>
+    </ion-nav-buttons>
+	<ion-content scroll="false">
+		<search-input class='search' ng-if="isValidDistance && currentInventory.length" search="self.search"></search-input>
+		<ion-scroll direction="y" class='inventory-container'  on-pull-refresh="getLastInventory(true)" scope="self">
+			<ng-include src="'templates/item/customerinfo.htm'"></ng-include>
+			<!-- <ion-refresher pulling-text="{{getLabel('PullToRefresh')}}" on-refresh="getLastInventory(true)"></ion-refresher> -->
+			<ion-list class='inventory cart' ng-if="isValidDistance && currentInventory.length" show-delete="showDeleteButton">
+				<ion-item ng-repeat="product in currentInventory | filter:search track by $index " class='item-icon-right cart-item'>
+					<div
+					ng-click="setQuantity(product, 'qtyInInventory', true)"
+					on-swipe-left="setQuantity(product, 'qtyInInventory', false, 0)"
+					on-swipe-right="setQuantity(product, 'qtyInInventory', true)"
+					on-hold="handleHoldQuantity(product, 'qtyInInventory', true)"
+					on-release="handleReleaseQuantity(product, 'qtyInInventory', true)"
+					ng-show="!product.editable || product.productId" class='product-content cart-content'>
+						<div class='cart-content-img' on-double-tap='getProductDetail(product.productId, store.productStoreId)'>
+							<img src="assets/images/default.jpg" ng-if="!product.image && !product.image_small">
+							<img ng-src="{{imageUrl}}{{product.image}}" ng-if="product.image">
+							<img ng-src="{{imageUrl}}{{product.image_small}}" ng-if="!product.image && product.image_small">
+						</div>
+						<div class='product-content-text'>
+							<h3>{{product.productName}}</h3>
+						</div>
+					</div>
+					<div ng-if="product.editable && !product.productId" class='product-content cart-content'>
+						<select class='editable-product' ng-options="p.productId as p.productName for p in productAvailable" ng-model="product.productId" ng-change="updateProductInfo()"></select>
+					</div>
+					<div class="cartquantity" ng-if="(!currentCustomer.isInventory || !isInventory)">
+						<input type="number" name="input" class="number" placeholder="0" id="quantity{{product.productId}}"
+							ng-model="product.qtyInInventory" min="0" max="{{product.max}}"
+							ng-keyup="changeQuantity(product, 'qtyInInventory')" required>
+						<div class='regulator'>
+							<div class="rexsub" ng-class="{'disabled': product.qtyInInventory==0}"
+							ng-click="setQuantity(product, 'qtyInInventory', false, 0)">
+								<i class="ion-ios-minus-outline"></i>
+							</div>
+							<div class="rexadd" ng-class="{'disabled':product.qtyInInventory==product.max}"
+							ng-click="setQuantity(product, 'qtyInInventory', true)">
+								<i class="ion-ios-plus-outline"></i>
+							</div>
+						</div>
+					</div>
+					<div class='cartquantity' ng-if="(currentCustomer.isInventory || isInventory)">
+						<div class='middle-wrapper'>
+							<div class='middle-content'>
+								{{product.qtyInInventory}}
+							</div>
+						</div>
+					</div>
+					<ion-delete-button class="ion-minus-circled" ng-click="removeItem($index)"></ion-delete-button>
+				</ion-item>
+				<ion-item class='item-empty'></ion-item>
+			</ion-list>
+			<div ng-if="!currentInventory.length && isValidDistance">
+				<ion-list>
+					<ion-item class='item-body item-icon-right'>
+						<b class="red">{{getLabel('NoInventoryStore')}}</b>
+						<i class='icon fa fa-cart-plus positive' ng-click="createOrder()">&nbsp;</i>
+					</ion-item>
+				</ion-list>
+			</div>
+			<div ng-if="!isValidDistance">
+				<ion-list>
+					<ion-item class='item-body'>
+						{{getWarningLocation()}} <span class="blue">{{getLabel('reload')}}
+					</ion-item>
+				</ion-list>
+				<button ng-click="reloadDistance()" class="button button-royal button-fab button-fab-bottom-right">
+					<i class="icon fa fa-refresh"></i>
+				</button>
+				<button ng-click="editLocation()" class="button button-assertive button-fab button-fab-bottom-right">
+					<i class="icon fa fa-map-marker"></i>
+				</button>
+			</div>
+		</ion-scroll>
+		<button class='button button-fab button-fab-bottom-right button-positive' ng-click="addProductToInventoryList({}, true)" ng-if="!currentCustomer.isInventory || !isInventory"><i class='icon ion-plus'></i></button>
+	</ion-content>
+</ion-view>

@@ -1,0 +1,3937 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
+
+	<!-- ==================================Forms for internal job posting=================== -->
+	<form name="FindInternalJobPosting" target="FindInternalJobPosting"
+		type="single">
+		<auto-fields-entity entity-name="EmploymentApp"
+			default-field-type="find" />
+		<field name="applicationId">
+			<lookup target-form-name="LookupEmploymentApp" />
+		</field>
+		<field name="applyingPartyId" use-when="hasAdminPermission">
+			<hidden />
+		</field>
+		<field name="applyingPartyId" use-when="!hasAdminPermission">
+			<hidden value="${partyId}" />
+		</field>
+		<field name="statusId"
+			title="${uiLabelMap.HROlbiusIJP} ${uiLabelMap.CommonStatus}">
+			<drop-down allow-empty="true">
+				<entity-options description="${description}"
+					key-field-name="statusId" entity-name="StatusItem">
+					<entity-constraint name="statusTypeId" operator="equals"
+						value="IJP_STATUS" />
+					<entity-order-by field-name="description" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="noConditionFind">
+			<hidden value="Y" />
+		</field>
+		<field name="jobRequisitionId">
+			<lookup target-form-name="LookupJobRequisition" />
+		</field>
+		<field name="approverPartyId" title="${uiLabelMap.HRolbiusApproverEmployeeID}">
+			<lookup target-form-name="LookupEmployeeNew" />
+		</field>
+		<field name="emplPositionId">
+			<hidden />
+		</field>
+		<field name="employmentAppSourceTypeId">
+			<hidden />
+		</field>
+		<field name="referredByPartyId">
+			<hidden />
+		</field>
+		<field name="searchButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-search" />
+		</field>
+	</form>
+	<form name="ListInternalJobPosting" list-name="listIt" type="list"
+		odd-row-style="alternate-row" header-row-style="header-row-2"
+		paginate-target="FindInternalJobPosting"
+		default-table-style="table table-hover table-striped table-bordered dataTable">
+		<actions>
+			<set field="entityName" value="EmploymentApp" />
+			<service service-name="performFind" result-map="result"
+				result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="requestParameters" />
+				<field-map field-name="entityName" from-field="entityName" />
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+				<field-map field-name="noConditionFind" value="Y" />
+			</service>
+		</actions>
+		<auto-fields-entity entity-name="EmploymentApp"
+			default-field-type="display" />
+		<field name="applicationId" widget-style="">
+			<hyperlink target="EditInternalJobPosting" description="${applicationId}">
+				<parameter param-name="applicationId" />
+			</hyperlink>
+		</field>
+
+		<field name="approverPartyId">
+			<display-entity entity-name="PartyNameView"
+				description="${firstName} ${lastName}" key-field-name="partyId">
+				<sub-hyperlink target="/partymgr/control/viewprofile"
+					target-type="inter-app" description="${approverPartyId}"
+					link-style="">
+					<parameter param-name="partyId" from-field="approverPartyId" />
+				</sub-hyperlink>
+			</display-entity>
+		</field>
+
+		<field name="applyingPartyId">
+			<display-entity entity-name="PartyNameView"
+				description="${firstName} ${lastName}" key-field-name="partyId">
+				<sub-hyperlink target="/partymgr/control/viewprofile"
+					target-type="inter-app" description="${applyingPartyId}"
+					link-style="">
+					<parameter param-name="partyId" from-field="applyingPartyId" />
+				</sub-hyperlink>
+			</display-entity>
+		</field>
+
+		<field name="statusId" title="${uiLabelMap.HumanResIJPStatus}">
+			<display />
+		</field>
+		<field name="jobRequisitionId" widget-style="">
+			<hyperlink target="EditJobRequisition" description="${jobRequisitionId}">
+				<parameter param-name="jobRequisitionId" />
+			</hyperlink>
+		</field>
+		<field name="deleteLink" title=" ${uiLabelMap.CommonDelete}"
+			widget-style="btn btn-danger btn-position btn-mini icon-trash"
+			use-when="hasAdminPermission">
+			<hyperlink also-hidden="false" description=" ${uiLabelMap.CommonDelete}"
+				target="deleteInternalJobPosting">
+				<parameter param-name="applicationId" />
+			</hyperlink>
+		</field>
+		<field name="emplPositionId">
+			<hidden />
+		</field>
+		<field name="employmentAppSourceTypeId">
+			<hidden />
+		</field>
+		<field name="referredByPartyId">
+			<hidden />
+		</field>
+	</form>
+
+	<form name="EditInternalJobPosting" type="single"
+		target="updateInternalJobPosting">
+		<alt-target use-when="employmentApp==null" target="createInternalJobPosting" />
+		<auto-fields-service service-name="updateInternalJobPosting"
+			map-name="employmentApp" />
+		<field name="applicationId" use-when="employmentApp==null">
+			<hidden />
+		</field>
+		<field name="applicationId" use-when="employmentApp!=null">
+			<display />
+		</field>
+		<field name="applyingPartyId">
+			<hidden value="${partyId}" />
+		</field>
+		<field name="approverPartyId" tooltip="${uiLabelMap.CommonRequired}"
+			title="${uiLabelMap.HRolbiusApproverEmployeeID}">
+			<lookup target-form-name="LookupEmployeeNew" />
+		</field>
+		<field name="jobRequisitionId" tooltip="${uiLabelMap.CommonRequired}">
+			<lookup target-form-name="LookupJobRequisition" />
+		</field>
+		<field name="statusId" title="${uiLabelMap.HROlbiusIJPStatus}">
+			<hidden value="IJP_APPLIED" />
+		</field>
+		<field name="emplPositionId">
+			<hidden />
+		</field>
+		<field name="employmentAppSourceTypeId">
+			<hidden />
+		</field>
+		<field name="referredByPartyId">
+			<hidden />
+		</field>
+		<field name="submitButton" use-when="employmentApp==null" title="Create"
+			widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+		<field name="submitButton" use-when="employmentApp!=null" title="Update"
+			widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+	<!-- ==============End of forms for internal job posting=========================================== -->
+
+	<!-- =================Job Interview================================================================ -->
+	<form name="FindJobInterview" type="single" target="FindJobInterview">
+		<auto-fields-entity entity-name="JobInterview"
+			default-field-type="find" />
+		<field name="noConditionFind">
+			<hidden value="Y" />
+		</field>
+		<field name="jobRequisitionId">
+			<lookup target-form-name="LookupJobRequisition" />
+		</field>
+		<field name="jobInterviewTypeId">
+			<drop-down allow-empty="true">
+				<entity-options key-field-name="jobInterviewTypeId"
+					description="${jobInterviewTypeId}" entity-name="JobInterviewType">
+					<entity-order-by field-name="description" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="gradeSecuredEnumId">
+			<drop-down allow-empty="true">
+				<entity-options entity-name="Enumeration"
+					key-field-name="enumId" description="${description}">
+					<entity-constraint name="enumTypeId" operator="equals"
+						value="INTR_RATNG" />
+					<entity-order-by field-name="description" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="searchButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-search" />
+		</field>
+	</form>
+	<form name="ListInterview" type="list" list-name="listIt"
+		paginate-target="FindJobInterview" odd-row-style="alternate-row"
+		header-row-style="header-row-2"
+		default-table-style="table table-hover table-striped table-bordered dataTable">
+		<actions>
+			<set field="entityName" value="JobInterview" />
+			<service service-name="performFind" result-map="result"
+				result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="requestParameters" />
+				<field-map field-name="entityName" from-field="entityName" />
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+				<field-map field-name="noConditionFind" value="Y" />
+			</service>
+		</actions>
+		<auto-fields-entity entity-name="JobInterview"
+			default-field-type="display" />
+		<field name="jobInterviewId" widget-style="">
+			<hyperlink target="EditJobInterview" description="${jobInterviewId}">
+				<parameter param-name="jobInterviewId" />
+			</hyperlink>
+		</field>
+
+		<field name="addIntervieweeLink" title="${uiLabelMap.AddInterviewee}"
+			widget-style="btn btn-mini btn-info width120">
+			<hyperlink also-hidden="false" description="${uiLabelMap.AddInterviewee}"
+				target="AddInterviewee">
+				<parameter param-name="jobInterviewId" />
+			</hyperlink>
+		</field>
+
+		<field name="addInterviewerLink" title="${uiLabelMap.AddInterviewer}"
+			widget-style="btn btn-mini btn-info width120">
+			<hyperlink also-hidden="false" description="${uiLabelMap.AddInterviewer}"
+				target="AddInterviewer">
+				<parameter param-name="jobInterviewId" />
+			</hyperlink>
+		</field>
+
+		<field name="addQuestionMap" title="${uiLabelMap.AddQuestion}"
+			widget-style="btn btn-mini btn-info width120">
+			<hyperlink also-hidden="false" description="${uiLabelMap.AddQuestion}"
+				target="AddInterviewQuestion">
+				<parameter param-name="jobInterviewId" />
+			</hyperlink>
+		</field>
+	</form>
+
+	<form name="ListJobInterviewRating" type="list" list-name="listIt"
+		paginate-target="FindJobInterviewRating" odd-row-style="alternate-row"
+		header-row-style="header-row-2"
+		default-table-style="table table-hover table-striped table-bordered dataTable">
+		<actions>
+			<set field="entityName" value="JobInterview" />
+			<service service-name="performFind" result-map="result"
+				result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="requestParameters" />
+				<field-map field-name="entityName" from-field="entityName" />
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+				<field-map field-name="noConditionFind" value="Y" />
+			</service>
+		</actions>
+		<auto-fields-entity entity-name="JobInterview"
+			default-field-type="display" />
+		<field name="jobInterviewId" widget-style="">
+			<hyperlink target="EditJobInterview" description="${jobInterviewId}">
+				<parameter param-name="jobInterviewId" />
+			</hyperlink>
+		</field>
+
+		<field name="EditJobInterviewRatingLink" title="${uiLabelMap.EditJobInterviewRating}"
+			widget-style="btn btn-mini btn-info width120">
+			<hyperlink also-hidden="false"
+				description="${uiLabelMap.EditJobInterviewRating}" target="EditJobInterviewRating">
+				<parameter param-name="jobInterviewId" />
+			</hyperlink>
+		</field>
+
+	</form>
+
+	<form name="EditJobInterview" type="single" target="updateJobInterview">
+		<actions>
+			<entity-one entity-name="JobInterview" value-field="JobInterview" />
+		</actions>
+		<alt-target use-when="JobInterview==null" target="createJobInterview" />
+		<auto-fields-service service-name="updateJobInterview"
+			map-name="JobInterview" />
+		<field use-when="JobInterview!=null" name="jobInterviewId"
+			tooltip="${uiLabelMap.CommonNotModifRecreat}">
+			<display />
+		</field>
+		<field name="jobInterviewId" use-when="JobInterview==null">
+			<ignored />
+		</field>
+		<field name="jobRequisitionId" tooltip="${uiLabelMap.CommonRequired}">
+			<lookup target-form-name="LookupJobRequisition" />
+		</field>
+		<field name="gradeSecuredEnumId">
+			<drop-down allow-empty="true">
+				<entity-options entity-name="Enumeration"
+					key-field-name="enumId" description="${description}">
+					<entity-constraint name="enumTypeId" operator="equals"
+						value="INTR_RATNG" />
+					<entity-order-by field-name="description" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="jobInterviewTypeId">
+			<drop-down allow-empty="false">
+				<entity-options description="${jobInterviewTypeId}"
+					entity-name="JobInterviewType">
+					<entity-order-by field-name="jobInterviewTypeId" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="submitButton" use-when="JobInterview==null" title="Create"
+			widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+		<field name="submitButton" use-when="JobInterview!=null" title="Update"
+			widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+
+	<form name="AddInterviewee" type="single" target="CreateInterviewee">
+		<field name="partyId">
+			<lookup target-form-name="LookupApplicant"></lookup>
+		</field>
+		<field name="jobInterviewId">
+			<hidden value="${jobInterviewId}" />
+		</field>
+		<field name="submitButton" title="Apply" widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+		<field name="jobInterviewResult">
+			<hidden />
+		</field>
+	</form>
+
+	<form name="ListInterviewee" type="list" list-name="interviewees"
+		default-table-style="table table-hover table-striped table-bordered dataTable">
+		<actions>
+			<entity-condition entity-name="Interviewee" list="interviewees">
+				<condition-expr field-name="jobInterviewId" operator="equals"
+					from-field="jobInterviewId" />
+				<order-by field-name="partyId" />
+			</entity-condition>
+		</actions>
+
+		<auto-fields-entity entity-name="Interviewee"
+			default-field-type="display" />
+		<field name="jobInterviewResult">
+			<hidden />
+		</field>
+		<field name="deleteLink" title="Delete" widget-style="btn btn-mini btn-danger">
+			<hyperlink target="DeleteInterviewee" description="${uiLabelMap.CommonDelete}">
+				<parameter param-name="partyId" />
+				<parameter param-name="jobInterviewId" />
+			</hyperlink>
+		</field>
+	</form>
+
+	<form name="AddQuestionInterviewMap" type="single"
+		target="AddQuestionInterviewMap">
+		<field name="questionId">
+			<lookup target-form-name="LookupQuestion"></lookup>
+		</field>
+		<field name="jobInterviewId">
+			<hidden value="${jobInterviewId}" />
+		</field>
+		<field name="submitButton" title="Apply" widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+
+	<form name="AddInterviewer" type="single" target="CreateInterviewer">
+		<field name="partyId">
+			<lookup target-form-name="LookupPartyName"></lookup>
+		</field>
+		<field name="jobInterviewId">
+			<hidden value="${jobInterviewId}" />
+		</field>
+		<field name="submitButton" title="Apply" widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+
+	<form name="ListInterviewer" type="list" list-name="interviewers"
+		default-table-style="table table-hover table-striped table-bordered dataTable">
+		<actions>
+			<entity-condition entity-name="Interviewer" list="interviewers">
+				<condition-expr field-name="jobInterviewId" operator="equals"
+					from-field="jobInterviewId" />
+				<order-by field-name="partyId" />
+			</entity-condition>
+		</actions>
+
+		<auto-fields-entity entity-name="Interviewer"
+			default-field-type="display" />
+		<field name="deleteLink" title="Delete" widget-style="btn btn-mini btn-danger">
+			<hyperlink target="DeleteInterviewer" description="${uiLabelMap.CommonDelete}">
+				<parameter param-name="partyId" />
+				<parameter param-name="jobInterviewId" />
+			</hyperlink>
+		</field>
+	</form>
+
+	<form name="EditJobInterviewRating" type="multi" target="RateInterviewee"
+		default-table-style="table table-hover table-striped table-bordered dataTable" group-columns="false">
+		<actions>
+			<entity-condition entity-name="Interviewee">
+				<condition-expr field-name="jobInterviewId" operator="equals"
+					value="${jobInterviewId}" />
+				<order-by field-name="partyId" />
+			</entity-condition>
+		</actions>
+		<auto-fields-entity entity-name="Interviewee"
+			default-field-type="display" />
+		<field name="partyId">
+			<display></display>
+		</field>
+		<field name="jobInterviewId">
+			<display></display>
+		</field>
+		<field name="jobInterviewResult">
+			<drop-down allow-empty="false">
+				<option key="PASS" description="Pass" />
+				<option key="FAIL" description="Fail" />
+			</drop-down>
+		</field>
+		<field name="_rowSubmit" title="${uiLabelMap.CommonSelect}">
+			<hidden value="Y" />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonSubmit}"
+			widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+
+	<form name="ListInterviewQuestion" type="list" list-name="listIt"
+		paginate-target="FindJobInterviewQuestion" odd-row-style="alternate-row"
+		header-row-style="header-row-2"
+		default-table-style="table table-hover table-striped table-bordered dataTable">
+		<actions>
+			<set field="entityName" value="JobInterviewQuestion" />
+			<service service-name="performFind" result-map="result"
+				result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="requestParameters" />
+				<field-map field-name="entityName" from-field="entityName" />
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+				<field-map field-name="noConditionFind" value="Y" />
+			</service>
+		</actions>
+		<auto-fields-entity entity-name="JobInterviewQuestion"
+			default-field-type="display" />
+		<field name="questionId" widget-style="">
+			<hyperlink target="EditQuestion" description="${questionId}">
+				<parameter param-name="questionId" />
+			</hyperlink>
+		</field>
+
+		<field name="deleteLink" title=" ${uiLabelMap.CommonDelete}"
+			widget-style="btn btn-danger btn-position btn-mini icon-trash">
+			<hyperlink also-hidden="false" description=" ${uiLabelMap.CommonDelete}"
+				target="deleteJobInterviewQuestion">
+				<parameter param-name="questionId" />
+			</hyperlink>
+		</field>
+	</form>
+
+	<form name="FindApprovals" target="FindApprovals" type="single">
+		<auto-fields-entity entity-name="EmploymentApp"
+			default-field-type="find" />
+		<field name="noConditionFind">
+			<hidden value="Y" />
+		</field>
+		<field name="applicationId">
+			<lookup target-form-name="LookupEmploymentApp" />
+		</field>
+		<field name="approverPartyId" use-when="!hasAdminPermission"
+			title="${uiLabelMap.HRolbiusApproverEmployeeID}">
+			<hidden value="${partyId}" />
+		</field>
+		<field name="applyingPartyId" title="${uiLabelMap.HRolbiusEmployeeApply}">
+			<lookup target-form-name="LookupEmployeeNew" />
+		</field>
+		<field name="emplPositionId">
+			<hidden />
+		</field>
+		<field name="employmentAppSourceTypeId">
+			<hidden />
+		</field>
+		<field name="referredByPartyId">
+			<hidden />
+		</field>
+		<field name="statusId"
+			title="${uiLabelMap.HROlbiusInternalJobPosting} ${uiLabelMap.CommonStatus}">
+			<drop-down allow-empty="true">
+				<entity-options description="${description}"
+					key-field-name="statusId" entity-name="StatusItem">
+					<entity-constraint name="statusTypeId" operator="equals"
+						value="IJP_STATUS" />
+					<entity-order-by field-name="description" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="jobRequisitionId">
+			<lookup target-form-name="LookupJobRequisition" />
+		</field>
+		<field name="searchButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-search" />
+		</field>
+	</form>
+	<form name="ListApprovals" list-name="listIt" type="list"
+		odd-row-style="alternate-row" header-row-style="header-row-2"
+		default-table-style="table table-hover table-striped table-bordered dataTable">
+		<actions>
+			<set field="entityName" value="EmploymentApp" />
+			<service service-name="performFind" result-map="result"
+				result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="parameters" />
+				<field-map field-name="entityName" from-field="entityName" />
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+				<field-map field-name="noConditionFind" value="Y" />
+			</service>
+		</actions>
+		<auto-fields-entity entity-name="EmploymentApp"
+			default-field-type="display" />
+		<field name="applyingPartyId" field-name="applyingPartyId"
+			title="${uiLabelMap.HRolbiusEmployeeApply}">
+			<display-entity entity-name="PartyNameView"
+				description="${firstName} ${lastName}" key-field-name="partyId">
+				<sub-hyperlink target="/partymgr/control/viewprofile"
+					target-type="inter-app" description="${applyingPartyId}"
+					link-style="">
+					<parameter param-name="partyId" from-field="applyingPartyId" />
+				</sub-hyperlink>
+			</display-entity>
+		</field>
+		<field name="approverPartyId" field-name="approverPartyId"
+			title="${uiLabelMap.HRolbiusApproverEmployeeID}">
+			<display-entity entity-name="PartyNameView"
+				description="${firstName} ${lastName}" key-field-name="partyId">
+				<sub-hyperlink target="/partymgr/control/viewprofile"
+					target-type="inter-app" description="${approverPartyId}"
+					link-style="">
+					<parameter param-name="partyId" from-field="approverPartyId" />
+				</sub-hyperlink>
+			</display-entity>
+		</field>
+		<field name="UpdateStatus" title="${uiLabelMap.CommonUpdate}"
+			widget-style="btn btn-mini btn-primary icon-ok open-sans">
+			<hyperlink target="EditApprovalStatus" description="${uiLabelMap.CommonUpdate}">
+				<parameter param-name="applicationId" />
+			</hyperlink>
+		</field>
+		<field name="emplPositionId">
+			<hidden />
+		</field>
+		<field name="employmentAppSourceTypeId">
+			<hidden />
+		</field>
+		<field name="referredByPartyId">
+			<hidden />
+		</field>
+	</form>
+
+	<form name="EditApprovalStatus" type="single" target="updateApprovalStatus"
+		default-map-name="employmentApp">
+		<auto-fields-service service-name="updateApprovalStatus"
+			map-name="employmentApp" />
+		<field name="applicationId" tooltip="${uiLabelMap.CommonNotModifRecreat}">
+			<display />
+		</field>
+		<field name="applicationId">
+			<display />
+		</field>
+		<field name="applyingPartyId">
+			<display />
+		</field>
+		<field name="jobRequisitionId">
+			<display />
+		</field>
+		<field name="approverPartyId">
+			<display />
+		</field>
+		<field name="statusId"
+			title="${uiLabelMap.HROlbiusInternalJobPosting} ${uiLabelMap.CommonStatus}">
+			<drop-down allow-empty="false">
+				<entity-options description="${description}"
+					key-field-name="statusId" entity-name="StatusItem">
+					<entity-constraint name="statusTypeId" operator="equals"
+						value="IJP_STATUS" />
+					<entity-order-by field-name="description" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="statusId"
+			use-when="employmentApp!=null&amp;&amp;employmentApp.getString(&quot;statusId&quot;).equals(&quot;IJP_REJECTED&quot;)">
+			<display></display>
+		</field>
+		<field name="emplPositionId">
+			<hidden />
+		</field>
+		<field name="employmentAppSourceTypeId">
+			<hidden />
+		</field>
+		<field name="referredByPartyId">
+			<hidden />
+		</field>
+		<field name="applicationDate">
+			<hidden />
+		</field>
+		<field name="submitButton" title="Update" widget-style="btn btn-purple btn-small">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+	<!-- =====================================End of Approval============================================ -->
+
+	<!-- =====================================Requirement================================================ -->
+
+	<form name="FindEmploymentApps" type="single" target="FindEmploymentApps"
+		header-row-style="header-row" default-table-style="basic-table"
+		default-map-name="employmentApp">
+		<actions>
+			<set field="referredByPartyId" from-field="parameters.partyId" />
+		</actions>
+		<auto-fields-entity entity-name="EmploymentApp"
+			default-field-type="find" />
+		<field name="noConditionFind">
+			<hidden value="Y" /><!-- if this isn't there then with all fields 
+				empty no query will be done -->
+		</field>
+		<field name="emplPositionId">
+			<hidden />
+		</field>
+		<field name="applicationId">
+			<lookup target-form-name="LookupEmploymentApp" />
+		</field>
+		<field name="statusId">
+			<drop-down allow-empty="true" current-description="">
+				<entity-options description="${description}"
+					key-field-name="statusId" entity-name="StatusItem">
+					<entity-constraint name="statusTypeId" operator="equals"
+						value="EMPL_POSITION_STATUS" />
+					<entity-order-by field-name="description" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="employmentAppSourceTypeId">
+			<drop-down allow-empty="true" current-description="">
+				<entity-options description="${description}"
+					key-field-name="employmentAppSourceTypeId" entity-name="EmploymentAppSourceType">
+					<entity-order-by field-name="description" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="applyingPartyId" title="${uiLabelMap.HRolbiusEmployeeApply}">
+			<lookup target-form-name="LookupEmployeeNew" />
+		</field>
+		<field name="referredByPartyId" use-when="referredByPartyId==null"
+			title="${uiLabelMap.HRolbiusEmployeeReferred}">
+			<lookup target-form-name="LookupEmployeeNew" />
+		</field>
+		<field name="referredByPartyId" use-when="referredByPartyId!=null">
+			<hidden />
+		</field>
+		<field name="approverPartyId">
+			<hidden />
+		</field>
+		<field name="jobRequisitionId">
+			<lookup target-form-name="LookupJobRequisition"></lookup>
+		</field>
+		<field name="searchButton" widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-search" />
+		</field>
+		<field name="searchButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-search" />
+		</field>
+	</form>
+
+	<form name="ListEmploymentApps" type="multi" list-name="listIt"
+		use-row-submit="true" separate-columns="true"
+		target="updateEmploymentAppExt?partyId=${partyId}&amp;&amp;referredByPartyId=${partyId}"
+		paginate-target="FindEmploymentApps" odd-row-style="alternate-row"
+		header-row-style="header-row-2"
+		default-table-style="table table-striped table-hover table-bordered dataTable" group-columns="false">
+		<actions>
+			<set field="partyId" from-field="parameters.partyId" />
+			<set field="referredByPartyId" from-field="parameters.partyId" />
+			<entity-one entity-name="EmploymentApp" auto-field-map="true" />
+			<service service-name="performFind" result-map="result"
+				result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="employmentAppCtx" />
+				<field-map field-name="entityName" value="EmploymentApp" />
+				<field-map field-name="orderBy" value="applicationId" />
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+				<field-map field-name="noConditionFind" value="Y" />
+			</service>
+			<set field="insideEmployee" from-field="parameters.insideEmployee" />
+		</actions>
+		<row-actions>
+			<set field="applicationId" from-field="applicationId" />
+		</row-actions>
+		<alt-target use-when="insideEmployee==null" target="updateEmploymentApp" />
+		<auto-fields-service default-field-type="hidden"
+			service-name="updateEmploymentApp" />
+		<field name="applicationId" title="${uiLabelMap.HumanResApplicationId}">
+			<display also-hidden="true" />
+		</field>
+		<field name="statusId">
+			<drop-down allow-empty="true" current-description="">
+				<entity-options description="${description}"
+					key-field-name="statusId" entity-name="StatusItem">
+					<entity-constraint name="statusTypeId" operator="equals"
+						value="EMPL_POSITION_STATUS" />
+					<entity-order-by field-name="description" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="emplPositionId">
+			<hidden />
+		</field>
+		<field name="jobRequisitionId" title="${uiLabelMap.FormFieldTitle_emplPositionId}">
+			<lookup target-form-name="LookupJobRequisitionId" />
+		</field>
+		<field name="employmentAppSourceTypeId">
+			<drop-down allow-empty="true" current-description="">
+				<entity-options description="${employmentAppSourceTypeId}"
+					key-field-name="employmentAppSourceTypeId" entity-name="EmploymentAppSourceType">
+					<entity-order-by field-name="employmentAppSourceTypeId" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="partyId">
+			<hidden />
+		</field>
+		<field name="applyingPartyId" title="${uiLabelMap.HRolbiusEmployeeApply}">
+			<lookup target-form-name="LookupEmployeeNew" />
+		</field>
+		<field name="referredByPartyId" use-when="referredByPartyId!=null"
+			title="${uiLabelMap.HRolbiusEmployeeReferred}">
+			<lookup target-form-name="LookupEmployeeNew" />
+		</field>
+		<field name="applicationDate" title="${uiLabelMap.FormFieldTitle_applicationDate}">
+			<date-time />
+		</field>
+		<field name="deleteLink" title="${uiLabelMap.CommonDelete}"
+			widget-style="btn btn-small btn-danger">
+			<hyperlink target="deleteEmploymentApp" description="${uiLabelMap.CommonDelete}"
+				also-hidden="true">
+				<parameter param-name="applicationId" />
+				<parameter param-name="partyId" />
+				<parameter param-name="referredByPartyId" />
+			</hyperlink>
+		</field>
+		<field name="_rowSubmit" title="${uiLabelMap.CommonSelect}">
+			<hidden value="Y" />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonSubmit}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+
+	<form name="AddEmploymentApp" type="single" target="createEmploymentApp"
+		default-entity-name="EmploymentApp" paginate-target="FindEmploymentApps"
+		header-row-style="header-row" default-table-style="basic-table">
+		<actions>
+			<set field="insideEmployee" from-field="parameters.insideEmployee" />
+		</actions>
+		<alt-target use-when="insideEmployee != null" target="createEmploymentAppExt" />
+		<auto-fields-service service-name="createEmploymentApp"
+			default-field-type="hidden" />
+		<field name="partyId">
+			<hidden value="${referredByPartyId}" />
+		</field>
+		<field name="applicationId" tooltip="${uiLabelMap.CommonRequired}"
+			widget-style="required">
+			<hidden />
+		</field>
+		<field name="emplPositionId">
+			<hidden />
+		</field>
+		<field name="jobRequisitionId">
+			<lookup target-form-name="LookupJobRequisition"></lookup>
+		</field>
+		<field name="statusId">
+			<drop-down allow-empty="true" current-description="">
+				<entity-options description="${description}"
+					key-field-name="statusId" entity-name="StatusItem">
+					<entity-constraint name="statusTypeId" operator="equals"
+						value="EMPL_POSITION_STATUS" />
+					<entity-order-by field-name="description" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="applyingPartyId" title="${uiLabelMap.HRolbiusEmployeeApply}">
+			<lookup target-form-name="LookupEmployeeNew" />
+		</field>
+		<field name="referredByPartyId" use-when="employmentApp==null"
+			title="${uiLabelMap.HRolbiusEmployeeReferred}">
+			<lookup target-form-name="LookupEmployeeNew" />
+		</field>
+		<field name="referredByPartyId" use-when="employmentApp!=null">
+			<hidden />
+		</field>
+		<field name="employmentAppSourceTypeId">
+			<drop-down allow-empty="true" current-description="">
+				<entity-options description="${description}"
+					key-field-name="employmentAppSourceTypeId" entity-name="EmploymentAppSourceType">
+					<entity-order-by field-name="employmentAppSourceTypeId" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="applicationDate">
+			<date-time />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonCreate}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+
+	<!--==============================================Recruitment Plan=============================== -->
+	<form name="FindRecruitmentPlan" target="FindRecruitmentPlan"
+		header-row-style="header-row" default-table-style="basic-table" type="single">
+		<field name="noConditionFind">
+			<hidden value="Y" />
+		</field>
+		<field name="partyId" use-when="${!isHeadOfHR}">
+			<hidden/>
+		</field>
+		<field name="emplPositionTypeId" title="${uiLabelMap.Position}">
+			<drop-down allow-empty="true">
+				<entity-options description="${description}"
+					entity-name="EmplPositionType">
+					</entity-options>
+			</drop-down>
+		</field>
+		<field name="year" title="${uiLabelMap.Year}">
+			<text-find default-option="equals" default-value="${year}"></text-find>
+		</field>
+		
+		<field name="submitButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-search" />
+		</field>
+	</form>
+	
+	<form name="ListRecruitmentPlan" list-name="listIt" header-row-style="header-row"
+		default-table-style="table table-striped table-hover table-bordered dataTable" type="list">
+		<field name="year" title="${uiLabelMap.Year}">
+			<display></display>
+		</field>
+		<field name="emplPositionTypeId" title="${uiLabelMap.Position}">
+			<display-entity entity-name="EmplPositionType" description="${description}">
+			</display-entity>
+		</field>
+		<field name="partyId" title="${uiLabelMap.Department}">
+			<display-entity entity-name="PartyGroup" description="${groupName}"></display-entity>
+		</field>
+		<field name="firstMonth" title="${uiLabelMap.FirstMonth}">
+			<display></display>
+		</field>
+		<field name="secondMonth" title="${uiLabelMap.SecondMonth}">
+			<display></display>
+		</field>
+		<field name="thirdMonth" title="${uiLabelMap.ThirdMonth}">
+			<display></display>
+		</field>
+		<field name="fourthMonth" title="${uiLabelMap.FourthMonth}">
+			<display></display>
+		</field>
+		<field name="fifthMonth" title="${uiLabelMap.FifthMonth}">
+			<display></display>
+		</field>
+		<field name="sixthMonth" title="${uiLabelMap.SixthMonth}">
+			<display></display>
+		</field>
+		<field name="seventhMonth" title="${uiLabelMap.SeventhMonth}">
+			<display></display>
+		</field>
+		<field name="eighthMonth" title="${uiLabelMap.EighthMonth}">
+			<display></display>
+		</field>
+		<field name="ninthMonth" title="${uiLabelMap.NinthMonth}">
+			<display></display>
+		</field>
+		<field name="tenthMonth" title="${uiLabelMap.TenthMonth}">
+			<display></display>
+		</field>
+		<field name="eleventhMonth" title="${uiLabelMap.EleventhMonth}">
+			<display></display>
+		</field>
+		<field name="twelfthMonth" title="${uiLabelMap.TwelfthMonth}">
+			<display></display>
+		</field>
+		<field name="statusId" title="${uiLabelMap.Status}">
+			<display-entity entity-name="StatusItem" description="${description}"></display-entity>
+		</field>
+	</form>
+	
+	<form name="FindAboveRecruitmentPlan" target="FindAboveRecruitmentPlan"
+		header-row-style="header-row" default-table-style="basic-table" type="single">
+		<field name="noConditionFind">
+			<hidden value="Y" />
+		</field>
+		<field name="partyId" use-when="${!isHeadOfHR}">
+			<hidden/>
+		</field>
+		<field name="emplPositionTypeId" title="${uiLabelMap.Position}">
+			<drop-down allow-empty="true">
+				<entity-options description="${description}"
+					entity-name="EmplPositionType">
+					</entity-options>
+			</drop-down>
+		</field>
+		<field name="year" title="${uiLabelMap.Year}">
+			<text-find default-option="equals" default-value="${year}"></text-find>
+		</field>
+		
+		<field name="submitButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-search" />
+		</field>
+	</form>
+	
+	<form name="ListAboveRecruitmentPlan" list-name="listIt"
+		header-row-style="header-row"
+		default-table-style="table table-striped table-hover table-bordered dataTable"
+		type="list">
+		<actions>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/util/setParameters.groovy"/>
+			<service service-name="performFind" result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="parameters" />
+				<field-map field-name="entityName" value="AboveRecruitmentPlan" />
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+				<field-map field-name="noConditionFind" value="Y"/>
+			</service>
+		</actions>
+
+		<field name="year" title="${uiLabelMap.Year}">
+			<display></display>
+		</field>
+		<field name="emplPositionTypeId" title="${uiLabelMap.Position}">
+			<display-entity entity-name="EmplPositionType" description="${description}">
+				
+			</display-entity>
+		</field>
+		<field name="partyId" title="${uiLabelMap.Department}">
+			<display-entity entity-name="PartyGroup" description="${groupName}"></display-entity>
+		</field>
+		<field name="firstMonth" title="${uiLabelMap.FirstMonth}">
+			<display></display>
+		</field>
+		<field name="secondMonth" title="${uiLabelMap.SecondMonth}">
+			<display></display>
+		</field>
+		<field name="thirdMonth" title="${uiLabelMap.ThirdMonth}">
+			<display></display>
+		</field>
+		<field name="fourthMonth" title="${uiLabelMap.FourthMonth}">
+			<display></display>
+		</field>
+		<field name="fifthMonth" title="${uiLabelMap.FifthMonth}">
+			<display></display>
+		</field>
+		<field name="sixthMonth" title="${uiLabelMap.SixthMonth}">
+			<display></display>
+		</field>
+		<field name="seventhMonth" title="${uiLabelMap.SeventhMonth}">
+			<display></display>
+		</field>
+		<field name="eighthMonth" title="${uiLabelMap.EighthMonth}">
+			<display></display>
+		</field>
+		<field name="ninthMonth" title="${uiLabelMap.NinthMonth}">
+			<display></display>
+		</field>
+		<field name="tenthMonth" title="${uiLabelMap.TenthMonth}">
+			<display></display>
+		</field>
+		<field name="eleventhMonth" title="${uiLabelMap.EleventhMonth}">
+			<display></display>
+		</field>
+		<field name="twelfthMonth" title="${uiLabelMap.TwelfthMonth}">
+			<display></display>
+		</field>
+	</form>
+	
+	<form name="ProposeRecruitmentPlan" list-name="listIt"
+		header-row-style="header-row"
+		default-table-style="table table-striped table-hover table-bordered dataTable"
+		type="multi" target="proposeRecruitmentPlan?header=${header}&amp;state=${state}&amp;action=${action}&amp;dateTime=${dateTime}&amp;partyId=${partyId}&amp;targetLink=${targetLink}" group-columns="false">
+		<actions>
+			<entity-condition entity-name="RecruitmentPlan">
+				<condition-list combine="and">
+					<condition-expr field-name="statusId" operator="equals" value="CRP_ACCEPTED"/>
+					<condition-expr field-name="year" operator="equals" value="${currentYear}"/>
+				</condition-list>
+			</entity-condition>
+		</actions>
+
+		<field name="year" title="${uiLabelMap.Year}">
+			<display></display>
+		</field>
+		<field name="emplPositionTypeId" title="${uiLabelMap.Position}">
+			<display-entity entity-name="EmplPositionType" description="${description}">
+				
+			</display-entity>
+		</field>
+		<field name="partyId" title="${uiLabelMap.Department}">
+			<display-entity entity-name="PartyGroup" description="${groupName}"></display-entity>
+		</field>
+		<field name="firstMonth" title="${uiLabelMap.FirstMonth}">
+			<display></display>
+		</field>
+		<field name="secondMonth" title="${uiLabelMap.SecondMonth}">
+			<display></display>
+		</field>
+		<field name="thirdMonth" title="${uiLabelMap.ThirdMonth}">
+			<display></display>
+		</field>
+		<field name="fourthMonth" title="${uiLabelMap.FourthMonth}">
+			<display></display>
+		</field>
+		<field name="fifthMonth" title="${uiLabelMap.FifthMonth}">
+			<display></display>
+		</field>
+		<field name="sixthMonth" title="${uiLabelMap.SixthMonth}">
+			<display></display>
+		</field>
+		<field name="seventhMonth" title="${uiLabelMap.SeventhMonth}">
+			<display></display>
+		</field>
+		<field name="eighthMonth" title="${uiLabelMap.EighthMonth}">
+			<display></display>
+		</field>
+		<field name="ninthMonth" title="${uiLabelMap.NinthMonth}">
+			<display></display>
+		</field>
+		<field name="tenthMonth" title="${uiLabelMap.TenthMonth}">
+			<display></display>
+		</field>
+		<field name="eleventhMonth" title="${uiLabelMap.EleventhMonth}">
+			<display></display>
+		</field>
+		<field name="twelfthMonth" title="${uiLabelMap.TwelfthMonth}">
+			<display></display>
+		</field>
+		<field name="statusId" title="${uiLabelMap.Status}">
+			<display-entity entity-name="StatusItem" description="${description}"></display-entity>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.HRCommonProposal}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+	
+	<form name="EditRecruitmentPlan" target="createRecruitmentPlan?header=${header}&amp;state=${state}&amp;dateTime=${dateTime}&amp;action=${action}&amp;partyId=${partyId}&amp;targetLink=${targetLink}"
+		default-entity-name="RecruitmentPlan" header-row-style="header-row"
+		type="multi" list-name="deptEmplPosTypeList" default-table-style="ofx-scroll table table-striped table-hover table-bordered dataTable" group-columns="false">
+		<actions>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/recruitment/getDeptEmplPositionType.groovy"/>
+		</actions>
+		
+		<field name="emplPositionTypeId" title="${uiLabelMap.Position}" separate-column="true" widget-style="width-table-column50">
+			<display-entity entity-name="EmplPositionType" description="${description}">
+			</display-entity>
+		</field>
+		<field name="firstMonth" title="${uiLabelMap.FirstMonth}" separate-column="true" widget-style="width-table-column50">
+			<text default-value="0" />
+		</field>
+		<field name="secondMonth" title="${uiLabelMap.SecondMonth}" separate-column="true" widget-style="width-table-column50">
+			<text default-value="0" />
+		</field>
+		<field name="thirdMonth" title="${uiLabelMap.ThirdMonth}" separate-column="true" widget-style="width-table-column50">
+			<text default-value="0" />
+		</field>
+		<field name="fourthMonth" title="${uiLabelMap.FourthMonth}" separate-column="true" widget-style="width-table-column50">
+			<text default-value="0" />
+		</field>
+		<field name="fifthMonth" title="${uiLabelMap.FifthMonth}" separate-column="true" widget-style="width-table-column50">
+			<text default-value="0" />
+		</field>
+		<field name="sixthMonth" title="${uiLabelMap.SixthMonth}" separate-column="true" widget-style="width-table-column50">
+			<text default-value="0" />
+		</field>
+		<field name="seventhMonth" title="${uiLabelMap.SeventhMonth}" separate-column="true" widget-style="width-table-column50">
+			<text default-value="0" />
+		</field>
+		<field name="eighthMonth" title="${uiLabelMap.EighthMonth}" separate-column="true" widget-style="width-table-column50">
+			<text default-value="0" />
+		</field>
+		<field name="ninthMonth" title="${uiLabelMap.NinthMonth}" separate-column="true" widget-style="width-table-column50">
+			<text default-value="0" />
+		</field>
+		<field name="tenthMonth" title="${uiLabelMap.TenthMonth}" separate-column="true" widget-style="width-table-column50">
+			<text default-value="0" />
+		</field>
+		<field name="eleventhMonth" title="${uiLabelMap.EleventhMonth}" separate-column="true" widget-style="width-table-column50">
+			<text default-value="0" />
+		</field>
+		<field name="twelfthMonth" title="${uiLabelMap.TwelfthMonth}" separate-column="true" widget-style="width-table-column50" >
+			<text default-value="0" />
+		</field>
+		<field name="_rowSubmit" separate-column="true">
+			<hidden/>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonCreate}"
+			widget-style="btn btn-small btn-primary mgt20" separate-column="true" >
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+
+	<form name="CheckRecruitmentPlan" target="checkRecruitmentPlan?ntfId=${ntfId}"
+		header-row-style="header-row"
+		default-table-style="table table-striped table-hover table-bordered dataTable"
+		type="multi" group-columns="false">
+		<actions>
+			<entity-condition entity-name="RecruitmentPlan">
+				<condition-list combine="and">
+					<condition-expr field-name="statusId" operator="equals"
+						value="IRP_INIT" />
+					<condition-expr field-name="partyId" operator="equals"
+						value="${partyId}"/>
+					<condition-expr field-name="year" operator="equals"
+						value="${year}" />
+				</condition-list>
+			</entity-condition>
+		</actions>
+		<field name="year" title="${uiLabelMap.Year}">
+			<display></display>
+		</field>
+		<field name="emplPositionTypeId" title="${uiLabelMap.Position}">
+			<display-entity description="${description}" entity-name="EmplPositionType">
+				
+			</display-entity>
+		</field>
+		<field name="partyId" title="${uiLabelMap.Department}">
+			<display-entity entity-name="PartyGroup" description="${groupName}"></display-entity>
+		</field>
+		<field name="firstMonth" title="${uiLabelMap.FirstMonth}">
+			<display></display>
+		</field>
+		<field name="secondMonth" title="${uiLabelMap.SecondMonth}">
+			<display></display>
+		</field>
+		<field name="thirdMonth" title="${uiLabelMap.ThirdMonth}">
+			<display></display>
+		</field>
+		<field name="fourthMonth" title="${uiLabelMap.FourthMonth}">
+			<display></display>
+		</field>
+		<field name="fifthMonth" title="${uiLabelMap.FifthMonth}">
+			<display></display>
+		</field>
+		<field name="sixthMonth" title="${uiLabelMap.SixthMonth}">
+			<display></display>
+		</field>
+		<field name="seventhMonth" title="${uiLabelMap.SeventhMonth}">
+			<display></display>
+		</field>
+		<field name="eighthMonth" title="${uiLabelMap.EighthMonth}">
+			<display></display>
+		</field>
+		<field name="ninthMonth" title="${uiLabelMap.NinthMonth}">
+			<display></display>
+		</field>
+		<field name="tenthMonth" title="${uiLabelMap.TenthMonth}">
+			<display></display>
+		</field>
+		<field name="eleventhMonth" title="${uiLabelMap.EleventhMonth}">
+			<display></display>
+		</field>
+		<field name="twelfthMonth" title="${uiLabelMap.TwelfthMonth}">
+			<display></display>
+		</field>
+		<field name="statusId" title="${uiLabelMap.Status}" widget-style="width120">
+			<drop-down current="selected">
+				<entity-options description="${description}"
+					entity-name="StatusItem">
+					<entity-constraint name="statusTypeId" operator="equals"
+						value="CHK_RP_STATUS" />
+					<entity-order-by field-name="sequenceId" />
+				</entity-options>
+			</drop-down>
+		</field>
+
+		<field name="submitButton" title="${uiLabelMap.HRCommonConfirm}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+
+	<form name="ApproveRecruitmentPlan" target="approveRecruitmentPlan?ntfIdClose=${ntfId}&amp;state=${state}&amp;year=${parameters.year}"
+		header-row-style="header-row"
+		default-table-style="table table-striped table-hover table-bordered dataTable"
+		type="multi" group-columns="false">
+		<actions>
+			<set field="year" from-field="parameters.year" type="Long"/>
+			<entity-condition entity-name="RecruitmentPlan">
+				<condition-list combine="and">
+					<condition-expr field-name="statusId" operator="equals"
+						value="PRP_PROPOSED" />
+					<condition-expr field-name="year" operator="equals"
+						from-field="year"/>
+				</condition-list>
+			</entity-condition>
+		</actions>
+		<field name="year" title="${uiLabelMap.Year}">
+			<display></display>
+		</field>
+		<field name="emplPositionTypeId" title="${uiLabelMap.Position}">
+			<display></display>
+		</field>
+		<field name="partyId" title="${uiLabelMap.Department}">
+			<display-entity entity-name="PartyGroup" description="${groupName}"></display-entity>
+		</field>
+		<field name="firstMonth" title="${uiLabelMap.FirstMonth}">
+			<display></display>
+		</field>
+		<field name="secondMonth" title="${uiLabelMap.SecondMonth}">
+			<display></display>
+		</field>
+		<field name="thirdMonth" title="${uiLabelMap.ThirdMonth}">
+			<display></display>
+		</field>
+		<field name="fourthMonth" title="${uiLabelMap.FourthMonth}">
+			<display></display>
+		</field>
+		<field name="fifthMonth" title="${uiLabelMap.FifthMonth}">
+			<display></display>
+		</field>
+		<field name="sixthMonth" title="${uiLabelMap.SixthMonth}">
+			<display></display>
+		</field>
+		<field name="seventhMonth" title="${uiLabelMap.SeventhMonth}">
+			<display></display>
+		</field>
+		<field name="eighthMonth" title="${uiLabelMap.EighthMonth}">
+			<display></display>
+		</field>
+		<field name="ninthMonth" title="${uiLabelMap.NinthMonth}">
+			<display></display>
+		</field>
+		<field name="tenthMonth" title="${uiLabelMap.TenthMonth}">
+			<display></display>
+		</field>
+		<field name="eleventhMonth" title="${uiLabelMap.EleventhMonth}">
+			<display></display>
+		</field>
+		<field name="twelfthMonth" title="${uiLabelMap.TwelfthMonth}">
+			<display></display>
+		</field>
+		<field name="statusId" title="${uiLabelMap.Status}">
+			<drop-down current="selected">
+				<entity-options description="${description}"
+					entity-name="StatusItem">
+					<entity-constraint name="statusTypeId" operator="equals"
+						value="APPR_RP_STATUS" />
+					<entity-order-by field-name="sequenceId" />
+				</entity-options>
+			</drop-down>
+		</field>
+
+		<field name="submitButton" title="${uiLabelMap.HREmplApproval}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+
+	<!--==============================================/Recruitment Plan=============================== -->
+
+	<!--=================================================Job Request============================== -->
+	<form name="FindJobRequest" type="single" target="FindJobRequest"
+		header-row-style="header-row" default-table-style="basic-table">
+		<field name="emplPositionTypeId" title="${uiLabelMap.Position}">
+			<drop-down allow-empty="true">
+				<entity-options description="${description}"
+					entity-name="EmplPositionType"></entity-options>
+			</drop-down>
+		</field>
+		<field name="jobRequestId" >
+			<hidden/>
+		</field>
+		
+		<field name="partyId" title="${uiLabelMap.Department}" use-when="${!isHeadOfHR}">
+			<hidden/>
+		</field>
+
+		<field name="fromDate" title="${uiLabelMap.FromDate}">
+			<date-find />
+		</field>
+
+		<field name="thruDate" title="${uiLabelMap.ThruDate}">
+			<date-find />
+		</field>
+
+		<field name="submitButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-search" />
+		</field>
+	</form>
+
+	<form name="ListJobRequest" header-row-style="header-row"
+		default-table-style="table table-striped table-hover table-bordered dataTable"
+		type="list" list-name="listIt">
+		<actions>
+			<service service-name="performFind" result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="parameters" />
+				<field-map field-name="entityName" value="JobRequest" />
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+				<field-map field-name="noConditionFind" value="Y"/>
+			</service>
+		</actions>
+		<field name="jobRequestId" title="${uiLabelMap.CommonId}">
+			<display></display>
+		</field>
+		<field name="partyId" title="${uiLabelMap.Department}">
+			<display-entity entity-name="PartyGroup" description="${groupName}">
+				
+			</display-entity>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.FromDate}" widget-area-style="width215" red-when="never">
+			<display type="date"></display>
+		</field>
+		<field name="thruDate" title="${uiLabelMap.ThruDate}" widget-area-style="width215" red-when="never">
+			<display type="date"></display>
+		</field>
+		<field name="emplPositionTypeId" title="${uiLabelMap.Position}">
+			<display-entity entity-name="EmplPositionType"
+				description="${description}">
+
+			</display-entity>
+		</field>
+		<field name="recruitmentTypeId" title="${uiLabelMap.RecruitmentType}">
+			<display-entity entity-name="RecruitmentType" description="${description}">
+				
+			</display-entity>
+		</field>
+		<field name="recruitmentFormId" title="${uiLabelMap.RecruitmentForm}">
+			<display-entity entity-name="RecruitmentForm" description="${description}">
+				
+			</display-entity>
+		</field>
+		<field name="isInPlan" title="${uiLabelMap.InPlan}">
+			<display-entity entity-name="StatusItem" description="${description}" key-field-name="statusId">
+				
+			</display-entity>
+		</field>
+		<field name="statusId" title="${uiLabelMap.Status}">
+			<display-entity entity-name="StatusItem" description="${description}">
+				
+			</display-entity>
+		</field>
+	</form>
+
+	<form name="EditJobRequest" type="single" target="createJobRequest">
+		<field name="emplPositionTypeId" title="${uiLabelMap.Position}" title-style="asterisk" required-field="true">
+			<drop-down allow-empty="true">
+				<entity-options description="${description}"
+					entity-name="EmplPositionType">
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.FromDate}" title-style="asterisk" required-field="true">
+			<date-time type="date"/>
+		</field>
+		<field name="thruDate" title="${uiLabelMap.ThruDate}" title-style="asterisk" required-field="true">
+			<date-time type="date"/>
+		</field>
+		<field name="resourceNumber" title="${uiLabelMap.ResourceNumber}" title-style="asterisk" required-field="true">
+			<text> </text>
+		</field>
+		<field name="recruitmentTypeId" title="${uiLabelMap.RecruitmentType}">
+			<drop-down>
+				<entity-options description="${description}"
+					entity-name="RecruitmentType"></entity-options>
+			</drop-down>
+		</field>
+		<field name="recruitmentFormId" title="${uiLabelMap.RecruitmentForm}">
+			<drop-down>
+				<entity-options description="${description}"
+					entity-name="RecruitmentForm"></entity-options>
+			</drop-down>
+		</field>
+		<field name="listCriteria" title="${uiLabelMap.Criteria}" widget-style="height100">
+			<drop-down allow-multiple="true">
+				<entity-options description="${description}"
+					entity-name="RecruitmentCriteria" key-field-name="recruitmentCriteriaId"></entity-options>
+			</drop-down>
+		</field>
+		<field name="otherRequirement" title="${uiLabelMap.OtherRequirement}">
+			<textarea />
+		</field>
+		<field name="jobDescription" title="${uiLabelMap.JobDescription}">
+			<textarea visual-editor-enable="true"
+				visual-editor-buttons="formatblock newline bold italic underline left center right number bullet 
+ 			indent outdent undo redo color hilite rule link image table clean html spellcheck" />
+		</field>
+		<field name="submit" title="${uiLabelMap.CommonSubmit}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+		<sort-order>
+			<field-group style="span6 no-widget-header no-left-margin">
+				<sort-field name="emplPositionTypeId"/>
+				<sort-field name="fromDate"/>
+				<sort-field name="thruDate"/>
+				<sort-field name="resourceNumber"/>
+				<sort-field name="recruitmentTypeId"/>
+			</field-group>
+			<field-group style="span6 no-widget-header">
+				<sort-field name="recruitmentFormId"/>
+				<sort-field name="listCriteria"/>
+				<sort-field name="otherRequirement"/>
+			</field-group>
+			<field-group style="span12 no-widget-header no-left-margin">
+				<sort-field name="jobDescription"/>
+			</field-group>
+			<field-group style="span12 no-widget-header no-left-margin">
+				<sort-field name="submit"/>
+			</field-group>
+		</sort-order>
+	</form>
+
+	<!--=================================================/ Job Request============================== -->
+	
+	<!--=================================================Rate Applicant============================== -->
+	<form name="ListExamApplicant" type="multi" target="RateExamApplicant?workEffortId=${workEffortId}"  header-row-style="header-row"
+		default-table-style="table table-striped table-hover table-bordered dataTable" list-name="listIt" group-columns="false">
+		<actions>
+			<entity-condition entity-name="PlanApplicantView" list="listIt">
+				<condition-list>
+					<condition-expr field-name="workEffortId" operator="equals" from-field="parameters.workEffortId"/>
+					<condition-expr field-name="roleTypeId" operator="equals" value="APPLICANT"/>
+					<condition-expr field-name="statusId" operator="equals" value="PA_ASSIGNED"/>
+				</condition-list>
+			</entity-condition>
+		</actions>
+		<field name="partyId" title="${uiLabelMap.ApplicantId}">
+			<display></display>
+		</field>
+		
+		<field name="roleTypeId" >
+			<hidden/>
+		</field>
+		
+		<field name="fromDate" >
+			<hidden/>
+		</field>
+		
+		<field name="workEffortId" >
+			<hidden/>
+		</field>
+		
+		<field name="parentRoleTypeId" >
+			<hidden/>
+		</field>
+		
+		<field name="parentFromDate" >
+			<hidden/>
+		</field>
+		
+		<field name="parentWorkEffortId" >
+			<hidden/>
+		</field>
+		
+		<field name="firstName" >
+			<display></display>
+		</field>
+		
+		<field name="lastName" >
+			<display></display>
+		</field>
+		
+		<field name="score" title="${uiLabelMap.Score}">
+			<text></text>
+		</field>
+		
+		<field name="resultId" title="${uiLabelMap.Result}">
+			<drop-down >
+				<entity-options description="${description}" entity-name="ResultItem">
+					<entity-constraint name="resultTypeId" operator="equals" value="RECR_TEST_RESULT"/>
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="_rowSubmit">
+			<hidden value="Y"/>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonSubmit}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+	
+	<form name="ListInterviewApplicant" type="list" target=""  header-row-style="header-row"
+		default-table-style="table table-striped table-hover table-bordered dataTable">
+		<actions>
+			<entity-condition entity-name="PlanApplicantView">
+				<condition-list combine="and">
+					<condition-expr field-name="workEffortId" operator="equals" from-field="parameters.workEffortId"/>
+					<condition-expr field-name="roleTypeId" operator="equals" value="APPLICANT"/>
+					<condition-expr field-name="statusId" operator="equals" value="PA_ASSIGNED"/>
+				</condition-list>
+			</entity-condition>
+		</actions>
+		
+		<field name="partyId" title="${uiLabelMap.ApplicantId}">
+			<display></display>
+		</field>
+		
+		<field name="roleTypeId" >
+			<hidden/>
+		</field>
+		
+		<field name="fromDate" >
+			<hidden/>
+		</field>
+		
+		<field name="workEffortId" >
+			<hidden/>
+		</field>
+		
+		<field name="parentRoleTypeId" >
+			<hidden/>
+		</field>
+		
+		<field name="parentFromDate" >
+			<hidden/>
+		</field>
+		
+		<field name="parentWorkEffortId" >
+			<hidden/>
+		</field>
+		
+		<field name="firstName" >
+			<display></display>
+		</field>
+		
+		<field name="lastName" >
+			<display></display>
+		</field>
+		
+		<field name="rateReview" title="${uiLabelMap.CommonRate}"
+			widget-style="btn btn-small btn-primary" >
+			<hyperlink target="RateJobInterviewApplicant" description="${uiLabelMap.CommonRate}">
+				<parameter param-name="partyId"/>
+				<parameter param-name="workEffortId"/>
+				<parameter param-name="roleTypeId"/>
+				<parameter param-name="fromDate"/>
+				<parameter param-name="parentRoleTypeId"/>
+				<parameter param-name="parentFromDate"/>
+				<parameter param-name="parentWorkEffortId"/>
+			</hyperlink>
+		</field>
+	</form>
+	
+	<form name="RateInterviewApplicant" target="rateFirstInterviewApplicant" type="single">
+		<alt-target target="rateSecondInterviewApplicant" use-when="${workEffort.workEffortTypeId == 'RECR_REVIEW2'}" />
+		<field name="partyId" title="${uiLabelMap.Applicant}" >
+			<display-entity entity-name="Person" description="${firstName} ${midleName} ${lastName}">
+			</display-entity>
+		</field>
+		<field name="emplPositionTypeId" title="${uiLabelMap.Position}" >
+			<display-entity entity-name="EmplPositionType" description="${description}">
+			</display-entity>
+		</field>
+		
+		<field name="roleTypeId" >
+			<hidden/>
+		</field>
+		
+		<field name="fromDate" >
+			<hidden/>
+		</field>
+		
+		<field name="workEffortId" >
+			<hidden/>
+		</field>
+		
+		<field name="parentRoleTypeId" >
+			<hidden/>
+		</field>
+		
+		<field name="parentFromDate" >
+			<hidden/>
+		</field>
+		
+		<field name="parentWorkEffortId" >
+			<hidden/>
+		</field>
+		
+		<field name="resultId" title="${uiLabelMap.ResultId}" >
+			<drop-down>
+				<entity-options description="${description}" entity-name="ResultItem">
+					<entity-constraint name="resultTypeId" value="RECR_TEST_RESULT"></entity-constraint>
+				</entity-options>
+			</drop-down>
+		</field>
+		
+		<field name="face" title="${uiLabelMap.Face}" >
+			<text mask="99,99" ></text>
+		</field>
+		
+		<field name="figure" title="${uiLabelMap.Figure}" >
+			<text mask="99,99" ></text>
+		</field>
+		
+		<field name="voice" title="${uiLabelMap.Voice}" >
+			<text mask="99,99" ></text>
+		</field>
+		
+		<field name="communication" title="${uiLabelMap.Communication}" >
+			<text mask="99,99" ></text>
+		</field>
+		
+		<field name="confidence" title="${uiLabelMap.Confidence}" >
+			<text mask="99,99" ></text>
+		</field>
+		
+		<field name="circumstance" title="${uiLabelMap.Circumstance}" >
+			<text mask="99,99" ></text>
+		</field>
+		
+		<field name="agility" title="${uiLabelMap.Agility}" >
+			<text mask="99,99" ></text>
+		</field>
+		
+		<field name="logic" title="${uiLabelMap.Logic}" >
+			<text mask="99,99" ></text>
+		</field>
+		
+		<field name="answer" title="${uiLabelMap.Answer}" >
+			<text mask="99,99" ></text>
+		</field>
+		
+		<field name="honest" title="${uiLabelMap.Honest}" >
+			<text mask="99,99" ></text>
+		</field>
+		
+		<field name="experience" title="${uiLabelMap.Experience}" >
+			<text ></text>
+		</field>
+		
+		<field name="expertise" title="${uiLabelMap.Expertise}" >
+			<text ></text>
+		</field>
+		
+		<field name="workChangeId" title="${uiLabelMap.WorkChangeId}" >
+			<drop-down>
+				<entity-options description="${description}" entity-name="WorkChange"></entity-options>
+			</drop-down>
+		</field>
+		
+		<field name="uniCertificateId" title="${uiLabelMap.UniCertificateId}" >
+			<drop-down>
+				<entity-options description="${description}" entity-name="UniCertificate"></entity-options>
+			</drop-down>
+		</field>
+		
+		<field name="itCertificateId" title="${uiLabelMap.ItCertificateId}" >
+			<drop-down>
+				<entity-options description="${description}" entity-name="ItCertificate"></entity-options>
+			</drop-down>
+		</field>
+		
+		<field name="engCertificateId" title="${uiLabelMap.EngCertificateId}" >
+			<drop-down>
+				<entity-options description="${description}" entity-name="EngCertificate"></entity-options>
+			</drop-down>
+		</field>
+		
+		<field name="teamWorkId" title="${uiLabelMap.TeamWorkId}" >
+			<drop-down>
+				<entity-options description="${description}" entity-name="TeamWork"></entity-options>
+			</drop-down>
+		</field>
+		
+		<field name="aloneWorkId" title="${uiLabelMap.AloneWorkId}" >
+			<drop-down>
+				<entity-options description="${description}" entity-name="AloneWork"></entity-options>
+			</drop-down>
+		</field>
+		
+		<field name="parentBackgroundId" title="${uiLabelMap.ParentBackgroundId}">
+			<drop-down>
+				<entity-options description="${description}" entity-name="ParentBackground"></entity-options>
+			</drop-down>
+		</field>
+		
+		<field name="siblingBackgroundId" title="${uiLabelMap.SiblingBackgroundId}">
+			<drop-down>
+				<entity-options description="${description}" entity-name="SiblingBackground"></entity-options>
+			</drop-down>
+		</field>
+		
+		<field name="spousesBackgroundId" title="${uiLabelMap.SpousesBackgroundId}">
+			<drop-down>
+				<entity-options description="${description}" entity-name="SpousesBackground"></entity-options>
+			</drop-down>
+		</field>
+		
+		<field name="childBackgroundId" title="${uiLabelMap.ChildBackgroundId}">
+			<drop-down>
+				<entity-options description="${description}" entity-name="ChildBackground"></entity-options>
+			</drop-down>
+		</field>
+		
+		<field name="currentSal" title="${uiLabelMap.CurrentSal}" >
+			<text></text>
+		</field>
+		
+		<field name="proposeSal" title="${uiLabelMap.ProposeSal}">
+			<text></text>
+		</field>
+		
+		<field name="genaralRate" title="${uiLabelMap.GenaralRate}">
+			<text></text>
+		</field>
+		
+		<field name="propose" title="${uiLabelMap.Propose}">
+			<text></text>
+		</field>
+		
+		<field name="rateReview" title="${uiLabelMap.CommonSubmit}"
+			widget-style="btn btn-small btn-primary" >
+			<submit/>
+		</field>
+		
+		<sort-order type="explicit">
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile">
+				<sort-field name="partyId" />
+				<sort-field name="emplPositionTypeId" />
+				<sort-field name="gender" />
+				<sort-field name="resultId"/>
+			</field-group>
+			
+			<field-group style="span6 no-left-margin no-widget-header boder-all-profile">
+				<sort-field name="face" />
+				<sort-field name="figure" />
+				<sort-field name="voice" />
+				<sort-field name="communication"/>
+				<sort-field name="confidence"/>
+			</field-group>
+			
+			<field-group style="span6 no-widget-header boder-all-profile">
+				<sort-field name="circumstance" />
+				<sort-field name="agility" />
+				<sort-field name="logic" />
+				<sort-field name="answer"/>
+				<sort-field name="honest"/>
+			</field-group>
+			
+			<field-group style="span6 no-left-margin no-widget-header boder-all-profile">
+				<sort-field name="experience" />
+				<sort-field name="expertise" />
+				<sort-field name="workChangeId" />
+				<sort-field name="uniCertificateId"/>
+				<sort-field name="itCertificateId"/>
+				<sort-field name="engCertificateId"/>
+				<sort-field name="teamWorkId"/>
+				<sort-field name="aloneWorkId"/>
+			</field-group>
+			
+			<field-group style="span6  no-widget-header boder-all-profile">
+				<sort-field name="parentBackgroundId"/>
+				<sort-field name="siblingBackgroundId"/>
+				<sort-field name="spousesBackgroundId"/>
+				<sort-field name="childBackgroundId"/>
+				<sort-field name="parentBackgroundId"/>
+				<sort-field name="parentBackgroundId"/>
+			</field-group>
+			
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile">
+				<sort-field name="currentSal"/>
+				<sort-field name="proposeSal"/>
+				<sort-field name="genaralRate"/>
+				<sort-field name="propose"/>
+			</field-group>
+			
+			<field-group style="span12 no-left-margin no-widget-header">
+				<sort-field name="rateReview" />
+			</field-group>
+		</sort-order>
+	</form>
+	
+	
+	<!--=================================================/ Rate Applicant============================== -->
+	
+	<!--================================================= Work Trial=================================== -->
+	<form target="CreateWorkTrialProposal" type="single" name="CreateWorkTrialProposal">
+		<actions>
+			<set field="workEffortId" from-field="parameters.workEffortId"/>
+		</actions>
+		<field name="applicantIdList" title="${uiLabelMap.Applicant}" widget-style="height100">
+			<drop-down allow-multiple="true">
+				<entity-options description="${firstName} ${middleName} ${lastName}" entity-name="WorkEffortApplicant" key-field-name="partyId">
+					<entity-constraint name="workEffortId" operator="equals" value="${workEffortId}"/>
+					<entity-constraint name="statusId" operator="equals" value="PA_PASS"/>
+					<entity-constraint name="roleTypeId" operator="equals" value="APPLICANT"/>
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="workEffortId">
+			<hidden/>
+		</field>
+		<field name="emplPositionTypeId" title="${uiLabelMap.Position}">
+			<display-entity entity-name="EmplPositionType" description="${description}"></display-entity>
+		</field>
+		<field name="workingPartyId" title="${uiLabelMap.OrganizationalUnit}">
+				<display-entity description="${groupName}" entity-name="LegalOrganization" key-field-name="partyId">
+				</display-entity>
+		</field>
+		<field name="salary" title="${uiLabelMap.Salary}">
+			<text ></text>
+		</field>
+		<field name="allowance" title="${uiLabelMap.Allowance}">
+			<text ></text>
+		</field>
+		<field name="trialSalaryRate" title="${uiLabelMap.TrailSalaryRate}">
+			<text mask="99.99"></text>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.FromDate}">
+			<date-time/>
+		</field>
+		<field name="trialTime" title="${uiLabelMap.TrialTime}">
+			<text></text>
+		</field>
+		<field name="description" title="${uiLabelMap.Description}">
+			<text/>
+		</field>
+		<field name="submit" title="${uiLabelMap.CommonSubmit}" widget-style="btn btn-small btn-info">
+			<submit/>
+		</field>
+	</form>
+	<form name="FindWorkTrialProposal" type="single" target="FindWorkTrialProposal">
+		<field name="noConditionFind"><hidden value="Y"/></field>
+		<field name="emplPositionTypeId">
+			<drop-down allow-empty="true">
+				<entity-options description="${description}" entity-name="EmplPositionType" key-field-name="emplPositionTypeId"></entity-options>
+			</drop-down>
+		</field>
+		<field name="workingPartyId" title="${uiLabelMap.Department}">
+			<lookup target-form-name="LookupPartyGroup"></lookup>
+		</field>
+		<field name="fromDate"><date-find/></field>
+		<field name="statusId" >
+			<drop-down>
+				<entity-options description="${description}" entity-name="StatusItem">
+					<entity-constraint name="statusTypeId" operator="in" value="APPR_WT_STATUS,INIT_WT_STATUS"/>
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="searchButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-primary btn-small"><submit button-type="button" image-location="icon-search"/></field>
+	</form>
+	
+	<form  type="list" name="ListWorkTrialProposal" header-row-style="header-row"
+		default-table-style="table table-striped table-hover table-bordered dataTable" list-name="listIt">
+		
+		  <actions>
+            <set field="entityName" value="WorkTrialProposal"/>
+            <service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="requestParameters"/>
+                <field-map field-name="entityName" from-field="entityName"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+        </actions>
+<!-- 		<actions> -->
+<!-- 			<entity-condition entity-name="WorkTrialProposal" > -->
+<!-- 			</entity-condition> -->
+<!-- 		</actions> -->
+		<field name="emplPositionTypeId" title="${uiLabelMap.Position}">
+			<display-entity entity-name="EmplPositionType" description="${description}"></display-entity>
+		</field>
+		<field name="workingPartyId" title="${uiLabelMap.Department}">
+			<display-entity entity-name="PartyNameView" description="${groupName}" key-field-name="partyId">
+			</display-entity>
+		</field>
+		<field name="salary" title="${uiLabelMap.TrailSalary}">
+			<display></display>
+		</field>
+		<field name="allowance" title="${uiLabelMap.Allowance}">
+			<display></display>
+		</field>
+		<field name="trialSalaryRate" title="${uiLabelMap.TrailSalaryRate}">
+			<display></display>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.FromDate}" widget-area-style="width215" red-when="never">
+			<display type="date"></display>
+		</field>
+		<field name="trialTime" title="${uiLabelMap.TrialTime}" widget-area-style="width215">
+			<display></display>
+		</field>
+		<field name="description" title="${uiLabelMap.Description}">
+			<display></display>
+		</field>
+		
+		<field name="statusId" >
+			<display-entity entity-name="StatusItem" description="${description}" >
+			</display-entity>
+		</field>
+	</form>
+	
+<!-- 	<form target="CreateWorkTrialReport" name="EditWorkTrialReport" type="single">
+		<actions>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/recruitment/prepareWorkTrialReportData.groovy" />
+			<set field="description" from-field="empl.description"/>
+			<set field="fromDate" from-field="empl.fromDate"/>
+			<set field="thruDate" from-field="empl.thruDate"/>
+			<set field="partyIdFrom" from-field="empl.partyIdFrom"/>
+		</actions>
+		<field name="partyId" title="${uiLabelMap.Applicant}" >
+			<display-entity entity-name="Person" description="${firstName} ${middleName} ${lastName}">
+			</display-entity>
+		</field>
+		<field name="description" title="${uiLabelMap.Position}" >
+			<display />
+		</field>
+		<field name="fromDate" title="${uiLabelMap.FromDate}" >
+			<display type="date-time" />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.ThruDate}" >
+			<display type="date"/>
+		</field>
+		<field name="partyIdFrom" title="${uiLabelMap.Department}" >
+			<display-entity entity-name="PartyGroup" description="${groupName}" key-field-name="partyId">
+			</display-entity>
+		</field>
+		<field name="eduProcess" title="${uiLabelMap.EduProcess}">
+			<text></text>
+		</field>
+		<field name="workResult" title="${uiLabelMap.WorkResult}" title-style="asterisk"  required-field="true">
+			<text></text>
+		</field>
+		<field name="advAndDis" title="${uiLabelMap.AdvAndDis}" title-style="asterisk"  required-field="true">
+			<textarea />
+		</field>
+		<field name="workOrientation" title="${uiLabelMap.WorkOrientation}">
+			<text></text>
+		</field>
+		<field name="workProposal" title="${uiLabelMap.WorkProposal}">
+			<text></text>
+		</field>
+		<field name="policyProposal" title="${uiLabelMap.PolicyProposal}">
+			<text></text>
+		</field>
+		<field name="eduProposal" title="${uiLabelMap.EduProposal}">
+			<text></text>
+		</field>
+		<field name="ruleComplianceSeft" title="${uiLabelMap.RuleCompliance}">
+			<drop-down>
+				<entity-options description="${description}" entity-name="Evaluation" key-field-name="evalId">
+					<entity-order-by field-name="sequenceId"/>
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="complWorkRateSeft" title="${uiLabelMap.ComplWorkRate}">
+			<drop-down>
+				<entity-options description="${description}" entity-name="Evaluation" key-field-name="evalId">
+					<entity-order-by field-name="sequenceId"/>
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="interCommunicationSeft" title="${uiLabelMap.InterCommunication}">
+			<drop-down>
+				<entity-options description="${description}" entity-name="Evaluation" key-field-name="evalId">
+					<entity-order-by field-name="sequenceId"/>
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="learningCapabilitySeft" title="${uiLabelMap.LearningCapability}">
+			<drop-down>
+				<entity-options description="${description}" entity-name="Evaluation" key-field-name="evalId">
+					<entity-order-by field-name="sequenceId"/>
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="exterCommunicationSeft" title="${uiLabelMap.ExterCommunication}">
+			<drop-down>
+				<entity-options description="${description}" entity-name="Evaluation" key-field-name="evalId">
+					<entity-order-by field-name="sequenceId"/>
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="submit" title="${uiLabelMap.CommonSubmit}" widget-style="btn btn-small btn-info icon-ok open-sans">
+			<submit/>
+		</field>
+		
+		<sort-order>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile appl-text-header margin-top20">
+				<sort-field name="partyId"/>
+				<sort-field name="description"/>
+				<sort-field name="fromDate"/>
+				<sort-field name="thruDate"/>
+				<sort-field name="partyIdFrom"/>
+			</field-group>
+			
+			<field-group style="span6 no-left-margin no-widget-header boder-all-profile work-stat-text-header margin-top20">
+				<sort-field name="eduProcess"/>
+				<sort-field name="workResult"/>
+				<sort-field name="advAndDis"/>
+				<sort-field name="workOrientation"/>
+			</field-group>
+			
+			<field-group style="span6 no-widget-header boder-all-profile proposal-text-header margin-top20">
+				<sort-field name="eduProposal"/>
+				<sort-field name="policyProposal"/>
+				<sort-field name="workProposal"/>
+			</field-group>
+			
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile self-rate-text-header margin-top20">
+				<sort-field name="ruleComplianceSeft"/>
+				<sort-field name="complWorkRateSeft"/>
+				<sort-field name="interCommunicationSeft"/>
+				<sort-field name="learningCapabilitySeft"/>
+				<sort-field name="exterCommunicationSeft"/>
+			</field-group>
+			<field-group style="span12 no-left-margin no-widget-header ">
+				<sort-field name="submit"/>
+			</field-group>
+		</sort-order>
+	</form>
+ -->	
+	<!-- <form target="rateLeaderWorkTrial" name="RateLeaderWorkTrial" type="single">
+		<actions>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/recruitment/prepareRateWorkTrialData.groovy" />
+			<set field="description" from-field="empl.description"/>
+			<set field="fromDate" from-field="empl.fromDate"/>
+			<set field="thruDate" from-field="empl.thruDate"/>
+			<set field="partyIdFrom" from-field="empl.partyIdFrom"/>
+			<set field="eduProcess" from-field="workTrialReport.eduProcess" />
+			<set field="workResult" from-field="workTrialReport.workResult"/>
+			<set field="advAndDis" from-field="workTrialReport.advAndDis"/>
+			<set field="workOrientation" from-field="workTrialReport.workOrientation"/>
+			<set field="workProposal" from-field="workTrialReport.workProposal"/>
+			<set field="policyProposal" from-field="workTrialReport.policyProposal"/>
+			<set field="eduProposal" from-field="workTrialReport.eduProposal"/>
+			<set field="ruleComplianceSeft" from-field="workTrialReport.ruleCompliance" />
+			<set field="complWorkRateSeft" from-field="workTrialReport.complWorkRate" />
+			<set field="interCommunicationSeft" from-field="workTrialReport.interCommunication" />
+			<set field="learningCapabilitySeft" from-field="workTrialReport.learningCapability" />
+			<set field="exterCommunicationSeft" from-field="workTrialReport.exterCommunication" />
+			<set field="workTrialReportId" from-field="workTrialReport.workTrialReportId" />
+			<set field="ntfId" from-field="parameters.ntfId"/>
+		</actions>
+		<field name="ntfId">
+			<hidden/>
+		</field>
+		<field name="workTrialReportId" title="${uiLabelMap.workTrialReportId}">
+			<display></display>
+		</field>
+		<field name="partyId" title="${uiLabelMap.Applicant}">
+			<display-entity entity-name="Person" description="${firstName} ${middleName} ${lastName}">
+			</display-entity>
+		</field>
+		<field name="description" title="${uiLabelMap.Position}">
+			<display />
+		</field>
+		<field name="fromDate" title="${uiLabelMap.fromDate}">
+			<display />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.thruDate}">
+			<display />
+		</field>
+		<field name="partyIdFrom" title="${uiLabelMap.Department}">
+			<display-entity entity-name="PartyGroup" description="${groupName}" key-field-name="partyId">
+			</display-entity>
+		</field>
+		<field name="eduProcess" title="${uiLabelMap.EduProcess}">
+			<display></display>
+		</field>
+		<field name="workResult" title="${uiLabelMap.WorkResult}">
+			<display></display>
+		</field>
+		<field name="advAndDis" title="${uiLabelMap.AdvAndDis}">
+			<display></display>
+		</field>
+		<field name="workOrientation" title="${uiLabelMap.WorkOrientation}">
+			<display></display>
+		</field>
+		<field name="workProposal" title="${uiLabelMap.WorkProposal}">
+			<display></display>
+		</field>
+		<field name="policyProposal" title="${uiLabelMap.PolicyProposal}">
+			<display></display>
+		</field>
+		<field name="eduProposal" title="${uiLabelMap.EduProposal}">
+			<display></display>
+		</field>
+		<field name="ruleComplianceSeft" title="${uiLabelMap.RuleCompliance}">
+			<display-entity description="${description}" entity-name="Evaluation" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="complWorkRateSeft" title="${uiLabelMap.ComplWorkRate}">
+			<display-entity description="${description}" entity-name="Evaluation" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="interCommunicationSeft" title="${uiLabelMap.InterCommunication}">
+			<display-entity description="${description}" entity-name="Evaluation" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="learningCapabilitySeft" title="${uiLabelMap.LearningCapability}">
+			<display-entity description="${description}" entity-name="Evaluation" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="exterCommunicationSeft" title="${uiLabelMap.ExterCommunication}">
+			<display-entity description="${description}" entity-name="Evaluation" key-field-name="evalId"></display-entity>
+		</field>
+		
+		<field name="ruleComplianceLeader" title="${uiLabelMap.RuleCompliance}">
+			<drop-down>
+				<entity-options description="${description}" entity-name="Evaluation" key-field-name="evalId">
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="complWorkRateLeader" title="${uiLabelMap.ComplWorkRate}">
+			<drop-down>
+				<entity-options description="${description}" entity-name="Evaluation" key-field-name="evalId">
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="interCommunicationLeader" title="${uiLabelMap.InterCommunication}">
+			<drop-down>
+				<entity-options description="${description}" entity-name="Evaluation" key-field-name="evalId">
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="learningCapabilityLeader" title="${uiLabelMap.LearningCapability}">
+			<drop-down>
+				<entity-options description="${description}" entity-name="Evaluation" key-field-name="evalId">
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="exterCommunicationLeader" title="${uiLabelMap.ExterCommunication}">
+			<drop-down>
+				<entity-options description="${description}" entity-name="Evaluation" key-field-name="evalId">
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="assignedTask" title="${uiLabelMap.AssignedTask}">
+			<text></text>
+		</field>
+		<field name="futureEdu" title="${uiLabelMap.FutureEdu}">
+			<text></text>
+		</field>
+		<field name="requiredOther" title="${uiLabelMap.RequiredOther}">
+			<text></text>
+		</field>
+		
+		<field name="resultId" title="${uiLabelMap.ResultId}" id-name="resultId">
+			<drop-down>
+				<entity-options description="${description}" entity-name="ResultItem">
+					<entity-constraint name="resultTypeId" value="WORK_TRIAL_RESULT"/>
+				</entity-options>
+			</drop-down>
+		</field>
+		
+		<field name="extTime" title="${uiLabelMap.ExtTime}" id-name="extTime">
+			<text></text>
+		</field>
+		
+		<field name="submit" title="${uiLabelMap.CommonSubmit}" widget-style="btn btn-small btn-info">
+			<submit/>
+		</field>
+		
+		<sort-order>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile appl-text-header margin-top20">
+				<sort-field name="partyId"/>
+				<sort-field name="description"/>
+				<sort-field name="fromDate"/>
+				<sort-field name="thruDate"/>
+				<sort-field name="partyIdFrom"/>
+				<sort-field name="workTrialReportId"/>
+			</field-group>
+			
+			<field-group style="span6 no-left-margin no-widget-header boder-all-profile work-stat-text-header margin-top20">
+				<sort-field name="eduProcess"/>
+				<sort-field name="workResult"/>
+				<sort-field name="advAndDis"/>
+				<sort-field name="workOrientation"/>
+			</field-group>
+			
+			<field-group style="span6 no-widget-header boder-all-profile proposal-text-header margin-top20">
+				<sort-field name="eduProposal"/>
+				<sort-field name="policyProposal"/>
+				<sort-field name="workProposal"/>
+			</field-group>
+			
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile self-rate-text-header margin-top20">
+				<sort-field name="ruleComplianceSeft"/>
+				<sort-field name="complWorkRateSeft"/>
+				<sort-field name="interCommunicationSeft"/>
+				<sort-field name="learningCapabilitySeft"/>
+				<sort-field name="exterCommunicationSeft"/>
+			</field-group>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile leader-rate-text-header margin-top20"> 
+				<sort-field name="ruleComplianceLeader"/>
+				<sort-field name="complWorkRateLeader"/>
+				<sort-field name="interCommunicationLeader"/>
+				<sort-field name="learningCapabilityLeader"/>
+				<sort-field name="exterCommunicationLeader"/>
+			</field-group>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile leader-proposal-text-header margin-top20">
+				<sort-field name="resultId"/>
+				<sort-field name="extTime" />
+				<sort-field name="assignedTask"/>
+				<sort-field name="futureEdu"/>
+				<sort-field name="requiredOther"/>
+			</field-group>
+			<field-group style="span12 no-left-margin no-widget-header">
+				<sort-field name="submit"/>
+			</field-group>
+		</sort-order>
+		
+	</form> -->
+	
+	<!-- <form target="rateHRMWorkTrial" name="RateHRMWorkTrial" type="single">
+		<actions>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/recruitment/prepareRateHRMWorkTrial.groovy" />
+			<set field="description" from-field="empl.description"/>
+			<set field="fromDate" from-field="empl.fromDate"/>
+			<set field="thruDate" from-field="empl.thruDate"/>
+			<set field="partyIdFrom" from-field="empl.partyIdFrom"/>
+			<set field="eduProcess" from-field="workTrialReport.eduProcess" />
+			<set field="workResult" from-field="workTrialReport.workResult"/>
+			<set field="advAndDis" from-field="workTrialReport.advAndDis"/>
+			<set field="workOrientation" from-field="workTrialReport.workOrientation"/>
+			<set field="workProposal" from-field="workTrialReport.workProposal"/>
+			<set field="policyProposal" from-field="workTrialReport.policyProposal"/>
+			<set field="eduProposal" from-field="workTrialReport.eduProposal"/>
+			<set field="ruleComplianceSeft" from-field="workTrialReport.ruleCompliance" />
+			<set field="complWorkRateSeft" from-field="workTrialReport.complWorkRate" />
+			<set field="interCommunicationSeft" from-field="workTrialReport.interCommunication" />
+			<set field="learningCapabilitySeft" from-field="workTrialReport.learningCapability" />
+			<set field="exterCommunicationSeft" from-field="workTrialReport.exterCommunication" />
+			<set field="workTrialReportId" from-field="workTrialReport.workTrialReportId" />
+			<set field="ruleComplianceLeader" from-field="workTrialLeaderRating.ruleCompliance" />
+			<set field="complWorkRateLeader" from-field="workTrialLeaderRating.complWorkRate" />
+			<set field="interCommunicationLeader" from-field="workTrialLeaderRating.interCommunication" />
+			<set field="learningCapabilityLeader" from-field="workTrialLeaderRating.learningCapability" />
+			<set field="exterCommunicationLeader" from-field="workTrialLeaderRating.exterCommunication" />
+			<set field="assignedTask" from-field="workTrialLeaderRating.assignedTask" />
+			<set field="futureEdu" from-field="workTrialLeaderRating.futureEdu" />
+			<set field="requiredOther" from-field="workTrialLeaderRating.requiredOther" />
+			<set field="leaderRatingResultId" from-field="workTrialLeaderRating.resultId"/>
+			<set field="ntfId" from-field="parameters.ntfId"/>
+		</actions>
+		<field name="ntfId">
+			<hidden/>
+		</field>
+		<field name="workTrialReportId" title="${uiLabelMap.WorkTrialReportId}">
+			<display></display>
+		</field>
+		<field name="partyId" title="${uiLabelMap.Applicant}">
+			<display-entity entity-name="Person" description="${firstName} ${middleName} ${lastName}">
+			</display-entity>
+		</field>
+		<field name="description" title="${uiLabelMap.Position}">
+			<display />
+		</field>
+		<field name="fromDate" title="${uiLabelMap.fromDate}">
+			<display />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.thruDate}">
+			<display />
+		</field>
+		<field name="partyIdFrom" title="${uiLabelMap.Department}">
+			<display-entity entity-name="PartyGroup" description="${groupName}" key-field-name="partyId">
+			</display-entity>
+		</field>
+		<field name="eduProcess" title="${uiLabelMap.EduProcess}">
+			<display></display>
+		</field>
+		<field name="workResult" title="${uiLabelMap.WorkResult}">
+			<display></display>
+		</field>
+		<field name="advAndDis" title="${uiLabelMap.AdvAndDis}">
+			<display></display>
+		</field>
+		<field name="workOrientation" title="${uiLabelMap.WorkOrientation}">
+			<display></display>
+		</field>
+		<field name="workProposal" title="${uiLabelMap.WorkProposal}">
+			<display></display>
+		</field>
+		<field name="policyProposal" title="${uiLabelMap.PolicyProposal}">
+			<display></display>
+		</field>
+		<field name="eduProposal" title="${uiLabelMap.EduProposal}">
+			<display></display>
+		</field>
+		<field name="ruleComplianceSeft" title="${uiLabelMap.RuleCompliance}">
+			<display-entity  description="${description}" entity-name="Evaluation" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="complWorkRateSeft" title="${uiLabelMap.ComplWorkRate}">
+			<display-entity  description="${description}" entity-name="Evaluation" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="interCommunicationSeft" title="${uiLabelMap.InterCommunication}">
+			<display-entity  description="${description}" entity-name="Evaluation" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="learningCapabilitySeft" title="${uiLabelMap.LearningCapability}">
+			<display-entity  description="${description}" entity-name="Evaluation" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="exterCommunicationSeft" title="${uiLabelMap.ExterCommunication}">
+			<display-entity  description="${description}" entity-name="Evaluation" key-field-name="evalId"></display-entity>
+		</field>
+		
+		<field name="ruleComplianceLeader" title="${uiLabelMap.RuleCompliance}">
+			<display-entity  description="${description}" entity-name="Evaluation" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="complWorkRateLeader" title="${uiLabelMap.ComplWorkRate}">
+			<display-entity  description="${description}" entity-name="Evaluation" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="interCommunicationLeader" title="${uiLabelMap.InterCommunication}">
+			<display-entity  description="${description}" entity-name="Evaluation" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="learningCapabilityLeader" title="${uiLabelMap.LearningCapability}">
+			<display-entity  description="${description}" entity-name="Evaluation" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="exterCommunicationLeader" title="${uiLabelMap.ExterCommunication}">
+			<display-entity  description="${description}" entity-name="Evaluation" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="assignedTask" title="${uiLabelMap.AssignedTask}">
+			<display></display>
+		</field>
+		<field name="futureEdu" title="${uiLabelMap.FutureEdu}">
+			<display></display>
+		</field>
+		<field name="requiredOther" title="${uiLabelMap.RequiredOther}">
+			<display></display>
+		</field>
+		
+		<field name="leaderRatingResultId" title="${uiLabelMap.RatingResult}">
+			<display-entity description="${description}" entity-name="ResultItem" key-field-name="resultId" >
+			</display-entity>
+		</field>
+		<field name="resultId" title="${uiLabelMap.ResultId}" id-name="resultId">
+			<drop-down>
+				<entity-options description="${description}" entity-name="ResultItem">
+					<entity-constraint name="resultTypeId" value="WORK_TRIAL_RESULT"/>
+				</entity-options>
+			</drop-down>
+		</field>
+		
+		<field name="extTime" title="${uiLabelMap.ExtTime}" id-name="extTime">
+			<text></text>
+		</field>
+		
+		<field name="submit" title="${uiLabelMap.CommonSubmit}" widget-style="btn btn-small btn-info">
+			<submit/>
+		</field>
+		
+		<sort-order>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile appl-text-header margin-top20">
+				<sort-field name="partyId"/>
+				<sort-field name="description"/>
+				<sort-field name="fromDate"/>
+				<sort-field name="thruDate"/>
+				<sort-field name="partyIdFrom"/>
+				<sort-field name="workTrialReportId"/>
+			</field-group>
+			
+			<field-group style="span6 no-left-margin no-widget-header boder-all-profile work-stat-text-header margin-top20">
+				<sort-field name="eduProcess"/>
+				<sort-field name="workResult"/>
+				<sort-field name="advAndDis"/>
+				<sort-field name="workOrientation"/>
+			</field-group>
+			
+			<field-group style="span6 no-widget-header boder-all-profile proposal-text-header margin-top20">
+				<sort-field name="eduProposal"/>
+				<sort-field name="policyProposal"/>
+				<sort-field name="workProposal"/>
+			</field-group>
+			
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile self-rate-text-header margin-top20">
+				<sort-field name="ruleComplianceSeft"/>
+				<sort-field name="complWorkRateSeft"/>
+				<sort-field name="interCommunicationSeft"/>
+				<sort-field name="learningCapabilitySeft"/>
+				<sort-field name="exterCommunicationSeft"/>
+			</field-group>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile leader-rate-text-header margin-top20"> 
+				<sort-field name="ruleComplianceLeader"/>
+				<sort-field name="complWorkRateLeader"/>
+				<sort-field name="interCommunicationLeader"/>
+				<sort-field name="learningCapabilityLeader"/>
+				<sort-field name="exterCommunicationLeader"/>
+			</field-group>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile leader-proposal-text-header margin-top20">
+				<sort-field name="leaderRatingResultId"/>
+				<sort-field name="assignedTask"/>
+				<sort-field name="futureEdu"/>
+				<sort-field name="requiredOther"/>
+				<sort-field name="leaderRatingResultId"/>
+			</field-group>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile hrm-rate-text-header margin-top20">
+				<sort-field name="resultId"/>
+				<sort-field name="extTime"/>
+			</field-group>
+			<field-group style="span12 no-left-margin no-widget-header ">
+				<sort-field name="submit"/>
+			</field-group>
+		</sort-order>
+	</form>
+	
+	<form name="ConfirmExtTimeResult" type="single" id="WorkTrialLeaderRateResult" target="ConfirmExtTime">
+		<actions>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/recruitment/prepareRateHRMWorkTrial.groovy" />
+			<set field="description" from-field="empl.description"/>
+			<set field="fromDate" from-field="empl.fromDate"/>
+			<set field="thruDate" from-field="empl.thruDate"/>
+			<set field="partyIdFrom" from-field="empl.partyIdFrom"/>
+			<set field="eduProcess" from-field="workTrialReport.eduProcess" />
+			<set field="workResult" from-field="workTrialReport.workResult"/>
+			<set field="advAndDis" from-field="workTrialReport.advAndDis"/>
+			<set field="workOrientation" from-field="workTrialReport.workOrientation"/>
+			<set field="workProposal" from-field="workTrialReport.workProposal"/>
+			<set field="policyProposal" from-field="workTrialReport.policyProposal"/>
+			<set field="eduProposal" from-field="workTrialReport.eduProposal"/>
+			<set field="ruleComplianceSeft" from-field="workTrialReport.ruleCompliance" />
+			<set field="complWorkRateSeft" from-field="workTrialReport.complWorkRate" />
+			<set field="interCommunicationSeft" from-field="workTrialReport.interCommunication" />
+			<set field="learningCapabilitySeft" from-field="workTrialReport.learningCapability" />
+			<set field="exterCommunicationSeft" from-field="workTrialReport.exterCommunication" />
+			<set field="workTrialReportId" from-field="workTrialReport.workTrialReportId" />
+			<set field="ruleComplianceLeader" from-field="workTrialLeaderRating.ruleCompliance" />
+			<set field="complWorkRateLeader" from-field="workTrialLeaderRating.complWorkRate" />
+			<set field="interCommunicationLeader" from-field="workTrialLeaderRating.interCommunication" />
+			<set field="learningCapabilityLeader" from-field="workTrialLeaderRating.learningCapability" />
+			<set field="exterCommunicationLeader" from-field="workTrialLeaderRating.exterCommunication" />
+			<set field="assignedTask" from-field="workTrialLeaderRating.assignedTask" />
+			<set field="futureEdu" from-field="workTrialLeaderRating.futureEdu" />
+			<set field="requiredOther" from-field="workTrialLeaderRating.requiredOther" />
+			<set field="leaderRatingResultId" from-field="workTrialLeaderRating.resultId"/>
+			<set field="extTime" from-field="workTrialLeaderRating.extTime"/>	
+			<set field="ntfId" from-field="parameters.ntfId"></set>
+		</actions>
+		<field name="ntfId">
+			<hidden></hidden>
+		</field>
+		<field name="workTrialReportId" title="${uiLabelMap.WorkTrialReportId}">
+			<display></display>
+		</field>
+		<field name="partyId" title="${uiLabelMap.Applicant}">
+			<display-entity entity-name="Person" description="${firstName} ${middleName} ${lastName}">
+			</display-entity>
+		</field>
+		<field name="description" title="${uiLabelMap.Position}">
+			<display />
+		</field>
+		<field name="fromDate" title="${uiLabelMap.fromDate}">
+			<display />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.thruDate}">
+			<display />
+		</field>
+		<field name="partyIdFrom" title="${uiLabelMap.Department}">
+			<display-entity entity-name="PartyGroup" description="${groupName}" key-field-name="partyId">
+			</display-entity>
+		</field>
+		<field name="eduProcess" title="${uiLabelMap.EduProcess}">
+			<display></display>
+		</field>
+		<field name="workResult" title="${uiLabelMap.WorkResult}">
+			<display></display>
+		</field>
+		<field name="advAndDis" title="${uiLabelMap.AdvAndDis}">
+			<display></display>
+		</field>
+		<field name="workOrientation" title="${uiLabelMap.WorkOrientation}">
+			<display></display>
+		</field>
+		<field name="workProposal" title="${uiLabelMap.WorkProposal}">
+			<display></display>
+		</field>
+		<field name="policyProposal" title="${uiLabelMap.PolicyProposal}">
+			<display></display>
+		</field>
+		<field name="eduProposal" title="${uiLabelMap.EduProposal}">
+			<display></display>
+		</field>
+		<field name="ruleComplianceSeft" title="${uiLabelMap.RuleCompliance}">
+			<display-entity entity-name="Evaluation" description="${description}" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="complWorkRateSeft" title="${uiLabelMap.ComplWorkRate}">
+			<display-entity entity-name="Evaluation" description="${description}" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="interCommunicationSeft" title="${uiLabelMap.InterCommunication}">
+			<display-entity entity-name="Evaluation" description="${description}" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="learningCapabilitySeft" title="${uiLabelMap.LearningCapability}">
+			<display-entity entity-name="Evaluation" description="${description}" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="exterCommunicationSeft" title="${uiLabelMap.ExterCommunication}">
+			<display-entity entity-name="Evaluation" description="${description}" key-field-name="evalId"></display-entity>
+		</field>
+		
+		<field name="ruleComplianceLeader" title="${uiLabelMap.RuleCompliance}">
+			<display-entity entity-name="Evaluation" description="${description}" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="complWorkRateLeader" title="${uiLabelMap.ComplWorkRate}">
+			<display-entity entity-name="Evaluation" description="${description}" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="interCommunicationLeader" title="${uiLabelMap.InterCommunication}">
+			<display-entity entity-name="Evaluation" description="${description}" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="learningCapabilityLeader" title="${uiLabelMap.LearningCapability}">
+			<display-entity entity-name="Evaluation" description="${description}" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="exterCommunicationLeader" title="${uiLabelMap.ExterCommunication}">
+			<display-entity entity-name="Evaluation" description="${description}" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="assignedTask" title="${uiLabelMap.AssignedTask}">
+			<display></display>
+		</field>
+		<field name="futureEdu" title="${uiLabelMap.FutureEdu}">
+			<display></display>
+		</field>
+		<field name="requiredOther" title="${uiLabelMap.RequiredOther}">
+			<display></display>
+		</field>
+		
+		<field name="leaderRatingResultId" title="${uiLabelMap.RatingResult}" id-name="leaderResult">
+			<display-entity entity-name="ResultItem" description="${description}" key-field-name="resultId"></display-entity>
+		</field>
+		
+		<field name="extTime" title="${uiLabelMap.ExtTime}">
+			<display></display>
+		</field>
+		
+		<field name="extTimeConfirm" title="${uiLabelMap.ExtTimeConfirm}" use-when="${userLogin.partyId} == ${partyId}">
+			<drop-down>
+				<option key="DONGY" description="Đồng ý"></option>
+				<option key="KHONGDONGY" description="Không đồng ý"></option>
+			</drop-down>
+		</field>
+		
+		<field name="submit" title="${uiLabelMap.CommonSubmit}" widget-style="btn btn-small btn-info" use-when="${userLogin.partyId} == ${partyId}">
+			<submit/>
+		</field>
+		
+		<sort-order>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile appl-text-header margin-top20">
+				<sort-field name="partyId"/>
+				<sort-field name="description"/>
+				<sort-field name="fromDate"/>
+				<sort-field name="thruDate"/>
+				<sort-field name="partyIdFrom"/>
+				<sort-field name="workTrialReportId"/>
+			</field-group>
+			
+			<field-group style="span6 no-left-margin no-widget-header boder-all-profile work-stat-text-header margin-top20">
+				<sort-field name="eduProcess"/>
+				<sort-field name="workResult"/>
+				<sort-field name="advAndDis"/>
+				<sort-field name="workOrientation"/>
+			</field-group>
+			
+			<field-group style="span6 no-widget-header boder-all-profile proposal-text-header margin-top20">
+				<sort-field name="eduProposal"/>
+				<sort-field name="policyProposal"/>
+				<sort-field name="workProposal"/>
+			</field-group>
+			
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile self-rate-text-header margin-top20">
+				<sort-field name="ruleComplianceSeft"/>
+				<sort-field name="complWorkRateSeft"/>
+				<sort-field name="interCommunicationSeft"/>
+				<sort-field name="learningCapabilitySeft"/>
+				<sort-field name="exterCommunicationSeft"/>
+			</field-group>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile leader-rate-text-header margin-top20"> 
+				<sort-field name="ruleComplianceLeader"/>
+				<sort-field name="complWorkRateLeader"/>
+				<sort-field name="interCommunicationLeader"/>
+				<sort-field name="learningCapabilityLeader"/>
+				<sort-field name="exterCommunicationLeader"/>
+			</field-group>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile leader-proposal-text-header margin-top20">
+				<sort-field name="leaderRatingResultId"/>
+				<sort-field name="assignedTask"/>
+				<sort-field name="futureEdu"/>
+				<sort-field name="requiredOther"/>
+				<sort-field name="leaderRatingResultId"/>
+			</field-group>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile ext-time-text-header margin-top20">
+				<sort-field name="extTime"/>
+				<sort-field name="extTimeConfirm"/>
+			</field-group>
+			<field-group style="span12 no-left-margin no-widget-header submit-button">
+				<sort-field name="submit"/>
+			</field-group>
+		</sort-order>
+	</form>
+	
+	<form name="ConfirmExtTimeResult" type="single" id="ConfirmExtTimeResult" target="ConfirmExtTimeResult">
+		<actions>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/recruitment/prepareRateHRMWorkTrial.groovy" />
+			<set field="description" from-field="empl.description"/>
+			<set field="fromDate" from-field="empl.fromDate"/>
+			<set field="thruDate" from-field="empl.thruDate"/>
+			<set field="partyIdFrom" from-field="empl.partyIdFrom"/>
+			<set field="extTime" from-field="workTrialLeaderRating.extTime"/>	
+			<set field="ntfId" from-field="parameters.ntfId"></set>
+			<set field="result" from-field="parameters.result"/>
+		</actions>
+		<field name="ntfId">
+			<hidden></hidden>
+		</field>
+		<field name="workTrialReportId" title="${uiLabelMap.WorkTrialReportId}">
+			<display></display>
+		</field>
+		<field name="partyId" title="${uiLabelMap.Applicant}">
+			<display-entity entity-name="Person" description="${firstName} ${middleName} ${lastName}">
+			</display-entity>
+		</field>
+		<field name="description" title="${uiLabelMap.Position}">
+			<display />
+		</field>
+		<field name="fromDate" title="${uiLabelMap.fromDate}">
+			<display />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.thruDate}">
+			<display />
+		</field>
+		<field name="partyIdFrom" title="${uiLabelMap.Department}">
+			<display-entity entity-name="PartyGroup" description="${groupName}" key-field-name="partyId">
+			</display-entity>
+		</field>
+		<field name="result" title="${uiLabelMap.result}">
+			<display />
+		</field>
+		<sort-order>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile appl-text-header margin-top20">
+				<sort-field name="partyId"/>
+				<sort-field name="description"/>
+				<sort-field name="fromDate"/>
+				<sort-field name="thruDate"/>
+				<sort-field name="partyIdFrom"/>
+				<sort-field name="workTrialReportId"/>
+			</field-group>
+			
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile ext-time-text-header margin-top20">
+				<sort-field name="extTime"/>
+				<sort-field name="result"/>
+			</field-group>
+		</sort-order>
+	</form>
+	
+	<form target="ConfirmExtTimeResult" name="WorkTrialCeoRateResult" type="single">
+		<actions>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/recruitment/prepareRateCEOResult.groovy" />
+			<set field="description" from-field="empl.description"/>
+			<set field="fromDate" from-field="empl.fromDate"/>
+			<set field="thruDate" from-field="empl.thruDate"/>
+			<set field="partyIdFrom" from-field="empl.partyIdFrom"/>
+			<set field="eduProcess" from-field="workTrialReport.eduProcess" />
+			<set field="workResult" from-field="workTrialReport.workResult"/>
+			<set field="advAndDis" from-field="workTrialReport.advAndDis"/>
+			<set field="workOrientation" from-field="workTrialReport.workOrientation"/>
+			<set field="workProposal" from-field="workTrialReport.workProposal"/>
+			<set field="policyProposal" from-field="workTrialReport.policyProposal"/>
+			<set field="eduProposal" from-field="workTrialReport.eduProposal"/>
+			<set field="ruleComplianceSeft" from-field="workTrialReport.ruleCompliance" />
+			<set field="complWorkRateSeft" from-field="workTrialReport.complWorkRate" />
+			<set field="interCommunicationSeft" from-field="workTrialReport.interCommunication" />
+			<set field="learningCapabilitySeft" from-field="workTrialReport.learningCapability" />
+			<set field="exterCommunicationSeft" from-field="workTrialReport.exterCommunication" />
+			<set field="workTrialReportId" from-field="workTrialReport.workTrialReportId" />
+			<set field="ruleComplianceLeader" from-field="workTrialLeaderRating.ruleCompliance" />
+			<set field="complWorkRateLeader" from-field="workTrialLeaderRating.complWorkRate" />
+			<set field="interCommunicationLeader" from-field="workTrialLeaderRating.interCommunication" />
+			<set field="learningCapabilityLeader" from-field="workTrialLeaderRating.learningCapability" />
+			<set field="exterCommunicationLeader" from-field="workTrialLeaderRating.exterCommunication" />
+			<set field="assignedTask" from-field="workTrialLeaderRating.assignedTask" />
+			<set field="futureEdu" from-field="workTrialLeaderRating.futureEdu" />
+			<set field="requiredOther" from-field="workTrialLeaderRating.requiredOther" />
+			<set field="leaderRatingResultId" from-field="workTrialLeaderRating.resultId"/>
+			<set field="hrmRatingResultId" from-field="workTrialHrmRating.resultId"/>
+			<set field="ceoRatingResultId" from-field="workTrialCeoRating.resultId"/>
+			<set field="extTime" from-field="workTrialCeoRating.extTime"/>
+		</actions>
+		<field name="workTrialReportId" title="${uiLabelMap.WorkTrialReportId}">
+			<display></display>
+		</field>
+		<field name="partyId" title="${uiLabelMap.Applicant}">
+			<display-entity entity-name="Person" description="${firstName} ${middleName} ${lastName}">
+			</display-entity>
+		</field>
+		<field name="description" title="${uiLabelMap.Position}">
+			<display />
+		</field>
+		<field name="fromDate" title="${uiLabelMap.fromDate}">
+			<display />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.thruDate}">
+			<display />
+		</field>
+		<field name="partyIdFrom" title="${uiLabelMap.Department}">
+			<display-entity entity-name="PartyGroup" description="${groupName}" key-field-name="partyId">
+			</display-entity>
+		</field>
+		<field name="eduProcess" title="${uiLabelMap.EduProcess}">
+			<display></display>
+		</field>
+		<field name="workResult" title="${uiLabelMap.WorkResult}">
+			<display></display>
+		</field>
+		<field name="advAndDis" title="${uiLabelMap.AdvAndDis}">
+			<display></display>
+		</field>
+		<field name="workOrientation" title="${uiLabelMap.WorkOrientation}">
+			<display></display>
+		</field>
+		<field name="workProposal" title="${uiLabelMap.WorkProposal}">
+			<display></display>
+		</field>
+		<field name="policyProposal" title="${uiLabelMap.PolicyProposal}">
+			<display></display>
+		</field>
+		<field name="eduProposal" title="${uiLabelMap.EduProposal}">
+			<display></display>
+		</field>
+		<field name="ruleComplianceSeft" title="${uiLabelMap.RuleCompliance}">
+			<display-entity description="${description}" entity-name="Evaluation" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="complWorkRateSeft" title="${uiLabelMap.ComplWorkRate}">
+			<display-entity description="${description}" entity-name="Evaluation" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="interCommunicationSeft" title="${uiLabelMap.InterCommunication}">
+			<display-entity description="${description}" entity-name="Evaluation" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="learningCapabilitySeft" title="${uiLabelMap.LearningCapability}">
+			<display-entity description="${description}" entity-name="Evaluation" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="exterCommunicationSeft" title="${uiLabelMap.ExterCommunication}">
+			<display-entity description="${description}" entity-name="Evaluation" key-field-name="evalId"></display-entity>
+		</field>
+		
+		<field name="ruleComplianceLeader" title="${uiLabelMap.RuleCompliance}">
+			<display-entity description="${description}" entity-name="Evaluation" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="complWorkRateLeader" title="${uiLabelMap.ComplWorkRate}">
+			<display-entity description="${description}" entity-name="Evaluation" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="interCommunicationLeader" title="${uiLabelMap.InterCommunication}">
+			<display-entity description="${description}" entity-name="Evaluation" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="learningCapabilityLeader" title="${uiLabelMap.LearningCapability}">
+			<display-entity description="${description}" entity-name="Evaluation" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="exterCommunicationLeader" title="${uiLabelMap.ExterCommunication}">
+			<display-entity description="${description}" entity-name="Evaluation" key-field-name="evalId"></display-entity>
+		</field>
+		<field name="assignedTask" title="${uiLabelMap.AssignedTask}">
+			<display></display>
+		</field>
+		<field name="futureEdu" title="${uiLabelMap.FutureEdu}">
+			<display></display>
+		</field>
+		<field name="requiredOther" title="${uiLabelMap.RequiredOther}">
+			<display></display>
+		</field>
+		
+		<field name="leaderRatingResultId" title="${uiLabelMap.RatingResult}">
+			<display-entity description="${description}" entity-name="ResultItem" key-field-name="resultId"></display-entity>
+		</field>
+		
+		<field name="hrmRatingResultId" title="${uiLabelMap.RatingResult}">
+			<display-entity description="${description}" entity-name="ResultItem" key-field-name="resultId"></display-entity>
+		</field>
+		
+		<field name="ceoRatingResultId" title="${uiLabelMap.RatingResult}" id-name="ceoResult">
+			<display-entity description="${description}" entity-name="ResultItem" key-field-name="resultId"></display-entity>
+		</field>
+		
+		<field name="extTime" title="${uiLabelMap.ExtTime}">
+			<display></display>
+		</field>
+		
+		<field name="extTimeConfirm" title="${uiLabelMap.ExtTimeConfirm}" use-when="${userLogin.partyId} == ${partyId}">
+			<drop-down>
+				<option key="DONGY" description="Đồng ý"></option>
+				<option key="KHONGDONGY" description="Không đồng ý"></option>
+			</drop-down>
+		</field>
+		
+		<field name="submit" title="${uiLabelMap.CommonSubmit}" widget-style="btn btn-small btn-info" use-when="${userLogin.partyId} == ${partyId}">
+			<submit/>
+		</field>
+		
+		<sort-order>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile appl-text-header margin-top20">
+				<sort-field name="partyId"/>
+				<sort-field name="description"/>
+				<sort-field name="fromDate"/>
+				<sort-field name="thruDate"/>
+				<sort-field name="partyIdFrom"/>
+				<sort-field name="workTrialReportId"/>
+			</field-group>
+			
+			<field-group style="span6 no-left-margin no-widget-header boder-all-profile work-stat-text-header margin-top20">
+				<sort-field name="eduProcess"/>
+				<sort-field name="workResult"/>
+				<sort-field name="advAndDis"/>
+				<sort-field name="workOrientation"/>
+			</field-group>
+			
+			<field-group style="span6 no-widget-header boder-all-profile proposal-text-header margin-top20">
+				<sort-field name="eduProposal"/>
+				<sort-field name="policyProposal"/>
+				<sort-field name="workProposal"/>
+			</field-group>
+			
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile self-rate-text-header margin-top20">
+				<sort-field name="ruleComplianceSeft"/>
+				<sort-field name="complWorkRateSeft"/>
+				<sort-field name="interCommunicationSeft"/>
+				<sort-field name="learningCapabilitySeft"/>
+				<sort-field name="exterCommunicationSeft"/>
+			</field-group>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile leader-rate-text-header margin-top20"> 
+				<sort-field name="ruleComplianceLeader"/>
+				<sort-field name="complWorkRateLeader"/>
+				<sort-field name="interCommunicationLeader"/>
+				<sort-field name="learningCapabilityLeader"/>
+				<sort-field name="exterCommunicationLeader"/>
+			</field-group>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile leader-proposal-text-header margin-top20">
+				<sort-field name="leaderRatingResultId"/>
+				<sort-field name="assignedTask"/>
+				<sort-field name="futureEdu"/>
+				<sort-field name="requiredOther"/>
+				<sort-field name="leaderRatingResultId"/>
+			</field-group>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile hrm-rate-text-header margin-top20">
+				<sort-field name="hrmRatingResultId"/>
+			</field-group>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile ceo-rate-text-header margin-top20">
+				<sort-field name="ceoRatingResultId"/>
+			</field-group>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile ext-time-text-header margin-top20">
+				<sort-field name="extTime"/>
+				<sort-field name="extTimeConfirm"/>
+			</field-group>
+			 <field-group style="span12 no-left-margin no-widget-header submit-button">
+				<sort-field name="submit"/>
+			</field-group>
+		</sort-order>
+	</form>
+	<form target="rateCEOWorkTrial" name="RateCEOWorkTrial" type="single">
+		<actions>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/recruitment/prepareRateCEOWorkTrial.groovy" />
+			<set field="description" from-field="empl.description"/>
+			<set field="fromDate" from-field="empl.fromDate"/>
+			<set field="thruDate" from-field="empl.thruDate"/>
+			<set field="partyIdFrom" from-field="empl.partyIdFrom"/>
+			<set field="eduProcess" from-field="workTrialReport.eduProcess" />
+			<set field="workResult" from-field="workTrialReport.workResult"/>
+			<set field="advAndDis" from-field="workTrialReport.advAndDis"/>
+			<set field="workOrientation" from-field="workTrialReport.workOrientation"/>
+			<set field="workProposal" from-field="workTrialReport.workProposal"/>
+			<set field="policyProposal" from-field="workTrialReport.policyProposal"/>
+			<set field="eduProposal" from-field="workTrialReport.eduProposal"/>
+			<set field="ruleComplianceSeft" from-field="workTrialReport.ruleCompliance" />
+			<set field="complWorkRateSeft" from-field="workTrialReport.complWorkRate" />
+			<set field="interCommunicationSeft" from-field="workTrialReport.interCommunication" />
+			<set field="learningCapabilitySeft" from-field="workTrialReport.learningCapability" />
+			<set field="exterCommunicationSeft" from-field="workTrialReport.exterCommunication" />
+			<set field="workTrialReportId" from-field="workTrialReport.workTrialReportId" />
+			<set field="ruleComplianceLeader" from-field="workTrialLeaderRating.ruleCompliance" />
+			<set field="complWorkRateLeader" from-field="workTrialLeaderRating.complWorkRate" />
+			<set field="interCommunicationLeader" from-field="workTrialLeaderRating.interCommunication" />
+			<set field="learningCapabilityLeader" from-field="workTrialLeaderRating.learningCapability" />
+			<set field="exterCommunicationLeader" from-field="workTrialLeaderRating.exterCommunication" />
+			<set field="assignedTask" from-field="workTrialLeaderRating.assignedTask" />
+			<set field="futureEdu" from-field="workTrialLeaderRating.futureEdu" />
+			<set field="requiredOther" from-field="workTrialLeaderRating.requiredOther" />
+			<set field="leaderRatingResultId" from-field="workTrialLeaderRating.resultId"/>
+			<set field="hrmRatingResultId" from-field="workTrialHrmRating.resultId"/>
+			<set field="ntfId" from-field="parameters.ntfId"/>
+		</actions>
+		<field name="ntfId">
+			<hidden/>
+		</field>
+		<field name="workTrialReportId" title="${uiLabelMap.WorkTrialReportId}">
+			<display></display>
+		</field>
+		<field name="partyId" title="${uiLabelMap.Applicant}">
+			<display-entity entity-name="Person" description="${firstName} ${middleName} ${lastName}">
+			</display-entity>
+		</field>
+		<field name="description" title="${uiLabelMap.Position}">
+			<display />
+		</field>
+		<field name="fromDate" title="${uiLabelMap.fromDate}">
+			<display />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.thruDate}">
+			<display />
+		</field>
+		<field name="partyIdFrom" title="${uiLabelMap.Department}">
+			<display-entity entity-name="PartyGroup" description="${groupName}" key-field-name="partyId">
+			</display-entity>
+		</field>
+		<field name="eduProcess" title="${uiLabelMap.EduProcess}">
+			<display></display>
+		</field>
+		<field name="workResult" title="${uiLabelMap.WorkResult}">
+			<display></display>
+		</field>
+		<field name="advAndDis" title="${uiLabelMap.AdvAndDis}">
+			<display></display>
+		</field>
+		<field name="workOrientation" title="${uiLabelMap.WorkOrientation}">
+			<display></display>
+		</field>
+		<field name="workProposal" title="${uiLabelMap.WorkProposal}">
+			<display></display>
+		</field>
+		<field name="policyProposal" title="${uiLabelMap.PolicyProposal}">
+			<display></display>
+		</field>
+		<field name="eduProposal" title="${uiLabelMap.EduProposal}">
+			<display></display>
+		</field>
+		<field name="ruleComplianceSeft" title="${uiLabelMap.RuleCompliance}">
+			<display-entity key-field-name="evalId" entity-name="Evaluation" description="${description}"></display-entity>
+		</field>
+		<field name="complWorkRateSeft" title="${uiLabelMap.ComplWorkRate}">
+			<display-entity key-field-name="evalId" entity-name="Evaluation" description="${description}"></display-entity>
+		</field>
+		<field name="interCommunicationSeft" title="${uiLabelMap.InterCommunication}">
+			<display-entity key-field-name="evalId" entity-name="Evaluation" description="${description}"></display-entity>
+		</field>
+		<field name="learningCapabilitySeft" title="${uiLabelMap.LearningCapability}">
+			<display-entity key-field-name="evalId" entity-name="Evaluation" description="${description}"></display-entity>
+		</field>
+		<field name="exterCommunicationSeft" title="${uiLabelMap.ExterCommunication}">
+			<display-entity key-field-name="evalId" entity-name="Evaluation" description="${description}"></display-entity>
+		</field>
+		
+		<field name="ruleComplianceLeader" title="${uiLabelMap.RuleCompliance}">
+			<display-entity key-field-name="evalId" entity-name="Evaluation" description="${description}"></display-entity>
+		</field>
+		<field name="complWorkRateLeader" title="${uiLabelMap.ComplWorkRate}">
+			<display-entity key-field-name="evalId" entity-name="Evaluation" description="${description}"></display-entity>
+		</field>
+		<field name="interCommunicationLeader" title="${uiLabelMap.InterCommunication}">
+			<display-entity key-field-name="evalId" entity-name="Evaluation" description="${description}"></display-entity>
+		</field>
+		<field name="learningCapabilityLeader" title="${uiLabelMap.LearningCapability}">
+			<display-entity key-field-name="evalId" entity-name="Evaluation" description="${description}"></display-entity>
+		</field>
+		<field name="exterCommunicationLeader" title="${uiLabelMap.ExterCommunication}">
+			<display-entity key-field-name="evalId" entity-name="Evaluation" description="${description}"></display-entity>
+		</field>
+		<field name="assignedTask" title="${uiLabelMap.AssignedTask}">
+			<display></display>
+		</field>
+		<field name="futureEdu" title="${uiLabelMap.FutureEdu}">
+			<display></display>
+		</field>
+		<field name="requiredOther" title="${uiLabelMap.RequiredOther}">
+			<display></display>
+		</field>
+		
+		<field name="leaderRatingResultId" title="${uiLabelMap.RatingResult}">
+			<display-entity key-field-name="resultId" entity-name="ResultItem" description="${description}"></display-entity>
+		</field>
+		
+		<field name="hrmRatingResultId" title="${uiLabelMap.RatingResult}">
+			<display-entity key-field-name="resultId" entity-name="ResultItem" description="${description}"></display-entity>
+		</field>
+		
+		<field name="resultId" title="${uiLabelMap.ResultId}" id-name="resultId">
+			<drop-down>
+				<entity-options description="${description}" entity-name="ResultItem">
+					<entity-constraint name="resultTypeId" value="WORK_TRIAL_RESULT"/>
+				</entity-options>
+			</drop-down>
+		</field>
+		
+		<field name="extTime" title="${uiLabelMap.ExtTime}" id-name="extTime">
+			<text></text>
+		</field>
+		
+		<field name="submit" title="${uiLabelMap.CommonSubmit}" widget-style="btn btn-small btn-info">
+			<submit/>
+		</field>
+		
+		<sort-order>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile appl-text-header margin-top20">
+				<sort-field name="partyId"/>
+				<sort-field name="description"/>
+				<sort-field name="fromDate"/>
+				<sort-field name="thruDate"/>
+				<sort-field name="partyIdFrom"/>
+				<sort-field name="workTrialReportId"/>
+			</field-group>
+			
+			<field-group style="span6 no-left-margin no-widget-header boder-all-profile work-stat-text-header margin-top20">
+				<sort-field name="eduProcess"/>
+				<sort-field name="workResult"/>
+				<sort-field name="advAndDis"/>
+				<sort-field name="workOrientation"/>
+			</field-group>
+			
+			<field-group style="span6 no-widget-header boder-all-profile proposal-text-header margin-top20">
+				<sort-field name="eduProposal"/>
+				<sort-field name="policyProposal"/>
+				<sort-field name="workProposal"/>
+			</field-group>
+			
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile self-rate-text-header margin-top20">
+				<sort-field name="ruleComplianceSeft"/>
+				<sort-field name="complWorkRateSeft"/>
+				<sort-field name="interCommunicationSeft"/>
+				<sort-field name="learningCapabilitySeft"/>
+				<sort-field name="exterCommunicationSeft"/>
+			</field-group>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile leader-rate-text-header margin-top20"> 
+				<sort-field name="ruleComplianceLeader"/>
+				<sort-field name="complWorkRateLeader"/>
+				<sort-field name="interCommunicationLeader"/>
+				<sort-field name="learningCapabilityLeader"/>
+				<sort-field name="exterCommunicationLeader"/>
+			</field-group>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile leader-proposal-text-header margin-top20">
+				<sort-field name="leaderRatingResultId"/>
+				<sort-field name="assignedTask"/>
+				<sort-field name="futureEdu"/>
+				<sort-field name="requiredOther"/>
+				<sort-field name="leaderRatingResultId"/>
+			</field-group>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile hrm-rate-text-header margin-top20">
+				<sort-field name="hrmRatingResultId"/>
+			</field-group>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile ceo-rate-text-header margin-top20">
+				<sort-field name="resultId"/>
+				<sort-field name="extTime"></sort-field>
+			</field-group>
+			<field-group style="span12 no-left-margin no-widget-header">
+				<sort-field name="submit"/>
+			</field-group>
+		</sort-order>
+	</form>
+	
+	<form target="ConfirmExtTimeResult" name="WorkTrialHRMRateResult" type="single">
+		<actions>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/recruitment/prepareRateCEOWorkTrial.groovy" />
+			<set field="description" from-field="empl.description"/>
+			<set field="fromDate" from-field="empl.fromDate"/>
+			<set field="thruDate" from-field="empl.thruDate"/>
+			<set field="partyIdFrom" from-field="empl.partyIdFrom"/>
+			<set field="eduProcess" from-field="workTrialReport.eduProcess" />
+			<set field="workResult" from-field="workTrialReport.workResult"/>
+			<set field="advAndDis" from-field="workTrialReport.advAndDis"/>
+			<set field="workOrientation" from-field="workTrialReport.workOrientation"/>
+			<set field="workProposal" from-field="workTrialReport.workProposal"/>
+			<set field="policyProposal" from-field="workTrialReport.policyProposal"/>
+			<set field="eduProposal" from-field="workTrialReport.eduProposal"/>
+			<set field="ruleComplianceSeft" from-field="workTrialReport.ruleCompliance" />
+			<set field="complWorkRateSeft" from-field="workTrialReport.complWorkRate" />
+			<set field="interCommunicationSeft" from-field="workTrialReport.interCommunication" />
+			<set field="learningCapabilitySeft" from-field="workTrialReport.learningCapability" />
+			<set field="exterCommunicationSeft" from-field="workTrialReport.exterCommunication" />
+			<set field="workTrialReportId" from-field="workTrialReport.workTrialReportId" />
+			<set field="ruleComplianceLeader" from-field="workTrialLeaderRating.ruleCompliance" />
+			<set field="complWorkRateLeader" from-field="workTrialLeaderRating.complWorkRate" />
+			<set field="interCommunicationLeader" from-field="workTrialLeaderRating.interCommunication" />
+			<set field="learningCapabilityLeader" from-field="workTrialLeaderRating.learningCapability" />
+			<set field="exterCommunicationLeader" from-field="workTrialLeaderRating.exterCommunication" />
+			<set field="assignedTask" from-field="workTrialLeaderRating.assignedTask" />
+			<set field="futureEdu" from-field="workTrialLeaderRating.futureEdu" />
+			<set field="requiredOther" from-field="workTrialLeaderRating.requiredOther" />
+			<set field="leaderRatingResultId" from-field="workTrialLeaderRating.resultId"/>
+			<set field="hrmRatingResultId" from-field="workTrialHrmRating.resultId"/>
+			<set field="extTime" from-field="workTrialHrmRating.extTime"/>
+		</actions>
+		<field name="workTrialReportId" title="${uiLabelMap.WorkTrialReportId}">
+			<display></display>
+		</field>
+		<field name="partyId" title="${uiLabelMap.Applicant}">
+			<display-entity entity-name="Person" description="${firstName} ${middleName} ${lastName}">
+			</display-entity>
+		</field>
+		<field name="description" title="${uiLabelMap.Position}">
+			<display />
+		</field>
+		<field name="fromDate" title="${uiLabelMap.fromDate}">
+			<display />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.thruDate}">
+			<display />
+		</field>
+		<field name="partyIdFrom" title="${uiLabelMap.Department}">
+			<display-entity entity-name="PartyGroup" description="${groupName}" key-field-name="partyId">
+			</display-entity>
+		</field>
+		<field name="eduProcess" title="${uiLabelMap.EduProcess}">
+			<display></display>
+		</field>
+		<field name="workResult" title="${uiLabelMap.WorkResult}">
+			<display></display>
+		</field>
+		<field name="advAndDis" title="${uiLabelMap.AdvAndDis}">
+			<display></display>
+		</field>
+		<field name="workOrientation" title="${uiLabelMap.WorkOrientation}">
+			<display></display>
+		</field>
+		<field name="workProposal" title="${uiLabelMap.WorkProposal}">
+			<display></display>
+		</field>
+		<field name="policyProposal" title="${uiLabelMap.PolicyProposal}">
+			<display></display>
+		</field>
+		<field name="eduProposal" title="${uiLabelMap.EduProposal}">
+			<display></display>
+		</field>
+		<field name="ruleComplianceSeft" title="${uiLabelMap.RuleCompliance}">
+			<display-entity description="${description}" entity-name="Evaluation" key-field-name="evalId" />
+		</field>
+		<field name="complWorkRateSeft" title="${uiLabelMap.ComplWorkRate}">
+			<display-entity description="${description}" entity-name="Evaluation" key-field-name="evalId"/>
+		</field>
+		<field name="interCommunicationSeft" title="${uiLabelMap.InterCommunication}">
+			<display-entity description="${description}" entity-name="Evaluation" key-field-name="evalId"/>
+		</field>
+		<field name="learningCapabilitySeft" title="${uiLabelMap.LearningCapability}">
+			<display-entity description="${description}" entity-name="Evaluation" key-field-name="evalId"/>
+		</field>
+		<field name="exterCommunicationSeft" title="${uiLabelMap.ExterCommunication}">
+			<display-entity description="${description}" entity-name="Evaluation" key-field-name="evalId"/>
+		</field>
+		
+		<field name="ruleComplianceLeader" title="${uiLabelMap.RuleCompliance}">
+			<display-entity description="${description}" entity-name="Evaluation" key-field-name="evalId"/>
+		</field>
+		<field name="complWorkRateLeader" title="${uiLabelMap.ComplWorkRate}">
+			<display-entity description="${description}" entity-name="Evaluation" key-field-name="evalId"/>
+		</field>
+		<field name="interCommunicationLeader" title="${uiLabelMap.InterCommunication}">
+			<display-entity description="${description}" entity-name="Evaluation" key-field-name="evalId"/>
+		</field>
+		<field name="learningCapabilityLeader" title="${uiLabelMap.LearningCapability}">
+			<display-entity description="${description}" entity-name="Evaluation" key-field-name="evalId"/>
+		</field>
+		<field name="exterCommunicationLeader" title="${uiLabelMap.ExterCommunication}">
+			<display-entity description="${description}" entity-name="Evaluation" key-field-name="evalId"/>
+		</field>
+		<field name="assignedTask" title="${uiLabelMap.AssignedTask}">
+			<display></display>
+		</field>
+		<field name="futureEdu" title="${uiLabelMap.FutureEdu}">
+			<display></display>
+		</field>
+		<field name="requiredOther" title="${uiLabelMap.RequiredOther}">
+			<display></display>
+		</field>
+		
+		<field name="leaderRatingResultId" title="${uiLabelMap.RatingResult}" >
+			<display-entity description="${description}" entity-name="ResultItem" key-field-name="resultId"></display-entity>
+		</field>
+		
+		<field name="hrmRatingResultId" title="${uiLabelMap.RatingResult}" id-name="hrmResult">
+			<display-entity description="${description}" entity-name="ResultItem" key-field-name="resultId"></display-entity>
+		</field>
+		
+		<field name="extTime" title="${uiLabelMap.ExtTime}">
+			<display></display>
+		</field>
+		
+		<field name="extTimeConfirm" title="${uiLabelMap.ExtTimeConfirm}" use-when="${userLogin.partyId} == ${partyId}">
+			<drop-down>
+				<option key="DONGY" description="Đồng ý"></option>
+				<option key="KHONGDONGY" description="Không đồng ý"></option>
+			</drop-down>
+		</field>
+		
+		<field name="submit" title="${uiLabelMap.CommonSubmit}" widget-style="btn btn-small btn-info" use-when="${userLogin.partyId} == ${partyId}">
+			<submit/>
+		</field>
+		
+		<sort-order>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile appl-text-header margin-top20">
+				<sort-field name="partyId"/>
+				<sort-field name="description"/>
+				<sort-field name="fromDate"/>
+				<sort-field name="thruDate"/>
+				<sort-field name="partyIdFrom"/>
+				<sort-field name="workTrialReportId"/>
+			</field-group>
+			
+			<field-group style="span6 no-left-margin no-widget-header boder-all-profile work-stat-text-header margin-top20">
+				<sort-field name="eduProcess"/>
+				<sort-field name="workResult"/>
+				<sort-field name="advAndDis"/>
+				<sort-field name="workOrientation"/>
+			</field-group>
+			
+			<field-group style="span6 no-widget-header boder-all-profile proposal-text-header margin-top20">
+				<sort-field name="eduProposal"/>
+				<sort-field name="policyProposal"/>
+				<sort-field name="workProposal"/>
+			</field-group>
+			
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile self-rate-text-header margin-top20">
+				<sort-field name="ruleComplianceSeft"/>
+				<sort-field name="complWorkRateSeft"/>
+				<sort-field name="interCommunicationSeft"/>
+				<sort-field name="learningCapabilitySeft"/>
+				<sort-field name="exterCommunicationSeft"/>
+			</field-group>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile leader-rate-text-header margin-top20"> 
+				<sort-field name="ruleComplianceLeader"/>
+				<sort-field name="complWorkRateLeader"/>
+				<sort-field name="interCommunicationLeader"/>
+				<sort-field name="learningCapabilityLeader"/>
+				<sort-field name="exterCommunicationLeader"/>
+			</field-group>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile leader-proposal-text-header margin-top20">
+				<sort-field name="leaderRatingResultId"/>
+				<sort-field name="assignedTask"/>
+				<sort-field name="futureEdu"/>
+				<sort-field name="requiredOther"/>
+				<sort-field name="leaderRatingResultId"/>
+			</field-group>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile hrm-rate-text-header margin-top20">
+				<sort-field name="hrmRatingResultId"/>
+			</field-group>
+			<field-group style="span12 no-left-margin no-widget-header boder-all-profile ext-time-text-header margin-top20">
+				<sort-field name="extTime"/>
+				<sort-field name="extTimeConfirm"/>
+			</field-group>
+			 <field-group style="span12 no-left-margin no-widget-header submit-button">
+				<sort-field name="submit"/>
+			</field-group>
+		</sort-order>
+	</form> -->
+	
+	<!--=================================================/ Work Trial=================================== -->
+	<!-- 	Recruiment Employee PG -->
+	
+	<!-- <form name="FindSalesmanPg" type="single" target="FindSalesmanPg" 
+		header-row-style="header-row" default-table-style="basic-table">
+		<field name="workTrialProposalId" title="${uiLabelMap.WorkTrialProposalId}">
+			<text-find></text-find>
+		</field>
+		<field name="applicantId" title="${uiLabelMap.ApplyingPartyId}">
+			<text-find></text-find>
+		</field>
+		<field name="emplPositionTypeId" title="${uiLabelMap.EmployeePositionTypeId}">
+			<drop-down allow-empty="false">
+                <entity-options description="${description}" entity-name="EmplPositionType" key-field-name="emplPositionTypeId">
+                	<entity-constraint name="emplPositionTypeId" operator="equals" value="SALESMAN" />
+                </entity-options>
+            	<entity-options description="${description}" entity-name="EmplPositionType" key-field-name="emplPositionTypeId">
+                	<entity-constraint name="emplPositionTypeId" operator="equals" value="PROMOTION_GIRL" />
+                </entity-options>
+            </drop-down>
+		</field>
+		<field name="statusId" title="${uiLabelMap.CommonStatus}">
+			<drop-down>
+				<entity-options description="${description}" entity-name="StatusItem">
+					<entity-constraint name="statusTypeId" operator="equals" value="APPR_WT_STATUS"/>
+					<entity-order-by field-name="sequenceId"/>
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.ProbationFrom}">
+			<date-find/>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form> -->
+	
+	<!-- <form name="ListSalesmanPgApp" type="list" list-name="listIt" odd-row-style="alternate-row" paginate-target="FindSalesmanPg" 
+		header-row-style="header-row-2"  default-table-style="table table-hover table-striped table-bordered dataTable">
+		<actions>								
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/recruitment/additionalCondSalesmanPGList.groovy"/>
+			<service service-name="performFind" result-map="result" result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="parameters" />
+				<field-map field-name="entityName" value="WorkTrialProposalAndApplicantAndPersonOfSales" />
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize"/>
+				<field-map field-name="orderBy" value="-fromDate"/>
+				<field-map field-name="noConditionFind" value="Y"/>
+			</service>
+		</actions>		
+		
+		<field name="workTrialProposalId" title="${uiLabelMap.WorkTrialProposalId}">
+			<hyperlink target="ProposeEmployeePg" description="${workTrialProposalId}">
+				<parameter param-name="workTrialProposalId"/>
+			</hyperlink>
+		</field>
+		<field name="applicantId" title="${uiLabelMap.ApplyingPartyId}">
+			<display-entity entity-name="Person" key-field-name="partyId" description="${lastName} ${middleName} ${firstName}">
+       			<sub-hyperlink target="EmployeeProfile" description="${applicantId}">
+       				<parameter param-name="partyId" from-field="applicantId"/>
+       			</sub-hyperlink>
+       		</display-entity>
+		</field>	
+		<field name="workingPartyId" title="${uiLabelMap.OrganizationManage}">
+	    	<display-entity entity-name="PartyGroup" key-field-name="partyId" description="${groupName}"></display-entity>
+	    </field>
+	    
+		<field name="emplPositionTypeId" title="${uiLabelMap.EmplPositionTypeId}" map-name="emplPos">
+			<display-entity entity-name="EmplPositionType" description="${description}"></display-entity>
+		</field>
+		<field name="salary">
+	    	<display></display>
+	    </field>
+		<field name="allowance" title="${uiLabelMap.Allowance}"><display></display></field>
+	    <field name="trialSalaryRate" title="${uiLabelMap.RateSalaryWorkTrial}"><display></display></field>
+	    <field name="fromDate" title="${uiLabelMap.ProbationFrom}">
+	    	<display type="date"></display>
+	    </field>
+	    <field name="trialTime" title="${uiLabelMap.TimeOfWorkTrial}"><display></display> </field>
+	    
+		<field name="statusId" title="${uiLabelMap.CommonStatus}">
+			<display-entity entity-name="StatusItem" description="${description}" key-field-name="statusId"></display-entity>
+		</field>
+		
+		<field name="applicationDate" title="${uiLabelMap.ApplicationDate}">
+			<display type="date"></display>
+		</field>
+		
+		<field name="_editLink" title=" " use-when="${groovy:}">
+			<hyperlink target="ProfileEmployeePG" description="${groovy: if(statusId==&quot;IWT_INIT&quot;) return uiLabelMap.CommonEdit; else return uiLabelMap.CommonView} ">
+				<parameter param-name="partyId" from-field="applicantId"/>
+				<parameter param-name="workTrialProposalId" from-field="workTrialProposalId"/>
+			</hyperlink>
+		</field>
+	</form> -->
+	
+	<form name="EditSalesmanPG" type="single" target="UpdateSalesmanPG" 
+		header-row-style="header-row" default-table-style="basic-table">
+	    <actions>
+	        <!-- <entity-one entity-name="WorkTrialProposal" value-field="workTrialProposal"></entity-one> -->
+	        <entity-one entity-name="Person" value-field="person" auto-field-map="true">
+	        	<!-- <field-map field-name="partyId" from-field="employmentApp.applyingPartyId"/> -->
+	        </entity-one>
+	        <script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/recruitment/getBankBrandNameVn.groovy"/>	    	
+	    </actions>
+	    <alt-target use-when="person==null" target="CreateSalesmanPG"/>
+	    <!-- <field name="partyId" use-when="Person!=null" 
+	    	title="${uiLabelMap.EmployeePGId}" tooltip="${uiLabelMap.CommonNotModifRecreat}"><display/></field> -->
+	    <field name="telContactmechId">
+	    	<hidden/>
+	    </field>
+	    <field name="postalAddressContactmechId">
+	    	<hidden/>
+	    </field>
+	    <field name="orgId">
+	    	<hidden/>
+	    </field>	
+	    <field name="partyId" use-when="person!=null" title="${uiLabelMap.EmployeePGId}">
+	    	<display></display>
+	    </field>
+	    <field name="firstName" title="${uiLabelMap.PartyFirstName}" 
+	    	title-style="asterisk">
+	    	<text size="40" maxlength="60"/>
+    	</field>
+	    <field name="lastName" title="${uiLabelMap.PartyLastName}" 
+	    	title-style="asterisk">
+	    	<text size="40" maxlength="60"/>
+    	</field>
+        <field name="gender">
+            <drop-down allow-empty="true">
+                <option key="M" description="${uiLabelMap.CommonMale}"/>
+                <option key="F" description="${uiLabelMap.CommonFemale}"/>
+            </drop-down>
+        </field>
+        <field name="recruitmentTypeId" title="${uiLabelMap.RecruitmentType}" title-style="asterisk">
+			<drop-down>
+				<entity-options description="${description}"
+					entity-name="RecruitmentType"></entity-options>
+			</drop-down>
+		</field>
+        <field name="emplPositionTypeId" title="${uiLabelMap.EmployeePositionTypeId}" title-style="asterisk">
+            <drop-down allow-empty="false">
+                <entity-options description="${description}" entity-name="EmplPositionType" key-field-name="emplPositionTypeId">
+                	<entity-constraint name="emplPositionTypeId" operator="equals" value="SALESMAN" />
+                </entity-options>
+            	<entity-options description="${description}" entity-name="EmplPositionType" key-field-name="emplPositionTypeId">
+                	<entity-constraint name="emplPositionTypeId" operator="equals" value="PROMOTION_GIRL" />
+                </entity-options>
+            </drop-down>
+        </field>
+        <field name="fromDate">
+        	<date-time type="date"/>
+        </field>
+        <field name="birthDate"><date-time type="date"/></field>
+        <field name="address" title="${uiLabelMap.PGAddress}" title-style="asterisk"  
+        	 map-name="context">
+        	<text size="40" maxlength="60"/>
+       	</field>
+        <field name="city">
+        	<drop-down allow-empty="true">
+        		<entity-options description="${geoName}" entity-name="Geo" key-field-name="geoId">
+        		</entity-options>
+        	</drop-down>
+        </field>
+        <field name="countryGeoId" required-field="true"  widget-style="required">
+        	<drop-down allow-empty="true" >
+        		<entity-options description="${geoName}" entity-name="Geo" key-field-name="geoId">
+        			<entity-constraint name="geoTypeId" operator="equals" value="COUNTRY"/>
+        		</entity-options>
+        	</drop-down>
+        </field>
+        <!-- <field name="idAddress"><hidden/></field> -->
+        <field name="trainingLevel" title="${uiLabelMap.TrainingLevel}">
+        	<drop-down allow-empty="true">
+        		<entity-options description="${description}" entity-name="TrainingLevel" 
+        			key-field-name="trainingLevelId"></entity-options>
+        	</drop-down>
+        </field>
+        <field name="experience" title="${uiLabelMap.Experience}"><textarea  cols="10" rows="4"/></field>
+        <field name="idNumber" title="${uiLabelMap.IdNumber}" title-style="asterisk"><text size="40" maxlength="60"/></field>
+        <field name="phoneNumber" title="${uiLabelMap.PhoneNumber}" title-style="asterisk" ><text size="25" maxlength="60"/></field>
+        <!-- <field name="idPhone"><hidden/></field> -->
+        <field name="bankAcountNumberCurr"><hidden/></field>
+        <field name="bankIdCurr"><hidden/></field>
+        <field name="bankBrandIdCurr"><hidden/></field>
+        <field name="bankAcountNumber" title="${uiLabelMap.CardId}"><text size="40" maxlength="60"/></field>
+        <field name="bankId" title="${uiLabelMap.BankName}">
+        	<drop-down allow-empty="true">
+        		<entity-options description="${description}" entity-name="BankVn" key-field-name="bankId">
+        			<entity-order-by field-name="description"/>
+        		 </entity-options>
+        	</drop-down>
+        </field>
+         <field name="bankBrandId" title="${uiLabelMap.BrandName}">
+         	<drop-down allow-empty="true">
+				<entity-options description="${brandName}" entity-name="BankBrandVn" key-field-name="bankBrandId"></entity-options>
+			</drop-down>
+         </field>
+         <field name="size" title="${uiLabelMap.Size}">
+         	<drop-down allow-empty="true">
+         		<option key="S" description="S"/>
+         		<option key="M" description="M"/>
+         		<option key="L" description="L"/>
+         		<option key="XL" description="XL"/>
+         		<option key="XXL" description="XXL"/>
+         	</drop-down>
+         </field>
+         
+        <field name="submitButton" title="${uiLabelMap.CommonCreate}"
+			widget-style="btn btn-small btn-primary" use-when="person==null">
+			<submit button-type="button" image-location="icon-ok"  />
+		</field>
+		 <field name="submitButton" title="${uiLabelMap.CommonUpdate}"
+			widget-style="btn btn-small btn-primary" use-when="person!=null">
+			<submit button-type="button" image-location="icon-ok"  />
+		</field>
+        <sort-order>
+            <field-group style="span6 no-widget-header no-left-margin boder-all-profile ">
+                <sort-field name="partyId"/>
+                <sort-field name="lastName"/>
+                <sort-field name="firstName"/>
+                <sort-field name="recruitmentTypeId"/>
+                <sort-field name="emplPositionTypeId"/>
+                <sort-field name="fromDate"/>
+                <sort-field name="probationFrom"/>
+                <sort-field name="gender"/>
+                <sort-field name="birthDate"/>
+                <sort-field name="address"/>
+                <sort-field name="countryGeoId"/>
+                <sort-field name="city"/>
+            </field-group>
+            <field-group style="span6 no-widget-header  boder-all-profile ">
+            	<sort-field name="trainingLevel"/>	
+                <sort-field name="experience"/>
+                <sort-field name="idNumber"/>
+                <sort-field name="phoneNumber"/>
+                <sort-field name="bankAcountNumber"/>
+                <sort-field name="bankId"/>
+                <sort-field name="bankBrandId"/>
+                <sort-field name="size"/>
+            </field-group>
+			<field-group style="span12 no-widget-header align-center">
+			    <sort-field name="submitButton"/>
+			</field-group>             
+       </sort-order>
+	</form>
+	<!--===================== proposal saleman/PG to ASM approval ================================-->
+	
+	<!-- <form name="ProposeEmployeePg" type="single"  
+		target="CreateWorkTrialProposal" header-row-style="header-row" default-table-style="basic-table"
+		default-map-name="workTrialProposal">
+	    <actions>
+	    	<set field="workingParty" value="${groovy: com.olbius.util.PartyUtil.getDepartmentOfEmployee(delegator, userLogin.partyId)}"/>
+			<set field="workingPartyId" from-field="workingParty.workingPartyId"/>	    		    	
+	    </actions>
+	    <field name="jobRequestId" title="${uiLabelMap.JobRequestId}" id-name="ProposeEmployeePg_jobRequestId" >
+	    	<lookup target-form-name="LookupJobRequestSalesmanPG"></lookup>
+	    </field>
+	    <field name="applicantIdList" title="${uiLabelMap.Applicant}" widget-style="height100">
+			<drop-down allow-multiple="true">
+				<option key=""/>
+				
+			</drop-down> 
+		</field>
+		
+		<field name="workingPartyId" title="${uiLabelMap.OrganizationalUnit}">
+			<display-entity description="${groupName}" entity-name="LegalOrganization" key-field-name="partyId">
+			</display-entity>
+		</field>
+		<field name="salary" title="${uiLabelMap.Salary}">
+			<text ></text>
+		</field>
+		<field name="allowance" title="${uiLabelMap.Allowance}">
+			<text ></text>
+		</field>
+		<field name="trialSalaryRate" title="${uiLabelMap.TrailSalaryRate}">
+			<text mask="99.99"></text>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.FromDate}">
+			<date-time/>
+		</field>
+		<field name="trialTime" title="${uiLabelMap.TrialTime}">
+			<text></text>
+		</field>
+		<field name="description" title="${uiLabelMap.Description}">
+			<text/>
+		</field>
+		<field name="submit" title="${uiLabelMap.CommonSubmit}" widget-style="btn btn-small btn-info">
+			<submit/>
+		</field>
+	</form> -->
+	
+	<!-- ====================== check and approval salesman/PG candidate ======================== -->
+	<!-- <form name="CheckSaleManPG" type="multi" target="UpdateWorkTrialProposal" list-name="listCheckRecruiment" 
+		separate-columns="false" default-table-style="table table-hover table-striped table-bordered dataTable" group-columns="false">	    	   
+	   
+	    <actions>
+	    	<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/recruitment/getCurrSttSMPgRecToApproval.groovy"/>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/recruitment/getSalessupList.groovy"/>
+	    	<entity-condition entity-name="WorkTrialProposalAndApplicantAndPersonOfSales" list="listCheckRecruiment">
+	        	<condition-list combine="and">
+		        	<condition-expr field-name="statusId" operator="in" from-field="statusIdCondList" />
+		        	<condition-expr field-name="workingPartyId" operator="in" from-field="salessupList"/>
+	        	</condition-list>
+	        </entity-condition>
+		</actions>						        
+	    <field name="ntfId">
+	    	<hidden value="${parameters.ntfId}"/>
+	    </field>
+	    <field name="workTrialProposalId">
+	    	<display></display>
+	    </field>
+	    <field name="applicantId" title="${uiLabelMap.FullName}">
+	    	<display-entity entity-name="Person" key-field-name="partyId" description="${firstName} ${middleName} ${lastName}"></display-entity>
+	    </field>
+	    <field name="workingPartyId" title="${uiLabelMap.OrganizationManage}">
+	    	<display-entity entity-name="PartyGroup" key-field-name="partyId" description="${groupName}"></display-entity>
+	    </field>
+		<field name="trainingLevel">
+			<display-entity entity-name="TrainingLevel" 
+				key-field-name="trainingLevelId" description="${description}"></display-entity> 
+		</field>
+		<field name="experience" title="${uiLabelMap.Experience}"><display></display> </field>
+		<field name="contactNumber" title="${uiLabelMap.PhoneNumber}"><display></display> </field>
+		<field name="emplPositionTypeId" title="${uiLabelMap.HROlbiusEmplPositionId}">
+			<display-entity entity-name="EmplPositionType" description="${description}"></display-entity>
+		</field>
+		<field name="salary"><display></display></field>
+		<field name="allowance" title="${uiLabelMap.Allowance}">
+			<display></display>
+		</field>
+		<field name="trialSalaryRate" title="${uiLabelMap.RateSalaryWorkTrial}"><display/></field>
+		<field name="fromDate" title="${uiLabelMap.ProbationFrom}">
+			<display type="date"></display>
+		</field>
+		<field name="trialTime" title="${uiLabelMap.TimeOfWorkTrial}  ${statusEmplApp.statusTypeId}">
+			<display></display>
+		</field>
+		
+		<field name="statusId" title="${uiLabelMap.CommonStatus}">
+		     <drop-down allow-empty="false" current="selected">
+		         <entity-options description="${description}" entity-name="StatusItem" key-field-name="statusId">		         	
+		             <entity-constraint name="statusTypeId" operator="equals" value="APPR_WT_STATUS"/>
+		             <entity-constraint name="statusId" operator="not-equals" env-name="emplAppStatusId"/>
+		         </entity-options>
+		     </drop-down>
+		</field>
+		<field name="description" title="${uiLabelMap.NoteOfCheck}">
+			<text size="40" maxlength="60"></text>
+		</field>
+		<field name="_rowSubmit" title="${uiLabelMap.CommonSelect}">
+			<hidden value="Y" />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.HREmplApproval}"
+			widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-ok"/>
+		</field>
+	</form> -->
+	
+	<form name="NewRecruitmentSalesmanPG" type="multi" default-table-style="table table-hover table-striped table-bordered dataTable" 
+		target="ApprovalRecruitmentSalesmanPG" group-columns="false" separate-columns="true" list-name="listIt" >
+		<actions>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/recruitment/getEmplRestrictCondition.groovy"/>
+			<set field="nowTimestamp" value="${groovy: import org.ofbiz.base.util.UtilDateTime; return UtilDateTime.nowTimestamp();}" type="Timestamp"/>
+			<set field="monthBegin" value="${groovy: import org.ofbiz.base.util.UtilDateTime; return UtilDateTime.getMonthStart(nowTimestamp, timeZone, locale);}"/>			
+			<set field="monthEnd" value="${groovy: import org.ofbiz.base.util.UtilDateTime; return UtilDateTime.getMonthEnd(nowTimestamp, timeZone, locale);}" />
+			<set field="parameters.fromDate_fld0_op" value="greaterThanEqualTo"/>
+			<set field="parameters.fromDate_fld1_op" value="lessThanEqualTo"/>			
+			<set field="parameters.fromDate_fld0_value" from-field="monthBegin"/>
+			<set field="parameters.fromDate_fld1_value" from-field="monthEnd"/>
+			<service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="EmploymentAndEmplPosAndFFSalesmanPg"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+		</actions>
+		<row-actions>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/recruitment/getStatusSalesmanPGrecruitment.groovy"/>
+		</row-actions>
+		<field name="partyIdFrom">
+			<hidden/>
+		</field>
+		<field name="partyIdTo">
+			<hidden/>
+		</field>
+		<field name="roleTypeIdFrom">
+			<hidden/>
+		</field>
+		<field name="roleTypeIdTo">
+			<hidden/>
+		</field>
+		<field name="emplPartyId" title="${uiLabelMap.EmployeeName}">
+			<display-entity entity-name="Person" description="${lastName} ${middleName} ${firstName}" key-field-name="partyId">
+				<sub-hyperlink target="EmployeeProfile" description="${emplPartyId}">
+					<parameter param-name="partyId" from-field="emplPartyId"/>	
+				</sub-hyperlink>
+			</display-entity>
+		</field>
+		<field name="interalOrgId" title="${uiLabelMap.OrganizationManage}">
+			<display-entity entity-name="PartyGroup" description="${groupName}" key-field-name="partyId"></display-entity>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.CommonFromDate}">
+			<display type="date"></display>
+		</field>
+		<field name="thruDate" title="${uiLabelMap.CommonThruDate}" red-when="never">
+			<display type="date"></display>
+		</field>
+		<field name="emplPositionId" title="${uiLabelMap.HROlbiusEmplPositionId}">
+            <hyperlink also-hidden="true" description="${emplPositionId}" target="emplPositionView" >
+                <parameter param-name="emplPositionId"/>
+            </hyperlink>
+        </field>
+		<field name="emplPositionTypeId" title="${uiLabelMap.EmplPositionTypeId}">
+			<display-entity entity-name="EmplPositionType" description="${description}"></display-entity>
+		</field>
+			<field name="temporaryFlag">
+       		<display></display>
+       	</field>
+       	<field name="exemptFlag">
+       		<display></display>
+       	</field>
+       	<field name="salaryFlag">
+       		<display></display>
+       	</field>
+       	<field name="fulltimeFlag">
+       		<display></display>
+       	</field>
+       	<field name="statusId" title="${uiLabelMap.CommonStatus}">
+       		<drop-down allow-empty="false" >
+       			<option key="APPROVAL" description="${uiLabelMap.HREmplApproval}"/>
+       			<option key="NOT_APPROVAL" description="${uiLabelMap.NotApproved}"/>
+       		</drop-down>
+       	</field>
+       	<field name="submitButton" title="${uiLabelMap.HREmplApproval}"
+			widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-ok"/>
+		</field>
+	</form>
+	
+	<form name="SummaryListSalesmanPGInMonth" type="list" default-table-style="table table-hover table-striped table-bordered dataTable" 
+		target="SummaryListSalesmanPGInMonth" group-columns="false" separate-columns="true" list-name="listIt" >
+		<actions>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/recruitment/getEmplRestrictCondition.groovy"/>
+			<set field="nowTimestamp" value="${groovy: import org.ofbiz.base.util.UtilDateTime; return UtilDateTime.nowTimestamp();}" type="Timestamp"/>
+			<set field="monthBegin" value="${groovy: import org.ofbiz.base.util.UtilDateTime; return UtilDateTime.getMonthStart(nowTimestamp, timeZone, locale);}"/>			
+			<set field="monthEnd" value="${groovy: import org.ofbiz.base.util.UtilDateTime; return UtilDateTime.getMonthEnd(nowTimestamp, timeZone, locale);}" />
+			<set field="parameters.fromDate_fld0_op" value="greaterThanEqualTo"/>
+			<set field="parameters.fromDate_fld1_op" value="lessThanEqualTo"/>			
+			<set field="parameters.fromDate_fld0_value" from-field="monthBegin"/>
+			<set field="parameters.fromDate_fld1_value" from-field="monthEnd"/>
+			<service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="EmploymentAndEmplPosAndFFSalesmanPg"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+		</actions>
+		<row-actions>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/recruitment/getStatusSalesmanPGrecruitment.groovy"/>
+		</row-actions>
+		<field name="partyIdFrom">
+			<hidden/>
+		</field>
+		<field name="partyIdTo">
+			<hidden/>
+		</field>
+		<field name="roleTypeIdFrom">
+			<hidden/>
+		</field>
+		<field name="roleTypeIdTo">
+			<hidden/>
+		</field>
+		<field name="emplPartyId" title="${uiLabelMap.EmployeeName}">
+			<display-entity entity-name="Person" description="${lastName} ${middleName} ${firstName}" key-field-name="partyId">
+				<sub-hyperlink target="EmployeeProfile" description="${emplPartyId}">
+					<parameter param-name="partyId" from-field="emplPartyId"/>	
+				</sub-hyperlink>
+			</display-entity>
+		</field>
+		<field name="interalOrgId" title="${uiLabelMap.OrganizationManage}">
+			<display-entity entity-name="PartyGroup" description="${groupName}" key-field-name="partyId"></display-entity>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.CommonFromDate}">
+			<display type="date"></display>
+		</field>
+		<field name="thruDate" title="${uiLabelMap.CommonThruDate}" red-when="never">
+			<display type="date"></display>
+		</field>
+		<field name="emplPositionId" title="${uiLabelMap.HROlbiusEmplPositionId}">
+            <hyperlink also-hidden="true" description="${emplPositionId}" target="emplPositionView" >
+                <parameter param-name="emplPositionId"/>
+            </hyperlink>
+        </field>
+		<field name="emplPositionTypeId" title="${uiLabelMap.EmplPositionTypeId}">
+			<display-entity entity-name="EmplPositionType" description="${description}"></display-entity>
+		</field>
+			<field name="temporaryFlag">
+       		<display></display>
+       	</field>
+       	<field name="exemptFlag">
+       		<display></display>
+       	</field>
+       	<field name="salaryFlag">
+       		<display></display>
+       	</field>
+       	<field name="fulltimeFlag">
+       		<display></display>
+       	</field>
+       	<field name="statusId" title="${uiLabelMap.CommonStatus}">
+       		<display></display>
+       	</field>
+       	
+	</form>
+	
+	<form name="ListEmployeePGSalesMan" type="list" list-name="listIt" odd-row-style="alternate-row" 
+		header-row-style="header-row-2" target="ListEmployeePGSalesMan" 
+		default-table-style="table table-hover table-striped table-bordered dataTable">		
+		<actions>	
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/recruitment/getEmplRestrictCondition.groovy"/>		
+			<service service-name="performFind" result-map="result" result-map-list="listIt">
+                <field-map field-name="inputFields" from-field="parameters"/>
+                <field-map field-name="entityName" value="EmploymentAndEmplPosAndFFSalesmanPg"/>
+                <field-map field-name="viewIndex" from-field="viewIndex"/>
+                <field-map field-name="viewSize" from-field="viewSize"/>
+                <field-map field-name="noConditionFind" value="Y"/>
+            </service>
+		</actions>
+		<field name="emplPartyId" title="${uiLabelMap.EmployeeName}">
+			<display-entity entity-name="Person" description="${lastName} ${middleName} ${firstName}" key-field-name="partyId">
+				<sub-hyperlink target="EmployeeProfile" description="${emplPartyId}">
+					<parameter param-name="partyId" from-field="emplPartyId"/>	
+				</sub-hyperlink>
+			</display-entity>
+		</field>
+		<field name="interalOrgId" title="${uiLabelMap.OrganizationManage}">
+			<display-entity entity-name="PartyGroup" description="${groupName}" key-field-name="partyId"></display-entity>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.CommonFromDate}" red-when="never">
+			<display type="date"></display>
+		</field>
+		<field name="thruDate" title="${uiLabelMap.CommonThruDate}" red-when="never">
+			<display type="date"></display>
+		</field>
+		<field name="emplPositionId" title="${uiLabelMap.HROlbiusEmplPositionId}" widget-style="">
+            <hyperlink also-hidden="false" description="${emplPositionId}" target="emplPositionView">
+                <parameter param-name="emplPositionId"/>
+            </hyperlink>
+        </field>
+		<field name="emplPositionTypeId" title="${uiLabelMap.EmplPositionTypeId}">
+			<display-entity entity-name="EmplPositionType" description="${description}"></display-entity>
+		</field>
+			<field name="temporaryFlag">
+       		<display></display>
+       	</field>
+       	<field name="exemptFlag">
+       		<display></display>
+       	</field>
+       	<field name="salaryFlag">
+       		<display></display>
+       	</field>
+       	<field name="fulltimeFlag">
+       		<display></display>
+       	</field>
+	</form>
+	
+	<!-- proposal salesman/PG to next level after checked-->
+	<!-- <form name="ProposalSalesmanPgAfterChecked" type="multi" target="updateSalManPGRecruimentStt" list-name="listIt"
+		default-table-style="table table-hover table-striped table-bordered dataTable" use-row-submit="true" group-columns="false">		
+		<actions>			
+	        <entity-condition entity-name="WorkTrialPropAndEmplAppAndPersonAndEmplPos" list="listIt">
+	        	<condition-list>
+	        		<condition-expr field-name="emplAppStatusId" operator="in" from-field="statusIdCondList"/>
+	        		<condition-expr field-name="referredByPartyId" operator="in" from-field="salessupList"/>
+	        	</condition-list>
+	        </entity-condition>
+	    </actions>
+	    <row-actions>
+	    	<script 
+	    		location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/recruitment/getCurrSttSMPgRecToProposal.groovy"/>
+	    </row-actions>	    
+	    <field name="workTrialProposalId" title="${uiLabelMap.ProposeId}">
+	    	<hidden/> 
+    	</field>
+    	<field name="applicationId" title="${uiLabelMap.ProposeId}">
+    		<display></display>
+    	</field>
+	    <field name="applyingPartyId" title="${uiLabelMap.EmployeePGId}" >
+			<hyperlink target="EmployeeProfile" description="${firstName} ${middleName} ${lastName} [${applyingPartyId}]">
+			    <parameter param-name="partyId" from-field="applyingPartyId"/>
+			</hyperlink>
+		</field>				
+		<field name="address1" title="${uiLabelMap.PGAddress}"><display></display></field>
+		<field name="trainingLevel">
+			<display-entity entity-name="TrainingLevel" 
+				key-field-name="trainingLevelId" description="${description}"></display-entity> 
+		</field>
+		<field name="experience" title="${uiLabelMap.Experience}"><display></display> </field>
+		<field name="contactNumber" title="${uiLabelMap.PhoneNumber}"><display></display> </field>
+		<field name="emplPositionId" title="${uiLabelMap.HROlbiusEmplPositionId}">
+			<display-entity entity-name="EmplPositionAndPositionType" description="${emplPositionId} [${description}]"></display-entity>
+		</field>
+		<field name="salary"><display></display></field>
+		<field name="allowance" title="${uiLabelMap.Allowance}">
+			<display></display>
+		</field>
+		<field name="trialSalaryRate" title="${uiLabelMap.RateSalaryWorkTrial}"><display/></field>
+		<field name="fromDate" title="${uiLabelMap.ProbationFrom}">
+			<display type="date"></display>
+		</field>
+		<field name="trialTime" title="${uiLabelMap.TimeOfWorkTrial}">
+			<display></display>
+		</field>
+		<field name="description" title="${uiLabelMap.NoteOfCheck}">
+			<display></display> 
+		</field>
+		<field name="emplAppStatusId" title="${uiLabelMap.CommonStatus}">
+			<display-entity entity-name="StatusItem" description="${description}" key-field-name="statusId"></display-entity>
+		</field>
+		<field name="newStatusId">
+		     <hidden value="${statusProposalId}"/>
+		</field>
+		<field name="_rowSubmit" title="${uiLabelMap.CommonSelect}">
+			<check all-checked="true"></check>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.HRCommonProposal}" use-when="statusProposalId!=null"
+			widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>	
+	</form> -->
+	<!-- <form name="ReportListEmployeePGSalesMan" type="list" odd-row-style="alternate-row" 
+		header-row-style="header-row-2" list-name="listIt" default-table-style="table table-hover table-striped table-bordered dataTable" >
+		<actions>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/recruitment/getSalessupList.groovy"/>
+	        <entity-condition entity-name="WorkTrialPropAndEmplAppAndPersonAndEmplPos" list="listIt">
+	        	<condition-list>
+	        		<condition-expr field-name="emplAppStatusId" operator="equals" value="CSM_ACCEPTED"/>
+	        		<condition-expr field-name="referredByPartyId" operator="in" from-field="salessupList"/>
+	        	</condition-list>
+	        </entity-condition>
+	    </actions>	    
+    	<field name="applicationId" title="${uiLabelMap.ProposeId}">
+    		<display></display>
+    	</field>
+	    <field name="applyingPartyId" title="${uiLabelMap.EmployeePGId}" >
+			<hyperlink target="EmployeeProfile" description="${firstName} ${middleName} ${lastName} [${applyingPartyId}]">
+			    <parameter param-name="partyId" from-field="applyingPartyId"/>
+			</hyperlink>
+		</field>				
+		<field name="address1" title="${uiLabelMap.PGAddress}"><display></display></field>
+		<field name="trainingLevel">
+			<display-entity entity-name="TrainingLevel" 
+				key-field-name="trainingLevelId" description="${description}"></display-entity> 
+		</field>
+		<field name="experience" title="${uiLabelMap.Experience}"><display></display> </field>
+		<field name="contactNumber" title="${uiLabelMap.PhoneNumber}"><display></display> </field>
+		<field name="emplPositionId" title="${uiLabelMap.HROlbiusEmplPositionId}">
+			<display-entity entity-name="EmplPositionAndPositionType" description="${emplPositionId} [${description}]"></display-entity>
+		</field>
+		<field name="salary"><display></display></field>
+		<field name="allowance" title="${uiLabelMap.Allowance}">
+			<display></display>
+		</field>
+		<field name="trialSalaryRate" title="${uiLabelMap.RateSalaryWorkTrial}"><display/></field>
+		<field name="fromDate" title="${uiLabelMap.ProbationFrom}">
+			<display type="date"></display>
+		</field>
+		<field name="trialTime" title="${uiLabelMap.TimeOfWorkTrial}">
+			<display></display>
+		</field>
+		<field name="description" title="${uiLabelMap.NoteOfCheck}">
+			<display></display> 
+		</field>
+		<field name="emplAppStatusId" title="${uiLabelMap.CommonStatus}">
+			<display-entity entity-name="StatusItem" description="${description}" key-field-name="statusId"></display-entity>
+		</field>				
+	</form>	 -->	
+	
+	<!-- ==================================================================================== -->
+</forms>

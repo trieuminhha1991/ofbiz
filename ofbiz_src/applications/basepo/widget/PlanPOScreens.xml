@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-screen.xsd">
+
+	<screen name="PlanCommonDecorator">
+		<section>
+			<actions>
+				<set field="tabBarName" value="PlanPOTabBar" global="true" />
+				<set field="tabBarLocation" value="component://basepo/widget/BasePOMenus.xml" global="true" />
+				<set field="productPlanId" from-field="parameters.productPlanId" />
+			</actions>
+			<widgets>
+				<section>
+					<widgets>
+						<section>
+							<condition>
+								<and>
+									<not>
+										<if-empty field="productPlanId" />
+									</not>
+								</and>
+							</condition>
+							<actions>
+								<set field="printTabBar" value="true" />
+							</actions>
+							<widgets></widgets>
+						</section>
+					</widgets>
+				</section>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<decorator-section-include name="body" />
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="SFCCommonDecorator">
+		<section>
+			<actions>
+				<set field="tabBarName" value="SFCPOTabBar" global="true" />
+				<set field="tabBarLocation" value="component://basepo/widget/BasePOMenus.xml" global="true" />
+				<set field="salesForecastId" from-field="parameters.salesForecastId" />
+			</actions>
+			<widgets>
+				<section>
+					<widgets>
+						<section>
+							<condition>
+								<and>
+									<not>
+										<if-empty field="salesForecastId" />
+									</not>
+								</and>
+							</condition>
+							<actions>
+								<set field="printTabBar" value="true" />
+							</actions>
+							<widgets></widgets>
+						</section>
+					</widgets>
+				</section>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<decorator-section-include name="body" />
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="PlanTitle">
+		<section>
+			<condition>
+				<not>
+					<if-empty field="parameters.productPlanId" />
+				</not>
+			</condition>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text=" ${uiLabelMap.POProductPlanID}: "></label>
+				<link url-mode="plain" target="listPlanItem?productPlanId=${parameters.productPlanId}" text="${parameters.productPlanId}"></link>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="SFCTitle">
+		<section>
+			<condition>
+				<not>
+					<if-empty field="parameters.salesForecastId" />
+				</not>
+			</condition>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text=" ${uiLabelMap.DASalesForecastId}: "></label>
+				<link url-mode="plain" target="viewSalesFCDetailForPO?salesForecastId=${parameters.salesForecastId}" text="${parameters.salesForecastId}"></link>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="CreateCommercialPeriod">
+		<section>
+			<condition>
+				<if-olbius-has-permission />
+			</condition>
+			<widgets>
+				<section>
+					<actions>
+						<set field="selectedMenuItem" value="planPO" />
+						<set field="selectedSubMenuItem" value="createCommercialPeriod" />
+						<set field="titleProperty" value="ListCommercialPeriod" />
+						<set field="organizationPartyId" from-field="parameters.organizationPartyId" />
+						<script location="component://basepo/webapp/basepo/WEB-INF/actions/plan/getPeriodYear.groovy" />
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<platform-specific>
+									<html>
+										<html-template location="component://basepo/webapp/basepo/plan/createCommercialPeriod.ftl" />
+									</html>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</widgets>
+			<fail-widgets>
+				<section>
+					<actions>
+						<set field="selectedMenuItem" value="planPO" />
+						<set field="selectedSubMenuItem" value="createCommercialPeriod" />
+						<set field="titleProperty" value="ListCommercialPeriod" global="true" />
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<label text="${uiLabelMap.DmsNotPermission}">
+								</label>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</fail-widgets>
+		</section>
+	</screen>
+
+	<screen name="ListPlanPO">
+		<section>
+			<condition>
+				<if-olbius-has-permission />
+			</condition>
+			<widgets>
+				<section>
+					<actions>
+						<set field="selectedMenuItem" value="planPO" />
+						<set field="selectedSubMenuItem" value="listPlanPO" />
+						<set field="titleProperty" value="BPOListPlan" />
+						<script location="component://basepo/webapp/basepo/WEB-INF/actions/plan/getPeriodYear.groovy" />
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<platform-specific>
+									<html>
+										<html-template location="component://basepo/webapp/basepo/plan/listPlanPO.ftl" />
+									</html>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</widgets>
+			<fail-widgets>
+				<section>
+					<actions>
+						<set field="selectedMenuItem" value="planPO" />
+						<set field="selectedSubMenuItem" value="listPlanPO" />
+						<set field="titleProperty" value="DmsListPlan" global="true" />
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<label text="${uiLabelMap.DmsNotPermission}">
+								</label>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</fail-widgets>
+		</section>
+	</screen>
+
+	<screen name="ListPlanItem">
+		<section>
+			<condition>
+				<if-olbius-has-permission />
+			</condition>
+			<widgets>
+				<section>
+					<condition>
+						<not>
+							<if-empty field="parameters.productPlanId" />
+						</not>
+					</condition>
+					<actions>
+						<set field="selectedMenuItem" value="planPO" />
+						<set field="selectedSubMenuItem" value="listPlanPO" />
+						<set field="tabButtonItem" value="listPlanItem" />
+						<set field="titleProperty" value="DmsPlanItem" />
+						<set field="titleHeaderValue" value="PlanTitle" global="true" />
+						<set field="titleHeaderLocation" value="component://basepo/widget/PlanPOScreens.xml" global="true" />
+					</actions>
+					<widgets>
+						<decorator-screen name="PlanCommonDecorator">
+							<decorator-section name="body">
+								<platform-specific>
+									<html>
+										<html-template location="component://basepo/webapp/basepo/plan/listPlanItem.ftl" />
+									</html>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<include-screen name="ListPlanPO" />
+					</fail-widgets>
+				</section>
+			</widgets>
+			<fail-widgets>
+				<section>
+					<actions>
+						<set field="selectedMenuItem" value="planPO" />
+						<set field="selectedSubMenuItem" value="listPlanPO" />
+						<set field="titleProperty" value="DmsPlanItem" />
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<label text="${uiLabelMap.DmsNotPermission}">
+								</label>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</fail-widgets>
+		</section>
+	</screen>
+
+	<screen name="StockAndPlanPO">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="planPO" />
+				<set field="selectedSubMenuItem" value="listPlanPO" />
+				<set field="tabButtonItem" value="stockAndPlan" />
+				<set field="titleProperty" value="DmsPlanItem" />
+				<set field="titleHeaderValue" value="PlanTitle" global="true" />
+				<set field="titleHeaderLocation" value="component://basepo/widget/PlanPOScreens.xml" global="true" />
+				<script location="component://basepo/webapp/basepo/WEB-INF/actions/plan/SetupPlanPO.groovy" />
+			</actions>
+			<widgets>
+				<decorator-screen name="PlanCommonDecorator">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission />
+							</condition>
+							<widgets>
+								<platform-specific>
+									<!-- <html><html-template location="component://basepo/webapp/basepo/plan/stockAndPlanPO.ftl"/></html> -->
+									<html>
+										<html-template location="component://basepo/webapp/basepo/plan/setupPlanPO.ftl" />
+									</html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}" />
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="SalesForecastListPO">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="planPO" />
+				<set field="selectedSubMenuItem" value="salesForecastList" />
+				<set field="titleProperty" value="BSAbbSalesForecastList" />
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission />
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://basepo/webapp/basepo/salesFC/salesForecastListForPO.ftl" />
+									</html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.DmsNotPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="SalesForecastDetailForPO">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="planPO" />
+				<set field="selectedSubMenuItem" value="salesForecastList" />
+				<set field="tabButtonItem" value="salesFCByMonth" />
+				<set field="titleProperty" value="PageTitleEditSalesForecast" />
+				<set field="titleHeaderValue" value="SFCTitle" global="true" />
+				<set field="titleHeaderLocation" value="component://basepo/widget/PlanPOScreens.xml" global="true" />
+				<script location="component://basesales/webapp/basesales/WEB-INF/actions/sales_forecast/GetListSalesForecastDetailJQ.groovy" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission />
+					</condition>
+					<widgets>
+						<section>
+							<condition>
+								<not>
+									<if-empty field="parameters.salesForecastId" />
+								</not>
+							</condition>
+							<widgets>
+								<decorator-screen name="SFCCommonDecorator">
+									<decorator-section name="body">
+										<platform-specific>
+											<html>
+												<html-template location="component://basesales/webapp/basesales/sales_forecast/salesForecastDetailCreateJQ.ftl" />
+											</html>
+										</platform-specific>
+									</decorator-section>
+								</decorator-screen>
+							</widgets>
+							<fail-widgets>
+								<include-screen name="SalesForecastListPO" />
+							</fail-widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.DmsNotPermission}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="ViewSalesForecastWeekForPO">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="planPO" />
+				<set field="selectedSubMenuItem" value="salesForecastList" />
+				<set field="tabButtonItem" value="salesFCByWeek" />
+				<set field="titleProperty" value="PageTitleEditSalesForecast" />
+				<set field="titleHeaderValue" value="SFCTitle" global="true" />
+				<set field="titleHeaderLocation" value="component://basepo/widget/PlanPOScreens.xml" global="true" />
+				<script location="component://basepo/webapp/basepo/WEB-INF/actions/agreement/getCurrentOrganization.groovy" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission />
+					</condition>
+					<widgets>
+						<section>
+							<condition>
+								<not>
+									<if-empty field="parameters.salesForecastId" />
+								</not>
+							</condition>
+							<widgets>
+								<decorator-screen name="SFCCommonDecorator">
+									<decorator-section name="body">
+										<platform-specific>
+											<html>
+												<html-template location="component://basepo/webapp/basepo/salesFC/viewSalesForecastWeekByPO.ftl" />
+											</html>
+										</platform-specific>
+									</decorator-section>
+								</decorator-screen>
+							</widgets>
+							<fail-widgets>
+								<include-screen name="SalesForecastListPO" />
+							</fail-widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.DmsNotPermission}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+</screens>

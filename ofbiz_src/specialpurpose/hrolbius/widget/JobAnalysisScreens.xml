@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	<!-- Screens for job requisition -->
+	<screen name="FindJobRequisition">
+		<section>
+			<actions>
+				<set field="navMenuName" value="JobRequisitionsSubTabBar" />
+				<set field="navMenuLocation" value="component://hrolbius/widget/menus/hrolbiusMenus.xml" />
+				<set field="subMenu" value="jobanalysis" />
+				<set field="headerItem" value="jobanalysis" />
+				<set field="tabButtonItem" value="jobrequisitions" />
+				<set field="titleProperty" value="pageRequistionTitle" />
+			</actions>
+			<widgets>
+				<decorator-screen name="FindJobAnalysisDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="search-options">
+						<include-form
+							location="component://hrolbius/widget/forms/JobAnalysisForms.xml"
+							name="FindJobRequisitions" />
+					</decorator-section>
+
+					<decorator-section name="search-results">
+						<section>
+							<actions>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/jobanalysis/getCurrentTime.groovy"/>
+								<set field="currentTime" from-field="currentTime"/>
+								<service service-name="findJobRequistion">
+									<field-map field-name="inputFields" from-field="requestParameters" />
+									<field-map field-name="entityName" value="JobRequisition" />
+									<field-map field-name="viewIndex" from-field="viewIndex" />
+									<field-map field-name="viewSize" from-field="viewSize" />
+									<field-map field-name="noConditionFind" value="Y"/>
+								</service>
+							</actions>
+							<widgets>
+								<container id="table-container">
+									<platform-specific>
+										<html>
+											<html-template
+												location="component://hrolbius/webapp/hrolbius/ftl/findJobRequisitionResults.ftl" />
+										</html>
+									</platform-specific>
+								</container>
+								
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="EditJobRequisitionApproval">
+		<section>
+			<actions>
+				<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/jobanalysis/prepareEditJobRequisitionForm.groovy" />
+				<script
+					location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/jobanalysis/getJobRequisitionStatus.groovy" />
+				<set field="titleProperty" value="PageTitleEditJobRequisitionItem"></set>
+				<set field = "statusList" from-field="statusList" /> 
+				<set field="requisition" from-field="requisition" />
+				<set field="customSkillTypeList" from-field="customSkillTypeList" />
+				<set field="customQualificationList" from-field="customQualificationList" />
+				<set field="examTypeEnumList" from-field="examTypeEnumList" />
+				<set field="tabButtonItem" value="jobrequisitions" />
+			</actions>
+			<widgets>
+				<decorator-screen name="jobAnalysisDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<platform-specific>
+							<html>
+								<html-template
+									location="component://hrolbius/webapp/hrolbius/ftl/editJobRequisitionApproval.ftl" />
+							</html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="EditJobRequisition">
+		<section>
+			<actions>
+				<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/jobanalysis/prepareEditJobRequisitionForm.groovy"/>
+				<set field="titleProperty" value="PageTitleEditJobRequisitionItem"></set>
+				<set field="requisition" from-field="requisition" />
+				<set field="customSkillTypeList" from-field="customSkillTypeList" />
+				<set field="customQualificationList" from-field="customQualificationList" />
+				<set field="examTypeEnumList" from-field="examTypeEnumList" />
+				<set field="tabButtonItem" value="jobrequisitions" />
+			</actions>
+			<widgets>
+				<decorator-screen name="jobAnalysisDecorator"
+					location="component://hrolbius/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<platform-specific>
+							<html><html-template location="component://hrolbius/webapp/hrolbius/ftl/editJobRequisition.ftl"/></html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="FindJobRequests">
+		<section>
+			<condition>
+				<if-has-permission permission="HROLBIUS" action="_VIEW"/>
+			</condition>
+			<actions>
+				<set field="titleProperty" value="FindRequestPageTitle" />
+				<set field="tabButtonItem" value="FindJobRequests" />
+				<set field="navMenuName" value="JobRequestSubTabBar" />
+				<set field="navMenuLocation" value="component://hrolbius/widget/menus/hrolbiusMenus.xml" />
+			</actions>
+			<widgets>
+				<decorator-screen name="FindJobAnalysisDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="search-options">
+						<include-form location="component://hrolbius/widget/forms/JobAnalysisForms.xml" name="FindJobRequests"/>
+					</decorator-section>
+					<decorator-section name="search-results">
+						<container id="table-container">
+						<include-form location="component://hrolbius/widget/forms/JobAnalysisForms.xml" name="ListJobRequests"/>
+						</container>
+						
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<label style="h3">${uiLabelMap.hrolbiusViewPermissionError}</label>
+			</fail-widgets>
+		</section>
+	</screen>
+
+	<screen name="EditJobRequest">
+		<section>
+			<condition>
+				<if-has-permission permission="HROLBIUS" action="_ADMIN"/>
+			</condition>
+			<actions>
+				<set field="tabButtonItem" value="FindJobRequests" />
+				<set field="jobRequestId" from-field="parameters.jobRequestId" />
+				<entity-one value-field="JobRequest" entity-name="JobRequest"></entity-one>
+			</actions>
+			<widgets>
+			 	<decorator-screen name="jobAnalysisDecorator" location="${parameters.mainDecoratorLocation}">
+			 		<decorator-section name="body">
+			 			<container>
+			 				<screenlet title="${uiLabelMap.editJobRequestTitle}">
+			 					<include-form location="component://hrolbius/widget/forms/JobAnalysisForms.xml" name="EditJobRequest"/>
+			 				</screenlet>
+			 			</container>
+			 		</decorator-section>
+			 	</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<label style="h3">${uiLabelMap.hrolbiusViewPermissionError}</label>
+			</fail-widgets>
+		</section>
+	</screen>
+	
+	<screen name="EditJobRequestApproval">
+		<section>
+			<condition>
+				<if-has-permission permission="HROLBIUS" action="_ADMIN"/>
+			</condition>
+			<actions>
+				<set field="tabButtonItem" value="FindJobRequests" />
+				<set field="jobRequestId" from-field="parameters.jobRequestId" />
+				<entity-one value-field="JobRequest" entity-name="JobRequest"></entity-one>
+			</actions>
+			<widgets>
+			 	<decorator-screen name="jobAnalysisDecorator" location="${parameters.mainDecoratorLocation}">
+			 		<decorator-section name="body">
+			 			<container>
+			 				<screenlet title="${uiLabelMap.JobRequestApprovalPageTitle}">
+			 					<include-form location="component://hrolbius/widget/forms/JobAnalysisForms.xml" name="EditJobRequestApproval"/>
+			 				</screenlet>
+			 			</container>
+			 		</decorator-section>
+			 	</decorator-screen>
+			</widgets>
+			<fail-widgets>
+				<label style="h3">${uiLabelMap.hrolbiusViewPermissionError}</label>
+			</fail-widgets>
+		</section>
+	</screen>
+	<!-- End of screens for job analysis -->
+</screens>

@@ -1,0 +1,607 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	<screen name="FindTrainingCourse">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="training"/>
+				<set field="tabButtonItem" value="TrainingPlan" />
+				<set field="tabSubButtonItem" value="FindTrainingPlan" />
+				<set field="titleProperty" value="TrainingPlanList" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTrainingDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<entity-condition list="trainingFormTypeList" entity-name="TrainingFormType"></entity-condition>
+								<entity-condition list="trainingTypeList" entity-name="TrainingType"></entity-condition>
+								<entity-condition list="statusList" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="TRAING_COURS_STT"/>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>
+								<entity-condition list="skillTypeList" entity-name="SkillType">
+									<condition-expr field-name="skillTypeId" operator="not-equals" value="_NA_"/>
+									<order-by field-name="skillTypeId"/>
+								</entity-condition>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/Training/getSkillTypeTree.groovy"/>
+								
+								<entity-condition list="emplPosType" entity-name="EmplPositionType">
+									<condition-expr field-name="emplPositionTypeId" operator="not-equals" value="_NA_"/>
+									<order-by field-name="emplPositionTypeId"/>
+								</entity-condition>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/Training/getPartyGroupTree.groovy"/>
+								<!-- <entity-condition list="trainingFormType" entity-name="TrainingFormType"></entity-condition>
+								<entity-condition list="trainingType" entity-name="TrainingType"></entity-condition> -->
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/Training/TrainingCourseList.ftl"/>
+									</html>
+								</platform-specific>						
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ApprovalTrainingProposal">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="training"/>
+				<set field="tabButtonItem" value="TrainingPlan" />
+				<set field="tabSubButtonItem" value="FindTrainingPlan" />
+				<set field="titleProperty" value="ApprovalTrainingPlan" />
+				<entity-one value-field="emplProposal" entity-name="EmplProposal"></entity-one>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTrainingDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<not>
+									<if-empty field="emplProposal"/>
+								</not>
+							</condition>
+							<actions>
+								<entity-one value-field="emplTrainingProposal" entity-name="EmplTrainingCourseProposal"></entity-one>
+								<entity-one value-field="trainingCourse" entity-name="TrainingCourse" auto-field-map="false">
+									<field-map field-name="trainingCourseId" from-field="emplTrainingProposal.trainingCourseId"/>
+								</entity-one>
+								<entity-condition list="skillTypeList" entity-name="SkillType">
+									<condition-expr field-name="skillTypeId" operator="not-equals" value="_NA_"/>
+									<order-by field-name="skillTypeId"/>
+								</entity-condition>
+								<entity-condition list="statusList" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="TRAIN_COURS_SKILL"/>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>	
+								<entity-condition list="trainingCourseEmplPosTypes" entity-name="TrainingCourseEmplPosTypeTrainee">
+									<condition-expr field-name="trainingCourseId" from-field="trainingCourse.trainingCourseId"/>
+								</entity-condition>
+								<entity-condition list="trainingCourseTrainee" entity-name="TrainingCoursePartyGroupTrainee">
+									<condition-expr field-name="trainingCourseId" from-field="trainingCourse.trainingCourseId"/>
+								</entity-condition>
+								<entity-condition list="approvalStatusList" entity-name="StatusItem">
+									<condition-list combine="or">
+										<condition-expr field-name="statusId" value="PPSL_ACCEPTED"/>
+										<condition-expr field-name="statusId" value="PPSL_REJECTED"/>
+									</condition-list>
+								</entity-condition>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/emplProposal/getEmplProposalRole.groovy"/>
+							</actions>
+							<widgets>
+								<screenlet title="${uiLabelMap.ApprovalTrainingPlan}">
+									<platform-specific>
+										<html>
+											<html-template location="component://hrolbius/webapp/hrolbius/ftl/Training/ApprovalTrainingProposal.ftl"/>
+										</html>
+									</platform-specific>
+								</screenlet>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label style="h4">${uiLabelMap.CannotFindEmplProposal}</label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EmplConfirmAttendanceTraining">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="training"/>
+				<set field="tabButtonItem" value="TrainingPlan" />
+				<set field="tabSubButtonItem" value="FindTrainingPlan" />
+				<set field="titleProperty" value="ApprovalTrainingPlan" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTrainingDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<entity-one value-field="trainingCourse" entity-name="TrainingCourse" auto-field-map="true">
+									<field-map field-name="trainingCourseId" from-field="parameters.trainingCourseId"/>
+								</entity-one>
+								<entity-one value-field="trainingCoursePartyAttendance" entity-name="TrainingCoursePartyAttendance" auto-field-map="false">
+									<field-map field-name="trainingCourseId" from-field="parameters.trainingCourseId"/>
+									<field-map field-name="partyId" from-field="userLogin.partyId"/>
+								</entity-one>
+								<entity-condition list="skillTypeList" entity-name="SkillType">
+									<condition-expr field-name="skillTypeId" operator="not-equals" value="_NA_"/>
+									<order-by field-name="skillTypeId"/>
+								</entity-condition>
+								<entity-condition list="statusList" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="TRAIN_COURS_SKILL"/>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>	
+								<entity-condition list="trainingCourseEmplPosTypes" entity-name="TrainingCourseEmplPosTypeTrainee">
+									<condition-expr field-name="trainingCourseId" from-field="trainingCourse.trainingCourseId"/>
+								</entity-condition>
+								<entity-condition list="trainingCourseTrainee" entity-name="TrainingCoursePartyGroupTrainee">
+									<condition-expr field-name="trainingCourseId" from-field="trainingCourse.trainingCourseId"/>
+								</entity-condition>
+								<entity-condition list="approvalStatusList" entity-name="StatusItem">
+									<condition-list combine="or">
+										<condition-expr field-name="statusId" value="PPSL_ACCEPTED"/>
+										<condition-expr field-name="statusId" value="PPSL_REJECTED"/>
+									</condition-list>
+								</entity-condition>
+							</actions>
+							<widgets>
+								<screenlet title="${uiLabelMap.AttendanceTrainingCourse}">
+									<platform-specific>
+										<html>
+											<html-template location="component://hrolbius/webapp/hrolbius/ftl/Training/EmplConfirmAttendanceTraining.ftl"/>
+										</html>
+									</platform-specific>
+								</screenlet>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EmplConfirmRegisterTraining">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="training"/>
+				<set field="tabButtonItem" value="TrainingPlan" />
+				<set field="tabSubButtonItem" value="FindTrainingPlan" />
+				<set field="titleProperty" value="ApprovalTrainingPlan" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTrainingDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<entity-one value-field="trainingCoursePartyRegister" entity-name="TrainingCoursePartyRegister" auto-field-map="false">
+									<field-map field-name="trainingCourseId" from-field="parameters.trainingCourseId"/>
+									<field-map field-name="partyId" from-field="userLogin.partyId"/>
+								</entity-one>
+								<entity-one value-field="trainingCourse" entity-name="TrainingCourse" auto-field-map="true">
+									<field-map field-name="trainingCourseId" from-field="parameters.trainingCourseId"/>
+								</entity-one>
+								<entity-condition list="skillTypeList" entity-name="SkillType">
+									<condition-expr field-name="skillTypeId" operator="not-equals" value="_NA_"/>
+									<order-by field-name="skillTypeId"/>
+								</entity-condition>
+								<entity-condition list="statusList" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="TRAIN_COURS_SKILL"/>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>	
+								<entity-condition list="trainingCourseEmplPosTypes" entity-name="TrainingCourseEmplPosTypeTrainee">
+									<condition-expr field-name="trainingCourseId" from-field="trainingCourse.trainingCourseId"/>
+								</entity-condition>
+								<entity-condition list="trainingCourseTrainee" entity-name="TrainingCoursePartyGroupTrainee">
+									<condition-expr field-name="trainingCourseId" from-field="trainingCourse.trainingCourseId"/>
+								</entity-condition>
+								<entity-condition list="approvalStatusList" entity-name="StatusItem">
+									<condition-list combine="or">
+										<condition-expr field-name="statusId" value="PPSL_ACCEPTED"/>
+										<condition-expr field-name="statusId" value="PPSL_REJECTED"/>
+									</condition-list>
+								</entity-condition>
+							</actions>
+							<widgets>
+								<screenlet title="${uiLabelMap.RegisterTrainingCourse}">
+									<platform-specific>
+										<html>
+											<html-template location="component://hrolbius/webapp/hrolbius/ftl/Training/EmplConfirmRegisterTraining.ftl"/>
+										</html>
+									</platform-specific>
+								</screenlet>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EmplAttendanceTrainCourse">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="training"/>
+				<set field="tabButtonItem" value="TrainingPlan" />
+				<set field="tabSubButtonItem" value="FindTrainingPlan" />
+				<set field="titleProperty" value="EmplListAttendanceTrainingCourse" />
+				<entity-one value-field="trainingCourse" entity-name="TrainingCourse"></entity-one>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTrainingDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<not>
+									<if-empty field="trainingCourse"/>
+								</not>
+							</condition>
+							<actions>
+								<entity-condition list="trainingCoursePartyAttendance" entity-name="TrainingCoursePartyAttendance">
+									<condition-expr field-name="trainingCourseId" from-field="parameters.trainingCourseId"/>
+									<order-by field-name="partyId"/>
+								</entity-condition>
+								<entity-condition list="statusAttendanceResult" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="TRAIN_COURS_ATT"/>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/party/getAllDepartment.groovy"/>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/Training/getPartyGroupTree.groovy"/>
+								<entity-condition list="emplPositionType" entity-name="EmplPositionType">
+									<condition-expr field-name="emplPositionTypeId" operator="not-equals" value="_NA_"/>
+									<order-by field-name="description"/>
+								</entity-condition>
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/Training/EmplAttendanceTrainCourse.ftl"/>
+									</html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label style="h4">
+								   ${uiLabelMap.CannotFindTrainingCourse} ${parameters.trainingCourseId}
+									</label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>		
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EmplRegisterTrainCourse">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="training"/>
+				<set field="tabButtonItem" value="TrainingPlan" />
+				<set field="tabSubButtonItem" value="FindTrainingPlan" />
+				<set field="titleProperty" value="EmplListRegisterTrainingCourse" />
+				<entity-one value-field="trainingCourse" entity-name="TrainingCourse"></entity-one>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTrainingDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<not>
+									<if-empty field="trainingCourse"/>
+								</not>
+							</condition>
+							<actions>
+								<entity-condition list="partyRegisterTrainCourse" entity-name="TrainingCoursePartyRegister">
+									<condition-expr field-name="trainingCourseId" from-field="parameters.trainingCourseId"/>
+									<order-by field-name="partyId"/>
+								</entity-condition>
+								<entity-condition list="statusList" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="TRAIN_COURS_REGIS"/>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/party/getAllDepartment.groovy"/>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/Training/getPartyGroupTree.groovy"/>
+								<entity-condition list="emplPositionType" entity-name="EmplPositionType">
+									<condition-expr field-name="emplPositionTypeId" operator="not-equals" value="_NA_"/>
+									<order-by field-name="description"/>
+								</entity-condition>
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/Training/EmplRegisterTrainCourse.ftl"/>
+									</html>
+								</platform-specific>
+							</widgets>						
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label style="h4">
+								   		${uiLabelMap.CannotFindTrainingCourse} ${parameters.trainingCourseId}
+									</label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	<screen name="TrainingCourseInformation">
+		<section>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="TrainingUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="HrCommonUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="CommonUiLabels" global="true"/>
+				<entity-one value-field="trainingCourse" entity-name="TrainingCourse"></entity-one>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not>
+							<if-empty field="trainingCourse"/>
+						</not>
+					</condition>
+					<widgets>
+						<platform-specific>
+							<html>
+								<html-template location="component://hrolbius/webapp/hrolbius/ftl/Training/trainingCourseInfo.ftl"/>
+							</html>
+						</platform-specific>
+					</widgets>
+					<fail-widgets>
+						<container style="alert alert-info">
+							<label style="h4 ">${uiLabelMap.CannotFindTrainingCourse} ${parameters.trainingCourseId}</label>
+						</container>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="TrainingCourseSkillType">
+		<section>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="TrainingUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="HrCommonUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="CommonUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="WidgetUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="DelysUiLabels" global="true"/>
+				<entity-one value-field="trainingCourse" entity-name="TrainingCourse"></entity-one>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not>
+							<if-empty field="trainingCourse"/>
+						</not>
+					</condition>
+					<actions>
+						<entity-condition list="skillTypeList" entity-name="SkillType">
+							<condition-expr field-name="skillTypeId" operator="not-equals" value="_NA_"/>
+							<order-by field-name="skillTypeId"/>
+						</entity-condition>
+						<entity-condition list="statusList" entity-name="StatusItem">
+							<condition-expr field-name="statusTypeId" value="TRAIN_COURS_SKILL"/>
+							<order-by field-name="sequenceId"/>
+						</entity-condition>
+						<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/Training/getSkillTypeTree.groovy"/>
+					</actions>
+					<widgets>
+						<platform-specific>
+							<html>
+								<html-template location="component://hrolbius/webapp/hrolbius/ftl/Training/trainingCourseSkillType.ftl"/>
+							</html>
+						</platform-specific>
+					</widgets>
+					<fail-widgets>
+						<container style="alert alert-info">
+							<label style="h4 ">${uiLabelMap.CannotFindTrainingCourse} ${parameters.trainingCourseId}</label>
+						</container>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="TrainingCourseTrainees">
+		<section>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="TrainingUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="HrCommonUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="CommonUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="WidgetUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="DelysUiLabels" global="true"/>
+				<entity-one value-field="trainingCourse" entity-name="TrainingCourse"></entity-one>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not>
+							<if-empty field="trainingCourse"/>
+						</not>
+					</condition>
+					<actions>
+						<entity-condition list="emplPosType" entity-name="EmplPositionType">
+							<condition-expr field-name="emplPositionTypeId" operator="not-equals" value="_NA_"/>
+							<order-by field-name="emplPositionTypeId"/>
+						</entity-condition>
+						<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/Training/getPartyGroupTree.groovy"/>
+						<entity-condition list="trainingCourseEmplPosType" entity-name="TrainingCourseEmplPosTypeTrainee">
+							<condition-expr field-name="trainingCourseId" from-field="parameters.trainingCourseId"/>
+						</entity-condition>
+						<entity-condition list="trainingCourseTrainee" entity-name="TrainingCoursePartyGroupTrainee">
+							<condition-expr field-name="trainingCourseId" from-field="parameters.trainingCourseId"/>
+						</entity-condition>
+					</actions>
+					<widgets>
+						<platform-specific>
+							<html>
+								<html-template location="component://hrolbius/webapp/hrolbius/ftl/Training/trainingCourseTrainees.ftl"/>
+							</html>
+						</platform-specific>
+					</widgets>
+					<fail-widgets>
+						<container style="alert alert-info">
+							<label style="h4 ">${uiLabelMap.CannotFindTrainingCourse} ${parameters.trainingCourseId}</label>
+						</container>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ListEmplInOrg">
+		<section>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="TrainingUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="HrCommonUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="CommonUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="WidgetUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="DelysUiLabels" global="true"/>				
+				<property-map map-name="uiLabelMap" resource="EmployeeUiLabels" global="true"/>
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://hrolbius/webapp/hrolbius/ftl/Training/EmployeeListInOrg.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ListTrainingCoursePartyAttend">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="training"/>
+				<set field="tabButtonItem" value="TrainingAndRatingTraining"/>
+				<set field="tabSubButtonItem" value="TrainingHarvestReport"/>
+				<set field="titleProperty" value="ListTrainingCoursePatyAttend"/>
+				<set field="layoutSettings.javaScripts[+0]" value="/delys/images/js/ckeditor/ckeditor.js"
+					global="true" />
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonTrainingDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<!-- <set field="partyId" from-field="userLogin.partyId"/> -->
+								<entity-condition list="trainingFormTypeList" entity-name="TrainingFormType"></entity-condition>
+								<entity-condition list="trainingTypeList" entity-name="TrainingType"></entity-condition>
+								<entity-condition list="statusList" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="RESULT_TRAINING"/>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/Training/ListTrainingCoursePartyAttend.ftl"/>
+									</html>
+								</platform-specific>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen>
+	<screen name="EditPartyTrainingCourseHarvestReport">
+		<section>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="TrainingUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="HrCommonUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="CommonUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="WidgetUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="DelysUiLabels" global="true"/>				
+				<property-map map-name="uiLabelMap" resource="EmployeeUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="EmploymentUiLabels" global="true"/>
+				<entity-one value-field="trainingCoursePartyAttendance" entity-name="TrainingCoursePartyAttendance"></entity-one>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not>
+							<if-empty field="trainingCoursePartyAttendance"/>
+						</not>
+					</condition>
+					<actions>
+						<entity-one value-field="employee" entity-name="Person">
+							<field-map field-name="partyId" from-field="parameters.partyId"/>
+						</entity-one>
+						<set field="emplId" from-field="parameters.partyId"/>
+						<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrPositionEmpl.groovy"/>
+						<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrDeptEmpl.groovy"/>
+						<entity-one value-field="trainingCourse" entity-name="TrainingCourse">
+							<field-map field-name="trainingCourseId" from-field="parameters.trainingCourseId"/>
+						</entity-one>
+						<entity-condition list="trainingCourseSkillType" entity-name="TrainingCourseSkillType">
+							<condition-expr field-name="trainingCourseId" from-field="parameters.trainingCourseId"/>
+						</entity-condition>
+						<entity-condition list="trainingCoursePurpose" entity-name="TrainingCoursePurpose">
+							<condition-expr field-name="trainingCourseId" from-field="parameters.trainingCourseId"/>
+						</entity-condition>
+						<entity-condition list="listTrainingCourseDocument" entity-name="TrainingDocumentAndContent">
+							<condition-list>
+								<condition-expr field-name="trainingCourseId" from-field="parameters.trainingCourseId"/>
+								<condition-expr field-name="partyId" from-field="userLogin.partyId"/>
+							</condition-list>
+							<order-by field-name="-createdDate"/>
+						</entity-condition>
+					</actions>
+					<widgets>
+						<platform-specific>
+							<html>
+								<html-template location="component://hrolbius/webapp/hrolbius/ftl/Training/EditPartyTrainingCourseHarvestReport.ftl"/>
+							</html>
+						</platform-specific>
+					</widgets>
+					<fail-widgets>
+						<container style="alert alert-info">
+							<label style="h4 ">${uiLabelMap.CannotViewEditTrainingCourseReport} ${parameters.trainingCourseId}</label>
+						</container>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ListTrainingCourseDocument">
+		<section>
+			<actions>
+				<property-map map-name="uiLabelMap" resource="TrainingUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="HrCommonUiLabels" global="true"/>
+			</actions>
+			<widgets>
+				<section>
+					<actions>
+						<entity-condition list="listTrainingCourseDocument" entity-name="TrainingDocumentAndContent">
+							<condition-list>
+								<condition-expr field-name="trainingCourseId" from-field="parameters.trainingCourseId"/>
+								<condition-expr field-name="partyId" from-field="userLogin.partyId"/>
+							</condition-list>
+							<order-by field-name="-createdDate"/>
+						</entity-condition>
+					</actions>
+					<widgets>
+						<platform-specific>
+							<html>
+								<html-template location="component://hrolbius/webapp/hrolbius/ftl/Training/listTrainingCourseDocument.ftl"/>
+							</html>
+						</platform-specific>
+					</widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	
+</screens>	

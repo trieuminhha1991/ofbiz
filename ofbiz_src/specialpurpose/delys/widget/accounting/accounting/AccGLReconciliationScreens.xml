@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+     <screen name="CommonReconciliationDecorator">
+        <section>
+            <actions>
+                <set field="headerItem" value="accAccTrans"/>
+            </actions>
+            <widgets>
+               <section>
+                     <condition>
+                         <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
+                     </condition>
+                     <actions>
+						<set field="tabBarName" value="AccReconTabBar" global="true" />
+						<set field="tabBarLocation" value="component://delys/widget/accounting/accounting/AccAccountingMenus.xml" global="true" />
+					 </actions>
+					 <widgets>
+						<section>
+							<actions>
+								<set field="printTabBar" value="true" />
+							</actions>
+							<widgets></widgets>
+						</section>
+					</widgets>
+                </section>
+                <decorator-screen name="main-decorator" location="component://delys/widget/accounting/ap/CommonScreens.xml">
+                    <decorator-section name="pre-body">
+                        <section>
+                            <condition>
+                                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
+                            </condition>
+                            <widgets>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <!-- do check for ACCOUNTING, _VIEW permission -->
+                            <condition>
+                                <if-service-permission service-name="acctgBasePermissionCheck" main-action="VIEW"/>
+                            </condition>
+                            <widgets>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                            <fail-widgets>
+                                <label style="alert alert-info" text="${uiLabelMap.AccountingViewPermissionError}"/>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="FindGlAccountReconciliations">
+        <section>
+            <actions>
+                <set field="titleProperty" value="AccountingAcctRecons"/>
+            	<set field="tabButtonItem" value="AccountReconciliations" />
+            	<set field="selectedMenuItem" value="accGeneralLedger" />
+				<set field="selectedSubMenuItem" value="accReconciliations"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonReconciliationDecorator" location="component://delys/widget/accounting/accounting/AccGLReconciliationScreens.xml">
+                    <decorator-section name="body">
+                        <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/listGlAccountReconciliations.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="FindGlAccountReconciliation">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindGlAccountReconciliation"/>
+            	<set field="tabButtonItem" value="AccountReconciliation" />
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonReconciliationDecorator" location="component://delys/widget/accounting/accounting/AccGLReconciliationScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                            	<platform-specific>
+                                  	<html><html-template location="component://delys/webapp/delys/accounting/listAccGlReconciliation.ftl"/></html>
+                            	</platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="EditGlReconciliation">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditGlAccountReconciliation"/>
+            	<set field="tabButtonItem" value="AccountReconciliation" />
+            	<set field="glReconciliationId" from-field="parameters.glReconciliationId" global="true"/>
+                <entity-one entity-name="GlReconciliation" value-field="glReconciliation"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonReconciliationDecorator" location="component://delys/widget/accounting/accounting/AccGLReconciliationScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                            	<platform-specific>
+                                  	<html><html-template location="component://delys/webapp/delys/accounting/editGlReconciliation.ftl"/></html>
+                            	</platform-specific>
+                            	
+                            	<platform-specific>
+                                  	<html><html-template location="component://delys/webapp/delys/accounting/listGlReconciliationEntries.ftl"/></html>
+                            	</platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+</screens>

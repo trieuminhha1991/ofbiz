@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+
+    <simple-method method-name="createDeliveryEntry" short-description="Create Delivery Entry">
+        <make-value entity-name="DeliveryEntry" value-field="newDeliveryEntry"></make-value>
+        <sequenced-id sequence-name="DeliveryEntry" field="deliveryEntryId"/>
+        <set field="newDeliveryEntry.deliveryEntryId" from-field="deliveryEntryId"/>
+        <set-nonpk-fields map="parameters" value-field="newDeliveryEntry" />
+        <set field="newDeliveryEntry.statusId" value="DELI_ENTRY_CREATED"/>
+        <set field="newDeliveryEntry.weight" value="0" type="BigDecimal"/>
+        <create-value value-field="newDeliveryEntry"/>	
+        <field-to-result field="deliveryEntryId"/>
+        <if-not-empty field="parameters.listShipments">
+        	<iterate entry="shipment" list="parameters.listShipments">
+        		<set field="shipmentMap.deliveryEntryId" from-field="deliveryEntryId"/>
+        		<set field="shipmentMap.shipmentId" from-field="shipment.shipmentId"/>
+        		<call-service service-name="assignShipmentToDE" in-map-name="shipmentMap"></call-service>
+    	    </iterate>
+        </if-not-empty>
+    </simple-method>
+    
+    <simple-method method-name="assignShipmentToDE" short-description="Assign Shipment To DE">
+        <!-- Update Delivery Entry To Shipment -->
+        <entity-one entity-name="Shipment" value-field="shipment" />
+        <set field="shipment.deliveryEntryId" from-field="parameters.deliveryEntryId"/>
+    	<store-value value-field="shipment"/>
+    	 <check-errors/>
+    	 
+    	 <!-- Update Quantity For Delivery Entry -->
+    	 <entity-one entity-name="DeliveryEntry" value-field="deliveryEntry"></entity-one>
+    	 
+    </simple-method>
+    
+</simple-methods>

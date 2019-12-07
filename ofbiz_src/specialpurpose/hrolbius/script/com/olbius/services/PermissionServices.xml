@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+    <simple-method method-name="hrGenericPermission" short-description="Main permission logic">
+        <set field="mainAction" from-field="parameters.mainAction"/>
+        <if-empty field="mainAction">
+            <add-error>
+                <fail-property resource="hrolbiusUiLabels" property="hrPermissionMainActionAttributeMissing"/>
+            </add-error>
+            <check-errors/>
+        </if-empty>
+        <if-has-permission permission="HR_SETTING" action="_${parameters.mainAction}">
+            <set field="hasPermission" type="Boolean" value="true"/>
+            <field-to-result field="hasPermission"/>
+            <else>
+                <property-to-field resource="hrolbiusUiLabels" property="ServiceNoPermission" field="failMessage"/>
+                <set field="hasPermission" type="Boolean" value="false"/>
+                <field-to-result field="hasPermission"/>
+                <field-to-result field="failMessage"/>
+            </else>
+        </if-has-permission>
+    </simple-method>
+</simple-methods>

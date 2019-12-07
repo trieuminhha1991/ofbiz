@@ -1,0 +1,993 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information regarding copyright ownership. The ASF licenses this file to you under
+    the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may
+    obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to
+    in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+    ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under
+    the License. -->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+
+    <!-- Custom apps can use their own invoice decorator by specifying its location in parameters.invoiceDecoratorLocation -->
+    <screen name="CommonInvoiceDecorator">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true" />
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true" />
+                <set field="headerItem" value="invoices" />
+                <set field="selectedSubMenuItem" value="accApInvoiceList"/>
+            </actions>
+            <widgets>
+                <section>
+                    <condition>
+                        <if-service-permission service-name="acctgInvoicePermissionCheck"
+                            main-action="VIEW" />
+                    </condition>
+                    <actions>
+                        <set field="tabBarName" value="InvoiceTabBar" global="true" />
+                        <set field="tabBarLocation" value="component://delys/widget/accounting/ap/AccApAccountingMenus.xml"
+                            global="true" />
+                        <set field="subTabBarName" value="InvoiceTabBarAdvance"
+								global="true" />
+						<set field="subTabBarLocation"
+							value="component://delys/widget/accounting/ap/AccApAccountingMenus.xml"
+							global="true" />
+                        <!-- <set field="extraFunctionNamePage" value="${${extraFunctionName}}" global="true" /> -->
+                        <!-- <set field="titleHeaderValue" value="promotitle" global="true" /> -->
+                        <set field="titleHeaderContent" value="${invoiceId}" />
+                        <!-- <set field="titleHeaderLocation" value="component://delys/widget/accounting/ap/AccApAccountingMenus.xml"
+                            global="true" /> -->
+                    </actions>
+                    <widgets>
+                        <section>
+                            <actions>
+                                <set field="printTabBar" value="true" />
+                            </actions>
+                            <widgets>
+
+                            </widgets>
+                        </section>
+                    </widgets>
+                </section>
+                <decorator-screen name="main-decorator" location="component://delys/widget/accounting/ap/CommonScreens.xml">
+                    <decorator-section name="pre-body">
+                        <section>
+                            <condition>
+                                <if-service-permission service-name="acctgInvoicePermissionCheck"
+                                    main-action="VIEW" />
+                            </condition>
+                            <widgets>
+                                <!-- <include-menu name="InvoiceTabBar" location="component://delys/widget/accounting/ap/AccApAccountingMenus.xml"/> -->
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-service-permission service-name="acctgInvoicePermissionCheck"
+                                    main-action="VIEW" />
+                            </condition>
+                            <widgets>
+                                <section>
+                                    <condition>
+                                        <not>
+                                            <if-empty field="parameters.invoiceId" />
+                                        </not>
+                                    </condition>
+                                    <widgets>
+                                        <screenlet
+                                            title="${uiLabelMap[labelTitleProperty]} ${uiLabelMap.OrderInvoices}:[${invoiceId}]  ${${extraFunctionName}}"
+                                            navigation-menu-name="InvoiceSubTabBar">
+                                            <include-menu name="InvoiceSubTabBar"
+                                                location="component://delys/widget/accounting/ap/AccApAccountingMenus.xml" />
+                                        </screenlet>
+                                        <!-- <include-menu name="InvoiceSubTabBar" location="component://delys/widget/accounting/ap/AccApAccountingMenus.xml"/> -->
+                                        <!-- <container style="blue smaller header l"> -->
+                                        <!-- <label style="h3" text="${uiLabelMap[labelTitleProperty]} ${uiLabelMap.CommonFor}:
+                                            ${invoice.description} [${invoiceId}] ${${extraFunctionName}}"/> -->
+                                        <!-- </container> -->
+                                    </widgets>
+                                </section>
+                                <decorator-section-include name="body" />
+                            </widgets>
+                            <fail-widgets>
+                                <label style="h3">${uiLabelMap.AccountingViewPermissionError}</label>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="FindInvoices">
+        <section>
+            <actions>
+                <set field="navMenuName" value="InvoiceSubTabBar" />
+                <set field="navMenuLocation" value="component://delys/widget/accounting/ap/AccApAccountingMenus.xml" />
+                <set field="headerItem" value="invoices" />
+                <set field="tabButtonItem" value="find" />
+                <set field="titleProperty" value="PageTitleFindInvoice" />
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonInvoiceDecorator" location="component://delys/widget/accounting/ap/AccApInvoiceScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+                                    <decorator-section name="search-options">
+                                        <include-form name="FindInvoices"
+                                            location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" />
+                                    </decorator-section>
+                                    <decorator-section name="search-results">
+                                        <include-form name="ListInvoices"
+                                            location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" />
+                                    </decorator-section>
+                                </decorator-screen>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="NewInvoice">
+        <section>
+            <actions>
+                <set field="titleProperty" value="AccountingCreateNewInvoice" />
+                <entity-one entity-name="Invoice" value-field="invoice" />
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonInvoiceDecorator" location="component://delys/widget/accounting/ap/AccApInvoiceScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.AccountingCreateNewSalesInvoice}">
+                                    <include-form name="NewSalesInvoice"
+                                        location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" />
+                                </screenlet>
+                                <screenlet title="${uiLabelMap.AccountingCreateNewPurchaseInvoice}">
+                                    <include-form name="NewPurchaseInvoice"
+                                        location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" />
+                                </screenlet>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditInvoice">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditInvoice" />
+                <set field="tabButtonItem" value="editInvoice" />
+                <set field="invoiceId" from-field="parameters.invoiceId" />
+                <entity-one entity-name="Invoice" value-field="invoice" />
+                <entity-one entity-name="InvoiceType" value-field="invoiceType">
+                    <field-map field-name="invoiceTypeId" from-field="invoice.invoiceTypeId" />
+                </entity-one>
+
+                <set field="selectedSubMenuItem" value="accApCreateInvoice" />
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonInvoiceDecorator" location="component://delys/widget/accounting/ap/AccApInvoiceScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-compare field="invoice.statusId" operator="equals" value="INVOICE_IN_PROCESS" />
+                            </condition>
+                            <widgets>
+                                <screenlet>
+<!--                                     <include-form name="EditInvoice" -->
+<!--                                         location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" /> -->
+										<platform-specific>
+                                               <html>
+                                                   <html-template location="component://delys/webapp/delys/accounting/EditInvoice.ftl"/>
+                                               </html>
+                                     </platform-specific>
+                                </screenlet>
+                            </widgets>
+                            <fail-widgets>
+                                <screenlet>
+<!--                                     <include-form name="invoiceHeader" -->
+<!--                                         location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" /> -->
+                                     <platform-specific>
+                                                 <html>
+                                                     <html-template location="component://delys/webapp/delys/accounting/listInvoiceHeader.ftl"/>
+                                                 </html>
+                                     </platform-specific>
+                                </screenlet>
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+	<screen name="ListInvoiceStatus">
+	    <section>
+	        <actions>
+	             <set field="titleProperty" value="CommonStatus" />
+	        </actions>
+	        <widgets>
+<!--                    <include-form name="ListInvoiceStatus" -->
+<!--                        location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" /> -->
+                   <platform-specific>
+                       <html>
+                           <html-template location="component://delys/webapp/delys/accounting/invoice/listInvoiceStatus.ftl"/>
+                       </html>
+                   </platform-specific>
+	        </widgets>
+	    </section>
+	    
+	</screen>
+	<screen name="ListInvoiceTerms">
+	    <section>
+	        <actions>
+	            <set field="titleProperty" value="PartyTerms"/>
+	        </actions>
+	        <widgets>
+<!--                   <include-form name="ListInvoiceTerms" -->
+<!--                         location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" /> -->
+	                  <platform-specific>
+	                      <html>
+	                          <html-template location="component://delys/webapp/delys/accounting/invoice/listInvoiceTerms.ftl"/>
+	                      </html>
+	                  </platform-specific>
+<!--                     <include-form name="ListInvoicePaymentInfo" -->
+<!--                     location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" /> -->
+                    <platform-specific>
+	                      <html>
+	                          <html-template location="component://delys/webapp/delys/accounting/invoice/listInvoicePaymentInfo.ftl"/>
+	                      </html>
+	                  </platform-specific>
+	        </widgets>
+	    </section>
+	</screen>
+	
+	<screen name="ListInvoiceApplications">
+	    <section>
+	        <actions>
+	            <set field="titleProperty" value="${uiLabelMap.AccountingAppliedPayments} ${appliedAmount?currency(${invoice.currencyUomId})} ${uiLabelMap.AccountingOpenPayments} ${notAppliedAmount?currency(${invoice.currencyUomId})}"/>
+	        </actions>
+	        <widgets>
+                   <!-- <screenlet
+                            title="${uiLabelMap.AccountingAppliedPayments} ${appliedAmount?currency(${invoice.currencyUomId})} ${uiLabelMap.AccountingOpenPayments} ${notAppliedAmount?currency(${invoice.currencyUomId})}"
+                            navigation-form-name="ListInvoiceApplications"> -->
+<!--                                         <container style="padding-top8 padding-bottom8"> -->
+<!--                                             <link target="accApeditInvoiceApplications" text="${uiLabelMap.CommonUpdate}" -->
+<!--                                                 style="icon-ok open-sans btn-mini btn btn-small btn-info"> -->
+<!--                                                 <parameter param-name="invoiceId" /> -->
+<!--                                             </link> -->
+<!--                                         </container> -->
+<!-- 	                                    <platform-specific> -->
+<!-- 	                                    <html>                                 	 -->
+<!-- 	                                        <html-template location="component://delys/webapp/delys/accounting/listInvoiceApplicationsJQ.ftl"/> -->
+<!-- 	                                    </html> -->
+<!-- 	                                	</platform-specific>                                         -->
+<!--                     <include-form name="ListInvoiceApplications" -->
+<!--                         location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" /> -->
+                     <platform-specific>
+	                      <html>
+	                          <html-template location="component://delys/webapp/delys/accounting/invoice/listInvoicesApplicationJQ.ftl"/>
+	                      </html>
+	                  </platform-specific>
+               	 	<!-- </screenlet> -->
+	        </widgets>
+	    </section>
+	</screen>
+    <screen name="invoiceOverview">
+        <section>
+            <actions>
+                <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true" />
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true" />
+                <set field="titleProperty" value="PageTitleInvoiceOverview" />
+                <set field="tabButtonItem" value="invoiceOverview" />
+                <set field="invoiceId" from-field="parameters.invoiceId" />
+                <entity-one entity-name="Invoice" value-field="invoice" />
+                <entity-and entity-name="InvoiceRole" list="invoiceRoles">
+                    <field-map from-field="parameters.invoiceId" field-name="invoiceId" />
+                    <order-by field-name="partyId" />
+                </entity-and>
+                <entity-and entity-name="InvoiceStatus" list="invoiceStatus">
+                    <field-map from-field="parameters.invoiceId" field-name="invoiceId" />
+                    <order-by field-name="statusDate" />
+                </entity-and>
+                <entity-and entity-name="InvoiceTerm" list="invoiceTerms">
+                    <field-map from-field="parameters.invoiceId" field-name="invoiceId" />
+                    <order-by field-name="invoiceTermId" />
+                </entity-and>
+                <entity-and entity-name="TimeEntry" list="timeEntries">
+                    <field-map from-field="parameters.invoiceId" field-name="invoiceId" />
+                    <order-by field-name="invoiceItemSeqId" />
+                </entity-and>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/invoice/CreateApplicationList.groovy" />
+                <set field="invoiceAmount" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceTotal(invoice)}"
+                    type="BigDecimal" />
+                <set field="notAppliedAmount" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceNotApplied(invoice)}"
+                    type="BigDecimal" />
+                <set field="appliedAmount" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceApplied(invoice)}"
+                    type="BigDecimal" />
+                <entity-condition entity-name="InvItemAndOrdItem" list="invItemAndOrdItems">
+                    <condition-expr field-name="invoiceId" operator="equals" from-field="invoiceId" />
+                    <order-by field-name="invoiceItemSeqId" />
+                </entity-condition>
+                <entity-condition entity-name="AcctgTransAndEntries" list="acctgTransAndEntries">
+                    <condition-expr field-name="invoiceId" operator="equals" from-field="invoiceId" />
+                    <order-by field-name="acctgTransId" />
+                    <order-by field-name="acctgTransEntrySeqId" />
+                </entity-condition>
+                <set field="conditionsFind" value="|OLBIUS|invoiceId|SUIBLO|${invoiceId}|SUIBLO|EQUAL|SUIBLO|0"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonInvoiceDecorator" location="component://delys/widget/accounting/ap/AccApInvoiceScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-compare field="invoice.statusId" operator="equals" value="INVOICE_IN_PROCESS" />
+                            </condition>
+                            <widgets>
+                                <container style="row-fluid">
+                                    <container style="no-left-margin span12">
+                                        <screenlet title="${uiLabelMap.AccountingInvoiceHeader}">
+<!--                                             <include-form name="invoiceHeader" -->
+<!--                                                 location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" /> -->
+	                                           <platform-specific> 
+				                                     <html>                                 	 
+				                                         <html-template location="component://delys/webapp/delys/accounting/listInvoiceHeader.ftl"/> 
+				                                     </html> 
+			                                 	</platform-specific> 
+                                        </screenlet>
+                                    </container>
+                                <container style="clear" />                                                                    	
+                                    <container>
+                                        <platform-specific> 
+		                                     <html>                                 	 
+		                                         <html-template location="component://delys/webapp/delys/accounting/listAPInvoiceItemsJQ.ftl"/> 
+		                                     </html> 
+	                                 	</platform-specific> 
+                                    </container>
+                                </container>
+                                <section>
+                                    <condition>
+                                        <not>
+                                            <if-empty field="timeEntries" />
+                                        </not>
+                                    </condition>
+                                    <widgets>
+                                        <screenlet title="${uiLabelMap.AccountingInvoiceTimeEntries}"
+                                            navigation-form-name="ListTimeEntries">
+                                            <include-form name="ListTimeEntries"
+                                                location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" />
+                                        </screenlet>
+                                    </widgets>
+                                </section>
+                                <container style="margin-top15">
+                                     <platform-specific> 
+	                                    <html>                                 	 
+	                                        <html-template location="component://delys/webapp/delys/accounting/listAPAcctgTransAndEntriesJQ.ftl"/> 
+	                                    </html> 
+                               		</platform-specific>
+                                </container>
+                                <container style="clear" />         
+                                <container>
+                                    <screenlet id="viewMore" collapsible="true" title="${uiLabelMap.ViewMoreCommonInvoice}">
+                                        <platform-specific> 
+		                                     <html>                                 	 
+		                                         <html-template location="component://delys/webapp/delys/accounting/formJqxAccounting/listCommonInfoInvoice.ftl"/> 
+		                                     </html> 
+	                                 	</platform-specific>
+                                    </screenlet>
+                                </container>    
+                            </widgets>
+                            <fail-widgets>
+                                <container style="row-fluid">
+                                    <container style="span12 no-left-margin">
+                                        <screenlet title="${uiLabelMap.AccountingInvoiceHeader}">
+                                            <!-- <include-menu name="InvoiceSubTabBar" location="component://delys/widget/accounting/ap/AccApAccountingMenus.xml"/> -->
+<!--                                             <include-form name="invoiceHeader" -->
+<!--                                                 location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" /> -->
+                                             <platform-specific> 
+				                                     <html>                                 	 
+				                                         <html-template location="component://delys/webapp/delys/accounting/listInvoiceHeader.ftl"/> 
+				                                     </html> 
+			                                 	</platform-specific> 
+                                        </screenlet>
+                                    </container>
+                                </container>
+                                <container style="clear" />
+                                <screenlet navigation-form-name="invoiceItems">
+                                    <container>
+                                        <platform-specific> 
+		                                     <html>                                 	 
+		                                         <html-template location="component://delys/webapp/delys/accounting/listAPInvoiceItemsJQ.ftl"/> 
+		                                     </html> 
+	                                 	</platform-specific> 
+                                    </container>
+                                </screenlet>
+                                <section>
+                                    <condition>
+                                        <not>
+                                            <if-empty field="timeEntries" />
+                                        </not>
+                                    </condition>
+                                    <widgets>
+                                        <screenlet title="${uiLabelMap.AccountingInvoiceTimeEntries}"
+                                            navigation-form-name="ListTimeEntries">
+                                            <container id="table-container">
+                                                <include-form name="ListTimeEntries"
+                                                    location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" />
+                                            </container>
+                                        </screenlet>
+                                    </widgets>
+                                </section>
+                                <screenlet  navigation-form-name="AcctgTransAndEntries">
+                                    <container  style="margin-top15">
+                                        <platform-specific> 
+		                                     <html>                                 	 
+		                                         <html-template location="component://delys/webapp/delys/accounting/listAPAcctgTransAndEntriesJQ.ftl"/> 
+		                                     </html> 
+	                                 	</platform-specific>
+                                    </container>
+                                </screenlet>
+                                 <container>
+                                    <screenlet id="viewMore" collapsible="true" title="${uiLabelMap.ViewMoreCommonInvoice}">
+                                        <platform-specific> 
+		                                     <html>                                 	 
+		                                         <html-template location="component://delys/webapp/delys/accounting/formJqxAccounting/listCommonInfoInvoice.ftl"/> 
+		                                     </html> 
+	                                 	</platform-specific>
+                                    </screenlet>
+                                </container>  
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    
+    <screen name="invoiceOverview1">
+        <section>
+            <actions>
+                <property-map resource="PartyUiLabels" map-name="uiLabelMap" global="true" />
+                <property-map resource="ProductUiLabels" map-name="uiLabelMap" global="true" />
+                <set field="titleProperty" value="PageTitleInvoiceOverview" />
+                <set field="tabButtonItem" value="invoiceOverview" />
+                <set field="invoiceId" from-field="parameters.invoiceId" />
+                <entity-one entity-name="Invoice" value-field="invoice" />
+                <entity-and entity-name="InvoiceRole" list="invoiceRoles">
+                    <field-map from-field="parameters.invoiceId" field-name="invoiceId" />
+                    <order-by field-name="partyId" />
+                </entity-and>
+                <entity-and entity-name="InvoiceStatus" list="invoiceStatus">
+                    <field-map from-field="parameters.invoiceId" field-name="invoiceId" />
+                    <order-by field-name="statusDate" />
+                </entity-and>
+                <entity-and entity-name="InvoiceTerm" list="invoiceTerms">
+                    <field-map from-field="parameters.invoiceId" field-name="invoiceId" />
+                    <order-by field-name="invoiceTermId" />
+                </entity-and>
+                <entity-and entity-name="TimeEntry" list="timeEntries">
+                    <field-map from-field="parameters.invoiceId" field-name="invoiceId" />
+                    <order-by field-name="invoiceItemSeqId" />
+                </entity-and>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/invoice/CreateApplicationList.groovy" />
+                <set field="invoiceAmount" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceTotal(invoice)}"
+                    type="BigDecimal" />
+                <set field="notAppliedAmount" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceNotApplied(invoice)}"
+                    type="BigDecimal" />
+                <set field="appliedAmount" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceApplied(invoice)}"
+                    type="BigDecimal" />
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/invoice/GetInvoiceItemTypes.groovy" />
+                <entity-condition entity-name="InvItemAndOrdItem" list="invItemAndOrdItems">
+                    <condition-expr field-name="invoiceId" operator="equals" from-field="invoiceId" />
+                    <order-by field-name="invoiceItemSeqId" />
+                </entity-condition>
+                <entity-condition entity-name="AcctgTransAndEntries" list="acctgTransAndEntries">
+                    <condition-expr field-name="invoiceId" operator="equals" from-field="invoiceId" />
+                    <order-by field-name="acctgTransId" />
+                    <order-by field-name="acctgTransEntrySeqId" />
+                </entity-condition>
+                <property-to-field field="defaultCurrencyUomId" resource="general" property="currency.uom.id.default"
+                    default="USD" />
+                <set field="conditionsFind" value="|OLBIUS|invoiceId|SUIBLO|${invoiceId}|SUIBLO|EQUAL|SUIBLO|0"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonInvoiceDecorator" location="component://delys/widget/accounting/ap/AccApInvoiceScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+<!--                             <condition> -->
+<!--                                 <if-compare field="invoice.statusId" operator="equals" value="INVOICE_IN_PROCESS" /> -->
+<!--                             </condition> -->
+                            <widgets>
+                                <container style="row-fluid">
+                                    <container style="no-left-margin span12">
+<!--                                         <screenlet title="${uiLabelMap.AccountingInvoiceHeader}"> -->
+<!--                                             <include-form name="invoiceHeader" -->
+<!--                                                 location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" /> -->
+	                                           <platform-specific> 
+				                                     <html>                                 	 
+				                                         <html-template location="component://delys/webapp/delys/accounting/invoicesTest/jqxApInvoiceDetail.ftl"/> 
+				                                     </html> 
+			                                 	</platform-specific> 
+<!--                                         </screenlet> -->
+                                    </container>
+                                <container style="clear" />                                                                    	
+<!--                                     <container> -->
+<!--                                         <platform-specific>  -->
+<!-- 		                                     <html>                                 	  -->
+<!-- 		                                         <html-template location="component://delys/webapp/delys/accounting/listAPInvoiceItemsJQ.ftl"/>  -->
+<!-- 		                                     </html>  -->
+<!-- 	                                 	</platform-specific>  -->
+<!--                                     </container> -->
+                                </container>
+                                <section>
+                                    <condition>
+                                        <not>
+                                            <if-empty field="timeEntries" />
+                                        </not>
+                                    </condition>
+                                    <widgets>
+<!--                                         <screenlet title="${uiLabelMap.AccountingInvoiceTimeEntries}" -->
+<!--                                             navigation-form-name="ListTimeEntries"> -->
+<!--                                             <include-form name="ListTimeEntries" -->
+<!--                                                 location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" /> -->
+<!--                                         </screenlet> -->
+                                    </widgets>
+                                </section>
+                                <container style="margin-top15">
+<!--                                      <platform-specific>  -->
+<!-- 	                                    <html>                                 	  -->
+<!-- 	                                        <html-template location="component://delys/webapp/delys/accounting/listAPAcctgTransAndEntriesJQ.ftl"/>  -->
+<!-- 	                                    </html>  -->
+<!--                                		</platform-specific> -->
+                                </container>
+                                <container style="clear" />         
+                                <container>
+<!--                                     <screenlet id="viewMore" collapsible="true" title="${uiLabelMap.ViewMoreCommonInvoice}"> -->
+<!--                                         <platform-specific>  -->
+<!-- 		                                     <html>                                 	  -->
+<!-- 		                                         <html-template location="component://delys/webapp/delys/accounting/formJqxAccounting/listCommonInfoInvoice.ftl"/>  -->
+<!-- 		                                     </html>  -->
+<!-- 	                                 	</platform-specific> -->
+<!--                                     </screenlet> -->
+                                </container>    
+                            </widgets>
+                            <fail-widgets>
+                                <container style="row-fluid">
+                                    <container style="span12 no-left-margin">
+                                        <screenlet title="${uiLabelMap.AccountingInvoiceHeader}">
+                                            <!-- <include-menu name="InvoiceSubTabBar" location="component://delys/widget/accounting/ap/AccApAccountingMenus.xml"/> -->
+<!--                                             <include-form name="invoiceHeader" -->
+<!--                                                 location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" /> -->
+<!--                                              <platform-specific>  -->
+<!-- 				                                     <html>                                 	  -->
+<!-- 				                                         <html-template location="component://delys/webapp/delys/accounting/listInvoiceHeader.ftl"/>  -->
+<!-- 				                                     </html>  -->
+<!-- 			                                 	</platform-specific>  -->
+                                        </screenlet>
+                                    </container>
+                                </container>
+                                <container style="clear" />
+                                <screenlet navigation-form-name="invoiceItems">
+                                    <container>
+<!--                                         <platform-specific>  -->
+<!-- 		                                     <html>                                 	  -->
+<!-- 		                                         <html-template location="component://delys/webapp/delys/accounting/listAPInvoiceItemsJQ.ftl"/>  -->
+<!-- 		                                     </html>  -->
+<!-- 	                                 	</platform-specific>  -->
+                                    </container>
+                                </screenlet>
+                                <section>
+                                    <condition>
+                                        <not>
+                                            <if-empty field="timeEntries" />
+                                        </not>
+                                    </condition>
+                                    <widgets>
+<!--                                         <screenlet title="${uiLabelMap.AccountingInvoiceTimeEntries}" -->
+<!--                                             navigation-form-name="ListTimeEntries"> -->
+<!--                                             <container id="table-container"> -->
+<!--                                                 <include-form name="ListTimeEntries" -->
+<!--                                                     location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" /> -->
+<!--                                             </container> -->
+<!--                                         </screenlet> -->
+                                    </widgets>
+                                </section>
+                                <screenlet  navigation-form-name="AcctgTransAndEntries">
+                                    <container  style="margin-top15">
+<!--                                         <platform-specific>  -->
+<!-- 		                                     <html>                                 	  -->
+<!-- 		                                         <html-template location="component://delys/webapp/delys/accounting/listAPAcctgTransAndEntriesJQ.ftl"/>  -->
+<!-- 		                                     </html>  -->
+<!-- 	                                 	</platform-specific> -->
+                                    </container>
+                                </screenlet>
+                                 <container>
+<!--                                     <screenlet id="viewMore" collapsible="true" title="${uiLabelMap.ViewMoreCommonInvoice}"> -->
+<!--                                         <platform-specific>  -->
+<!-- 		                                     <html>                                 	  -->
+<!-- 		                                         <html-template location="component://delys/webapp/delys/accounting/formJqxAccounting/listCommonInfoInvoice.ftl"/>  -->
+<!-- 		                                     </html>  -->
+<!-- 	                                 	</platform-specific> -->
+<!--                                     </screenlet> -->
+                                </container>  
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="InvoiceStatus">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListInvoices" />
+                <set field="tabButtonItem" value="invoiceStatus" />
+                <set field="invoiceId" from-field="parameters.invoiceId" />
+                <entity-one entity-name="Invoice" value-field="invoice" auto-field-map="true" />
+                <entity-and entity-name="InvoiceStatus" list="invoiceStatus">
+                    <field-map from-field="invoice.invoiceId" field-name="invoiceId" />
+                    <order-by field-name="statusDate" />
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonInvoiceDecorator" location="component://delys/widget/accounting/ap/AccApInvoiceScreens.xml">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.AccountingInvoiceStatusHistory}">
+                            <include-form name="ListInvoiceStatus"
+                                location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" />
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditInvoiceApplications">
+        <section>
+            <actions>
+                <set field="titleProperty" value="" />
+                <set field="tabButtonItem" value="editInvoiceApplications" />
+                <set field="invoiceId" from-field="parameters.invoiceId" />
+                <entity-one entity-name="Invoice" value-field="invoice" />
+<!--                 <script location="component://accounting/webapp/accounting/WEB-INF/actions/invoice/CreateApplicationList.groovy" /> -->
+<!--                 <script location="component://accounting/webapp/accounting/WEB-INF/actions/invoice/ListNotAppliedPayments.groovy" /> -->
+                <set field="invoiceAmount" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceTotal(invoice)}"
+                    type="BigDecimal" />
+                <set field="notAppliedAmount" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceNotApplied(invoice)}"
+                    type="BigDecimal" />
+                <set field="appliedAmount" value="${bsh:org.ofbiz.accounting.invoice.InvoiceWorker.getInvoiceApplied(invoice)}"
+                    type="BigDecimal" />
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonInvoiceDecorator" location="component://delys/widget/accounting/ap/AccApInvoiceScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                            <condition>
+                                <if-compare field="notAppliedAmount" operator="greater" value="0" />
+                            </condition>
+                            <widgets>	
+                                <screenlet
+                                    title="">
+<!--                                     <include-form name="EditInvoiceApplications" -->
+<!--                                         location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" /> -->
+                                    <platform-specific>
+                                        <html>
+                                            <html-template location="component://delys/webapp/delys/accounting/EditInvoiceApplications.ftl"/>
+                                        </html>
+                                    </platform-specific>
+                                </screenlet>
+<!--                                 <section> -->
+<!--                                     <condition> -->
+<!--                                         <if-empty field="invoiceApplications" /> -->
+<!--                                     </condition> -->
+<!--                                     <widgets> -->
+<!--                                         <container style="alert alert-info"> -->
+<!--                                             <label style="h3" text="${uiLabelMap.AccountingNoPaymentsApplicationsfound}"></label> -->
+<!--                                         </container> -->
+<!--                                     </widgets> -->
+<!--                                 </section> -->
+                                <section>
+                                    <condition>
+                                        <or>
+                                            <not>
+                                                <if-empty field="payments" />
+                                            </not>
+                                            <not>
+                                                <if-empty field="paymentsActualCurrency" />
+                                            </not>
+                                        </or>
+                                    </condition>
+                                    <widgets>
+                                        <screenlet
+                                            title="">
+                                            <section>
+                                                <condition>
+                                                    <not>
+                                                        <if-empty field="payments" />
+                                                    </not>
+                                                </condition>
+                                                <widgets>
+<!--                                                     <platform-specific> -->
+<!--                                                         <html> -->
+<!--                                                             <html-template location="component://delys/webapp/delys/accounting/formJqxAccounting/ListPaymentsNotApplied.ftl"/> -->
+<!--                                                         </html> -->
+<!--                                                     </platform-specific> -->
+<!--                                                     <include-form name="ListPaymentsNotApplied" -->
+<!--                                                         location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" /> -->
+                                                </widgets>
+                                            </section>
+                                            <section>
+                                                <condition>
+                                                    <not>
+                                                        <if-empty field="paymentsActualCurrency" />
+                                                    </not>
+                                                </condition>
+                                                <widgets>
+                                                    <include-form name="ListPaymentsNotAppliedForeignCurrency"
+                                                        location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" />
+                                                </widgets>
+                                            </section>
+                                        </screenlet>
+                                    </widgets>
+                                </section>
+<!--                                 <screenlet title="${uiLabelMap.AccountingAssignPaymentToInvoice}"> -->
+<!--                                     <platform-specific> -->
+<!--                                         <html> -->
+<!-- 					                        <html-template location="component://delys/webapp/delys/accounting/formJqxAccounting/AddPayment.ftl"/> 	                    -->
+<!--                                         </html> -->
+<!--                                     </platform-specific> -->
+<!--                                     <include-form name="AddPayment" -->
+<!--                                         location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" /> -->
+                                    
+<!--                                 </screenlet> -->
+                            </widgets>
+                            <fail-widgets>
+                                <screenlet
+                                    title="">
+<!--                                     <include-form name="EditInvoiceApplications" -->
+<!--                                         location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" /> -->
+                                    <platform-specific>
+                                        <html>
+                                            <html-template location="component://delys/webapp/delys/accounting/EditInvoiceApplications.ftl"/>
+                                        </html>
+                                    </platform-specific>
+                                </screenlet>
+<!--                                 <section> -->
+<!--                                     <condition> -->
+<!--                                         <if-empty field="invoiceApplications" /> -->
+<!--                                     </condition> -->
+<!--                                     <widgets> -->
+<!--                                         <container style="alert alert-info"> -->
+<!--                                             <label text="${uiLabelMap.AccountingNoPaymentsApplicationsfound}"></label> -->
+<!--                                         </container> -->
+<!--                                     </widgets> -->
+<!--                                 </section> -->
+                            </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+	
+    <screen name="EditInvoiceItems">
+        <section>
+            <actions>
+                <property-map resource="AccountingEntityLabels" map-name="uiLabelMap" global="true" />
+                <set field="viewIndex" from-field="parameters.viewIndex" />
+                <set field="viewSize" from-field="parameters.viewSize" />
+                <set field="titleProperty" value="${uiLabelMap.AccountingInvoiceItems}" />
+                <set field="tabButtonItem" value="listInvoiceItems" />
+                <set field="invoiceId" from-field="parameters.invoiceId" />
+                <set field="invoiceItemSeqd" from-field="parameters.invoiceItemSeqId" />
+                <property-to-field field="defaultCurrencyUomId" resource="general" property="currency.uom.id.default"
+                    default="USD" />
+                <entity-one entity-name="Invoice" value-field="invoice" />
+                <entity-one entity-name="InvoiceItem" value-field="invoiceItem" />
+                <entity-and entity-name="InvoiceItem" list="invoiceItems">
+                    <field-map field-name="invoiceId" from-field="parameters.invoiceId" />
+                    <order-by field-name="invoiceItemSeqId" />
+                </entity-and>
+                <script location="component://accounting/webapp/accounting/WEB-INF/actions/invoice/GetInvoiceItemTypes.groovy" />
+                <entity-condition entity-name="InvoiceItemType" list="PayrolGroup">
+                    <condition-expr field-name="parentTypeId" value="PAYROL" />
+                </entity-condition>
+                <entity-condition entity-name="InvoiceItemType" list="PayrolList"></entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonInvoiceDecorator" location="component://delys/widget/accounting/ap/AccApInvoiceScreens.xml">
+                    <decorator-section name="body">
+                       <screenlet>
+<!--                             <include-form name="EditInvoiceItems" -->
+<!--                                 location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" /> -->
+                            <platform-specific>
+                            	<html>
+                            		<html-template location="component://delys/webapp/delys/accounting/listProductInvoiceItems.ftl"/>
+                            	</html>
+                            </platform-specific>
+                        </screenlet>
+<!--                         <screenlet> -->
+<!--                             <section> -->
+<!--                                 <condition> -->
+<!--                                     <not> -->
+<!--                                         <if-compare field="invoice.invoiceTypeId" operator="equals" value="PAYROL_INVOICE" /> -->
+<!--                                     </not> -->
+<!--                                 </condition> -->
+<!--         	                     <widgets> -->
+                                    <!-- <include-form name="EditInvoiceItem"
+                                        location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" /> -->
+<!--                                     <platform-specific> -->
+<!--                                     	<html> -->
+<!--                                     		<html-template location="component://delys/webapp/delys/accounting/listProductInvoiceItems.ftl"/> -->
+<!--                                     	</html> -->
+<!--                                     </platform-specific> -->
+<!--                                 </widgets> -->
+<!--                                 <fail-widgets> -->
+<!-- 	                                    <platform-specific> -->
+<!-- 	                                        <html> -->
+<!-- 	                                                <html-template location="component://delys/webapp/delys/accounting/listProductInvoiceItems.ftl"/> -->
+<!-- 	                                        </html> -->
+<!-- 	                                    </platform-specific> -->
+<!--                                 </fail-widgets> -->
+<!--                             </section> -->
+<!--                         </screenlet> -->
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="EditInvoiceTimeEntries">
+        <section>
+            <actions>
+                <set field="viewIndex" from-field="parameters.viewIndex" />
+                <set field="viewSize" from-field="parameters.viewSize" />
+                <set field="titleProperty" value="PageTitleListInvoiceTimeEntries" />
+                <set field="tabButtonItem" value="EditInvoiceTimeEntries" />
+                <set field="invoiceId" from-field="parameters.invoiceId" />
+                <entity-one entity-name="Invoice" value-field="invoice" />
+                <entity-and entity-name="TimeEntry" list="timeEntries">
+                    <field-map field-name="invoiceId" from-field="parameters.invoiceId" />
+                    <order-by field-name="timeEntryId" />
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonInvoiceDecorator" location="component://delys/widget/accounting/ap/AccApInvoiceScreens.xml">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.AccountingInvoiceTimeEntries}">
+                            <include-form name="EditTimeEntries"
+                                location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" />
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="InvoiceRoles">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleListInvoiceRoles" />
+                <set field="tabButtonItem" value="invoiceRoles" />
+                <set field="invoiceId" from-field="parameters.invoiceId" />
+                <entity-one entity-name="Invoice" value-field="invoice" />
+                <entity-and entity-name="InvoiceRole" list="invoiceRoles">
+                    <field-map from-field="invoiceId" field-name="invoiceId" />
+                    <order-by field-name="partyId" />
+                </entity-and>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonInvoiceDecorator" location="component://delys/widget/accounting/ap/AccApInvoiceScreens.xml">
+                    <decorator-section name="body">
+                        <screenlet id="PartyInvoiceRolePanel" title="${uiLabelMap.AccountingPartyRoleAdd}"
+                            collapsible="true">
+                            <include-form name="EditInvoiceRole"
+                                location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" />
+                        </screenlet>
+                        <include-form name="ListInvoiceRoles" location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" />
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="SendPerEmail">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleSendInvoicePerEmail" />
+                <set field="invoiceId" from-field="parameters.invoiceId" />
+                <entity-one entity-name="Invoice" value-field="invoice" />
+                <set field="tabButtonItem" value="sendPerEmail" />
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonInvoiceDecorator" location="component://delys/widget/accounting/ap/AccApInvoiceScreens.xml">
+                    <decorator-section name="body">
+                        <screenlet>
+<!--                             <include-form name="SendPerEmail" -->
+<!--                                 location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" /> -->
+                            <platform-specific>
+                                <html>
+                                    <html-template location="component://delys/webapp/delys/accounting/SendPerEmail.ftl"/>
+                                </html>
+                            </platform-specific>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="sendPerEmailBody">
+        <section>
+            <widgets>
+                <platform-specific>
+                    <html>
+                        <html-template location="component://accounting/webapp/accounting/invoice/sendPerEmail.ftl" />
+                    </html>
+                </platform-specific>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ListCustomerInvoices">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true" />
+                <script location="component://party/webapp/partymgr/WEB-INF/actions/party/GetMyCompany.groovy" />
+                <entity-condition list="invoices" entity-name="Invoice">
+                    <condition-list combine="and">
+                        <condition-expr field-name="partyId" operator="equals" from-field="myCompanyId" />
+                        <condition-list combine="or">
+                            <condition-expr field-name="statusId" operator="equals" value="INVOICE_APPROVED" />
+                            <condition-expr field-name="statusId" operator="equals" value="INVOICE_SENT" />
+                            <condition-expr field-name="statusId" operator="equals" value="INVOICE_READY" />
+                            <condition-expr field-name="statusId" operator="equals" value="INVOICE_PAID" />
+                        </condition-list>
+                    </condition-list>
+                    <order-by field-name="invoiceDate DESC" />
+                </entity-condition>
+            </actions>
+            <widgets>
+                <screenlet title="${uiLabelMap.PageTitleListInvoices}" navigation-form-name="ListInvoices">
+                    <include-form name="ListCustomerInvoices" location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" />
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="ListSupplierInvoices">
+        <section>
+            <actions>
+                <set field="myCompanyId" from-field="userLogin.partyId" />
+                <entity-condition list="invoiceslistexternal" entity-name="Invoice">
+                    <condition-list combine="and">
+                        <condition-expr field-name="partyIdFrom" operator="equals" from-field="myCompanyId" />
+                        <condition-expr field-name="invoiceTypeId" operator="equals" value="PURCHASE_INVOICE" />
+                        <condition-list combine="or">
+                            <condition-expr field-name="statusId" operator="equals" value="INVOICE_APPROVED" />
+                            <condition-expr field-name="statusId" operator="equals" value="INVOICE_SENT" />
+                            <condition-expr field-name="statusId" operator="equals" value="INVOICE_READY" />
+                            <condition-expr field-name="statusId" operator="equals" value="INVOICE_PAID" />
+                        </condition-list>
+                    </condition-list>
+                    <order-by field-name="invoiceDate DESC" />
+                </entity-condition>
+            </actions>
+            <widgets>
+                <screenlet title="${uiLabelMap.PageTitleListInvoices}" navigation-form-name="ListInvoices">
+                    <include-form name="ListSupplierInvoices" location="component://delys/widget/accounting/ap/AccApInvoiceForms.xml" />
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+</screens>

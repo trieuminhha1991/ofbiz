@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-screen.xsd">
+
+	<screen name="editContentTitle">
+		<section>
+			<condition>
+				<not>
+					<if-empty field="parameters.contentId" />
+				</not>
+			</condition>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text="${uiLabelMap.DAId}: "></label>
+				<link url-mode="plain" target="ProductContent?contentId=${parameters.contentId}&amp;productId=${parameters.productId}" text="${parameters.contentId}"></link>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="ContentEditorEngine">
+		<section>
+			<actions>
+				<set field="titleHeaderValue" value="editContentTitle" global="true" />
+				<set field="titleHeaderLocation" value="component://baseecommerce/widget/ContentScreens.xml" global="true" />
+				<set field="selectedMenuItem" value="content" />
+				<set field="titleProperty" value="DAAbbListDistributor" />
+				<entity-one value-field="content" entity-name="Content">
+					<field-map field-name="contentId" from-field="parameters.contentId" />
+				</entity-one>
+				<entity-one value-field="product" entity-name="Product">
+					<field-map field-name="productId" from-field="parameters.productId" />
+				</entity-one>
+				<entity-one value-field="contentType" entity-name="ContentType">
+					<field-map field-name="contentTypeId" from-field="parameters.contentTypeId" />
+				</entity-one>
+				<script location="component://baseecommerce/webapp/baseecommerce/WEB-INF/actions/backend/content/ContentEditorEngine.groovy" />
+			</actions>
+			<widgets>
+				<decorator-screen name="EcommerceBackEndDecorator" location="component://baseecommerce/widget/CommonScreens.xml">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission />
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://baseecommerce/webapp/baseecommerce/backend/content/contentEditorEngine.ftl" />
+									</html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}" />
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="BrowserImageUpload">
+		<section>
+			<actions>
+				<set field="path" from-field="parameters.url" />
+			</actions>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baseecommerce/webapp/baseecommerce/backend/content/browserImageUpload.ftl" />
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="ListContent">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="content" />
+				<set field="selectedSubMenuItem" value="ListProductContent" />
+				<set field="titleProperty" value="BSListProductContent" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-compare operator="equals" value="PRODUCT" field="parameters.type" />
+					</condition>
+					<widgets>
+						<include-screen location="component://baseecommerce/widget/ConfigProductScreens.xml" name="ListProductContent" />
+					</widgets>
+					<fail-widgets>
+						<include-screen location="component://baseecommerce/widget/TopicScreens.xml" name="ListTopicContent" />
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	
+</screens>

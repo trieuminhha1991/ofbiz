@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service-eca xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/service-eca.xsd">
+        
+	<eca service="changeQuotaItemStatus" event="commit">
+     	<action mode="sync" service="checkQuotaStatus"/>
+    </eca>
+    
+	<eca service="changeProductEventItemStatus" event="commit">
+     	<action mode="sync" service="checkProductEventStatus"/>
+    </eca>
+    
+<!--    	<eca service="updateAgreement" event="commit"> -->
+<!--    		<condition operator="equals" field-name="statusId" type="String" value="AGREEMENT_PROCESSING"/> -->
+<!--      	<action mode="sync" service="createPurchaseOrderFromAgreement"/> -->
+<!--     </eca> -->
+    
+   	<eca service="updateAgreement" event="commit">
+   		<condition operator="equals" field-name="statusId" type="String" value="AGREEMENT_PROCESSING"/>
+     	<action mode="sync" service="updateQuotaFromAgreement"/>
+    </eca>
+    
+    <eca service="updateOrderItemsTotal" event="return">
+        <action service="updateProductPlanByOrder" mode="sync"/>
+    </eca>
+    
+    <eca service="changeOrderStatus" event="return">
+    	<condition field-name="statusId" operator="equals" value="ORDER_CANCELLED"/>
+    	<condition field-name="orderTypeId" operator="equals" value="PURCHASE_ORDER"/>
+        <action service="updateProductPlanByOrder" mode="sync"/>
+    </eca>
+    
+    <eca service="updateShipment" event="commit">
+        <condition-field field-name="statusId" operator="not-equals" to-field-name="oldStatusId"/>
+        <condition field-name="statusId" operator="equals" value="PURCH_SHIP_RECEIVED"/>
+        <condition field-name="shipmentTypeId" operator="equals" value="PURCHASE_SHIPMENT"/>
+        <action service="updateProductPlanByShipment" mode="sync"/>
+    </eca>
+</service-eca>

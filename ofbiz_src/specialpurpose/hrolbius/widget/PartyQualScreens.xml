@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+    <screen name="FindPartyQuals">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="PartyQual"/>
+           		<set field="navMenuName" value="FindPartyQualsSubTabBar"/>
+				<set field="navMenuLocation" value="component://hrolbius/widget/menus/hrolbiusMenus.xml"/>
+                <set field="titleProperty" value="HRolbiusFindEmployeeQuaf"/>
+                <set field="tabButtonItem" value="PartyQualification"/>
+                <set field="partyId" from-field="parameters.partyId"/>
+                <set field="partyQualTypeId" from-field="parameters.partyQualTypeId"/>
+                <set field="fromDate" from-field="parameters.fromDate"/>
+                <set field="partyQualCtx" from-field="parameters"/>
+                <set field="editPartyId" value="true" type="Boolean"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonDirectoryDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                        	<condition>
+                        		<if-has-permission permission="HR_EMPLQUALS" action="_VIEW"/>
+                        	</condition>
+	                        <widgets>
+		                        <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+		                            <decorator-section name="menu-bar">
+		                                <section>
+		                                    <widgets>
+		                                        <container style="button-bar">
+		                                            <link target="NewPartyQual" text="${uiLabelMap.HROlbiusNewPartyQual}" style="btn btn-primary btn-small"/>
+		                                        </container>
+		                                    </widgets>
+		                                </section>
+		                            </decorator-section>
+		                           <decorator-section name="search-options">
+		                               <include-form name="FindPartyQuals" location="component://hrolbius/widget/forms/PartyQualForms.xml"/>
+		                           </decorator-section>
+		                           <decorator-section name="search-results">
+			                          <container id="table-container">
+		                              		<include-form name="ListPartyQualsDir" location="component://hrolbius/widget/forms/PartyQualForms.xml"/>
+		                               </container>
+		                           </decorator-section>
+		                       </decorator-screen>
+	                       </widgets>
+	                       <fail-widgets>
+	                       		<label style="h2">${uiLabelMap.HROlbiusViewPermissionError}</label>
+	                       </fail-widgets>
+                       </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditPartyQuals">
+        <section>
+            <actions>
+                <set field="titleProperty" value="HROlbiusEditPartyQual"/>
+                <set field="tabButtonItem" value="PartyQualification"/>
+                <set field="partyId" from-field="parameters.partyId"/>
+                <set field="partyQualCtx.partyId" from-field="parameters.partyId"/>
+                <set field="parameters.insideEmployee" value="true"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonDirectoryDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                        	<condition>
+                        		<if-has-permission permission="HR_EMPLQUALS" action="_VIEW"/>
+                        	</condition>
+	                        <widgets>
+		                        <screenlet id="AddPartyQualPanel" title="${uiLabelMap.HumanResAddPartyQual}" collapsible="true">
+		                            <include-form name="AddPartyQual" location="component://hrolbius/widget/forms/PartyQualForms.xml"/>
+		                        </screenlet>
+		                        <include-form name="ListPartyQuals" location="component://hrolbius/widget/forms/PartyQualForms.xml"/>
+	                        </widgets>
+	                        <fail-widgets>
+								<label style="h2">${uiLabelMap.HROlbiusViewPermissionError}</label>	                        	
+	                        </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="NewPartyQual">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="PartyQual"/>
+                <set field="tabButtonItem" value="PartyQualification"/>
+                <entity-one entity-name="PartyQual" value-field="partyQual"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonDirectoryDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                        	<condition>
+                        		<if-has-permission permission="HR_EMPLQUALS" action="_VIEW"/>
+                        	</condition>
+	                        <widgets>
+		                        <screenlet title="${uiLabelMap.HROlbiusNewPartyQual}" navigation-menu-name="PartyQualMenu">
+		                        <include-menu location="component://hrolbius/widget/menus/hrolbiusMenus.xml" name="PartyQualMenu"/>
+		                            <section>
+		                                <widgets>
+		                                    <include-form name="AddPartyQual" location="component://hrolbius/widget/forms/PartyQualForms.xml"/>
+		                                </widgets>
+		                            </section>
+		                        </screenlet>
+                        	</widgets>
+                        	<fail-widgets>
+								<label style="h2">${uiLabelMap.HROlbiusViewPermissionError}</label>	                        	
+	                        </fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>  
+    <screen name="EmplQualificationDir">
+    	<section>
+			<actions>
+				<set field="navMenuName" value="FindPartyQualsSubTabBar" />
+				<set field="navMenuLocation" value="component://hrolbius/widget/menus/hrolbiusMenus.xml" />
+				<set field="tabButtonItem" value="EmployeeAdvancesTabBar" />
+				<set field="tabSubButtonItem" value="EmplQualificationDir" />
+				<set field="labelTitleProperty" value="HROlbiusEditPartyQual" />
+				<set field="titleProperty" value="HROlbiusEditPartyQual"/>
+				<set field="partyQualCtx" from-field="parameters"/>
+				
+				<set field="partyId" from-field="parameters.partyId"></set>
+				<set field="partyName" value="${groovy: if(partyId != null) org.ofbiz.party.party.PartyHelper.getPartyName(delegator, partyId, false)}"/>
+                
+             	<set field="editPartyId" value="false" type="Boolean"/>
+                <set field="donePage" value="EmplQualificationDir"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="profileDirDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+                       	<section>
+                       		<condition>
+                       			<if-has-permission permission="HR_EMPLQUALS" action="_VIEW"/>
+                       		</condition>
+	                       	<widgets>
+		                        <decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">
+		                            <decorator-section name="menu-bar">
+		                                <section>
+		                                    <widgets>
+		                                        <container style="button-bar">
+		                                            <link target="NewPartyQual" text="${uiLabelMap.HROlbiusNewPartyQual}" style="btn btn-primary btn-small"/>
+		                                        </container>
+		                                    </widgets>
+		                                </section>
+		                            </decorator-section>
+		                           <decorator-section name="search-options">
+		                               <include-form name="FindPartyQuals" location="component://hrolbius/widget/forms/PartyQualForms.xml"/>
+		                           </decorator-section>
+		                           <decorator-section name="search-results">
+			                          <container id="table-container">
+		                              		<include-form name="ListPartyQualsDir" location="component://hrolbius/widget/forms/PartyQualForms.xml"/>
+		                               </container>
+		                           </decorator-section>
+		                       </decorator-screen>
+	                       </widgets>
+	                       <fail-widgets>
+								<label style="h2">${uiLabelMap.HROlbiusViewPermissionError}</label>	                        	
+	                        </fail-widgets>
+                       </section>
+                    </decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+    </screen>  
+    <screen name="EmplQualification">
+    	<section>
+			<actions>
+				<set field="selectedSubMenuItem" value="EmplQualification"/>
+				<set field="labelTitleProperty" value="HROlbiusEditPartyQual" />
+				<set field="titleProperty" value="HROlbiusListPartyQual"/>
+				<set field="partyQualCtx" from-field="parameters"/>
+				
+				<set field="partyId" from-field="userLogin.partyId"></set>
+				<set field="partyName" value="${groovy: if(partyId != null) org.ofbiz.party.party.PartyHelper.getPartyName(delegator, partyId, false)}"/>
+                
+             	<set field="editPartyId" value="false" type="Boolean"/>
+                <set field="donePage" value="EmplQualification"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="profileDecorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+                        <platform-specific>
+							<html>
+								<html-template location="component://hrolbius/webapp/hrolbius/ftl/profile/jqxListEmplQualification.ftl"></html-template>
+							</html>
+						</platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+</screens>

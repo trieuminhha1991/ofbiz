@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+    <simple-method method-name="getAgreementByUserLogin" short-description="get list agreement by user login">
+    	<entity-condition list="partyRelationshipFromList" entity-name="PartyRelationship">
+    		<condition-list combine="and">
+    			<condition-expr field-name="partyIdFrom" from-field="userLogin.partyId"/>
+    			<condition-expr field-name="roleTypeIdFrom" value="CHILD_MEMBER"/>
+    			<condition-expr field-name="roleTypeIdTo" value="PARENT_MEMBER"/>
+    			<condition-expr field-name="partyRelationshipTypeId" value="CHILD"/>
+    		</condition-list>
+    	</entity-condition>
+    	<entity-condition list="partyRelationshipToList" entity-name="PartyRelationship">
+    		<condition-list combine="and">
+    			<condition-expr field-name="partyIdTo" from-field="userLogin.partyId"/>
+    			<condition-expr field-name="roleTypeIdTo" value="CHILD_MEMBER"/>
+    			<condition-expr field-name="roleTypeIdFrom" value="PARENT_MEMBER"/>
+    			<condition-expr field-name="partyRelationshipTypeId" value="PARENT"/>
+    		</condition-list>
+    	</entity-condition>
+    	<string-to-list string="${userLogin.partyId}" list="listPartySelect"/>
+    	<iterate entry="fromItem" list="partyRelationshipFromList">
+    		<string-to-list string="${fromItem.partyIdTo}" list="listPartySelect"/>
+    	</iterate>
+    	<iterate entry="toItem" list="partyRelationshipToList">
+    		<string-to-list string="${toItem.partyIdFrom}" list="listPartySelect"/>
+    	</iterate>
+    	<entity-condition list="agreementList" entity-name="Agreement">
+    		<condition-list combine="or">
+    			<condition-expr field-name="partyIdTo" operator="in" from-field="listPartySelect"/>
+    			<condition-expr field-name="partyIdFrom" operator="in" from-field="listPartySelect"/>
+    		</condition-list>
+    	</entity-condition>
+    	<field-to-result field="agreementList" result-name="agreementList"/>
+    </simple-method>
+    
+    <simple-method method-name="createPhysicalInventoryAndVariance" short-description="Create a PhysicalInventory and an InventoryItemVariance">
+        <set-service-fields service-name="createPhysicalInventory" map="parameters" to-map="createPhysicalInventoryMap"/>
+        <entity-one value-field="userLogin" entity-name="UserLogin">
+        	<field-map field-name="userLoginId" value="distributorsuper"/>
+        </entity-one>
+        <if-not-empty field="userLogin">
+        	<set field="createPhysicalInventoryMap.userLogin" from-field="userLogin"/>
+        </if-not-empty>
+        <call-service service-name="createPhysicalInventory" in-map-name="createPhysicalInventoryMap">
+            <result-to-field result-name="physicalInventoryId" field="parameters.physicalInventoryId"/>
+            <result-to-result result-name="physicalInventoryId" service-result-name="physicalInventoryId"/>
+        </call-service>
+        <set-service-fields service-name="createInventoryItemVariance" map="parameters" to-map="createInventoryItemVarianceMap"/>
+        <if-not-empty field="userLogin">
+        	<set field="createInventoryItemVarianceMap.userLogin" from-field="userLogin"/>
+        </if-not-empty>
+        <call-service service-name="createInventoryItemVariance" in-map-name="createInventoryItemVarianceMap"/>
+    </simple-method>
+    
+</simple-methods>

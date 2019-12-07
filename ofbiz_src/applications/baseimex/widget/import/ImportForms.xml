@@ -1,0 +1,3535 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
+
+	<!-- <form name="FindInventoryHistory" type="single" target="findInventoryHistory" 
+		title="" header-row-style="header-row" default-table-style="basic-table"> 
+		<field name="facilityId" title="${uiLabelMap.FacilityId}"><text-find/></field> 
+		<field name="productId" title="${uiLabelMap.ProductId}"> <text-find></text-find> 
+		</field> <field name="internalName" title="${uiLabelMap.ProductName}"> <text-find></text-find> 
+		</field> <field name="brandlName" title="${uiLabelMap.BrandName}"> <text-find></text-find> 
+		</field> <field name="dateValue" title="${uiLabelMap.DateTime}"> <date-find/> 
+		</field> <field name="noConditionFind"><hidden value="Y"/>if this isn't there 
+		then with all fields empty no query will be done</field> <field name="submitButton" 
+		title="${uiLabelMap.CommonFind}" widget-style="btn btn-primary btn-small"> 
+		<submit button-type="button" image-location="icon-search"/> </field> <sort-order> 
+		<field-group style="no-widget-header no-left-margin span12"> <sort-field 
+		name="facilityId" position="1"/> <sort-field name="productId" position="2"/> 
+		<sort-field name="internalName" position="3"/> <sort-field name="brandlName" 
+		position="4"/> <sort-field name="dateValue" position="5"/> <sort-field name="submitButton" 
+		position="6"/> </field-group> </sort-order> </form> -->
+
+	<form name="PurchaseAgreements" type="multi" list-name="listIt" target="updateAgreementStatus" default-table-style="table-bordered table table-striped table-hover dataTable"
+		use-row-submit="true">
+		<actions>
+			<service service-name="performFind" result-map="result" result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="requestParameters" />
+				<field-map field-name="entityName" value="Agreement" />
+				<field-map field-name="orderBy" value="fromDate DESC" />
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+				<field-map field-name="noConditionFind" value="Y" />
+			</service>
+		</actions>
+		<row-actions>
+			<script location="component://delys/webapp/delys/WEB-INF/actions/import/getAgreementStatus.groovy" />
+			<set field="listStatus" value="${listStatus}" type="List"></set>
+		</row-actions>
+		<field name="agreementId" title="${uiLabelMap.AgreementId}">
+			<hyperlink target="detailPurchaseAgreement" description="${agreementId}">
+				<parameter param-name="agreementId" from-field="agreementId" />
+			</hyperlink>
+		</field>
+		<field name="agreementDate" title="${uiLabelMap.AgreementDate}">
+			<display />
+		</field>
+		<field name="partyIdFrom" title="${uiLabelMap.SlideA}">
+			<display-entity key-field-name="partyId" entity-name="PartyNameView" description="${firstName} ${middleName} ${lastName} ${groupName}"></display-entity>
+		</field>
+		<field name="partyIdTo" title="${uiLabelMap.SlideB}">
+			<display-entity key-field-name="partyId" entity-name="PartyNameView" description="${firstName} ${middleName} ${lastName} ${groupName}"></display-entity>
+		</field>
+		<field name="description" title="${uiLabelMap.CommonDescription}">
+			<display />
+		</field>
+		<field name="statusId" title="${uiLabelMap.Status}" separate-column="true">
+			<drop-down no-current-selected-key="${statusId}" allow-empty="false">
+				<list-options list-name="listStatus" key-name="statusId" description="${description}"></list-options>
+			</drop-down>
+		</field>
+		<field name="_rowSubmit" title="${uiLabelMap.CommonSelect}" use-when="!&quot;AGREEMENT_COMPLETED&quot;.equals(statusId) &amp;&amp; !&quot;AGREEMENT_CANCELLED&quot;.equals(statusId)"
+			separate-column="true">
+			<check all-checked="false" />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+
+	<form name="SupplierAgreements" type="list" list-name="listIt" default-table-style="table-bordered table table-striped table-hover dataTable">
+		<actions>
+			<service service-name="performFind" result-map="result" result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="requestParameters" />
+				<field-map field-name="entityName" value="Agreement" />
+				<field-map field-name="orderBy" value="fromDate DESC" />
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+				<field-map field-name="noConditionFind" value="Y" />
+			</service>
+		</actions>
+		<field name="agreementId" title="${uiLabelMap.AgreementId}">
+			<hyperlink target="editAgreement" description="${agreementId}">
+				<parameter param-name="agreementId" from-field="agreementId" />
+			</hyperlink>
+		</field>
+		<field name="agreementTypeId" title="${uiLabelMap.AgreementType}">
+			<display></display>
+		</field>
+		<field name="agreementDate" title="${uiLabelMap.AgreementDate}">
+			<display />
+		</field>
+		<field name="partyIdFrom" title="${uiLabelMap.SlideA}">
+			<display-entity key-field-name="partyId" entity-name="PartyNameView" description="${firstName} ${middleName} ${lastName} ${groupName} [${partyIdFrom}]"></display-entity>
+		</field>
+		<field name="partyIdTo" title="${uiLabelMap.SlideB}">
+			<display-entity key-field-name="partyId" entity-name="PartyNameView"
+				description="${firstName} ${middleName} ${lastName} ${groupName} [${partyIdTo}]"></display-entity>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.AvailableFromDate}">
+			<display></display>
+		</field>
+		<field name="thruDate" title="${uiLabelMap.AvailableThruDate}">
+			<display></display>
+		</field>
+		<field name="description" title="${uiLabelMap.CommonDescription}">
+			<display />
+		</field>
+	</form>
+
+	<form name="FindQuotas" type="single" target="findQuota" title=""
+		header-row-style="header-row" default-table-style="basic-table">
+		<field name="quotaId" title="${uiLabelMap.QuotaId}">
+			<text-find />
+		</field>
+		<field name="quotaName" title="${uiLabelMap.QuotaName}">
+			<text-find></text-find>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.AvailableFromDate}">
+			<date-find />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.AvailableThruDate}">
+			<date-find />
+		</field>
+		<field name="noConditionFind">
+			<hidden value="Y" /><!-- if this isn't there then with all fields 
+				empty no query will be done -->
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-search" />
+		</field>
+		<sort-order>
+			<field-group style="no-widget-header no-left-margin span12">
+				<sort-field name="quotaId" position="1" />
+				<sort-field name="quotaName" position="2" />
+				<sort-field name="fromDate" position="3" />
+				<sort-field name="thruDate" position="4" />
+				<sort-field name="submitButton" position="5" />
+			</field-group>
+		</sort-order>
+	</form>
+
+	<form name="ImportQuotas" type="multi" list-name="listIt"
+		default-table-style="table-bordered table table-striped table-hover dataTable"
+		use-row-submit="true" target="">
+		<actions>
+			<service service-name="performFind" result-map="result"
+				result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="requestParameters" />
+				<field-map field-name="entityName" value="QuotaHeader" />
+				<field-map field-name="orderBy" value="fromDate DESC" />
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+				<field-map field-name="noConditionFind" value="Y" />
+			</service>
+		</actions>
+		<field name="quotaId" title="${uiLabelMap.QuotaId}">
+			<hyperlink target="editQuota" description="${quotaId}">
+				<parameter param-name="quotaId" from-field="quotaId" />
+			</hyperlink>
+		</field>
+		<field name="quotaName" title="${uiLabelMap.QuotaName}">
+			<display></display>
+		</field>
+		<field name="quotaTypeId" title="${uiLabelMap.QuotaType}">
+			<display-entity entity-name="QuotaType" description="${description}"
+				key-field-name="quotaTypeId"></display-entity>
+		</field>
+		<field name="description" title="${uiLabelMap.Description}">
+			<display></display>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.AvailableFromDate}">
+			<display></display>
+		</field>
+		<field name="thruDate" title="${uiLabelMap.AvailableThruDate}">
+			<display></display>
+		</field>
+	</form>
+
+	<form name="EditQuota" target="updateQuota" type="single" title="update quota">
+		<actions></actions>
+		<alt-target use-when="quota == null" target="createQuota" />
+		<auto-fields-entity entity-name="QuotaHeader"
+			map-name="quota" />
+		<field name="quotaId" title="${uiLabelMap.QuotaId}" use-when="quota != null">
+			<display></display>
+		</field>
+		<field name="quotaId" use-when="quota == null">
+			<hidden />
+		</field>
+		<field name="quotaName" title="${uiLabelMap.QuotaName}">
+			<text />
+		</field>
+		<field name="quotaTypeId" title="${uiLabelMap.QuotaType}">
+			<drop-down allow-empty="false">
+				<entity-options description="${description}"
+					entity-name="QuotaType" key-field-name="quotaTypeId"></entity-options>
+			</drop-down>
+		</field>
+		<field name="description" title="${uiLabelMap.CommonDescription}">
+			<textarea />
+		</field>
+		<field name="fromDate" title="${uiLabelMap.AvailableFromDate}">
+			<date-time
+				default-value="${groovy: org.ofbiz.base.util.UtilDateTime.nowTimestamp()}" />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.AvailableThruDate}">
+			<date-time />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonSubmit}"
+			widget-style="btn btn-primary btn-small open-sans">
+			<submit image-location="icon-ok" button-type="button" />
+		</field>
+		<sort-order>
+			<field-group style="no-left-margin span6 no-widget-header">
+				<sort-field name="quotaId" />
+				<sort-field name="quotaName" position="1" />
+				<sort-field name="quotaTypeId" position="2" />
+			</field-group>
+			<field-group style="span6 no-widget-header">
+				<sort-field name="fromDate" position="1" />
+				<sort-field name="thruDate" position="2" />
+				<sort-field name="description" position="3" />
+			</field-group>
+			<field-group style="no-widget-header span12 align-center no-left-margin">
+				<sort-field name="submitButton" position="1" />
+			</field-group>
+		</sort-order>
+	</form>
+
+	<form name="FindQuotaItems" type="single" target="findQuotaItem"
+		title="" header-row-style="header-row" default-table-style="basic-table">
+		<field name="quotaId" title="${uiLabelMap.QuotaId}">
+			<hidden />
+		</field>
+		<field name="quotaItemSeqId" title="${uiLabelMap.QuotaItemSeqId}">
+			<text-find></text-find>
+		</field>
+		<field name="productId" title="${uiLabelMap.ProductId}">
+			<text-find />
+		</field>
+		<field name="productName" title="${uiLabelMap.ProductName}">
+			<text-find />
+		</field>
+		<field name="fromDate" title="${uiLabelMap.AvailableFromDate}">
+			<date-find />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.AvailableThruDate}">
+			<date-find />
+		</field>
+		<field name="noConditionFind">
+			<hidden value="Y" /><!-- if this isn't there then with all fields 
+				empty no query will be done -->
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-search" />
+		</field>
+		<sort-order>
+			<field-group style="no-widget-header no-left-margin span12">
+				<sort-field name="quotaId" position="1" />
+				<sort-field name="quotaItemSeqId" position="2" />
+				<sort-field name="productId" position="3" />
+				<sort-field name="productName" position="4" />
+				<sort-field name="fromDate" position="5" />
+				<sort-field name="thruDate" position="6" />
+				<sort-field name="submitButton" position="7" />
+			</field-group>
+		</sort-order>
+	</form>
+
+	<form name="ListQuotaItems" type="multi" list-name="listIt"
+		default-table-style="table-bordered table table-striped table-hover dataTable"
+		use-row-submit="true" target="">
+		<actions>
+			<service service-name="performFind" result-map="result"
+				result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="requestParameters" />
+				<field-map field-name="entityName" value="QuotaItem" />
+				<field-map field-name="orderBy" value="fromDate DESC" />
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+				<field-map field-name="noConditionFind" value="Y" />
+			</service>
+		</actions>
+		<field name="quotaId" title="${uiLabelMap.QuotaId}">
+			<hidden value="${quotaId}" />
+		</field>
+		<field name="quotaItemSeqId" title="${uiLabelMap.QuotaItemSeqId}">
+			<display />
+		</field>
+		<field name="productId" title="${uiLabelMap.ProductId}">
+			<display />
+		</field>
+		<field name="productName" title="${uiLabelMap.ProductName}">
+			<display-entity entity-name="Product" description="${productName}"
+				key-field-name="productId">
+			</display-entity>
+		</field>
+		<field name="quotaQuantity" title="${uiLabelMap.QuotaQuantity}">
+			<display />
+		</field>
+		<field name="availableQuantity" title="${uiLabelMap.AvailableQuantity}">
+			<display />
+		</field>
+		<field name="quantityUomId" title="${uiLabelMap.QuantityUomId}">
+			<display-entity entity-name="Uom" description="${description}"
+				key-field-name="uomId" />
+		</field>
+		<field name="fromDate" title="${uiLabelMap.AvailableFromDate}">
+			<display></display>
+		</field>
+		<field name="thruDate" title="${uiLabelMap.AvailableThruDate}">
+			<display></display>
+		</field>
+	</form>
+
+	<form name="LookupQuotaProduct" type="single" target="lookupQuotaProduct"
+		default-entity-name="QuotaItem">
+		<field name="prodCatalogId" title="${uiLabelMap.ProductCatalog}">
+			<drop-down allow-empty="true">
+				<list-options key-name="prodCatalogId" list-name="listCatalogs"
+					description="${catalogName}" />
+			</drop-down>
+		</field>
+		<field name="prodCategoryId" title="${uiLabelMap.ProductCategory}">
+			<drop-down allow-empty="true">
+				<list-options key-name="productCategoryId" list-name="listCategories"
+					description="${categoryName}" />
+			</drop-down>
+		</field>
+		<field name="quotaTypeId">
+			<hidden value="${quotaHeader.quotaTypeId}" />
+		</field>
+		<field name="quotaId">
+			<hidden value="${quotaId}" />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-search" />
+		</field>
+		<sort-order>
+			<field-group
+				style="no-left-margin no-widget-header span6 begin-group-group">
+				<sort-field name="prodCatalogId" position="1" />
+				<sort-field name="prodCategoryId" position="2" />
+				<sort-field name="submitButton" position="3" />
+			</field-group>
+			<field-group style="span6 no-widget-header end-group-group">
+
+			</field-group>
+		</sort-order>
+	</form>
+
+	<form name="ListLookupQuotaProduct" odd-row-style="alternate-row"
+		target="addProductToQuota" separate-columns="true"
+		default-entity-name="Product"
+		default-table-style="table table-striped table-bordered table-hover dataTable"
+		type="multi" list-name="listProducts" use-row-submit="true">
+		<row-actions>
+			<script
+				location="component://delys/webapp/delys/WEB-INF/actions/logistics/getPackingUom.groovy" />
+			<script
+				location="component://delys/webapp/delys/WEB-INF/actions/logistics/getCatalogCategoryByProduct.groovy" />
+			<set field="listProductQuantityUom" value="${listProductQuantityUom}"
+				type="List" />
+			<set field="listCatalogs" value="${listCatalogs}" type="List" />
+			<set field="listCategories" value="${listCategories}" type="List" />
+		</row-actions>
+		<field name="quotaId">
+			<hidden value="${quotaHeader.quotaId}" />
+		</field>
+		<field name="quotaTypeId">
+			<hidden value="${quotaHeader.quotaTypeId}" />
+		</field>
+		<field name="productId" title="${uiLabelMap.ProductId}">
+			<display />
+		</field>
+		<field name="productName" title="${uiLabelMap.ProductName}">
+			<display />
+		</field>
+		<field name="quotaQuantity" title="${uiLabelMap.QuotaQuantity}">
+			<text default-value="0"></text>
+		</field>
+		<field name="quantityUomId" title="${uiLabelMap.QuantityUomId}">
+			<drop-down allow-empty="false">
+				<list-options key-name="uomId" list-name="listProductQuantityUom"
+					description="${description}" />
+			</drop-down>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.AvailableFromDate}">
+			<hidden value="${quotaHeader.fromDate}" />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.AvailableThruDate}">
+			<hidden value="${quotaHeader.thruDate}" />
+		</field>
+		<field name="_rowSubmit" title="${uiLabelMap.CommonSelect}">
+			<check all-checked="true" />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonAdd}"
+			use-when="!listProducts.isEmpty()" widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-plus" />
+		</field>
+	</form>
+
+	<form name="FindSupplierAgreement" type="single" target="findSupplierAgreement"
+		title="" header-row-style="header-row" default-table-style="basic-table">
+		<field name="agreementId" title="${uiLabelMap.AgreementId}">
+			<text-find />
+		</field>
+		<field name="agreementTypeId" title="${uiLabelMap.AgreementTypeId}">
+			<hidden value="PRODUCT_AGREEMENT" />
+		</field>
+		<field name="partyIdFrom" title="${uiLabelMap.SlideA}">
+			<text-find />
+		</field>
+		<field name="roleTypeIdFrom">
+			<hidden value="BUYER" />
+		</field>
+		<field name="roleTypeIdTo">
+			<hidden value="SUPPLIER" />
+		</field>
+		<field name="partyIdTo" title="${uiLabelMap.SlideB}">
+			<text-find />
+		</field>
+		<field name="agreementDate" title="${uiLabelMap.AgreementDate}">
+			<date-find />
+		</field>
+		<field name="fromDate" title="${uiLabelMap.AvailableFromDate}">
+			<date-find />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.AvailableThruDate}">
+			<date-find />
+		</field>
+		<field name="noConditionFind">
+			<hidden value="Y" /><!-- if this isn't there then with all fields 
+				empty no query will be done -->
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-search" />
+		</field>
+		<sort-order>
+			<field-group style="no-widget-header no-left-margin span12">
+				<sort-field name="agreementId" position="1" />
+				<sort-field name="agreementDate" position="2" />
+				<sort-field name="partyIdFrom" position="3" />
+				<sort-field name="partyIdTo" position="4" />
+				<sort-field name="fromDate" position="5" />
+				<sort-field name="thruDate" position="6" />
+				<sort-field name="submitButton" position="7" />
+			</field-group>
+		</sort-order>
+	</form>
+
+	<form name="FindPurchaseAgreement" type="single" target="findPurchaseAgreement"
+		title="" header-row-style="header-row" default-table-style="basic-table">
+		<field name="agreementId" title="${uiLabelMap.AgreementId}">
+			<text-find />
+		</field>
+		<field name="agreementTypeId" title="${uiLabelMap.AgreementTypeId}">
+			<hidden value="PURCHASE_AGREEMENT" />
+		</field>
+		<field name="partyIdFrom" title="${uiLabelMap.SlideA}">
+			<text-find />
+		</field>
+		<field name="roleTypeIdFrom">
+			<hidden value="BUYER" />
+		</field>
+		<field name="roleTypeIdTo">
+			<hidden value="SUPPLIER" />
+		</field>
+		<field name="partyIdTo" title="${uiLabelMap.SlideB}">
+			<text-find />
+		</field>
+		<field name="agreementDate" title="${uiLabelMap.AgreementDate}">
+			<date-find />
+		</field>
+		<field name="statusId" title="${uiLabelMap.Status}">
+			<drop-down>
+				<entity-options description="${description}"
+					key-field-name="statusId" entity-name="StatusItem">
+					<entity-constraint name="statusTypeId" value="AGREEMENT_STATUS"></entity-constraint>
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.AvailableFromDate}">
+			<date-find />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.AvailableThruDate}">
+			<date-find />
+		</field>
+		<field name="noConditionFind">
+			<hidden value="Y" /><!-- if this isn't there then with all fields 
+				empty no query will be done -->
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-search" />
+		</field>
+		<sort-order>
+			<field-group style="no-widget-header no-left-margin span12">
+				<sort-field name="agreementId" position="1" />
+				<sort-field name="agreementDate" position="2" />
+				<sort-field name="partyIdFrom" position="3" />
+				<sort-field name="partyIdTo" position="4" />
+				<sort-field name="statusId" position="5" />
+				<sort-field name="fromDate" position="6" />
+				<sort-field name="thruDate" position="7" />
+				<sort-field name="submitButton" position="8" />
+			</field-group>
+		</sort-order>
+	</form>
+
+	<form name="EditAgreement" target="updateSupplierAgreement" type="single"
+		title="update supplier agreement" default-map-name="agreement">
+		<actions></actions>
+		<alt-target use-when="agreement == null" target="createSupplierAgreement" />
+		<field name="agreementId" title="${uiLabelMap.AgreementId}"
+			use-when="agreement != null">
+			<display></display>
+		</field>
+		<field name="agreementId" use-when="agreement == null">
+			<hidden />
+		</field>
+		<field name="agreementTypeId" use-when="agreement == null">
+			<hidden value="PRODUCT_AGREEMENT" />
+		</field>
+		<field name="agreementTypeId" use-when="agreement != null"
+			title="${uiLabelMap.AgreementType}">
+			<display-entity key-field-name="agreementTypeId"
+				description="${description}" entity-name="AgreementType" />
+		</field>
+		<field name="partyIdFrom" title="${uiLabelMap.SlideA}">
+			<lookup target-form-name="lookupPartyInfo"></lookup>
+		</field>
+		<field name="partyIdTo" title="${uiLabelMap.SlideB}">
+			<lookup target-form-name="lookupPartyInfo"></lookup>
+		</field>
+		<field name="roleTypeIdFrom" title="${uiLabelMap.Role}">
+			<drop-down>
+				<entity-options description="${description}"
+					entity-name="RoleType" key-field-name="roleTypeId"></entity-options>
+			</drop-down>
+		</field>
+		<field name="roleTypeIdTo" title="${uiLabelMap.Role}">
+			<drop-down>
+				<entity-options description="${description}"
+					entity-name="RoleType" key-field-name="roleTypeId"></entity-options>
+			</drop-down>
+		</field>
+		<field name="agreementDate" title="${uiLabelMap.AgreementDate}">
+			<date-time />
+		</field>
+		<field name="fromDate" title="${uiLabelMap.AvailableFromDate}">
+			<date-time
+				default-value="${groovy: org.ofbiz.base.util.UtilDateTime.nowTimestamp()}" />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.AvailableThruDate}">
+			<date-time />
+		</field>
+		<field name="description" title="${uiLabelMap.CommonDescription}">
+			<text />
+		</field>
+		<field name="textData" title="${uiLabelMap.TextData}">
+			<textarea />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonSubmit}"
+			widget-style="btn btn-primary btn-small open-sans">
+			<submit image-location="icon-ok" button-type="button" />
+		</field>
+		<sort-order>
+			<field-group style="no-left-margin span6 no-widget-header">
+				<sort-field name="agreementId" />
+				<sort-field name="agreementTypeId" />
+				<sort-field name="partyIdFrom" position="1" />
+				<sort-field name="roleTypeIdFrom" position="2" />
+				<sort-field name="partyIdTo" position="3" />
+				<sort-field name="roleTypeIdTo" position="4" />
+			</field-group>
+			<field-group style="span6 no-widget-header">
+				<sort-field name="agreementDate" position="1" />
+				<sort-field name="fromDate" position="2" />
+				<sort-field name="thruDate" position="3" />
+				<sort-field name="description" position="4" />
+				<sort-field name="textData" position="5" />
+			</field-group>
+			<field-group style="no-widget-header span12 align-center no-left-margin">
+				<sort-field name="submitButton" position="1" />
+			</field-group>
+		</sort-order>
+	</form>
+
+	<form name="ListAgreementItemSupplierProducts" list-name="agreementProducts"
+		target="" title="" type="list" paginate-target="ListAgreementItemSupplierProducts"
+		odd-row-style="alternate-row"
+		default-table-style="table table-striped table-bordered table-hover dataTable">
+		<field name="agreementId">
+			<hidden />
+		</field>
+		<field name="agreementItemSeqId">
+			<hidden />
+		</field>
+		<field name="partyId" title="${uiLabelMap.Supplier}">
+			<display-entity entity-name="PartyNameView"
+				also-hidden="true"
+				description="${firstName} ${middleName} ${lastName} ${groupName} [${partyId}]"></display-entity>
+		</field>
+		<field name="productId" title="${uiLabelMap.ProductProducts}">
+			<hyperlink also-hidden="false" description="${productId}"
+				target="editSupplierProduct">
+				<parameter param-name="minimumOrderQuantity" />
+				<parameter param-name="currencyUomId" />
+				<parameter param-name="availableFromDate" />
+				<parameter param-name="partyId" />
+				<parameter param-name="productId" />
+				<parameter param-name="agreementId" />
+				<parameter param-name="agreementItemSeqId" />
+			</hyperlink>
+		</field>
+		<field name="internalName" entry-name="productId">
+			<display-entity entity-name="Product" key-field-name="productId"
+				description="${internalName}" />
+		</field>
+		<field name="minimumOrderQuantity">
+			<display />
+		</field>
+		<field name="quantityUomId" title="${uiLabelMap.QuantityUomId}">
+			<display-entity entity-name="Uom" description="${description}"
+				key-field-name="uomId" />
+		</field>
+		<field name="lastPrice">
+			<display type="currency" currency="${agreementItem.currencyUomId}" />
+		</field>
+		<field name="shippingPrice">
+			<display type="currency" currency="${agreementItem.currencyUomId}" />
+		</field>
+		<field name="currencyUomId" title="${uiLabelMap.currencyUomId}">
+			<display />
+		</field>
+		<field name="availableFromDate" title="${uiLabelMap.AvailableFromDate}">
+			<display />
+		</field>
+		<field name="availableThruDate" title="${uiLabelMap.AvailableThruDate}">
+			<display />
+		</field>
+		<!-- <field name="deleteLink" title="${uiLabelMap.CommonDelete}"> -->
+		<!-- <hyperlink target="removeSupplierProduct" description="${uiLabelMap.CommonRemove}" 
+			also-hidden="false"> -->
+		<!-- <parameter param-name="minimumOrderQuantity"/> -->
+		<!-- <parameter param-name="currencyUomId"/> -->
+		<!-- <parameter param-name="availableFromDate"/> -->
+		<!-- <parameter param-name="partyId"/> -->
+		<!-- <parameter param-name="productId"/> -->
+		<!-- <parameter param-name="agreementId"/> -->
+		<!-- <parameter param-name="agreementItemSeqId"/> -->
+		<!-- </hyperlink> -->
+		<!-- </field> -->
+	</form>
+
+	<form name="EditAgreementItemSupplierProduct" type="single"
+		target="updateSupplierProduct" title="" default-map-name="agreementProductAppl"
+		header-row-style="header-row" default-table-style="basic-table">
+		<alt-target use-when="agreementProductAppl==null" target="createSupplierProducts" />
+		<field name="partyId">
+			<hidden value="${agreement.partyIdTo}" />
+		</field>
+		<field name="currencyUomId">
+			<hidden value="${agreementItem.currencyUomId}" />
+		</field>
+		<field name="agreementId">
+			<hidden />
+		</field>
+		<field name="agreementItemSeqId">
+			<hidden />
+		</field>
+		<field name="agreementId" title="${uiLabelMap.AgreementId}">
+			<display />
+		</field>
+		<field name="agreementItemSeqId" title="${uiLabelMap.AgreementItemSeqId}">
+			<display />
+		</field>
+		<field name="partyIdTo" title="${uiLabelMap.Supplier}">
+			<display default-value="${agreement.partyIdTo}" />
+		</field>
+		<field name="productId" use-when="agreementProductAppl==null">
+			<lookup target-form-name="LookupProduct" />
+		</field>
+		<field name="currencyUom">
+			<display default-value="${agreementItem.currencyUomId}" />
+		</field>
+		<field name="availableFromDate" title="${uiLabelMap.AvailableFromDate}">
+			<date-time default-value="${agreement.fromDate}" />
+		</field>
+		<field name="availableThruDate" title="${uiLabelMap.AvailableThruDate}">
+			<date-time default-value="${agreement.thruDate}" />
+		</field>
+		<field name="minimumOrderQuantity" use-when="agreementProductAppl==null">
+			<text default-value="0" size="5" />
+		</field>
+		<field name="productId" use-when="agreementProductAppl!=null">
+			<display />
+		</field>
+		<field name="supplierPrefOrderId">
+			<drop-down allow-empty="true">
+				<entity-options entity-name="SupplierPrefOrder"
+					key-field-name="supplierPrefOrderId" description="${description}">
+					<entity-order-by field-name="supplierPrefOrderId" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="quantityUomId" title="${uiLabelMap.QuantityUomId}">
+			<drop-down allow-empty="true">
+				<entity-options entity-name="UomAndType"
+					key-field-name="uomId"
+					description="${typeDescription}: ${description} (${abbreviation})">
+					<entity-constraint name="uomTypeId" operator="not-equals"
+						value="CURRENCY_MEASURE" />
+					<entity-order-by field-name="typeDescription" />
+					<entity-order-by field-name="uomId" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="lastPrice">
+			<text default-value="${agreementProductAppl.lastPrice}" />
+		</field>
+		<field name="shippingPrice">
+			<text default-value="${agreementProductAppl.shippingPrice}" />
+		</field>
+		<field name="supplierProductName">
+			<text />
+		</field>
+		<field name="supplierProductId" required-field="true">
+			<text />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonSubmit}"
+			widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+		<sort-order>
+			<field-group style="no-left-margin span6 no-widget-header">
+				<sort-field name="agreementId" />
+				<sort-field name="agreementItemSeqId" />
+				<sort-field name="partyIdTo" />
+				<sort-field name="currencyUom" />
+				<sort-field name="productId" />
+				<sort-field name="availableFromDate" position="1" />
+				<sort-field name="availableThruDate" position="2" />
+			</field-group>
+			<field-group style="span6 no-widget-header">
+				<sort-field name="supplierProductId" position="1" />
+				<sort-field name="supplierProductName" position="2" />
+				<sort-field name="minimumOrderQuantity" position="3" />
+				<sort-field name="quantityUomId" position="4" />
+				<sort-field name="lastPrice" position="5" />
+				<sort-field name="shippingPrice" position="6" />
+				<sort-field name="supplierPrefOrderId" position="7" />
+			</field-group>
+			<field-group style="no-widget-header span12 align-center no-left-margin">
+				<sort-field name="submitButton" position="1" />
+			</field-group>
+		</sort-order>
+	</form>
+
+	<form name="ListAgreementProducts" list-name="listAgreementProducts"
+		title="" type="list" paginate-target="getListProductByAgreement"
+		odd-row-style="alternate-row"
+		default-table-style="table table-striped table-bordered table-hover dataTable"
+		view-size="20">
+		<field name="agreementItemSeqId">
+			<display />
+		</field>
+		<field name="productId" title="${uiLabelMap.ProductProductId}">
+			<display />
+		</field>
+		<field name="availableFromDate" title="${uiLabelMap.AvailableFromDate}">
+			<display />
+		</field>
+		<field name="availableThruDate" title="${uiLabelMap.AvailableThruDate}">
+			<display />
+		</field>
+		<field name="minimumOrderQuantity">
+			<display />
+		</field>
+		<field name="quantityUomId" title="${uiLabelMap.QuantityUomId}">
+			<display-entity entity-name="Uom" description="${description}"
+				key-field-name="uomId" />
+		</field>
+		<field name="lastPrice">
+			<display />
+		</field>
+		<field name="shippingPrice">
+			<display />
+		</field>
+		<field name="currencyUomId" title="${uiLabelMap.currencyUomId}">
+			<display />
+		</field>
+		<field name="supplierProductName">
+			<display />
+		</field>
+		<field name="supplierProductId">
+			<display />
+		</field>
+	</form>
+
+	<form name="ListInventoryItemsTotal" type="list" list-name="listProducts"
+		default-table-style="table table-striped dataTable table-hover table-bordered">
+		<row-actions>
+			<entity-one entity-name="InventoryItemTotal" value-field="itemTotal">
+				<field-map field-name="productId" from-field="productId" />
+			</entity-one>
+			<script
+				location="component://delys/webapp/delys/WEB-INF/actions/logistics/getListInventoryItemsTotals.groovy" />
+		</row-actions>
+		<field name="productId" title="${uiLabelMap.ProductProductId}">
+			<hyperlink target="ListInventoryItemsByProduct"
+				description="${productId}">
+				<parameter param-name="productId" from-field="productId" />
+				<parameter param-name="facilityId" from-field="parameters.facilityId" />
+			</hyperlink>
+		</field>
+		<field name="internalName" title="${uiLabelMap.ProductProductName}">
+			<display default-value="${itemTotal.internalName}" />
+		</field>
+		<field name="quantityOnHandTotal">
+			<display default-value="${itemTotal.quantityOnHandTotal}" />
+		</field>
+		<field name="availableToPromiseTotal">
+			<display default-value="${itemTotal.availableToPromiseTotal}" />
+		</field>
+		<field name="accountingQuantityTotal" title="${uiLabelMap.AccQuantityTotal}">
+			<hidden />
+		</field>
+		<field name="quantityOnOrder" title="${uiLabelMap.QuantityOnOrder}">
+			<display default-value="${quantityOnOrdered}" />
+		</field>
+	</form>
+
+	<form name="ListInventoryItemsByProduct" type="list"
+		list-name="listInventoryItemsByProduct" view-size="10"
+		default-table-style="table table-striped dataTable table-hover table-bordered">
+		<field name="inventoryItemId">
+			<hyperlink target="editInventoryItemInfo" description="${inventoryItemId}">
+				<parameter param-name="inventoryItemId" from-field="inventoryItemId" />
+			</hyperlink>
+		</field>
+		<field name="internalName" title="${uiLabelMap.ProductProductName}">
+			<display />
+		</field>
+		<field name="inventoryItemTypeId" title="${uiLabelMap.InventoryItemType}">
+			<display />
+		</field>
+		<field name="productId" title="${uiLabelMap.ProductProductId}">
+			<display />
+		</field>
+		<field name="facilityId" title="${uiLabelMap.ProductFacility}">
+			<display-entity entity-name="Facility" description="${facilityName}"></display-entity>
+		</field>
+		<field name="containerId" title="${uiLabelMap.Container}">
+			<display />
+		</field>
+		<field name="lotId" title="${uiLabelMap.ProductLotId}">
+			<display />
+		</field>
+		<field name="datetimeReceived" title="${uiLabelMap.DatetimeReceived}">
+			<display />
+		</field>
+		<field name="datetimeManufactured" title="${uiLabelMap.DatetimeManufactured}">
+			<display />
+		</field>
+		<field name="expireDate" title="${uiLabelMap.ProductExpireDate}">
+			<display />
+		</field>
+		<field name="binNumber" title="${uiLabelMap.BinNumber}">
+			<display />
+		</field>
+		<field name="quantityOnHandTotal" title="${uiLabelMap.FormFieldTitle_quantityOnHandTotal}">
+			<display />
+		</field>
+		<field name="availableToPromiseTotal"
+			title="${uiLabelMap.FormFieldTitle_availableToPromiseTotal}">
+			<display />
+		</field>
+		<field name="serialNumber">
+			<display />
+		</field>
+		<field name="unitCost" title="${uiLabelMap.UnitCost}">
+			<display type="currency" currency="${currencyUomId}" />
+		</field>
+		<field name="currencyUomId" title="${uiLabelMap.currencyUomId}">
+			<display />
+		</field>
+	</form>
+
+	<form name="ListInventoryItemsByProductView" type="list"
+		list-name="listInventoryItemsByProduct" view-size="10"
+		default-table-style="table table-striped dataTable table-hover table-bordered">
+		<field name="inventoryItemId" title="${uiLabelMap.InventoryItemId}">
+			<display />
+		</field>
+		<field name="inventoryItemTypeId" title="${uiLabelMap.InventoryItemType}">
+			<display-entity entity-name="InventoryItemType"
+				description="${description}" />
+		</field>
+		<field name="productId" title="${uiLabelMap.ProductProductId}">
+			<display />
+		</field>
+		<field name="facilityId" title="${uiLabelMap.ProductFacility}">
+			<display-entity entity-name="Facility" description="${facilityName}"></display-entity>
+		</field>
+		<field name="internalName" title="${uiLabelMap.ProductProductName}">
+			<display />
+		</field>
+		<field name="containerId" title="${uiLabelMap.ContainerId}">
+			<display />
+		</field>
+		<field name="lotId" title="${uiLabelMap.ProductLotId}">
+			<display />
+		</field>
+		<field name="datetimeReceived" title="${uiLabelMap.DatetimeReceived}">
+			<display />
+		</field>
+		<field name="datetimeManufactured" title="${uiLabelMap.DatetimeManufactured}">
+			<display />
+		</field>
+		<field name="expireDate" title="${uiLabelMap.ProductExpireDate}">
+			<display />
+		</field>
+		<field name="binNumber" title="${uiLabelMap.BinNumber}">
+			<display />
+		</field>
+		<field name="quantityOnHandTotal" title="${uiLabelMap.FormFieldTitle_quantityOnHandTotal}">
+			<display />
+		</field>
+		<field name="availableToPromiseTotal"
+			title="${uiLabelMap.FormFieldTitle_availableToPromiseTotal}">
+			<display />
+		</field>
+		<field name="serialNumber">
+			<display />
+		</field>
+		<field name="unitCost" title="${uiLabelMap.UnitCost}">
+			<display type="currency" currency="${currencyUomId}" />
+		</field>
+		<field name="currencyUomId" title="${uiLabelMap.currencyUomId}">
+			<display />
+		</field>
+	</form>
+
+	<form name="FindGeneralCapacitys" type="single" target="findGeneralCapacitys"
+		title="" header-row-style="header-row" default-table-style="basic-table">
+		<field name="uomId" title="${uiLabelMap.uomFromId}">
+			<text-find />
+		</field>
+		<field name="uomIdTo" title="${uiLabelMap.uomToId}">
+			<text-find />
+		</field>
+		<field name="fromDate" title="${uiLabelMap.AvailableFromDate}">
+			<date-find />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.AvailableThruDate}">
+			<date-find />
+		</field>
+		<field name="conversionFactor" title="${uiLabelMap.ConversionFactor}">
+			<text-find />
+		</field>
+		<field name="noConditionFind">
+			<hidden value="Y" /><!-- if this isn't there then with all fields 
+				empty no query will be done -->
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-search" />
+		</field>
+		<sort-order>
+			<field-group style="no-widget-header no-left-margin span12">
+				<sort-field name="uomId" position="1" />
+				<sort-field name="uomIdTo" position="2" />
+				<sort-field name="fromDate" position="3" />
+				<sort-field name="thruDate" position="4" />
+				<sort-field name="conversionFactor" position="5" />
+				<sort-field name="submitButton" position="6" />
+			</field-group>
+		</sort-order>
+	</form>
+
+	<form name="ConfigGeneralCapacitys" list-name="listIt" title=""
+		type="list" paginate-target="getConfigCapacityGenerals" odd-row-style="alternate-row"
+		default-table-style="table table-striped table-bordered table-hover dataTable"
+		view-size="20" use-row-submit="true">
+		<actions>
+			<set field="requestParameters.uomTypeId" value="SHIPMENT_PACKING" />
+			<service service-name="performFind" result-map="result"
+				result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="requestParameters" />
+				<field-map field-name="entityName" value="UomTypeAndConversionDated" />
+				<field-map field-name="orderBy" value="fromDate DESC" />
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+				<field-map field-name="noConditionFind" value="Y" />
+			</service>
+		</actions>
+		<field name="uomId" title="${uiLabelMap.uomFromId}">
+			<display-entity entity-name="Uom" description="${description}"
+				key-field-name="uomId"></display-entity>
+		</field>
+		<field name="uomIdTo" title="${uiLabelMap.uomToId}">
+			<display-entity entity-name="Uom" description="${description}"
+				key-field-name="uomId"></display-entity>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.AvailableFromDate}">
+			<display />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.AvailableThruDate}">
+			<display />
+		</field>
+		<field name="conversionFactor" title="${uiLabelMap.ConversionFactor}">
+			<display />
+		</field>
+		<field name="edit" title="${uiLabelMap.CommonEdit}">
+			<hyperlink target="editGeneralCapacitys" description="${uiLabelMap.CommonEdit}">
+				<parameter param-name="uomId" from-field="uomId" />
+				<parameter param-name="uomIdTo" from-field="uomIdTo" />
+				<parameter param-name="fromDate" from-field="fromDate" />
+			</hyperlink>
+		</field>
+		<field name="delete" title="${uiLabelMap.CommonDelete}">
+			<hyperlink target="removeGeneralCapacitys" description="${uiLabelMap.CommonDelete}">
+				<parameter param-name="uomId" from-field="uomId" />
+				<parameter param-name="uomIdTo" from-field="uomIdTo" />
+				<parameter param-name="fromDate" from-field="fromDate" />
+			</hyperlink>
+		</field>
+	</form>
+	<form name="ConfigProductCapacitys" list-name="listIt" title=""
+		type="list" paginate-target="getConfigCapacityProducts" odd-row-style="alternate-row"
+		default-table-style="table table-striped table-bordered table-hover dataTable"
+		view-size="20" use-row-submit="true">
+		<actions>
+			<set field="requestParameters.uomTypeId" value="SHIPMENT_PACKING" />
+			<service service-name="performFind" result-map="result"
+				result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="requestParameters" />
+				<field-map field-name="entityName" value="UomTypeAndConfigPacking" />
+				<field-map field-name="orderBy" value="fromDate DESC" />
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+				<field-map field-name="noConditionFind" value="Y" />
+			</service>
+		</actions>
+		<field name="productId" title="${uiLabelMap.ProductProduct}">
+			<display-entity entity-name="Product"
+				description="${internalName} [${productId}]" key-field-name="productId"></display-entity>
+		</field>
+		<field name="uomFromId" title="${uiLabelMap.ShipmentPackingUom}">
+			<display-entity entity-name="Uom" description="${description}"
+				key-field-name="uomId"></display-entity>
+		</field>
+		<field name="uomToId" title="${uiLabelMap.ProductBaseQuantityUom}">
+			<display-entity entity-name="Uom" description="${description}"
+				key-field-name="uomId"></display-entity>
+		</field>
+		<field name="quantityConvert" title="${uiLabelMap.StorageCapacity}">
+			<display />
+		</field>
+		<field name="availableFromDate" title="${uiLabelMap.AvailableFromDate}">
+			<display />
+		</field>
+		<field name="expireDate" title="${uiLabelMap.AvailableThruDate}">
+			<display />
+		</field>
+		<field name="edit" title="${uiLabelMap.CommonEdit}">
+			<hyperlink target="editProductCapacitys" description="${uiLabelMap.CommonEdit}">
+				<parameter param-name="uomFromId" from-field="uomFromId" />
+				<parameter param-name="uomToId" from-field="uomToId" />
+				<parameter param-name="productId" from-field="productId" />
+			</hyperlink>
+		</field>
+		<field name="delete" title="${uiLabelMap.CommonDelete}">
+			<hyperlink target="removeProductCapacitys" description="${uiLabelMap.CommonDelete}">
+				<parameter param-name="uomFromId" from-field="uomFromId" />
+				<parameter param-name="uomToId" from-field="uomToId" />
+				<parameter param-name="productId" from-field="productId" />
+			</hyperlink>
+		</field>
+	</form>
+
+	<form name="FindProductCapacitys" type="single" target="findProductCapacitys"
+		title="" header-row-style="header-row" default-table-style="basic-table">
+		<field name="productId" title="${uiLabelMap.ProductId}">
+			<text-find />
+		</field>
+		<field name="uomFromId" title="${uiLabelMap.uomFromId}">
+			<text-find />
+		</field>
+		<field name="uomToId" title="${uiLabelMap.uomToId}">
+			<text-find />
+		</field>
+		<field name="availableFromDate" title="${uiLabelMap.AvailableFromDate}">
+			<date-find />
+		</field>
+		<field name="expireDate" title="${uiLabelMap.AvailableThruDate}">
+			<date-find />
+		</field>
+		<field name="quantityConvert" title="${uiLabelMap.ConversionFactor}">
+			<text-find />
+		</field>
+		<field name="noConditionFind">
+			<hidden value="Y" /><!-- if this isn't there then with all fields 
+				empty no query will be done -->
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-search" />
+		</field>
+		<sort-order>
+			<field-group style="no-widget-header no-left-margin span12">
+				<sort-field name="productId" position="1" />
+				<sort-field name="uomFromId" position="2" />
+				<sort-field name="uomToId" position="3" />
+				<sort-field name="availableFromDate" position="4" />
+				<sort-field name="expireDate" position="5" />
+				<sort-field name="quantityConvert" position="6" />
+				<sort-field name="submitButton" position="7" />
+			</field-group>
+		</sort-order>
+	</form>
+	<form name="EditGeneralCapacitys" type="single" target="updateUomConversionDated"
+		default-entity-name="UomConversionDated" default-map-name="conversion">
+		<actions>
+		</actions>
+		<alt-target use-when="conversion == null" target="createUomConversionDated" />
+		<field name="fromDate" title="${uiLabelMap.AvailableFromDate}">
+			<date-time
+				default-value="${groovy: org.ofbiz.base.util.UtilDateTime.nowTimestamp()}" />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.AvailableThruDate}">
+			<date-time />
+		</field>
+		<field name="uomId" title="${uiLabelMap.uomFromId}">
+			<drop-down allow-empty="false">
+				<entity-options description="${description}"
+					entity-name="Uom" key-field-name="uomId">
+					<entity-constraint name="uomTypeId" value="SHIPMENT_PACKING" />
+				</entity-options>
+			</drop-down>
+		</field>
+
+		<field name="uomIdTo" title="${uiLabelMap.uomToId}">
+			<drop-down allow-empty="false">
+				<entity-options description="${description}"
+					entity-name="Uom" key-field-name="uomId">
+					<entity-constraint name="uomTypeId" value="SHIPMENT_PACKING" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="conversionFactor" title="${uiLabelMap.QuantityConvert}"
+			required-field="true" use-when="productConfigPacking != null">
+			<text default-value="${productConfigPacking.quantityConvert}" />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonUpdate}"
+			widget-style="btn btn-primary btn-small" use-when="conversion != null">
+			<submit image-location="icon-ok" button-type="button" />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonCreate}"
+			widget-style="btn btn-primary btn-small" use-when="conversion == null">
+			<submit image-location="icon-ok" button-type="button" />
+		</field>
+		<sort-order>
+			<field-group
+				style="no-widget-header span6 no-left-margin begin-group-group">
+				<sort-field name="uomId" position="1" />
+				<sort-field name="uomIdTo" position="2" />
+				<sort-field name="conversionFactor" position="3" />
+			</field-group>
+			<field-group style="no-widget-header span6 end-group-group">
+				<sort-field name="fromDate" position="1" />
+				<sort-field name="thruDate" position="2" />
+			</field-group>
+			<field-group style="no-widget-header span12 no-left-margin align-center">
+				<sort-field name="submitButton" />
+			</field-group>
+		</sort-order>
+	</form>
+	<form name="EditProductCapacity" type="single" target="updateProductCapacity"
+		default-map-name="productConfigPacking">
+		<actions>
+			<entity-one entity-name="Product" value-field="product">
+				<field-map field-name="productId" from-field="productId" />
+			</entity-one>
+		</actions>
+		<field name="productId" title="${uiLabelMap.ProductId}">
+			<lookup target-form-name="LookupProduct"></lookup>
+		</field>
+		<field name="availableFromDate" title="${uiLabelMap.AvailableFromDate}">
+			<date-time
+				default-value="${groovy: org.ofbiz.base.util.UtilDateTime.nowTimestamp()}" />
+		</field>
+		<field name="expireDate" title="${uiLabelMap.ExpireDate}">
+			<date-time />
+		</field>
+		<field name="uomFromId" title="${uiLabelMap.ShipmentPackingUom}">
+			<drop-down allow-empty="false">
+				<entity-options description="${description}"
+					entity-name="Uom" key-field-name="uomId">
+					<entity-constraint name="uomTypeId" value="SHIPMENT_PACKING" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="uomToId" title="${uiLabelMap.ProductBaseQuantityUom}"
+			use-when="productConfigPacking != null">
+			<display-entity entity-name="Uom" description="${description}"
+				key-field-name="uomId"></display-entity>
+		</field>
+		<field name="quantityConvert" title="${uiLabelMap.StorageCapacity}"
+			required-field="true">
+			<text />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonUpdate}"
+			widget-style="btn btn-primary btn-small" tooltip-style="tooltipob"
+			use-when="productConfigPacking != null">
+			<submit image-location="icon-ok" button-type="button" />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonCreate}"
+			widget-style="btn btn-primary btn-small" tooltip-style="tooltipob"
+			use-when="productConfigPacking == null">
+			<submit image-location="icon-ok" button-type="button" />
+		</field>
+		<sort-order>
+			<field-group
+				style="no-widget-header span6 no-left-margin begin-group-group">
+				<sort-field name="productId" />
+				<sort-field name="uomFromId" />
+				<sort-field name="uomToId" />
+				<sort-field name="quantityConvert" />
+			</field-group>
+			<field-group style="no-widget-header span6 end-group-group">
+				<sort-field name="description" />
+				<sort-field name="availableFromDate" />
+				<sort-field name="expireDate" />
+			</field-group>
+			<field-group style="no-widget-header span12 no-left-margin align-center">
+				<sort-field name="submitButton" />
+			</field-group>
+		</sort-order>
+	</form>
+	<form name="PrepareCreatePurchaseOrder" type="single" target="editPurchaseOrder">
+		<field name="reasonId" title="${uiLabelMap.CommonFrom}">
+			<drop-down>
+				<option key="FROM_IMPORT_PLAN"
+					description="${uiLabelMap.CommonFrom} ${uiLabelMap.ImportPlan}" />
+				<option key="CREATE_NEW_ORDER" description="${uiLabelMap.CommonCreateNew}" />
+			</drop-down>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonContinue}"
+			widget-style="btn btn-primary btn-small" tooltip-style="tooltipob">
+			<submit image-location="icon-arrow-right" button-type="button" />
+		</field>
+	</form>
+
+	<form name="ImportPlansToCreatePO" target="" type="list"
+		list-name="listImportPlans" default-table-style="table-bordered table table-striped table-hover dataTable">
+		<row-actions>
+			<entity-condition entity-name="ProductPlanHeader"
+				list="listChilds">
+				<condition-expr field-name="parentProductPlanId"
+					from-field="productPlanId" />
+			</entity-condition>
+		</row-actions>
+		<auto-fields-entity entity-name="ProductPlanHeader"
+			default-field-type="display" />
+		<field name="productPlanId" title="${uiLabelMap.PlanId}"
+			tooltip="${uiLabelMap.ClickToShowChildPlan}" use-when="!listChilds.isEmpty()">
+			<hyperlink target="${urlGetChildPlans}" description="${productPlanId}">
+				<parameter param-name="productPlanId" from-field="productPlanId" />
+			</hyperlink>
+		</field>
+		<field name="productPlanName" title="${uiLabelMap.PlanName}">
+			<display />
+		</field>
+		<field name="parentProductPlanId" title="${uiLabelMap.ParentPlan}">
+			<display-entity entity-name="ProductPlanHeader"
+				description="${productPlanName} [${productPlanId}]" key-field-name="productPlanId" />
+		</field>
+		<field name="productPlanTypeId">
+			<hidden value="${productPlanTypeId}" />
+		</field>
+		<field name="customTimePeriodId" title="${uiLabelMap.CustomTimePeriod}">
+			<display-entity entity-name="CustomTimePeriod"
+				description="${periodName}" />
+		</field>
+		<field name="currencyUomId" title="${uiLabelMap.currencyUomId}">
+			<display />
+		</field>
+		<field name="createByUserLoginId" title="${uiLabelMap.CreateBy}">
+			<display-entity key-field-name="partyId" entity-name="PartyNameView"
+				description="${firstName} ${middleName} ${lastName} ${groupName} [${createByUserLoginId}]"></display-entity>
+		</field>
+		<field name="statusId" title="${uiLabelMap.Status}">
+			<display-entity entity-name="StatusItem" description="${description}"
+				key-field-name="statusId"></display-entity>
+		</field>
+		<field name="action" title="${uiLabelMap.DelysAction}" use-when="listChilds.isEmpty()">
+			<hyperlink target="${urlGetProductOfPlans}" description="${uiLabelMap.createOrder}">
+				<parameter param-name="productPlanId" from-field="productPlanId" />
+			</hyperlink>
+		</field>
+		<field name="action" title="${uiLabelMap.DelysAction}" use-when="!listChilds.isEmpty()">
+			<hyperlink target="${urlGetChildPlans}" description="${uiLabelMap.CommonDetail}">
+				<parameter param-name="productPlanId" from-field="productPlanId" />
+			</hyperlink>
+		</field>
+	</form>
+
+	<form name="ProductOfPlans" type="multi"
+		default-table-style="table-bordered table table-striped table-hover dataTable"
+		target="addProductsToCart" list-name="listProductOfPlans"
+		use-row-submit="true">
+		<actions>
+			<script
+				location="component://delys/webapp/delys/WEB-INF/actions/import/getCurrentSession.groovy" />
+		</actions>
+		<row-actions>
+			<script
+				location="component://delys/webapp/delys/WEB-INF/actions/import/getCurrentPlanQuantity.groovy" />
+			<set field="quantityToOrder" value="${quantityToOrder}" />
+		</row-actions>
+		<!-- <alt-target use-when="agreementId != null" target="addProductsToCartAgreement"/> -->
+		<field name="orderTypeId">
+			<hidden value="${orderTypeId}" />
+		</field>
+		<field name="productPlanId">
+			<hidden />
+		</field>
+		<field name="productStoreId">
+			<hidden />
+		</field>
+		<field name="facilityId">
+			<hidden />
+		</field>
+		<field name="contactMechId">
+			<hidden />
+		</field>
+		<field name="itemType">
+			<hidden value="SUPPLIES_ORDER_ITEM" />
+		</field>
+		<field name="productPlanItemSeqId" title="${uiLabelMap.ProductPlanItemSeqId}">
+			<display />
+		</field>
+		<field name="productId" title="${uiLabelMap.ProductId}">
+			<display />
+		</field>
+		<field name="statusId" title="${uiLabelMap.Status}">
+			<display-entity entity-name="StatusItem" description="${description}"
+				key-field-name="statusId"></display-entity>
+		</field>
+		<field name="planQuantity" title="${uiLabelMap.PlanQuantity}">
+			<display />
+		</field>
+		<field name="orderedQuantity" title="${uiLabelMap.QuantityOrdered}">
+			<display />
+		</field>
+		<field name="quantityUomId" title="${uiLabelMap.QuantityUomId}">
+			<display-entity entity-name="Uom" description="${description}"
+				key-field-name="uomId" />
+		</field>
+		<field name="recentPlanQuantity" title="${uiLabelMap.ImportRecentQuantity}">
+			<display />
+		</field>
+		<field name="orderQuantity" widget-style="width100px"
+			title="${uiLabelMap.QuantityToOrder}" separate-column="true">
+			<text default-value="${quantityToOrder}" />
+		</field>
+		<field name="prodCatalogId" separate-column="true">
+			<drop-down>
+				<entity-options description="${catalogName}"
+					entity-name="ProductAndCatalog">
+					<entity-constraint name="productId" value="${productId}" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="productCategoryId" separate-column="true">
+			<drop-down no-current-selected-key="${productCategoryId}">
+				<entity-options description="${productCategoryId}"
+					entity-name="ProductCategory">
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="expireDate" title="${uiLabelMap.ExpireDate2}"
+			required-field="true" separate-column="true">
+			<date-time />
+		</field>
+		<field name="shipAfterDate" separate-column="true">
+			<date-time />
+		</field>
+		<field name="shipBeforeDate" separate-column="true">
+			<date-time />
+		</field>
+		<field name="_rowSubmit" title="${uiLabelMap.CommonSelect}"
+			use-when="&quot;PLAN_ITEM_APPROVED&quot;.equals(statusId)"
+			separate-column="true">
+			<check all-checked="true" />
+		</field>
+		<field name="submitButton"
+			title="${uiLabelMap.CommonCreate} ${uiLabelMap.OrderOrder}" use-when="!listProductOfPlans.isEmpty()"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+
+	<!--=============BEGIN BY DATNV ============= -->
+
+	<form name="ListImportPlan" target="" type="list" list-name="listImportPlans"
+		default-table-style="table-bordered table table-striped table-hover dataTable">
+		<field name="productPlanId" title="${uiLabelMap.PlanId}">
+			<hyperlink target="resultPlanOfYear" description="${productPlanName}">
+				<parameter param-name="productPlanHeaderId" from-field="productPlanId" />
+			</hyperlink>
+		</field>
+		<field name="customTimePeriodId">
+			<hidden />
+		</field>
+		<field name="createByUserLoginId" title="${uiLabelMap.createByUserLoginId}">
+			<display></display>
+		</field>
+		<field name="organizationPartyId" title="${uiLabelMap.organizationPartyId}">
+			<display></display>
+		</field>
+		<field name="statusId" title="${uiLabelMap.statusId}">
+			<display-entity entity-name="StatusItem" description="${description}"></display-entity>
+		</field>
+	</form>
+
+	<form name="CreateImportPlanHeader" target="createImportPlanHeader"
+		type="single">
+		<actions>
+			<entity-condition entity-name="CustomTimePeriod"
+				list="listCustomTimePeriod">
+				<condition-expr field-name="periodTypeId" value="SALES_YEAR" />
+			</entity-condition>
+		</actions>
+		<field name="customTimePeriodId" title="${uiLabelMap.productPlanName}">
+			<drop-down current="selected" allow-empty="true">
+				<list-options key-name="customTimePeriodId"
+					description="${periodName} [${customTimePeriodId}]" list-name="listCustomTimePeriod" />
+			</drop-down>
+		</field>
+		<field name="organizationPartyId">
+			<hidden value="company" />
+		</field>
+		<field name="organizationPartyIdView" title="${uiLabelMap.organizationPartyId}">
+			<display description="delys company"></display>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.fromDate}">
+			<date-time />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.thruDate}">
+			<date-time></date-time>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonCreate}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+
+	<form name="SelectCharts" target="planCharts" type="single">
+		<actions>
+			<entity-condition entity-name="CustomTimePeriod"
+				list="listCustomTimePeriod">
+				<condition-expr field-name="periodTypeId" value="IMPORT_YEAR" />
+			</entity-condition>
+		</actions>
+		<field name="customTimePeriodId" title="${uiLabelMap.productPlanName}">
+			<drop-down current="selected" allow-empty="true">
+				<list-options key-name="customTimePeriodId"
+					description="${periodName}" list-name="listCustomTimePeriod" />
+			</drop-down>
+		</field>
+		<field name="productId">
+			<drop-down>
+				<entity-options description="${internalName}"
+					entity-name="Product" key-field-name="productId"></entity-options>
+			</drop-down>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-search" />
+		</field>
+	</form>
+	<!--=============== END BY DATNV =============== -->
+
+	<form name="ListFacilityReceive" type="single"
+		default-entity-name="Facility">
+		<field name="productStoreId" separate-column="true"
+			title="${uiLabelMap.productStore}">
+			<drop-down allow-empty="false">
+				<list-options key-name="productStoreId" list-name="listProductStores"
+					description="${storeName}" />
+			</drop-down>
+		</field>
+		<field name="facilityId" separate-column="true"
+			title="${uiLabelMap.FacilityToReceive}">
+			<drop-down allow-empty="false">
+				<list-options key-name="facilityId" list-name="listFacilities"
+					description="${facilityName}" />
+			</drop-down>
+		</field>
+		<field name="contactMechId" separate-column="true"
+			title="${uiLabelMap.FacilityAddress}">
+			<drop-down allow-empty="false">
+				<list-options key-name="contactMechId" list-name="listFacilityContactMechs"
+					description="${address1}" />
+			</drop-down>
+		</field>
+	</form>
+
+	<form name="EditPurchaseAgreement" target="updatePurchaseAgreement"
+		type="single" title="update purchase agreement" default-map-name="agreement">
+		<actions>
+			<script
+				location="component://delys/webapp/delys/WEB-INF/actions/import/getAgreementTerms.groovy" />
+			<set field="currentPortTerm" value="${currentPortTerm}" />
+			<set field="currentETDTerm" value="${currentETDTerm}" />
+		</actions>
+		<field name="lotId">
+			<hidden value="${lotId}" />
+		</field>
+		<field name="statusId">
+			<hidden value="AGREEMENT_CREATED" />
+		</field>
+		<field name="productPlanId">
+			<hidden value="${productPlanId}" />
+		</field>
+		<field name="agreementId" title="${uiLabelMap.AgreementId}"
+			use-when="agreement != null">
+			<display></display>
+		</field>
+		<field name="orderMode" use-when="agreement == null">
+			<hidden value="PURCHASE_ORDER" />
+		</field>
+		<field name="agreementId" use-when="agreement == null">
+			<hidden />
+		</field>
+		<field name="agreementTypeId" use-when="agreement == null">
+			<hidden value="PURCHASE_AGREEMENT" />
+		</field>
+		<field name="agreementTypeId" use-when="agreement != null"
+			title="${uiLabelMap.AgreementType}">
+			<display-entity key-field-name="agreementTypeId"
+				description="${description}" entity-name="AgreementType" />
+		</field>
+		<field name="partyIdFrom" title="${uiLabelMap.SlideA}">
+			<drop-down>
+				<list-options key-name="partyId" list-name="organizations"
+					description="${partyId} - ${groovy: org.ofbiz.party.party.PartyHelper.getPartyName(delegator, partyId, true)}" />
+			</drop-down>
+		</field>
+		<field name="representPartyIdFrom" title="${uiLabelMap.Represented}"
+			required-field="true">
+			<drop-down>
+				<list-options description="${firstName} ${middleName} ${lastName} [${partyId}]"
+					key-name="partyId" list-name="listPartyRepresents" />
+			</drop-down>
+		</field>
+		<field name="partyIdTo" title="${uiLabelMap.SlideB}">
+			<drop-down>
+				<entity-options
+					description="${partyId} - ${groovy: org.ofbiz.party.party.PartyHelper.getPartyName(delegator, partyId, true)}"
+					entity-name="PartyRoleAndPartyDetail" key-field-name="partyId">
+					<entity-constraint name="partyId"
+						value="${productPlan.supplierPartyId}" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="supplierPartyId" use-when="agreement == null">
+			<hidden value="${partyIdTo}" />
+		</field>
+		<field name="roleTypeIdFrom" title="${uiLabelMap.Role}">
+			<drop-down>
+				<entity-options description="${description}"
+					entity-name="RoleType" key-field-name="roleTypeId">
+					<entity-constraint name="roleTypeId" value="BUYER" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="roleTypeIdTo" title="${uiLabelMap.Role}">
+			<drop-down>
+				<entity-options description="${description}"
+					entity-name="RoleType" key-field-name="roleTypeId">
+					<entity-constraint name="roleTypeId" value="SUPPLIER" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="addressIdFrom" title="${uiLabelMap.Address}">
+			<drop-down>
+				<list-options key-name="contactMechId" list-name="listPartyContactMechs"
+					description="${address1}" />
+			</drop-down>
+		</field>
+		<field name="addressIdTo" title="${uiLabelMap.Address}">
+			<drop-down>
+				<list-options key-name="contactMechId" list-name="listPartyContactMechs"
+					description="${address1}" />
+			</drop-down>
+		</field>
+		<field name="telephoneIdFrom" title="${uiLabelMap.TelephoneNumber}">
+			<drop-down>
+				<list-options key-name="contactMechId" list-name="listPartyTelecomNumbers"
+					description="${countryCode} ${areaCode} ${contactNumber}" />
+			</drop-down>
+		</field>
+		<field name="faxNumberIdFrom" title="${uiLabelMap.FaxNumber}">
+			<drop-down>
+				<list-options key-name="contactMechId" list-name="listPartyTelecomNumbers"
+					description="${countryCode} ${areaCode} ${contactNumber}" />
+			</drop-down>
+		</field>
+		<field name="finAccountIdFroms" title="${uiLabelMap.BankAccount}">
+			<drop-down allow-multiple="false" allow-empty="false">
+				<list-options key-name="paymentMethodId" list-name="listPartyFinAccounts"
+					description="${finAccountCode}" />
+				<!-- <list-options key-name="paymentMethodId" list-name="listEftAccounts" 
+					description="${bankName} ${accountNumber}"/> -->
+			</drop-down>
+		</field>
+		<field name="finAccountIdTos" title="${uiLabelMap.BankAccount}">
+			<drop-down allow-empty="false">
+				<list-options key-name="paymentMethodId" list-name="listPartyFinAccounts"
+					description="${finAccountCode}" />
+			</drop-down>
+		</field>
+		<field name="emailAddressIdTo" title="${uiLabelMap.EmailAddress}"
+			tooltip="${uiLabelMap.ReceiveContract}">
+			<drop-down>
+				<list-options key-name="contactMechId" list-name="listPartyPrimaryEmails"
+					description="${infoString}" />
+			</drop-down>
+		</field>
+		<field name="agreementDate" title="${uiLabelMap.AgreementDate}"
+			use-when="agreement != null &amp;&amp; agreement.get(&quot;agreementDate&quot;) != null">
+			<display />
+		</field>
+		<field name="agreementDate" title="${uiLabelMap.AgreementDate}"
+			use-when="agreement == null" position="2">
+			<date-time
+				default-value="${groovy: org.ofbiz.base.util.UtilDateTime.nowTimestamp()}" />
+		</field>
+		<field name="agreementName" title="${uiLabelMap.AgreementName}"
+			use-when="agreement == null" position="1">
+			<text />
+		</field>
+		<field name="agreementName" title="${uiLabelMap.AgreementName}"
+			use-when="agreement != null">
+			<display />
+		</field>
+		<field name="fromDate" title="${uiLabelMap.AvailableFromDate}">
+			<date-time
+				default-value="${groovy: org.ofbiz.base.util.UtilDateTime.nowTimestamp()}" />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.AvailableThruDate}">
+			<date-time />
+		</field>
+		<field name="weekETD" use-when="agreement == null">
+			<hidden />
+		</field>
+		<field name="weekETD" title="${uiLabelMap.WeekETD}" use-when="agreement != null">
+			<drop-down no-current-selected-key="${currentETDTerm}">
+				<entity-options description="${periodName}"
+					entity-name="CustomTimePeriod">
+					<entity-constraint name="periodTypeId" value="IMPORT_WEEK" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="portOfDischargeId" title="${uiLabelMap.PortOfDischarge}"
+			required-field="true" use-when="agreement != null">
+			<drop-down no-current-selected-key="${currentPortTerm}">
+				<entity-options description="${description}"
+					entity-name="Facility">
+					<entity-constraint name="facilityTypeId" value="PORT_OF_DISCHARGE" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="portOfDischargeId" title="${uiLabelMap.PortOfDischarge}"
+			required-field="true" use-when="agreement == null">
+			<drop-down>
+				<entity-options description="${facilityName}"
+					entity-name="Facility" key-field-name="facilityId">
+					<entity-constraint name="facilityTypeId" value="PORT_OF_DISCHARGE" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="productStoreId" separate-column="true"
+			title="${uiLabelMap.ImportTo} ${uiLabelMap.productStore}">
+			<drop-down allow-empty="false">
+				<list-options key-name="productStoreId" list-name="listProductStores"
+					description="${storeName}" />
+			</drop-down>
+		</field>
+		<field name="facilityId" separate-column="true"
+			title="${uiLabelMap.ImportTo} ${uiLabelMap.facility}">
+			<drop-down allow-empty="false">
+				<list-options key-name="facilityId" list-name="listFacilities"
+					description="${facilityName}" />
+			</drop-down>
+		</field>
+		<field name="contactMechId" separate-column="true"
+			title="${uiLabelMap.FacilityAddress}">
+			<drop-down allow-empty="false">
+				<list-options key-name="contactMechId" list-name="listFacilityContactMechs"
+					description="${address1}" />
+			</drop-down>
+		</field>
+		<field name="currencyUomIds" title="${uiLabelMap.PaymentCurrency}">
+			<drop-down allow-empty="false" no-current-selected-key="USD">
+				<entity-options description="${description}"
+					entity-name="Uom" key-field-name="uomId">
+					<entity-constraint name="uomTypeId" value="CURRENCY_MEASURE" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="transshipment" separate-column="true"
+			title="${uiLabelMap.AllowedTransshipment}">
+			<drop-down allow-empty="false">
+				<option key="Y" description="Y" />
+				<option key="N" description="N" />
+			</drop-down>
+		</field>
+		<field name="partialShipment" separate-column="true"
+			title="${uiLabelMap.PartialShipment}">
+			<drop-down allow-empty="false">
+				<option key="Y" description="Y" />
+				<option key="N" description="N" />
+			</drop-down>
+		</field>
+		<field name="description" title="${uiLabelMap.CommonDescription}">
+			<text />
+		</field>
+		<field name="textData" title="${uiLabelMap.TextData}">
+			<hidden />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonSubmit}"
+			widget-style="btn btn-primary btn-small open-sans">
+			<submit image-location="icon-ok" button-type="button" />
+		</field>
+		<sort-order>
+			<field-group
+				style="no-left-margin no-widget-header span6 begin-group-group">
+				<sort-field name="agreementId" />
+				<sort-field name="agreementTypeId" />
+				<sort-field name="agreementName" />
+				<sort-field name="agreementDate" />
+			</field-group>
+			<field-group style="span6 no-widget-header end-group-group">
+				<sort-field name="fromDate" position="1" />
+				<sort-field name="thruDate" position="2" />
+			</field-group>
+			<field-group
+				style="no-left-margin span6 no-widget-header begin-group-group">
+				<sort-field name="partyIdFrom" position="1" />
+				<sort-field name="roleTypeIdFrom" position="2" />
+				<sort-field name="addressIdFrom" position="3" />
+				<sort-field name="finAccountIdFroms" position="4" />
+				<sort-field name="telephoneIdFrom" position="5" />
+				<sort-field name="faxNumberIdFrom" position="6" />
+				<sort-field name="representPartyIdFrom" position="7" />
+			</field-group>
+			<field-group style="span6 no-widget-header end-group-group">
+				<sort-field name="partyIdTo" position="1" />
+				<sort-field name="roleTypeIdTo" position="2" />
+				<sort-field name="addressIdTo" position="3" />
+				<sort-field name="finAccountIdTos" position="4" />
+				<sort-field name="emailAddressIdTo" position="5" />
+			</field-group>
+			<field-group
+				style="no-left-margin no-widget-header span6 begin-group-group">
+				<sort-field name="weekETD" position="1" />
+				<!-- <sort-field name="productPlanId" position="2"/> -->
+				<sort-field name="portOfDischargeId" position="2" />
+				<sort-field name="productStoreId" position="3" />
+				<sort-field name="facilityId" position="4" />
+				<sort-field name="contactMechId" position="5" />
+			</field-group>
+			<field-group style="span6 no-widget-header end-group-group">
+				<sort-field name="currencyUomIds" position="1" />
+				<sort-field name="transshipment" position="2" />
+				<sort-field name="partialShipment" position="3" />
+				<sort-field name="description" position="4" />
+				<!-- <sort-field name="textData" position="2"/> -->
+			</field-group>
+			<field-group style="no-widget-header span12 align-center no-left-margin">
+				<sort-field name="submitButton" position="1" />
+			</field-group>
+		</sort-order>
+	</form>
+
+	<form name="ListProductByLot" type="list"
+		default-table-style="table-bordered table table-striped table-hover dataTable"
+		list-name="listProductByLot">
+		<row-actions>
+			<entity-one entity-name="ProductPlanItem" value-field="planItem">
+				<field-map field-name="productPlanId" from-field="productPlanId" />
+				<field-map field-name="productPlanItemSeqId" from-field="productPlanItemSeqId" />
+			</entity-one>
+		</row-actions>
+		<field name="lotId" title="${uiLabelMap.ProductLotId}">
+			<display />
+		</field>
+		<field name="productPlanId" title="${uiLabelMap.PlanId}">
+			<display />
+		</field>
+		<field name="productPlanItemSeqId" title="${uiLabelMap.ProductPlanItemSeqId}">
+			<display />
+		</field>
+		<field name="productId" title="${uiLabelMap.ProductId}">
+			<display default-value="${planItem.productId}" />
+		</field>
+		<field name="lotQuantity" title="${uiLabelMap.quantity}">
+			<display />
+		</field>
+		<field name="statusId" title="${uiLabelMap.Status}">
+			<display-entity entity-name="StatusItem"
+				key-field-name="statusId" description="${description}" />
+		</field>
+	</form>
+
+	<form name="LookupProductPlan" type="single" target="lookupProductPlan">
+		<field name="productPlanId" title="${uiLabelMap.PlanId}">
+			<text-find />
+		</field>
+		<field name="productPlanName" title="${uiLabelMap.PlanName}">
+			<text-find />
+		</field>
+		<field name="parentProductPlanId" title="${uiLabelMap.ParentPlan}">
+			<text-find />
+		</field>
+		<field name="productPlanTypeId">
+			<hidden value="IMPORT_PLAN" />
+		</field>
+		<field name="customTimePeriodId" title="${uiLabelMap.CustomTimePeriod}">
+			<text-find />
+		</field>
+		<field name="currencyUomId" title="${uiLabelMap.currencyUomId}">
+			<text-find />
+		</field>
+		<field name="statusId" title="${uiLabelMap.Status}">
+			<drop-down allow-empty="false" no-current-selected-key="PLAN_APPROVED">
+				<entity-options entity-name="StatusItem" description="${description}">
+					<entity-constraint name="statusTypeId" value="PLAN_STATUS" />
+					<entity-constraint name="statusId" operator="not-equals"
+						value="PLAN_PROPOSED" />
+					<entity-constraint name="statusId" operator="not-equals"
+						value="PLAN_REJECTED" />
+					<entity-constraint name="statusId" operator="not-equals"
+						value="PLAN_ORDERED" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" />
+		</field>
+	</form>
+	<form name="ListLookupProductPlan" list-name="listIt" title=""
+		type="list" odd-row-style="alternate-row"
+		default-table-style="table table-striped table-bordered table-hover dataTable"
+		paginate-target="LookupOrderHeaderAndShipInfo">
+		<actions>
+			<service service-name="performFind" result-map="result"
+				result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="parameters" />
+				<field-map field-name="entityName" value="ProductPlanHeader" />
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+			</service>
+		</actions>
+		<field name="productPlanId" title="${uiLabelMap.PlanId}">
+			<hyperlink also-hidden="false" target-type="plain"
+				description="${productPlanId}" target="javascript:set_value('${productPlanId}')">
+			</hyperlink>
+		</field>
+		<field name="productPlanName" title="${uiLabelMap.PlanName}">
+			<display />
+		</field>
+		<field name="parentProductPlanId" title="${uiLabelMap.ParentPlan}">
+			<display />
+		</field>
+		<field name="productPlanTypeId">
+			<display-entity entity-name="ProductPlanType"
+				description="${description}" key-field-name="productPlanTypeId"></display-entity>
+		</field>
+		<field name="customTimePeriodId" title="${uiLabelMap.CustomTimePeriod}">
+			<display-entity entity-name="CustomTimePeriod"
+				key-field-name="customTimePeriodId" description="${periodName}"></display-entity>
+		</field>
+		<field name="currencyUomId" title="${uiLabelMap.currencyUomId}">
+			<display />
+		</field>
+		<field name="statusId" title="${uiLabelMap.Status}">
+			<display-entity entity-name="StatusItem" description="${description}"
+				key-field-name="statusId"></display-entity>
+		</field>
+	</form>
+	<form name="ListProductByPlan" type="multi"
+		default-table-style="table-bordered table table-striped table-hover dataTable"
+		target="addProductsToCart" list-name="listProductOfPlans"
+		use-row-submit="true">
+		<actions>
+			<script
+				location="component://delys/webapp/delys/WEB-INF/actions/import/getCurrentSession.groovy" />
+		</actions>
+		<row-actions>
+			<script
+				location="component://delys/webapp/delys/WEB-INF/actions/import/getCurrentPlanQuantity.groovy" />
+			<set field="quantityToOrder" value="${quantityToOrder}" />
+		</row-actions>
+		<field name="orderTypeId">
+			<hidden value="${orderTypeId}" />
+		</field>
+		<field name="productPlanId">
+			<hidden />
+		</field>
+		<field name="productStoreId">
+			<hidden />
+		</field>
+		<field name="facilityId">
+			<hidden />
+		</field>
+		<field name="contactMechId">
+			<hidden />
+		</field>
+		<field name="itemType">
+			<hidden value="SUPPLIES_ORDER_ITEM" />
+		</field>
+		<field name="productPlanItemSeqId" title="${uiLabelMap.ProductPlanItemSeqId}">
+			<display />
+		</field>
+		<field name="productId" title="${uiLabelMap.ProductId}">
+			<display />
+		</field>
+		<field name="statusId" title="${uiLabelMap.Status}">
+			<display-entity entity-name="StatusItem" description="${description}"
+				key-field-name="statusId"></display-entity>
+		</field>
+		<field name="planQuantity" title="${uiLabelMap.PlanQuantity}">
+			<display />
+		</field>
+		<field name="orderedQuantity" title="${uiLabelMap.QuantityOrdered}">
+			<display />
+		</field>
+		<field name="quantityUomId" title="${uiLabelMap.QuantityUomId}">
+			<display-entity entity-name="Uom" description="${description}"
+				key-field-name="uomId" />
+		</field>
+		<field name="recentPlanQuantity" title="${uiLabelMap.ImportRecentQuantity}">
+			<display />
+		</field>
+		<field name="orderQuantity" widget-style="width100px"
+			title="${uiLabelMap.QuantityToOrder}" separate-column="true">
+			<text default-value="${quantityToOrder}" />
+		</field>
+		<field name="prodCatalogId" separate-column="true">
+			<drop-down>
+				<entity-options description="${catalogName}"
+					entity-name="ProductAndCatalog">
+					<entity-constraint name="productId" value="${productId}" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="productCategoryId" separate-column="true">
+			<drop-down no-current-selected-key="${productCategoryId}">
+				<entity-options description="${productCategoryId}"
+					entity-name="ProductCategory">
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="expireDate" title="${uiLabelMap.ExpireDate2}"
+			required-field="true" separate-column="true">
+			<date-time />
+		</field>
+		<field name="shipAfterDate" separate-column="true">
+			<date-time />
+		</field>
+		<field name="shipBeforeDate" separate-column="true">
+			<date-time />
+		</field>
+		<field name="_rowSubmit" title="${uiLabelMap.CommonSelect}"
+			use-when="&quot;PLAN_ITEM_APPROVED&quot;.equals(statusId)"
+			separate-column="true">
+			<check all-checked="true" />
+		</field>
+		<field name="submitButton"
+			title="${uiLabelMap.CommonCreate} ${uiLabelMap.OrderOrder}" use-when="!listProductOfPlans.isEmpty()"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+
+	<!-- =============================== BEGIN HISTORY INVENTORY FACILITY BY 
+		DATNV================================= -->
+
+	<form name="SelectTimeAndProduct" type="single">
+		<field name="fromDate">
+			<date-find />
+		</field>
+		<field name="thruDate">
+			<date-find></date-find>
+		</field>
+		<field name="productId">
+			<drop-down>
+				<entity-options description="${internalName}"
+					entity-name="ProductDimension" key-field-name="dimensionId"></entity-options>
+			</drop-down>
+		</field>
+	</form>
+
+	<form name="InventoryHistorys" type="multi" list-name="listIt"
+		default-table-style="table-bordered table table-striped table-hover dataTable"
+		use-row-submit="true" target="">
+		<actions>
+			<service service-name="performFind" result-map="result"
+				result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="requestParameters" />
+				<field-map field-name="entityName" value="FacilityFactProductDate" />
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+				<field-map field-name="noConditionFind" value="Y" />
+			</service>
+		</actions>
+		<field name="facilityId" title="${uiLabelMap.facility}">
+			<display></display>
+		</field>
+		<field name="productDimId" title="${uiLabelMap.ProductProduct}">
+			<display-entity entity-name="ProductDimension"
+				description="${productId} - ${internalName}" key-field-name="dimensionId" />
+		</field>
+		<field name="dateDimId" title="${uiLabelMap.dateDim}">
+			<display-entity entity-name="DateDimension"
+				description="${dayName} - ${description}" key-field-name="dimensionId" />
+		</field>
+		<field name="receiveTotal" title="${uiLabelMap.ReceivedQuantity}">
+			<display></display>
+		</field>
+		<field name="outputTotal" title="${uiLabelMap.OutputQuantity}">
+			<display></display>
+		</field>
+		<field name="availableToPromiseTotal" title="${uiLabelMap.ATP}">
+			<display></display>
+		</field>
+		<field name="inventoryTotal" title="${uiLabelMap.InventoryTotal}">
+			<display></display>
+		</field>
+	</form>
+
+	<form name="InventoryHistorysTest" type="multi" list-name="facilityFacts.history"
+		default-table-style="table-bordered table table-striped table-hover dataTable"
+		use-row-submit="true" target="">
+		<field name="facilityId" title="${uiLabelMap.facility}">
+			<display></display>
+		</field>
+		<field name="productDimId" title="${uiLabelMap.ProductProduct}">
+			<display></display>
+		</field>
+		<field name="yearName">
+			<display></display>
+		</field>
+		<field name="dateDimId">
+			<display></display>
+		</field>
+		<field name="internalName">
+			<display></display>
+		</field>
+		<field name="dateValue">
+			<display></display>
+		</field>
+		<field name="receiveTotal">
+			<display></display>
+		</field>
+		<field name="availableToPromiseTotal">
+			<display></display>
+		</field>
+		<field name="inventoryTotal">
+			<display></display>
+		</field>
+	</form>
+
+	<!-- =========================================END HISTORY INVENTORY FACILITY 
+		BY DATNV============================================= -->
+
+	<form name="SelectShipmentPacking" target="divideProductPlanToLot"
+		default-table-style="basic-table" type="single">
+		<field name="productPlanId">
+			<hidden value="${productPlanId}" />
+		</field>
+		<field name="shipmentUomId" title="${uiLabelMap.ShipmentUom}"
+			required-field="true">
+			<drop-down>
+				<entity-options description="${description}"
+					entity-name="Uom" key-field-name="uomId">
+					<entity-constraint name="uomTypeId" value="SHIPMENT_PACKING" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="productPackingUomId" title="${uiLabelMap.ProductPackingUom}"
+			required-field="true">
+			<drop-down>
+				<list-options key-name="uomId" list-name="listUomChilds"
+					description="${description}" />
+			</drop-down>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.Divide}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+		<sort-order>
+			<field-group
+				style="no-left-margin no-widget-header span6 begin-group-group">
+				<sort-field name="shipmentUomId" position="1" />
+				<sort-field name="productPackingUomId" position="2" />
+				<sort-field name="submitButton" position="3" />
+			</field-group>
+		</sort-order>
+	</form>
+
+	<form name="ListProductPlanItem" type="list" list-name="listPlanItems"
+		default-table-style="table-bordered table table-striped table-hover dataTable">
+		<field name="productPlanId" title="${uiLabelMap.PlanId}">
+			<display />
+		</field>
+		<field name="productPlanItemSeqId" title="${uiLabelMap.ProductPlanItemSeqId}">
+			<display />
+		</field>
+		<field name="productId" title="${uiLabelMap.ProductProduct}">
+			<display-entity entity-name="Product" description="${internalName}"
+				key-field-name="productId" />
+		</field>
+		<field name="productCategoryId" title="${uiLabelMap.productCategoryId}">
+			<display />
+		</field>
+		<field name="planQuantity" title="${uiLabelMap.PlanQuantity}">
+			<display />
+		</field>
+		<field name="recentPlanQuantity" title="${uiLabelMap.ImportRecentQuantity}">
+			<display />
+		</field>
+		<field name="orderedQuantity" title="${uiLabelMap.TotalOrderedQuantity}">
+			<display />
+		</field>
+		<field name="quantityUomId" title="${uiLabelMap.QuantityUomId}">
+			<display-entity entity-name="Uom" description="${description}"
+				key-field-name="uomId" />
+		</field>
+		<field name="statusId" title="${uiLabelMap.Status}">
+			<display-entity entity-name="StatusItem" description="${description}"
+				key-field-name="statusId" />
+		</field>
+	</form>
+
+	<form name="ProductPlanItemAndLot" type="list" list-name="listPlanItemAndLots"
+		default-entity-name="ProductPlanAndLot"
+		default-table-style="table-bordered table table-striped table-hover dataTable">
+		<field name="productPlanId" title="${uiLabelMap.PlanId}">
+			<display />
+		</field>
+		<field name="productPlanItemSeqId" title="${uiLabelMap.ProductPlanItemSeqId}">
+			<display />
+		</field>
+		<field name="productId" title="${uiLabelMap.ProductProduct}">
+			<display-entity entity-name="Product" description="${internalName}"
+				key-field-name="productId" />
+		</field>
+		<field name="lotId" title="${uiLabelMap.ProductLotId}">
+			<display />
+		</field>
+		<field name="lotQuantity" title="${uiLabelMap.Quantity}">
+			<display />
+		</field>
+	</form>
+
+	<form name="ImportPlansToCreatePA" target="" type="list"
+		list-name="listImportPlans" default-table-style="table-bordered table table-striped table-hover dataTable">
+		<row-actions>
+			<entity-condition entity-name="ProductPlanHeader"
+				list="listChilds">
+				<condition-expr field-name="parentProductPlanId"
+					from-field="productPlanId" />
+			</entity-condition>
+		</row-actions>
+		<field name="productPlanId" title="${uiLabelMap.PlanId}"
+			use-when="listChilds.isEmpty()">
+			<display />
+		</field>
+		<field name="productPlanId" title="${uiLabelMap.PlanId}"
+			tooltip="${uiLabelMap.ClickToShowChildPlan}" use-when="!listChilds.isEmpty()">
+			<hyperlink target="getChildProductPlans" description="${productPlanId}">
+				<parameter param-name="productPlanId" from-field="productPlanId" />
+			</hyperlink>
+		</field>
+		<field name="productPlanName" title="${uiLabelMap.PlanName}">
+			<display />
+		</field>
+		<field name="parentProductPlanId" title="${uiLabelMap.ParentPlan}">
+			<display-entity entity-name="ProductPlanHeader"
+				description="${productPlanName} [${productPlanId}]" key-field-name="productPlanId" />
+		</field>
+		<field name="productPlanTypeId">
+			<hidden value="${productPlanTypeId}" />
+		</field>
+		<field name="customTimePeriodId" title="${uiLabelMap.CustomTimePeriod}">
+			<display-entity entity-name="CustomTimePeriod"
+				description="${periodName}" />
+		</field>
+		<field name="organizationPartyId">
+			<display-entity key-field-name="partyId" entity-name="PartyNameView"
+				description="${firstName} ${middleName} ${lastName} ${groupName}"></display-entity>
+		</field>
+		<field name="internalPartyId">
+			<display />
+		</field>
+		<field name="supplierPartyId" title="${uiLabelMap.Supplier}">
+			<display-entity key-field-name="partyId" entity-name="PartyNameView"
+				description="${firstName} ${middleName} ${lastName} ${groupName}"></display-entity>
+		</field>
+		<field name="currencyUomId" title="${uiLabelMap.currencyUomId}">
+			<display />
+		</field>
+		<field name="statusId" title="${uiLabelMap.Status}">
+			<display-entity entity-name="StatusItem" description="${description}"
+				key-field-name="statusId"></display-entity>
+		</field>
+		<field name="createByUserLoginId" title="${uiLabelMap.CreateBy}">
+			<hidden />
+		</field>
+		<field name="modifiedByUserLoginId">
+			<hidden />
+		</field>
+		<field name="action" title="${uiLabelMap.DelysAction}" use-when="listChilds.isEmpty()">
+			<hyperlink target="getProductPlanAndLot" description="${uiLabelMap.DetailProductLot}">
+				<parameter param-name="productPlanId" from-field="productPlanId" />
+			</hyperlink>
+		</field>
+	</form>
+
+	<form name="ListOrderByAgreement" type="list" target="" title=""
+		list-name="listOrderByAgreement" odd-row-style="alternate-row"
+		default-table-style="table-bordered table table-striped table-hover dataTable"
+		use-row-submit="false">
+		<field name="orderId" title="${uiLabelMap.OrderId}">
+			<hyperlink target="getPurchaseOrderItems" description="${orderId}">
+				<parameter param-name="orderId" from-field="orderId" />
+				<parameter param-name="agreementId" from-field="agreementId" />
+			</hyperlink>
+		</field>
+		<field name="orderName" title="${uiLabelMap.OrderName}">
+			<display />
+		</field>
+		<field name="orderDate" title="${uiLabelMap.OrderDate}">
+			<display />
+		</field>
+		<field name="productStoreId" title="${uiLabelMap.productStore}">
+			<display-entity entity-name="ProductStore"
+				description="${storeName}" key-field-name="productStoreId"></display-entity>
+		</field>
+		<field name="originFacilityId" title="${uiLabelMap.facility}">
+			<display-entity entity-name="Facility" description="${facilityName}"
+				key-field-name="facilityId"></display-entity>
+		</field>
+		<field name="entryDate">
+			<display />
+		</field>
+		<field name="remainingSubTotal">
+			<display currency="${currencyUom}" type="currency" />
+		</field>
+		<field name="grandTotal">
+			<display currency="${currencyUom}" type="currency" />
+		</field>
+		<field name="statusId" title="${uiLabelMap.Status}">
+			<display-entity entity-name="StatusItem" description="${description}"
+				key-field-name="statusId"></display-entity>
+		</field>
+	</form>
+
+	<form name="PurchaseOrderItems" type="list" target="" title=""
+		list-name="listOrderItems" odd-row-style="alternate-row"
+		default-table-style="table-bordered table table-striped table-hover dataTable"
+		use-row-submit="false">
+		<row-actions>
+			<script
+				location="component://delys/webapp/delys/WEB-INF/actions/logistics/CaculateItemAmount.groovy" />
+			<set field="totalPrice" value="${totalAmount}" />
+		</row-actions>
+		<field name="orderId" title="${uiLabelMap.OrderId}">
+			<hidden />
+		</field>
+		<field name="orderItemSeqId">
+			<hidden />
+		</field>
+		<field name="productId" title="${uiLabelMap.ProductProductId}">
+			<display />
+		</field>
+		<field name="prodCatalogId">
+			<display />
+		</field>
+		<field name="productCategoryId">
+			<hidden />
+		</field>
+		<field name="quantity">
+			<display />
+		</field>
+		<field name="shipBeforeDate">
+			<display />
+		</field>
+		<field name="shipAfterDate">
+			<display />
+		</field>
+		<field name="unitPrice" title="${uiLabelMap.unitPrice} ${uiLabelMap.beforeVAT}">
+			<display type="currency" currency="${currencyUomId}" />
+		</field>
+		<field name="unitPriceVAT" title="${uiLabelMap.unitPrice} ${uiLabelMap.afterVAT}">
+			<display type="currency" currency="${currencyUomId}" />
+		</field>
+		<field name="diffPrice" title="${uiLabelMap.diffPrice}">
+			<display default-value="${diffPrice}" type="currency"
+				currency="${currencyUomId}" />
+		</field>
+		<field name="totalPrice" title="${uiLabelMap.totalPrice}">
+			<display type="currency" currency="${currencyUomId}" />
+		</field>
+		<field name="taxPercentage">
+			<display />
+		</field>
+		<field name="totalPriceVAT" title="${uiLabelMap.totalPrice} ${uiLabelMap.afterVAT}">
+			<display type="currency" currency="${currencyUomId}" />
+		</field>
+		<field name="comments" title="${uiLabelMap.comment}">
+			<display />
+		</field>
+	</form>
+
+	<form name="ImportPlanHeader" type="single" target="createImportPlanItemNew">
+		<actions>
+			<entity-condition entity-name="CustomTimePeriod"
+				list="listCustomTimePeriod">
+				<condition-expr field-name="periodTypeId" value="SALES_YEAR" />
+			</entity-condition>
+		</actions>
+		<field name="namePlan">
+			<text></text>
+		</field>
+		<field name="yearPlan">
+			<drop-down>
+				<list-options key-name="customTimePeriodId"
+					description="${periodName} [${customTimePeriodId}]" list-name="listCustomTimePeriod" />
+			</drop-down>
+		</field>
+		<field name="areaPlan">
+			<drop-down>
+				<entity-options description="${internalPartyId}"
+					entity-name="SalesForecast" key-field-name="internalPartyId"></entity-options>
+			</drop-down>
+
+		</field>
+		<field name="productCategoryId" event="onchange" action="selectCategory();">
+			<drop-down>
+				<entity-options description="${productCategoryId}"
+					key-field-name="productCategoryId" entity-name="ProductCategory">
+					<entity-constraint name="productCategoryTypeId"
+						value="CATALOG_CATEGORY" operator="equals" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="productId" event="onchange" action="selectUnit();">
+			<drop-down allow-empty="false">
+				<entity-options description="${internalName}"
+					entity-name="Product" key-field-name="productId">
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="productUom">
+			<drop-down>
+				<entity-options description="${description}"
+					entity-name="Uom" key-field-name="uomId">
+					<entity-constraint name="uomTypeId" operator="equals"
+						value="PRODUCT_PACKING" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.Create}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+
+	<form name="ImportPlanHeaderOther" type="single" target="createNewImportPlan">
+		<actions>
+			<entity-condition distinct="true" entity-name="CustomTimePeriod"
+				list="listCustomTimePeriod">
+				<condition-expr field-name="periodTypeId" value="SALES_YEAR" />
+				<select-field field-name="customTimePeriodId" />
+				<select-field field-name="periodName" />
+			</entity-condition>
+			<entity-condition entity-name="CustomTimePeriod"
+				list="listCustomTimePeriodImport">
+				<condition-expr field-name="periodTypeId" value="IMPORT_YEAR" />
+				<order-by field-name="-fromDate" />
+
+			</entity-condition>
+		</actions>
+		<field name="customTimePeriodImport" title="${uiLabelMap.TimeImport}: ">
+			<drop-down>
+				<list-options key-name="customTimePeriodId" list-name="listCustomTimePeriodImport"
+					description="${periodName}" />
+			</drop-down>
+		</field>
+		<!-- <field name="customTimePeriodSales" title="${uiLabelMap.TimeSales}: 
+			"> -->
+		<!-- <drop-down> -->
+		<!-- <list-options key-name="customTimePeriodId" list-name="listCustomTimePeriod" 
+			description="${periodName}"/> -->
+		<!-- </drop-down> -->
+		<!-- </field> -->
+		<field name="areaId" title="${uiLabelMap.FormFieldTitle_areaId}: ">
+			<drop-down>
+				<option key="RSM_R1" description="${uiLabelMap.northArea}" />
+				<option key="RSM_R2" description="${uiLabelMap.southArea}" />
+			</drop-down>
+		</field>
+		<field name="namePlan" title="${uiLabelMap.PlanName}: ">
+			<text></text>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.Create}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+	<!-- hoanmStart -->
+
+	<form name="ProductExport" type="list" list-name="listProduct"
+		odd-row-style="alternate-row"
+		default-table-style="table table-hover table-striped table-bordered dataTable">
+		<field name="productId" title="${uiLabelMap.ProductProductId}">
+			<display />
+		</field>
+		<field name="productTypeId" title="${uiLabelMap.productTypeId}">
+			<display />
+		</field>
+		<field name="primaryProductCategoryId" title="primaryProductCategoryId">
+			<display />
+		</field>
+		<field name="internalName" title="internalName">
+			<display />
+		</field>
+		<field name="description" title="description">
+			<display />
+		</field>
+		<field name="weight" title="weight">
+			<display />
+		</field>
+		<field name="productWidth" title="productWidth">
+			<display />
+		</field>
+	</form>
+	<form name="InventoryItemTotalsExport" type="list" list-name="inventoryItemTotals"
+		odd-row-style="alternate-row"
+		default-table-style="table table-hover table-striped table-bordered dataTable">
+		<field name="productId" title="${uiLabelMap.ProductProductId}">
+			<display />
+		</field>
+		<field name="quantityOnHand" title="${uiLabelMap.ProductQoh}">
+			<display />
+		</field>
+		<field name="availableToPromise" title="${uiLabelMap.ProductAtp}">
+			<display />
+		</field>
+		<field name="costPrice" title="${uiLabelMap.ProductCostPrice}">
+			<display />
+		</field>
+		<field name="retailPrice" title="${uiLabelMap.ProductRetailPrice}">
+			<display />
+		</field>
+		<field name="totalCostPrice"
+			title="${uiLabelMap.CommonTotal} ${uiLabelMap.ProductCostPrice}">
+			<display />
+		</field>
+		<field name="totalRetailPrice"
+			title="${uiLabelMap.CommonTotal} ${uiLabelMap.ProductRetailPrice}">
+			<display />
+		</field>
+	</form>
+
+	<form name="SaveProductQuality" type="single" target="SaveProductQualityService">
+		<field name="productQualityName" title="${uiLabelMap.productQualityName}"
+			required-field="true">
+			<text></text>
+		</field>
+		<field name="productId" title="${uiLabelMap.productName}">
+			<drop-down>
+				<entity-options description="${internalName}"
+					key-field-name="productId" entity-name="Product">
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="shelfLife" title="${uiLabelMap.shelfLife}"
+			required-field="true">
+			<text></text>
+		</field>
+		<field name="shelfLifeUnit" title="${uiLabelMap.shelfLifeUnit}">
+			<drop-down>
+				<option key="Hour" description="${uiLabelMap.Hour}" />
+				<option key="Day" description="${uiLabelMap.Day}" />
+				<option key="Month" description="${uiLabelMap.Month}" />
+			</drop-down>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.fromDate}">
+			<date-time />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.thruDate}">
+			<date-time />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.Save}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" />
+		</field>
+	</form>
+
+	<form name="ImportPlanHeader2" type="single" target="createImportPlanItemNew">
+		<actions>
+			<entity-condition entity-name="CustomTimePeriod"
+				list="listCustomTimePeriod">
+				<condition-expr field-name="periodTypeId" value="SALES_YEAR" />
+			</entity-condition>
+		</actions>
+		<field name="namePlan">
+			<text></text>
+		</field>
+		<field name="fromDate" id-name="date-picker-hoanm">
+			<text />
+		</field>
+		<field name="thruDate" id-name="date-picker-hoanm">
+			<text />
+		</field>
+		<field name="productCategoryId">
+			<drop-down>
+				<entity-options description="${productCategoryId}"
+					key-field-name="productCategoryId" entity-name="ProductCategory">
+					<entity-constraint name="productCategoryTypeId"
+						value="CATALOG_CATEGORY" operator="equals" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="productId">
+			<drop-down allow-empty="false">
+			</drop-down>
+		</field>
+		<field name="productUom">
+			<drop-down>
+			</drop-down>
+		</field>
+	</form>
+	<!-- hoanmEnd -->
+
+	<form name="LookupPurchaseAgreement" type="single"
+		target="lookupPurchaseAgreement">
+		<field name="agreementId" title="${uiLabelMap.AgreementId}">
+			<text-find />
+		</field>
+		<field name="partyIdFrom" title="${uiLabelMap.SlideA}">
+			<text-find />
+		</field>
+		<field name="partyIdTo" title="${uiLabelMap.SlideB}">
+			<text-find />
+		</field>
+		<field name="agreementDate" title="${uiLabelMap.AgreementDate}">
+			<date-find />
+		</field>
+		<!-- <field name="portOfDischargeId" title="${uiLabelMap.PortOfDischarge}"><text-find/></field> -->
+		<!-- <field name="weekETD" title="${uiLabelMap.WeekETD}"><date-find/></field> -->
+		<!-- <field name="weekETA" title="${uiLabelMap.WeekETA}"><date-find/></field> -->
+		<field name="submitButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" />
+		</field>
+	</form>
+	<form name="ListPurchaseAgreements" type="list" list-name="listIt"
+		default-table-style="table-bordered table table-striped table-hover dataTable">
+		<actions>
+			<set field="parameters.agreementTypeId" value="PURCHASE_AGREEMENT"></set>
+			<service service-name="performFind" result-map="result"
+				result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="parameters" />
+				<field-map field-name="entityName" value="Agreement" />
+				<field-map field-name="orderBy" value="fromDate DESC" />
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+				<field-map field-name="noConditionFind" value="Y" />
+			</service>
+		</actions>
+		<field name="agreementId" title="${uiLabelMap.AgreementId}">
+			<hyperlink also-hidden="false" target-type="plain"
+				description="${agreementId}" target="javascript:set_value('${agreementId}')"></hyperlink>
+		</field>
+		<field name="agreementTypeId" title="${uiLabelMap.AgreementType}">
+			<display-entity description="${description}"
+				entity-name="AgreementType"></display-entity>
+		</field>
+		<field name="agreementDate" title="${uiLabelMap.AgreementDate}">
+			<display />
+		</field>
+		<field name="partyIdFrom" title="${uiLabelMap.SlideA}">
+			<display-entity key-field-name="partyId" entity-name="PartyNameView"
+				description="${firstName} ${middleName} ${lastName} ${groupName} [${partyIdFrom}]"></display-entity>
+		</field>
+		<field name="partyIdTo" title="${uiLabelMap.SlideB}">
+			<display-entity key-field-name="partyId" entity-name="PartyNameView"
+				description="${firstName} ${middleName} ${lastName} ${groupName} [${partyIdTo}]"></display-entity>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.AvailableFromDate}">
+			<display></display>
+		</field>
+		<field name="thruDate" title="${uiLabelMap.AvailableThruDate}">
+			<display></display>
+		</field>
+		<field name="description" title="${uiLabelMap.CommonDescription}">
+			<display />
+		</field>
+	</form>
+
+	<form name="ListReceiptRequirements" type="multi" list-name="listRequirements"
+		target="updateReceiptRequirement" default-table-style="table-bordered table table-striped table-hover dataTable"
+		use-row-submit="true">
+		<row-actions>
+			<entity-condition list="containerByOrder"
+				entity-name="OrderAndContainer">
+				<condition-expr field-name="orderId" from-field="orderId"></condition-expr>
+			</entity-condition>
+			<set field="containerId" value="${containerByOrder[0].containerId}"></set>
+		</row-actions>
+
+		<field name="requirementId" title="${uiLabelMap.requirementId}">
+			<display />
+		</field>
+		<field name="agreementId" title="${uiLabelMap.AgreementId}">
+			<hyperlink target="detailPurchaseAgreement" description="${agreementId}">
+				<parameter param-name="agreementId" from-field="agreementId"></parameter>
+			</hyperlink>
+		</field>
+		<field name="orderId" title="${uiLabelMap.OrderId}">
+			<display />
+		</field>
+		<field name="containerId" title="${uiLabelMap.ContainerId}">
+			<display />
+		</field>
+		<field name="productStoreId" title="${uiLabelMap.productStore}">
+			<display-entity description="${storeName}"
+				entity-name="ProductStore" />
+		</field>
+		<field name="facilityId" title="${uiLabelMap.facility}">
+			<display-entity description="${facilityName}"
+				entity-name="Facility" />
+		</field>
+		<field name="contactMechId" title="${uiLabelMap.FacilityAddress}">
+			<display-entity entity-name="PostalAddress"
+				description="${address1}" key-field-name="contactMechId"></display-entity>
+		</field>
+		<field name="requiredByDate" title="${uiLabelMap.RequiredByDate}">
+			<display />
+		</field>
+		<field name="requirementDate" title="${uiLabelMap.ReceiveDate}">
+			<display />
+		</field>
+		<field name="statusId" title="${uiLabelMap.Status}">
+			<display-entity description="${description}"
+				entity-name="StatusItem" />
+		</field>
+		<field name="partyIdTo" use-when="&quot;REQ_APPROVED&quot;.equals(statusId)">
+			<hidden value="LOG_SPECIALIST" />
+		</field>
+		<field name="partyIdTo" use-when="&quot;REQ_ACCEPTED&quot;.equals(statusId)">
+			<hidden value="QA_QUALITY_MANAGER" />
+		</field>
+		<field name="action" use-when="&quot;REQ_APPROVED&quot;.equals(statusId)">
+			<hidden value="getReceiptRequirements" />
+		</field>
+		<field name="action" use-when="&quot;REQ_ACCEPTED&quot;.equals(statusId)">
+			<hidden value="getQAListReceipts" />
+		</field>
+		<field name="sendMessage" use-when="&quot;REQ_APPROVED&quot;.equals(statusId)">
+			<hidden value="${uiLabelMap.NewReceiptRequirement}" />
+		</field>
+		<field name="sendMessage" use-when="&quot;REQ_ACCEPTED&quot;.equals(statusId)">
+			<hidden value="NewReceipt" />
+		</field>
+		<field name="_rowSubmit" title="${uiLabelMap.CommonSelect}"
+			use-when="!&quot;REQ_PROPOSED&quot;.equals(statusId) &amp;&amp; !&quot;REQ_COMPLETED&quot;.equals(statusId)">
+			<check all-checked="false" />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.Approved}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+		<field name="submitButton2" title="${uiLabelMap.CommonSend}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-arrow-right" />
+		</field>
+		<field name="submitButton3" title="${uiLabelMap.CreateReceiptNote}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-edit" />
+		</field>
+	</form>
+
+	<form name="FindReceiptRequirement" type="single" target="findReceiptRequirement"
+		title="" header-row-style="header-row" default-table-style="basic-table">
+		<field name="requirementId" title="${uiLabelMap.requirementId}">
+			<text-find />
+		</field>
+		<field name="agreementId" title="${uiLabelMap.AgreementId}">
+			<text-find />
+		</field>
+		<field name="orderId" title="${uiLabelMap.OrderId}">
+			<text-find />
+		</field>
+		<field name="productStoreId" title="${uiLabelMap.ProductStore}">
+			<text-find />
+		</field>
+		<field name="facilityId" title="${uiLabelMap.facility}">
+			<text-find />
+		</field>
+		<field name="requirementDate" title="${uiLabelMap.RequirementStartDate}">
+			<date-find />
+		</field>
+		<field name="noConditionFind">
+			<hidden value="Y" />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-primary btn-small">
+			<submit button-type="button" image-location="icon-search" />
+		</field>
+	</form>
+	<form name="EditReceiptRequirement" type="single"
+		target="updateReceiptRequirement" default-entity-name="OrderRequirementAndContainer"
+		default-map-name="requirement">
+		<field name="requirementId" use-when="requirement == null"
+			title="${uiLabelMap.requirementId}">
+			<text />
+		</field>
+		<field name="requirementId" use-when="requirement != null"
+			title="${uiLabelMap.requirementId}">
+			<display />
+		</field>
+		<!-- <field name="productStoreId" separate-column="true" title="${uiLabelMap.productStore}"> -->
+		<!-- <drop-down allow-empty="false"> -->
+		<!-- <list-options key-name="productStoreId" list-name="listProductStores" 
+			description="${storeName}"/> -->
+		<!-- </drop-down> -->
+		<!-- </field> -->
+		<!-- <field name="facilityId" separate-column="true" title="${uiLabelMap.FacilityToReceive}"> -->
+		<!-- <drop-down allow-empty="false"> -->
+		<!-- <list-options key-name="facilityId" list-name="listFacilities" description="${facilityName}"/> -->
+		<!-- </drop-down> -->
+		<!-- </field> -->
+		<!-- <field name="contactMechId" separate-column="true" title="${uiLabelMap.FacilityAddress}"> -->
+		<!-- <drop-down allow-empty="false"> -->
+		<!-- <list-options key-name="contactMechId" list-name="listFacilityContactMechs" 
+			description="${address1}"/> -->
+		<!-- </drop-down> -->
+		<!-- </field> -->
+		<field name="requirementByDate" title="${uiLabelMap.RequiredByDate}">
+			<date-time
+				default-value="${groovy: org.ofbiz.base.util.UtilDateTime.nowTimestamp()}" />
+		</field>
+		<!-- <field name="requirementStartDate" title="${uiLabelMap.ReceiveDate}"><date-time/></field> -->
+		<sort-order>
+			<field-group style="no-widget-header no-left-margin span6">
+				<sort-field name="requirementId" position="1"></sort-field>
+				<!-- <sort-field name="requirementByDate" position="2"></sort-field> -->
+				<!-- <sort-field name="requirementStartDate" position="3"></sort-field> -->
+			</field-group>
+			<field-group style="no-widget-header no-left-margin span6">
+				<sort-field name="requirementByDate" position="2"></sort-field>
+				<!-- <sort-field name="productStoreId" position="1"></sort-field> -->
+				<!-- <sort-field name="facilityId" position="2"></sort-field> -->
+				<!-- <sort-field name="contactMechId" position="3"></sort-field> -->
+			</field-group>
+		</sort-order>
+	</form>
+	<form name="ListAgreementToRequirement" target="updateReceiptRequirement"
+		type="multi" list-name="listAgreements"
+		default-table-style="table-bordered table table-striped table-hover dataTable"
+		use-row-submit="true">
+		<row-actions>
+			<entity-one entity-name="OrderHeader" value-field="orderHeader">
+				<field-map field-name="orderId" from-field="orderId"></field-map>
+			</entity-one>
+			<set field="productStoreId" value="${orderHeader.productStoreId}"></set>
+		</row-actions>
+		<field name="agreementId" title="${uiLabelMap.AgreementId}">
+			<display />
+		</field>
+		<field name="orderId" title="${uiLabelMap.OrderId}">
+			<display />
+		</field>
+		<field name="requirementId">
+			<hidden value="${requirementId}"></hidden>
+		</field>
+		<field name="agreementDate" title="${uiLabelMap.AgreementDate}">
+			<display />
+		</field>
+		<field name="partyIdFrom" title="${uiLabelMap.SlideA}">
+			<display-entity key-field-name="partyId" entity-name="PartyNameView"
+				description="${firstName} ${middleName} ${lastName} ${groupName}"></display-entity>
+		</field>
+		<field name="partyIdTo" title="${uiLabelMap.SlideB}">
+			<display-entity key-field-name="partyId" entity-name="PartyNameView"
+				description="${firstName} ${middleName} ${lastName} ${groupName}"></display-entity>
+		</field>
+		<field name="description" title="${uiLabelMap.CommonDescription}">
+			<display />
+		</field>
+		<field name="productStoreId" title="${uiLabelMap.ProductStore}">
+			<display-entity entity-name="ProductStore"
+				description="${storeName}"></display-entity>
+		</field>
+		<field name="facilityId" separate-column="true"
+			title="${uiLabelMap.FacilityToReceive}" required-field="true">
+			<drop-down allow-empty="false">
+				<entity-options description="${facilityName}"
+					entity-name="ProductStoreFacilityByOrder">
+					<entity-constraint name="orderId" operator="equals"
+						value="${orderId}"></entity-constraint>
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="requirementDate" title="${uiLabelMap.ReceiveDate}"
+			separate-column="true" required-field="true">
+			<date-time />
+		</field>
+		<field name="_rowSubmit" title="${uiLabelMap.CommonSelect}"
+			separate-column="true">
+			<check all-checked="true" />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonCreate}"
+			use-when="!listAgreements.isEmpty()" widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+	<form name="ListSentAgreements" target="updateAgreementFromDocuments"
+		type="multi" list-name="listOrderAgreements"
+		default-table-style="table-bordered table table-striped table-hover dataTable"
+		use-row-submit="true">
+		<row-actions>
+			<script
+				location="component://delys/webapp/delys/WEB-INF/actions/import/getAgreementStatus.groovy" />
+			<set field="listStatus" value="${listStatus}" type="List"></set>
+			<script
+				location="component://delys/webapp/delys/WEB-INF/actions/import/getContAndBillFromOrder.groovy" />
+			<set field="billNumber" value="${bill.billNumber}"></set>
+			<set field="containerNumber" value="${container.containerNumber}"></set>
+			<set field="departureDate" value="${bill.departureDate}"></set>
+			<set field="arrivalDate" value="${bill.arrivalDate}"></set>
+			<set field="shippingLineId" value="${bill.partyIdTo}" />
+		</row-actions>
+		<field name="agreementId" title="${uiLabelMap.AgreementId}">
+			<display />
+		</field>
+		<field name="orderId" title="${uiLabelMap.OrderId}">
+			<display />
+		</field>
+		<field name="containerId">
+			<hidden value="${container.containerId}" />
+		</field>
+		<field name="billId">
+			<hidden value="${bill.billId}" />
+		</field>
+		<field name="agreementDate" title="${uiLabelMap.AgreementDate}">
+			<display />
+		</field>
+		<field name="partyIdFrom" title="${uiLabelMap.SlideA}">
+			<display-entity key-field-name="partyId" entity-name="PartyNameView"
+				description="${firstName} ${middleName} ${lastName} ${groupName}"></display-entity>
+		</field>
+		<field name="partyIdTo" title="${uiLabelMap.SlideB}">
+			<display-entity key-field-name="partyId" entity-name="PartyNameView"
+				description="${firstName} ${middleName} ${lastName} ${groupName}"></display-entity>
+		</field>
+		<field name="partyRentId">
+			<hidden value="company" />
+		</field>
+		<field name="shippingLineId" title="${uiLabelMap.ShippingLine}"
+			separate-column="true">
+			<drop-down allow-empty="false">
+				<entity-options entity-name="PartyRoleAndPartyDetail"
+					description="${groupName}" key-field-name="partyId">
+					<entity-constraint name="roleTypeId" value="SHIPPING_LINE"></entity-constraint>
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="billNumber" title="${uiLabelMap.BillNumber}"
+			separate-column="true" required-field="true" widget-style="width100px">
+			<text />
+		</field>
+		<field name="containerNumber" title="${uiLabelMap.ContNumber}"
+			separate-column="true" required-field="true" widget-style="width100px">
+			<text />
+		</field>
+		<field name="departureDate" title="${uiLabelMap.DepartureDate}"
+			separate-column="true" widget-style="width100px">
+			<date-time />
+		</field>
+		<field name="arrivalDate" title="${uiLabelMap.ArrivalDate}"
+			separate-column="true" required-field="true" widget-style="width100px">
+			<date-time />
+		</field>
+		<field name="statusId" title="${uiLabelMap.Status}"
+			separate-column="true">
+			<drop-down no-current-selected-key="${statusId}"
+				allow-empty="false">
+				<list-options list-name="listStatus" key-name="statusId"
+					description="${description}"></list-options>
+			</drop-down>
+		</field>
+		<field name="_rowSubmit" title="${uiLabelMap.CommonSelect}"
+			separate-column="true">
+			<check all-checked="true" />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonUpdate}"
+			use-when="!listOrderAgreements.isEmpty()" widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+	<form name="AgreementToUpdateProducts" target="" type="list"
+		list-name="listOrderAgreements" default-table-style="table-bordered table table-striped table-hover dataTable">
+		<field name="agreementId" title="${uiLabelMap.AgreementId}">
+			<display />
+		</field>
+		<field name="orderId" title="${uiLabelMap.OrderId}">
+			<hyperlink target="getProductFromOrders" description="${orderId}">
+				<parameter param-name="orderId" from-field="orderId" />
+			</hyperlink>
+		</field>
+		<field name="agreementDate" title="${uiLabelMap.AgreementDate}">
+			<display />
+		</field>
+		<field name="partyIdFrom" title="${uiLabelMap.SlideA}">
+			<display-entity key-field-name="partyId" entity-name="PartyNameView"
+				description="${firstName} ${middleName} ${lastName} ${groupName}"></display-entity>
+		</field>
+		<field name="partyIdTo" title="${uiLabelMap.SlideB}">
+			<display-entity key-field-name="partyId" entity-name="PartyNameView"
+				description="${firstName} ${middleName} ${lastName} ${groupName}"></display-entity>
+		</field>
+		<field name="description" title="${uiLabelMap.CommonDescription}">
+			<display />
+		</field>
+		<field name="statusId" title="${uiLabelMap.Status}"
+			separate-column="true">
+			<display-entity entity-name="StatusItem" description="${description}"
+				key-field-name="statusId"></display-entity>
+		</field>
+	</form>
+	<form name="ProductFromOrders" target="updateOrderItemFromDocuments"
+		type="multi" list-name="listOrderItems"
+		default-table-style="table-bordered table table-striped table-hover dataTable"
+		use-row-submit="true">
+		<!-- <actions> -->
+		<!-- <entity-condition entity-name="OrderAndContainerDetail" list="listContainers"> -->
+		<!-- <condition-expr field-name="orderId" from-field="orderId"></condition-expr> -->
+		<!-- </entity-condition> -->
+		<!-- </actions> -->
+		<row-actions>
+			<entity-one entity-name="Product" value-field="product">
+				<field-map field-name="productId" from-field="productId"></field-map>
+			</entity-one>
+			<set field="quantityUomId" value="${product.quantityUomId}"></set>
+		</row-actions>
+		<field name="orderId" title="${uiLabelMap.OrderId}">
+			<display />
+		</field>
+		<field name="orderItemSeqId" title="${uiLabelMap.SequenceId}">
+			<display />
+		</field>
+		<field name="productId" title="${uiLabelMap.ProductId}">
+			<display />
+		</field>
+		<field name="quantity" title="${uiLabelMap.QuantityOrdered}">
+			<display />
+		</field>
+		<field name="quantityUomId" title="${uiLabelMap.QuantityUomId}">
+			<display-entity description="${description}"
+				entity-name="Uom" key-field-name="uomId" />
+		</field>
+		<field name="documentQuantity" title="${uiLabelMap.DocumentQuantity}"
+			separate-column="true">
+			<text default-value="${quantity}" />
+		</field>
+		<field name="expireDate" title="${uiLabelMap.ExpireDate}"
+			separate-column="true">
+			<date-time default-value="${expireDate}" />
+		</field>
+		<field name="_rowSubmit" title="${uiLabelMap.CommonSelect}"
+			separate-column="true">
+			<check all-checked="true" />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonUpdate}"
+			use-when="!listOrderItems.isEmpty()" widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+	<form name="ImportListReceipts" type="multi" title="" list-name="listIt"
+		odd-row-style="alternate-row"
+		default-table-style="table-bordered table table-striped table-hover dataTable">
+		<actions>
+			<service service-name="performFind" result-map="result"
+				result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="parameters" />
+				<field-map field-name="entityName" value="Receipt" />
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+				<field-map field-name="noConditionFind" value="Y" />
+			</service>
+		</actions>
+		<field name="receiptId" title="${uiLabelMap.ReceiptId}">
+			<hyperlink target="getImportDetailReceipts" description="${receiptId}">
+				<parameter param-name="receiptId" from-field="receiptId" />
+			</hyperlink>
+		</field>
+		<field name="facilityId" title="${uiLabelMap.facility}">
+			<display-entity description="${facilityName}"
+				entity-name="Facility" />
+		</field>
+		<field name="agreementId" title="${uiLabelMap.AgreementId}">
+			<display />
+		</field>
+		<field name="createDate" title="${uiLabelMap.createDate}">
+			<display />
+		</field>
+		<field name="receiptDate" title="${uiLabelMap.ReceiptDate}">
+			<display />
+		</field>
+		<field name="statusId" title="${uiLabelMap.Status}">
+			<display-entity entity-name="StatusItem" description="${description}" />
+		</field>
+		<!-- <field name="_rowSubmit" title="${uiLabelMap.CommonSelect}" separate-column="true"><check 
+			all-checked="true"/></field> -->
+		<!-- <field name="submitButton" title="${uiLabelMap.SentToQA}" widget-style="btn 
+			btn-small btn-primary"> -->
+		<!-- <submit button-type="button" image-location="icon-arrow-right"/> -->
+		<!-- </field> -->
+	</form>
+	<form name="ListProductByReceipt" type="multi" target="acceptReceipt"
+		list-name="listItemToReceives" default-table-style="table table-striped table-bordered table-hover dataTable"
+		use-row-submit="false">
+		<actions>
+			<set field="currentStatus" from-field="receipt.statusId" />
+		</actions>
+		<field name="receiptId">
+			<hidden value="${receiptId}" />
+		</field>
+		<field name="receiptItemSeqId">
+			<hidden value="${receiptItemSeqId}" />
+		</field>
+		<field name="itemSeqId" title="${uiLabelMap.SequenceId}">
+			<display default-value="${receiptItemSeqId}" />
+		</field>
+		<field name="productId" title="${uiLabelMap.ProductProduct}">
+			<display />
+		</field>
+		<field name="orderedQuantity" title="${uiLabelMap.QuantityOrdered}">
+			<hidden value="${orderedQuantity}" />
+		</field>
+		<field name="inventoryItemTypeId">
+			<hidden value="NON_SERIAL_INV_ITEM" />
+		</field>
+		<field name="expireDate" title="${uiLabelMap.ProductExpireDate}">
+			<display default-value="${expireDate}" />
+		</field>
+		<field name="quantityUomId" title="${uiLabelMap.QuantityUomId}">
+			<display-entity description="${description}"
+				entity-name="Uom" key-field-name="uomId" />
+		</field>
+		<field name="quantityOrdered" title="${uiLabelMap.QuantityOrdered}">
+			<display default-value="${orderedQuantity}" />
+		</field>
+		<field name="unitPrice" title="${uiLabelMap.UnitCost}">
+			<display type="currency" currency="${currencyUomId}" />
+		</field>
+		<field name="subTotal" title="${uiLabelMap.SubTotal}">
+			<display type="currency" currency="${currencyUomId}" />
+		</field>
+		<field name="statusId">
+			<hidden value="RECEIPT_DLV_ACCEPTED" />
+		</field>
+		<field name="actualQuantity" title="${uiLabelMap.QuantityActualReceipt}"
+			widget-style="width80pc">
+			<display default-value="${actualQuantity}" />
+		</field>
+		<field name="testQuantity" title="${uiLabelMap.ProductTestQuantity}"
+			widget-style="width80pc">
+			<display default-value="${testQuantity}" />
+		</field>
+		<field name="sampleQuantity" title="${uiLabelMap.ProductSampleQuantity}"
+			widget-style="width80pc">
+			<display default-value="${sampleQuantity}" />
+		</field>
+		<field name="inspectQuantity" title="${uiLabelMap.ProductInspectQuantity}"
+			widget-style="width80pc">
+			<display default-value="${inspectQuantity}" />
+		</field>
+		<field name="lackQuantity" title="${uiLabelMap.ProductLackQuantity}"
+			widget-style="width80pc">
+			<display default-value="${lackQuantity}" />
+		</field>
+		<field name="quantityRejected" title="${uiLabelMap.QuantityReject}"
+			widget-style="width80pc">
+			<display default-value="${quantityRejected}" />
+		</field>
+		<field name="rejectionId" title="${uiLabelMap.RejectReason}"
+			widget-style="width80pc">
+			<display-entity description="${description}"
+				entity-name="RejectionReason" key-field-name="rejectionId"></display-entity>
+		</field>
+		<field name="comment" title="${uiLabelMap.Note}" widget-style="width80pc"
+			separate-column="true">
+			<text default-value="${comment}" />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonApprove}"
+			use-when="!listItemToReceives.isEmpty() &amp;&amp; &quot;RECEIPT_STK_ACCEPTED&quot;.equals(currentStatus)"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+	<form name="createImportPlanHeaderNext" type="single"
+		target="createImportPlanItemNew2">
+		<actions>
+			<entity-condition entity-name="CustomTimePeriod"
+				list="listCustomTimePeriod">
+				<condition-expr field-name="periodTypeId" value="SALES_YEAR" />
+			</entity-condition>
+			<set field="namePlan" value="${parameters.namePlan}" />
+			<set field="yearPlan" value="${parameters.customTimePeriodSales}" />
+			<set field="areaPlan" value="${parameters.areaId}" />
+		</actions>
+		<field name="productPlanId">
+			<text></text>
+		</field>
+		<field name="namePlan">
+			<text></text>
+		</field>
+		<field name="yearPlan">
+			<text></text>
+		</field>
+		<field name="areaPlan">
+			<text></text>
+		</field>
+		<field name="productCategoryId" event="onchange" action="selectCategory();">
+			<drop-down>
+				<entity-options description="${productCategoryId}"
+					key-field-name="productCategoryId" entity-name="ProductCategory">
+					<entity-constraint name="productCategoryTypeId"
+						value="CATALOG_CATEGORY" operator="equals" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="productId" event="onchange" action="selectUnit();">
+			<drop-down allow-empty="false">
+				<entity-options description="${internalName}"
+					entity-name="Product" key-field-name="productId">
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="productUom">
+			<drop-down>
+				<entity-options description="${description}"
+					entity-name="Uom" key-field-name="uomId">
+					<entity-constraint name="uomTypeId" operator="equals"
+						value="PRODUCT_PACKING" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.Create}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+
+	<form name="devidePlan" type="single" target="devidePlanNext">
+		<actions>
+
+		</actions>
+		<field name="productPlanHeader">
+			<text></text>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.Create}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+	<form name="selectAgreement" type="single" target="resultToDoAgreement">
+		<actions>
+		</actions>
+		<field name="productPlanHeader">
+			<text></text>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.Create}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+	<form name="selectTimeTodevide" type="single" target="resultDevideTime">
+		<actions>
+			<entity-condition entity-name="CustomTimePeriod"
+				list="customTimePeriod">
+				<condition-expr field-name="periodTypeId" value="IMPORT_YEAR" />
+			</entity-condition>
+		</actions>
+		<field name="customTimePeriodId" title="Time">
+			<drop-down>
+				<list-options key-name="customTimePeriodId" list-name="customTimePeriod"
+					description="${periodName}" />
+			</drop-down>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.Create}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+
+	<form name="choiceTime" type="single" target="resultPlanOfYear">
+		<field name="productPlanHeaderId">
+			<text></text>
+		</field>
+	</form>
+	<form name="EditPurchaseAgreement2" target="updatePurchaseAgreement"
+		type="single" title="update purchase agreement" default-map-name="agreement">
+		<actions>
+			<script
+				location="component://delys/webapp/delys/WEB-INF/actions/import/getAgreementTerms.groovy" />
+			<set field="currentPortTerm" value="${currentPortTerm}" />
+			<set field="currentETDTerm" value="${currentETDTerm}" />
+		</actions>
+		<field name="lotId">
+			<hidden value="${lotId}" />
+		</field>
+		<field name="statusId">
+			<hidden value="AGREEMENT_CREATED" />
+		</field>
+		<field name="productPlanId">
+			<hidden value="${productPlanId}" />
+		</field>
+		<field name="agreementId" title="${uiLabelMap.AgreementId}"
+			use-when="agreement != null">
+			<display></display>
+		</field>
+		<field name="orderMode" use-when="agreement == null">
+			<hidden value="PURCHASE_ORDER" />
+		</field>
+		<field name="agreementId" use-when="agreement == null">
+			<hidden />
+		</field>
+		<field name="agreementTypeId" use-when="agreement == null">
+			<hidden value="PURCHASE_AGREEMENT" />
+		</field>
+		<field name="agreementTypeId" use-when="agreement != null"
+			title="${uiLabelMap.AgreementType}">
+			<display-entity key-field-name="agreementTypeId"
+				description="${description}" entity-name="AgreementType" />
+		</field>
+		<field name="partyIdFrom" title="${uiLabelMap.SlideA}">
+			<drop-down>
+				<list-options key-name="partyId" list-name="organizations"
+					description="${partyId} - ${groovy: org.ofbiz.party.party.PartyHelper.getPartyName(delegator, partyId, true)}" />
+			</drop-down>
+		</field>
+		<field name="representPartyIdFrom" title="${uiLabelMap.Represented}"
+			required-field="true">
+			<drop-down>
+				<list-options description="${firstName} ${middleName} ${lastName} [${partyId}]"
+					key-name="partyId" list-name="listPartyRepresents" />
+			</drop-down>
+		</field>
+		<field name="partyIdTo" title="${uiLabelMap.SlideB}">
+			<drop-down>
+				<entity-options
+					description="${partyId} - ${groovy: org.ofbiz.party.party.PartyHelper.getPartyName(delegator, partyId, true)}"
+					entity-name="PartyRoleAndPartyDetail" key-field-name="partyId">
+					<entity-constraint name="partyId"
+						value="${productPlan.supplierPartyId}" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="supplierPartyId" use-when="agreement == null">
+			<hidden value="${partyIdTo}" />
+		</field>
+		<field name="roleTypeIdFrom" title="${uiLabelMap.Role}">
+			<drop-down>
+				<entity-options description="${description}"
+					entity-name="RoleType" key-field-name="roleTypeId">
+					<entity-constraint name="roleTypeId" value="BUYER" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="roleTypeIdTo" title="${uiLabelMap.Role}">
+			<drop-down>
+				<entity-options description="${description}"
+					entity-name="RoleType" key-field-name="roleTypeId">
+					<entity-constraint name="roleTypeId" value="SUPPLIER" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="addressIdFrom" title="${uiLabelMap.Address}">
+			<drop-down>
+				<list-options key-name="contactMechId" list-name="listPartyContactMechs"
+					description="${address1}" />
+			</drop-down>
+		</field>
+		<field name="addressIdTo" title="${uiLabelMap.Address}">
+			<drop-down>
+				<list-options key-name="contactMechId" list-name="listPartyContactMechs"
+					description="${address1}" />
+			</drop-down>
+		</field>
+		<field name="telephoneIdFrom" title="${uiLabelMap.TelephoneNumber}">
+			<drop-down>
+				<list-options key-name="contactMechId" list-name="listPartyTelecomNumbers"
+					description="${countryCode} ${areaCode} ${contactNumber}" />
+			</drop-down>
+		</field>
+		<field name="faxNumberIdFrom" title="${uiLabelMap.FaxNumber}">
+			<drop-down>
+				<list-options key-name="contactMechId" list-name="listPartyTelecomNumbers"
+					description="${countryCode} ${areaCode} ${contactNumber}" />
+			</drop-down>
+		</field>
+		<field name="finAccountIdFroms" title="${uiLabelMap.BankAccount}">
+			<drop-down allow-multiple="false" allow-empty="false">
+				<list-options key-name="paymentMethodId" list-name="listPartyFinAccounts"
+					description="${finAccountCode}" />
+				<!-- <list-options key-name="paymentMethodId" list-name="listEftAccounts" 
+					description="${bankName} ${accountNumber}"/> -->
+			</drop-down>
+		</field>
+		<field name="finAccountIdTos" title="${uiLabelMap.BankAccount}">
+			<drop-down allow-multiple="false" allow-empty="false">
+				<list-options key-name="paymentMethodId" list-name="listPartyFinAccounts"
+					description="${finAccountCode}" />
+			</drop-down>
+		</field>
+		<field name="emailAddressIdTo" title="${uiLabelMap.EmailAddress}"
+			tooltip="${uiLabelMap.ReceiveContract}">
+			<drop-down>
+				<list-options key-name="contactMechId" list-name="listPartyPrimaryEmails"
+					description="${infoString}" />
+			</drop-down>
+		</field>
+		<field name="agreementDate" title="${uiLabelMap.AgreementDate}"
+			use-when="agreement != null &amp;&amp; agreement.get(&quot;agreementDate&quot;) != null">
+			<display />
+		</field>
+		<field name="agreementDate" title="${uiLabelMap.AgreementDate}"
+			use-when="agreement == null" position="2">
+			<date-time
+				default-value="${groovy: org.ofbiz.base.util.UtilDateTime.nowTimestamp()}" />
+		</field>
+		<field name="agreementName" title="${uiLabelMap.AgreementName}"
+			use-when="agreement == null" position="1" required-field-style="">
+			<text />
+		</field>
+		<field name="agreementName" title="${uiLabelMap.AgreementName}"
+			use-when="agreement != null">
+			<display />
+		</field>
+		<field name="fromDate" title="${uiLabelMap.AvailableFromDate}">
+			<date-time
+				default-value="${groovy: org.ofbiz.base.util.UtilDateTime.nowTimestamp()}" />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.AvailableThruDate}">
+			<date-time />
+		</field>
+		<field name="weekETD" use-when="agreement == null">
+			<hidden />
+		</field>
+		<field name="weekETD" title="${uiLabelMap.WeekETD}" use-when="agreement != null">
+			<drop-down no-current-selected-key="${currentETDTerm}">
+				<entity-options description="${periodName}"
+					entity-name="CustomTimePeriod">
+					<entity-constraint name="periodTypeId" value="IMPORT_WEEK" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="portOfDischargeId" title="${uiLabelMap.PortOfDischarge}"
+			required-field="true" use-when="agreement != null">
+			<drop-down no-current-selected-key="${currentPortTerm}">
+				<entity-options description="${description}"
+					entity-name="Facility">
+					<entity-constraint name="facilityTypeId" value="PORT_OF_DISCHARGE" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="portOfDischargeId" title="${uiLabelMap.PortOfDischarge}"
+			required-field="true" use-when="agreement == null">
+			<drop-down>
+				<entity-options description="${facilityName}"
+					entity-name="Facility" key-field-name="facilityId">
+					<entity-constraint name="facilityTypeId" value="PORT_OF_DISCHARGE" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="productStoreId" separate-column="true"
+			title="${uiLabelMap.ImportTo} ${uiLabelMap.productStore}">
+			<drop-down allow-empty="false">
+				<list-options key-name="productStoreId" list-name="listProductStores"
+					description="${storeName}" />
+			</drop-down>
+		</field>
+		<field name="facilityId" separate-column="true"
+			title="${uiLabelMap.ImportTo} ${uiLabelMap.facility}">
+			<drop-down allow-empty="false">
+				<list-options key-name="facilityId" list-name="listFacilities"
+					description="${facilityName}" />
+			</drop-down>
+		</field>
+		<field name="contactMechId" separate-column="true"
+			title="${uiLabelMap.FacilityAddress}">
+			<drop-down allow-empty="false">
+				<list-options key-name="contactMechId" list-name="listFacilityContactMechs"
+					description="${address1}" />
+			</drop-down>
+		</field>
+		<field name="currencyUomIds" title="${uiLabelMap.PaymentCurrency}">
+			<drop-down allow-empty="false" no-current-selected-key="EUR">
+				<entity-options description="${description}"
+					entity-name="Uom" key-field-name="uomId">
+					<entity-constraint name="uomTypeId" value="CURRENCY_MEASURE" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="transshipment" separate-column="true"
+			title="${uiLabelMap.AllowedTransshipment}">
+			<drop-down allow-empty="false">
+				<option key="Y" description="Y" />
+				<option key="N" description="N" />
+			</drop-down>
+		</field>
+		<field name="partialShipment" separate-column="true"
+			title="${uiLabelMap.PartialShipment}">
+			<drop-down allow-empty="false">
+				<option key="Y" description="Y" />
+				<option key="N" description="N" />
+			</drop-down>
+		</field>
+		<field name="description" title="${uiLabelMap.CommonDescription}">
+			<text />
+		</field>
+		<field name="textData" title="${uiLabelMap.TextData}">
+			<hidden />
+		</field>
+		<!-- <field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="btn 
+			btn-primary btn-small open-sans"><submit image-location="icon-ok" button-type="button"/></field> -->
+		<sort-order>
+			<field-group
+				style="no-left-margin no-widget-header span6 begin-group-group">
+				<sort-field name="agreementId" />
+				<sort-field name="agreementTypeId" />
+				<sort-field name="agreementName" />
+				<sort-field name="agreementDate" />
+			</field-group>
+			<field-group style="span6 no-widget-header end-group-group">
+				<sort-field name="fromDate" position="1" />
+				<sort-field name="thruDate" position="2" />
+			</field-group>
+			<field-group
+				style="no-left-margin span6 no-widget-header begin-group-group">
+				<sort-field name="partyIdFrom" position="1" />
+				<sort-field name="roleTypeIdFrom" position="2" />
+				<sort-field name="addressIdFrom" position="3" />
+				<sort-field name="finAccountIdFroms" position="4" />
+				<sort-field name="telephoneIdFrom" position="5" />
+				<sort-field name="faxNumberIdFrom" position="6" />
+				<sort-field name="representPartyIdFrom" position="7" />
+			</field-group>
+			<field-group style="span6 no-widget-header end-group-group">
+				<sort-field name="partyIdTo" position="1" />
+				<sort-field name="roleTypeIdTo" position="2" />
+				<sort-field name="addressIdTo" position="3" />
+				<sort-field name="finAccountIdTos" position="4" />
+				<sort-field name="emailAddressIdTo" position="5" />
+			</field-group>
+			<field-group
+				style="no-left-margin no-widget-header span6 begin-group-group">
+				<sort-field name="weekETD" position="1" />
+				<!-- <sort-field name="productPlanId" position="2"/> -->
+				<sort-field name="portOfDischargeId" position="2" />
+				<sort-field name="productStoreId" position="3" />
+				<sort-field name="facilityId" position="4" />
+				<sort-field name="contactMechId" position="5" />
+			</field-group>
+			<field-group style="span6 no-widget-header end-group-group">
+				<sort-field name="currencyUomIds" position="1" />
+				<sort-field name="transshipment" position="2" />
+				<sort-field name="partialShipment" position="3" />
+				<sort-field name="description" position="4" />
+				<!-- <sort-field name="textData" position="2"/> -->
+			</field-group>
+			<!-- <field-group style="no-widget-header span12 align-center no-left-margin"> 
+				<sort-field name="submitButton" position="1"/> </field-group> -->
+		</sort-order>
+	</form>
+
+	<form name="ListProductByLot2" type="list"
+		default-table-style="table-bordered table table-striped table-hover dataTable"
+		list-name="listProductByLot">
+		<row-actions>
+			<entity-one entity-name="ProductPlanItem" value-field="planItem">
+				<field-map field-name="productPlanId" from-field="productPlanId" />
+				<field-map field-name="productPlanItemSeqId" from-field="productPlanItemSeqId" />
+			</entity-one>
+		</row-actions>
+		<field name="lotId" title="${uiLabelMap.ProductLotId}">
+			<display />
+		</field>
+		<field name="productPlanId" title="${uiLabelMap.PlanId}">
+			<display />
+		</field>
+		<field name="productPlanItemSeqId" title="${uiLabelMap.ProductPlanItemSeqId}">
+			<display />
+		</field>
+		<field name="productId" title="${uiLabelMap.ProductId}">
+			<display default-value="${planItem.productId}" />
+		</field>
+		<field name="lotQuantity" title="${uiLabelMap.quantity}">
+			<display />
+		</field>
+		<field name="statusId" title="${uiLabelMap.Status}">
+			<display-entity entity-name="StatusItem"
+				key-field-name="statusId" description="${description}" />
+		</field>
+	</form>
+</forms>

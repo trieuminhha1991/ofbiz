@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>BaseAccounting Services</description>
+    <vendor></vendor>
+    <version>1.0</version>
+
+    <service name="noSyntaxError" engine="interface">
+        <description>
+            Dummy service to prevent empty files and syntax error - Remove when the 1st real service will be added here 
+        </description>
+    </service>
+    
+    <service name="getPaymentNotApplied" engine="groovy" invoke="" location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/payment/getPaymentNotApplied.groovy">
+   		<attribute name="paymentId" mode="IN" type="String" optional="false"></attribute>
+   		<attribute name="amountToApply" mode="OUT" type="String" optional="false"></attribute>
+   </service>
+   
+   <service engine="java" name="JqxGetListPayments" invoke="getListPayments" location="com.olbius.acc.payment.JqxPaymentServices">
+   		<implements service="jqxGetListInterface"/>
+   		<override name="listIterator" type="List"></override>
+   </service>
+   
+   <service engine="java" name="JqxGetListPaymentsNew" invoke="getListPaymentsNew" location="com.olbius.acc.payment.JqxPaymentServices">
+   		<implements service="jqxGetListInterface"/>
+   </service>
+
+   <service engine="java" name="JQGetAllListPayment" invoke="getAllListPaymentJQ" location="com.olbius.acc.payment.JqxPaymentServices">
+   		<implements service="jqxGetListInterface"/>
+   </service>
+
+   <service engine="java" name="JQGetListInvoiceOfPayment" invoke="getListInvoiceOfPaymentJQ" location="com.olbius.acc.payment.JqxPaymentServices">
+   		<implements service="jqxGetListInterface"/>
+   		<override name="listIterator" type="List"></override>
+   </service>
+   <service engine="java" name="JQGetListInvoiceNotCompleteApply" invoke="getListInvoiceNotCompleteApplyJQ" location="com.olbius.acc.payment.JqxPaymentServices">
+   		<implements service="jqxGetListInterface"/>
+   </service>
+   
+   <service name="getListReceiptPayment" engine="java" invoke="getListReceiptPayment"  location="com.olbius.acc.payment.OrdersReportServices">
+       <attribute name="orderId" mode="IN" type="String" optional="false"></attribute>
+       <attribute name="avo" mode="IN" type="String" optional="false"></attribute>
+       <attribute name="avt" mode="IN" type="String" optional="false"></attribute>
+       <attribute name="listIterator" mode="OUT" type="List" optional="false"></attribute>
+   </service>
+   
+   <service name="getListPaymentMethodOrders" engine="groovy" invoke="" location="component://baseaccounting/webapp/baseaccounting/WEB-INF/actions/payment/GetListPaymentMethods.groovy">
+       <attribute name="orderId" mode="IN" type="String" optional="false" ></attribute>
+       <attribute name="paymentMethods" mode="OUT" type="List" optional="false" ></attribute>
+   </service>
+   
+   	<service name="sendPaidOrderNotiLog" engine="java" invoke="sendPaidOrderNotiLog" location="com.olbius.acc.payment.JqxPaymentServices">
+   		<attribute name="orderId" mode="IN" type="String" optional="false"></attribute>	
+   	</service>
+   	
+   	<service name="changeOrderStatusByAccountant" engine="java" invoke="changeOrderStatusByAccountant" location="com.olbius.acc.payment.JqxPaymentServices">
+   		<attribute name="orderId" mode="IN" type="String" optional="false"></attribute>
+   		<attribute name="statusId" mode="IN" type="String" optional="false"></attribute>
+   		<attribute name="amount" mode="IN" type="java.math.BigDecimal" optional="false"></attribute>
+   		<attribute name="setItemStatus" mode="IN" type="String" optional="true"></attribute>
+   		<attribute name="shipAfterDate" mode="IN" type="java.sql.Timestamp" optional="true"></attribute>
+   	</service>
+   	<service name="checkPaymentInvoiceAppr" engine="java" invoke="checkPaymentInvoiceAppr" auth="true"
+   		location="com.olbius.acc.payment.PaymentServices">
+   		<attribute name="paymentId" mode="IN" type="String"></attribute>
+   		<attribute name="statusId" mode="IN" type="String"></attribute>
+	</service>
+	<service name="getListReceiveExcessMoney" engine="java" invoke="getListReceiveExcessMoney" auth="true"
+   		location="com.olbius.acc.payment.PaymentServices">
+   		<attribute name="filterFromDate" mode="IN" type="Long" optional="true"></attribute>
+   		<attribute name="filterThruDate" mode="IN" type="Long" optional="true"></attribute>
+   		<attribute name="listEmployee" mode="OUT" type="java.util.List" optional="false"></attribute>
+	</service>
+	<service name="processExcessMoney" engine="java" invoke="processExcessMoney" auth="true"
+   		location="com.olbius.acc.payment.PaymentServices" transaction-timeout="1000000">
+   		<attribute name="filterFromDate" mode="IN" type="Long"></attribute>
+   		<attribute name="filterThruDate" mode="IN" type="Long"></attribute>
+   		<attribute name="transactionDate" mode="IN" type="Long"></attribute>
+   		<attribute name="listEmployee" mode="IN" type="String"></attribute>
+	</service>
+	<service name="addAmountAppliedPayment" engine="java" invoke="addAmountAppliedPayment" auth="true"
+   		location="com.olbius.acc.payment.PaymentServices">
+   		<attribute name="paymentId" mode="IN" type="String"></attribute>
+   		<attribute name="amountApplied" type="BigDecimal" mode="IN" optional="true"/>
+	</service>
+	<service name="removeAmountAppliedPayment" engine="java" invoke="removeAmountAppliedPayment" auth="true"
+   		location="com.olbius.acc.payment.PaymentServices">
+   		<attribute name="paymentId" mode="IN" type="String"></attribute>
+   		<attribute name="paymentApplicationId" mode="IN" type="String"></attribute>
+	</service>
+	<service name="updateAmountPosTerminalState" engine="java" invoke="updateAmountPosTerminalState" auth="true"
+   		location="com.olbius.acc.payment.PaymentServices">
+   		<attribute name="paymentId" mode="IN" type="String"></attribute>
+	</service>
+	<service name="updateStatusOrderReceiptNote" engine="java" invoke="updateStatusOrderReceiptNote" auth="true"
+   		location="com.olbius.acc.payment.PaymentServices">
+   		<attribute name="receiptId" mode="IN" type="String"></attribute>
+	</service>
+	<service name="updateOrderReceiptNote" engine="java" invoke="updateOrderReceiptNote" auth="true"
+   		location="com.olbius.acc.payment.PaymentServices">
+   		<attribute name="paymentId" mode="IN" type="String"></attribute>
+	</service>
+</services>

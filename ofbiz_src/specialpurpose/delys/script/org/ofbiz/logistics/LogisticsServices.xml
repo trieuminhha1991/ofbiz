@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+
+    <simple-method method-name="getNextSequenceId" short-description="get next sequence Id for a entity">
+        <set field="entityName" from-field="parameters.entityName"/>
+        <sequenced-id sequence-name="${entityName}" field="newSequenceId"/>
+        <field-to-result field="newSequenceId" result-name="newSequenceId"/>
+    </simple-method>
+    <simple-method method-name="removeOrderInShipment" short-description="remove Order In Shipment">
+        <entity-one entity-name="OrderShipment" value-field="orderShipment"/>
+        <remove-value value-field="orderShipment"/>
+        <field-to-result field="parameters.shipmentId" result-name="shipmentId"/>
+    </simple-method>
+    <simple-method method-name="getSeqTargetHeader" short-description="get next sequence Id for a target header">
+		<make-value value-field="newEntity" entity-name="TargetHeader"/>
+        <sequenced-id sequence-name="TargetHeader" field="newEntity.targetHeaderId"/>
+        <field-to-result field="newEntity.targetHeaderId" result-name="targetHeaderId"/>
+    </simple-method>
+    <simple-method method-name="editTargetItemCompany" short-description="edit target item">
+		<set field="targetHeaderId" value="${parameters.targetHeaderId}"/>
+		<set field="targetItemSeqId" value="${parameters.targetItemSeqId}"/>
+		<set field="quantity" value="${parameters.quantity}" />
+		<entity-one value-field="targetItem" entity-name="TargetItem">
+			<field-map field-name="targetHeaderId" from-field="targetHeaderId" />
+			<field-map field-name="targetItemSeqId" from-field="targetItemSeqId"/>
+		</entity-one>
+		<set field="targetItem.quantity" from-field="quantity"/>
+		<store-value value-field="targetItem"/>
+		<field-to-result field="targetHeaderId" result-name="targetHeaderId"/>
+    </simple-method>
+</simple-methods>

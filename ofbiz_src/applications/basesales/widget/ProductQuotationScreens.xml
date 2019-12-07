@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-screen.xsd">
+	<screen name="QuotationCommonDecorator">
+		<section>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+                    	<decorator-section-include name="body"/>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ListQuotation">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="quotation"/>
+				<set field="selectedSubMenuItem" value="quotationList"/>
+				<set field="titleProperty" value="BSListProductQuotation"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html><html-template location="component://basesales/webapp/basesales/quotation/quotationList.ftl"/></html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="NewQuotationInfo">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html><html-template location="component://basesales/webapp/basesales/quotation/quotationNewInfo.ftl"/></html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="NewQuotationProductItems">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html><html-template location="component://basesales/webapp/basesales/quotation/quotationNewProductItems.ftl"/></html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="NewQuotationConfirm">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html><html-template location="component://basesales/webapp/basesales/quotation/quotationNewConfirm.ftl"/></html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="quotationTitle">
+		<section>
+			<condition>
+				<not><if-empty field="productQuotation"/></not>
+			</condition>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text="${uiLabelMap.BSId}: "></label>
+				<link url-mode="plain" target="viewQuotation?productQuotationId=${productQuotation.productQuotationId}" text="${productQuotation.productQuotationId}"></link>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewQuotation">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="quotation"/>
+				<set field="selectedSubMenuItem" value="quotationList"/>
+				<set field="titleProperty" value="BSViewProductQuotation"/>
+				<set field="productQuotationId" from-field="parameters.productQuotationId"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission/>
+					</condition>
+					<actions>
+						<entity-one value-field="productQuotation" entity-name="ProductQuotation">
+							<field-map field-name="productQuotationId" value="${productQuotationId}"/>
+						</entity-one>
+					</actions>
+					<widgets>
+						<section>
+							<condition><not><if-empty field="productQuotation"/></not></condition>
+							<actions>
+								<set field="titleHeaderValue" value="quotationTitle" global="true"/>
+								<set field="titleHeaderLocation" value="component://basesales/widget/ProductQuotationScreens.xml" global="true"/>
+								<set field="currentStatusId" from-field="productQuotation.statusId"/>
+								<entity-condition list="roleTypes" entity-name="RoleType" use-cache="true"/>
+								<!-- <entity-condition list="roleTypesSelected" entity-name="ProductQuotationRoleTypeAppl">
+									<condition-expr field-name="productQuotationId" value="${productQuotationId}"/>
+								</entity-condition> -->
+								<set field="allowQuotationEdit" type="Boolean" default-value="false" value="${groovy: return com.olbius.basesales.util.SalesWorker.checkPermissionEditQuotation(productQuotation, null, delegator, userLogin, security)}"/>
+								<script location="component://basesales/webapp/basesales/WEB-INF/actions/product/ViewProductQuotation.groovy"/>
+							</actions>
+							<widgets>
+								<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+									<decorator-section name="body">
+										<screenlet title="${uiLabelMap.BSProductQuotation}: ${productQuotation.quotationName} (${productQuotation.productQuotationId})" navigation-menu-name="ViewQuotationSubTabBar">
+											<include-menu name="ViewQuotationSubTabBar" location="component://basesales/widget/BaseSalesTabBarMenus.xml" />
+											<platform-specific>
+												<html><html-template location="component://basesales/webapp/basesales/quotation/quotationView.ftl"/></html>
+											</platform-specific>
+										</screenlet>
+									</decorator-section>
+								</decorator-screen>
+							</widgets>
+							<fail-widgets>
+								<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+									<decorator-section name="body">
+										<container style="alert alert-info">
+						               		<label text="${uiLabelMap.BSProductQuotationHasIdIsNotFound}"></label>
+						               	</container>
+						           	</decorator-section>
+						       	</decorator-screen>
+							</fail-widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="NewQuotation">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="quotation"/>
+				<set field="selectedSubMenuItem" value="newQuotation"/>
+				<set field="titleProperty" value="BSCreateNewProductQuotation"/>
+				
+				<entity-one value-field="productQuotation" entity-name="ProductQuotation"></entity-one>
+				<entity-one value-field="productQuotationCopy" entity-name="ProductQuotation">
+					<field-map field-name="productQuotationId" from-field="parameters.productQuotationIdOrg" />
+				</entity-one>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<and>
+							<if-empty field="productQuotation"/>
+							<not><if-empty field="productQuotationCopy"/></not>
+						</and>
+					</condition>
+					<actions>
+						<set field="productQuotation" from-field="productQuotationCopy"/>
+						<set field="copyMode" type="Boolean" value="true"/>
+					</actions>
+					<widgets></widgets>
+				</section>
+				<section>
+					<condition>
+						<not>
+							<if-empty field="productQuotation" />
+						</not>
+					</condition>
+					<actions>
+						<set field="titleHeaderValue" value="quotationTitle" global="true"/>
+						<set field="titleHeaderLocation" value="component://basesales/widget/ProductQuotationScreens.xml" global="true"/>
+						<set field="currentStatusId" from-field="productQuotation.statusId"/>
+						<set field="quotationAllowEditSpecial" type="Boolean" default-value="false" value="${groovy: return com.olbius.basesales.util.SalesUtil.getSystemConfigValue(delegator, 'quotationAllowEditSpecial')}"/>
+						<set field="allowQuotationEdit" type="Boolean" default-value="false" value="${groovy: return com.olbius.basesales.util.SalesWorker.checkPermissionEditQuotation(productQuotation, null, delegator, userLogin, security)}"/>
+						<script location="component://basesales/webapp/basesales/WEB-INF/actions/product/EditProductQuotation.groovy"/>
+					</actions>
+					<widgets>
+						<section>
+							<condition><if-empty field="productQuotationCopy"/></condition>
+							<actions><set field="titleProperty" value="BSEditProductQuotation"/></actions>
+							<widgets></widgets>
+							<fail-widgets>
+								<section>
+									<condition><if-compare operator="equals" value="true" field="copyMode" type="Boolean"/></condition>
+									<actions><set field="allowQuotationEdit" value="true" type="Boolean"/></actions>
+									<widgets></widgets>
+								</section>
+							</fail-widgets>
+						</section>
+					</widgets>
+				</section>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<and>
+									<if-olbius-has-permission/>
+									<or>
+										<if-empty field="productQuotation"/>
+										<if-compare operator="equals" value="true" field="allowQuotationEdit" type="Boolean"/>
+									</or>
+								</and>
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html><html-template location="component://basesales/webapp/basesales/quotation/quotationNewTotal.ftl"/></html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotCreatePermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<!-- <screen name="EditQuotation">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="quotation"/>
+				<set field="selectedSubMenuItem" value="newQuotation"/>
+				<set field="titleProperty" value="BSEditProductQuotation"/>
+				<set field="productQuotationId" from-field="parameters.productQuotationId"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission/>
+					</condition>
+					<actions>
+						<entity-one value-field="productQuotation" entity-name="ProductQuotation">
+							<field-map field-name="productQuotationId" value="${productQuotationId}"/>
+						</entity-one>
+					</actions>
+					<widgets>
+						<section>
+							<condition><not><if-empty field="productQuotation"/></not></condition>
+							<actions>
+								<set field="titleHeaderValue" value="quotationTitle" global="true"/>
+								<set field="titleHeaderLocation" value="component://basesales/widget/ProductQuotationScreens.xml" global="true"/>
+								<set field="currentStatusId" from-field="productQuotation.statusId"/>
+								<script location="component://basesales/webapp/basesales/WEB-INF/actions/product/EditProductQuotation.groovy"/>
+							</actions>
+							<widgets>
+								<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+									<decorator-section name="body">
+										<platform-specific>
+											<html><html-template location="component://basesales/webapp/basesales/quotation/quotationNewTotal.ftl"/></html>
+										</platform-specific>
+									</decorator-section>
+								</decorator-screen>
+							</widgets>
+							<fail-widgets>
+								<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+									<decorator-section name="body">
+										<container style="alert alert-info">
+						               		<label text="${uiLabelMap.BSProductQuotationHasIdIsNotFound}"></label>
+						               	</container>
+						           	</decorator-section>
+						       	</decorator-screen>
+							</fail-widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotUpdatePermission}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen> -->
+	<screen name="PrintQuotation">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="quotation"/>
+				<set field="selectedSubMenuItem" value="newQuotation"/>
+				<set field="titleProperty" value="BSPrintPriceRule"/>
+				<set field="productQuotationId" from-field="parameters.productQuotationId"/>
+				<entity-one value-field="productQuotation" entity-name="ProductQuotation">
+					<field-map field-name="productQuotationId" from-field="productQuotationId"/>
+				</entity-one>
+				<!-- <entity-condition list="roleTypesSelected" entity-name="ProductQuotationRoleTypeAppl">
+					<condition-expr field-name="productQuotationId" from-field="productQuotationId"/>
+				</entity-condition> -->
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<not><if-empty field="productQuotation"/></not>
+							</condition>
+							<actions>
+								<entity-condition list="productStoreAppls" entity-name="ProductQuotationStoreAppl">
+									<condition-list>
+										<condition-expr field-name="productQuotationId" from-field="productQuotationId"/>
+										<condition-list combine="or">
+											<condition-expr field-name="thruDate" operator="greater" from-field="nowTimestamp"/>
+											<condition-expr field-name="thruDate" operator="equals" from-field="nullField"/>
+										</condition-list>
+									</condition-list>
+								</entity-condition>
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html><html-template location="component://basesales/webapp/basesales/quotation/quotationPrintTotal.ftl"/></html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotUpdatePermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+	         	</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+</screens>

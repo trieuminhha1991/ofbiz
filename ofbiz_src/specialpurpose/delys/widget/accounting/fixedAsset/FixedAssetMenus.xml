@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+<menus xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-menu.xsd">
+	 <menu name="ListFixedAssetsSubTabBar" modelMenu="olbiusScreenletMenu" default-widget-style="marginSubMenu" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+	 	<menu-item name="EditFixedAsset" title="${uiLabelMap.AccountingNewFixedAsset}" widget-style="icon-plus-sign open-sans">
+	 		<link target="EditFixedAsset"></link>
+	 	</menu-item>
+	 </menu>
+	 
+	 <menu name="ListFixedAssetMaintsSubTabBar" modelMenu="olbiusScreenletMenu" default-widget-style="marginSubMenu" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml">
+	 	<menu-item name="NewFixedAssetMaint" title="${uiLabelMap.AccountingNewFixedAssetMaint}" widget-style="icon-plus-sign open-sans">
+	 		<link target="EditFixedAssetMaint">
+	 			<parameter param-name="fixedAssetId" />
+	 		</link>
+	 	</menu-item>
+	 	<menu-item name="EditFixedAssetMaint" title="${uiLabelMap.AccountingFixedAssetMaint}">
+            <condition>
+            	<not>
+            		<if-empty field="maintHistSeqId"/>
+            	</not>
+            </condition>
+            <link target="EditFixedAssetMaint">
+                <parameter param-name="fixedAssetId" from-field="fixedAssetMaint.fixedAssetId"/>
+                <parameter param-name="maintHistSeqId" from-field="fixedAssetMaint.maintHistSeqId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditFixedAssetMeters" title="${uiLabelMap.AccountingFixedAssetMeters}">
+            <condition>
+            	<not>
+            		<if-empty field="maintHistSeqId"/>
+            	</not>
+            </condition>
+            <link target="EditFixedAssetMeters">
+                <parameter param-name="fixedAssetId"/>
+                <parameter param-name="maintHistSeqId"/>
+                <parameter param-name="productMeterTypeId" from-field="fixedAssetMaint.intervalMeterTypeId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditFixedAssetMaintOrders" title="${uiLabelMap.AccountingFixedAssetMaintOrders}">
+            <condition>
+            	<not>
+            		<if-empty field="maintHistSeqId"/>
+            	</not>
+            </condition>
+            <link target="EditFixedAssetMaintOrders">
+                <parameter param-name="fixedAssetId" from-field="fixedAssetMaint.fixedAssetId"/>
+                <parameter param-name="maintHistSeqId" from-field="fixedAssetMaint.maintHistSeqId"/>
+            </link>
+        </menu-item>
+        
+        <menu-item name="CreateAcctgTransAndEntries" title="${uiLabelMap.AccountingCreateAnAccountingTransaction}: ${assetDepreciationResultMap.plannedPastDepreciationTotal}" widget-style="icon-plus-sign open-sans">
+	 		<condition>
+				<and>
+					<not>
+						<if-empty
+							field="assetDepreciationResultMap.plannedPastDepreciationTotal" />
+					</not>
+					<not>
+						<if-empty field="fixedAsset.partyId" />
+					</not>
+					<if-compare-field
+						field="assetDepreciationResultMap.plannedPastDepreciationTotal"
+						to-field="depreciation" operator="greater" type="BigDecimal" />
+				</and>
+			</condition>
+	 		<link target="CreateAcctgTransAndEntries">
+	 			<parameter param-name="fixedAssetId" from-field="fixedAsset.fixedAssetId" />
+				<parameter param-name="organizationPartyId"
+					from-field="fixedAsset.partyId" />
+				<parameter param-name="acctgTransTypeId" value="DEPRECIATION" />
+				<parameter param-name="debitGlAccountId"
+					from-field="defaultDebitAccountForDepreciationTransaction" />
+				<parameter param-name="creditGlAccountId"
+					from-field="defaultCreditAccountForDepreciationTransaction" />
+				<parameter param-name="amount"
+					from-field="assetDepreciationResultMap.plannedPastDepreciationTotal" />
+	 		</link>
+	 	</menu-item>
+	 </menu>
+    <menu name="FixedAssetMaintTabBar" default-widget-style="marginSubMenu" modelMenu="olbiustab" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml"
+          selected-menuitem-context-field-name="tabButtonItemFixedAssetMaint" default-menu-item-name="EditFixedAssetMaint">
+        <menu-item name="EditFixedAssetMaint" title="${uiLabelMap.AccountingFixedAssetMaint}">
+            <link target="EditFixedAssetMaint">
+                <parameter param-name="fixedAssetId" from-field="fixedAssetMaint.fixedAssetId"/>
+                <parameter param-name="maintHistSeqId" from-field="fixedAssetMaint.maintHistSeqId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditFixedAssetMeters" title="${uiLabelMap.AccountingFixedAssetMeters}">
+            <link target="EditFixedAssetMeters">
+                <parameter param-name="fixedAssetId"/>
+                <parameter param-name="maintHistSeqId"/>
+                <parameter param-name="productMeterTypeId" from-field="fixedAssetMaint.intervalMeterTypeId"/>
+            </link>
+        </menu-item>
+        <menu-item name="EditFixedAssetMaintOrders" title="${uiLabelMap.AccountingFixedAssetMaintOrders}">
+            <link target="EditFixedAssetMaintOrders">
+                <parameter param-name="fixedAssetId" from-field="fixedAssetMaint.fixedAssetId"/>
+                <parameter param-name="maintHistSeqId" from-field="fixedAssetMaint.maintHistSeqId"/>
+            </link>
+        </menu-item>
+    </menu>
+
+    <menu name="FixedAssetTabBar" extends="CommonTabBarMenu" modelMenu="olbiustab" extends-resource="component://common/widget/CommonMenus.xml"
+          default-menu-item-name="EditFixedAsset">
+        <menu-item name="EditFixedAsset" title="${uiLabelMap.AccountingFixedAsset}">
+            <link target="EditFixedAsset">
+                <parameter param-name="fixedAssetId"/>
+            </link>
+        </menu-item>
+<!--         <menu-item name="FixedAssetChildren" title="${uiLabelMap.CommonEntityChildren}"> -->
+<!--             <link target="FixedAssetChildren"> -->
+<!--                 <parameter param-name="fixedAssetId"/> -->
+<!--                 <parameter param-name="trail" from-field="fixedAssetId"/> -->
+<!--             </link> -->
+<!--         </menu-item> -->
+        <menu-item name="ListFixedAssetProducts" title="${uiLabelMap.AccountingFixedAssetProducts}">
+            <link target="ListFixedAssetProducts">
+                <parameter param-name="fixedAssetId"/>
+            </link>
+        </menu-item>
+<!--         <menu-item name="ListFixedAssetCalendar" title="${uiLabelMap.AccountingFixedAssetCalendar}"> -->
+<!--             <link target="calendar"> -->
+<!--                 <parameter param-name="fixedAssetId"/> -->
+<!--             </link> -->
+<!--         </menu-item> -->
+<!--         <menu-item name="EditFixedAssetStdCosts" title="${uiLabelMap.AccountingFixedAssetStdCosts}"> -->
+<!--             <link target="EditFixedAssetStdCosts"> -->
+<!--                 <parameter param-name="fixedAssetId"/> -->
+<!--             </link> -->
+<!--         </menu-item> -->
+        <menu-item name="EditFixedAssetIdents" title="${uiLabelMap.AccountingFixedAssetIdents}">
+            <link target="EditFixedAssetIdents">
+                <parameter param-name="fixedAssetId"/>
+            </link>
+        </menu-item>
+        <menu-item name="ListFixedAssetMaints" title="${uiLabelMap.AccountingFixedAssetMaints}">
+            <link target="ListFixedAssetMaints">
+                <parameter param-name="fixedAssetId"/>
+            </link>
+        </menu-item>       
+        <menu-item name="EditPartyFixedAssetAssignments" title="${uiLabelMap.AccountingPartyFixedAssetAssignments}">
+            <link target="EditPartyFixedAssetAssignments">
+                <parameter param-name="fixedAssetId"/>
+            </link>
+        </menu-item>
+        <menu-item name="FixedAssetDepreciation" title="${uiLabelMap.AccountingFixedAssetDepreciation}">
+            <link target="showFixedAssetDepreciation">
+                <parameter param-name="fixedAssetId"/>
+            </link>
+        </menu-item>                 
+         <menu-item name="Advance" title="${uiLabelMap.Advance}" widget-style="dropdown ProductTabBarAdvance">
+<!--             <sub-menu location="component://product/widget/catalog/CatalogMenus.xml" name="ProductTabBarAdvance"/> -->
+			<sub-menu location="component://accounting/widget/AccountingMenus.xml" name="noneMenu" />
+        </menu-item>
+    </menu>
+	 <menu name="noneMenu" modelMenu="olbiusSubMenu" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml" style="dropdown-menu dropdown-info none-menu">
+    </menu>
+    <menu name="FixedAssetAdvance" modelMenu="olbiusSubMenu" extends="CommonTabBarMenu" extends-resource="component://common/widget/CommonMenus.xml" style="dropdown-menu dropdown-info submenu-tabbar-custom">
+<!--     	  <menu-item name="EditFixedAssetMeters" title="${uiLabelMap.AccountingFixedAssetMeters}"> -->
+<!--             <link target="EditFixedAssetMeters"> -->
+<!--                 <parameter param-name="fixedAssetId"/> -->
+<!--             </link> -->
+<!--         </menu-item> -->
+<!--         <menu-item name="ListFixedAssetMaints" title="${uiLabelMap.AccountingFixedAssetMaints}"> -->
+<!--             <link target="ListFixedAssetMaints"> -->
+<!--                 <parameter param-name="fixedAssetId"/> -->
+<!--             </link> -->
+<!--         </menu-item> -->
+<!--         <menu-item name="EditPartyFixedAssetAssignments" title="${uiLabelMap.AccountingPartyFixedAssetAssignments}"> -->
+<!--             <link target="EditPartyFixedAssetAssignments"> -->
+<!--                 <parameter param-name="fixedAssetId"/> -->
+<!--             </link> -->
+<!--         </menu-item> -->
+<!--         <menu-item name="FixedAssetDepreciation" title="${uiLabelMap.AccountingFixedAssetDepreciation}"> -->
+<!--             <link target="showFixedAssetDepreciation"> -->
+<!--                 <parameter param-name="fixedAssetId"/> -->
+<!--             </link> -->
+<!--         </menu-item> -->
+        <menu-item name="FixedAssetGeoLocation" title="${uiLabelMap.CommonGeoLocation}">
+            <link target="FixedAssetGeoLocation">
+                <parameter param-name="fixedAssetId"/>
+            </link>
+        </menu-item>
+         <menu-item name="EditFixedAssetRegistrations" title="${uiLabelMap.AccountingFixedAssetRegistrations}">
+            <link target="EditFixedAssetRegistrations">
+                <parameter param-name="fixedAssetId"/>
+            </link>
+        </menu-item>
+    </menu>	 
+</menus>

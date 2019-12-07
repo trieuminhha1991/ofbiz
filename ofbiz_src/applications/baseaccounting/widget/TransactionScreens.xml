@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Licensed to the Apache Software Foundation (ASF) under one or more contributor license agreements. See the NOTICE file
+    distributed with this work for additional information regarding copyright ownership. The ASF licenses this file to you under
+    the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may
+    obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable law or agreed to
+    in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+    ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under
+    the License. -->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	<screen name="TransactionDecorator">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="Transaction" global="true"/>
+            </actions>
+            <widgets>
+               <decorator-screen name="BaseAccountingCommonDecorator" location="component://baseaccounting/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+	<screen name="ListTrans" use-transaction="false">
+        <section>
+	        <actions>
+	        	<set field="titleProperty" value="BACCListTrans"/>
+                <set field="selectedSubMenuItem" value="ListTrans"/>
+	        </actions>
+	        <widgets>
+	            <decorator-screen name="TransactionDecorator">
+	                <decorator-section name="body">
+	                    <section>
+							<condition>
+								<!-- <if-has-permission permission="VIEW_ACCTGTRAN" action="_VIEW"/> -->
+								<if-olbius-has-permission/>
+							</condition>
+							<actions>
+								<entity-condition list="invoiceTypeList" entity-name="InvoiceType">
+									<order-by field-name="description"/>
+								</entity-condition>
+								<entity-condition list="paymentTypeList" entity-name="PaymentType">
+									<order-by field-name="description"/>
+								</entity-condition>
+								<entity-condition list="invoiceStatusList" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="INVOICE_STATUS"/>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>
+								<entity-condition list="paymentStatusList" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="PMNT_STATUS"/>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>
+								<entity-condition list="shipmentTypeList" entity-name="ShipmentType">
+									<order-by field-name="description"/>
+								</entity-condition>
+								<entity-condition list="enumPartyTypeList" entity-name="Enumeration">
+					        		<condition-expr field-name="enumTypeId" value="PARTY_TYPE"/>
+					        		<order-by field-name="sequenceId"/>
+					        	</entity-condition>
+								<entity-condition list="glAccountTypeList" entity-name="GlAccountType">
+					        		<order-by field-name="description"/>
+					        	</entity-condition>
+							</actions>
+							<widgets>
+	                            <platform-specific>
+	                                <html>
+	                      				<html-template location="component://baseaccounting/webapp/baseaccounting/transaction/transList.ftl"/>
+	                      			</html>
+	                            </platform-specific>
+	                        </widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>	 									        		
+	                    </section>
+	                </decorator-section>
+	            </decorator-screen>
+	        </widgets>
+	    </section>
+	</screen>
+	
+	<screen name="ViewcreateRandomAcctgTransAndEntriesSalesOrderInvoiceForTesting">
+		<section>
+			<actions>
+				<service service-name="createRandomAcctgTransAndEntriesSalesOrderInvoiceForTesting">
+					<field-map field-name="nbAcctgTrans" value="${parameters.nbAcctgTrans}"/>
+					<field-map field-name="month" value="${parameters.month}"/>
+					<field-map field-name="year" value="${parameters.year}"/>
+					<field-map field-name="amount" value="${parameters.amount}"/>
+					
+				</service>
+			</actions>
+			<widgets>
+	            <decorator-screen name="TransactionDecorator">
+	                <decorator-section name="body">
+	                    <section>
+							<widgets>
+	                            <platform-specific>
+	                                <html>
+	                      				<html-template location="component://baseaccounting/webapp/baseaccounting/transaction/transList.ftl"/>
+	                      			</html>
+	                            </platform-specific>
+	                        </widgets>
+	                    </section>
+	                </decorator-section>
+	            </decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ViewcreateRandomAcctgTransAndEntriesPurchaseOrderInvoiceForTesting">
+		<section>
+			<actions>
+				<service service-name="createRandomAcctgTransAndEntriesPurchaseOrderInvoiceForTesting">
+					<field-map field-name="nbAcctgTrans" value="${parameters.nbAcctgTrans}"/>
+					<field-map field-name="month" value="${parameters.month}"/>
+					<field-map field-name="year" value="${parameters.year}"/>
+					<field-map field-name="amount" value="${parameters.amount}"/>
+					
+				</service>
+			</actions>
+			<widgets>
+	            <decorator-screen name="TransactionDecorator">
+	                <decorator-section name="body">
+	                    <section>
+							<widgets>
+	                            <platform-specific>
+	                                <html>
+	                      				<html-template location="component://baseaccounting/webapp/baseaccounting/transaction/transList.ftl"/>
+	                      			</html>
+	                            </platform-specific>
+	                        </widgets>
+	                    </section>
+	                </decorator-section>
+	            </decorator-screen>
+			</widgets>
+		</section>
+	</screen>	
+	
+</screens>

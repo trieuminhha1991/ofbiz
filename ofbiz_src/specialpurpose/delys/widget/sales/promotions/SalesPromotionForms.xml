@@ -1,0 +1,461 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
+	<form name="lookupBudgetPromo" target="lookupBudgetPromotion" type="single"
+        header-row-style="header-row" default-table-style="basic-table">
+        <field name="budgetTypeId"><hidden value="${budgetTypeId}" /></field>
+        <field name="budgetId" title="${uiLabelMap.BudgetId}"><text-find/> </field>
+        <field name="comments"><text-find/> </field>        
+        <field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        <field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-small btn-primary open-sans icon-search">
+        	<submit image-location="icon-search" button-type="button"/>
+       	</field>
+    </form>
+     
+    <form name="registerPromotionSearch" type="single" target="registerPromotionProgram" 
+    	header-row-style="header-row" default-table-style="basic-table">
+    	<field name="productPromoId" title="${uiLabelMap.productPromoId}"><text-find></text-find> </field>
+    	<field name="partyId" title="${uiLabelMap.partyId}"><text-find></text-find> </field>
+    	<field name="productPromoTypeId" title="${uiLabelMap.productPromoTypeId}">
+    		<drop-down allow-empty="true">
+    			<entity-options description="${description}" entity-name="ProductPromoType"></entity-options>
+    		</drop-down>
+    	</field>
+    	<field name="registerStatus" title="${uiLabelMap.DelysRegisterStatus}">
+    		<drop-down allow-empty="true">
+				<entity-options description="${description}" entity-name="StatusItem" key-field-name="statusId">
+					<entity-constraint name="statusTypeId" value="REG_PROMO_STTS"/>
+                    <entity-order-by field-name="sequenceId"/>
+				</entity-options>    			
+    		</drop-down>
+    	</field>
+    	<field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-small btn-primary open-sans">
+      		<submit image-location="icon-search" button-type="button"/>
+     	</field>
+    </form>    
+    <form name="registerPromotionForm" type="multi" list-name="listIt" 
+    	paginate-target="registerPromotionProgram" 
+        odd-row-style="alternate-row" target="updateRegPromotion" use-row-submit="true"
+        default-table-style="table table-striped table-bordered table-hover dataTable">
+   	   <actions>   	   		
+   	   		<service service-name="performFind" result-map-list="listIt">
+   	   			<field-map field-name="entityName" value="ProductPromoRegister"/>
+				<field-map field-name="inputFields" from-field="parameters"/>	
+				<field-map field-name="noConditionFind" value="Y"/>				
+   	   		</service>
+   	   </actions>
+   	   <row-actions>
+   	   	<entity-one entity-name="ProductPromo" auto-field-map="true"></entity-one>	
+   	   </row-actions>   	   
+   	    <field name="productPromoId" title="${uiLabelMap.PromotionContentDelys}" >
+   	    	<hyperlink target="editProductPromotion" description="${promoName} [${productPromoId}]">
+   	    		<parameter param-name="productPromoId"/>		
+   	    	</hyperlink>
+   	    </field>
+   	    <field name="partyId" title="${uiLabelMap.DelysPartyId}">
+   	    	<display-entity entity-name="PartyGroup" key-field-name="partyId" description="${groupName} [${partyId}]"></display-entity>
+   	    </field>
+   	    <!-- <field name="productPromoTypeId" title="${uiLabelMap.productPromoTypeId}">
+   	    	<display-entity entity-name="ProductPromoType" description="${description}" key-field-name="productPromoTypeId"></display-entity>
+   	    </field> -->
+   	    <field name="registerStatus" title="${uiLabelMap.DelysRegisterStatus}">   	    	
+   	    	<drop-down allow-empty="false">
+   	    		<entity-options entity-name="StatusItem" key-field-name="statusId" description="${description}">
+                    <entity-constraint name="statusTypeId" value="REG_PROMO_STTS"/>
+                    <entity-order-by field-name="sequenceId"/>
+                </entity-options>
+   	    	</drop-down>
+   	    </field>
+   	    <field name="_rowSubmit" title="${uiLabelMap.CommonSelect}" separate-column="true"><check/></field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="btn btn-small btn-primary margin-top5 margin-left6">
+        	<submit image-location="icon-ok" button-type="button"/>
+       	</field>
+    </form>
+    
+    <form name="exhibitedMarkingSearch" type="single" target="exhibitedMarkingList" 
+    	header-row-style="header-row" default-table-style="basic-table">    
+    	<field name="productPromoId" title="${uiLabelMap.productPromoId}"><text-find></text-find></field>
+    	<field name="partyId" title="${uiLabelMap.DelysPartyId}"><text-find></text-find></field>
+    	<field name="registerStatus" title="${uiLabelMap.DelysRegisterStatus}">
+    		<drop-down>
+    			<option key=""/>
+    			<entity-options description="${description}" entity-name="StatusItem" key-field-name="statusId">
+    				<entity-constraint name="statusTypeId" value="REG_PROMO_STTS"/>
+    			</entity-options>
+    		</drop-down>
+    	</field>
+    	<field name="promoMarkingStatus" title="${uiLabelMap.DelysPromoMarkingStatus}">
+    		<drop-down allow-empty="true">    			
+    			<entity-options description="${description}" entity-name="StatusItem" key-field-name="statusId">
+    				<entity-constraint name="statusTypeId" value="EXH_MARKING_STTS"/>
+    			</entity-options>
+    		</drop-down>
+    	</field>
+    	<field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-small btn-primary open-sans">
+      		<submit image-location="icon-search" button-type="button"/>
+     	</field>
+    </form>
+   <form name="exhibitedMarkingList" type="list" list-name="listIt" 
+   	paginate-target="exhibitedMarkingList" 
+       odd-row-style="alternate-row" 
+       default-table-style="table table-striped table-bordered table-hover dataTable">        
+       <actions>        	
+   		<set field="parameters.productPromoTypeId" value="EXHIBITED"/>
+   		<service service-name="performFind" result-map-list="listIt">
+			<field-map field-name="entityName" value="ProductPromoRegister"/>
+			<field-map field-name="inputFields" from-field="parameters"/>	
+			<field-map field-name="noConditionFind" value="Y"/>				
+		</service>
+   	</actions>
+       <field name="productPromoId" title="${uiLabelMap.PromotionContentDelys}">
+       	<display-entity entity-name="ProductPromo" key-field-name="productPromoId" description="${promoName}"></display-entity>
+       </field>
+       <field name="partyId" title="${uiLabelMap.DelysPartyId}">
+       	<display-entity entity-name="PartyGroup" key-field-name="partyId"  description="${groupName}"></display-entity>
+       </field>
+       <field name="roleTypeId">
+       	<display></display>
+       </field>
+       <!-- <field name="promoMarkingStatus" title="${uiLabelMap.DelysPromoMarkingStatus}">        	
+       	<display></display>
+       </field> -->
+       <field name="registerStatus">
+       	<display></display>
+       </field> 
+       <field name="editLink" title=" " widget-style="btn btn-mini btn-primary icon-edit open-sans">
+           <hyperlink target="editMarkingExhParty" description="${uiLabelMap.CommonEdit}">
+               <parameter param-name="productPromoId" />
+               <parameter param-name="partyId"/>
+           </hyperlink>
+       </field>               
+    </form>
+    <form name="FindExhibitedPromoSearch" type="single" target="findExhibitedPromos" 
+    	header-row-style="header-row" default-table-style="basic-table" style="form-horizontal-mini">
+    	<field name="productPromoId" title="${uiLabelMap.DelysPromoProductPromoId}"><text-find></text-find></field>
+    	<field name="promoName" title="${uiLabelMap.PromotionContentDelys}"><text-find></text-find> </field>
+    	<field name="productPromoTypeId"><hidden value="EXHIBITED"/></field>
+    	<!--
+    	<field name="productPromoTypeId" title="${uiLabelMap.DelysPromotionType}">
+    		<drop-down allow-empty="true" no-current-selected-key="EXHIBITED">
+    			<entity-options description="${description}" entity-name="ProductPromoType"></entity-options>
+    		</drop-down>
+    	</field>
+    	-->
+    	<field name="productPromoStatusId" title="${uiLabelMap.DelysProductPromoStatusId}">
+    		<drop-down allow-empty="true">
+    			<entity-options description="${description}" entity-name="StatusItem" key-field-name="statusId">
+    				<entity-constraint name="statusTypeId" value="PROMO_STATUS"/>
+    				<entity-order-by field-name="sequenceId"/>
+    			</entity-options>
+    		</drop-down>
+    	</field>
+    	<field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-small btn-primary open-sans">
+     		<submit image-location="icon-search" button-type="button"/>
+    	</field>
+    </form>
+    <form name="FindAccumulatePromoSearch" type="single" target="findAccumulatePromos" 
+    	header-row-style="header-row" default-table-style="basic-table" style="form-horizontal-mini">
+    	<field name="productPromoId" title="${uiLabelMap.DelysPromoProductPromoId}"><text-find></text-find></field>
+    	<field name="promoName" title="${uiLabelMap.PromotionContentDelys}"><text-find></text-find> </field>
+    	<field name="productPromoTypeId"><hidden value="ACCUMULATE"/></field>
+    	<!--
+    	<field name="productPromoTypeId" title="${uiLabelMap.DelysPromotionType}">
+    		<drop-down allow-empty="true" no-current-selected-key="EXHIBITED">
+    			<entity-options description="${description}" entity-name="ProductPromoType"></entity-options>
+    		</drop-down>
+    	</field>
+    	-->
+    	<field name="productPromoStatusId" title="${uiLabelMap.DelysProductPromoStatusId}">
+    		<drop-down allow-empty="true">
+    			<entity-options description="${description}" entity-name="StatusItem" key-field-name="statusId">
+    				<entity-constraint name="statusTypeId" value="PROMO_STATUS"/>
+    				<entity-order-by field-name="sequenceId"/>
+    			</entity-options>
+    		</drop-down>
+    	</field>
+    	<field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-small btn-primary open-sans">
+     		<submit image-location="icon-search" button-type="button"/>
+    	</field>
+    </form>
+    <form name="FindOrderPromoSearch" type="single" target="findOrderPromos" 
+    	header-row-style="header-row" default-table-style="basic-table" style="form-horizontal-mini">
+    	<field name="productPromoId" title="${uiLabelMap.DelysPromoProductPromoId}"><text-find></text-find></field>
+    	<field name="promoName" title="${uiLabelMap.PromotionContentDelys}"><text-find></text-find></field>
+    	<field name="productPromoTypeId"><hidden value="PROMOTION"/></field>
+    	<!--
+    	<field name="productPromoTypeId" title="${uiLabelMap.DelysPromotionType}">
+    		<drop-down allow-empty="true" no-current-selected-key="EXHIBITED">
+    			<entity-options description="${description}" entity-name="ProductPromoType"></entity-options>
+    		</drop-down>
+    	</field>
+    	-->
+    	<field name="productPromoStatusId" title="${uiLabelMap.DelysProductPromoStatusId}">
+    		<drop-down allow-empty="true">
+    			<entity-options description="${description}" entity-name="StatusItem" key-field-name="statusId">
+    				<entity-constraint name="statusTypeId" value="PROMO_STATUS"/>
+    				<entity-order-by field-name="sequenceId"/>
+    			</entity-options>
+    		</drop-down>
+    	</field>
+    	<field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-small btn-primary open-sans">
+     		<submit image-location="icon-search" button-type="button"/>
+    	</field>
+    </form>
+    <form name="FindOtherPromoSearch" type="single" target="findOtherPromos" 
+    	header-row-style="header-row" default-table-style="basic-table" style="form-horizontal-mini">
+    	<field name="productPromoId" title="${uiLabelMap.DelysPromoProductPromoId}"><text-find></text-find></field>
+    	<field name="promoName" title="${uiLabelMap.PromotionContentDelys}"><text-find></text-find> </field>
+    	<field name="productPromoTypeId"><hidden value="OTHER"/></field>
+    	<!--
+    	<field name="productPromoTypeId" title="${uiLabelMap.DelysPromotionType}">
+    		<drop-down allow-empty="true" no-current-selected-key="EXHIBITED">
+    			<entity-options description="${description}" entity-name="ProductPromoType"></entity-options>
+    		</drop-down>
+    	</field>
+    	-->
+    	<field name="productPromoStatusId" title="${uiLabelMap.DelysProductPromoStatusId}">
+    		<drop-down allow-empty="true">
+    			<entity-options description="${description}" entity-name="StatusItem" key-field-name="statusId">
+    				<entity-constraint name="statusTypeId" value="PROMO_STATUS"/>
+    				<entity-order-by field-name="sequenceId"/>
+    			</entity-options>
+    		</drop-down>
+    	</field>
+    	<field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-small btn-primary open-sans">
+     		<submit image-location="icon-search" button-type="button"/>
+    	</field>
+    </form>
+    <form name="FindProductPromoSearch" type="single" target="findProductPromos" 
+    	header-row-style="header-row" default-table-style="basic-table" style="form-horizontal-mini">
+    	<field name="productPromoId" title="${uiLabelMap.DelysPromoProductPromoId}"><text-find></text-find></field>
+    	<field name="promoName" title="${uiLabelMap.PromotionContentDelys}"><text-find></text-find> </field>
+    	<field name="productPromoTypeId" title="${uiLabelMap.DelysPromotionType}">
+    		<drop-down allow-empty="true">
+    			<entity-options description="${description}" entity-name="ProductPromoType"></entity-options>
+    		</drop-down>
+    	</field>
+    	<field name="productPromoStatusId" title="${uiLabelMap.DelysProductPromoStatusId}">
+    		<drop-down allow-empty="true">
+    			<entity-options description="${description}" entity-name="StatusItem" key-field-name="statusId">
+    				<entity-constraint name="statusTypeId" value="PROMO_STATUS"/>
+    				<entity-order-by field-name="sequenceId"/>
+    			</entity-options>
+    		</drop-down>
+    	</field>
+    	<field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-small btn-primary open-sans">
+     		<submit image-location="icon-search" button-type="button"/>
+    	</field>
+    </form>
+    <form name="FindProductPromo" type="list" list-name="listIt" paginate-target="findProductPromos" 
+        odd-row-style="alternate-row" use-row-submit="true" default-table-style="table table-striped table-bordered table-hover dataTable">
+      	<actions>
+      		<service service-name="performFind" result-map-list="listIt">
+				<field-map field-name="entityName" value="ProductPromo"/>
+				<field-map field-name="inputFields" from-field="parameters"/>	
+				<field-map field-name="noConditionFind" value="Y"/>
+				<field-map field-name="orderBy" value="-fromDate"/>				
+			</service>
+      	</actions>
+      	<row-actions>
+			<script location="component://delys/webapp/delys/WEB-INF/actions/sales/promotions/productPromoBudgetInfo.groovy"/>
+      	</row-actions>
+      	<field name="index" title="${uiLabelMap.DANo}"><display description="${itemIndex + 1}"/></field>
+      	<field name="productPromoId" title="${uiLabelMap.DelysPromoProductPromoId}">        		
+      		<hyperlink target="viewProductPromo" description="${productPromoId}">
+      			<parameter param-name="productPromoId"/>
+      		</hyperlink>
+      	</field>
+      	<field name="promoName" title="${uiLabelMap.DelysPromoPromotionName}"><display></display></field>
+      	<field name="productPromoTypeId" title="${uiLabelMap.DelysPromotionType}">
+      		<display-entity entity-name="ProductPromoType" description="${description}"></display-entity>
+      	</field>
+      	<field name="budgetTotalId" title="${uiLabelMap.DelysBudgetTotal}">
+      		<hyperlink target="editBudgetPromo" description="${budgetTotalId}">
+      			<parameter param-name="budgetId" from-field="budgetTotalId"/>
+      		</hyperlink>
+      	</field>
+      	<field name="revenueMiniId" title="${uiLabelMap.DelysMiniRevenue}">
+      		<hyperlink target="editBudgetPromo" description="${revenueMiniId}">
+      			<parameter param-name="budgetId" from-field="revenueMiniId"/>
+      		</hyperlink>
+      	</field>
+      	<field name="productPromoStatusId" title="${uiLabelMap.DelysProductPromoStatusId}">
+      		<display-entity entity-name="StatusItem" description="${description}" key-field-name="statusId"></display-entity>        		
+      	</field>
+      	<field name="viewLink" title=" " widget-style="btn btn-mini btn-success icon-zoom-in bigger-120 no-bottom-margin border-width1" widget-area-style="width10 padding-right1">
+      		<hyperlink target="viewProductPromo" description=" ">
+      			<parameter param-name="productPromoId"/>
+      		</hyperlink>
+      	</field>
+      	<field name="editLink" title=" " widget-style="btn btn-mini btn-primary icon-edit open-sans no-bottom-margin border-width1" widget-area-style="width10 no-border-left no-left-padding padding-right1">
+      		<hyperlink target="editProductPromotion" description=" "><!-- description="${uiLabelMap.CommonEdit} ${uiLabelMap.CommonStatus}" -->
+      			<parameter param-name="productPromoId"/>
+      		</hyperlink>
+      	</field>
+      	<field name="deleteLink" title=" " use-when="${productPromoStatusId != 'PROMO_ACCEPTED'}" widget-style="btn btn-mini btn-danger icon-trash open-sans no-bottom-margin border-width1" widget-area-style="width10 no-border-left no-left-padding">
+      		<hyperlink target="deleteProductPromo" description=" ">
+      			<parameter param-name="productPromoId"/>
+      		</hyperlink>
+      	</field>
+      	<field name="deleteLink" title=" " use-when="${productPromoStatusId == 'PROMO_ACCEPTED'}" widget-style="btn btn-mini btn-danger icon-trash open-sans no-bottom-margin border-width1 disabled" widget-area-style="width10 no-border-left no-left-padding">
+      		<hyperlink target="deleteProductPromo" description=" ">
+      			<parameter param-name="productPromoId"/>
+      		</hyperlink>
+      	</field>
+    </form>
+    <form name="lookupRoleType" target="lookupRoleType" type="single"
+        header-row-style="header-row" default-table-style="basic-table">
+      		<field name="roleTypeId" title="${uiLabelMap.RoleTypeId}"><text-find></text-find></field>
+      		<field name="description" title=""><text-find></text-find></field>
+      		<field name="noConditionFind"><hidden value="Y"/><!-- if this isn't there then with all fields empty no query will be done --></field>
+        	<field name="submitButton" title="${uiLabelMap.CommonFind}" widget-style="btn btn-small btn-primary open-sans icon-search">
+        		<submit image-location="icon-search" button-type="button"/>
+       		</field>
+    </form>
+    <form name="listLookupRoleType" type="list"
+    	paginate-target="lookupRoleType" list-name="listIt"
+      odd-row-style="alternate-row" default-table-style="table table-striped table-bordered table-hover dataTable">
+    	<actions>
+    		<set field="entityName" value="RoleType"/>
+    		<set field="inputFields" from-field="parameters"/>
+    		<script location="component://delys/webapp/delys/WEB-INF/actions/sales/promotions/FindRoleType.groovy"/>
+    	</actions>
+    	<field name="roleTypeId" title="${uiLabelMap.roleTypeId}" widget-style="btn btn-mini btn-info">
+    		<hyperlink also-hidden="false" target-type="plain" description="${roleTypeId}" target="javascript:set_value('${roleTypeId}')"/>
+    	</field>
+    	<field name="description" title="${uiLabelMap.description}">
+    		<display></display>
+    	</field>
+    </form>
+    <form name="EditProductPromoRole" type="list" paginate-target="EditProductPromoRole" list-name="listIt"
+      	odd-row-style="alternate-row" default-table-style="table table-striped table-bordered table-hover dataTable">
+    	<actions>
+    		<entity-condition entity-name="ProductPromoRoleTypeAppl">
+    			<condition-expr field-name="productPromoId" from-field="parameters.productPromoId"/>
+    		</entity-condition>    		
+    	</actions>
+    	<field name="roleTypeId" title="${uiLabelMap.DelysRoleTypeApply}">
+    		<display-entity entity-name="RoleType" key-field-name="roleTypeId" description="${description} [${roleTypeId}]"></display-entity>
+    	</field>
+    	<field name="deleteLink" title=" " widget-style="btn btn-trash btn-danger btn-mini btn-position icon-remove">
+    		<hyperlink target="deleteProductPromoRole" also-hidden="false" description="${uiLabelMap.CommonDelete}">
+    			<parameter param-name="productPromoId"/>
+    			<parameter param-name="roleTypeId"/>
+    		</hyperlink>
+    	</field>
+    </form>
+    <form name="AddProductPromoRole" type="single" target="addProductPromoRole"
+   		header-row-style="header-row" default-table-style="basic-table">   		
+   		<field name="productPromoId"><hidden/> </field>
+   		<field name="roleTypeId" title="${uiLabelMap.DelysRoleTypeApply}">
+   			<drop-down allow-empty="false">
+   				<entity-options description="${description}" entity-name="RoleType">   					
+   				</entity-options>
+   			</drop-down>
+   		</field>
+   		<field name="submitButton" title="${uiLabelMap.CommonAdd}" widget-style="btn btn-small btn-primary open-sans">
+			<submit image-location="icon-ok" button-type="button"/>
+		</field>    	 
+	</form>
+    <!-- budget form -->
+    <form name="FindBudgetPromo" type="list" list-name="budgetPromoList" paginate-target="FindBudgetPromo" title=""
+        odd-row-style="alternate-row" default-table-style="table table-striped table-bordered table-hover dataTable">
+    	<field name="budgetId" title="${uiLabelMap.DelysBudgetId}">
+    		<hyperlink target="editBudgetPromo" description="${budgetId}">
+    			<parameter param-name="budgetId"/>
+    		</hyperlink>
+    	</field>
+    	<field name="budgetTypeId" title="${uiLabelMap.DelysBudgetTypeId}">
+    		<display></display>
+    	</field>
+    	<field name="comments" title="${uiLabelMap.DelysDescription}">
+    		<display></display>
+    	</field>
+    </form>
+    <form name="editBudgetPromo" type="single" target="updateBudgetPromo" default-map-name="budget"
+    	header-row-style="header-row" default-table-style="basic-table" default-title-style="control-label">
+    	<alt-target use-when="budgetId==null" target="createBudgetPromo"/>
+    	<field name="budgetId" use-when="budgetId!=null" title="${uiLabelMap.DelysBudgetId}"><display></display> </field>
+    	<field name="budgetId" use-when="budget==null&amp;&amp;budgetId!=null" title="${uiLabelMap.DelysBudgetTypeId}" tooltip="${uiLabelMap.DelysCouldNotFindBudgetPromo} [${budgetId}]"><display></display> </field>
+    	<field name="budgetId" use-when="budget==null&amp;&amp;budgetId==null" title="${uiLabelMap.DelysBudgetTypeId}"><ignored/> </field>
+    	<field name="budgetTypeId" title="${uiLabelMap.DelysBudgetTypeId}">
+    		<drop-down>
+    			<entity-options description="${description}" entity-name="BudgetType"></entity-options>
+    		</drop-down>
+    	 </field>    	 
+		<field name="comments" title="${uiLabelMap.DelysDescription}">
+			<text></text>
+		</field>			
+		<field name="submitButton" title="${uiLabelMap.CommonSave}" widget-style="btn btn-small btn-primary open-sans">
+			<submit image-location="icon-save" button-type="button"/>
+		</field>    	 
+   	</form>
+   	<form name="addBudgetItemPromo" type="single" target="createBudgetItemPromo"
+   		header-row-style="header-row" default-table-style="basic-table" default-title-style="control-label">   		
+   		<field name="budgetId"><hidden/> </field>
+   		<field name="budgetItemTypeId" title="${uiLabelMap.DABudgetItemTypeId}">
+   			<drop-down>
+   				<entity-options description="${description}" entity-name="BudgetItemType"></entity-options>
+   			</drop-down>
+   		</field>
+   		<field name="amount" title="${uiLabelMap.DelysBudgetAmount}">
+   			<text></text>
+   		</field>
+   		<field name="quantity" title="${uiLabelMap.DelysBudgetQty}">
+   			<text></text>
+   		</field>
+   		<field name="productId" title="${uiLabelMap.ProductProductName}">
+   			<lookup target-form-name="LookupProduct" ></lookup>
+   		</field>
+   		<field name="submitButton" title="${uiLabelMap.CommonSubmit}" widget-style="btn btn-small btn-primary">
+            <submit button-type="button" image-location="icon-ok"/>
+        </field>
+   	</form>
+   	<form name="listBudgetItem" type="list" target="updateBugetItemPromo" list-name="budgetItems"	
+   		paginate-target="EditBudgetItem" title="" odd-row-style="alternate-row" default-table-style="table table-striped table-bordered table-hover dataTable">
+   		<actions>
+   			<entity-and entity-name="BudgetItem" list="budgetItems">
+   				<field-map field-name="budgetId" from-field="budgetId"/>
+   				<order-by field-name="budgetItemSeqId"/>
+   			</entity-and>
+   		</actions>
+   		<field name="budgetId" separate-column="false" ><hidden/> </field>
+   		<field name="budgetItemSeqId" separate-column="false"><hidden/> </field>
+   		<field name="budgetItemTypeId" title="${uiLabelMap.DelysBudgetItemTypeId}" separate-column="true">
+   			<drop-down>
+   				<entity-options description="${description}" entity-name="BudgetItemType"></entity-options>
+   			</drop-down>
+   		 </field>		
+   		 <field name="amount" title="${uiLabelMap.DelysBudgetAmount}" separate-column="true">
+   		 	<text></text>
+   		 </field>
+   		 <field name="quantity" title="${uiLabelMap.DelysBudgetQty}" separate-column="true">
+   		 	<text></text>
+   		 </field>
+   		 <field name="productId" title="${uiLabelMap.ProductProductName}" separate-column="true">
+   		 	<lookup target-form-name="LookupProduct" description-field-name="internalName"></lookup>
+   		 </field>
+   		 <field name="deleteLink" title=" " widget-style="btn btn-trash btn-danger btn-mini btn-position">
+            <hyperlink target="deleteBudgetItemPromo" description="${uiLabelMap.CommonDelete}" also-hidden="false">
+                <parameter param-name="budgetId"/>
+                <parameter param-name="budgetItemSeqId"/>
+            </hyperlink>
+        </field>
+        <field name="submitButton" title="${uiLabelMap.CommonUpdate}" widget-style="btn btn-small btn-primary" separate-column="true">
+        	<submit button-type="button" image-location="icon-ok"></submit>
+       	</field>
+   	</form>
+   	<form name="OrderItemPromoList" type="list" list-name="orderItemPromoList" paginate-target="orderItemPromoList" 
+   		default-table-style="table table-striped table-bordered table-hover dataTable">
+   		<field name="index" title="${uiLabelMap.DANo}"><display description="${itemIndex + 1}"/></field>
+   		<field name="orderId" title="${uiLabelMap.DAOrderId}"><display/></field>
+   		<field name="orderItemSeqId"><display/></field>
+   		<field name="productId" title="${uiLabelMap.DAProductId}"><display/></field>
+   		<field name="orderDate"><display type="date"/></field>
+   		<field name="orderStatusId" title="${uiLabelMap.DAOrderStatus}"><display-entity also-hidden="false" entity-name="StatusItem" key-field-name="statusId" /></field>
+   		<field name="itemStatusId" title="${uiLabelMap.DAOrderItemStatus}"><display-entity also-hidden="false" entity-name="StatusItem" key-field-name="statusId" /></field>
+   		<field name="quantity" title="${uiLabelMap.DAQuantity}"><display /></field>
+   		<field name="customerId" title="${uiLabelMap.DACustomerId}"><display /></field>
+   		<field name="shippedQuantity" title="${uiLabelMap.DAShippedQuantity}"><display /></field>
+    </form>
+</forms>

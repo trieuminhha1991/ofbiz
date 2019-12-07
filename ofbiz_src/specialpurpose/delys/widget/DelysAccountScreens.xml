@@ -1,0 +1,1422 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	
+	<screen name="ListGlAccountOrganization">
+		<section>
+			<actions>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId" global="true"/>
+                <set field="selectedMenuItem" value="accGeneralLedger"/>
+                <set field="selectedSubMenuItem" value="accChartOfAccounts"/>
+                
+            </actions>
+			<widgets>
+				<decorator-screen name="main-decorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<screenlet id="GlAccountOrganizationPanel" title="${uiLabelMap.AccountingChartOfAcctsMenu}">
+                            <include-form name="ListGlAccountOrganization" location="component://delys/widget/DelysAccountForms.xml"/>
+                        </screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ListGlAccountOrganizationJQ">
+		<section>
+			<actions>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId" global="true"/>
+                <set field="selectedMenuItem" value="accGeneralLedger"/>
+                <set field="selectedSubMenuItem" value="accChartOfAccountsOrigination"/> 
+                <entity-one entity-name="PartyAcctgPreference" value-field="partyAcctgPreference" auto-field-map="false">
+                    <field-map field-name="partyId" from-field="parameters.organizationPartyId"/>
+                </entity-one>                
+				<entity-condition list="listGlAccountType" entity-name="GlAccountType">
+					<order-by field-name="description"/>
+				</entity-condition>            
+				<entity-condition list="listGlAccountClass" entity-name="GlAccountClass">
+					<order-by field-name="description"/>
+				</entity-condition>
+				<entity-condition list="listGlResourceType" entity-name="GlResourceType">
+					<order-by field-name="description"/>
+				</entity-condition>
+				<entity-condition list="listGlXbrlClass" entity-name="GlXbrlClass">
+					<order-by field-name="description"/>
+				</entity-condition>				
+				<entity-condition list="listGlAccount" entity-name="GlAccount">
+					<condition-expr field-name="glTaxFormId" operator="equals" value="${partyAcctgPreference.taxFormId}"/>
+					<order-by field-name="description"/>
+				</entity-condition>
+				<entity-condition list="listTaxFormId" entity-name="Enumeration">
+					<condition-expr field-name="enumTypeId" operator="equals" value="TAX_FORMS"/>
+					<order-by field-name="enumId"/>
+				</entity-condition>				
+            </actions>
+			<widgets>					
+				<decorator-screen name="main-decorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+                        <section>
+                            <widgets>	
+                            	<platform-specific>
+                            		<html><html-template location="component://delys/webapp/delys/accounting/listGlAccountOrganizationJQ.ftl"/></html>
+                            	</platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+
+	<screen name="ListGlAccountJQ">
+		<section>
+			<actions>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId" global="true"/>
+                <set field="selectedMenuItem" value="accGeneralLedger"/>
+                <set field="selectedSubMenuItem" value="accChartOfAccountss"/> 
+                
+				<entity-condition list="listGlAccountType" entity-name="GlAccountType">
+					<order-by field-name="description"/>
+				</entity-condition>            
+				<entity-condition list="listGlAccountClass" entity-name="GlAccountClass">
+					<order-by field-name="description"/>
+				</entity-condition>
+				<entity-condition list="listGlResourceType" entity-name="GlResourceType">
+					<order-by field-name="description"/>
+				</entity-condition>
+				<entity-condition list="listGlXbrlClass" entity-name="GlXbrlClass">
+					<order-by field-name="description"/>
+				</entity-condition>
+				<entity-condition list="listGlAccount" entity-name="GlAccount">
+					<order-by field-name="description"/>
+				</entity-condition>
+				<entity-condition list="listTaxFormId" entity-name="Enumeration">
+					<condition-expr field-name="enumTypeId" operator="equals" value="TAX_FORMS"/>
+					<order-by field-name="enumId"/>
+				</entity-condition>				
+            </actions>
+			<widgets>
+				<decorator-screen name="main-decorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+                        <section>
+                            <widgets>
+                            	<platform-specific>
+                            		<html><html-template location="component://delys/webapp/delys/accounting/listGlAccountJQ.ftl"/></html>
+                            	</platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	
+	<screen name="FindInvoiceAggregateApDistributors">
+        <section>
+            <actions>
+                <set field="tabButtonItem" value="InvoiceAggregateApDistributor"></set>
+                <set field="tabBarName" value="InvoiceAggregateDistributorTabBar"/>
+                <set field="tabBarLocation" value="component://delys/widget/InvoiceAggregateMenus.xml"/>                        	
+    			<set field="navMenuLocation" value="component://delys/widget/InvoiceAggregateMenus.xml"/>            	
+                <set field="headerItem" value="invoices"/>
+                <set field="titleProperty" value="accFindDistributors"/>
+                <set field="selectedMenuItem" value="accLiabilities"/>
+                <set field="selectedSubMenuItem" value="accLiaDistributors"/>
+                <set field="printTabBar" value="true" />
+                <entity-condition list="listInvoiceType" entity-name="InvoiceType">
+                	<condition-expr field-name="parentTypeId" operator="equals" value="PURCHASE_INVOICE"/>
+                </entity-condition>
+                <entity-condition list="listStatusItem" entity-name="StatusItem">
+                	<condition-list combine="and">
+		                	<condition-expr field-name="statusTypeId" operator="equals" value="INVOICE_STATUS"/>
+	                	<condition-list combine="or">
+		                	<condition-expr field-name="statusId" operator="equals" value="INVOICE_IN_PROCESS"/>
+		                	<condition-expr field-name="statusId" operator="equals" value="INVOICE_READY"/>
+		                </condition-list>
+	                </condition-list>
+                </entity-condition>                
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                        		<actions>                        												
+										<set field="parameters.partyId" from-field="parameters.organizationPartyId"/>
+										<set field="parameters.parentTypeId" value="PURCHASE_INVOICE"/>																															
+										<set field="parameters.roleTypeId" value="DELYS_DISTRIBUTOR"/>
+										<script location="component://delys/webapp/delys/WEB-INF/actions/accounting/GetSumInvoiceApAggregate.groovy"/>
+								</actions>                                                    						
+								<widgets>											
+<!-- 									<screenlet id="apInvoices" title="${uiLabelMap.accPayable} ${uiLabelMap.accDistributors}"> -->
+<!-- 										<label style="aggregate-label">${uiLabelMap.accTotalInvoicesValue}: </label> <label style="aggregate-value">${totalValue} ${defaultOrganizationPartyCurrencyUomId}</label>  -->
+<!-- 			                        	<label style="aggregate-label">${uiLabelMap.accPayableToApplyTotal}: </label> <label style="aggregate-value">${totalToApply} ${defaultOrganizationPartyCurrencyUomId}</label>												 -->
+			                            <platform-specific>
+		                                    <html>
+				                        		<html-template location="component://delys/webapp/delys/accounting/liability/listCDApInvoicesJQ.ftl"/>
+				                        	</html>
+		                                </platform-specific>
+<!-- 			                        </screenlet> -->
+		                        </widgets>
+	                    </section>	                        
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+	
+	<screen name="AggregateApDistributorsData">
+        <section>
+            <actions>
+                <entity-condition list="listInvoiceType" entity-name="InvoiceType">
+                	<condition-expr field-name="parentTypeId" operator="equals" value="PURCHASE_INVOICE"/>
+                </entity-condition>
+                <entity-condition list="listStatusItem" entity-name="StatusItem">
+                	<condition-list combine="and">
+	                	<condition-expr field-name="statusTypeId" operator="equals" value="INVOICE_STATUS"/>
+	                	<condition-list combine="or">
+		                	<condition-expr field-name="statusId" operator="equals" value="INVOICE_IN_PROCESS"/>
+		                	<condition-expr field-name="statusId" operator="equals" value="INVOICE_READY"/>
+		                </condition-list>
+	                </condition-list>
+                </entity-condition>        
+                <property-map resource="DelysUiLabels" map-name="uiLabelMap" global="true"/> 
+                <property-to-field resource="general" property="ORGANIZATION_PARTY" field="organizationPartyId"/>  
+            </actions>
+            <widgets>
+               <section>       
+                	<actions>										
+						<set field="parameters.partyIdFrom" from-field="organizationPartyId"/>
+						<set field=" parameters.parentTypeId" value="PURCHASE_INVOICE"/>																															
+						<set field="parameters.roleTypeId" value="DELYS_DISTRIBUTOR"/>
+						<script location="component://delys/webapp/delys/WEB-INF/actions/accounting/GetSumInvoiceApAggregate.groovy"/>
+						<property-to-field field="defaultOrganizationPartyCurrencyUomId" resource="general" property="currency.uom.id.default" default="VND"/>						
+	                </actions>                                           						
+				    <widgets>			                       		                            		 																		
+						<label style="aggregate-label">${uiLabelMap.accTotalInvoicesValue}: </label> <label style="aggregate-value">${totalValue} ${defaultOrganizationPartyCurrencyUomId}</label> 
+                        <label style="aggregate-label">${uiLabelMap.accPayableToApplyTotal}: </label> <label style="aggregate-value">${totalToApply} ${defaultOrganizationPartyCurrencyUomId}</label>												
+                    </widgets>
+                 </section>	                        
+            </widgets>
+        </section>
+    </screen>     
+	<screen name="FindInvoiceAggregateArDistributors">
+        <section>
+            <actions>
+                <set field="tabButtonItem" value="InvoiceAggregateArDistributor"></set>
+                <set field="tabBarName" value="InvoiceAggregateDistributorTabBar"/>
+                <set field="tabBarLocation" value="component://delys/widget/InvoiceAggregateMenus.xml"/>                        	
+<!--             	<set field="navMenuName" value="InvoiceSubTabBarLib"/> -->
+    			<set field="navMenuLocation" value="component://delys/widget/InvoiceAggregateMenus.xml"/>            	
+                <set field="headerItem" value="invoices"/>
+<!--                 <set field="tabButtonItem" value="find"/> -->
+                <set field="titleProperty" value="accFindDistributors"/>
+                <set field="selectedMenuItem" value="accLiabilities"/>
+                <set field="selectedSubMenuItem" value="accLiaDistributors"/>
+                <set field="printTabBar" value="true" />
+                <entity-condition list="listInvoiceType" entity-name="InvoiceType">
+                	<condition-expr field-name="parentTypeId" operator="equals" value="SALES_INVOICE"/>
+                </entity-condition>
+                <entity-condition list="listStatusItem" entity-name="StatusItem">
+                	<condition-list combine="and">
+	                	<condition-expr field-name="statusTypeId" operator="equals" value="INVOICE_STATUS"/>
+	                	<condition-list combine="or">
+		                	<condition-expr field-name="statusId" operator="equals" value="INVOICE_IN_PROCESS"/>
+		                	<condition-expr field-name="statusId" operator="equals" value="INVOICE_READY"/>
+		                </condition-list>
+	                </condition-list>
+                </entity-condition>                
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>       
+	                        	<actions>										
+										<set field="parameters.partyIdFrom" from-field="parameters.organizationPartyId"/>
+										<set field=" parameters.parentTypeId" value="SALES_INVOICE"/>																															
+										<set field="parameters.roleTypeId" value="DELYS_DISTRIBUTOR"/>
+										<!-- <script location="component://delys/webapp/delys/WEB-INF/actions/accounting/GetSumInvoiceArAggregate.groovy"/> -->
+								</actions>                                           						
+								<widgets>			                       		                            		 																		
+<!-- 									<screenlet id="arInvoices" title="${uiLabelMap.accReceivable} ${uiLabelMap.accDistributors}"> -->
+ 									<!-- <label style="aggregate-label">${uiLabelMap.accTotalInvoicesValue}: </label> <label style="aggregate-value">${totalValue} ${defaultOrganizationPartyCurrencyUomId}</label> 
+			                        <label style="aggregate-label">${uiLabelMap.accReceivableToApplyTotal}: </label> <label style="aggregate-value">${totalToApply} ${defaultOrganizationPartyCurrencyUomId}</label> -->												
+			                            <platform-specific>
+		                                    <html>
+				                        		<html-template location="component://delys/webapp/delys/accounting/liability/listCDArInvoicesJQ.ftl"/>
+				                        	</html>
+		                                </platform-specific>
+<!-- 			                        </screenlet> -->
+		                        </widgets>
+	                    </section>	                        
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>    
+	<screen name="AggregateArDistributorsData">
+        <section>
+            <actions>
+                <entity-condition list="listInvoiceType" entity-name="InvoiceType">
+                	<condition-expr field-name="parentTypeId" operator="equals" value="SALES_INVOICE"/>
+                </entity-condition>
+                <entity-condition list="listStatusItem" entity-name="StatusItem">
+                	<condition-list combine="and">
+	                	<condition-expr field-name="statusTypeId" operator="equals" value="INVOICE_STATUS"/>
+	                	<condition-list combine="or">
+		                	<condition-expr field-name="statusId" operator="equals" value="INVOICE_IN_PROCESS"/>
+		                	<condition-expr field-name="statusId" operator="equals" value="INVOICE_READY"/>
+		                </condition-list>
+	                </condition-list>
+                </entity-condition>        
+                <property-map resource="DelysUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-to-field resource="general" property="ORGANIZATION_PARTY" field="organizationPartyId"/>     
+            </actions>
+            <widgets>
+               <section>       
+                	<actions>										
+						<set field="parameters.partyIdFrom" from-field="organizationPartyId"/>
+						<set field=" parameters.parentTypeId" value="SALES_INVOICE"/>																															
+						<set field="parameters.roleTypeId" value="DELYS_DISTRIBUTOR"/>
+						<script location="component://delys/webapp/delys/WEB-INF/actions/accounting/GetSumInvoiceArAggregate.groovy"/>
+						<property-to-field field="defaultOrganizationPartyCurrencyUomId" resource="general" property="currency.uom.id.default" default="VND"/>
+	                </actions>                                           						
+				    <widgets>			                       		                            		 																		
+						<label style="aggregate-label">${uiLabelMap.accTotalInvoicesValue}: </label> <label style="aggregate-value">${totalValue} ${defaultOrganizationPartyCurrencyUomId}</label> 
+                        <label style="aggregate-label">${uiLabelMap.accReceivableToApplyTotal}: </label> <label style="aggregate-value">${totalToApply} ${defaultOrganizationPartyCurrencyUomId}</label>												
+                    </widgets>
+                 </section>	                        
+            </widgets>
+        </section>
+    </screen>    
+    
+	<screen name="FindInvoiceAggregateApCustomers">
+        <section>
+            <actions>
+                <set field="tabButtonItem" value="InvoiceAggregateApCustomer"></set>
+                <set field="tabBarName" value="InvoiceAggregateCustomerTabBar"/>
+                <set field="tabBarLocation" value="component://delys/widget/InvoiceAggregateMenus.xml"/>                        	
+<!--             	<set field="navMenuName" value="InvoiceSubTabBarLib"/> -->
+    			<set field="navMenuLocation" value="component://delys/widget/InvoiceAggregateMenus.xml"/>            	
+                <set field="headerItem" value="invoices"/>
+<!--                 <set field="tabButtonItem" value="find"/> -->
+                <set field="titleProperty" value="accFindCustomers"/>
+                <set field="selectedMenuItem" value="accLiabilities"/>
+                <set field="selectedSubMenuItem" value="accLiaCustomers"/>
+                <set field="printTabBar" value="true" />
+                <entity-condition list="listInvoiceType" entity-name="InvoiceType">
+                	<condition-expr field-name="parentTypeId" operator="equals" value="PURCHASE_INVOICE"/>
+                </entity-condition>
+                <entity-condition list="listStatusItem" entity-name="StatusItem">
+                	<condition-list combine="and">
+	                	<condition-expr field-name="statusTypeId" operator="equals" value="INVOICE_STATUS"/>
+	                	<condition-list combine="or">
+		                	<condition-expr field-name="statusId" operator="equals" value="INVOICE_IN_PROCESS"/>
+		                	<condition-expr field-name="statusId" operator="equals" value="INVOICE_READY"/>
+		                </condition-list>
+	                </condition-list>
+                </entity-condition>                
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                        		<actions>										
+										<set field="parameters.partyId" from-field="parameters.organizationPartyId"/>
+										<set field="parameters.parentTypeId" value="PURCHASE_INVOICE"/>																															
+										<set field="parameters.roleTypeId" value="DELYS_CUSTOMER"/>
+										<script location="component://delys/webapp/delys/WEB-INF/actions/accounting/GetSumInvoiceApAggregate.groovy"/>
+								</actions>                                                    						
+								<widgets>											
+<!-- 									<screenlet id="apInvoices" title="${uiLabelMap.accPayable} ${uiLabelMap.accCustomers}"> -->
+<!-- 										<label style="aggregate-label">${uiLabelMap.accTotalInvoicesValue}: </label> <label style="aggregate-value">${totalValue} ${defaultOrganizationPartyCurrencyUomId}</label>  -->
+<!-- 			                        	<label style="aggregate-label">${uiLabelMap.accPayableToApplyTotal}: </label> <label style="aggregate-value">${totalToApply} ${defaultOrganizationPartyCurrencyUomId}</label>												 -->
+			                            <platform-specific>
+		                                    <html>
+				                        		<html-template location="component://delys/webapp/delys/accounting/liability/listCUSCDApInvoicesJQ.ftl"/>
+				                        	</html>
+		                                </platform-specific>
+<!-- 			                        </screenlet> -->
+		                        </widgets>
+	                    </section>	                        
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+	<screen name="AggregateApCustomersData">
+        <section>
+            <actions>
+                <entity-condition list="listInvoiceType" entity-name="InvoiceType">
+                	<condition-expr field-name="parentTypeId" operator="equals" value="PURCHASE_INVOICE"/>
+                </entity-condition>
+                <entity-condition list="listStatusItem" entity-name="StatusItem">
+                	<condition-list combine="and">
+	                	<condition-expr field-name="statusTypeId" operator="equals" value="INVOICE_STATUS"/>
+	                	<condition-list combine="or">
+		                	<condition-expr field-name="statusId" operator="equals" value="INVOICE_IN_PROCESS"/>
+		                	<condition-expr field-name="statusId" operator="equals" value="INVOICE_READY"/>
+		                </condition-list>
+	                </condition-list>
+                </entity-condition>        
+                <property-map resource="DelysUiLabels" map-name="uiLabelMap" global="true"/>
+                <property-to-field resource="general" property="ORGANIZATION_PARTY" field="organizationPartyId"/>     
+            </actions>
+            <widgets>
+               <section>       
+                	<actions>										
+						<set field="parameters.partyIdFrom" from-field="organizationPartyId"/>
+						<set field=" parameters.parentTypeId" value="PURCHASE_INVOICE"/>																															
+						<set field="parameters.roleTypeId" value="DELYS_CUSTOMER"/>
+						<script location="component://delys/webapp/delys/WEB-INF/actions/accounting/GetSumInvoiceApAggregate.groovy"/>
+						<property-to-field field="defaultOrganizationPartyCurrencyUomId" resource="general" property="currency.uom.id.default" default="VND"/>
+	                </actions>                                           						
+				    <widgets>			                       		                            		 																		
+						<label style="aggregate-label">${uiLabelMap.accTotalInvoicesValue}: </label> <label style="aggregate-value">${totalValue} ${defaultOrganizationPartyCurrencyUomId}</label> 
+                        <label style="aggregate-label">${uiLabelMap.accPayableToApplyTotal}: </label> <label style="aggregate-value">${totalToApply} ${defaultOrganizationPartyCurrencyUomId}</label>												
+                    </widgets>
+                 </section>	                        
+            </widgets>
+        </section>
+    </screen>       
+    
+	<screen name="FindInvoiceAggregateArCustomers">
+        <section>
+            <actions>
+                <set field="tabButtonItem" value="InvoiceAggregateArCustomer"></set>
+                <set field="tabBarName" value="InvoiceAggregateCustomerTabBar"/>
+                <set field="tabBarLocation" value="component://delys/widget/InvoiceAggregateMenus.xml"/>                        	
+<!--             	<set field="navMenuName" value="InvoiceSubTabBarLib"/> -->
+    			<set field="navMenuLocation" value="component://delys/widget/InvoiceAggregateMenus.xml"/>            	
+                <set field="headerItem" value="invoices"/>
+<!--                 <set field="tabButtonItem" value="find"/> -->
+                <set field="titleProperty" value="accFindCustomers"/>
+                <set field="selectedMenuItem" value="accLiabilities"/>
+                <set field="selectedSubMenuItem" value="accLiaCustomers"/>
+                <set field="printTabBar" value="true" />
+                <entity-condition list="listInvoiceType" entity-name="InvoiceType">
+                	<condition-expr field-name="parentTypeId" operator="equals" value="SALES_INVOICE"/>
+                </entity-condition>
+                <entity-condition list="listStatusItem" entity-name="StatusItem">
+                	<condition-list combine="and">
+	                	<condition-expr field-name="statusTypeId" operator="equals" value="INVOICE_STATUS"/>
+	                	<condition-list combine="or">
+		                	<condition-expr field-name="statusId" operator="equals" value="INVOICE_IN_PROCESS"/>
+		                	<condition-expr field-name="statusId" operator="equals" value="INVOICE_READY"/>
+		                </condition-list>
+	                </condition-list>
+                </entity-condition>                
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>       
+	                        	<actions>										
+										<set field="parameters.partyIdFrom" from-field="parameters.organizationPartyId"/>
+										<set field=" parameters.parentTypeId" value="SALES_INVOICE"/>																															
+										<set field="parameters.roleTypeId" value="DELYS_CUSTOMER"/>
+										<script location="component://delys/webapp/delys/WEB-INF/actions/accounting/GetSumInvoiceArAggregate.groovy"/>
+								</actions>                                           						
+								<widgets>			                       		                            		 																		
+<!-- 									<screenlet id="arInvoices" title="${uiLabelMap.accReceivable} ${uiLabelMap.accCustomers}"> -->
+<!--  									<label style="aggregate-label">${uiLabelMap.accTotalInvoicesValue}: </label> <label style="aggregate-value">${totalValue} ${defaultOrganizationPartyCurrencyUomId}</label>  -->
+<!-- 			                        <label style="aggregate-label">${uiLabelMap.accReceivableToApplyTotal}: </label> <label style="aggregate-value">${totalToApply} ${defaultOrganizationPartyCurrencyUomId}</label>												 -->
+			                            <platform-specific>
+		                                    <html>
+				                        		<html-template location="component://delys/webapp/delys/accounting/liability/listCUSCDArInvoicesJQ.ftl"/>
+				                        	</html>
+		                                </platform-specific>
+<!-- 			                        </screenlet> -->
+		                        </widgets>
+	                    </section>	                        
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>    
+    
+	<screen name="AggregateArCustomersData">
+        <section>
+            <actions>
+                <entity-condition list="listInvoiceType" entity-name="InvoiceType">
+                	<condition-expr field-name="parentTypeId" operator="equals" value="SALES_INVOICE"/>
+                </entity-condition>
+                <entity-condition list="listStatusItem" entity-name="StatusItem">
+                	<condition-list combine="and">
+	                	<condition-expr field-name="statusTypeId" operator="equals" value="INVOICE_STATUS"/>
+	                	<condition-list combine="or">
+		                	<condition-expr field-name="statusId" operator="equals" value="INVOICE_IN_PROCESS"/>
+		                	<condition-expr field-name="statusId" operator="equals" value="INVOICE_READY"/>
+		                </condition-list>
+	                </condition-list>
+                </entity-condition>        
+                <property-map resource="DelysUiLabels" map-name="uiLabelMap" global="true"/>   
+                <property-to-field resource="general" property="ORGANIZATION_PARTY" field="organizationPartyId"/>  
+            </actions>
+            <widgets>
+               <section>       
+                	<actions>										
+						<set field="parameters.partyIdFrom" from-field="organizationPartyId"/>
+						<set field=" parameters.parentTypeId" value="SALES_INVOICE"/>																															
+						<set field="parameters.roleTypeId" value="DELYS_CUSTOMER"/>
+						<script location="component://delys/webapp/delys/WEB-INF/actions/accounting/GetSumInvoiceArAggregate.groovy"/>
+						<property-to-field field="defaultOrganizationPartyCurrencyUomId" resource="general" property="currency.uom.id.default" default="VND"/>
+	                </actions>                                           						
+				    <widgets>			                       		                            		 																		
+						<label style="aggregate-label">${uiLabelMap.accTotalInvoicesValue}: </label> <label style="aggregate-value">${totalValue} ${defaultOrganizationPartyCurrencyUomId}</label> 
+                        <label style="aggregate-label">${uiLabelMap.accReceivableToApplyTotal}: </label> <label style="aggregate-value">${totalToApply} ${defaultOrganizationPartyCurrencyUomId}</label>												
+                    </widgets>
+                 </section>	                        
+            </widgets>
+        </section>
+    </screen>      
+       	
+	<screen name="FindInvoiceAggregateApSuppliers">
+        <section>
+            <actions>
+                <set field="tabButtonItem" value="InvoiceAggregateApSupplier"></set>
+                <set field="tabBarName" value="InvoiceAggregateSupplierTabBar"/>
+                <set field="tabBarLocation" value="component://delys/widget/InvoiceAggregateMenus.xml"/>                        	
+<!--             	<set field="navMenuName" value="InvoiceSubTabBarLib"/> -->
+    			<set field="navMenuLocation" value="component://delys/widget/InvoiceAggregateMenus.xml"/>            	
+                <set field="headerItem" value="invoices"/>
+<!--                 <set field="tabButtonItem" value="find"/> -->
+                <set field="titleProperty" value="accFindSuppliers"/>
+                <set field="selectedMenuItem" value="accLiabilities"/>
+                <set field="selectedSubMenuItem" value="accLiaSuppliers"/>
+                <set field="printTabBar" value="true" />
+                <entity-condition list="listInvoiceType" entity-name="InvoiceType">
+                	<condition-expr field-name="parentTypeId" operator="equals" value="PURCHASE_INVOICE"/>
+                </entity-condition>
+                <entity-condition list="listStatusItem" entity-name="StatusItem">
+                	<condition-list combine="and">
+	                	<condition-expr field-name="statusTypeId" operator="equals" value="INVOICE_STATUS"/>
+	                	<condition-list combine="or">
+		                	<condition-expr field-name="statusId" operator="equals" value="INVOICE_IN_PROCESS"/>
+		                	<condition-expr field-name="statusId" operator="equals" value="INVOICE_READY"/>
+		                </condition-list>
+	                </condition-list>
+                </entity-condition>                
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                        		<actions>										
+										<set field="parameters.partyId" from-field="parameters.organizationPartyId"/>
+										<set field="parameters.parentTypeId" value="PURCHASE_INVOICE"/>																															
+										<set field="parameters.roleTypeId" value="DELYS_SUPPLIER"/>
+										<script location="component://delys/webapp/delys/WEB-INF/actions/accounting/GetSumInvoiceApAggregate.groovy"/>
+								</actions>                                                    						
+								<widgets>											
+<!-- 									<screenlet id="apInvoices" title="${uiLabelMap.accPayable} ${uiLabelMap.accSuppliers}"> -->
+<!-- 										<label style="aggregate-label">${uiLabelMap.accTotalInvoicesValue}: </label> <label style="aggregate-value">${totalValue} ${defaultOrganizationPartyCurrencyUomId}</label>  -->
+<!-- 			                        	<label style="aggregate-label">${uiLabelMap.accPayableToApplyTotal}: </label> <label style="aggregate-value">${totalToApply} ${defaultOrganizationPartyCurrencyUomId}</label>												 -->
+			                            <platform-specific>
+		                                    <html>
+				                        		<html-template location="component://delys/webapp/delys/accounting/liability/listSUPCDApInvoicesJQ.ftl"/>
+				                        	</html>
+		                                </platform-specific>
+<!-- 			                        </screenlet> -->
+		                        </widgets>
+	                    </section>	                        
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+	<screen name="AggregateApSuppliersData">
+        <section>
+            <actions>
+                <entity-condition list="listInvoiceType" entity-name="InvoiceType">
+                	<condition-expr field-name="parentTypeId" operator="equals" value="PURCHASE_INVOICE"/>
+                </entity-condition>
+                <entity-condition list="listStatusItem" entity-name="StatusItem">
+                	<condition-list combine="and">
+	                	<condition-expr field-name="statusTypeId" operator="equals" value="INVOICE_STATUS"/>
+	                	<condition-list combine="or">
+		                	<condition-expr field-name="statusId" operator="equals" value="INVOICE_IN_PROCESS"/>
+		                	<condition-expr field-name="statusId" operator="equals" value="INVOICE_READY"/>
+		                </condition-list>
+	                </condition-list>
+                </entity-condition>        
+                <property-map resource="DelysUiLabels" map-name="uiLabelMap" global="true"/> 
+                <property-to-field resource="general" property="ORGANIZATION_PARTY" field="organizationPartyId"/>    
+            </actions>
+            <widgets>
+               <section>       
+                	<actions>										
+						<set field="parameters.partyIdFrom" from-field="organizationPartyId"/>
+						<set field=" parameters.parentTypeId" value="PURCHASE_INVOICE"/>																															
+						<set field="parameters.roleTypeId" value="DELYS_SUPPLIER"/>
+						<script location="component://delys/webapp/delys/WEB-INF/actions/accounting/GetSumInvoiceApAggregate.groovy"/>
+						<property-to-field field="defaultOrganizationPartyCurrencyUomId" resource="general" property="currency.uom.id.default" default="VND"/>
+	                </actions>                                           						
+				    <widgets>			                       		                            		 																		
+						<label style="aggregate-label">${uiLabelMap.accTotalInvoicesValue}: </label> <label style="aggregate-value">${totalValue} ${defaultOrganizationPartyCurrencyUomId}</label> 
+                        <label style="aggregate-label">${uiLabelMap.accPayableToApplyTotal}: </label> <label style="aggregate-value">${totalToApply} ${defaultOrganizationPartyCurrencyUomId}</label>												
+                    </widgets>
+                 </section>	                        
+            </widgets>
+        </section>
+    </screen>      
+    
+	<screen name="FindInvoiceAggregateArSuppliers">
+        <section>
+            <actions>
+                <set field="tabButtonItem" value="InvoiceAggregateArSupplier"></set>
+                <set field="tabBarName" value="InvoiceAggregateSupplierTabBar"/>
+                <set field="tabBarLocation" value="component://delys/widget/InvoiceAggregateMenus.xml"/>                        	
+<!--             	<set field="navMenuName" value="InvoiceSubTabBarLib"/> -->
+    			<set field="navMenuLocation" value="component://delys/widget/InvoiceAggregateMenus.xml"/>            	
+                <set field="headerItem" value="invoices"/>
+<!--                 <set field="tabButtonItem" value="find"/> -->
+                <set field="titleProperty" value="accFindSuppliers"/>
+                <set field="selectedMenuItem" value="accLiabilities"/>
+                <set field="selectedSubMenuItem" value="accLiaSuppliers"/>
+                <set field="printTabBar" value="true" />
+                <entity-condition list="listInvoiceType" entity-name="InvoiceType">
+                	<condition-expr field-name="parentTypeId" operator="equals" value="SALES_INVOICE"/>
+                </entity-condition>
+                <entity-condition list="listStatusItem" entity-name="StatusItem">
+                	<condition-list combine="and">
+	                	<condition-expr field-name="statusTypeId" operator="equals" value="INVOICE_STATUS"/>
+	                	<condition-list combine="or">
+		                	<condition-expr field-name="statusId" operator="equals" value="INVOICE_IN_PROCESS"/>
+		                	<condition-expr field-name="statusId" operator="equals" value="INVOICE_READY"/>
+		                </condition-list>
+	                </condition-list>
+                </entity-condition>                
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>       
+	                        	<actions>										
+										<set field="parameters.partyIdFrom" from-field="parameters.organizationPartyId"/>
+										<set field=" parameters.parentTypeId" value="SALES_INVOICE"/>																															
+										<set field="parameters.roleTypeId" value="DELYS_SUPPLIER"/>
+										<script location="component://delys/webapp/delys/WEB-INF/actions/accounting/GetSumInvoiceArAggregate.groovy"/>
+								</actions>                                           						
+								<widgets>			                       		                            		 																		
+<!-- 									<screenlet id="arInvoices" title="${uiLabelMap.accReceivable} ${uiLabelMap.accSuppliers}"> -->
+<!--  									<label style="aggregate-label">${uiLabelMap.accTotalInvoicesValue}: </label> <label style="aggregate-value">${totalValue} ${defaultOrganizationPartyCurrencyUomId}</label>  -->
+<!-- 			                        <label style="aggregate-label">${uiLabelMap.accReceivableToApplyTotal}: </label> <label style="aggregate-value">${totalToApply} ${defaultOrganizationPartyCurrencyUomId}</label>												 -->
+			                            <platform-specific>
+		                                    <html>
+				                        		<html-template location="component://delys/webapp/delys/accounting/liability/listSUPCDArInvoicesJQ.ftl"/>
+				                        	</html>
+		                                </platform-specific>
+<!-- 			                        </screenlet> -->
+		                        </widgets>
+	                    </section>	                        
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>    
+    
+	<screen name="AggregateArSuppliersData">
+        <section>
+            <actions>
+                <entity-condition list="listInvoiceType" entity-name="InvoiceType">
+                	<condition-expr field-name="parentTypeId" operator="equals" value="SALES_INVOICE"/>
+                </entity-condition>
+                <entity-condition list="listStatusItem" entity-name="StatusItem">
+                	<condition-list combine="and">
+	                	<condition-expr field-name="statusTypeId" operator="equals" value="INVOICE_STATUS"/>
+	                	<condition-list combine="or">
+		                	<condition-expr field-name="statusId" operator="equals" value="INVOICE_IN_PROCESS"/>
+		                	<condition-expr field-name="statusId" operator="equals" value="INVOICE_READY"/>
+		                </condition-list>
+	                </condition-list>
+                </entity-condition>        
+                <property-map resource="DelysUiLabels" map-name="uiLabelMap" global="true"/>   
+                <property-to-field resource="general" property="ORGANIZATION_PARTY" field="organizationPartyId"/>  
+            </actions>
+            <widgets>
+               <section>       
+                	<actions>										
+						<set field="parameters.partyIdFrom" from-field="organizationPartyId"/>
+						<set field=" parameters.parentTypeId" value="SALES_INVOICE"/>																															
+						<set field="parameters.roleTypeId" value="DELYS_SUPPLIER"/>
+						<script location="component://delys/webapp/delys/WEB-INF/actions/accounting/GetSumInvoiceArAggregate.groovy"/>
+						<property-to-field field="defaultOrganizationPartyCurrencyUomId" resource="general" property="currency.uom.id.default" default="VND"/>
+	                </actions>                                           						
+				    <widgets>			                       		                            		 																		
+						<label style="aggregate-label">${uiLabelMap.accTotalInvoicesValue}: </label> <label style="aggregate-value">${totalValue} ${defaultOrganizationPartyCurrencyUomId}</label> 
+                        <label style="aggregate-label">${uiLabelMap.accReceivableToApplyTotal}: </label> <label style="aggregate-value">${totalToApply} ${defaultOrganizationPartyCurrencyUomId}</label>												
+                    </widgets>
+                 </section>	                        
+            </widgets>
+        </section>
+    </screen>        
+	<screen name="InvoiceAggregate">
+		<section>
+			<actions>
+                <set field="selectedMenuItem" value="accLiabilities"/>
+                <set field="selectedSubMenuItem" value="accLiaDistributors"/>
+            </actions>
+			<widgets>
+				<decorator-screen name="main-decorator"
+					location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<set field="parameters.sortField" from-field="parameters.sortField" default-value="-invoiceDate"/>
+								<set field="parameters.parentTypeId" value="PURCHASE_INVOICE"/>
+								<set field="parameters.partyIdFrom" from-field="parameters.distributorId"/>
+								<set field="parameters.toPartyId" value="company"/>
+								<set field="parameters.statusId" value="INVOICE_IN_PROCESS"/>
+							</actions>
+							<widgets>
+								<screenlet id="apInvoices" title="${uiLabelMap.accReceivable}">
+		                            <include-form name="ListInvoices" location="component://delys/widget/DelysAccountForms.xml"/>
+		                            <section>
+		                            	<actions>
+		                            		<service service-name="performFind" result-map="result">
+		                            			<field-map field-name="inputFields" from-field="parameters"/>
+                								<field-map field-name="entityName" value="InvoiceAndType"/>
+		                            		</service>
+		                            		<script location="component://delys/webapp/delys/WEB-INF/actions/accounting/sumupResultListIt.groovy"/>
+		                            	</actions>
+		                            	<widgets>
+		                            		 <label>${uiLabelMap.accTotalInvoicesValue}:${totalValue} ${defaultOrganizationPartyCurrencyUomId}</label>
+		                            		 <label>${uiLabelMap.accReceivableToApplyTotal}:${totalToApply} ${defaultOrganizationPartyCurrencyUomId}</label>
+		                            	</widgets>
+		                            </section>
+		                        </screenlet>
+	                        </widgets>
+                        </section>
+                        <section>
+							<actions>
+								<set field="parameters.sortField" from-field="parameters.sortField" default-value="-invoiceDate"/>
+								<set field="parameters.parentTypeId" value="SALES_INVOICE"/>
+								<set field="parameters.partyIdFrom" value="company"/>
+								<set field="parameters.partyId" from-field="parameters.distributorId"/>
+								<set field="parameters.statusId" value="INVOICE_IN_PROCESS"/>
+							</actions>
+							<widgets>
+								<screenlet id="arInvoices" title="${uiLabelMap.accPayable}">
+		                            <include-form name="ListInvoices" location="component://delys/widget/DelysAccountForms.xml"/>
+		                            <section>
+		                            	<actions>
+		                            		<service service-name="performFind" result-map="result">
+		                            			<field-map field-name="inputFields" from-field="parameters"/>
+                								<field-map field-name="entityName" value="InvoiceAndType"/>
+		                            		</service>
+		                            		<script location="component://delys/webapp/delys/WEB-INF/actions/accounting/sumupResultListIt.groovy"/>
+		                            	</actions>
+		                            	<widgets>
+		                            		 <label>${uiLabelMap.accTotalInvoicesValue}:${totalValue} ${defaultOrganizationPartyCurrencyUomId}</label>
+		                            		 <label>${uiLabelMap.accPayableToApplyTotal}:${totalToApply} ${defaultOrganizationPartyCurrencyUomId}</label>
+		                            	</widgets>
+		                            </section>
+		                        </screenlet>
+	                        </widgets>
+                        </section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="EditPaymentMethodType">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="accSetting"/>
+                <set field="selectedSubMenuItem" value="accPaymentMethod"/>
+                <set field="tabButtonItem" value="PaymentMethodTypes"/>
+                <set field="titleProperty" value="CommonPaymentMethodType"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <entity-condition entity-name="PaymentMethodType" list="paymentMethodTypes">
+                    <order-by field-name="paymentMethodTypeId"/>
+                </entity-condition>
+                <entity-condition entity-name="GlAccount" list="listGlAccount">
+                    <order-by field-name="glAccountId"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="GlobalGLSettingsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+<!--                     	<container id="custom-header" style="smaller lighter blue"> -->
+<!--                     		<label style="h3" text="${uiLabelMap.CommonPaymentMethodType}"></label> -->
+<!--                     	</container> -->
+                        <!-- <screenlet title="${uiLabelMap.AccountingListPaymentMethodType}">
+                            <include-form name="ListPaymentMethodType" location="component://delys/widget/DelysAccountForms.xml"/>
+                        </screenlet> -->
+                        <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/listPaymentMethodType.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+   <screen name="EditInvoiceItemType">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="accSetting"/>
+                <set field="selectedSubMenuItem" value="accInvoiceItemType"/>            
+                <set field="titleProperty" value="AccountingListInvoiceItemType"/>
+                <set field="tabButtonItem" value="InvoiceItemTypes"/>
+                <set field="viewIndex" from-field="parameters.VIEW_INDEX" type="Integer" default-value="0"/>
+                <set field="viewSize" from-field="parameters.VIEW_SIZE" type="Integer" default-value="20"/>
+                <entity-condition entity-name="GlAccount" list="listGlAccount">
+                    <order-by field-name="glAccountId"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="GlobalGLSettingsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <!-- <screenlet title="${uiLabelMap.AccountingListInvoiceItemType}">
+                            <include-form name="ListInvoiceItemType" location="component://delys/widget/DelysAccountForms.xml"/>
+                        </screenlet> -->
+                        <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/listInvoiceItemTypeJQ.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen> 
+    
+    <screen name="GlAccountSalInvoice">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="accSetting"/>
+                <set field="selectedSubMenuItem" value="accSalesInvoice"/>                  
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="AccountingInvoiceSales"/>
+                <set field="labelTitleProperty" value="${uiLabelMap.AccountingInvoiceSales}"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+	            <entity-one entity-name="GlAccountClass" value-field="revenueGlAccountClass">
+	                <field-map field-name="glAccountClassId" value="REVENUE"/>
+	            </entity-one>
+	            <set field="revenueAccountClassIds" value="${bsh:org.ofbiz.accounting.util.UtilAccounting.getDescendantGlAccountClassIds(revenueGlAccountClass)}" type="List"/>
+	            <entity-condition list="listInvoiceItemType" entity-name="InvoiceItemType">
+	            	<condition-expr field-name="invoiceItemTypeId" operator="like" value="INV_%"/>
+	            	<order-by field-name="description"/>
+	            </entity-condition>
+	            <entity-condition list="listGlAccountOrganizationAndClass" entity-name="GlAccountOrganizationAndClass">
+	            	<condition-list combine="and">
+	            		<condition-expr field-name="organizationPartyId" operator="equals" from-field="organizationPartyId" />
+	            		<condition-expr field-name="glAccountClassId" operator="in" from-field="revenueAccountClassIds" />
+	            	</condition-list>
+	            	<order-by field-name="accountCode"/>
+	            </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonGlSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	
+                       <!--  <screenlet id="SalInvoiceItemTypeGlAsigmtPanel" title="${uiLabelMap.AccAssignSalesInvoiceToRevenue}" collapsible="true">
+                            <include-form name="AddSalInvoiceItemTypeGlAssignment" location="component://delys/widget/DelysAccountForms.xml"/>
+                        </screenlet> -->
+                        <!-- <include-form name="ListSalInvoiceItemTypeGlAssignments" location="component://delys/widget/DelysAccountForms.xml"/> -->
+                        <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/listGlAccountSalInvoice.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>    
+    
+    <screen name="GlAccountPurInvoice">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="accSetting"/>
+                <set field="selectedSubMenuItem" value="accPurchaseInvoice"/>                
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="AccountingInvoicePurchase"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <set field="invItemTypePrefix" value="PINV"/>
+	            <entity-one entity-name="GlAccountClass" value-field="expenseGlAccountClass">
+	                <field-map field-name="glAccountClassId" value="EXPENSE"/>
+	            </entity-one>
+	            <set field="expenseAccountClassIds" value="${bsh:org.ofbiz.accounting.util.UtilAccounting.getDescendantGlAccountClassIds(expenseGlAccountClass)}" type="List"/>
+	            <entity-condition list="listInvoiceItemType" entity-name="InvoiceItemType">
+	            	<condition-expr field-name="invoiceItemTypeId" operator="like" value="PINV%"/>
+	            	<order-by field-name="description"/>
+	            </entity-condition>
+	            <entity-condition list="listGlAccountOrganizationAndClass" entity-name="GlAccountOrganizationAndClass">
+	            	<condition-list combine="and">
+	            		<condition-expr field-name="organizationPartyId" operator="equals" from-field="organizationPartyId" />
+	            		<condition-expr field-name="glAccountClassId" operator="in" from-field="expenseAccountClassIds" />
+	            	</condition-list>
+	            	<order-by field-name="accountCode"/>
+	            </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonGlSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <!-- <screenlet id="PurInvoiceItemTypeGlAsigmtPanel" title="${uiLabelMap.AccountingAssignPurchaseInvoiceToRevenue}" collapsible="true">
+                            <include-form name="AddPurInvoiceItemTypeGlAssignment" location="component://delys/widget/DelysAccountForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListPurInvoiceItemTypeGlAssignments" location="component://delys/widget/DelysAccountForms.xml"/> -->
+                        <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/listGlAccountPOInvoice.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen> 
+    
+    <screen name="PartyAcctgPreference">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="accSetting"/>
+                <set field="selectedSubMenuItem" value="accCompanyInfo"/>              
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="AccountingPreference"/>
+                <set field="labelTitleProperty" value="${uiLabelMap.AccountingPreference}"/>
+                <set field="tabButtonItem" value="PartyAcctgPreference"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <property-to-field field="defaultCurrencyUomId" resource="general" property="currency.uom.id.default" default="USD"/>
+                <set field="partyId" from-field="parameters.organizationPartyId"/>
+                <entity-one entity-name="PartyAcctgPreference" value-field="partyAcctgPreference"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonGlSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.AccountingPreference}">
+                            <include-form name="PartyAcctgPreference" location="component://delys/widget/DelysAccountForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="TimePeriods">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="accSetting"/>
+                <set field="selectedSubMenuItem" value="accTimePeriod"/>             
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="AccountingTimePeriod"/>
+                <set field="labelTitleProperty" value="${uiLabelMap.AccountingTimePeriod}"/>
+                <set field="tabButtonItem" value="TimePeriods"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <entity-condition entity-name="CustomTimePeriod" list="openTimePeriods">
+                    <condition-list>
+                        <condition-expr field-name="organizationPartyId" operator="equals" from-field="organizationPartyId"/>
+                        <condition-expr field-name="isClosed" operator="equals" value="N"/>
+                    </condition-list>
+                    <order-by field-name="thruDate"/>
+                </entity-condition>
+                <entity-condition entity-name="CustomTimePeriod" list="closedTimePeriods">
+                    <condition-list>
+                        <condition-expr field-name="organizationPartyId" operator="equals" from-field="organizationPartyId"/>
+                        <condition-expr field-name="isClosed" operator="equals" value="Y"/>
+                    </condition-list>
+                    <order-by field-name="periodTypeId"/>
+                    <order-by field-name="periodNum"/>
+                    <order-by field-name="thruDate"/>
+                </entity-condition>
+                <entity-condition list="listPeriodType" entity-name="PeriodType"></entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonGlSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <!-- <screenlet title="${uiLabelMap.AccountingOpenTimePeriods}">
+                            <include-form name="ListOpenTimePeriods" location="component://delys/widget/DelysAccountForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.AccountingClosedTimePeriods}">
+                            <include-form name="ListClosedTimePeriods" location="component://delys/widget/DelysAccountForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.AccountingNewTimePeriods}">
+                            <include-form name="CreateTimePeriod" location="component://delys/widget/DelysAccountForms.xml"/>
+                        </screenlet> title="${uiLabelMap.AccountingClosedTimePeriods}"-->
+                        <screenlet>
+	                        <platform-specific>
+	                        	<html>
+	                        		<html-template location="component://delys/webapp/delys/accounting/listAccTimePeriods.ftl"/>
+	                        	</html>
+	                        </platform-specific>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <!-- Screen to view and manage foreign exchange conversions -->
+    <screen name="ViewFXConversions">
+        <section>
+            <actions>
+                <set field="selectedMenuItem" value="accSetting"/>
+                <set field="selectedSubMenuItem" value="accForeignExchangeRates"/>    
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="AccountingFX"/>
+                <set field="labelTitleProperty" value="${uiLabelMap.AccountingFX}"/>
+                <set field="tabButtonItem" value="ViewFXConversions"/>
+                <property-to-field field="defaultCurrencyUomId" resource="general" property="currency.uom.id.default" default="USD"/>
+                <!-- TODO: If UomConversionDated is ever used for another type of conversion besides currencies or if some currencies are
+                    stored in UomConversion, we need to change the logic here -->
+                <entity-condition entity-name="UomConversionDated" list="conversions">
+                    <order-by field-name="uomId"/>
+                    <order-by field-name="uomIdTo"/>
+                    <order-by field-name="fromDate"/>
+                </entity-condition>
+                
+                <script location="component://delys/script/com/olbius/accounting/listEnumerationConversion.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="GlobalGLSettingsDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+<!--                     	<container id="custom-header" style="smaller lighter blue"> -->
+<!--                     		<label text="${uiLabelMap.AccountingFX}" style="h3"></label> -->
+<!--                     	</container> -->
+                        <!-- <screenlet id="FxConversionPanel" title="${uiLabelMap.AccountingUpdateFX}" collapsible="true">
+                            <include-form name="updateFXConversion" location="component://delys/widget/DelysAccountForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListConversions" location="component://delys/widget/DelysAccountForms.xml"/> -->
+                    	<platform-specific>
+                    		<html>
+                    			<html-template location="component://delys/webapp/delys/accounting/listForeignExchangeRates.ftl"></html-template>
+                    		</html>
+                    	</platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="GlAccountTypeDefaults">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="AccountingGlAccountTypeDefaults"/>
+                <set field="labelTitleProperty" value="${uiLabelMap.AccountingGlAccountTypeDefaults}"/>
+                <set field="selectedMenuItem" value="accSetting"/>
+                <set field="selectedSubMenuItem" value="accAccountTypeDefault"/>                 
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+                <entity-condition entity-name="GlAccountTypeDefault" list="glAccountTypeDefaults">
+	                <condition-list>
+	                    <condition-expr field-name="organizationPartyId" operator="equals" from-field="organizationPartyId"/>
+	                </condition-list>
+	                <order-by field-name="glAccountTypeId"/>
+	            </entity-condition>
+	            <entity-condition entity-name="GlAccountType" list="glAccountTypeDefaults">
+                    <order-by field-name="description"/>
+                </entity-condition>
+                <entity-condition entity-name="GlAccountOrganizationAndClass" list="glAccountOrganizationAndClass">
+                	<condition-expr field-name="organizationPartyId" from-field="organizationPartyId"/>
+                    <order-by field-name="accountCode"/>
+                </entity-condition>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonGlSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                       <!--  <screenlet id="GlAccountTypeDefaultPanel" title="${uiLabelMap.CommonAdd}" collapsible="true">
+                            <include-form name="EditGlAccountTypeDefault" location="component://delys/widget/DelysAccountForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListGlAccountTypeDefaults" location="component://delys/widget/DelysAccountForms.xml"/> -->
+                        <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/listGLAccTypeDefault.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditVarianceReasonGlAccounts">
+        <section>
+            <actions>
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="AccountingVarianceReasonGlAccounts"/>
+                <set field="selectedMenuItem" value="accSetting"/>
+                <set field="selectedSubMenuItem" value="accAccountVarianceReason"/>    
+                <set field="labelTitleProperty" value="${uiLabelMap.AccountingVarianceReasonGlAccounts}"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+
+                <entity-condition entity-name="VarianceReasonGlAccount" list="varianceReasonGlAccounts">
+                    <condition-expr field-name="organizationPartyId" from-field="organizationPartyId"/>
+                    <order-by field-name="glAccountId"/>
+                </entity-condition>
+                
+                <entity-condition entity-name="VarianceReason" list="varianceReasons"> 
+                	<order-by field-name="varianceReasonId"/>
+                </entity-condition>
+                
+                <entity-condition entity-name="GlAccountOrganizationAndClass" list="glAccountOrganizationAndClasses"> 
+                	<condition-expr field-name="organizationPartyId" operator="equals" value="${organizationPartyId}"/>
+                    <order-by field-name="accountCode"/>
+                </entity-condition>
+                
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonGlSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <!-- <screenlet id="VarianceReasonGlAccountPanel" title="${uiLabelMap.AccountingVarianceReasonGlAccounts}" collapsible="true">
+                            <include-form name="AddVarianceReasonGlAccount" location="component://delys/widget/DelysAccountForms.xml"/>
+                        </screenlet>
+                        <include-form name="ListVarianceReasonGlAccounts" location="component://delys/widget/DelysAccountForms.xml"/> --> 
+                    	<platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/listVarianceReasonGlAccounts.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+     
+	<screen name="VatTaxProductionSetting">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="accTax"/>
+				<set field="selectedSubMenuItem" value="accVatTax"/>
+				<set field="navMenuName" value="VatTaxProductionSettingSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/VatTaxMenus.xml" />
+				<set field="userLogin" from-field="parameters.userLogin" />
+				<set field="tabButtonItem" value="VatTaxProductionSetting" /> 
+				<set field="tabSubButtonItem" value="SetProductionCategory" />
+				<set field="titleProperty" value="${uiLabelMap.AccountingVatTaxProductionSetting}" />
+				
+                <entity-condition entity-name="ProductCategory" list="productCategory">
+                    <condition-expr field-name="productCategoryTypeId" value="TAX_CATEGORY"/>
+                    <order-by field-name="productCategoryId"/>
+                </entity-condition>
+                
+                <entity-condition entity-name="Product" list="product"> 
+                	<order-by field-name="productId"/>
+                </entity-condition>
+                				
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonVatTaxDecorator" location="${parameters.mainDecoratorLocation}">
+<!-- 				<decorator-screen name="CommonPartyGlDecorator" -->
+<!-- 					location="${parameters.mainDecoratorLocation}"> -->					
+					<decorator-section name="body">
+					<screenlet title="${uiLabelMap.AccountingVatTaxProductionSetting}"> 					
+						 <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/tax/listTaxProductCategory.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+    
+
+	<screen name="VatTaxPurchaseInvoice">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="accTax"/>
+				<set field="selectedSubMenuItem" value="accVatTax"/>
+				<set field="navMenuName" value="DepreciationVatTaxSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/VatTaxMenus.xml" />
+				<set field="userLogin" from-field="parameters.userLogin" />
+				<set field="tabButtonItem" value="DepreciationVatTax" /> 
+				<set field="tabSubButtonItem" value="VatTaxPurchaseInvoice" />
+				<set field="titleProperty" value="${uiLabelMap.accVatTaxPurchaseInvoice}" />
+                <entity-condition entity-name="Product" list="product"> 
+                	<order-by field-name="productId"/>
+                </entity-condition>              								                				
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonVatTaxDecorator" location="${parameters.mainDecoratorLocation}">
+<!-- 				<decorator-screen name="CommonPartyGlDecorator" -->
+<!-- 					location="${parameters.mainDecoratorLocation}"> -->					
+					<decorator-section name="body">				
+					<screenlet title="${uiLabelMap.accVatTaxPurchaseInvoice}"> 	
+						 <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/tax/listVatTaxApInvoicesJQ.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="VatTaxSalesInvoice">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="accTax"/>
+				<set field="selectedSubMenuItem" value="accVatTax"/>
+				<set field="navMenuName" value="DepreciationVatTaxSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/VatTaxMenus.xml" />
+				<set field="userLogin" from-field="parameters.userLogin" />
+				<set field="tabButtonItem" value="DepreciationVatTax" /> 
+				<set field="tabSubButtonItem" value="VatTaxSalesInvoice" />
+				<set field="titleProperty" value="${uiLabelMap.accVatTaxSalesInvoice}" />
+                <entity-condition entity-name="Product" list="product"> 
+                	<order-by field-name="productId"/>
+                </entity-condition>              								                				
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonVatTaxDecorator" location="${parameters.mainDecoratorLocation}">
+<!-- 				<decorator-screen name="CommonPartyGlDecorator" -->
+<!-- 					location="${parameters.mainDecoratorLocation}"> -->					
+					<decorator-section name="body">				
+					<screenlet title="${uiLabelMap.accVatTaxSalesInvoice}"> 	
+						 <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/tax/listVatTaxArInvoicesJQ.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+ 	<screen name="TaxPurchaseInvoiceNotProcess">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="accTax"/>
+				<set field="selectedSubMenuItem" value="accVatTax"/>
+				<set field="navMenuName" value="InvoiceTaxSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/VatTaxMenus.xml" />
+				<set field="userLogin" from-field="parameters.userLogin" />
+				<set field="tabButtonItem" value="InvoiceTax" /> 
+				<set field="tabSubButtonItem" value="TaxPurchaseInvoiceNotProcess" />
+				<set field="titleProperty" value="${uiLabelMap.accTaxPurchaseInvoiceNotProcess}" />
+				
+                <set field="parameters.parentTypeId" value="PURCHASE_INVOICE"/>
+                <entity-condition list="listInvoiceType" entity-name="InvoiceType">
+                	<condition-expr field-name="parentTypeId" operator="equals" value="PURCHASE_INVOICE"/>
+                </entity-condition>
+                <entity-condition list="listStatusItem" entity-name="StatusItem">
+                	<condition-expr field-name="statusTypeId" operator="equals" value="INVOICE_STATUS"/>
+                </entity-condition>                								                				
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonVatTaxDecorator" location="${parameters.mainDecoratorLocation}">
+<!-- 				<decorator-screen name="CommonPartyGlDecorator" -->
+<!-- 					location="${parameters.mainDecoratorLocation}"> -->					
+					<decorator-section name="body">				
+					<screenlet title="${uiLabelMap.accTaxPurchaseInvoiceNotProcess}"> 
+						 <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/tax/listTaxApInvoicesNotProcessJQ.ftl"/>
+                        	</html>
+                        </platform-specific>
+					</screenlet>                       
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>   
+ 
+ 	<screen name="TaxPurchaseInvoiceProcess">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="accTax"/>
+				<set field="selectedSubMenuItem" value="accVatTax"/>
+				<set field="navMenuName" value="InvoiceTaxSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/VatTaxMenus.xml" />
+				<set field="userLogin" from-field="parameters.userLogin" />
+				<set field="tabButtonItem" value="InvoiceTax" /> 
+				<set field="tabSubButtonItem" value="TaxPurchaseInvoiceProcess" />
+				<set field="titleProperty" value="${uiLabelMap.accTaxPurchaseInvoiceProcessed}" />
+				
+                <set field="parameters.parentTypeId" value="PURCHASE_INVOICE"/>
+                <entity-condition list="listInvoiceType" entity-name="InvoiceType">
+                	<condition-expr field-name="parentTypeId" operator="equals" value="PURCHASE_INVOICE"/>
+                </entity-condition>
+                <entity-condition list="listStatusItem" entity-name="StatusItem">
+                	<condition-expr field-name="statusTypeId" operator="equals" value="INVOICE_STATUS"/>
+                </entity-condition>                								                				
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonVatTaxDecorator" location="${parameters.mainDecoratorLocation}">
+<!-- 				<decorator-screen name="CommonPartyGlDecorator" -->
+<!-- 					location="${parameters.mainDecoratorLocation}"> -->					
+					<decorator-section name="body">	
+					<screenlet title="${uiLabelMap.accTaxPurchaseInvoiceProcessed}"> 				
+						 <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/tax/listTaxApInvoicesProcessedJQ.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>  
+  	<screen name="TaxSalesInvoiceNotProcess">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="accTax"/>
+				<set field="selectedSubMenuItem" value="accVatTax"/>
+				<set field="navMenuName" value="InvoiceTaxSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/VatTaxMenus.xml" />
+				<set field="userLogin" from-field="parameters.userLogin" />
+				<set field="tabButtonItem" value="InvoiceTax" /> 
+				<set field="tabSubButtonItem" value="TaxSalesInvoiceNotProcess" />
+				<set field="titleProperty" value="${uiLabelMap.accTaxSalesInvoiceNotProcess}" />
+				
+                <set field="parameters.parentTypeId" value="SALES_INVOICE"/>
+                <entity-condition list="listInvoiceType" entity-name="InvoiceType">
+                	<condition-expr field-name="parentTypeId" operator="equals" value="SALES_INVOICE"/>
+                </entity-condition>
+                <entity-condition list="listStatusItem" entity-name="StatusItem">
+                	<condition-expr field-name="statusTypeId" operator="equals" value="INVOICE_STATUS"/>
+                </entity-condition>                								                				
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonVatTaxDecorator" location="${parameters.mainDecoratorLocation}">
+<!-- 				<decorator-screen name="CommonPartyGlDecorator" -->
+<!-- 					location="${parameters.mainDecoratorLocation}"> -->					
+					<decorator-section name="body">	
+						<screenlet title="${uiLabelMap.accTaxSalesInvoiceNotProcess}"> 				
+						 <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/tax/listTaxArInvoicesNotProcessJQ.ftl"/>
+                        	</html>
+                        </platform-specific>
+                        </screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>   
+ 
+ 	<screen name="TaxSalesInvoiceProcess">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="accTax"/>
+				<set field="selectedSubMenuItem" value="accVatTax"/>
+				<set field="navMenuName" value="InvoiceTaxSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/VatTaxMenus.xml" />
+				<set field="userLogin" from-field="parameters.userLogin" />
+				<set field="tabButtonItem" value="InvoiceTaxSubTabBar" /> 
+				<set field="tabSubButtonItem" value="TaxSalesInvoiceProcess" />
+				<set field="titleProperty" value="${uiLabelMap.accTaxSalesInvoiceProcessed}" />
+				
+                <set field="parameters.parentTypeId" value="SALES_INVOICE"/>
+                <entity-condition list="listInvoiceType" entity-name="InvoiceType">
+                	<condition-expr field-name="parentTypeId" operator="equals" value="SALES_INVOICE"/>
+                </entity-condition>
+                <entity-condition list="listStatusItem" entity-name="StatusItem">
+                	<condition-expr field-name="statusTypeId" operator="equals" value="INVOICE_STATUS"/>
+                </entity-condition>                								                				
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonVatTaxDecorator" location="${parameters.mainDecoratorLocation}">
+<!-- 				<decorator-screen name="CommonPartyGlDecorator" -->
+<!-- 					location="${parameters.mainDecoratorLocation}"> -->					
+					<decorator-section name="body">	
+					<screenlet title="${uiLabelMap.accTaxSalesInvoiceProcessed}">				
+						 <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/tax/listTaxArInvoicesProcessedJQ.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>  
+
+	<screen name="VatTaxTemplate">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="accTax"/>
+				<set field="selectedSubMenuItem" value="accVatTax"/>
+				<set field="navMenuName" value="DepreciationVatTaxSubTabBar" />
+				<set field="navMenuLocation" value="component://delys/widget/VatTaxMenus.xml" />
+				<set field="userLogin" from-field="parameters.userLogin" />
+				<set field="tabButtonItem" value="DepreciationVatTax" /> 
+				<set field="tabSubButtonItem" value="VatTaxStatement" />
+				<set field="titleProperty" value="${uiLabelMap.accVatTaxStatement}" />
+                <entity-condition entity-name="Product" list="product"> 
+                	<order-by field-name="productId"/>
+                </entity-condition>              								                				
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonVatTaxDecorator" location="${parameters.mainDecoratorLocation}">				
+					<decorator-section name="body">				
+					<screenlet title="${uiLabelMap.accVatTaxStatement}"> 	
+						 <platform-specific>
+                        	<html>
+                        		<html-template location="component://delys/webapp/delys/accounting/tax/listVatTaxTemplateJQ.ftl"/>
+                        	</html>
+                        </platform-specific>
+                    </screenlet>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ReportConfiguration">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="accSetting"/>
+                <set field="selectedSubMenuItem" value="accReportSetting"/>             
+                <property-map map-name="uiLabelMap" resource="DelysAccReportUiLabels"/>
+                <property-map map-name="uiLabelMap" resource="WidgetUiLabels" global="true"/>
+              
+                <set field="titleProperty" value="accReportSetting"/>
+                <set field="labelTitleProperty" value="${uiLabelMap.accReportSetting}"/>
+             	<script location="component://delys/webapp/delys/WEB-INF/actions/accounting/ReportConfiguration.groovy"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonGlSetupDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                       
+                        <screenlet id="ReportConfiguration">
+	                        <platform-specific>
+	                        	<html>
+	                        		<html-template location="component://delys/webapp/delys/accounting/reportConfiguration.ftl"/>
+	                        	</html>
+	                        </platform-specific>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ReportConfigurationUpdate">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="accSetting"/>
+                <set field="selectedSubMenuItem" value="accReportSetting"/>             
+                <property-map resource="AccountingUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="titleProperty" value="accReportSetting"/>
+                <set field="labelTitleProperty" value="${uiLabelMap.accReportSetting}"/>
+               	<property-map map-name="uiLabelMap" resource="WidgetUiLabels" global="true"/>
+             	<script location="component://delys/webapp/delys/WEB-INF/actions/accounting/ReportConfiguration.groovy"/>
+                <set field="organizationPartyId" from-field="parameters.organizationPartyId"/>
+            </actions>
+            <widgets> 
+                  <platform-specific>
+                  	<html>
+                  		<html-template location="component://delys/webapp/delys/accounting/reportConfiguration.ftl"/>
+                  	</html>
+                  </platform-specific>
+            </widgets>
+        </section>
+    </screen>
+</screens>

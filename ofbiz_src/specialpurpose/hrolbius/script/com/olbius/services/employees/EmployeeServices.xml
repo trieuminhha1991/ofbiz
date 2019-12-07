@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+	<simple-method method-name="createNtfUpdateEmplLeave">
+		<entity-one entity-name="Notification" value-field="lookedUpValue"/>
+        <set field="pId" from-field="parameters.partyId"/>
+        <if-not-empty field="parameters.ntfId">
+	        <set field="ntfMap.ntfId" from-field="parameters.ntfId"/>	        
+	        <call-service service-name="updateNotification" in-map-name="ntfMap"></call-service>
+        </if-not-empty>	         
+		<call-class-method method-name="getManagerOfEmpl" class-name="com.olbius.util.PartyUtil" ret-field="managerId">
+			<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+			<field field="pId" type="String"/>
+		</call-class-method>
+		<call-class-method method-name="getCEO" class-name="com.olbius.util.PartyUtil" ret-field="ceoId">
+			<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+		</call-class-method>
+		<call-class-method method-name="getHrmAdmin" class-name="com.olbius.util.PartyUtil" ret-field="headOfHrId">
+			<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+		</call-class-method>			
+		<set field="partyIds" value="${groovy: return org.ofbiz.base.util.UtilMisc.toSet(managerId, ceoId, headOfHrId, pId)}" type="java.util.Set"/>
+		<iterate entry="temPartyId" list="partyIds">
+			<set field="createNotificationCtx.partyId" from-field="temPartyId"/>
+	        <set field="createNotificationCtx.header" value="Nghỉ phép của ${pId} đã được xử lý"/>
+	        <set field="createNotificationCtx.state" value="open"/>
+	        <set field="createNotificationCtx.action" value="ViewLeaveApproval"/>
+	        <set field="createNotificationCtx.targetLink" value="partyId=${pId};leaveTypeId=${parameters.leaveTypeId};fromDate=${parameters.fromDate}"/>
+	        <now field="createNotificationCtx.dateTime" type="java.sql.Timestamp"/>
+	        <call-service service-name="createNotification" in-map-name="createNotificationCtx"/>
+        </iterate>	        
+	</simple-method>
+	
+	<!-- <simple-method method-name="createJobTransProposal">
+		<make-value value-field="newEntity" entity-name="JobTransferProposal"/>
+		<set-nonpk-fields value-field="newEntity" map="parameters"/>
+		<sequenced-id sequence-name="JobTransferProposal" field="newEntity.jobTransferProposalId"/>
+		<create-value value-field="newEntity"/>
+		<field-to-result field="newEntity.jobTransferProposalId" result-name="jobTransferProposalId"/>
+	</simple-method> -->
+	
+	<!-- <simple-method method-name="createDeptTransferProposal">
+		<set field="partyIdTransfer" from-field="parameters.partyIdTransfer"/>
+		<make-value value-field="newEntity" entity-name="TransferDeptProposal"/>
+		<call-class-method method-name="checkPositionTypeInDept" class-name="com.olbius.util.CommonUtil" 
+			ret-field="checkPD">
+			<field field="parameters.emplPositionTypeToId" type="String"/>
+			<field field="parameters.internalOrgUnitToId" type="String"/>
+			<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+		</call-class-method>		
+		<if-compare value="true" operator="equals" field="checkPD">
+			<set-service-fields service-name="createJobTransProposal" to-map="proposalCtx" map="parameters"/>
+			<call-service service-name="createJobTransProposal" in-map-name="proposalCtx">
+				<result-to-field result-name="jobTransferProposalId" field="jobTransferProposalId"/>
+			</call-service>
+			<if-empty field="parameters.dateLeave">
+				<set field="parameters.dateLeave" from-field="parameters.dateMoveTo"/>
+			</if-empty>
+			<set-nonpk-fields value-field="newEntity" map="parameters"/>
+			<set from-field="jobTransferProposalId" field="newEntity.jobTransferProposalId"/>				
+			<set field="newEntity.statusId" value="JTP_CREATED"/>			
+			<create-value value-field="newEntity" />
+			<set field="jobTransferProposalId" from-field="newEntity.jobTransferProposalId"/>
+			<call-class-method method-name="getManagerOfEmpl" class-name="com.olbius.util.PartyUtil" ret-field="managerId">
+				<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+				<field field="partyIdTransfer"/>
+			</call-class-method>
+			<call-bsh>
+				<![CDATA[
+				import org.ofbiz.base.util.UtilProperties;
+				import org.ofbiz.base.util.UtilMisc;
+				import org.ofbiz.party.party.PartyHelper;
+				partyName = PartyHelper.getPartyName(delegator, partyIdTransfer, false);
+				ntfHeader = UtilProperties.getMessage("EmployeeUiLabels", "ntfTransDeptProposal", UtilMisc.toMap("partyName", partyName), locale);
+				parameters.put("ntfHeader", ntfHeader);
+				]]>
+			</call-bsh>	
+			<set field="ntfCtx.partyId" from-field="managerId"/>	
+			<set field="ntfCtx.state" value="open"/>
+			<set field="ntfCtx.action" value="JobTransProposalApproval"/>
+			<set field="ntfCtx.targetLink" value="jobTransferProposalId=${jobTransferProposalId}"/>
+			<now field="ntfCtx.dateTime" type="java.sql.Timestamp"/>
+			<set field="ntfCtx.header" from-field="parameters.ntfHeader"/>
+			<call-service service-name="createNotification" in-map-name="ntfCtx"></call-service>
+			<field-to-result field="newEntity.jobTransferProposalId" result-name="jobTransferProposalId"/>
+			<field-to-result field="partyIdTransfer" result-name="partyIdTransfer"/>
+			<call-bsh>
+				import org.ofbiz.base.util.UtilProperties;
+				import org.ofbiz.service.ServiceUtil;
+				import org.ofbiz.base.util.UtilMisc;
+				import org.ofbiz.party.party.PartyHelper;
+				resource = "EmployeeUiLabels";
+				departmentName = PartyHelper.getPartyName(delegator, parameters.get("internalOrgUnitToId"), false);				
+				ServiceUtil.returnSuccess(UtilProperties.getMessage(resource, "employee_CreateIntOrgTransferSuccess", UtilMisc.toMap("departmentName", departmentName ), locale));
+			</call-bsh>
+		<else>
+			<call-bsh>
+				import org.ofbiz.base.util.UtilProperties;
+				import org.ofbiz.service.ServiceUtil;
+				import org.ofbiz.base.util.UtilMisc;
+				import org.ofbiz.party.party.PartyHelper;
+				resource = "EmployeeUiLabels";
+				departmentName = PartyHelper.getPartyName(delegator, parameters.get("internalOrgUnitToId"), false);
+				ServiceUtil.returnError(UtilProperties.getMessage(resource, "employee_departmentHaveNoPositionType", UtilMisc.toMap("departmentName", departmentName), locale));			
+			</call-bsh>
+		</else>	
+		</if-compare>
+	</simple-method> -->
+	<!-- <simple-method method-name="createTransPositionProposal">
+		<set field="partyIdTransfer" from-field="parameters.partyIdTransfer"/>
+		<set-service-fields service-name="createJobTransProposal" to-map="proposalCtx" map="parameters"/>
+		<call-service service-name="createJobTransProposal" in-map-name="proposalCtx">
+			<result-to-field result-name="jobTransferProposalId" field="jobTransferProposalId"/>
+		</call-service>
+		<make-value value-field="newEntity" entity-name="TransferPositionProposal"/>
+		<set-nonpk-fields value-field="newEntity" map="parameters"/>
+		<set field="newEntity.statusId" value="JTP_CREATED"/>
+		<set from-field="jobTransferProposalId" field="newEntity.jobTransferProposalId"/>
+		<create-value value-field="newEntity"/>
+		<call-bsh>
+			<![CDATA[
+			import org.ofbiz.base.util.UtilProperties;
+			import org.ofbiz.base.util.UtilMisc;	
+			import org.ofbiz.party.party.PartyHelper;
+			partyName = PartyHelper.getPartyName(delegator, parameters.get("partyIdTransfer"), false);		
+			ntfHeader = UtilProperties.getMessage("EmployeeUiLabels", "ntfTransferPositionProposal", UtilMisc.toMap("partyName", partyName), locale);
+			parameters.put("ntfHeader", ntfHeader);
+			]]>
+		</call-bsh>
+		<call-class-method method-name="getManagerOfEmpl" class-name="com.olbius.util.PartyUtil" ret-field="managerId">
+			<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+			<field field="partyIdTransfer" type="String"/>
+		</call-class-method>
+		<set field="ntfCtx.partyId" from-field="managerId"/>	
+		<set field="ntfCtx.state" value="open"/>
+		<set field="ntfCtx.action" value="JobTransProposalApproval"/>
+		<set field="ntfCtx.targetLink" value="jobTransferProposalId=${newEntity.jobTransferProposalId}"/>
+		<now field="ntfCtx.dateTime" type="java.sql.Timestamp"/>
+		<set field="ntfCtx.header" from-field="parameters.ntfHeader"/>
+		<call-service service-name="createNotification" in-map-name="ntfCtx"></call-service>
+		<field-to-result field="newEntity.jobTransferProposalId" result-name="jobTransferProposalId"/>
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import org.ofbiz.service.ServiceUtil;
+			resource = "EmployeeUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resource, "employee_TransPositionProposalCreateSuccessful", locale));
+		</call-bsh>
+	</simple-method> -->
+	
+	<simple-method method-name="getPositionTypeOfDept">		
+		<if-not-empty field="parameters.departmentId">
+			<call-class-method method-name="getPositionTypeOfDept" class-name="com.olbius.util.CommonUtil" ret-field="listPositionTypeIdOfDept">
+				<field field="parameters.departmentId"/>
+				<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+			</call-class-method>
+		<else>
+			<entity-condition list="listPositionTypeIdOfDept" entity-name="EmplPositionType" ></entity-condition>			
+		</else>			
+		</if-not-empty>
+		<iterate entry="positionType" list="listPositionTypeIdOfDept">
+			<entity-one value-field="emplPositionType" entity-name="EmplPositionType" >
+				<field-map field-name="emplPositionTypeId" from-field="positionType.emplPositionTypeId"/>
+			</entity-one>
+			<set field="option" value="${emplPositionType.description}[${emplPositionType.emplPositionTypeId}]: ${emplPositionType.emplPositionTypeId}"/>
+			<field-to-list list="emplPositionTypeList" field="option"/>
+		</iterate>
+		<field-to-result field="emplPositionTypeList" result-name="positionTypeList"/>
+	</simple-method>
+	
+	<simple-method method-name="getPositionTypeOfEmpl">
+		<!-- <entity-condition list="listPositionTypeIdOfEmpl" entity-name="EmplPosition">
+			<condition-expr field-name="partyId" from-field="parameters.employeeId"/>
+		</entity-condition> -->	
+		<call-class-method method-name="getCurrPositionTypeOfEmpl" class-name="com.olbius.util.PartyUtil" 
+			ret-field="listPositionTypeIdOfEmpl">
+			<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+			<field field="parameters.employeeId" type="String"/>
+		</call-class-method>
+		<iterate entry="positionType" list="listPositionTypeIdOfEmpl">
+			<entity-one value-field="emplPositionType" entity-name="EmplPositionType" >
+				<field-map field-name="emplPositionTypeId" from-field="positionType.emplPositionTypeId"/>
+			</entity-one>
+			<set field="option" value="${emplPositionType.description}[${emplPositionType.emplPositionTypeId}]: ${emplPositionType.emplPositionTypeId}"/>
+			<field-to-list list="emplPositionTypeList" field="option"/>			
+		</iterate>
+		<field-to-result field="emplPositionTypeList" result-name="positionTypeList"/>
+	</simple-method>	
+	
+	<!-- <simple-method method-name="updateTransDeptProposalStt">
+		<entity-one value-field="jobTransferProposal" entity-name="JobTransferProposal" auto-field-map="true"></entity-one>
+		<if-not-empty field="parameters.ntfId">
+			<set-service-fields service-name="updateNotification" to-map="updateNftCtx" map="parameters"/>		
+			set state ntf is close
+			<call-service service-name="updateNotification" in-map-name="updateNftCtx"></call-service>		
+		</if-not-empty>
+		<set field="newStatusId" from-field="parameters.statusId"/>
+		<set field="jobTransferProposal.statusId" from-field="newStatusId"/>
+		<store-value value-field="jobTransferProposal"/>
+		<field-to-result field="jobTransferProposal.jobTransferProposalId" result-name="jobTransferProposalId"/>
+		
+		ceo accepted proposal
+		<if-compare operator="equals" value="TRANS_DEPT_CEO_A" field="newStatusId">
+			expire current position of employee
+			<entity-and list="emplPositions" entity-name="EmplPosition">
+				<field-map field-name="partyId" from-field="partyIdTransfer"/>
+			</entity-and>		
+			<iterate entry="position" list="emplPositions">
+				<set field="position.actualThruDate" from-field="jobTransferProposal.dateLeave"/>
+				<store-value value-field="position"/>
+			</iterate>
+			create new position for employee
+			<make-value value-field="newPosition" entity-name="EmplPosition"/>
+			<set field="newPosition.partyId" from-field="partyIdTransfer"/>
+			<set field="newPosition.emplPositionTypeId" from-field="jobTransferProposal.emplPositionTypeToId"/>
+			<set field="newPosition.actualFromDate" from-field="jobTransferProposal.dateMoveTo"/>
+			<sequenced-id sequence-name="EmplPosition" field="newPosition.emplPositionId" />
+			<create-value value-field="newPosition"/>
+			
+			expire current department of employee			
+			<entity-and list="employmentList" entity-name="Employment">
+				<field-map field-name="roleTypeIdFrom" value="INTERNAL_ORGANIZATIO"/>
+				<field-map field-name="roleTypeIdTo" value="EMPLOYEE"/>
+				<field-map field-name="partyIdTo" from-field="partyIdTransfer"/>
+			</entity-and>
+			<iterate entry="employment" list="employmentList">
+				<set field="employment.thruDate" from-field="jobTransferProposal.dateLeave"/>
+				<store-value value-field="employment"/>
+			</iterate>
+			set new department for employee
+			<make-value value-field="newEmployment" entity-name="Employment"/>
+			<set field="newEmployment.roleTypeIdFrom" value="INTERNAL_ORGANIZATIO"/>
+			<set field="newEmployment.roleTypeIdTo" value="EMPLOYEE"/>
+			<set field="newEmployment.partyIdTo" from-field="partyIdTransfer"/>
+			<set field="newEmployment.partyIdFrom" from-field="jobTransferProposal.departmentToId"/>
+			<set field="newEmployment.fromDate" from-field="jobTransferProposal.dateMoveTo"/>
+			<create-value value-field="newEmployment"/>						
+		</if-compare>
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import org.ofbiz.service.ServiceUtil;
+			resource = "EmployeeUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resource, "updateApprovalStatusSuccessful", locale));
+		</call-bsh>
+	</simple-method> -->	
+	
+	<!-- <simple-method method-name="updateTransPositionProposal">
+		<entity-one value-field="jobTransferProposal" entity-name="JobTransferProposal" auto-field-map="true"></entity-one>		
+		<if-not-empty field="parameters.ntfId">
+			<set-service-fields service-name="updateNotification" to-map="updateNftCtx" map="parameters"/>		
+			set state ntf is close
+			<call-service service-name="updateNotification" in-map-name="updateNftCtx"></call-service>
+		</if-not-empty>
+		<set-nonpk-fields value-field="jobTransferProposal" map="parameters"/>
+		<store-value value-field="jobTransferProposal"/>
+		<field-to-result field="jobTransferProposal.jobTransferProposalId" result-name="jobTransferProposalId"/>
+		<if-compare operator="equals" value="TRANS_POS_CEO_A" field="jobTransferProposal.statusId">
+			<now-timestamp field="nowStamptime"/>
+			expire current position
+			<entity-condition list="listPosition" entity-name="EmplPosition">
+				<condition-list>
+					<condition-expr field-name="partyId" from-field="partyIdTransfer"/>
+					<condition-expr field-name="emplPositionId" from-field="jobTransferProposal.emplPositionTypeFromId"/>
+					<condition-expr field-name="actualFromDate" from-field="nowStamptime" operator="less-equals"/>
+					<condition-expr field-name="actualThruDate" from-field="nowStamptime" operator="greater-equals"/>
+				</condition-list>
+			</entity-condition>
+			<iterate entry="position" list="listPosition">
+				<set field="position.actualThruDate" from-field="jobTransferProposal.dateMoveTo"/>
+				<store-value value-field="position"/>
+			</iterate>
+			
+			create new position
+			<make-value value-field="newEntityPosition" entity-name="EmplPosition"/>
+			<set field="newEntityPosition.partyId" from-field="partyIdTransfer"/>
+			<set field="newEntityPosition.emplPositionTypeId" from-field="jobTransferProposal.emplPositionTypeToId" />
+			<set field="newEntityPosition.actualFromDate" from-field="jobTransferProposal.dateMoveTo"/>
+			<set field="newEntityPosition.actualThruDate" from-field="parameters.actualThruDate"/>
+			<sequenced-id sequence-name="EmplPosition" field="newEntityPosition.emplPositionId" />
+			<create-value value-field="newEntityPosition"/>					
+		</if-compare>
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import org.ofbiz.service.ServiceUtil;
+			resource = "EmployeeUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resource, "updateApprovalStatusSuccessful", locale));
+		</call-bsh>
+	</simple-method> -->
+	
+	<!-- <simple-method method-name="createWorkOvertimeRegis">
+		<set field="timeBegin" from-field="parameters.overTimeFromDate"/>
+		<set field="timeEnd" from-field="parameters.overTimeThruDate"/>
+		<if-compare-field to-field="timeEnd" operator="greater" field="timeBegin">
+			<add-error>
+				<fail-property resource="HrCommonUiLabels" property="TimeBeginAfterTimeEnd"/>				
+			</add-error>
+			<check-errors/>
+		</if-compare-field>
+		<make-value value-field="newEntity" entity-name="WorkOvertimeRegistration"/>
+		<set-nonpk-fields value-field="newEntity" map="parameters"/>
+		<sequenced-id sequence-name="WorkOvertimeRegistration" field="newEntity.workOvertimeRegisId"/>
+		<set field="newEntity.partyId" from-field="userLogin.partyId"/>
+		<set field="workOvertimeRegisId" from-field="newEntity.workOvertimeRegisId"/>
+		<field-to-result field="workOvertimeRegisId" result-name="workOvertimeRegisId"/>
+		<create-value value-field="newEntity"/>
+		
+		<call-class-method method-name="getManagerOfEmpl" class-name="com.olbius.util.PartyUtil" ret-field="managerId">
+			<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+			<field field="userLogin.partyId" type="String"/>
+		</call-class-method>
+		<call-bsh>
+			<![CDATA[
+			import org.ofbiz.base.util.UtilProperties;
+			import org.ofbiz.base.util.UtilMisc;
+			import org.ofbiz.party.party.PartyHelper;
+			partyName = PartyHelper.getPartyName(delegator, userLogin.getString("partyId"), false);
+			ntfHeader = UtilProperties.getMessage("EmployeeUiLabels", "ntfEmplWorkOvertimeRegis", UtilMisc.toMap("partyName", partyName), locale);			
+			parameters.put("ntfHeader", ntfHeader);
+			]]>
+		</call-bsh>
+		<set field="ntfCtx.header" from-field="parameters.ntfHeader"/>
+		<set field="ntfCtx.partyId" from-field="managerId"/>
+		<set field="ntfCtx.state" value="open"/>
+		<set field="ntfCtx.action" value="WorkOvertimeRegisApproval"/>
+		<set field="ntfCtx.targetLink" value="workOvertimeRegisId=${workOvertimeRegisId}"/>
+		<now field="ntfCtx.dateTime" type="java.sql.Timestamp"/>
+		<call-service service-name="createNotification" in-map-name="ntfCtx"></call-service>
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import org.ofbiz.service.ServiceUtil;
+			resource = "EmployeeUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resource, "WorkOvertimeRegisSent", locale));
+		</call-bsh>
+	</simple-method> -->
+	
+	<simple-method method-name="updateWorkOvertimeApproval">
+		<entity-one value-field="workOvertimeRegistration" entity-name="WorkOvertimeRegistration"></entity-one>
+		<set field="workOvertimeRegistration.statusId" from-field="parameters.statusId"/>
+		<set field="workOvertimeRegistration.reasonApproval" from-field="parameters.reasonApproval"/>
+		<store-value value-field="workOvertimeRegistration"/>
+		
+		<call-bsh>
+			<![CDATA[
+			import org.ofbiz.base.util.UtilProperties;
+			import org.ofbiz.base.util.UtilMisc;
+			import org.ofbiz.party.party.PartyHelper;
+			partyName = PartyHelper.getPartyName(delegator, workOvertimeRegistration.getString("partyId"), false);
+			ntfHeader = UtilProperties.getMessage("EmployeeUiLabels", "WorkOvertimeRegisApproved", UtilMisc.toMap("partyName", partyName), locale);			
+			parameters.put("ntfHeader", ntfHeader);
+			]]>
+		</call-bsh>
+		<set field="ntfCtx.header" from-field="parameters.ntfHeader"/>
+		<set field="ntfCtx.partyId" from-field="workOvertimeRegistration.partyId"/>
+		<set field="ntfCtx.state" value="open"/>
+		<set field="ntfCtx.action" value="WorkOvertimeRegisApproval"/>
+		<set field="ntfCtx.targetLink" value="workOvertimeRegisId=${workOvertimeRegistration.workOvertimeRegisId}"/>
+		<now field="ntfCtx.dateTime" type="java.sql.Timestamp"/>
+		<call-service service-name="createNotification" in-map-name="ntfCtx"></call-service>
+		<!-- <log message="ntfToHeadOfHR: ${parameters.ntfToHeadOfHR}" level="info"/> -->
+		<if-compare operator="equals" value="Y" field="parameters.ntfToHeadOfHR">
+			<call-class-method method-name="getHrmAdmin" class-name="com.olbius.util.PartyUtil" ret-field="headOfHR">
+				<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+			</call-class-method>
+			<set field="ntfCtx.partyId" from-field="headOfHR"/>		
+			<call-service service-name="createNotification" in-map-name="ntfCtx"></call-service>
+		</if-compare>
+		<set field="returnMsg" from-field="parameters.ntfHeader"/>
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import org.ofbiz.service.ServiceUtil;
+			resource = "EmployeeUiLabels";
+			ServiceUtil.returnSuccess(returnMsg);
+		</call-bsh>
+	</simple-method>
+	
+	<!--========== replace with createEmplWorkingLate in com.olbius.employment.services.EmploymentServices, maybe delete ===========-->
+	<simple-method method-name="createEmplWorkingLate">
+		<entity-one value-field="person" entity-name="Person" auto-field-map="true"></entity-one>
+		<if-empty field="person">
+			<add-error>
+				<fail-property resource="HrCommonUiLabels" property="PartyIdIsNotValid"/>
+			</add-error>
+			<check-errors/>
+		</if-empty>
+		<call-map-processor in-map-name="parameters" out-map-name="emplWorkingLateMap">
+			<simple-map-processor name="createEmplWorkingLate">
+				<process field="dateWorkingLate">
+					<convert type="Timestamp">
+						<fail-property resource="EmployeeUiLabels" property="DateWorkingLateInvalidValueFormat"/>
+					</convert>
+				</process>
+				<process field="delayTime">
+					<convert type="Long">
+						<fail-property resource="EmployeeUiLabels" property="DelayTimeInvalidValueFormat"/>
+					</convert>
+				</process>
+				<process field="partyId"><copy/></process>
+				<process field="reason"><copy/></process>
+			</simple-map-processor>
+		</call-map-processor>
+		<make-value value-field="newEntity" entity-name="EmplWorkingLate"/>
+		<set-nonpk-fields value-field="newEntity" map="emplWorkingLateMap"/>
+		
+		<sequenced-id sequence-name="EmplWorkingLate" field="newEntity.emplWorkingLateId"/>
+		<if-empty field="parameters.reason">
+			<set field="newEntity.reasonFlag" value="N"/>
+			<else>
+				<set field="newEntity.reasonFlag" value="Y"/>
+			</else>	
+		</if-empty>
+		<create-value value-field="newEntity"/>
+		<field-to-result field="newEntity.emplWorkingLateId" result-name="emplWorkingLateId"/>
+		
+		<call-bsh>
+			<![CDATA[
+			import org.ofbiz.base.util.UtilProperties;
+			import org.ofbiz.base.util.UtilMisc;
+			import org.ofbiz.party.party.PartyHelper;
+			partyName = PartyHelper.getPartyName(delegator, parameters.get("partyId"), false);
+			ntfHeader = UtilProperties.getMessage("EmployeeUiLabels", "EmplWorkingLate", UtilMisc.toMap("partyName", partyName), locale);			
+			parameters.put("ntfHeader", ntfHeader);
+			]]>
+		</call-bsh>
+		<set field="ntfCtx.header" from-field="parameters.ntfHeader"/>
+		<set field="ntfCtx.partyId" from-field="parameters.partyId"/>
+		<set field="ntfCtx.state" value="open"/>
+		<set field="ntfCtx.action" value="WorkingLateEmplDetails"/>
+		<set field="ntfCtx.targetLink" value="emplWorkingLateId=${newEntity.emplWorkingLateId}"/>
+		<now field="ntfCtx.dateTime" type="java.sql.Timestamp"/>
+		<call-service service-name="createNotification" in-map-name="ntfCtx"></call-service>
+		
+		<call-class-method method-name="getHrmAdmin" class-name="com.olbius.util.PartyUtil" ret-field="headOfHR">
+			<field field="delegator" type="org.ofbiz.entity.Delegator"/>
+		</call-class-method>
+		<set field="ntfCtx.partyId" from-field="headOfHR"/>
+		<call-service service-name="createNotification" in-map-name="ntfCtx"></call-service>
+		<call-bsh>
+			import org.ofbiz.base.util.UtilProperties;
+			import org.ofbiz.service.ServiceUtil;
+			resource = "EmployeeUiLabels";
+			ServiceUtil.returnSuccess(UtilProperties.getMessage(resource, "createEmplWorkingLate", locale));
+		</call-bsh>
+	</simple-method>
+	<!--=============================================== ./end replace =================================================-->
+	
+	<simple-method method-name="createEmplTerminationProposal">
+		<make-value value-field="newEntity" entity-name="EmplTerminationProposal"/>
+		<set-nonpk-fields value-field="newEntity" map="parameters"/>
+		<sequenced-id sequence-name="EmplTerminationProposal" field="newEntity.emplTerminationProposalId"/>
+		<create-value value-field="newEntity"/>
+		<field-to-result field="newEntity.emplTerminationProposalId" result-name="emplTerminationProposalId"/>		
+	</simple-method>
+	
+</simple-methods>

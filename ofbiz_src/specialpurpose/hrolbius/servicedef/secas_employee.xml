@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service-eca xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/service-eca.xsd">
+	<eca service="updateApproval" event="commit">	
+		<condition operator="equals" field-name="leaveStatus" value="LEAVE_APPROVED"/>		
+		<action mode="sync" service="createNtfUpdateEmplLeave"/>
+	</eca>		
+	<eca service="updateJobTransferProposal" event="commit">
+		<set field-name="ntfId" env-name="${ntfId}"/>
+		<action mode="sync" service="updateNotification"/>
+	</eca>	
+	<!-- after create dept transfer proposal, notify to approver -->	
+	<!-- <eca service="createDeptTransferProposal" event="commit">
+		<set field-name="roleTypeId" value="JTP_APPROVER"/>
+		<action mode="sync" service="createNtfToApprJobTransPropl"/>
+	</eca> -->
+	<eca service="createJobTransferApproval" event="commit">
+		<action mode="sync" service="updateJobTransferProposalStatus"/>
+	</eca>
+	<eca service="approvalRetireProposal" event="invoke">		
+		<action mode="sync" ignore-error="false" service="checkRetireStatusApproval"/>
+	</eca>
+	<eca service="approvalRetireProposal" event="commit">
+		<set field-name="emplTerminationProposalId" env-name="emplTerminationProposalId"/>		
+		<action mode="sync" service="ntfAPPLRetirePPSL" />
+	</eca>
+	
+	<eca service="approvalSackingProposal" event="invoke">
+		<action mode="sync" ignore-error="false" service="checkSackingStatusApproval"/>
+	</eca>
+	<eca service="approvalSackingProposal" event="commit">
+		<set field-name="emplTerminationProposalId" env-name="emplTerminationProposalId"/>
+		<action mode="sync" service="ntfAPPLSackingPPSL"/>
+	</eca>
+	
+	<eca service="updateResignationProposal" event="invoke">
+		<action mode="sync" ignore-error="false" service="checkResignStatusApproval"/>
+	</eca>
+	<eca service="updateResignationProposal" event="commit">
+		<set field-name="emplTerminationProposalId" env-name="emplTerminationProposalId"/>
+		<action mode="sync" service="ntfAPPLResignPPSL"/>
+	</eca>		
+	
+	<!-- <eca service="createEmplTerminationApproval" event="commit">
+		<action mode="sync" service="updateTerminationProposalStatus"/>
+	</eca> -->
+	<!-- <eca service="updateTransferDeptProposal" event="invoke">
+		<action mode="sync" ignore-error="false" service="checkTransDeptStatusAppl"/>
+	</eca>
+	<eca service="updateTransferDeptProposal" event="commit">		
+		<set field-name="jobTransferProposalId" env-name="jobTransferProposalId"/>
+		<action mode="sync" service="ntfAPPLDeptTransPPSL"/>
+	</eca> -->
+	
+	<eca service="updateTransPositionProposal" event="invoke">
+		<action mode="sync" ignore-error="false" service="checkTransPositionStatusAppl"/>
+	</eca>
+	<eca service="updateTransPositionProposal" event="commit">
+		<set field-name="jobTransferProposalId" env-name="jobTransferProposalId"/>
+		<action mode="sync" service="ntfAPPLPositionTransPPSL"/>
+	</eca>
+	<!-- <eca service="createEmployee" event="commit">
+		<condition operator="is-not-empty" field-name="partyId"/>
+		<action mode="sync" service="createEmplContactInfo"/>
+	</eca> -->
+	
+	<eca service="createEmployee" event="commit">
+		<condition operator="is-not-empty" field-name="emplPositionTypeId"/>
+		<condition operator="is-not-empty" field-name="internalOrgId"/>
+		<set field-name="statusId" env-name="EMPL_POS_ACTIVE"/>
+		<action mode="sync" service="createEmplPositionAndFulfillment"/>		
+	</eca>
+	<eca service="createEmployee" event="commit">
+		<condition operator="is-not-empty" field-name="internalOrgId"/>
+		<condition operator="is-not-empty" field-name="partyId"/>
+		<set field-name="roleTypeIdFrom" value="INTERNAL_ORGANIZATIO"/>
+		<set field-name="roleTypeIdTo" value="EMPLOYEE"/>
+		<set field-name="partyIdFrom" env-name="internalOrgId"/>
+		<set field-name="partyIdTo" env-name="partyId"/>
+		<set field-name="partyRelationshipTypeId" value="EMPLOYMENT" />
+		 <action mode="sync" service="createPartyRelationship" />
+	</eca>
+	<!-- <eca service="createEmplContactInfo" event="commit">
+		<condition operator="is-not-empty" field-name="internalOrgId"/>
+		<condition operator="is-not-empty" field-name="partyId"/>
+		<set field-name="roleTypeIdFrom" value="INTERNAL_ORGANIZATIO"/>
+		<set field-name="roleTypeIdTo" value="EMPLOYEE"/>
+		<set field-name="partyIdFrom" env-name="internalOrgId"/>
+		<set field-name="partyIdTo" env-name="partyId"/>		
+		<action mode="sync" service="createEmployment"/>
+	</eca> -->	
+	<eca service="approvalBussTripProposal" event="commit">
+		<action mode="sync" service="updateStatusBussTripProposal"/>
+	</eca>
+	<eca service="createEmplLeave" event="commit">
+		<set field-name="roleTypeId" env-name="roleTypeIdNtf"/>
+		<action mode="sync" service="createNtfToApprEmplLeave"/>
+	</eca>
+	<eca service="updateEmplLeaveApproval" event="commit">
+		<action mode="sync" service="updateEmplLeaveStatusHr"/>
+	</eca>
+	<eca service="createEmplProposalApproval" event="out-validate">
+		<action mode="sync" service="updateEmplProposal" result-to-result="true"/>
+	</eca>
+	<eca service="updateEmplProposalApproval" event="out-validate">
+		<action mode="sync" service="updateEmplProposal" result-to-result="true" />
+	</eca>
+</service-eca>

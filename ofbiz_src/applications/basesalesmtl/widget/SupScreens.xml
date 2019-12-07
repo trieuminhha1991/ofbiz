@@ -1,0 +1,573 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	<screen name="ListRoute">
+	    <section>
+			<actions>
+			    <set field="titleProperty" value="BSAssignRoute"/>
+			    <set field="selectedMenuItem" value="routerGT" />
+				<set field="selectedSubMenuItem" value="ListRoute"/>
+				<entity-condition list="Days" entity-name="DayOfWeek"/>
+				<set field="layoutSettings.styleSheets[]" value="/salesmtlresources/css/routeList.css" global="true"/>
+				<script location="component://basesalesmtl/webapp/basesalesmtl/WEB-INF/actions/sup/checkPermissionEmployee.groovy"></script>
+			</actions>
+            <condition>
+                <if-olbius-has-permission/>
+            </condition>
+	        <widgets>
+	            <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <actions>
+
+                            </actions>
+                            <widgets>
+                                <platform-specific>
+                                    <html>
+                                        <html-template location="component://basesalesmtl/webapp/basesalesmtl/sup/routeList.ftl"/>
+                                    </html>
+                                </platform-specific>
+                            </widgets>
+                          </section>
+                    </decorator-section>
+		        </decorator-screen>
+	        </widgets>
+            <fail-widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container style="alert alert-info">
+                            <label text="${uiLabelMap.BSYouHavenotViewPermission}"/>
+                        </container>
+                    </decorator-section>
+                </decorator-screen>
+            </fail-widgets>
+	    </section>
+    </screen>
+    <screen name="routeTitle">
+        <section>
+            <condition>
+                <not><if-empty field="parameters.routeId"/></not>
+            </condition>
+            <widgets>
+                <label style="ibefore-icon-angle-right" text="${uiLabelMap.BSId}: "></label>
+                <link url-mode="plain" target="RouteDetail?routeId=${parameters.routeId}" text="${parameters.routeId}"></link>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="RouteDetail">
+	    <section>
+			<actions>
+			    <set field="titleProperty" value="BSAssignRoute"/>
+			    <set field="selectedMenuItem" value="router" />
+				<set field="selectedSubMenuItem" value="ListRoute"/>
+				<entity-condition list="Days" entity-name="DayOfWeek"/>
+                <set field="titleHeaderValue" value="routeTitle" global="true"/>
+                <set field="titleHeaderLocation" value="component://basesalesmtl/widget/SupScreens.xml" global="true"/>
+			</actions>
+            <condition>
+                <if-olbius-has-permission/>
+            </condition>
+	        <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <actions>
+                                <service service-name="loadRouteInfo" result-map="resultValueLoadRoute">
+                                    <field-map field-name="routeId" from-field="parameters.routeId"/>
+                                </service>
+                                <set field="routeInfo" from-field="resultValueLoadRoute.routeInfo"/>
+                                <set field="activeTab" from-field="parameters.activeTab" default-value="routeoverview-tab"/>
+                            </actions>
+                            <widgets>
+                                <platform-specific>
+                                    <html>
+                                        <html-template location="component://basesalesmtl/webapp/basesalesmtl/sup/route/routeDetailViewTotal.ftl"/>
+                                    </html>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+	        </widgets>
+            <fail-widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container style="alert alert-info">
+                            <label text="${uiLabelMap.BSYouHavenotViewPermission}"/>
+                        </container>
+                    </decorator-section>
+                </decorator-screen>
+            </fail-widgets>
+	    </section>
+	</screen>
+	<screen name="ListSalesman">
+	    <section>
+			<actions>
+			    <set field="titleProperty" value="BSListSalesman"/>
+			    <set field="selectedMenuItem" value="routerGT" />
+			<set field="selectedSubMenuItem" value="ListSalesman"/>
+			</actions>
+            <condition>
+                <if-olbius-has-permission/>
+            </condition>
+	        <widgets>
+	            <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <actions>
+
+                            </actions>
+                            <widgets>
+                                <platform-specific>
+                                    <html>
+                                        <html-template location="component://basesalesmtl/webapp/basesalesmtl/distributor/salesman/listSalesman.ftl"/>
+                                    </html>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+	        </widgets>
+            <fail-widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container style="alert alert-info">
+                            <label text="${uiLabelMap.BSYouHavenotViewPermission}"/>
+                        </container>
+                    </decorator-section>
+                </decorator-screen>
+            </fail-widgets>
+	    </section>
+	</screen>
+	
+	<screen name="RouteHistory">
+	    <section>
+			<actions>
+			    <set field="titleProperty" value="BSRouteHistory"/>
+			    <set field="selectedMenuItem" value="router" />
+				<set field="selectedSubMenuItem" value="RouteHistory"/>
+				<set field="layoutSettings.styleSheets[]" value="/salesmtlresources/css/coverage.css" global="true"/>
+				<set field="layoutSettings.javaScripts[+0]" value="/salesmtlresources/js/sup/routeHistory.js" global="true"/>
+				<script location="component://basesalesmtl/webapp/basesalesmtl/WEB-INF/actions/sup/routeHistory.groovy"></script>
+				<set field="sync" value="Y"></set>
+			</actions>	        
+	        <widgets>
+	            <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+		               <decorator-section name="body">
+		                   <section>
+			                  	 <actions>
+			                  	 
+			                  	 </actions>
+<!-- 		                  	 <condition> -->
+<!-- 		                  	 	<if-has-permission permission=""/> -->
+<!-- 		                  	 </condition> -->
+			                       <widgets>
+				                       <platform-specific>
+									        <html>
+									            <html-template location="component://basesalesmtl/webapp/basesalesmtl/common/map.ftl"/>
+									        </html>
+									    </platform-specific>
+			                           <platform-specific>
+			                               <html>
+			                                   <html-template location="component://basesalesmtl/webapp/basesalesmtl/sup/route/routeHistory.ftl"/>
+			                               </html>
+			                           </platform-specific>
+			                       </widgets>
+		                   </section>
+		               </decorator-section>
+		            </decorator-screen>
+	        </widgets>
+	    </section>
+	</screen>
+
+    <screen name="ListRouteScheduleDate">
+	    <section>
+			<actions>
+			    <set field="titleProperty" value="BSListSaleRouteScheduleDetail"/>
+			    <set field="selectedMenuItem" value="routerGT" />
+				<set field="selectedSubMenuItem" value="ListRouteScheduleDate"/>
+                <entity-condition list="Days" entity-name="DayOfWeek"/>
+			</actions>
+            <condition>
+                <if-olbius-has-permission/>
+            </condition>
+	        <widgets>
+	            <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <actions>
+			                </actions>
+                            <widgets>
+                                <platform-specific>
+                                    <html>
+                                        <html-template location="component://basesalesmtl/webapp/basesalesmtl/sup/routeListScheduleDetailDate.ftl"/>
+                                    </html>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+		               </decorator-section>
+		            </decorator-screen>
+	        </widgets>
+            <fail-widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container style="alert alert-info">
+                            <label text="${uiLabelMap.BSYouHavenotViewPermission}"/>
+                        </container>
+                    </decorator-section>
+                </decorator-screen>
+            </fail-widgets>
+	    </section>
+	</screen>
+	
+	<!-- <screen name="CustomerPromosRegistration">
+	    <section>
+			<actions>
+			    <set field="titleProperty" value="BSCustomerPromosRegistration"/>
+			    <set field="selectedMenuItem" value="retailOutlet" />
+				<set field="selectedSubMenuItem" value="CustomerPromosRegistration"/>
+				<entity-condition list="marks" entity-name="Enumeration">
+				    <condition-expr field-name="enumTypeId" value="PROD_PROMOEXT_REG_EVAL"/>
+				</entity-condition>
+				<entity-condition list="statuses" entity-name="StatusItem">
+				    <condition-expr field-name="statusTypeId" value="PROMO_REGISTRATION"/>
+				</entity-condition>
+			</actions>
+	        <widgets>
+	            <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+               		<decorator-section name="body">
+	                    <platform-specific>
+	                        <html><html-template location="component://basesalesmtl/webapp/basesalesmtl/sup/eval/customerPromosRegistration.ftl"/></html>
+	                    </platform-specific>
+					</decorator-section>
+				</decorator-screen>
+	        </widgets>
+	    </section>
+	</screen> -->
+	<screen name="CustomerPromosRegExh">
+	    <section>
+			<actions>
+			    <set field="titleProperty" value="BSRegistrationPromosExhibitionList"/>
+			    <set field="selectedMenuItem" value="retailOutlet"/>
+				<set field="selectedSubMenuItem" value="customerPromosRegExhibition"/>
+				<entity-condition list="marks" entity-name="Enumeration">
+				    <condition-expr field-name="enumTypeId" value="PROD_PROMOEXT_REG_EVAL"/>
+				</entity-condition>
+				<entity-condition list="statuses" entity-name="StatusItem">
+				    <condition-expr field-name="statusTypeId" value="PROMO_REGISTRATION"/>
+				</entity-condition>
+				<set field="productPromoTypeId" value="PROMO_EXHIBITION"/>
+			</actions>
+	        <widgets>
+	            <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+               		<decorator-section name="body">
+	                    <platform-specific>
+	                        <html><html-template location="component://basesalesmtl/webapp/basesalesmtl/sup/eval/customerPromosRegistration.ftl"/></html>
+	                    </platform-specific>
+					</decorator-section>
+				</decorator-screen>
+	        </widgets>
+	    </section>
+	</screen>
+	<screen name="CustomerPromosRegAcc">
+	    <section>
+			<actions>
+			    <set field="titleProperty" value="BSRegistrationPromosAccumulationList"/>
+			    <set field="selectedMenuItem" value="retailOutlet"/>
+				<set field="selectedSubMenuItem" value="customerPromosRegAccumulation"/>
+				<entity-condition list="marks" entity-name="Enumeration">
+				    <condition-expr field-name="enumTypeId" value="PROD_PROMOEXT_REG_EVAL"/>
+				</entity-condition>
+				<entity-condition list="statuses" entity-name="StatusItem">
+				    <condition-expr field-name="statusTypeId" value="PROMO_REGISTRATION"/>
+				</entity-condition>
+				<set field="productPromoTypeId" value="PROMO_ACCUMULATION"/>
+			</actions>
+	        <widgets>
+	            <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+               		<decorator-section name="body">
+	                    <platform-specific>
+	                        <html><html-template location="component://basesalesmtl/webapp/basesalesmtl/sup/eval/customerPromosRegistration.ftl"/></html>
+	                    </platform-specific>
+					</decorator-section>
+				</decorator-screen>
+	        </widgets>
+	    </section>
+	</screen>
+	<screen name="CustomerRegistration">
+	    <section>
+			<actions>
+			    <set field="titleProperty" value="BSRetailOuletPurposeNewList"/>
+			    <set field="selectedMenuItem" value="approveCustomer"/>
+				<set field="selectedSubMenuItem" value="CustomerRegistration"/>
+			</actions>
+	        <widgets>
+	        	<section>
+	        		<condition>
+						<if-olbius-has-permission/>
+					</condition>
+					<actions>
+						<entity-condition list="partyStatus" entity-name="StatusItem">
+						    <condition-expr field-name="statusTypeId" value="PARTY_STATUS"/>
+						</entity-condition>
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<platform-specific>
+									<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/customer/request/requestNewCustomerList.ftl"/></html>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+	        	</section>
+	        </widgets>
+	    </section>
+	</screen>
+	<screen name="CustomerSelfRegistration">
+	    <section>
+			<actions>
+			    <set field="titleProperty" value="BSRetailOuletSelfPurposeNewList"/>
+			    <set field="selectedMenuItem" value="approveCustomer"/>
+				<set field="selectedSubMenuItem" value="ListRegisAccount"/>
+			</actions>
+	        <widgets>
+	        	<section>
+	        		<condition>
+						<if-olbius-has-permission/>
+					</condition>
+					<actions>
+						<entity-condition list="partyStatus" entity-name="StatusItem">
+						    <condition-expr field-name="statusTypeId" value="PARTY_STATUS"/>
+						</entity-condition>
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<platform-specific>
+									<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/customer/request/requestRegisterCustomerList.ftl"/></html>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+	        	</section>
+	        </widgets>
+	    </section>
+	</screen>
+	<screen name="Coverage">
+	    <section>
+			<actions>
+			    <set field="titleProperty" value="BSCoverage"/>
+			    <set field="selectedMenuItem" value="retailOutlet" />
+				<set field="selectedSubMenuItem" value="Coverage"/>
+				<set field="layoutSettings.styleSheets[]" value="/salesmtlresources/css/coverage.css" global="true"/>
+				
+				<set field="layoutSettings.javaScripts[+0]" value="/crmresources/js/generalUtils.js" global="true"/>
+				<set field="layoutSettings.javaScripts[+1]" value="/salesmtlresources/js/sup/coverage.js" global="true"/>
+				<script location="component://basesalesmtl/webapp/basesalesmtl/WEB-INF/actions/sup/coverage.groovy"></script>
+				<set field="sync" value="Y"/>
+			</actions>
+	        <widgets>
+	            <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+		               <decorator-section name="body">
+		                  <section>
+								<actions>
+								
+								</actions>
+								<widgets>
+								    <platform-specific>
+								        <html>
+								            <html-template location="component://basesalesmtl/webapp/basesalesmtl/common/map.ftl"/>
+								        </html>
+								    </platform-specific>
+								    <platform-specific>
+								        <html>
+								            <html-template location="component://basesalesmtl/webapp/basesalesmtl/sup/route/coverage.ftl"/>
+								        </html>
+								    </platform-specific>
+								</widgets>
+		                   </section>
+		               </decorator-section>
+	            </decorator-screen>
+	        </widgets>
+	    </section>
+	</screen>
+	
+	<screen name="CoverageNew">
+	    <section>
+			<actions>
+			    <set field="titleProperty" value="BSCoverage"/>
+			    <set field="selectedMenuItem" value="retailOutlet" />
+				<set field="selectedSubMenuItem" value="CoverageNew"/>
+				<set field="layoutSettings.styleSheets[]" value="/salesmtlresources/css/coverage.css" global="true"/>
+				
+				<set field="layoutSettings.javaScripts[+0]" value="/crmresources/js/generalUtils.js" global="true"/>
+				<set field="layoutSettings.javaScripts[+1]" value="/salesmtlresources/js/sup/coverageNew.js" global="true"/>
+				
+				<set field="sync" value="Y"/>
+			</actions>
+	        <widgets>
+	            <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+		               <decorator-section name="body">
+		                  <section>
+								<actions>
+								
+								</actions>
+								<condition>
+									<if-olbius-has-permission/>
+								</condition>
+								<widgets>
+								    <platform-specific>
+								        <html>
+								            <html-template location="component://basesalesmtl/webapp/basesalesmtl/common/map.ftl"/>
+								        </html>
+								    </platform-specific>
+								    <platform-specific>
+								        <html>
+								            <html-template location="component://basesalesmtl/webapp/basesalesmtl/sup/route/coverageNew.ftl"/>
+								        </html>
+								    </platform-specific>
+								</widgets>
+		                   </section>
+		               </decorator-section>
+	            </decorator-screen>
+	        </widgets>
+	    </section>
+	</screen>
+	<screen name="RouteVisitHistory">
+		<section>
+			<actions>
+				<set field="titleProperty" value="BSVisitCustomerHistory"/>
+				<set field="selectedMenuItem" value="routerGT" />
+				<set field="selectedSubMenuItem" value="RouteVisitHistory"/>
+				<entity-condition list="Days" entity-name="DayOfWeek"/>
+			</actions>
+            <condition>
+                <if-olbius-has-permission/>
+            </condition>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<actions>
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://basesalesmtl/webapp/basesalesmtl/sup/route/routeVisitHistory.ftl"/>
+									</html>
+								</platform-specific>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+            <fail-widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container style="alert alert-info">
+                            <label text="${uiLabelMap.BSYouHavenotViewPermission}"/>
+                        </container>
+                    </decorator-section>
+                </decorator-screen>
+            </fail-widgets>
+		</section>
+	</screen>
+
+    <screen name="ListMobileDevice">
+        <section>
+            <actions>
+                <set field="titleProperty" value="BSListMobileDevice"/>
+                <set field="selectedMenuItem" value="routerGT" />
+                <set field="selectedSubMenuItem" value="ListMobileDevice"/>
+            </actions>
+            <condition>
+                <if-olbius-has-permission/>
+            </condition>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <actions>
+                            </actions>
+                            <widgets>
+                                <platform-specific>
+                                    <html>
+                                        <html-template location="component://basesalesmtl/webapp/basesalesmtl/sup/listMobileDevice.ftl"/>
+                                    </html>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+            <fail-widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container style="alert alert-info">
+                            <label text="${uiLabelMap.BSYouHavenotViewPermission}"/>
+                        </container>
+                    </decorator-section>
+                </decorator-screen>
+            </fail-widgets>
+        </section>
+    </screen>
+    <screen name="ListApprovedAccount">
+	    <section>
+			<actions>
+			    <set field="titleProperty" value="BSListApprovedAccount"/>
+			    <set field="selectedMenuItem" value="approveCustomer"/>
+				<set field="selectedSubMenuItem" value="ListApprovedAccount"/>
+			</actions>
+	        <widgets>
+	        	<section>
+	        		<condition>
+						<if-olbius-has-permission/>
+					</condition>
+					<actions>
+						<entity-condition list="partyStatus" entity-name="StatusItem">
+						    <condition-expr field-name="statusTypeId" value="PARTY_STATUS"/>
+						</entity-condition>
+					</actions>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<platform-specific>
+									<html><html-template location="component://basesalesmtl/webapp/basesalesmtl/end_customer/request/listApprovedAccount.ftl"/></html>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+	        	</section>
+	        </widgets>
+	    </section>
+	</screen>
+
+</screens>

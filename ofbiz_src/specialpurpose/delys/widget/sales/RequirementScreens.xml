@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	<screen name="RequireChangeDateList">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="requireChangeDate"/>
+                <set field="selectedSubMenuItem" value="requireChangeDateList"/>
+                <set field="titleProperty" value="DAListRequireChangeDate"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/checkRolePermissionPerson.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<platform-specific>
+							<html><html-template location="component://delys/webapp/delys/sales/requirement/listRequireChangeDate.ftl"/></html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="CommonRequireReturnComDecorator">
+        <section>
+            <actions>
+                <set field="selectedMenuItem" value="returnProductTC" global="true" />
+                <set field="tabBarName" value="RequireReturnComTabBar" global="true" />
+				<set field="tabBarLocation" value="component://delys/widget/sales/SalesMenus.xml" global="true" />
+				<set field="printTabBar" value="true" />
+            </actions>
+            <widgets>
+                <decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<decorator-section-include name="body"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+	<screen name="ListReturnProductRequirementCompany">
+    	<section>
+			<actions>
+				<set field="selectedMenuItem" value="returnProductTC"/>
+            	<set field="selectedSubMenuItem" value="returnReqToCompany"/>
+                <set field="titleProperty" value="DAListRequirementReturnToCompany"/>
+                <set field="tabButtonItem" value="ListRequireReturn"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/checkRolePermissionPerson.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonRequireReturnComDecorator">
+                    <decorator-section name="body">
+                    	<section>
+                    		<condition>
+                    			<if-has-permission permission="REREQCOM_ROLE" action="_VIEW"/>
+                    		</condition>
+                    		<widgets>
+                    			<platform-specific>
+	                            	<html><html-template location="component://delys/webapp/delys/sales/requirement/listReturnProductReqComJQ.ftl"/></html>
+	                            </platform-specific>
+                    		</widgets>
+                    		<fail-widgets>
+                    			<container style="alert alert-info">
+                    				<label text="${uiLabelMap.DAYouHavenotViewPermission}"/>
+                    			</container>
+                    		</fail-widgets>
+                    	</section>
+                    </decorator-section>
+                </decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    <screen name="UpdateReturnProductRequirementCompany">
+    	<section>
+			<actions>
+				<set field="selectedMenuItem" value="returnProductTC"/>
+            	<set field="selectedSubMenuItem" value="returnReqToCompany"/>
+                <set field="titleProperty" value="DAListRequirementReturnToCompany"/>
+                <set field="tabButtonItem" value="ApproveRequireReturn"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/delys/navigator/checkRolePermissionPerson.groovy"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="CommonRequireReturnComDecorator">
+                    <decorator-section name="body">
+                    	<section>
+                    		<widgets>
+                    			<platform-specific>
+	                            	<html><html-template location="component://delys/webapp/delys/sales/requirement/updateReturnProductReqComJQ.ftl"/></html>
+	                            </platform-specific>
+                    		</widgets>
+                    	</section>
+                    </decorator-section>
+                </decorator-screen>
+			</widgets>
+		</section>
+    </screen>
+    <screen name="ViewReturnProductRequirement">
+    	<section>
+			<actions>
+				<set field="selectedMenuItem" value="returnProduct"/>
+            	<set field="selectedSubMenuItem" value="returnFromMarket" />
+                <set field="titleProperty" value="DAViewRequirementReturnFromMarket"/>
+                <entity-one value-field="requirement" entity-name="Requirement">
+                	<field-map field-name="requirementId" from-field="parameters.requirementId"/>
+                </entity-one>
+			</actions>
+			<widgets>
+            	<section>
+               		<condition>
+                		<not><if-empty field="requirement"/></not>
+             		</condition>
+                	<actions>
+                   		<set field="titleHeaderValue" value="viewReturnRequirementTitle" global="true"/>
+						<set field="titleHeaderLocation" value="component://delys/widget/sales/SalesScreens.xml" global="true"/>
+						<script location="component://delys/webapp/delys/WEB-INF/actions/delys/sales/requirement/ViewReturnRequirement.groovy"/>
+                  	</actions>
+                 	<widgets>
+                 		<section>
+                 			<condition>
+                 				<if-compare field="requirement.requirementTypeId" operator="equals" value="RETURN_PRODCOM_REQ"/>
+                 			</condition>
+                 			<actions>
+                 				<set field="selectedMenuItem" value="returnProductTC"/>
+            					<set field="selectedSubMenuItem" value="returnReqToCompany"/>
+                 			</actions>
+                 			<widgets></widgets>
+                 			<fail-widgets>
+                 				<section>
+                 					<condition><if-compare field="requirement.requirementTypeId" operator="equals" value="CHANGE_DATE_REQ"/></condition>
+                 					<actions>
+                 						<set field="selectedMenuItem" value="requireChangeDate"/>
+            							<set field="selectedSubMenuItem" value="requireChangeDateList"/>
+                 					</actions>
+                 					<widgets></widgets>
+                 				</section>
+                 			</fail-widgets>
+                 		</section>
+                   		<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                  	 		<decorator-section name="body">
+                  	 			<screenlet title="${uiLabelMap.DAViewRequirement}: ${requirement.requirementId}" navigation-menu-name="ViewRequirementSubTabBar">
+									<include-menu name="ViewRequirementSubTabBar" location="component://delys/widget/sales/SalesMenus.xml" />
+									<platform-specific>
+			                 			<html><html-template location="component://delys/webapp/delys/sales/requirement/viewReturnProductReqJQ.ftl"/></html>
+			               			</platform-specific>
+								</screenlet>
+		           			</decorator-section>
+            			</decorator-screen>
+                 	</widgets>
+                   	<fail-widgets>
+                   		<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+                  	 		<decorator-section name="body">
+		                   		<container style="alert alert-info">
+		                   			<label text="${uiLabelMap.DAThisRequirementNotAvaiable}"/>
+		                   		</container>
+		                   	</decorator-section>
+            			</decorator-screen>
+                	</fail-widgets>
+              	</section>
+			</widgets>
+		</section>
+    </screen>
+</screens>

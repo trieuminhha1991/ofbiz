@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+        
+	<simple-method method-name="issueTransferItemShipGrpInvResToShipment" short-description="Issue TransferItemShipGrpInvRes to Shipment">
+		<set value="Issue TransferItemShipGrpInvRes to Shipment" field="operationName"/>
+		<call-simple-method method-name="checkCanChangeShipmentStatusPacked" xml-resource="component://product/script/org/ofbiz/shipment/shipment/ShipmentServices.xml"/>
+		<!-- get transferItemShipGrpInvRes -->
+		<make-value entity-name="TransferItemShipGrpInvRes" value-field="TransferItemShipGrpInvResLookupPk"/>
+		<set-pk-fields value-field="TransferItemShipGrpInvResLookupPk" map="parameters"/>
+		<find-by-primary-key map="TransferItemShipGrpInvResLookupPk" value-field="transferItemShipGrpInvRes"/>
+		<log level="info" message="transfer item ship grp inv res info: ${transferItemShipGrpInvRes}"/>
+		
+		<set from-field="parameters.weight" field="parameters.amount"/>
+		
+		<!-- get TransferHeader -->
+		<make-value entity-name="TransferHeader" value-field="transferHeaderLookupPk"/>
+		<set-pk-fields value-field="transferHeaderLookupPk" map="parameters"/>
+		<find-by-primary-key map="transferHeaderLookupPk" value-field="transferHeader"/>
+		
+		<!-- make sure specified quantity is not empty -->
+		<if-empty field="parameters.quantity">
+		    <add-error>
+		        <fail-property resource="ProductUiLabels" property="ProductNotIssueTransferToShipment"/>
+		    </add-error>
+		</if-empty>
+		<if-empty field="transferItemShipGrpInvRes.quantity">
+		    <log level="info" message="Transfer item reservation amount is null! PK lookup: ${TransferItemShipGrpInvResLookupPk}"/>
+		</if-empty>
+		<!-- make sure specified quantity is not less than or equal to 0 -->
+		<if-compare field="parameters.quantity" operator="less-equals" value="0" type="BigDecimal">
+		    <add-error>
+		        <fail-property resource="BaseLogisticsUiLabels" property="ProductNotIssueTransferToShipmentQuantityLess"/>
+		    </add-error>
+		</if-compare>
+		<!-- make sure specified quantity is not greater than reserved quantity left to be issued, ie transferItemShipGrpInvRes.quantity -->
+		<set field="quantityTmpTo" value="${transferItemShipGrpInvRes.quantity}" type="BigDecimal"/>
+		<set field="quantityTmpFrom" value="${parameters.quantity}" type="BigDecimal"/>
+		<if-compare-field field="quantityTmpFrom" to-field="quantityTmpTo" operator="greater" type="BigDecimal">
+		    <add-error>
+		        <fail-property resource="ProductUiLabels" property="ProductNotIssueTransferToShipmentQuantityGreater"/>
+		    </add-error>
+		</if-compare-field>
+		
+		<check-errors/>
+		<!-- get transferItem -->
+		<entity-one entity-name="TransferItem" value-field="transferItem"/>
+		<!-- get inventoryItem -->
+		<entity-one entity-name="InventoryItem" value-field="inventoryItem"/>
+		
+		<!--  thangnv change to update cost for inventoryItem before call service findCreateItemIssuance -->
+		<!-- update unitCost and purCost for InventoryItem -->
+		<set field="getProdAvgCostMap.inventoryItem" from-field="inventoryItem"/>
+	    <call-service service-name="getProductAverageCost" in-map-name="getProdAvgCostMap">
+        	<result-to-field result-name="unitCost"/>
+            <result-to-field result-name="purCost"/> <!-- get cost for Purchase -->
+        </call-service>
+        <set field="inventoryItem.unitCost" from-field="unitCost"/>
+        <set field="inventoryItem.purCost" from-field="purCost"/>
+        <store-value value-field="inventoryItem"/>
+        <!-- end thangnv edit -->
+        
+		<!-- get shipment -->
+		<entity-one entity-name="Shipment" value-field="shipment"/>
+		<!-- get transferShipment -->
+		<make-value entity-name="TransferShipment" value-field="transferShipmentLookupPk"/>
+		<set-pk-fields value-field="transferShipmentLookupPk" map="parameters"/>
+		<find-by-and entity-name="TransferShipment" map="transferShipmentLookupPk" list="transferShipments"/>
+		<first-from-list entry="transferShipment" list="transferShipments"/>
+		<!-- will create qtyForShipmentItem -->
+		<call-simple-method method-name="calcQtyForShipmentItemInline"/>
+		<if-compare value="0" operator="greater-equals" field="qtyForShipmentItem" type="BigDecimal">
+		    <if-not-empty field="transferShipment">
+		        <field-to-result field="transferShipment.shipmentItemSeqId" result-name="shipmentItemSeqId"/>
+		        <make-value entity-name="ShipmentItem" value-field="shipmentItemLookupPk"/>
+		        <set-pk-fields value-field="shipmentItemLookupPk" map="parameters"/>
+		        <set from-field="transferShipment.shipmentItemSeqId" field="shipmentItemLookupPk.shipmentItemSeqId"/>
+		        <find-by-primary-key map="shipmentItemLookupPk" value-field="shipmentItem"/>
+		    </if-not-empty>
+		    <if-compare value="0" operator="not-equals" field="qtyForShipmentItem" type="BigDecimal">
+		        <!-- add the qtyForShipmentItem to the shipmentItem -->
+		        <set from-field="parameters.quantity" field="originalQuantity"/>
+		        <set from-field="qtyForShipmentItem" field="parameters.quantity"/>
+		        <call-simple-method method-name="findCreateIssueShipmentItem"/>
+		        <set from-field="originalQuantity" field="parameters.quantity"/>
+		    </if-compare>
+		<else>
+		    <!-- A reduction in the quantity, so TransferShipment must exist. -->
+		    <calculate field="transferShipment.quantity">
+		        <calcop field="transferShipment.quantity" operator="subtract">
+		            <calcop operator="get" field="parameters.quantity"/>
+		        </calcop>
+		    </calculate>
+		    <store-value value-field="transferShipment"/>
+		    <field-to-result field="transferShipment.shipmentItemSeqId" result-name="shipmentItemSeqId"/>
+		    <make-value entity-name="ShipmentItem" value-field="shipmentItemLookupPk"/>
+		    <set-pk-fields value-field="shipmentItemLookupPk" map="parameters"/>
+		    <set from-field="transferShipment.shipmentItemSeqId" field="shipmentItemLookupPk.shipmentItemSeqId"/>
+		    <find-by-primary-key map="shipmentItemLookupPk" value-field="shipmentItem"/>
+		</else>
+		</if-compare>
+		<set field="eventDate" from-field="parameters.eventDate"/>
+		<set field="shipmentId" from-field="parameters.shipmentId"/>
+		<call-simple-method method-name="findCreateItemIssuance"/>
+		<call-simple-method method-name="associateIssueRoles"/>
+		
+		<!-- decrement quantity still reserved -->
+		<calculate field="transferItemShipGrpInvRes.quantity">
+		    <calcop operator="subtract">
+		        <calcop operator="get" field="transferItemShipGrpInvRes.quantity"/>
+		        <calcop operator="get" field="parameters.quantity"/>
+		    </calcop>
+		</calculate>
+		<if-not-empty field="parameters.amount">
+			<calculate field="transferItemShipGrpInvRes.amount">
+			    <calcop operator="subtract">
+			        <calcop operator="get" field="transferItemShipGrpInvRes.amount"/>
+			        <calcop operator="get" field="parameters.amount"/>
+			    </calcop>
+			</calculate>
+		</if-not-empty>
+		<if-compare value="0" operator="equals" field="transferItemShipGrpInvRes.quantity" type="BigDecimal">
+		    <remove-value value-field="transferItemShipGrpInvRes"/>
+<!-- 		    <if-compare operator="equals" value="${transferItem.quantity}" field="transferItemShipGrpInvRes.quantity"> -->
+<!-- 		    	<if-compare field="shipment.statusId" operator="not-equals" value="SHIPMENT_SCHEDULED"> -->
+<!-- 			        <get-related value-field="transferItem" relation-name="TransferItemShipGrpInvRes" list="otherTiirs"/> -->
+<!-- 			        <if-empty field="otherTiirs"> -->
+<!-- 			            <set value="TRANS_ITEM_COMPLETED" field="changeTransferItemStatusMap.statusId"/> -->
+<!-- 			            <set from-field="transferItem.statusId" field="changeTransferItemStatusMap.fromStatusId"/> -->
+<!-- 			            <set from-field="transferItem.transferId" field="changeTransferItemStatusMap.transferId"/> -->
+<!-- 			            <set from-field="transferItem.transferItemSeqId" field="changeTransferItemStatusMap.transferItemSeqId"/> -->
+<!-- 			            <call-service service-name="changeTransferItemStatus" in-map-name="changeTransferItemStatusMap"/> -->
+<!-- 			        </if-empty> -->
+<!-- 			    <else> -->
+<!-- 			        <log level="info" message="Items issued but can't set transfer item status to TRANS_ITEM_COMPLETED because shipment status is SHIPMENT_SCHEDULED" /> -->
+<!-- 			    </else> -->
+<!-- 			    </if-compare> -->
+<!-- 		    </if-compare> -->
+		<else>
+		    <store-value value-field="transferItemShipGrpInvRes"/>
+		</else>
+		</if-compare>
+		<!-- Decrement InventoryItem quantityOnHand -->
+		<!-- instead of updating InventoryItem, add an InventoryItemDetail -->
+		    <set from-field="inventoryItem.inventoryItemId" field="createDetailMap.inventoryItemId"/>
+		    <set from-field="unitCost" field="createDetailMap.unitCost"/>
+		    <set from-field="purCost" field="createDetailMap.purCost"/>
+		    <set from-field="transferItem.transferId" field="createDetailMap.transferId"/>
+		    <set from-field="transferItem.transferItemSeqId" field="createDetailMap.transferItemSeqId"/>
+		    <set from-field="transferItemShipGrpInvRes.shipGroupSeqId" field="createDetailMap.shipGroupSeqId"/>
+		    <set from-field="shipmentItem.shipmentId" field="createDetailMap.shipmentId"/>
+		    <set from-field="shipmentItem.shipmentItemSeqId" field="createDetailMap.shipmentItemSeqId"/>
+		    <set from-field="transItemIssuanceId" field="createDetailMap.transItemIssuanceId"/>
+		    <calculate field="createDetailMap.quantityOnHandDiff">
+		        <calcop field="parameters.quantity" operator="negative"/>
+		    </calculate>
+		    <calculate field="createDetailMap.amountOnHandDiff">
+	            <calcop field="amountOnHandDiff" operator="negative">
+                    <calcop operator="get" field="parameters.amount"/>
+	            </calcop>
+	        </calculate>
+		    <call-service service-name="createInventoryItemDetail" in-map-name="createDetailMap"/>
+		    <clear-field field="createDetailMap"/>
+	</simple-method>
+	<simple-method method-name="calcQtyForShipmentItemInline" short-description="Calculate quantity for a shipment item - meant to be called in-line">
+		<if-not-empty field="parameters.inventoryItemId">
+		    <entity-and list="itemIssuances" entity-name="TransferItemIssuance">
+		        <field-map field-name="transferId" from-field="parameters.transferId"/>
+		        <field-map field-name="transferItemSeqId" from-field="parameters.transferItemSeqId"/>
+		        <field-map field-name="shipGroupSeqId" from-field="parameters.shipGroupSeqId"/>
+		        <field-map field-name="shipmentId" from-field="parameters.shipmentId"/>
+		        <order-by field-name="-issuedDateTime"/>
+		    </entity-and>
+		    <set field="otherInventoryItemQuantity" value="0" />
+		    <iterate list="itemIssuances" entry="itemIssuance">
+		        <if-compare-field field="itemIssuance.inventoryItemId" operator="not-equals" to-field="parameters.inventoryItemId">
+		            <calculate field="otherInventoryItemQuantity">
+		               <calcop field="otherInventoryItemQuantity" operator="add">
+		                   <calcop operator="get" field="itemIssuance.quantity"/>
+		               </calcop>
+		            </calculate>
+		        </if-compare-field>
+		    </iterate>
+		</if-not-empty>
+		<!-- If the shipmentItem includes products from more than one inventoryItemId, any items that came from a different inventoryItemId 
+		    from the current one should be ignored as we calculate the adjustment to make.
+		-->
+		<calculate field="transferShipmentAmount">
+		   <calcop field="transferShipment.quantity" operator="subtract">
+		       <calcop operator="get" field="otherInventoryItemQuantity"/>
+		   </calcop>
+		</calculate>
+		<!-- qtyForShipmentItem is the quantity we will add to the ShipmentItem -->
+		    <calculate field="qtyForShipmentItem">
+		       <calcop field="parameters.quantity" operator="subtract">
+		           <calcop operator="get" field="transferShipmentAmount"/>
+		       </calcop>
+		    </calculate>
+	</simple-method>
+	
+	<simple-method method-name="findCreateIssueShipmentItem" short-description="Find or Create ShipmentItem to Issue To - meant to be called in-line">
+	    <!-- try to find an existing shipmentItem and attach to it, if none found create a new shipmentItem -->
+	    <if-not-empty field="shipmentItem.productId">
+	        <entity-condition entity-name="ShipmentItem" list="shipmentItems">
+	            <condition-list combine="and">
+	                <condition-expr field-name="productId" from-field="transferItem.productId"/>
+	                <condition-expr field-name="shipmentId" from-field="parameters.shipmentId"/>
+	                <condition-expr field-name="shipmentItemSeqId" from-field="parameters.shipmentItemSeqId" ignore-if-empty="true"/>
+	            </condition-list>
+	            <order-by field-name="shipmentItemSeqId"/>
+	        </entity-condition>
+	        <first-from-list entry="shipmentItem" list="shipmentItems"/>
+	    </if-not-empty>
+	
+	    <if-empty field="shipmentItem">
+	        <set from-field="transferItem.productId" field="shipmentItemCreate.productId"/>
+	        <set from-field="parameters.shipmentId" field="shipmentItemCreate.shipmentId"/>
+	        <set from-field="parameters.quantity" field="shipmentItemCreate.quantity"/>
+	        <set from-field="parameters.weight" field="shipmentItemCreate.weight"/>
+	        <call-service service-name="createShipmentItem" in-map-name="shipmentItemCreate">
+	            <result-to-field result-name="shipmentItemSeqId" field="shipmentItemLookupPk.shipmentItemSeqId"/>
+	        </call-service>
+	        <set from-field="parameters.shipmentId" field="shipmentItemLookupPk.shipmentId"/>
+	        <find-by-primary-key entity-name="ShipmentItem" map="shipmentItemLookupPk" value-field="shipmentItem"/>
+	    <else>
+	        <calculate field="shipmentItem.quantity">
+	            <calcop operator="add" field="shipmentItem.quantity">
+	                <calcop operator="get" field="parameters.quantity"/>
+	            </calcop>
+	        </calculate>
+	        <store-value value-field="shipmentItem"/>
+	    </else>
+	    </if-empty>
+	
+	    <call-simple-method method-name="createOrUpdateTransferShipmentInline" />
+	    
+	    <field-to-result field="shipmentItem.shipmentItemSeqId" result-name="shipmentItemSeqId"/>
+	</simple-method>
+	<simple-method method-name="createOrUpdateTransferShipmentInline" short-description="Create or update the TransferShipment - meant to be called in-line">
+        <set from-field="parameters.shipmentId" field="transferShipmentCreate.shipmentId"/>
+        <set from-field="shipmentItem.shipmentItemSeqId" field="transferShipmentCreate.shipmentItemSeqId"/>
+        <set from-field="transferItem.transferId" field="transferShipmentCreate.transferId"/>
+        <set from-field="transferItem.transferItemSeqId" field="transferShipmentCreate.transferItemSeqId"/>
+
+        <if-not-empty field="transferItemShipGroupAssoc">
+            <set from-field="transferItemShipGroupAssoc.shipGroupSeqId" field="transferShipmentCreate.shipGroupSeqId"/>
+        </if-not-empty>
+        <if-not-empty field="transferItemShipGrpInvRes">
+            <set from-field="transferItemShipGrpInvRes.shipGroupSeqId" field="transferShipmentCreate.shipGroupSeqId"/>
+        </if-not-empty>
+                
+
+        <make-value entity-name="TransferShipment" value-field="transferShipmentLookupPk"/>
+        <set-pk-fields value-field="transferShipmentLookupPk" map="transferShipmentCreate"/>
+        <find-by-and entity-name="TransferShipment" map="transferShipmentLookupPk" list="transferShipments"/>
+        <first-from-list entry="transferShipment" list="transferShipments"/>
+
+        <if-empty field="transferShipment">
+            <set from-field="parameters.quantity" field="transferShipmentCreate.quantity"/>
+            <set from-field="parameters.amount" field="transferShipmentCreate.amount"/>
+            <call-service service-name="createTransferShipment" in-map-name="transferShipmentCreate"/>
+        <else>
+            <calculate field="transferShipment.quantity">
+                <calcop field="transferShipment.quantity" operator="add">
+                    <calcop operator="get" field="parameters.quantity"/>
+                </calcop>
+            </calculate>
+            <if-not-empty field="parameters.amount">
+           		<calculate field="transferShipment.amount">
+	                <calcop field="transferShipment.amount" operator="add">
+	                    <calcop operator="get" field="parameters.amount"/>
+	                </calcop>
+            	</calculate>
+            </if-not-empty>
+            <store-value value-field="transferShipment"/>
+        </else>
+        </if-empty>
+    </simple-method>
+    <simple-method method-name="createTransferShipment" short-description="Create TransferShipment">
+        <set value="Create TransferShipment" field="operationName"/>
+
+        <make-value value-field="newEntity" entity-name="TransferShipment"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    <simple-method method-name="findCreateItemIssuance" short-description="Find Create ItemIssuance - meant to be called in-line">
+        <entity-and list="itemIssuances" entity-name="TransferItemIssuance">
+            <field-map field-name="transferId" from-field="transferItem.transferId"/>
+            <field-map field-name="transferItemSeqId" from-field="transferItem.transferItemSeqId"/>
+            <field-map field-name="shipmentId" from-field="shipmentItem.shipmentId"/>
+            <field-map field-name="shipmentItemSeqId" from-field="shipmentItem.shipmentItemSeqId"/>
+            <field-map field-name="shipGroupSeqId" from-field="transferItemShipGroupAssoc.shipGroupSeqId"/>
+            <order-by field-name="-issuedDateTime"/>
+        </entity-and>
+        <if-not-empty field="itemIssuances">
+            <first-from-list entry="itemIssuance" list="itemIssuances"/>
+            <set field="itemIssuance.quantity" value="${itemIssuance.quantity$bigDecimal + parameters.quantity$bigDecimal}" type="BigDecimal"/>
+            <store-value value-field="itemIssuance"/>
+            <set field="transItemIssuanceId" from-field="itemIssuance.transItemIssuanceId"/>
+            <field-to-result field="transItemIssuanceId"/>
+            <return/>
+        </if-not-empty>
+        
+        <!-- create the ItemIssuance -->
+        <set from-field="parameters.quantity" field="itemIssuanceCreate.quantity"/>
+        <set from-field="parameters.amount" field="itemIssuanceCreate.amount"/>
+        <set from-field="shipmentItem.shipmentId" field="itemIssuanceCreate.shipmentId"/>
+        <set from-field="shipmentItem.shipmentItemSeqId" field="itemIssuanceCreate.shipmentItemSeqId"/>
+        <set from-field="transferItem.transferId" field="itemIssuanceCreate.transferId"/>
+        <set from-field="transferItem.transferItemSeqId" field="itemIssuanceCreate.transferItemSeqId"/>
+        <set from-field="eventDate" field="itemIssuanceCreate.issuedDateTime"/>
+
+        <if-not-empty field="transferItemShipGrpInvRes">
+            <!-- if this is coming from an TransferItem issue instead of an TransferItemShipGrpInvRes issue, we won't have this info -->
+            <set from-field="transferItemShipGrpInvRes.inventoryItemId" field="itemIssuanceCreate.inventoryItemId"/>
+            <set from-field="transferItemShipGrpInvRes.shipGroupSeqId" field="itemIssuanceCreate.shipGroupSeqId"/>
+        </if-not-empty>
+        <if-not-empty field="transferItemShipGroupAssoc">
+            <!-- If we have a ShipGroup Assoc for this Item to focus on, set that;-->
+            <set from-field="transferItemShipGroupAssoc.shipGroupSeqId" field="itemIssuanceCreate.shipGroupSeqId"/>
+        </if-not-empty>
+
+        <set from-field="userLogin.userLoginId" field="itemIssuanceCreate.issuedByUserLoginId"/>
+        <call-service service-name="createTransferItemIssuance" in-map-name="itemIssuanceCreate">
+            <result-to-field result-name="transItemIssuanceId"/>
+        </call-service>
+        <field-to-result field="transItemIssuanceId"/>
+    </simple-method>
+    <simple-method method-name="associateIssueRoles" short-description="Associate Roles for ItemIssuance - meant to be called in-line">
+        <!-- make sure the party is in the PACKER role -->
+        <make-value entity-name="PartyRole" value-field="partyRole"/>
+        <set field="partyRole.partyId" from-field="userLogin.partyId"/>
+        <set field="partyRole.roleTypeId" value="PACKER"/>
+        <find-by-primary-key entity-name="PartyRole" map="partyRole" value-field="checkPartyRole"/>
+        <if-empty field="checkPartyRole">
+            <create-value value-field="partyRole"/>
+        </if-empty>
+
+        <!-- Add ItemIssuanceRole for party that issues this... -->
+        <entity-one value-field="itemIssuanceRole" entity-name="TransferItemIssuanceRole">
+            <field-map field-name="transItemIssuanceId" from-field="transItemIssuanceId"/>
+            <field-map field-name="partyId" from-field="userLogin.partyId"/>
+            <field-map field-name="roleTypeId" value="PACKER"/>
+        </entity-one>
+        <if-empty field="itemIssuanceRole">
+            <set from-field="transItemIssuanceId" field="itemIssuanceRoleCreate.transItemIssuanceId"/>
+            <set from-field="userLogin.partyId" field="itemIssuanceRoleCreate.partyId"/>
+            <set value="PACKER" field="itemIssuanceRoleCreate.roleTypeId"/>
+            <set from-field="shipmentId" field="itemIssuanceRoleCreate.shipmentId"/>
+            <call-service service-name="createTransferItemIssuanceRole" in-map-name="itemIssuanceRoleCreate"/>
+        </if-empty>
+    </simple-method>
+    <simple-method method-name="createTransferItemIssuance" short-description="Create TransferItemIssuance">
+        <set value="Create TransferItemIssuance" field="operationName"/>
+        <call-simple-method method-name="checkCanChangeShipmentStatusPacked" xml-resource="component://product/script/org/ofbiz/shipment/shipment/ShipmentServices.xml"/>
+        <check-errors/>
+
+        <make-value value-field="newEntity" entity-name="TransferItemIssuance"/>
+        <sequenced-id sequence-name="TransferItemIssuance" field="newEntity.transItemIssuanceId"/>
+        <field-to-result field="newEntity.transItemIssuanceId" result-name="transItemIssuanceId"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <if-empty field="newEntity.issuedDateTime">
+            <now-timestamp field="newEntity.issuedDateTime"/>
+        </if-empty>
+
+        <create-value value-field="newEntity"/>
+        <set field="affectAccounting" type="Boolean" value="true"/>
+
+        <!-- if the InventoryItem issued is serialized, then change its status to DELIVERED -->
+        <get-related-one value-field="newEntity" relation-name="InventoryItem" to-value-field="inventoryItem"/>
+        <if-not-empty field="inventoryItem">
+            <if-compare field="inventoryItem.inventoryItemTypeId" operator="equals" value="SERIALIZED_INV_ITEM">
+                <set field="updateContext.inventoryItemId" from-field="inventoryItem.inventoryItemId"/>
+                <set field="updateContext.statusId" value="INV_DELIVERED"/>
+                <call-service service-name="updateInventoryItem" in-map-name="updateContext"/>
+                
+                <entity-one value-field="product" entity-name="Product">
+                    <field-map field-name="productId" from-field="inventoryItem.productId"/>
+                </entity-one>
+                <if>
+                    <condition>
+                        <or>
+                            <if-compare field="product.productTypeId" operator="equals" value="SERVICE_PRODUCT"/>
+                            <if-compare field="product.productTypeId" operator="equals" value="ASSET_USAGE_OUT_IN"/>
+                            <if-compare field="product.productTypeId" operator="equals" value="AGGREGATEDSERV_CONF"/>
+                            <if-compare field="product.productTypeId" operator="equals" value="AGGR_DIGSERV"/>
+                            <if-compare field="product.productTypeId" operator="equals" value="AGGR_DIGSERV_CONF"/>
+                        </or>
+                    </condition>
+                    <then>
+                        <set field="affectAccounting" type="Boolean" value="false"/>
+                    </then>
+                </if>
+            </if-compare>
+        </if-not-empty>
+        <field-to-result field="affectAccounting" result-name="affectAccounting"/>
+    </simple-method>
+    <simple-method method-name="createTransferItemIssuanceRole" short-description="Create TransferItemIssuanceRole">
+        <set value="Create TransferItemIssuanceRole" field="operationName"/>
+        <call-simple-method method-name="checkCanChangeShipmentStatusPacked" xml-resource="component://product/script/org/ofbiz/shipment/shipment/ShipmentServices.xml"/>
+        <check-errors/>
+        <make-value value-field="newEntity" entity-name="TransferItemIssuanceRole"/>
+        <set-pk-fields map="parameters" value-field="newEntity"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    
+    <simple-method method-name="cancelTransferItemShipGrpInvRes" short-description="Cancel An Inventory Reservation">
+        <entity-one entity-name="TransferItemShipGrpInvRes" value-field="transferItemShipGrpInvRes"/>
+        <get-related-one relation-name="InventoryItem" value-field="transferItemShipGrpInvRes" to-value-field="inventoryItem"/>
+<!--         <if-compare value="SERIALIZED_INV_ITEM" operator="equals" field="inventoryItem.inventoryItemTypeId">
+            <log level="verbose" message="Serialized inventory re-enabled."/>
+            <set value="INV_AVAILABLE" field="inventoryItem.statusId"/>
+            <remove-value value-field="orderItemShipGrpInvRes"/>
+            <store-value value-field="inventoryItem"/>
+        </if-compare>
+ -->        
+ 		<if-compare value="NON_SERIAL_INV_ITEM" operator="equals" field="inventoryItem.inventoryItemTypeId">
+            <log level="verbose" message="Non-Serialized inventory item incrementing availableToPromise."/>
+            <set from-field="parameters.cancelQuantity" field="cancelQuantity"/>
+            <if-empty field="cancelQuantity">
+                <set from-field="transferItemShipGrpInvRes.quantity" field="cancelQuantity"/>
+            </if-empty>
+
+            <!-- instead of updating InventoryItem, add an InventoryItemDetail -->
+            <set from-field="inventoryItem.inventoryItemId" field="createDetailMap.inventoryItemId"/>
+            <set from-field="parameters.transferId" field="createDetailMap.transferId"/>
+            <set from-field="parameters.transferItemSeqId" field="createDetailMap.transferItemSeqId"/>
+            <set from-field="parameters.shipGroupSeqId" field="createDetailMap.shipGroupSeqId"/>
+            <set from-field="cancelQuantity" field="createDetailMap.availableToPromiseDiff"/>
+            <call-service service-name="createInventoryItemDetail" in-map-name="createDetailMap"/>
+            <clear-field field="createDetailMap"/>
+
+            <if-compare-field field="cancelQuantity" to-field="transferItemShipGrpInvRes.quantity" operator="less" type="BigDecimal">
+                <calculate field="transferItemShipGrpInvRes.quantity">
+                    <calcop operator="subtract" field="transferItemShipGrpInvRes.quantity">
+                        <calcop operator="get" field="cancelQuantity"/>
+                    </calcop>
+                </calculate>
+                <store-value value-field="transferItemShipGrpInvRes"/>
+            <else>
+                <remove-value value-field="transferItemShipGrpInvRes"/>
+            </else>
+            </if-compare-field>
+            <set field="balanceInventoryItemMap.inventoryItemId" from-field="inventoryItem.inventoryItemId"/>
+	        <call-service service-name="balanceInventoryItems" in-map-name="balanceInventoryItemMap"/>
+        </if-compare>
+    </simple-method>
+</simple-methods>

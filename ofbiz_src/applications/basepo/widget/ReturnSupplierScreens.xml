@@ -1,0 +1,296 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-screen.xsd">
+
+	<screen name="ReturnHeaderTitle">
+		<section>
+			<condition>
+				<not>
+					<if-empty field="parameters.returnId" />
+				</not>
+			</condition>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text=" ${uiLabelMap.POReturnId}: "></label>
+				<link url-mode="plain" target="viewGeneralReturnSupplier?returnId=${parameters.returnId}" text="${parameters.returnId}"></link>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="CreateNewReturnSupplier">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="manageReturnPO" />
+				<set field="selectedSubMenuItem" value="createNewReturnSupplier" />
+				<set field="titleProperty" value="DmsCreateNewReturnSupplier" />
+				<property-map resource="BaseLogisticsUiLabels" map-name="uiLabelMap" global="true" />
+				<script location="component://basepo/webapp/basepo/WEB-INF/actions/order/orderInfoPurchase.groovy" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission />
+					</condition>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<platform-specific>
+									<html>
+										<html-template location="component://basepo/webapp/basepo/returnSupplier/supReturnNewSupReturnTemplate.ftl" />
+									</html>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-danger">
+									<label text="${uiLabelMap.DmsNotPermission}" />
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="EditReturnSupplier">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="manageReturnPO" />
+				<set field="selectedSubMenuItem" value="listReturnSupplier" />
+				<set field="titleProperty" value="BPEditReturnSupplier" />
+				<property-map resource="BaseLogisticsUiLabels" map-name="uiLabelMap" global="true" />
+				<set field="titleHeaderValue" value="ReturnHeaderTitle" global="true" />
+				<set field="titleHeaderLocation" value="component://basepo/widget/ReturnSupplierScreens.xml" global="true" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission />
+					</condition>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<platform-specific>
+									<html>
+										<html-template location="component://basepo/webapp/basepo/returnSupplier/supReturnEditSupReturnTemplate.ftl" />
+									</html>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-danger">
+									<label text="${uiLabelMap.DmsNotPermission}" />
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="ListReturnSupplier">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="manageReturnPO" />
+				<set field="selectedSubMenuItem" value="listReturnSupplier" />
+				<set field="titleProperty" value="POListReturnSupplier" />
+				<script location="component://basepo/webapp/basepo/WEB-INF/actions/order/orderInfoPurchase.groovy" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission />
+					</condition>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<platform-specific>
+									<html>
+										<html-template location="component://basepo/webapp/basepo/returnSupplier/returnSupplierList.ftl" />
+									</html>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-danger">
+									<label text="${uiLabelMap.DmsNotPermission}" />
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="ViewGeneralReturnSupplier">
+		<section>
+			<actions>
+				<set field="titleProperty" value="ReturnSupplierPO" global="true" />
+				<set field="returnId" from-field="parameters.returnId"/>
+				<entity-one value-field="returnHeader" entity-name="ReturnHeader">
+                	<field-map field-name="returnId" from-field="parameters.returnId"/>
+                </entity-one>
+                <script location="component://baselogistics/webapp/baselogistics/WEB-INF/actions/return/returnViewTotal.groovy"/>
+                <script location="component://baselogistics/webapp/baselogistics/WEB-INF/actions/return/getProductDetailReturn.groovy"></script>
+				<set field="activeTab" from-field="parameters.activeTab" default-value="general-tab" />
+				<set field="selectedMenuItem" value="manageReturnPO" />
+				<set field="selectedSubMenuItem" value="listReturnSupplier" />
+				
+				<set field="titleHeaderValue" value="ReturnHeaderTitle" global="true" />
+				<set field="titleHeaderLocation" value="component://basepo/widget/ReturnSupplierScreens.xml" global="true" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission />
+					</condition>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<platform-specific>
+									<html>
+										<html-template location="component://baselogistics/webapp/baselogistics/return/returnSupplierDetailBegin.ftl"/>
+									</html>
+								</platform-specific>
+								<include-screen name="ReturnSupplierDetailContainer"/>
+								<platform-specific>
+									<html>
+										<html-template location="component://baselogistics/webapp/baselogistics/return/returnSupplierDetailEnd.ftl"/>
+									</html>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-danger">
+									<label text="${uiLabelMap.DmsNotPermission}" />
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="ReturnSupplierDetailContainer">
+		<section>
+			<widgets>
+				<include-screen name="ReturnSupplierInfo"/>
+				<include-screen name="ReturnSupplierProduct"/>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ReturnSupplierInfo">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baselogistics/webapp/baselogistics/return/returnSupplierDetail.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ReturnSupplierProduct">
+		<section>
+			<widgets>
+				<platform-specific>
+					<html>
+						<html-template location="component://baselogistics/webapp/baselogistics/return/returnDetailProduct.ftl"/>
+					</html>
+				</platform-specific>
+			</widgets>
+		</section>
+	</screen>
+
+<!-- 	<screen name="NewReturnSupplierWOutOrder"> -->
+<!-- 		<section> -->
+<!-- 			<actions> -->
+<!-- 				<set field="selectedMenuItem" value="manageReturnPO"/> -->
+<!--                 <set field="selectedSubMenuItem" value="newReturnSupplierWOutOrder"/> -->
+<!-- 				<set field="titleProperty" value="BSCreateNewReturnSupplierWithoutOrder" global="true"/> -->
+<!-- 			</actions> -->
+<!-- 			<widgets> -->
+<!-- 				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}"> -->
+<!-- 					<decorator-section name="body"> -->
+<!-- 						<section> -->
+<!-- 							<condition> -->
+<!-- 								<if-olbius-has-permission/> -->
+<!-- 							</condition> -->
+<!-- 							<widgets> -->
+<!-- 								<screenlet title="${uiLabelMap[titleProperty]}"> -->
+<!-- 									<platform-specific> -->
+<!-- 										<html> -->
+<!-- 											<html-template location="component://basepo/webapp/basepo/returnSupplier/returnSupplierWithoutOrderNewTotal.ftl"/> -->
+<!-- 										</html> -->
+<!-- 									</platform-specific> -->
+<!-- 								</screenlet> -->
+<!-- 							</widgets> -->
+<!-- 							<fail-widgets> -->
+<!-- 								<container style="alert alert-info"> -->
+<!-- 									<label text="${uiLabelMap.BSYouHavenotCreatePermission}"></label> -->
+<!-- 								</container> -->
+<!-- 							</fail-widgets> -->
+<!-- 						</section> -->
+<!-- 					</decorator-section> -->
+<!-- 				</decorator-screen> -->
+<!-- 			</widgets> -->
+<!-- 		</section> -->
+<!-- 	</screen> -->
+
+	<screen name="NewReturnSupplierWOutOrder">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="manageReturnPO" />
+				<set field="selectedSubMenuItem" value="newReturnSupplierWOutOrder" />
+				<set field="titleProperty" value="BSCreateNewReturnSupplierWithoutOrder" />
+				<property-map resource="BaseLogisticsUiLabels" map-name="uiLabelMap" global="true" />
+				<script location="component://basepo/webapp/basepo/WEB-INF/actions/order/orderInfoPurchase.groovy" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission />
+					</condition>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<platform-specific>
+									<html>
+										<html-template location="component://basepo/webapp/basepo/returnSupplier/returnSupplierWithoutOrderNewInfoTotal.ftl" />
+									</html>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-danger">
+									<label text="${uiLabelMap.DmsNotPermission}" />
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	
+</screens>

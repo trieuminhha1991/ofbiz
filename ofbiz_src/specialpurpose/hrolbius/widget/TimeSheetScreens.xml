@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+-->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+    <screen name="FindTimeSheet">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindTimeSheet"/>
+                <set field="headerItem" value="timesheet"/>
+                <set field="labelTitleProperty" value="ProjectMgrFindTimeSheet"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProjectTimesheetDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.PageTitleFindTimeSheet}">
+                                    <include-form name="FindTimeSheet" location="component://hrolbius/widget/forms/TimeSheetForms.xml"/>
+                                </screenlet>
+                                <screenlet title="${uiLabelMap.PageTitleTimesheets}" navigation-form-name="ListFindTimeSheet">
+                                    <include-form name="ListFindTimeSheet" location="component://hrolbius/widget/forms/TimeSheetForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="Timesheet">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="FindResource"/>
+            	<set field="selectedSubMenuItem" value="mytime"/>
+                <set field="tabButtonItem" value="mytime"/>
+                <set field="tabSubButtonItem" value="ListMyTimeSheet"/>
+                <set field="titleProperty" value="PageTitleTimesheet"/>
+                <set field="headerItem" value="timesheet"/>
+                <set field="labelTitleProperty" value="ProjectMgrTimeSheetMyTime"/>
+                <script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/projectmgr/EditWeekTimesheet.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProjectTimesheetDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <screenlet title="${uiLabelMap.PageTitleTimesheet} ${uiLabelMap.CommonWeek}: ${weekNumber} ${uiLabelMap.CommonFrom} ${bsh:timesheet.get(&quot;fromDate&quot;).toString().substring(0,10)} ${uiLabelMap.CommonTo} ${bsh:timesheet.get(&quot;thruDate&quot;).toString().substring(0,10)}">                        	
+                            <section>
+                                <condition>
+                                    <if-compare field="timesheet.statusId" operator="equals" value="TIMESHEET_COMPLETED"/>
+                                </condition>
+                                <widgets>
+                                    <include-form name="WeekTimesheet" location="component://hrolbius/widget/forms/TimeSheetForms.xml"/>
+                                </widgets>
+                                <fail-widgets>
+                                	<container id="EditWeekTimesheetUpdate">
+                                		<platform-specific>
+	                               			<html>
+	                               				<html-template location="component://hrolbius/webapp/hrolbius/ftl/updateRowEditTimesheetFormJs.ftl"/>
+	                               			</html>
+	                               		</platform-specific>
+                                    	<include-form name="EditWeekTimesheet" location="component://hrolbius/widget/forms/TimeSheetForms.xml"/>                                    	                                    	                                    	
+                                    	<label style="btn btn-success btn-small margin-top5 margin-left8 margin-bottom5 icon-plus"
+                                   			text="${uiLabelMap.AddNewRow}" id="addNewRowEditTimeSheetForms"></label>
+                                    	<label style="btn btn-danger btn-small margin-top5 margin-left8 margin-bottom5 icon-remove"
+                							text="${uiLabelMap.DeleteRow}" id="deleteNewRowEditTimeSheetForms"></label>                                    	
+                                    </container>
+                                </fail-widgets>
+                            </section>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.PageTitleAddATimesheet}">
+                            <include-form name="AddWeeklyTimesheet" location="component://hrolbius/widget/forms/TimeSheetForms.xml"/>
+                        </screenlet>
+                        <include-screen name="ListTimesheets"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditTimeSheet">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindTimesheet"/>
+                <set field="headerItem" value="timesheet"/>
+                <set field="tabButtonItem" value="edittimesheet"/>
+                <set field="labelTitleProperty" value="PageTitleAddTimesheet"/>
+                <entity-one entity-name="Timesheet" value-field="timesheet"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProjectTimesheetDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.PageTitleEditTimesheet} ${uiLabelMap.CommonNbr} ${timesheet.timesheetId}">
+                                    <include-form name="EditTimesheet" location="component://workeffort/widget/TimesheetForms.xml"/>									                                   
+                                </screenlet>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+	<screen name="AddNewRowEditTimeSheet">
+		<section>
+			<actions>
+				<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/projectmgr/AddNewRowInForm.groovy"/>
+				<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/projectmgr/EditWeekTimesheet.groovy"/>
+				<property-map map-name="uiLabelMap" resource="ProjectManagerUiLabels"/>
+				<property-map map-name="uiLabelMap" resource="CommonUiLabels"/>
+			</actions>
+			<widgets>
+				<container id="EditWeekTimesheetUpdate">
+             		<platform-specific>
+             			<html>
+             				<html-template location="component://hrolbius/webapp/hrolbius/ftl/updateRowEditTimesheetFormJs.ftl"/>
+             			</html>
+             		</platform-specific>
+                 	<include-form name="EditWeekTimesheet" location="component://hrolbius/widget/forms/TimeSheetForms.xml"/>                                    	                                    	                                    	
+                 	<label style="btn btn-success btn-small margin-top5 margin-left8 margin-bottom5 icon-plus"
+                			text="${uiLabelMap.AddNewRow}" id="addNewRowEditTimeSheetForms"></label>                 	
+                	<label style="btn btn-danger btn-small margin-top5 margin-left8 margin-bottom5 icon-remove"
+                		text="${uiLabelMap.DeleteRow}" id="deleteNewRowEditTimeSheetForms"></label>                	
+                 </container>				
+			</widgets>
+		</section>
+	</screen>
+   
+    <screen name="addWeeklyTimesheet">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleFindTimesheet"/>
+                <set field="headerItem" value="timesheet"/>
+                <set field="tabButtonItem" value="addtimesheet"/>
+                <set field="labelTitleProperty" value="PageTitleAddTimesheet"/>
+                <entity-one entity-name="Timesheet" value-field="timesheet"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProjectTimesheetDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <screenlet title="${uiLabelMap.PageTitleAddTimesheet}">
+                                    <include-form name="AddWeeklyTimesheet" location="component://hrolbius/widget/forms/TimeSheetForms.xml"/>
+                                </screenlet>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+
+    <screen name="MyTimesheet">
+        <section>
+            <actions>
+            	<set field="selectedMenuItem" value="FindResource"/>
+            	<set field="selectedSubMenuItem" value="mytime"/>
+                <set field="titleProperty" value="WorkEffortMyTimesheets"/>
+                <set field="headerItem" value="mytimesheet"/>
+                <set field="tabButtonItem" value="mytime"/>
+                <set field="tabSubButtonItem" value="ListMyTimeSheet"/>
+                <set field="labelTitleProperty" value="PageTitleAddTimesheet"/>
+                <set field="my" value="My"/><!-- change link and target -->
+                <script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/projectmgr/EditWeekTimesheet.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProjectTimesheetDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<include-screen name="ListTimesheets"/>
+                        <!-- <include-screen name="CurrentTimesheet"/>
+                        <include-screen name="AddTimesheet"/> -->
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditTimeSheetEntries">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditTimesheetEntries"/>
+                <set field="tabButtonItem" value="TimesheetEntries"/>
+                <set field="labelTitleProperty" value="PageTitleEditTimesheetEntries"/>
+
+                <set field="timesheetId" from-field="parameters.timesheetId"/>
+                <entity-one entity-name="Timesheet" value-field="timesheet"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProjectTimesheetDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container><link  text="${uiLabelMap.WorkEffortTimesheetCreate}" target="EditTimesheet" style="linktext"/></container>
+                        <screenlet title="${uiLabelMap.PageTitleEditTimesheetEntries}">
+                            <include-form name="ListTimesheetEntries" location="component://hrolbius/widget/forms/TimeSheetForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.PageTitleAddTimesheetEntry}">
+                            <include-form name="AddTimesheetEntry" location="component://hrolbius/widget/forms/TimeSheetForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="EditTimesheetRoles">
+        <section>
+            <actions>
+                <set field="titleProperty" value="PageTitleEditTimesheetRoles"/>
+                <set field="tabButtonItem" value="TimesheetRoles"/>
+                <set field="labelTitleProperty" value="PageTitleEditTimesheetRoles"/>
+
+                <set field="timesheetId" from-field="parameters.timesheetId"/>
+                <entity-one entity-name="Timesheet" value-field="timesheet"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProjectTimesheetDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                        <container><link  text="${uiLabelMap.WorkEffortTimesheetCreate}" target="EditTimesheet" style="linktext"/></container>
+                        <screenlet title="${uiLabelMap.PageTitleEditTimesheetRoles}">
+                            <include-form name="ListTimesheetRoles" location="component://workeffort/widget/TimesheetForms.xml"/>
+                        </screenlet>
+                        <screenlet title="${uiLabelMap.PageTitleAddTimesheetRole}">
+                            <include-form name="AddTimesheetRole" location="component://workeffort/widget/TimesheetForms.xml"/>
+                        </screenlet>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="CurrentTimesheet">
+        <section>
+            <actions>
+                <property-map resource="ProjectMgrUiLabels" map-name="uiLabelMap" global="true"/>
+                <script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/projectmgr/EditWeekTimesheet.groovy"/>
+            </actions>
+            <widgets>
+                    <section>
+                        <condition>
+                            <if-compare field="timesheet.statusId" operator="equals" value="TIMESHEET_COMPLETED"/>
+                        </condition>
+                        <widgets>                        	
+                            <screenlet title="${uiLabelMap.HRCurrentTimesheet} ${uiLabelMap.ProjectMgrWeek}: ${weekNumber} ${uiLabelMap.CommonFrom} ${bsh:timesheet.get(&quot;fromDate&quot;).toString().substring(0,10)} ${uiLabelMap.CommonTo} ${bsh:timesheet.get(&quot;thruDate&quot;).toString().substring(0,10)}"
+                                navigation-form-name="WeekTimesheet">
+                            <include-form name="WeekTimesheet" location="component://hrolbius/widget/forms/TimeSheetForms.xml"/>
+                            </screenlet>
+                        </widgets>
+                        <fail-widgets>
+                            <screenlet title="${uiLabelMap.HRCurrentTimesheet} ${uiLabelMap.ProjectMgrWeek}: ${weekNumber} ${uiLabelMap.CommonFrom} ${bsh:timesheet.get(&quot;fromDate&quot;).toString().substring(0,10)} ${uiLabelMap.CommonTo} ${bsh:timesheet.get(&quot;thruDate&quot;).toString().substring(0,10)}"
+                                navigation-menu-name="TimesheetBar">
+                                <include-menu name="TimesheetBar" location="component://hrolbius/widget/menus/ProjectMenus.xml"/>
+                                <include-form name="EditWeekTimesheet" location="component://hrolbius/widget/forms/TimeSheetForms.xml"/>
+                            </screenlet>
+                        </fail-widgets>
+                    </section>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="AddTimesheet">
+        <section>
+            <widgets>
+                <screenlet title="${uiLabelMap.PageTitleAddATimesheet}">
+                    <include-form name="AddMyWeeklyTimesheet" location="component://hrolbius/widget/forms/TimeSheetForms.xml"/>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ListTimesheets">
+        <section>
+            <actions>
+                <entity-one entity-name="PartyNameView" value-field="partyNameView">
+                    <field-map field-name="partyId" from-field="timesheet.partyId"/>
+                </entity-one>
+            </actions>
+            <widgets>
+                <screenlet title="${uiLabelMap.PageTitleTimesheets} ${uiLabelMap.CommonOf} ${partyNameView.firstName} ${partyNameView.middleName} ${partyNameView.lastName}">
+                    <container id="table-container"><include-form name="ListTimeSheets" location="component://hrolbius/widget/forms/TimeSheetForms.xml"/></container>
+                </screenlet>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="MyCurrentTimeSheet">
+    	<section>
+            <actions>
+            	<set field="selectedMenuItem" value="FindResource"/>
+            	<set field="selectedSubMenuItem" value="mytime"/>
+                <set field="titleProperty" value="WorkEffortMyTimesheets"/>
+                <set field="headerItem" value="mytimesheet"/>
+                <set field="tabButtonItem" value="mytime"/>
+                <set field="tabSubButtonItem" value="MyCurrentTimeSheet"/>
+                <set field="labelTitleProperty" value="PageTitleAddTimesheet"/>
+                <set field="my" value="My"/><!-- change link and target -->
+                <script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/projectmgr/EditWeekTimesheet.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonProjectTimesheetDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+                    	<!-- <include-screen name="ListTimesheets"/> -->
+                        <include-screen name="CurrentTimesheet"/>
+                        <include-screen name="AddTimesheet"/>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+</screens>

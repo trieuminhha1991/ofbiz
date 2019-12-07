@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	<screen name="CommonEquipmentDecorator">
+        <section>
+            <actions>
+                <set field="selectedMenuItem" value="Equipment"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="BaseAccountingCommonDecorator" location="component://baseaccounting/widget/CommonScreens.xml">
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <decorator-section-include name="body"/>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="ListEquipments">
+        <section>
+            <actions>
+                <set field="titleProperty" value="BACCListEquipments"/>
+                <set field="selectedSubMenuItem" value="ListEquipments"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonEquipmentDecorator">
+                    <decorator-section name="body">
+                        <section>
+                        	<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<actions>
+								<property-to-field field="defaultCurrencyUomId" resource="general" property="currency.uom.id.default" default="USD"/>
+								<entity-condition list="listCurrencyUom" entity-name="Uom">
+									<condition-expr field-name="uomTypeId" value="CURRENCY_MEASURE"/>
+									<order-by field-name="abbreviation"/>
+								</entity-condition>
+								<entity-condition list="listEquipmentType" entity-name="EquipmentType">
+									<order-by field-name="description"/>
+								</entity-condition>
+							</actions>
+                            <widgets>
+                                <platform-specific>
+                                    <html>
+		                        		<!-- <html-template location="component://baseaccounting/webapp/baseaccounting/equipment/equipList$tmp.ftl"/> -->
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/equipment/ViewEquipmentList.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <screen name="ViewListEquipmentIncrease">
+    	<section>
+    		<actions>
+    			<set field="titleProperty" value="BACCEquipmentIncreaseList"/>
+                <set field="selectedSubMenuItem" value="EquipmentIncrease"/>
+    		</actions>
+    		<widgets>
+                <decorator-screen name="CommonEquipmentDecorator">
+                    <decorator-section name="body">
+                    	<section>
+                    		<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<actions>
+								<property-to-field field="defaultCostGlAccountId" resource="baseaccounting" property="equipment.increase.cost.glaccount.id"/>
+							</actions>
+							<widgets>
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/equipment/ViewListEquipmentIncrease.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+                    	</section>
+                    </decorator-section>
+                </decorator-screen>
+           	</widgets> 	        
+    	</section>
+    </screen>
+    
+    <!-- <screen name="CreateEquipment">
+    	<section>
+    		<actions>
+    			<set field="titleProperty" value="BACCCreateEquipment"/>
+                <set field="selectedSubMenuItem" value="AddEquipment"/>	
+    		</actions>
+    		<widgets>
+                <decorator-screen name="CommonEquipmentDecorator">
+                	<decorator-section name="body">
+                		<section>
+                			<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<actions>
+								<property-to-field field="defaultCurrencyUomId" resource="general" property="currency.uom.id.default" default="USD"/>
+								<entity-condition list="equipmentTypeList" entity-name="EquipmentType">
+									<order-by field-name="description"/>
+								</entity-condition>
+								<entity-condition list="uomCurrencyList" entity-name="Uom">
+									<condition-list combine="or">
+										<condition-expr field-name="uomId" value="EUR"/>
+										<condition-expr field-name="uomId" value="USD"/>
+										<condition-expr field-name="uomId" value="VND"/>
+									</condition-list>
+									<order-by field-name="description"/>
+								</entity-condition>
+								<entity-condition list="uomProdPackList" entity-name="Uom">
+									<condition-expr field-name="uomTypeId" value="PRODUCT_PACKING"/>
+									<order-by field-name="description"/>
+								</entity-condition>
+							</actions>
+							<widgets>
+								<platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/equipment/CreateEquipment$tmp.ftl"/>
+		                        	</html>
+                                </platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+                		</section>
+                	</decorator-section>
+                </decorator-screen>
+               </widgets> 
+    	</section>
+    </screen> -->
+    
+    <screen name="ListEquipAllocations">
+        <section>
+            <actions>
+                <set field="titleProperty" value="BACCListEquipAllocPeriods"/>
+                <set field="selectedSubMenuItem" value="ListEquipAllocations"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonEquipmentDecorator">
+                    <decorator-section name="body">
+                        <section>
+                        	<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<actions>
+								<property-to-field field="defaultCostGlAccountId" resource="baseaccounting" property="equipment.allocation.item.party.glaccount.id"/>
+								<property-to-field field="defaultCreditGlAccountId" resource="baseaccounting" property="equipment.allocation.item.party.creditglaccount.id"/>
+								<property-to-field field="defaultDebitGlAccountId" resource="baseaccounting" property="equipment.allocation.item.party.debitglaccount.id"/>
+							</actions>
+                            <widgets>
+                                <platform-specific>
+                                    <html>
+		                        		<!-- <html-template location="component://baseaccounting/webapp/baseaccounting/equipment/equipAllocList$tmp.ftl"/> -->
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/equipment/ViewListEquipmentAllocate.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <!-- <screen name="ListAllocatedEquips">
+        <section>
+            <actions>
+                <set field="titleProperty" value="BACCListEquipAllocPeriods"/>
+                <set field="selectedSubMenuItem" value="ListEquipAllocations"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonEquipmentDecorator">
+                    <decorator-section name="body">
+                        <section>
+                        	<condition>
+								<if-olbius-has-permission/>
+							</condition>
+                            <widgets>
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/equipment/allocatedEquipList$tmp.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen> -->
+    
+    <screen name="ListEquipDecrements">
+        <section>
+            <actions>
+                <set field="titleProperty" value="BACCListEquipDecrements"/>
+                <set field="selectedSubMenuItem" value="ListEquipDecrements"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonEquipmentDecorator">
+                    <decorator-section name="body">
+                        <section>
+                        	<condition>
+								<if-olbius-has-permission/>
+							</condition>
+                            <widgets>
+                                <platform-specific>
+                                    <html>
+		                        		<!-- <html-template location="component://baseaccounting/webapp/baseaccounting/equipment/equipDecList$tmp.ftl"/> -->
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/equipment/ViewListEquipmentDecrease.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    
+    <!-- <screen name="ListDecreasedEquip">
+        <section>
+            <actions>
+                <set field="titleProperty" value="BACCListDecreasedEquipments"/>
+                <set field="selectedSubMenuItem" value="ListEquipDecrements"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonEquipmentDecorator">
+                    <decorator-section name="body">
+                        <section>
+                        	<condition>
+								<if-olbius-has-permission/>
+							</condition>
+                            <widgets>
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/equipment/decreasedEquipList$tmp.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen> -->
+    
+    <screen name="EquipCostAlloc">
+        <section>
+            <actions>
+                <set field="titleProperty" value="BACCCostAllocation"/>
+                <set field="selectedSubMenuItem" value="EquipCostAlloc"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonEquipmentDecorator">
+                    <decorator-section name="body">
+                        <section>
+                        	<condition>
+								<if-olbius-has-permission/>
+							</condition>
+                            <widgets>
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/equipment/equipCostAlloc.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ViewEquipmentReport">
+    	<section>
+    		<actions>
+                <set field="titleProperty" value="CommonReport"/>
+                <set field="selectedSubMenuItem" value="EquipmentReport"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="CommonEquipmentDecorator">
+                    <decorator-section name="body">
+                    	<section>
+                        	<condition>
+								<if-olbius-has-permission/>
+							</condition>
+                            <widgets>
+                                <platform-specific>
+                                    <html>
+		                        		<html-template location="component://baseaccounting/webapp/baseaccounting/equipment/ViewEquipmentReport.ftl"/>
+		                        	</html>
+                                </platform-specific>
+                            </widgets>
+                            <fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+                        </section>
+                    </decorator-section>
+				</decorator-screen>
+			</widgets>	              	     
+    	</section>
+    </screen>
+</screens>

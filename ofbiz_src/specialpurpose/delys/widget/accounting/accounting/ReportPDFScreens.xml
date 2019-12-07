@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- These forms are for generating printed documents, such as invoices, bills, statements, etc. -->
+
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+
+    <!-- generate a PDF for the order, sharing the same BSH file as the HTML page for viewing the order -->
+    <screen name="FinancialStatementTemplate">
+    	<section>
+    		<actions>
+    			<set field="organizationPartyId" from-field="parameters.organizationPartyId" global="true"/>
+                <service service-name="getPartyAccountingPreferences" result-map="result">
+                    <field-map field-name="organizationPartyId"/>
+                </service>
+                <set field="partyAcctgPreference" from-field="result.partyAccountingPreference" global="true"/>
+                <set field="currencyUomId" from-field="partyAcctgPreference.baseCurrencyUomId" global="true"/>
+    			<entity-one entity-name="PartyGroup" value-field="partyGroup" global="true">
+    				 <field-map from-field="parameters.organizationPartyId" field-name="partyId"/>
+    			</entity-one>
+                <property-map resource="DelysAccReportUiLabels" map-name="uiLabelMap" global="true"/>
+                <set field="partyInfo" value="${partyGroup.groupName}" global="true"></set>
+                <service service-name="getPartyPostalAddress" result-map="partyAddressMap">
+                	<field-map field-name="partyId" from-field="parameters.organizationPartyId"></field-map>
+                </service>
+                <set field="partyAddress" value="${partyAddressMap.address1}" global="true"></set>
+    		</actions>
+    		<widgets>
+    			<decorator-screen name="FoReportDecorator" location="component://common/widget/CommonScreens.xml">
+    				<decorator-section name="topLeft"><decorator-section-include name="topLeft"/></decorator-section>
+    				<decorator-section name="topRight"><decorator-section-include name="topRight"/></decorator-section>
+    				<decorator-section name="body"><decorator-section-include name="body"/></decorator-section>
+    			</decorator-screen>
+    		</widgets>
+    	</section>
+    </screen>
+    <screen name="BSRPDF">
+        <section>
+            <actions>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/accounting/report/BalanceSheetReport.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="FinancialStatementTemplate">
+                    <!-- at the top left of every page we put the logo and company information -->
+                    <decorator-section name="topLeft">
+                        <section>
+                            <widgets>
+                                <platform-specific>
+                                    <xsl-fo><html-template location="component://delys/webapp/delys/accounting/fo/balanceSheetTopLeft.fo.ftl"/></xsl-fo>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <!-- at the top right of every page we put the order information -->
+                    <decorator-section name="topRight">
+                        <section>
+                            <widgets>
+                                <platform-specific>
+                                    <xsl-fo><html-template location="component://delys/webapp/delys/accounting/fo/balanceSheetTopRight.fo.ftl"/></xsl-fo>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <platform-specific>
+                                    <xsl-fo><html-template location="component://delys/webapp/delys/accounting/fo/balanceSheetBody.fo.ftl"/></xsl-fo>
+                                </platform-specific>
+                                <!-- return policies and notes are shown in the last page -->
+                                <platform-specific>
+                                    <xsl-fo><html-template location="component://delys/webapp/delys/accounting/fo/balanceSheetBottom.fo.ftl"/></xsl-fo>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="ISRPDF">
+        <section>
+            <actions>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/accounting/report/IncomeStatementReport.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="FinancialStatementTemplate">
+                    <!-- at the top left of every page we put the logo and company information -->
+                    <decorator-section name="topLeft">
+                        <section>
+                            <widgets>
+                                <platform-specific>
+                                    <xsl-fo><html-template location="component://delys/webapp/delys/accounting/fo/incomeStatementTopLeft.fo.ftl"/></xsl-fo>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <!-- at the top right of every page we put the order information -->
+                    <decorator-section name="topRight">
+                        <section>
+                            <widgets>
+                                <platform-specific>
+                                    <xsl-fo><html-template location="component://delys/webapp/delys/accounting/fo/incomeStatementTopRight.fo.ftl"/></xsl-fo>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <platform-specific>
+                                    <xsl-fo><html-template location="component://delys/webapp/delys/accounting/fo/incomeStatementBody.fo.ftl"/></xsl-fo>
+                                </platform-specific>
+                                <!-- return policies and notes are shown in the last page -->
+                                <platform-specific>
+                                    <xsl-fo><html-template location="component://delys/webapp/delys/accounting/fo/incomeStatementBottom.fo.ftl"/></xsl-fo>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="CFRPDF">
+        <section>
+            <actions>
+                <set field="titleProperty" value="123"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/accounting/report/CashflowReport.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="FinancialStatementTemplate">
+                    <!-- at the top left of every page we put the logo and company information -->
+                    <decorator-section name="topLeft">
+                        <section>
+                            <widgets>
+                                <platform-specific>
+                                    <xsl-fo><html-template location="component://delys/webapp/delys/accounting/fo/cashflowTopLeft.fo.ftl"/></xsl-fo>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <!-- at the top right of every page we put the order information -->
+                    <decorator-section name="topRight">
+                        <section>
+                            <widgets>
+                                <platform-specific>
+                                    <xsl-fo><html-template location="component://delys/webapp/delys/accounting/fo/cashflowTopRight.fo.ftl"/></xsl-fo>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <platform-specific>
+                                    <xsl-fo><html-template location="component://delys/webapp/delys/accounting/fo/cashflowBody.fo.ftl"/></xsl-fo>
+                                </platform-specific>
+                                <!-- return policies and notes are shown in the last page -->
+                                <platform-specific>
+                                    <xsl-fo><html-template location="component://delys/webapp/delys/accounting/fo/cashflowBottom.fo.ftl"/></xsl-fo>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="DRPDF">
+        <section>
+            <actions>
+                <set field="titleProperty" value="OrderOrder"/>
+                <script location="component://delys/webapp/delys/WEB-INF/actions/accounting/report/DemonstrationReport.groovy"/>
+            </actions>
+            <widgets>
+                <decorator-screen name="FinancialStatementTemplate">
+                    <!-- at the top left of every page we put the logo and company information -->
+                    <decorator-section name="topLeft">
+                        <section>
+                            <widgets>
+                                <platform-specific>
+                                    <xsl-fo><html-template location="component://delys/webapp/delys/accounting/fo/demonstrationTopLeft.fo.ftl"/></xsl-fo>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <!-- at the top right of every page we put the order information -->
+                    <decorator-section name="topRight">
+                        <section>
+                            <widgets>
+                                <platform-specific>
+                                    <xsl-fo><html-template location="component://delys/webapp/delys/accounting/fo/demonstrationTopRight.fo.ftl"/></xsl-fo>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                    <decorator-section name="body">
+                        <section>
+                            <widgets>
+                                <platform-specific>
+                                    <xsl-fo><html-template location="component://delys/webapp/delys/accounting/fo/demonstrationBody.fo.ftl"/></xsl-fo>
+                                </platform-specific>
+                                <!-- return policies and notes are shown in the last page -->
+                                <platform-specific>
+                                    <xsl-fo><html-template location="component://delys/webapp/delys/accounting/fo/demonstrationBottom.fo.ftl"/></xsl-fo>
+                                </platform-specific>
+                            </widgets>
+                        </section>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="CompanyLogo">
+        <section>
+            <actions>
+                <script location="component://order/webapp/ordermgr/WEB-INF/actions/order/CompanyHeader.groovy"/>
+            </actions>
+            <widgets>
+                <platform-specific><xsl-fo><html-template location="component://order/webapp/ordermgr/order/companyHeader.fo.ftl"/></xsl-fo></platform-specific>
+            </widgets>
+        </section>
+    </screen>
+</screens>

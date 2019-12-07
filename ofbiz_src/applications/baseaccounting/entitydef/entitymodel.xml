@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entitymodel xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/entitymodel.xsd">
+    <!-- ========================================================= -->
+    <!-- ======================== Defaults ======================= -->
+    <!-- ========================================================= -->
+    <title>Entity of BaseAccounting Component</title>
+    <description>None</description>
+    <copyright></copyright>
+    <version></version>
+    
+     
+   	<entity entity-name="GlAccountBalanceParty" package-name="com.olbius.accounting.config"
+      	title="GlAccountBalanceParty Entity">
+      	<field name="glAccountId" type="id-ne"></field>
+      	<field name="organizationPartyId" type="id-ne"></field>
+      	<field name="openingCrBalance" type="currency-amount"></field>
+      	<field name="openingDrBalance" type="currency-amount"></field>
+      	<field name="partyId" type="id-ne"></field>
+      	<prim-key field="glAccountId"/>
+      	<prim-key field="organizationPartyId"/>
+      	<prim-key field="partyId"/>
+      	<relation type="one" fk-name="GLACC_BL_PARTY" rel-entity-name="GlAccount">
+        	<key-map field-name="glAccountId"/>
+      	</relation>
+	<relation type="one" fk-name="GLACCOUNTB_ORGPARTY" title="orgParty" rel-entity-name="Party">
+        	<key-map field-name="organizationPartyId" rel-field-name="partyId"/>
+      	</relation>
+	<relation type="one" fk-name="GLACCOUNTB_PARTY" title="party" rel-entity-name="Party">
+        	<key-map field-name="partyId"/>
+      	</relation>      	
+    </entity>	
+    
+   	<view-entity entity-name="GlAccountBalancePartyView" package-name="com.olbius.accounting.config">
+    	<member-entity entity-alias="GAB" entity-name="GlAccountBalanceParty"/>
+        <member-entity entity-alias="GLA" entity-name="GlAccount"/>
+        <member-entity entity-alias="PFD" entity-name="PartyFullNameDetail"></member-entity>
+        <alias-all entity-alias="GAB"></alias-all>
+        <alias-all entity-alias="GLA"></alias-all>
+        <alias name="fullName" entity-alias="PFD" field="fullName"></alias>
+        <alias name="partyCode" entity-alias="PFD" field="partyCode"></alias>
+    	<view-link entity-alias="GAB" rel-entity-alias="GLA" rel-optional="false" >
+            <key-map field-name="glAccountId"/>            
+        </view-link>
+        <view-link rel-entity-alias="PFD" entity-alias="GAB" rel-optional="false">
+        	<key-map field-name="partyId"/>
+        </view-link>
+    </view-entity>
+	
+	<view-entity entity-name="PartyDetail" package-name="com.olbius.bacc"
+            title="Party Detail Entity">
+      <member-entity entity-alias="PNV" entity-name="PartyNameView"></member-entity>
+      <alias-all entity-alias="PNV" />
+      <alias name="fullName">
+       	<complex-alias operator="||' '||">
+       		<complex-alias-field field="lastName" entity-alias="PNV" default-value="''"/>
+       		<complex-alias-field field="middleName" entity-alias="PNV" default-value="''"/>
+       		<complex-alias-field field="firstName" entity-alias="PNV" default-value="''"/>
+       		<complex-alias-field field="groupName" entity-alias="PNV" default-value="''"/>
+       	</complex-alias>
+      </alias>      
+    </view-entity>
+    
+    <view-entity entity-name="InvoicePartyFromDetail" package-name="com.olbius.bacc"
+            title="Invoice Party Detail Entity">
+      <member-entity entity-alias="PD" entity-name="PartyDetail"></member-entity>
+      <member-entity entity-alias="INV" entity-name="Invoice"></member-entity>
+      <alias-all entity-alias="INV"></alias-all>
+      <alias field="fullName" entity-alias="PD" name="fullNameFrom"></alias>
+	  <view-link entity-alias="PD" rel-entity-alias="INV">
+			<key-map field-name="partyId" rel-field-name="partyIdFrom"/>
+	  </view-link>
+    </view-entity>
+    
+<!--     <view-entity entity-name="InvoicePartyFromDetail" package-name="com.olbius.bacc" -->
+<!--             title="Invoice Party Detail Entity"> -->
+<!--       <member-entity entity-alias="PD" entity-name="PartyDetail"></member-entity> -->
+<!--       <member-entity entity-alias="INV" entity-name="Invoice"></member-entity> -->
+<!--       <alias-all entity-alias="INV"></alias-all> -->
+<!--       <alias field="fullName" entity-alias="PD" name="fullNameFrom"></alias> -->
+<!-- 	  <view-link entity-alias="PD" rel-entity-alias="INV"> -->
+<!-- 			<key-map field-name="partyId" rel-field-name="partyIdFrom"/> -->
+<!-- 	  </view-link> -->
+<!--     </view-entity> -->
+    
+    <view-entity entity-name="InvoicePartyDetail" package-name="com.olbius.bacc"
+            title="Invoice Party Detail Entity">
+      <member-entity entity-alias="IPD" entity-name="InvoicePartyFromDetail"></member-entity>
+      <member-entity entity-alias="PD" entity-name="PartyDetail"></member-entity>
+      <alias-all entity-alias="IPD"></alias-all>
+      <alias field="fullName" entity-alias="PD" name="fullNameTo"></alias>
+	  <view-link entity-alias="IPD" rel-entity-alias="PD">
+			<key-map field-name="partyId" rel-field-name="partyId"/>
+	  </view-link>
+    </view-entity>
+    
+    <view-entity entity-name="PaymentPartyFromDetail" package-name="com.olbius.bacc"
+            title="Payment Party Detail Entity">
+      <member-entity entity-alias="PD" entity-name="PartyFullNameDetailSimple"></member-entity>
+      <member-entity entity-alias="PAY" entity-name="Payment"></member-entity>
+      <alias-all entity-alias="PAY"></alias-all>
+      <alias field="fullName" entity-alias="PD" name="fullNameFrom"></alias>
+      <alias name="groupNameFrom" field="groupName" entity-alias="PD"></alias>
+      <alias name="partyCode" entity-alias="PD"></alias>
+	  <view-link entity-alias="PD" rel-entity-alias="PAY">
+			<key-map field-name="partyId" rel-field-name="partyIdFrom"/>
+	  </view-link>
+    </view-entity>
+    
+    <view-entity entity-name="PaymentPartyDetail" package-name="com.olbius.bacc"
+            title="Payment Party Detail Entity">
+      <member-entity entity-alias="PPD" entity-name="PaymentPartyFromDetail"></member-entity>
+      <member-entity entity-alias="PD" entity-name="PartyFullNameDetailSimple"></member-entity>
+      <alias-all entity-alias="PPD"></alias-all>
+      <alias field="fullName" entity-alias="PD" name="fullNameTo"></alias>
+      <alias name="groupNameTo" field="groupName" entity-alias="PD"></alias>
+      <alias name="partyCodeFrom" field="partyCode" entity-alias="PPD"></alias>
+      <alias name="partyCodeTo" field="partyCode" entity-alias="PD"></alias>
+	  <view-link entity-alias="PPD" rel-entity-alias="PD">
+			<key-map field-name="partyIdTo" rel-field-name="partyId"/>
+	  </view-link>
+    </view-entity>
+    
+    <view-entity entity-name="PaymentAcctgTrans" package-name="com.olbius.bacc"
+            title="Payment Acctg Trans Entity">
+      <member-entity entity-alias="PMN" entity-name="Payment"></member-entity>
+      <member-entity entity-alias="ACT" entity-name="AcctgTrans"></member-entity>
+      <alias-all entity-alias="PMN"></alias-all>
+      <alias field="transactionDate" entity-alias="ACT" name="transactionDate"></alias>
+      <alias field="postedDate" entity-alias="ACT" name="postedDate"></alias>
+	  <view-link entity-alias="PMN" rel-entity-alias="ACT">
+			<key-map field-name="paymentId"/>
+	  </view-link>
+    </view-entity>
+    
+    <view-entity entity-name="CustomTimePeriodAndType" package-name="com.olbius.bacc"
+            title="CustomTimePeriodAndType Entity">
+      <member-entity entity-alias="CTP" entity-name="CustomTimePeriod"></member-entity>
+      <member-entity entity-alias="PT" entity-name="PeriodType"></member-entity>
+      <alias-all entity-alias="CTP"></alias-all>
+      <alias-all entity-alias="PT"></alias-all>
+	  <view-link entity-alias="CTP" rel-entity-alias="PT">
+			<key-map field-name="periodTypeId"/>
+	  </view-link>
+    </view-entity>
+    
+    <view-entity entity-name="AcctgTransAndEntryDistinct" package-name="com.olbius.bacc">
+    	<member-entity entity-alias="ACT" entity-name="AcctgTrans"/>
+        <member-entity entity-alias="ATE" entity-name="AcctgTransEntryView"/>
+        <alias name="acctgTransId" field="acctgTransId" entity-alias="ACT"  distinct="true"></alias>
+        <alias name="transactionDate" field="transactionDate" entity-alias="ACT"  distinct="true"></alias>
+        <alias name="acctgTransTypeId" field="acctgTransTypeId" entity-alias="ACT"  distinct="true"></alias>
+        <alias name="glFiscalTypeId" field="glFiscalTypeId" entity-alias="ACT"  distinct="true"></alias>
+        <alias name="invoiceId" field="invoiceId" entity-alias="ACT"  distinct="true"></alias>
+        <alias name="paymentId" field="paymentId" entity-alias="ACT"  distinct="true"></alias>
+        <alias name="workEffortId" field="workEffortId" entity-alias="ACT"  distinct="true"></alias>
+        <alias name="shipmentId" field="shipmentId" entity-alias="ACT"  distinct="true"></alias>
+        <alias name="isPosted" field="isPosted" entity-alias="ACT"  distinct="true"></alias>
+        <alias name="postedDate" field="postedDate" entity-alias="ACT"  distinct="true"></alias>
+        <alias name="organizationPartyId" entity-alias="ATE"  distinct="true"/>       
+    	<view-link entity-alias="ACT" rel-entity-alias="ATE">
+            <key-map field-name="acctgTransId"/>            
+        </view-link>
+    </view-entity>
+    
+    <view-entity entity-name="AcctgTransEntryView" package-name="com.olbius.bacc">
+    	<member-entity entity-alias="ATE" entity-name="AcctgTransEntry"/>
+        <alias name="acctgTransId" entity-alias="ATE" distinct="true"></alias>
+        <alias name="organizationPartyId" entity-alias="ATE" distinct="true"></alias>
+    </view-entity>
+    
+    <view-entity entity-name="InventoryOrderItem" package-name="com.olbius.bacc">
+    	<member-entity entity-alias="II" entity-name="InventoryItem"/>
+        <member-entity entity-alias="OI" entity-name="OrderItem"/>
+        <member-entity entity-alias="DI" entity-name="DeliveryItem"/>
+        <alias name="unitCost" field="unitCost" entity-alias="II" />
+        <alias name="purCost" field="purCost" entity-alias="II" />
+        <alias name="orderId" field="orderId" entity-alias="OI" />
+        <alias name="productId" field="productId" entity-alias="II" />
+    	<view-link entity-alias="OI" rel-entity-alias="DI">
+    		<key-map field-name="orderId" rel-field-name="fromOrderId"/>
+    		<key-map field-name="orderItemSeqId" rel-field-name="fromOrderItemSeqId" />
+    	</view-link>
+    	<view-link entity-alias="DI" rel-entity-alias="II" rel-optional="false" >
+            <key-map field-name="inventoryItemId"/>            
+        </view-link>
+    </view-entity>
+    
+	<entity entity-name="CostAccMapDepartment"
+            package-name="org.ofbiz.accounting.ledger"
+            title="Map Cost accounting and invoice item type for department">
+       <description>Map Cost accounting and invoice item type for department</description> 
+       <field name="costAccMapDepId" type="id-ne"/>      
+       <field name="invoiceItemTypeId" type="id-ne"/>
+       <field name="applicationBaseId" type="id-ne"/>
+       <field name="organizationPartyId" type="id-ne"/>
+       <field name="departmentId" type="id-ne"/> 
+       <field name="fromDate" type="date-time"/>   
+       <field name="thruDate" type="date-time"/>
+       <prim-key field="costAccMapDepId"/>      
+       <relation type="one" rel-entity-name="InvoiceItemType" fk-name="COST_DEP_IIT">
+           <key-map field-name="invoiceItemTypeId"/>
+       </relation>
+       <relation type="one" rel-entity-name="Enumeration" fk-name="COSTD_ENUM_ABI">
+           <key-map field-name="applicationBaseId" rel-field-name="enumId"/>
+       </relation>
+       <relation type="one" fk-name="COSTD_PAR_OPI" title="Organization" rel-entity-name="Party">
+       		<key-map field-name="organizationPartyId" rel-field-name="partyId"/>
+       </relation>
+       <relation type="one" fk-name="COSTD_PAR_DPI" title="Department" rel-entity-name="Party">
+       		<key-map field-name="departmentId" rel-field-name="partyId"/>
+       </relation>  
+       <index name="CACCMDEP_UNQCD" unique="true">
+       		 <index-field name="invoiceItemTypeId"/>
+       		 <index-field name="organizationPartyId"/>
+       		 <index-field name="departmentId"/>
+       		 <index-field name="fromDate"/>
+	   </index> 
+    </entity>
+    
+    <entity entity-name="CostAccDepartment"
+            package-name="org.ofbiz.accounting.invoice"
+            title="Cost for all transaction in bussiness for Department">
+       	<description>Cost for all transaction in bussiness for Department</description>
+       	<field name="costAccDepId" type="id-ne"/> 
+   	 	<field name="costAccMapDepId" type="id-ne"/>      
+       	<field name="orderId" type="id"/>
+       	<field name="invoiceId" type="id"/>
+       	<field name="partyId" type="id"/>
+       	<field name="description" type="name"/>
+       	<field name="costPriceTemporary" type="fixed-point"/>
+    	<field name="costPriceActual" type="fixed-point"/>
+       	<field name="currencyUomId" type="id-ne"/>
+       	<field name="statusId" type="id-ne"/>
+       	<field name="pathScanFile" type="value"/>
+       	<field name="costAccDate" type="date-time"/>
+       	<field name="createdByUserLogin" type="id-ne"/>
+       	<field name="changedByUserLogin" type="id-ne"/>
+       	<prim-key field="costAccDepId"/>
+       	<relation type="one" rel-entity-name="CostAccMapDepartment" fk-name="COST_ACCD_CAB">
+           	<key-map field-name="costAccMapDepId"/>
+       	</relation>
+       	<relation type="one" fk-name="COST_ACCD_ODRH" rel-entity-name="OrderHeader">
+          	<key-map field-name="orderId"/>
+		</relation>  
+		<relation type="one" fk-name="COST_ACCD_PARTY" rel-entity-name="Party">
+          	<key-map field-name="partyId"/>
+		</relation>
+    	<relation type="one" fk-name="COST_ACCD_CURRENCY" rel-entity-name="Uom">
+          	<key-map field-name="currencyUomId" rel-field-name="uomId"/>
+   		</relation>  
+	<relation type="one" rel-entity-name="UserLogin" title="created" fk-name="FK_COST_ACCD_CRUSER">
+        	<key-map field-name="createdByUserLogin" rel-field-name="userLoginId"/>
+      	</relation>
+	<relation type="one" rel-entity-name="UserLogin" title="changed" fk-name="FK_COST_ACCD_CHUSER">
+        	<key-map field-name="changedByUserLogin" rel-field-name="userLoginId"/>
+      	</relation>
+      	<relation type="one" rel-entity-name="StatusItem">
+        	<key-map field-name="statusId" rel-field-name="statusId"/>
+      	</relation>
+   	</entity>
+   	
+   	<entity entity-name="AcctgTransHistory" package-name="com.olbius.acc">
+   		<field name="acctgTransId" type="id-ne"></field>
+   		<field name="changeDate" type="date-time"></field>
+		<field name="changeUserLoginId" type="id-ne"></field>
+   		<prim-key field="acctgTransId"/>
+   		<prim-key field="changeDate"/>
+   		<relation rel-entity-name="AcctgTrans" type="one" fk-name="ACCTG_TRANS_HIS_TRANS">
+   			<key-map field-name="acctgTransId"/>
+   		</relation>
+   		<relation rel-entity-name="UserLogin" type="one" fk-name="ACCTG_TRANS_HIS_UL">
+   			<key-map field-name="changeUserLoginId" rel-field-name="userLoginId"/>
+   		</relation>
+   	</entity>
+   	
+   	<entity entity-name="AcctgTransEntryHistory" package-name="com.olbius.acc">
+   		<field name="acctgTransId" type="id-ne"></field>
+   		<field name="acctgTransEntrySeqId" type="id-ne"></field>
+   		<field name="changeDate" type="date-time"></field>
+   		<field name="glAccountId" type="id-ne"></field>
+   		<field name="glAccountIdTo" type="id-ne"></field>
+   		<field name="amount" type="currency-amount"></field>
+   		<field name="amountTo" type="currency-amount"></field>
+   		<field name="description" type="description"></field>
+   		<field name="descriptionTo" type="description"></field>
+   		<prim-key field="acctgTransId"/>
+   		<prim-key field="changeDate"/>
+   		<prim-key field="acctgTransEntrySeqId"/>
+   		<relation rel-entity-name="AcctgTransHistory" type="one" fk-name="ACCTG_TRANS_ET_HIS_TRANS">
+   			<key-map field-name="acctgTransId"/>
+   			<key-map field-name="changeDate"/>
+   		</relation>
+   		<relation rel-entity-name="AcctgTransEntry" type="one" fk-name="ACCTG_TRANS_ET_HIS_ENTRY">
+   			<key-map field-name="acctgTransId"/>
+   			<key-map field-name="acctgTransEntrySeqId"/>
+   		</relation>
+   	</entity>
+   	
+   	<!-- Entity for Account History Party by dunglv -->
+   	<entity entity-name="GlAccountHistoryParty"
+            package-name="org.ofbiz.accounting.ledger"
+            title="GL Account History Party Entity">
+    	<field name="glAccountId" type="id-ne"></field>
+    	<field name="partyId" type="id-ne"></field>
+      	<field name="organizationPartyId" type="id-ne"></field>
+      	<field name="customTimePeriodId" type="id-ne"></field>
+      	<field name="openingBalance" type="currency-amount"></field>
+      	<field name="postedDebits" type="currency-amount"></field>
+      	<field name="postedCredits" type="currency-amount"></field>
+      	<field name="endingBalance" type="currency-amount"></field>
+      	<field name="openingCrBalance" type="currency-amount"></field>
+        <field name="openingDrBalance" type="currency-amount"></field>
+        <field name="endingCrBalance" type="currency-amount"></field>
+        <field name="endingDrBalance" type="currency-amount"></field>
+      	<prim-key field="glAccountId"/>
+      	<prim-key field="partyId"/>
+      	<prim-key field="organizationPartyId"/>
+      	<prim-key field="customTimePeriodId"/>
+      	<relation type="one" fk-name="GLACPT_HST_GLA" rel-entity-name="GlAccount">
+        	<key-map field-name="glAccountId"/>
+      	</relation>
+      	<relation type="one" fk-name="GLACPT_HST_ORGPTY" title="orgParty" rel-entity-name="Party">
+        	<key-map field-name="organizationPartyId" rel-field-name="partyId"/>
+      	</relation>
+      	<relation type="one" fk-name="GLACPT_HST_PARTY" title="normalParty" rel-entity-name="Party">
+        	<key-map field-name="partyId" />
+      	</relation>
+      	<relation type="one" fk-name="GLACPT_HST_CTP" rel-entity-name="CustomTimePeriod">
+        	<key-map field-name="customTimePeriodId"/>
+      	</relation>
+    </entity>
+    <!-- end by dunglv -->
+   	
+   	<view-entity entity-name="CostAccMapDepartmentDetail" package-name="org.ofbiz.accounting.ledger">
+		<member-entity entity-alias="CAMD" entity-name="CostAccMapDepartment"/>
+		<member-entity entity-alias="PG1" entity-name="PartyGroup"/>
+		<member-entity entity-alias="PG2" entity-name="PartyGroup"/>
+		<member-entity entity-alias="IIT" entity-name="InvoiceItemType"/>
+		<alias-all entity-alias="CAMD"></alias-all>
+		<alias name="organizationPartyName" field="groupName" entity-alias="PG1"></alias>
+		<alias name="departmentName" field="groupName" entity-alias="PG2"></alias>
+		<alias name="invoiceItemTypeName" field="description" entity-alias="IIT"></alias>
+		<view-link rel-entity-alias="PG1" entity-alias="CAMD">
+			<key-map field-name="organizationPartyId" rel-field-name="partyId"/>
+		</view-link>
+		<view-link rel-entity-alias="PG2" entity-alias="CAMD">
+			<key-map field-name="departmentId" rel-field-name="partyId"/>
+		</view-link>
+		<view-link rel-entity-alias="IIT" entity-alias="CAMD">
+			<key-map field-name="invoiceItemTypeId"/>
+		</view-link>
+   	</view-entity>
+   	
+   	<view-entity entity-name="CostAccDepartmentDetail" package-name="org.ofbiz.accounting.ledger">
+   		<member-entity entity-alias="CAMD" entity-name="CostAccMapDepartmentDetail"></member-entity>
+   		<member-entity entity-alias="CAD" entity-name="CostAccDepartment"></member-entity>
+   		<member-entity entity-alias="PG" entity-name="PersonAndPartyGroupSimple"/>
+   		<alias-all entity-alias="CAMD"></alias-all>
+   		<alias-all entity-alias="CAD"></alias-all>
+   		<alias name="partyName" field="partyName" entity-alias="PG"></alias>
+   		<view-link rel-entity-alias="CAMD" entity-alias="CAD">
+			<key-map field-name="costAccMapDepId"/>
+		</view-link>
+   		<view-link rel-entity-alias="PG" entity-alias="CAD">
+			<key-map field-name="partyId"/>
+		</view-link>
+   	</view-entity>
+</entitymodel>

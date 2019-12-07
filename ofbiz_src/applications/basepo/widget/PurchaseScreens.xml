@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+
+	<screen name="newPlanPurchase">
+		<section>
+			<actions>
+				<set field="titleProperty" value="SettingCalculatePurchase" />
+				<set field="selectedMenuItem" value="manageCalculatePO" />
+				<set field="selectedSubMenuItem" value="calculatePurchase" />
+				<script location="component://basepo/webapp/basepo/WEB-INF/actions/plan/createPurchasePlan.groovy" />
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<platform-specific>
+							<html>
+								<html-template location="component://basepo/webapp/basepo/plan/olbius/createPurchasePlan.ftl" />
+							</html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="PurchaseHistory">
+		<section>
+			<actions>
+				<set field="titleProperty" value="SettingPurchaseOrderHistory" />
+				<set field="selectedMenuItem" value="manageCalculatePO" />
+				<set field="selectedSubMenuItem" value="POHistory" />
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<platform-specific>
+							<html>
+								<html-template location="component://basepo/webapp/basepo/plan/olbius/showPurchaseHistory.ftl" />
+							</html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="ShowPurchasePlan">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="receiving" />
+				<set field="selectedSubMenuItem" value="PurchaseHistory" />
+				<property-to-field resource="general" property="currency.uom.id.default" field="currencyUomId" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-has-permission permission="CALCULATE_PO" action="_VIEW" />
+					</condition>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<platform-specific>
+									<html>
+										<html-template location="component://basepo/webapp/basepo/plan/olbius/ShowPurchasePlanInfo.ftl" />
+									</html>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<label style="h4">${uiLabelMap.PosViewPermissionError}</label>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ShowPurchaseOrder">
+		<section>
+			<actions>
+				<set field="orderMode" value="purchaseHistory"></set>
+				<set field="orderId" from-field="parameters.orderId" />
+			</actions>
+			<widgets>
+				<section>
+					<widgets>
+						<section>
+							<condition>
+								<not>
+									<if-empty field="orderId" />
+								</not>
+							</condition>
+							<widgets>
+								<decorator-screen name="GlobalDecoratorForPos" location="component://webpos/widget/CommonScreens.xml">
+									<decorator-section name="header">
+										<platform-specific>
+											<html>
+												<html-template location="component://webpos/webapp/webpos/includes/header.ftl" />
+											</html>
+										</platform-specific>
+									</decorator-section>
+									<decorator-section name="CenterBar">
+										<include-screen name="pleaseWait" location="component://webpos/widget/ShortcutsScreens.xml" />
+									</decorator-section>
+									<decorator-section name="top-left">
+										<include-screen name="ShowCartItemSelectedHistory" location="component://webpos/widget/CartScreens.xml" />
+									</decorator-section>
+									<decorator-section name="top-right">
+										<include-screen name="ShowPartyInfo" location="component://webpos/widget/SearchScreens.xml" />
+									</decorator-section>
+									<decorator-section name="main-left">
+										<include-screen name="ShowCartHisotry" location="component://webpos/widget/CartScreens.xml" />
+									</decorator-section>
+									<decorator-section name="main-right">
+										<include-screen name="ShowCartHeaderHistory" location="component://webpos/widget/CartScreens.xml" />
+									</decorator-section>
+									<decorator-section name="shortcut">
+										<include-screen name="ShortcutsHistory" location="component://webpos/widget/ShortcutsScreens.xml" />
+									</decorator-section>
+								</decorator-screen>
+							</widgets>
+							<fail-widgets>
+								<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+									<decorator-section name="body">
+										<label style="h4">${uiLabelMap.SettingNoOrderToDisplay}
+										</label>
+									</decorator-section>
+								</decorator-screen>
+							</fail-widgets>
+						</section>
+					</widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+</screens>  

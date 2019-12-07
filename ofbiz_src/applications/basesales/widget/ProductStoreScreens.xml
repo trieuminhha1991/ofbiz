@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	<screen name="ProductStoreCommonDecorator">
+		<section>
+			<actions>
+				<set field="tabBarName" value="ViewProductStoreSubTabBar" global="true"/>
+				<set field="tabBarLocation" value="component://basesales/widget/BaseSalesTabBarMenus.xml" global="true"/>
+				<set field="selectedMenuItem" from-field="selectedMenuItem" default-value="settingSales"/>
+				<set field="selectedSubMenuItem" from-field="selectedSubMenuItem" default-value="listProductStores"/>
+				<script location="component://basesales/webapp/basesales/WEB-INF/actions/navigator/nav_productStoreList.groovy"/>
+				<script location="component://basesales/webapp/basesales/WEB-INF/actions/permission/productStoreView.groovy"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-compare operator="equals" value="true" field="hasPermissionView"/>
+					</condition>
+					<actions>
+						<entity-one value-field="productStore" entity-name="ProductStore">
+							<field-map field-name="productStoreId" from-field="parameters.productStoreId"/>
+						</entity-one>
+					</actions>
+					<widgets>
+						<section>
+							<condition>
+								<not><if-empty field="productStore"/></not>
+							</condition>
+							<actions>
+								<set field="titleHeaderValue" value="productStoreTitle" global="true"/>
+								<set field="titleHeaderLocation" value="component://basesales/widget/ProductStoreScreens.xml" global="true"/>
+								<set field="productStoreId" from-field="productStore.productStoreId"/>
+								<set field="printTabBar" value="true"/>
+							</actions>
+							<widgets>
+								<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+									<decorator-section name="body">
+										<decorator-section-include name="body"/>
+									</decorator-section>
+								</decorator-screen>
+							</widgets>
+							<fail-widgets>
+								<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+									<decorator-section name="body">
+										<container style="alert alert-info">
+											<label text="${uiLabelMap.BSNotFoundProductStoreHasProductStoreIdIs}"></label>
+										</container>
+									</decorator-section>
+								</decorator-screen>
+							</fail-widgets>
+						</section>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="productStoreTitle">
+		<section>
+			<condition>
+				<not><if-empty field="productStore"/></not>
+			</condition>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text="${uiLabelMap.BSId}: "></label>
+				<link url-mode="plain" target="showProductStore?productStoreId=${productStore.productStoreId}" text="${productStore.productStoreId}"></link>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewProductStoreDetaill">
+       <section>
+            <actions>
+                <set field="titleProperty" value="BSViewDetail"/>
+                <set field="productStoreId" from-field="parameters.productStoreId"/>
+				<set field="tabButtonItem" value="viewDetail" global="true"/>
+                
+                <entity-one value-field="productStore" entity-name="ProductStore">
+                	<field-map field-name="productStoreId" from-field="productStoreId"/>
+                </entity-one>
+           </actions>
+            <widgets>
+                <decorator-screen name="ProductStoreCommonDecorator">
+                    <decorator-section name="body">
+                    	<platform-specific>
+                    		<html><html-template location="component://basesales/webapp/basesales/setting/product_store_channel/productStoreView.ftl"/></html>
+                    	</platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+       </section>
+    </screen>
+    <screen name="FullProductStoreRoles">
+       <section>
+            <actions>
+                <set field="titleProperty" value="BSPartyRoles"/>
+                <set field="productStoreId" from-field="parameters.productStoreId"/>
+               	<set field="tabBarName" value="ViewProductStoreSubTabBar" global="true"/>
+				<set field="tabBarLocation" value="component://basesales/widget/BaseSalesTabBarMenus.xml" global="true"/>
+				<set field="printTabBar" value="true"/>
+				<set field="tabButtonItem" value="viewProductStoreRoleTypes" global="true"/>
+				<set field="layoutSettings.javaScripts[+0]" value="/aceadmin/jqw/jqwidgets/olbMain.js" global="true"/>
+                
+                <entity-one value-field="productStore" entity-name="ProductStore">
+                	<field-map field-name="productStoreId" from-field="productStoreId"/>
+                </entity-one>
+           </actions>
+            <widgets>
+                <decorator-screen name="ProductStoreCommonDecorator">
+                    <decorator-section name="body">
+                    	<platform-specific>
+                    		<html><html-template location="component://basesales/webapp/basesales/setting/product_store/role_type/productStoreListRoleType.ftl"/></html>
+                    	</platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+       </section>
+    </screen>
+    <screen name="FullProductStoreFacilities">
+       <section>
+            <actions>
+                <set field="titleProperty" value="BSFacilityDelivery"/>
+                <set field="productStoreId" from-field="parameters.productStoreId"/>
+               	<set field="tabBarName" value="ViewProductStoreSubTabBar" global="true"/>
+				<set field="tabBarLocation" value="component://basesales/widget/BaseSalesTabBarMenus.xml" global="true"/>
+				<set field="printTabBar" value="true"/>
+				<set field="tabButtonItem" value="viewProductStoreFacilities" global="true"/>
+				<set field="layoutSettings.javaScripts[+0]" value="/aceadmin/jqw/jqwidgets/olbMain.js" global="true"/>
+           </actions>
+            <widgets>
+                <decorator-screen name="ProductStoreCommonDecorator">
+                    <decorator-section name="body">
+                    	<platform-specific>
+                    		<html><html-template location="component://basesales/webapp/basesales/setting/product_store/facility/productStoreListFacility.ftl"/></html>
+                    	</platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+       </section>
+    </screen>
+    <screen name="FullProductStoreCatalog">
+       <section>
+            <actions>
+                <set field="titleProperty" value="BSProductCatalogs"/>
+                <set field="productStoreId" from-field="parameters.productStoreId"/>
+               	<set field="tabBarName" value="ViewProductStoreSubTabBar" global="true"/>
+				<set field="tabBarLocation" value="component://basesales/widget/BaseSalesTabBarMenus.xml" global="true"/>
+				<set field="printTabBar" value="true"/>
+				<set field="tabButtonItem" value="viewProductStoreCatalogs" global="true"/>
+				<set field="layoutSettings.javaScripts[+0]" value="/aceadmin/jqw/jqwidgets/olbMain.js" global="true"/>
+                
+                <entity-one value-field="productStore" entity-name="ProductStore">
+                	<field-map field-name="productStoreId" from-field="productStoreId"/>
+                </entity-one>
+           </actions>
+            <widgets>
+                <decorator-screen name="ProductStoreCommonDecorator">
+                    <decorator-section name="body">
+                    	<platform-specific>
+                    		<html><html-template location="component://basesales/webapp/basesales/setting/product_store/catalog/productStoreListCatalog.ftl"/></html>
+                    	</platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+       </section>
+    </screen>
+    <screen name="FullProductStoreShipmentMethod">
+       <section>
+            <actions>
+                <set field="titleProperty" value="BSShipmentMethod"/>
+                <set field="productStoreId" from-field="parameters.productStoreId"/>
+               	<set field="tabBarName" value="ViewProductStoreSubTabBar" global="true"/>
+				<set field="tabBarLocation" value="component://basesales/widget/BaseSalesTabBarMenus.xml" global="true"/>
+				<set field="printTabBar" value="true"/>
+				<set field="tabButtonItem" value="viewProductStoreShipmentMethods" global="true"/>
+				<set field="layoutSettings.javaScripts[+0]" value="/aceadmin/jqw/jqwidgets/olbMain.js" global="true"/>
+                
+                <entity-one value-field="productStore" entity-name="ProductStore">
+                	<field-map field-name="productStoreId" from-field="productStoreId"/>
+                </entity-one>
+           </actions>
+            <widgets>
+                <decorator-screen name="ProductStoreCommonDecorator">
+                    <decorator-section name="body">
+                    	<platform-specific>
+                    		<html><html-template location="component://basesales/webapp/basesales/setting/product_store/shipment_method/productStoreListShipment.ftl"/></html>
+                    	</platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+       </section>
+    </screen>
+    <screen name="FullProductStorePaymentMethod">
+       <section>
+            <actions>
+                <set field="titleProperty" value="BSPaymentMethod"/>
+                <set field="productStoreId" from-field="parameters.productStoreId"/>
+               	<set field="tabBarName" value="ViewProductStoreSubTabBar" global="true"/>
+				<set field="tabBarLocation" value="component://basesales/widget/BaseSalesTabBarMenus.xml" global="true"/>
+				<set field="printTabBar" value="true"/>
+				<set field="tabButtonItem" value="viewProductStorePaymentMethods" global="true"/>
+				<set field="layoutSettings.javaScripts[+0]" value="/aceadmin/jqw/jqwidgets/olbMain.js" global="true"/>
+                
+                <entity-one value-field="productStore" entity-name="ProductStore">
+                	<field-map field-name="productStoreId" from-field="productStoreId"/>
+                </entity-one>
+           </actions>
+            <widgets>
+                <decorator-screen name="ProductStoreCommonDecorator">
+                    <decorator-section name="body">
+                    	<platform-specific>
+                    		<html><html-template location="component://basesales/webapp/basesales/setting/product_store/payment_method/productStoreListPayment.ftl"/></html>
+                    	</platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+       </section>
+    </screen>
+    <screen name="FullProductStoreShipmentCost">
+       <section>
+            <actions>
+                <set field="titleProperty" value="BSShipmentCost"/>
+                <set field="productStoreId" from-field="parameters.productStoreId"/>
+               	<set field="tabBarName" value="ViewProductStoreSubTabBar" global="true"/>
+				<set field="tabBarLocation" value="component://basesales/widget/BaseSalesTabBarMenus.xml" global="true"/>
+				<set field="printTabBar" value="true"/>
+				<set field="tabButtonItem" value="viewProductStoreShipmentCosts" global="true"/>
+				<set field="layoutSettings.javaScripts[+0]" value="/aceadmin/jqw/jqwidgets/olbMain.js" global="true"/>
+                
+                <entity-one value-field="productStore" entity-name="ProductStore">
+                	<field-map field-name="productStoreId" from-field="productStoreId"/>
+                </entity-one>
+           </actions>
+            <widgets>
+                <decorator-screen name="ProductStoreCommonDecorator">
+                    <decorator-section name="body">
+                    	<platform-specific>
+                    		<html><html-template location="component://basesales/webapp/basesales/setting/product_store/shipment_cost/productStoreListShipmentCost.ftl"/></html>
+                    	</platform-specific>
+                    </decorator-section>
+                </decorator-screen>
+            </widgets>
+       </section>
+    </screen>
+    
+    <!-- PRODUCT STORE GROUP -->
+	<screen name="ListProductStoreGroup">
+		<section>
+			<actions>
+				<set field="titleProperty" value="BSPSListProductStoreGroup"/>
+				<set field="selectedMenuItem" value="settingSales"/>
+				<set field="selectedSubMenuItem" value="listProductStoreGroup"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<platform-specific>
+							<html><html-template location="component://basesales/webapp/basesales/setting/product_store_group/productStoreGroupList.ftl"/></html>
+						</platform-specific>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ViewProductStoreGroup">
+		<section>
+			<actions>
+				<set field="titleProperty" value="BSPSViewProductStoreGroup"/>
+				<set field="selectedMenuItem" value="settingSales"/>
+				<set field="selectedSubMenuItem" value="listProductStoreGroup"/>
+				<entity-one value-field="productStoreGroup" entity-name="ProductStoreGroup">
+					<field-map field-name="productStoreGroupId" from-field="parameters.productStoreGroupId"/>
+				</entity-one>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not><if-empty field="productStoreGroup"/></not>
+					</condition>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<screenlet title="${uiLabelMap.BSPSProductStoreGroup}: ${productStoreGroup.productStoreGroupName} (${productStoreGroup.productStoreGroupId})">
+									<platform-specific>
+										<html><html-template location="component://basesales/webapp/basesales/setting/product_store_group/productStoreGroupView.ftl"/></html>
+									</platform-specific>
+								</screenlet>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSProductStoreGroupHasIdIsNotFound}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+</screens>

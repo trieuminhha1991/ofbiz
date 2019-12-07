@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-screen.xsd">
+	<screen name="S4CCommonDecorator">
+		<section>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+                    	<decorator-section-include name="body"/>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="ListSalesForecast">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="salesForecast"/>
+				<set field="selectedSubMenuItem" value="salesForecastList"/>
+				<set field="titleProperty" value="BSListSalesForecast"/>
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-olbius-has-permission/>
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html><html-template location="component://basesales/webapp/basesales/sales_forecast/salesForecastList.ftl"/></html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSYouHavenotViewPermission}"></label>
+								</container>
+							</fail-widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="salesForecastTitle">
+		<section>
+			<condition>
+				<not><if-empty field="salesForecast"/></not>
+			</condition>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text="${uiLabelMap.BSId}: "></label>
+				<link url-mode="plain" target="newSalesForecastDetailVer?salesForecastId=${salesForecast.salesForecastId}" text="${salesForecast.salesForecastId}"></link>
+			</widgets>
+		</section>
+	</screen>
+	<screen name="NewSalesForecastDetailVertical">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="salesForecast"/>
+				<set field="selectedSubMenuItem" value="salesForecastList"/>
+                <set field="titleProperty" value="PageTitleEditSalesForecast"/>
+                <entity-one value-field="salesForecast" entity-name="SalesForecast">
+					<field-map field-name="salesForecastId" from-field="parameters.salesForecastId"/>
+				</entity-one>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<not><if-empty field="salesForecast"/></not>
+					</condition>
+					<actions>
+						<set field="titleHeaderValue" value="salesForecastTitle" global="true"/>
+						<set field="titleHeaderLocation" value="component://basesales/widget/SalesForecastScreens.xml" global="true"/>
+						<script location="component://basesales/webapp/basesales/WEB-INF/actions/sales_forecast/GetListSalesForecastDetailJQ.groovy"/>
+		                <set field="layoutSettings.styleSheets[+0]" value="/salesresources/css/sales_forecast/custom-actors.css" global="true"/>
+		                <set field="layoutSettings.styleSheets[+0]" value="/salesresources/css/sales_forecast/salesforecast.css" global="true"/>
+					</actions>
+					<widgets>
+						<decorator-screen name="S4CCommonDecorator">
+		                    <decorator-section name="body">
+		                    	<section>
+		                    		<widgets>
+		                    			<platform-specific>
+			                            	<html><html-template location="component://basesales/webapp/basesales/sales_forecast/salesForecastDetailCreateJQ.ftl"/></html>
+			                            </platform-specific>
+		                    		</widgets>
+		                    	</section>
+		                    </decorator-section>
+		                </decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="S4CCommonDecorator">
+							<decorator-section name="body">
+								<container style="alert alert-info">
+									<label text="${uiLabelMap.BSNoSalesForecastFound}"></label>
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+</screens>

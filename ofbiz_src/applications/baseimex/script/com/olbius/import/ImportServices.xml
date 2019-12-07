@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+
+	<simple-method method-name="updateBillOfLading" short-description="update bill of lading">
+		<entity-one entity-name="BillOfLading" value-field="billOfLading" auto-field-map="true" />
+		<if-not-empty field="billOfLading">
+			<set-pk-fields value-field="billOfLading" map="parameters" />
+			<set-nonpk-fields value-field="billOfLading" map="parameters" />
+			<store-value value-field="billOfLading" />
+			<field-to-result field="billOfLading.billId" result-name="billId" />
+			<else>
+				<make-value value-field="newEntity" entity-name="BillOfLading" />
+				<set-pk-fields value-field="newEntity" map="parameters" />
+				<set-nonpk-fields value-field="newEntity" map="parameters" />
+				<sequenced-id sequence-name="BillOfLading" field="newEntity.billId" />
+				<create-value value-field="newEntity" />
+				<field-to-result field="newEntity.billId" result-name="billId" />
+			</else>
+		</if-not-empty>
+	</simple-method>
+
+	<simple-method method-name="updateCostOrder" short-description="update CostAccounting">
+		<set from-field="parameters.oneOrder" field="oneOrder"></set>
+		<set from-field="parameters.perOrder" field="perOrder"></set>
+        <set from-field="parameters.totalCost" field="totalCost"></set>
+        <set from-field="parameters.exchangedRate" field="exchangedRate"></set>
+		<set from-field="parameters.orderId" field="orderId"></set>
+		<set from-field="parameters.costAccBaseId" field="costAccBaseId"></set>
+		<call-simple-method method-name="getGlArithmeticSettingsInline" xml-resource="component://accounting/script/org/ofbiz/accounting/ledger/GeneralLedgerServices.xml" />
+		<calculate field="resultTotal" type="BigDecimal">
+			<number value="0" />
+		</calculate>
+		<calculate field="resultTotal" type="BigDecimal" decimal-scale="${ledgerDecimal}" rounding-mode="${roundingMode}">
+			<calcop operator="divide">
+				<calcop operator="multiply">
+					<calcop operator="get" field="oneOrder"></calcop>
+					<calcop operator="get" field="totalCost"></calcop>
+				</calcop>
+				<calcop operator="get" field="perOrder"></calcop>
+			</calcop>
+		</calculate>
+		<check-errors />
+		<entity-condition list="listOrderCost" entity-name="CostAccounting">
+			<condition-list>
+				<condition-expr field-name="costAccBaseId" operator="equals" from-field="costAccBaseId" />
+				<condition-expr field-name="orderId" operator="equals" from-field="orderId" />
+			</condition-list>
+		</entity-condition>
+		<check-errors />
+		<if-empty field="listOrderCost">
+			<make-value value-field="costAccounting" entity-name="CostAccounting" />
+			<set field="costAccounting.orderId" from-field="orderId" />
+			<sequenced-id sequence-name="CostAccounting" field="costAccountingId" />
+			<set field="costAccounting.costAccountingId" from-field="costAccountingId" />
+			<set field="costAccounting.costAccBaseId" from-field="costAccBaseId" />
+            <set field="costAccounting.costPriceTemporary" from-field="resultTotal"></set>
+            <set field="costAccounting.exchangedRate" from-field="exchangedRate"></set>
+			<create-value value-field="costAccounting" />
+			<check-errors />
+			<else>
+				<first-from-list entry="firstCostAcc" list="listOrderCost" />
+				<set field="firstCostAcc.costPriceTemporary" from-field="resultTotal" />
+				<store-value value-field="firstCostAcc" />
+				<check-errors />
+			</else>
+		</if-empty>
+	</simple-method>
+
+	<simple-method method-name="createAgreementPartyCTMPurpose" short-description="create AgreementPartyCTMPurpose">
+		<make-value entity-name="AgreementPartyCTMPurpose" value-field="newEntity" />
+		<set-pk-fields value-field="newEntity" map="parameters" />
+		<set-nonpk-fields map="parameters" value-field="newEntity" />
+		<create-value value-field="newEntity" />
+	</simple-method>
+
+	<simple-method method-name="createAgreementPartyContactMech" short-description="create AgreementPartyContactMech">
+		<make-value entity-name="AgreementPartyContactMech" value-field="newEntity" />
+		<set-pk-fields value-field="newEntity" map="parameters" />
+		<set-nonpk-fields map="parameters" value-field="newEntity" />
+		<create-value value-field="newEntity" />
+	</simple-method>
+
+	<simple-method method-name="updateContainer" short-description="update Container">
+		<entity-one entity-name="Container" value-field="container" auto-field-map="true" />
+		<if-not-empty field="container">
+			<set-pk-fields value-field="container" map="parameters" />
+			<set-nonpk-fields value-field="container" map="parameters" />
+			<store-value value-field="container" />
+			<field-to-result field="container.containerId" result-name="containerId" />
+		<else>
+			<make-value value-field="newEntity" entity-name="Container" />
+			<set-pk-fields value-field="newEntity" map="parameters" />
+			<set-nonpk-fields value-field="newEntity" map="parameters" />
+			<sequenced-id sequence-name="Container" field="newEntity.containerId" />
+			<create-value value-field="newEntity" />
+			<field-to-result field="newEntity.containerId" result-name="containerId" />
+		</else>
+		</if-not-empty>
+	</simple-method>
+
+	<simple-method method-name="updateStatusAgreement" short-description="update status agreement">
+		<entity-one entity-name="Agreement" value-field="agreement" auto-field-map="true" />
+		<if-not-empty field="agreement">
+			<set-pk-fields value-field="agreement" map="parameters" />
+			<set-nonpk-fields value-field="agreement" map="parameters" />
+			<store-value value-field="agreement" />
+		</if-not-empty>
+	</simple-method>
+
+	<simple-method method-name="updateOrderAndContainer" short-description="update Order And Container">
+		<entity-one entity-name="OrderAndContainer" value-field="orderAndContainer" auto-field-map="true" />
+		<if-not-empty field="orderAndContainer">
+			<set-pk-fields value-field="orderAndContainer" map="parameters" />
+			<set-nonpk-fields value-field="orderAndContainer" map="parameters" />
+			<store-value value-field="orderAndContainer" />
+			<else>
+				<make-value value-field="newEntity" entity-name="OrderAndContainer" />
+				<set-pk-fields value-field="newEntity" map="parameters" />
+				<set-nonpk-fields value-field="newEntity" map="parameters" />
+				<if-empty field="newEntity.fromDate">
+					<now-timestamp field="newEntity.fromDate" />
+				</if-empty>
+				<create-value value-field="newEntity" />
+				<field-to-result field="newEntity.packingListSeqId" result-name="packingListSeqId" />
+			</else>
+		</if-not-empty>
+	</simple-method>
+
+	<simple-method method-name="updatePackingListHeader" short-description="update packing list header">
+		<entity-one entity-name="PackingListHeader" value-field="packingListHeader" auto-field-map="true" />
+		<if-not-empty field="packingListHeader">
+			<set-pk-fields value-field="packingListHeader" map="parameters" />
+			<set-nonpk-fields value-field="packingListHeader" map="parameters" />
+			<store-value value-field="packingListHeader" />
+			<field-to-result field="packingListHeader.packingListId" result-name="packingListId" />
+			<field-to-result field="packingListHeader.purchaseOrderId" result-name="purchaseOrderId" />
+			<field-to-result field="packingListHeader.containerId" result-name="containerId" />
+			<else>
+				<make-value value-field="newEntity" entity-name="PackingListHeader" />
+				<set-pk-fields value-field="newEntity" map="parameters" />
+				<set-nonpk-fields value-field="newEntity" map="parameters" />
+				<sequenced-id sequence-name="PackingListHeader" field="newEntity.packingListId" />
+				<!-- <make-next-seq-id seq-field-name="packingListId" value-field="newEntity"/> -->
+				<create-value value-field="newEntity" />
+				<field-to-result field="newEntity.packingListId" result-name="packingListId" />
+				<field-to-result field="newEntity.purchaseOrderId" result-name="purchaseOrderId" />
+				<field-to-result field="newEntity.containerId" result-name="containerId" />
+			</else>
+		</if-not-empty>
+	</simple-method>
+
+	<simple-method method-name="updatePackingListDetail" short-description="update Packing List Detail">
+		<entity-one entity-name="PackingListDetail" value-field="packingListDetail" auto-field-map="true" />
+		<if-not-empty field="packingListDetail">
+			<set-pk-fields value-field="packingListDetail" map="parameters" />
+			<set-nonpk-fields value-field="packingListDetail" map="parameters" />
+			<store-value value-field="packingListDetail" />
+			<field-to-result field="packingListDetail.packingListSeqId" result-name="packingListSeqId" />
+			<else>
+				<make-value value-field="newEntity" entity-name="PackingListDetail" />
+				<set-pk-fields value-field="newEntity" map="parameters" />
+				<set-nonpk-fields value-field="newEntity" map="parameters" />
+				<!-- <sequenced-id sequence-name="PackingListDetail" field="newEntity.packingListSeqId"/> -->
+				<make-next-seq-id seq-field-name="packingListSeqId" value-field="newEntity" />
+				<create-value value-field="newEntity" />
+				<field-to-result field="newEntity.packingListSeqId" result-name="packingListSeqId" />
+			</else>
+		</if-not-empty>
+	</simple-method>
+
+	<simple-method method-name="updateDocumentCustoms" short-description="update document customs">
+		<entity-one entity-name="DocumentCustoms" value-field="documentCustoms" auto-field-map="true" />
+		<if-not-empty field="documentCustoms">
+			<set-pk-fields value-field="documentCustoms" map="parameters" />
+			<set-nonpk-fields value-field="documentCustoms" map="parameters" />
+			<store-value value-field="documentCustoms" />
+			<field-to-result field="documentCustoms.documentCustomsId" result-name="documentCustomsId" />
+			<else>
+				<make-value value-field="newEntity" entity-name="DocumentCustoms" />
+				<set-pk-fields value-field="newEntity" map="parameters" />
+				<set-nonpk-fields value-field="newEntity" map="parameters" />
+				<sequenced-id sequence-name="DocumentCustoms" field="newEntity.documentCustomsId" />
+				<!-- <make-next-seq-id seq-field-name="packingListId" value-field="newEntity"/> -->
+				<create-value value-field="newEntity" />
+				<field-to-result field="newEntity.documentCustomsId" result-name="documentCustomsId" />
+			</else>
+		</if-not-empty>
+	</simple-method>
+
+</simple-methods>

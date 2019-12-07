@@ -1,0 +1,175 @@
+<uib-tabset>
+	<uib-tab select="chooseTab(0)" active="activeTab[0]">
+		<uib-tab-heading>
+			<i class="ace-icon fa fa-newspaper-o"></i>&nbsp;{{LanguageFactory.getLabel('NewEvents')}}
+		</uib-tab-heading>
+		<div ng-repeat ="obj in promotionTypes" ng-click="loadPromotions(obj.productPromoTypeId)">
+			<div class="item-click">
+				<i class="ace-icon fa fa-tag"></i>{{LanguageFactory.getLabel(obj.productPromoTypeId)}}
+			</div>
+		</div>
+	</uib-tab>
+	<uib-tab select="chooseTab(1)" active="activeTab[1]">
+		<uib-tab-heading>
+			<i class="ace-icon fa fa-registered"></i>&nbsp;{{LanguageFactory.getLabel('Registration')}}
+		</uib-tab-heading>
+		<div class='row store-chosen-container'>
+			<div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+				{{LanguageFactory.getLabel('ChooseCustomer')}}
+			</div>
+			<div class="col-lg-6 col-md-6 col-sm-8 col-xs-6">
+				<select class='full-width-input' ng-options="cus.groupName for cus in customers.content" ng-model="self.customer"></select>
+			</div>
+		</div>
+		<div class='row store-chosen-container'>
+			<div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+				{{LanguageFactory.getLabel('PromoName')}}
+			</div>
+			<div class="col-lg-6 col-md-6 col-sm-8 col-xs-6">
+				<select class='full-width-input' ng-options="type.productPromoTypeId as LanguageFactory.getLabel(type.productPromoTypeId) for type in promotionTypes" ng-model="self.registration.productPromoTypeId"></select>
+			</div>
+		</div>
+		<div class='row store-chosen-container'>
+			<div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+				{{LanguageFactory.getLabel('ChooseProductStore')}}
+			</div>
+			<div class="col-lg-6 col-md-6 col-sm-8 col-xs-6">
+				<select class='full-width-input' ng-options="store.productStoreId as store.storeName for store in productStores" ng-model="self.productStoreId"></select>
+			</div>
+		</div>
+		<div class='row store-chosen-container'>
+			<div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+				{{LanguageFactory.getLabel('PromoName')}}
+			</div>
+			<div class="col-lg-6 col-md-6 col-sm-8 col-xs-6">
+				<select class='full-width-input' ng-options="promo.productPromoId as promo.promoName for promo in promotions" ng-model="self.registration.productPromoId"></select>
+			</div>
+		</div>
+		<div class='promotion-detail' horizon-scrollable>
+			<table class="table table-striped table-bordered table-hover center">
+				<thead>
+					<tr>
+						<th rowspan="2">&nbsp;</th>
+						<th colspan="2">{{LanguageFactory.getLabel('Condition')}}</th>
+						<th colspan="2">{{LanguageFactory.getLabel('Action')}}</th>
+					</tr>
+					<tr>
+						<th>{{LanguageFactory.getLabel('ProductCategoryApply')}}</th>
+						<th>{{LanguageFactory.getLabel('Condition')}}</th>
+						<th>{{LanguageFactory.getLabel('ProductCategoryApply')}}</th>
+						<th>{{LanguageFactory.getLabel('Action')}}</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat ="obj in promotion.rules" ng-click="choosePromotionRule(obj.productPromoRuleId)">
+						<td><input type="radio" ng-model="registration.productPromoRuleId" ng-value="obj.productPromoRuleId" name="rule"/></td>
+						<td>
+							<div ng-repeat ="objc in obj.productCondition">
+								[{{objc.productCode}}]-{{objc.productName}}
+							</div>
+						</td>
+						<td>
+							<div ng-repeat ="objc in obj.productCondition">
+								{{LanguageFactory.getLabel(objc.inputParamEnumId)}} {{LanguageFactory.getLabel(objc.operatorEnumId)}} {{objc.condValue}} {{objc.otherValue}} {{objc.note}}
+							</div>
+						</td>
+						<td>
+							<div ng-repeat ="obja in obj.productAction">
+								[{{obja.productCode}}]-{{obja.productName}} ({{LanguageFactory.getLabel(obja.productPromoActionEnumId)}})
+							</div>
+						</td>
+						<td>
+							<div ng-repeat ="obja in obj.productAction">
+								<span ng-if="obja.quantity">{{LanguageFactory.getLabel("Quantity")}} {{obja.quantity}}</span><span ng-if="obja.amount">{{LanguageFactory.getLabel("AmountValue")}} {{obja.amount}}</span>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<div class="bottom-action">
+			<div class="right">
+				<button class="btn btn-app btn-primary" ng-click="sendRegistration()">
+					<i class="ace-icon fa fa-send"></i> {{LanguageFactory.getLabel('SendRegister')}}
+				</button>
+				<button ng-click="cancelRegistration()" class="btn btn-app btn-purple">
+					<i class="ace-icon fa fa-book"></i> {{LanguageFactory.getLabel('Cancel')}}
+				</button>
+			</div>
+		</div>
+	</uib-tab>
+	<uib-tab select="chooseTab(2)" active="activeTab[2]">
+		<uib-tab-heading>
+			<i class="ace-icon fa fa-flag"></i>&nbsp;{{LanguageFactory.getLabel('ExhibitionMarking')}}
+		</uib-tab-heading>
+		<div class='row store-chosen-container'>
+			<div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+				{{LanguageFactory.getLabel('ChooseCustomer')}}
+			</div>
+			<div class="col-lg-6 col-md-6 col-sm-8 col-xs-6">
+				<select class='full-width-input' ng-options="cus.partyId as cus.groupName for cus in customerRegistered" ng-model="self.marking.partyId"></select>
+			</div>
+		</div>
+		<div class='row store-chosen-container'>
+			<div class="col-lg-2 col-md-3 col-sm-4 col-xs-6">
+				{{LanguageFactory.getLabel('ChoosePromotion')}}
+			</div>
+			<div class="col-lg-6 col-md-6 col-sm-8 col-xs-6">
+				<select class='full-width-input' ng-options="promo.promoName for promo in promotionRegistered" ng-model="self.promoRegSelected"></select>
+			</div>
+		</div>
+		<div class="order-statistic" ng-if="promoRegSelected">
+			<div class='row'>
+				<div class='col-lg-4 col-md-4 col-sm-6 col-xs-6'>
+					<label>{{LanguageFactory.getLabel('PromoId')}}:</label>
+				</div>
+				<div class='col-lg-8 col-md-8 col-sm-6 col-xs-6'>
+					{{promoRegSelected.productPromoId}}
+				</div>
+			</div>
+			<div class='row'>
+				<div class='col-lg-4 col-md-4 col-sm-6 col-xs-6'>
+					<label>{{LanguageFactory.getLabel('PromoName')}}:</label>
+				</div>
+				<div class='col-lg-8 col-md-8 col-sm-6 col-xs-6'>
+					{{promoRegSelected.promoName}}
+				</div>
+			</div>
+			<div class='row'>
+				<div class='col-lg-4 col-md-4 col-sm-6 col-xs-6'>
+					<label>{{LanguageFactory.getLabel('PromoRegistrationAcceptedFromDate')}}:</label>
+				</div>
+				<div class='col-lg-8 col-md-8 col-sm-6 col-xs-6'>
+					{{formatDateDMY(promoRegSelected.fromDate)}}
+				</div>
+			</div>
+			<div class='row margin-bottom-10'>
+				<div class='col-lg-4 col-md-4 col-sm-6 col-xs-6'>
+					<label>{{LanguageFactory.getLabel('EvaluationResult')}}:</label>
+				</div>
+				<div class='col-lg-8 col-md-8 col-sm-6 col-xs-6'>
+					<div class='marking-item'>
+						<input type="radio" id="markOk" name="mark" ng-model="self.marking.resultEnumId" value="PROMO_REG_EVAL_PASS"/>
+						<label for="markOk">{{LanguageFactory.getLabel('Pass')}}</label>
+					</div>
+					<div class='marking-item'>
+						<input type="radio" id="markNotOk" name="mark" ng-model="self.marking.resultEnumId" value="PROMO_REG_EVAL_FAIL"/>
+						<label for="markNotOk">{{LanguageFactory.getLabel('Fail')}}</label>
+					</div>
+				</div>
+			</div>
+			<img ng-src="{{self.camera.avatar}}" class="preview-image" ng-if="self.camera.avatar" id="olImg"/>
+			<camera options="self.camera.options" path="self.marking.url" image="self.camera.avatar"></camera>
+			<div class="bottom-action">
+				<div class="right">
+					<button class="btn btn-app btn-primary" ng-click="createRegistrationEvaluation()">
+						<i class="ace-icon fa fa-send"></i> {{LanguageFactory.getLabel('Confirm')}}
+					</button>
+					<button ng-click="reloadState()" class="btn btn-app btn-purple">
+						<i class="ace-icon fa fa-book"></i> {{LanguageFactory.getLabel('Cancel')}}
+					</button>
+				</div>
+			</div>
+		</div>
+	</uib-tab>
+</uib-tabset>

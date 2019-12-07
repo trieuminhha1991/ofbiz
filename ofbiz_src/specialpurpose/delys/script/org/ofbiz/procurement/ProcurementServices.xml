@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+    <simple-method method-name="createShoppingProposal" short-description="Create a shopping proposal">
+    	<make-value value-field="newEntity" entity-name="Requirement"/>
+        <sequenced-id sequence-name="Requirement" field="requirementId"/>
+        <set field="newEntity.requirementId" from-field="requirementId"/>
+        
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <set field="description" from-field="parameters.description"/>
+        <if-not-empty field="description">
+        	<call-object-method method-name="trim" obj-field="description" ret-field="strdescription"></call-object-method>
+        </if-not-empty>
+        <set field="newEntity.description" from-field="strdescription" />
+        <set field="newEntity.requirementTypeId" value="WORK_REQUIREMENT"/>
+        <if-empty field="parameters.statusId">
+            <set value="REQ_CREATED" field="newEntity.statusId"/>
+        </if-empty>
+        <now-timestamp field="nowTimestamp"/>
+        <set field="newEntity.createdDate" from-field="nowTimestamp"/>
+        <set field="newEntity.lastModifiedDate" from-field="nowTimestamp"/>
+        <set field="newEntity.createdByUserLogin" from-field="userLogin.userLoginId"/>
+        <set field="newEntity.lastModifiedByUserLogin" from-field="userLogin.userLoginId"/>
+        <create-value value-field="newEntity"/>
+        <set field="proposalId" from-field="requirementId"/>
+        
+        <property-to-field resource="DelysProcurementLabels" property="PleaseApproveShoppingProposal"  field="header"/>
+		<field-to-result field="header" result-name="header"/>
+		<field-to-result field="nowTimestamp" result-name="dateTime"/>
+        <field-to-result field="requirementId" result-name="requirementId"/>
+        <set field="action" value="viewProcurementProposal?requirementId=${requirementId}"/>
+        <field-to-result field="action" result-name="action"/>
+    </simple-method>
+    <simple-method method-name="createItemProcurementProposal" short-description="Create a requirement item">
+    	
+    	<make-value value-field="newEntity" entity-name="RequirementItem"/>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <set-pk-fields value-field="newEntity" map="parameters"/>
+        <if-empty field="parameters.statusId">
+            <set value="REQ_ITEM_CREATED" field="newEntity.statusId"/>
+        </if-empty>
+        <now-timestamp field="nowTimestamp"/>
+        <set field="newEntity.createDate" from-field="nowTimestamp"/>
+        <create-value value-field="newEntity"/>
+    </simple-method>
+    <simple-method method-name="createProduct" short-description="Create a simple product">
+    	<set field="CreateProduct.productTypeId" value="FINISHED_GOOD"/>
+    	<set field="CreateProduct.primaryProductCategoryId" value="PROCUREMENT_CATEGORY"/>
+    	<set field="CreateProduct.productName" from-field="parameters.productName"/>
+    	<set field="CreateProduct.internalName" from-field="parameters.productName"/>
+    	<set field="CreateProduct.description" from-field="parameters.description"/>
+    	<call-service service-name="createProduct" include-user-login="true" in-map-name="CreateProduct">
+    		<result-to-field result-name="productId" field="productId"/>
+    		
+    		
+    	</call-service>
+    	<if-not-empty field="productId">
+    		<entity-one value-field="productCreated" entity-name="Product">
+    			<field-map field-name="productId" from-field="productId"/>
+    		</entity-one>
+    		<if-not-empty field="productCreated">
+    		   <field-to-result field="productCreated.productName" result-name="productName"/>
+    		   <field-to-result field="productCreated.internalName" result-name="internalName"/>
+    		   <field-to-result field="productCreated.description" result-name="description"/>
+    		   <field-to-result field="productCreated.quantityUomId" result-name="quantityUomId"/>
+    		   <field-to-result field="productCreated.productId" result-name="productId"/>
+    		</if-not-empty>
+    	</if-not-empty>
+    </simple-method>
+    <simple-method method-name="updateItemProcurementProposal" short-description="Update item procurement proposal">
+    	
+    	<entity-one value-field="requirementItem" entity-name="RequirementItem">
+    		<field-map field-name="requirementId" from-field="parameters.requirementId"/>
+    		<field-map field-name="reqItemSeqId" from-field="parameters.reqItemSeqId"/>
+    	</entity-one>
+    	<set-nonpk-fields value-field="requirementItem" map="parameters"/>
+    </simple-method>
+    <simple-method method-name="removeItemProcurementProposal" short-description="Remove Item procurement proposal">
+    	<entity-one value-field="requirementItem" entity-name="RequirementItem" use-cache="false">
+    	</entity-one>
+    	<if-not-empty field="requirementItem">
+    		<remove-value value-field="requirementItem"/>
+    	</if-not-empty>
+    </simple-method>
+</simple-methods>

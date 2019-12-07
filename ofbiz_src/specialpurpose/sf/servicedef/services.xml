@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/services.xsd">
+    <description>sf Services</description>
+    <vendor></vendor>
+    <version>1.0</version>
+	<service name="interfaceProduct" default-entity-name="Product" engine="interface" location="" invoke="">
+        <auto-attributes include="nonpk" mode="IN" optional="true">
+            <exclude field-name="createdDate"/>
+            <exclude field-name="createdByUserLogin"/>
+            <exclude field-name="lastModifiedDate"/>
+            <exclude field-name="lastModifiedByUserLogin"/>
+        </auto-attributes>
+        <override name="description" allow-html="safe"/>
+        <override name="longDescription" allow-html="safe"/>
+    </service>
+    <service name="createProduct" default-entity-name="Product" engine="simple"
+                location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="createProduct" auth="true">
+        <description>Create a Product</description>
+        <implements service="interfaceProduct"/>
+        <auto-attributes include="pk" mode="INOUT" optional="true"/>
+        <override name="productTypeId" optional="false"/>
+        <override name="internalName" optional="false"/>
+    </service>
+    <service name="updateProductExp" default-entity-name="Product" engine="simple"
+                location="component://product/script/org/ofbiz/product/product/ProductServices.xml" invoke="updateProduct" auth="true">
+        <description>Update a Product</description>
+        <implements service="interfaceProduct"/>
+        <auto-attributes include="pk" mode="IN" optional="false"/>
+    </service>
+    <service name="uploadProductAdditionalViewImages" engine="simple"
+        location="component://product/script/org/ofbiz/product/product/ProductContentServices.xml" invoke="uploadProductAdditionalViewImages" auth="true">
+        <description>Upload Additional View Images For Product</description>
+        <permission-service service-name="genericContentPermission" main-action="UPDATE"/>
+        <attribute name="productId" type="String" mode="INOUT" optional="false"/>
+        <attribute name="additionalImageOne" type="java.nio.ByteBuffer" mode="IN" optional="true"/>
+        <attribute name="_additionalImageOne_fileName" type="String" mode="IN" optional="true"/>
+        <attribute name="_additionalImageOne_contentType" type="String" mode="IN" optional="true"/>
+        <attribute name="additionalImageTwo" type="java.nio.ByteBuffer" mode="IN" optional="true"/>
+        <attribute name="_additionalImageTwo_fileName" type="String" mode="IN" optional="true"/>
+        <attribute name="_additionalImageTwo_contentType" type="String" mode="IN" optional="true"/>
+        <attribute name="additionalImageThree" type="java.nio.ByteBuffer" mode="IN" optional="true"/>
+        <attribute name="_additionalImageThree_fileName" type="String" mode="IN" optional="true"/>
+        <attribute name="_additionalImageThree_contentType" type="String" mode="IN" optional="true"/>
+        <attribute name="additionalImageFour" type="java.nio.ByteBuffer" mode="IN" optional="true"/>
+        <attribute name="_additionalImageFour_fileName" type="String" mode="IN" optional="true"/>
+        <attribute name="_additionalImageFour_contentType" type="String" mode="IN" optional="true"/>
+    </service>
+    <service name="createSupplier" engine="simple"
+    location="component://sf/script/com/olbius/sf/supplier/SupplierServices.xml" invoke="createSupplier" auth="true">
+	<description>Create new supplier</description>
+	<attribute name="partyId" mode="IN" type="String" optional="true"></attribute>
+	<attribute name="salutation" mode="IN" type="String" optional="true"></attribute>
+	<attribute name="firstName" mode="IN" type="String" optional="false"></attribute>
+	<attribute name="middleName" mode="IN" type="String" optional="true"></attribute>
+	<attribute name="lastName" mode="IN" type="String" optional="false"></attribute>
+	<attribute name="facebookId" mode="IN" type="String" optional="false"></attribute>
+	<attribute name="gender" mode="IN" type="String" optional="false"></attribute>
+	<attribute name="birthDate" mode="IN" type="Timestamp" optional="true"></attribute>
+	<attribute name="partyId" mode="OUT" type="String" optional="false"></attribute>
+	</service>
+	<service name="updateSupplier" engine="simple"
+	location="component://sf/script/com/olbius/sf/supplier/SupplierServices.xml" invoke="updateSupplier" auth="true">
+	<description>Create new supplier</description>
+	<attribute name="partyId" mode="IN" type="String" optional="false"></attribute>
+	<attribute name="salutation" mode="IN" type="String" optional="true"></attribute>
+	<attribute name="firstName" mode="IN" type="String" optional="false"></attribute>
+	<attribute name="middleName" mode="IN" type="String" optional="true"></attribute>
+	<attribute name="lastName" mode="IN" type="String" optional="false"></attribute>
+	<attribute name="facebookId" mode="IN" type="String" optional="false"></attribute>
+	<attribute name="gender" mode="IN" type="String" optional="false"></attribute>
+	<attribute name="birthDate" mode="IN" type="Timestamp" optional="true"></attribute>
+	<attribute name="partyId" mode="OUT" type="String" optional="false"></attribute>
+	</service>
+	<service name="findSupplier" engine="java"
+        location="com.olbius.sf.supplier.SupplierServices" invoke="findSupplier">
+        <description>Supplier Find Service, Used in the findSupplier page in the SF Manager, etc</description>
+        <attribute name="VIEW_INDEX" type="String" mode="IN" optional="true"/>
+        <attribute name="VIEW_SIZE" type="String" mode="IN" optional="true"/>
+        <attribute name="lookupFlag" type="String" mode="IN" optional="true"/>
+        <attribute name="showAll" type="String" mode="IN" optional="true"/>
+        <attribute name="partyId" type="String" mode="IN" optional="true"/> <!-- does a LIKE compare on this, can do partial, case insensitive, etc -->
+        <attribute name="userLoginId" type="String" mode="IN" optional="true"/> <!-- does a LIKE compare on this, can do partial, case insensitive, etc -->
+        <attribute name="firstName" type="String" mode="IN" optional="true"/>
+        <attribute name="lastName" type="String" mode="IN" optional="true"/>
+        <attribute name="sortField" type="String" mode="IN" optional="true"/>
+
+        <attribute name="viewIndex" type="Integer" mode="OUT" optional="false"/>
+        <attribute name="viewSize" type="Integer" mode="OUT" optional="false"/>
+        <attribute name="partyList" type="List" mode="OUT" optional="false"/>
+        <attribute name="partyListSize" type="Integer" mode="OUT" optional="false"/>
+        <attribute name="paramList" type="String" mode="OUT" optional="false"/>
+        <attribute name="highIndex" type="Integer" mode="OUT" optional="false"/>
+        <attribute name="lowIndex" type="Integer" mode="OUT" optional="false"/>
+        <attribute name="sortField" type="String" mode="OUT" optional="true"/>
+    </service>
+    <service name="regisToSupply" engine="simple"
+	location="component://sf/script/com/olbius/sf/supplier/SupplierServices.xml" invoke="regisToSupply" auth="true">
+		<attribute name="partyId" type="String" mode="IN" optional="false"/>
+		<attribute name="productId" type="String" mode="IN" optional="false"/>
+		<attribute name="fromDate" mode="IN" type="Timestamp" optional="false"></attribute>
+		<attribute name="thruDate" mode="IN" type="Timestamp" optional="true"></attribute>
+		<attribute name="productId" mode="OUT" type="String" optional="false"></attribute>
+    </service>
+    <service name="unregisToSupply" engine="simple"
+	location="component://sf/script/com/olbius/sf/supplier/SupplierServices.xml" invoke="unRegisToSupply" auth="true">
+		<attribute name="partyId" type="String" mode="IN" optional="false"/>
+		<attribute name="productId" type="String" mode="IN" optional="false"/>
+		<attribute name="fromDate" mode="IN" type="Timestamp" optional="false"></attribute>
+		<attribute name="productId" mode="OUT" type="String" optional="false"></attribute>
+    </service>
+</services>

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../../framework/widget/dtd/widget-screen.xsd">
+
+	<screen name="supplierManager">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="SupplierManager" />
+				<set field="selectedSubMenuItem" value="supplierManager" />
+				<set field="titleProperty" value="ListPartySupplier" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission />
+					</condition>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<platform-specific>
+									<html>
+										<html-template location="component://basepo/webapp/basepo/supplier/supplierViewSupplierParty.ftl" />
+									</html>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-danger">
+									<label text="${uiLabelMap.DmsNotPermission}" />
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="supplierTitle">
+		<section>
+			<condition>
+				<not>
+					<if-empty field="parameters.partyId" />
+				</not>
+			</condition>
+			<widgets>
+				<label style="ibefore-icon-angle-right" text="${uiLabelMap.DAId}: "></label>
+				<link url-mode="plain" target="viewSupplier?partyId=${parameters.partyId}" text="${party.partyCode}"></link>
+			</widgets>
+		</section>
+	</screen>
+	
+	<screen name="ViewSupplier">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="SupplierManager" />
+				<set field="selectedSubMenuItem" value="supplierManager" />
+				<set field="titleProperty" value="BSSupplierInformation" />
+				<entity-one value-field="party" entity-name="Party"></entity-one>
+				<set field="titleHeaderValue" value="supplierTitle" global="true" />
+				<set field="titleHeaderLocation" value="component://basepo/widget/SupplierScreens.xml" global="true" />
+				<property-to-field field="defaultCountryGeoId" resource="general" property="country.geo.id.default" default="VNM"/>
+				<script location="component://basepo/webapp/basepo/WEB-INF/actions/supplier/ViewSupplier.groovy" />
+			</actions>
+			<widgets>
+				<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<actions>
+								<entity-condition list="statusFinAccList" entity-name="StatusItem">
+									<condition-list combine="or">
+										<condition-expr field-name="statusId" value="FNACT_ACTIVE"/>
+										<condition-expr field-name="statusId" value="FNACT_MANFROZEN"/>
+									</condition-list>
+									<order-by field-name="sequenceId"/>
+								</entity-condition>
+							</actions>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://basepo/webapp/basepo/supplier/ViewSupplier.ftl" />
+									</html>
+								</platform-specific>
+							</widgets>
+						</section>
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>
+	</screen>
+
+	<screen name="ListSupplierTargets">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="SupplierManager" />
+				<set field="selectedSubMenuItem" value="listSupllierTargets" />
+				<set field="titleProperty" value="BPOListSupplierTargets" />
+				<script location="component://basepo/webapp/basepo/WEB-INF/actions/order/orderInfoPurchase.groovy" />
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-olbius-has-permission />
+					</condition>
+					<widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<platform-specific>
+									<html>
+										<html-template location="component://basepo/webapp/basepo/supplier/supplierListTargets.ftl" />
+									</html>
+								</platform-specific>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<decorator-screen name="main-decorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<container style="alert alert-danger">
+									<label text="${uiLabelMap.DmsNotPermission}" />
+								</container>
+							</decorator-section>
+						</decorator-screen>
+					</fail-widgets>
+				</section>
+			</widgets>
+		</section>
+	</screen>
+
+</screens>

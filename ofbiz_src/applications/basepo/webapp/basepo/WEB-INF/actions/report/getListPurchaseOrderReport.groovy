@@ -1,0 +1,31 @@
+import java.util.Map;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
+
+import org.ofbiz.base.util.*;
+import org.ofbiz.entity.*;
+import org.ofbiz.entity.condition.EntityCondition;
+import org.ofbiz.entity.condition.EntityConditionList;
+import org.ofbiz.entity.condition.EntityExpr;
+import org.ofbiz.entity.condition.EntityOperator;
+import org.ofbiz.entity.model.*;
+import org.ofbiz.entity.util.EntityListIterator;
+import org.ofbiz.entity.util.EntityUtil;
+import com.olbius.basepo.report.ReportEvens;
+
+List<GenericValue> listProduct = delegator.findList("Product", null, null, null, null, false);
+List<GenericValue>  listStatusItem = delegator.findList("StatusItem", null, null, null, null, false);
+List<GenericValue>  listProductCategory = delegator.findList("ProductCategory", null, null, null, null, false);
+List<GenericValue>  listEnumeration = delegator.findList("Enumeration", null, null, null, null, false);
+List<GenericValue> listUom = delegator.findList("Uom", EntityCondition.makeCondition(UtilMisc.toMap("uomTypeId", "PRODUCT_PACKING")), null, null, null, false);
+List<GenericValue>  listProductStore = delegator.findList("ProductStore", null, null, null, null, false);
+String filterTypeId = request.getParameter("filterTypeId");
+listPuchaseOrder = ReportEvens.exportPurchaseOrderReportToPdf(request, null);
+context.listProduct = listProduct;
+context.listStatusItem = listStatusItem;
+context.listPuchaseOrder = listPuchaseOrder;
+context.listProductCategory = listProductCategory;
+context.listEnumeration = listEnumeration;
+context.filterTypeId = filterTypeId;
+context.listUom = listUom;
+context.listProductStore = listProductStore;

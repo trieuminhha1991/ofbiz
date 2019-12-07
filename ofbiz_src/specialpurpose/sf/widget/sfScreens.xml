@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+
+    <screen name="main">
+        <section>
+            <actions>
+                <set field="headerItem" value="main" global="true"/><!-- this highlights the selected menu-item with name "main" -->
+            </actions>
+            <widgets>
+                <include-screen name="FindProduct" location="component://sf/widget/ProductScreens.xml"/>
+            </widgets>
+        </section>
+    </screen>
+    <screen name="editProdExp">
+	<section>
+		<actions>
+                <set field="headerItem" value="sfProduct"/><!-- this highlights the selected menu-item with name "main" -->
+                <set field=""/>
+                <entity-one value-field="productSellerFriend" entity-name="ProductSellerFriend">
+			<field-map field-name="productId" from-field="parameters.productId"/>
+			<field-map field-name="partyId" from-field="userLogin.productId"/>
+                </entity-one>
+                <script location="component://sf/script/com/olbius/sf/supplier/CheckSupplierProduct.groovy"/>
+            </actions>
+		<widgets>
+			<decorator-screen name="sfCommonProductDecorator" location="${parameters.mainDecoratorLocation}">
+                    <decorator-section name="body">
+			<section>
+							<condition>
+								<not>
+									<if-empty field="product"/>
+								</not>
+							</condition>
+							<widgets>
+								<section>
+									<actions>
+										<set field="layoutSettings.javaScripts[]" value="/ecommerce/images/productAdditionalView.js" global="true" />
+										<script location="component://product/webapp/catalog/WEB-INF/actions/product/EditProductContent.groovy" />
+									</actions>
+									<widgets>
+										<section>
+											<condition>
+												<if-compare operator="equals" value="${userLogin.partyId}" field="product.createdByUserLogin"/>
+											</condition>
+											<widgets>
+												<screenlet title="${uiLabelMap.sfRedSupPro}">
+													<container>
+														<include-form name="RegistrantionSupply"
+																location="component://sf/widget/sfForms.xml" />
+													</container>
+												</screenlet>
+												<screenlet title="${uiLabelMap.PageTitleEditProduct}">
+													<container style="row-fluid">
+														<container style="span12">
+															<include-form name="EditOrCreateProduct"
+																location="component://sf/widget/sfForms.xml" />
+														</container>
+													</container>
+												</screenlet>
+												<screenlet title="${uiLabelMap.ProductContent}">
+													<container style="row-fluid">
+														<container style="span12">
+															<platform-specific>
+																<html>
+																	<html-template
+																		location="component://sf/webapp/sf/product/EditProductContentExp.ftl" />
+																</html>
+															</platform-specific>
+														</container>
+													</container>
+												</screenlet>
+											</widgets>
+											<fail-widgets>
+												<screenlet title="${uiLabelMap.sfRedSupPro}">
+													<container>
+														<include-form name="RegistrantionSupply"
+																location="component://sf/widget/sfForms.xml" />
+													</container>
+												</screenlet>
+											</fail-widgets>
+										</section>
+									</widgets>
+								</section>
+							</widgets>
+							<fail-widgets>
+								<screenlet title="${uiLabelMap.PageTitleNewProduct}">
+									<container style="row-fluid">
+										<container style="span12">
+											<include-form name="EditOrCreateProduct"
+												location="component://sf/widget/sfForms.xml" />
+										</container>
+									</container>
+								</screenlet>
+							</fail-widgets>
+						</section>
+						<!--
+						<section>
+							<condition>
+								<not>
+									<if-empty field="product" />
+								</not>
+							</condition>
+							<widgets>
+								<section>
+									<condition>
+										<if-compare field="product.isVirtual" operator="equals"
+											type="String" value="Y" />
+									</condition>
+									<widgets>
+										<screenlet title="${uiLabelMap.ProductUpdateProductVariants}">
+											<container style="row-fluid">
+												<container style="span12">
+													<include-form name="UpdateProductVariants"
+														location="component://product/widget/catalog/ProductForms.xml" />
+												</container>
+											</container>
+										</screenlet>
+									</widgets>
+								</section>
+							</widgets>
+						</section>
+						 -->
+                    </decorator-section>
+                </decorator-screen>
+		</widgets>
+	</section>
+    </screen>
+
+</screens>

@@ -1,0 +1,1433 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Licensed to the Apache Software Foundation (ASF) under one or more contributor 
+	license agreements. See the NOTICE file distributed with this work for additional 
+	information regarding copyright ownership. The ASF licenses this file to 
+	you under the Apache License, Version 2.0 (the "License"); you may not use 
+	this file except in compliance with the License. You may obtain a copy of 
+	the License at http://www.apache.org/licenses/LICENSE-2.0 Unless required 
+	by applicable law or agreed to in writing, software distributed under the 
+	License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS 
+	OF ANY KIND, either express or implied. See the License for the specific 
+	language governing permissions and limitations under the License. -->
+
+<forms xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-form.xsd">
+	<form name="FindEmployments" type="single" target="FindEmployments"
+		odd-row-style="header-row" default-table-style="basic-table">
+		<field name="roleTypeIdFrom">
+			<hidden value="INTERNAL_ORGANIZATIO" />
+		</field>
+		<field name="roleTypeIdTo">
+			<hidden value="EMPLOYEE" />
+		</field>
+		<field name="partyIdFrom" title="${uiLabelMap.HumanResEmploymentPartyIdFrom}"
+			tooltip="${uiLabelMap.HumanResEmploymentPartyIdFromToolTip}">
+			<drop-down allow-empty="true" no-current-selected-key="${defaultOrganizationPartyId}">
+				<entity-options description="${groupName}"
+					entity-name="PartyGroupRoleType" key-field-name="partyId">
+					<entity-constraint name="roleTypeId" operator="equals" value="INTERNAL_ORGANIZATIO"/>
+					<entity-order-by field-name="groupName" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="partyIdTo" title="${uiLabelMap.EmployeePartyIdTo}">
+			<lookup target-form-name="LookupEmployeeNew" />
+		</field>
+		<field name="firstName">
+			<text-find />
+		</field>
+		<field name="lastName">
+			<text-find />
+		</field>
+		<field name="fromDate">
+			<date-find />
+		</field>
+		<field name="thruDate">
+			<date-find />
+		</field>
+		<field name="terminationReasonId" title="${uiLabelMap.HumanResTerminationReasonId}">
+			<lookup target-form-name="LookupTerminationReason" />
+		</field>
+		<field name="terminationTypeId" title="${uiLabelMap.HREmplTerminalTypeId}">
+			<drop-down allow-empty="true" current-description="">
+				<entity-options description="${description}"
+					key-field-name="terminationTypeId" entity-name="TerminationType">
+					<entity-order-by field-name="description" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="noConditionFind">
+			<hidden value="Y" /><!-- if this isn't there then with all fields 
+				empty no query will be done -->
+		</field>
+		<field name="searchButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-small btn-success">
+			<submit button-type="button" image-location="icon-search" />
+		</field>
+	</form>
+	<form name="ListEmploymentsPerson" type="list" paginate-target="FindEmployments"
+		default-entity-name="EmploymentAndPerson" list-name="listIt"
+		separate-columns="true" odd-row-style="alternate-row"
+		header-row-style="header-row-2"
+		default-table-style="table table-hover table-striped table-bordered dataTable">
+		<actions>
+			<!-- <service service-name="performFind" result-map="result"
+				result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="employmentCtx" />
+				<field-map field-name="entityName" value="EmploymentAndPerson" />
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+			</service> -->
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getListEmploymentPerson.groovy"/>
+		</actions>
+		
+		<field name="partyIdTo" title="${uiLabelMap.EmployeePartyIdTo}"
+			widget-style="">
+			<hyperlink also-hidden="false" description="${partyIdTo}"
+				target="EmployeeProfile">
+				<parameter param-name="partyId" from-field="partyIdTo" />
+			</hyperlink>
+		</field>
+		<field name="partyIdFrom" title="${uiLabelMap.EmploymentPartyIdFrom}">
+			<display-entity entity-name="PartyGroup" description="${groupName}" key-field-name="partyId"></display-entity>
+		</field>
+		<field name="emplName" title="${uiLabelMap.EmployeeName}">
+			<display description="${lastName} ${middleName} ${firstName}"></display>
+		</field>		
+		<!-- <field name="departmentId" title="${uiLabelMap.InternalOrgManage}">
+			<display-entity entity-name="PartyGroup" description="${groupName}" key-field-name="partyId"></display-entity>
+		</field> -->
+		<field name="fromDate" title="${uiLabelMap.CommonFromDate}">
+			<display also-hidden="true" type="date" />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.CommonThruDate}" red-when="never">
+			<display type="date"  />
+		</field>
+		<field name="terminationReasonId" title="${uiLabelMap.HumanResTerminationReasonId}">
+			<display />
+		</field>
+		<field name="terminationTypeId" title="${uiLabelMap.HREmplTerminalTypeId}">
+			<display />
+		</field>
+		<field name="editLink" title="${uiLabelMap.CommonEdit}" widget-style="btn btn-mini btn-primary icon-edit open-sans">
+			<hyperlink target="EditEmployment" description=" ">
+				<parameter param-name="partyIdFrom" />
+				<parameter param-name="partyIdTo" />
+				<parameter param-name="roleTypeIdFrom" />
+				<parameter param-name="fromDate" />
+				<parameter param-name="roleTypeIdTo" />
+			</hyperlink>
+		</field>
+	</form>
+	<form name="ListEmployments" type="list" paginate-target="FindEmployments"
+		default-entity-name="EmploymentAndPerson" list-name="listIt"
+		separate-columns="true" odd-row-style="alternate-row"
+		header-row-style="header-row-2"
+		default-table-style="table table-hover table-striped table-bordered dataTable">
+		<actions>
+			<service service-name="performFind" result-map="result"
+				result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="employmentCtx" />
+				<field-map field-name="entityName" value="Employment" />
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+			</service>
+		</actions>
+		<field name="partyIdFrom" title="${uiLabelMap.HumanResEmploymentPartyIdFrom}">
+			<display></display>
+		</field>
+		<field name="partyIdTo" title="${uiLabelMap.HumanResEmployeePartyIdTo}"
+			widget-style="btn btn-mini btn-primary">
+			<hyperlink also-hidden="false" description="${partyIdTo}"
+				target="viewprofile">
+				<parameter param-name="partyId" from-field="partyIdTo" />
+			</hyperlink>
+		</field>
+		<field name="fromDate">
+			<display also-hidden="true" />
+		</field>
+		<field name="thruDate">
+			<display />
+		</field>
+		<field name="terminationReasonId" title="${uiLabelMap.HumanResTerminationReasonId}">
+			<display />
+		</field>
+		<field name="terminationTypeId">
+			<display />
+		</field>
+		<field name="editLink" title=" " widget-style="btn btn-mini btn-primary">
+			<hyperlink target="EditEmployment" description="${uiLabelMap.CommonEdit}">
+				<parameter param-name="partyIdFrom" />
+				<parameter param-name="partyIdTo" />
+				<parameter param-name="roleTypeIdFrom" />
+				<parameter param-name="fromDate" />
+				<parameter param-name="roleTypeIdTo" />
+			</hyperlink>
+		</field>
+	</form>
+	<form name="EditEmployment" type="single" target="updateEmployment"
+		default-map-name="employment" header-row-style="header-row"
+		default-table-style="basic-table">
+		<alt-target use-when="employment==null" target="createEmployment" />
+		<auto-fields-service service-name="createEmployment"
+			default-field-type="hidden" />
+		<field name="roleTypeIdFrom">
+			<hidden value="INTERNAL_ORGANIZATIO" />
+		</field>
+		<field name="roleTypeIdTo">
+			<hidden value="EMPLOYEE" />
+		</field>
+		<field name="partyIdFrom" use-when="employment==null"
+			title="${uiLabelMap.HumanResEmploymentPartyIdFrom}" title-style="asterisk" required-field="true">
+			<drop-down allow-empty="false">
+				<entity-options entity-name="PartyRole" description="${partyId}"
+					key-field-name="partyId">
+					<entity-constraint name="roleTypeId" operator="equals"
+						value="INTERNAL_ORGANIZATIO" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="partyIdFrom" use-when="employment!=null"
+			title="${uiLabelMap.HumanResEmploymentPartyIdFrom}" tooltip="${uiLabelMap.CommonNotModifRecreat}" title-style="asterisk" required-field="true">
+			<hidden />
+		</field>
+		<field name="partyIdTo" use-when="employment==null"
+			title="${uiLabelMap.HumanResEmployeePartyIdTo}" title-style="asterisk" required-field="true">
+			<lookup target-form-name="LookupEmployeeNew" />
+		</field>
+		<field name="partyIdTo" use-when="employment!=null"
+			title="${uiLabelMap.HumanResEmployeePartyIdTo}" tooltip="${uiLabelMap.CommonNotModifRecreat}" title-style="asterisk" required-field="true">
+			<hidden />
+		</field>
+		<field name="fromDate" use-when="employment==null" title="${uiLabelMap.CommonFromDate}"
+			title-style="asterisk" required-field="true">
+			<date-time />
+		</field>
+		<field name="fromDate" use-when="employment!=null" title="${uiLabelMap.CommonFromDate}"
+			tooltip="${uiLabelMap.CommonNotModifRecreat}" title-style="asterisk" required-field="true">
+			<display  type="date"/>
+		</field>
+		<field name="thruDate" use-when="employment!=null" title="${uiLabelMap.CommonThruDate}">
+			<date-time />
+		</field>
+		<field name="terminationReasonId" use-when="employment!=null"
+			title="${uiLabelMap.HumanResTerminationReasonId}">
+			<drop-down allow-empty="true" no-current-selected-key="------">
+				<entity-options description="${description}"
+					key-field-name="terminationReasonId" entity-name="TerminationReason">
+					<entity-order-by field-name="description" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="terminationTypeId" use-when="employment!=null">
+			<drop-down allow-empty="true" no-current-selected-key="------">
+				<entity-options description="${description}"
+					key-field-name="terminationTypeId" entity-name="TerminationType">
+					<entity-order-by field-name="description" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="submitButton" use-when="employment==null" title="${uiLabelMap.CommonCreate}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+		<field name="submitButton" use-when="employment!=null" title="${uiLabelMap.CommonUpdate}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok-circle" />
+		</field>
+	</form>
+	<form name="ListPayHistories" type="list" target="updatePayHistory"
+		title="" paginate-target="findPayHistories" odd-row-style="alternate-row"
+		default-table-style="table table-hover table-striped table-bordered dataTable" separate-columns="true" group-columns="false">
+		<actions>
+			<entity-condition entity-name="PayHistory"
+				filter-by-date="true">
+				<condition-list combine="and">
+					<condition-expr field-name="roleTypeIdFrom"
+						operator="equals" from-field="parameters.roleTypeIdFrom" />
+					<condition-expr field-name="roleTypeIdTo" operator="equals"
+						from-field="parameters.roleTypeIdTo" />
+					<condition-expr field-name="partyIdFrom" operator="equals"
+						from-field="parameters.partyIdFrom" />
+					<condition-expr field-name="partyIdTo" operator="equals"
+						from-field="parameters.partyIdTo" />
+					<condition-expr field-name="fromDate" operator="equals"
+						from-field="parameters.fromDate" />
+				</condition-list>
+			</entity-condition>
+		</actions>
+		<auto-fields-service service-name="updatePayHistory" />
+		<field name="roleTypeIdFrom">
+			<hidden />
+		</field>
+		<field name="roleTypeIdTo">
+			<hidden />
+		</field>
+		<field name="partyIdFrom">
+			<hidden />
+		</field>
+		<field name="partyIdTo">
+			<hidden />
+		</field>
+		<field name="fromDate">
+			<display />
+		</field>
+		<field name="amount">
+			<hidden />
+		</field>
+		<field name="comments">
+			<hidden />
+		</field>
+		<field name="salaryStepSeqId" title="${uiLabelMap.HumanResSalaryStepSeqId}">
+			<lookup target-form-name="LookupSalaryStep" size="20" />
+		</field>
+		<field name="payGradeId" title="${uiLabelMap.HumanResPayGradeID}">
+			<lookup target-form-name="LookupPayGrade" size="20" />
+		</field>
+		<field name="periodTypeId" title="${uiLabelMap.FormFieldTitle_periodTypeId}">
+			<drop-down allow-empty="false">
+				<entity-options description="${description}"
+					key-field-name="periodTypeId" entity-name="PeriodType">
+					<entity-order-by field-name="description" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonUpdate}"
+			widget-style="btn btn-mini btn-primary">
+			<submit button-type="button" image-location="icon-ok-circle" />
+		</field>
+		<field name="deleteLink" title=" " widget-style="btn btn-mini btn-danger icon-trash open-sans">
+			<hyperlink target="deletePayHistory" description="${uiLabelMap.CommonDelete}">
+				<parameter param-name="roleTypeIdFrom" />
+				<parameter param-name="roleTypeIdTo" />
+				<parameter param-name="partyIdFrom" />
+				<parameter param-name="partyIdTo" />
+				<parameter param-name="fromDate" />
+			</hyperlink>
+		</field>
+	</form>
+	<form name="ListPartyBenefits" type="multi"
+		target="updatePartyBenefit?benefitTypeId=${benefitTypeId}&amp;roleTypeIdFrom=${roleTypeIdFrom}&amp;roleTypeIdTo=${roleTypeIdTo}&amp;partyIdFrom=${partyIdFrom}&amp;partyIdTo=${partyIdTo}&amp;fromDate=${fromDate}"
+		title="" paginate-target="findPartyBenefits" odd-row-style="alternate-row"
+		header-row-style="header-row-2"
+		default-table-style="table table-hover table-striped table-bordered dataTable" group-columns="false">
+		<actions>
+			<entity-condition entity-name="PartyBenefit">
+				<order-by field-name="fromDate" />
+			</entity-condition>
+		</actions>
+		<auto-fields-service service-name="updatePartyBenefit" />
+		<field name="roleTypeIdFrom">
+			<hidden />
+		</field>
+		<field name="roleTypeIdTo">
+			<hidden />
+		</field>
+		<field name="partyIdFrom">
+			<hidden />
+		</field>
+		<field name="partyIdTo">
+			<hidden />
+		</field>
+		<field name="benefitTypeId" title="${uiLabelMap.BenefitTypeId}">
+			<display-entity entity-name="BenefitType" description="${description}" />
+		</field>
+		<field name="actualEmployerPaidPercent" title="${uiLabelMap.ActualEmployerPaidPercent}">
+			<text></text>
+		</field>
+		<field name="availableTime" title="${uiLabelMap.AvailableTime}">
+			<text></text>
+		</field>
+		<field name="fromDate">
+			<display />
+		</field>
+		<field name="periodTypeId">
+			<drop-down allow-empty="false">
+				<entity-options description="${description}"
+					key-field-name="periodTypeId" entity-name="PeriodType">
+					<entity-order-by field-name="description" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="thruDate">
+			<date-time />
+		</field>
+		<field name="_rowSubmit" title="${uiLabelMap.CommonSelect}">
+			<hidden value="Y" />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonSubmit}"
+			widget-style="btn btn-small btn-primary margin-left6 margin-top5 btn-position-center">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+		<field name="deleteLink" title="${uiLabelMap.CommonDelete}"
+			widget-style="btn btn-mini btn-danger icon-trash open-sans">
+			<hyperlink target="deletePartyBenefit" description="${uiLabelMap.CommonDelete}">
+				<parameter param-name="benefitTypeId" />
+				<parameter param-name="roleTypeIdFrom" />
+				<parameter param-name="roleTypeIdTo" />
+				<parameter param-name="partyIdFrom" />
+				<parameter param-name="partyIdTo" />
+				<parameter param-name="fromDate" />
+			</hyperlink>
+		</field>
+	</form>
+
+	<form name="AddPartyBenefit" type="single" target="createPartyBenefit"
+		header-row-style="header-row" default-table-style="basic-table">
+		<auto-fields-service service-name="createPartyBenefit" />
+		<field name="roleTypeIdFrom">
+			<hidden />
+		</field>
+		<field name="roleTypeIdTo">
+			<hidden />
+		</field>
+		<field name="partyIdFrom">
+			<hidden />
+		</field>
+		<field name="partyIdTo">
+			<hidden />
+		</field>
+		<field name="fromDate">
+			<hidden />
+		</field>
+		<field name="benefitTypeId" title-style="asterisk"
+			title="${uiLabelMap.BenefitTypeId}">
+			<drop-down allow-empty="false">
+				<entity-options description="${description}"
+					key-field-name="benefitTypeId" entity-name="BenefitType">
+					<entity-order-by field-name="description" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="fromDate" tooltip="${uiLabelMap.CommonRequired}" />
+		<field name="periodTypeId">
+			<drop-down allow-empty="false">
+				<entity-options description="${description}"
+					key-field-name="periodTypeId" entity-name="PeriodType">
+					<entity-order-by field-name="description" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="actualEmployerPaidPercent" title="${uiLabelMap.ActualEmployerPaidPercent}"></field>
+		<field name="availableTime" title="${uiLabelMap.AvailableTime}"></field>
+		<field name="submitButton" title="${uiLabelMap.CommonAdd}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+
+	<form name="ListPayrollPreferences" type="multi"
+		target="updatePayrollPreference?partyId=${partyId}&amp;roleTypeId=${roleTypeId}&amp;payrollPreferenceSeqId=${payrollPreferenceSeqId}"
+		separate-columns="true" paginate-target="findPayRollPreferences"
+		odd-row-style="alternate-row" header-row-style="header-row-2"
+		default-table-style="table table-hover table-striped table-bordered dataTable" group-columns="false">
+		<actions>
+			<entity-condition entity-name="PayrollPreference">
+				<condition-list combine="and">
+					<condition-expr field-name="partyId" operator="equals"
+						from-field="parameters.partyIdTo" />
+					<condition-expr field-name="roleTypeId" operator="equals"
+						from-field="parameters.roleTypeIdTo" />
+				</condition-list>
+				<order-by field-name="fromDate" />
+			</entity-condition>
+		</actions>
+		<auto-fields-service default-field-type="hidden"
+			service-name="updatePayrollPreference" />
+		<field name="partyId">
+			<display />
+		</field>
+		<field name="roleTypeId">
+			<display-entity entity-name="RoleType" description="${description}" />
+		</field>
+		<field name="payrollPreferenceSeqId" title="${uiLabelMap.HumanResPayrollPreferenceSeqId}">
+			<display also-hidden="true" />
+		</field>
+		<field name="paymentMethodTypeId">
+			<display-entity entity-name="PaymentMethodType"
+				description="${description}" />
+		</field>
+		<field name="periodTypeId">
+			<display-entity entity-name="PeriodType" description="${description}" />
+		</field>
+		<field name="fromDate">
+			<display />
+		</field>
+		<field name="thruDate" widget-area-style="width250px float-left">
+			<date-time />
+		</field>
+		<field name="deleteLink" title="${uiLabelMap.CommonDelete}"
+			widget-style="btn btn-mini btn-danger">
+			<hyperlink target="deletePayrollPreference" description="${uiLabelMap.CommonDelete}"
+				also-hidden="true">
+				<parameter param-name="partyId" />
+				<parameter param-name="roleTypeId" />
+				<parameter param-name="payrollPreferenceSeqId" />
+			</hyperlink>
+		</field>
+		<field name="_rowSubmit" title="${uiLabelMap.CommonSelect}">
+			<hidden value="Y" />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonSubmit}"
+			widget-style="btn btn-small btn-primary btn-position-center margin-top5 margin-left6">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+	<form name="AddPayrollPreference" type="single" target="createPayrollPreference"
+		header-row-style="header-row" default-table-style="basic-table">
+		<auto-fields-service service-name="createPayrollPreference" />
+		<field name="payrollPreferenceSeqId" title="${uiLabelMap.HumanResPayrollPreferenceSeqId}"
+			title-style="asterisk" required-field="true">
+			<lookup target-form-name="LookupPayRollPreference" />
+		</field>
+		<field name="partyId">
+			<hidden />
+		</field>
+		<field name="partyIdFrom"><hidden/></field>
+		<field name="roleTypeIdFrom"><hidden/></field>
+		<field name="roleTypeId">
+			<hidden />
+		</field>
+		<field name="fromDate">
+			<hidden />
+		</field>
+		<field name="deductionTypeId">
+			<drop-down allow-empty="false">
+				<entity-options description="${description}"
+					key-field-name="deductionTypeId" entity-name="DeductionType">
+					<entity-order-by field-name="deductionTypeId" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="paymentMethodTypeId">
+			<drop-down allow-empty="false">
+				<entity-options description="${description}"
+					key-field-name="paymentMethodTypeId" entity-name="PaymentMethodType">
+					<entity-order-by field-name="paymentMethodTypeId" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="periodTypeId">
+			<drop-down allow-empty="false">
+				<entity-options description="${description}"
+					key-field-name="periodTypeId" entity-name="PeriodType">
+					<entity-order-by field-name="periodTypeId" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonCreate}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+		
+		<sort-order>
+			<field-group style="span6 no-left-margin no-widget-header">
+				<sort-field name="payrollPreferenceSeqId"/>
+				<sort-field name="deductionTypeId"/>
+				<sort-field name="paymentMethodTypeId"/>
+				<sort-field name="periodTypeId"/>
+				<sort-field name="thruDate"/>
+			</field-group>
+			<field-group style="span6 no-widget-header">
+				<sort-field name="routingNumber"/>
+				<sort-field name="percentage"/>
+				<sort-field name="flatAmount"/>
+				<sort-field name="accountNumber"/>
+				<sort-field name="bankName"/>
+			</field-group>
+			
+			<field-group style="span12 no-widget-header align-center">
+				<sort-field name="submitButton"/>
+			</field-group>
+		</sort-order>
+	</form>
+	<form name="ListPerformanceNotes" type="list" target="updatePerformanceNote"
+		title="" paginate-target="findPerformanceNotes" odd-row-style="alternate-row"
+		header-row-style="header-row-2"
+		default-table-style="table table-hover table-striped table-bordered dataTable">
+		<actions>
+			<entity-condition entity-name="PerformanceNote" />
+		</actions>
+		<auto-fields-service default-field-type="display"
+			service-name="updatePerformanceNote" />
+		<field name="partyId" title="${uiLabelMap.PartyPartyId}">
+			<display-entity description="${firstName} ${middleName} ${lastName} ${groupName}"
+				entity-name="PartyNameView">
+				<sub-hyperlink target="/partymgr/control/viewprofile"
+					link-style="btn btn-small btn-purple" target-type="inter-app"
+					description="${partyId}">
+					<parameter param-name="partyId" />
+				</sub-hyperlink>
+			</display-entity>
+		</field>
+	</form>
+	<form name="AddPerformanceNote" type="single" target="createPerformanceNote"
+		default-map-name="performanceNote" header-row-style="header-row"
+		default-table-style="basic-table">
+		<auto-fields-service service-name="createPerformanceNote"
+			map-name="performanceNote" />
+		<field name="partyId">
+			<hidden />
+		</field>
+		<field name="roleTypeId">
+			<drop-down allow-empty="true">
+				<entity-options description="${description}"
+					key-field-name="roleTypeId" entity-name="RoleType">
+					<entity-order-by field-name="description" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonCreate}"
+			widget-style="btn btn-small btn-purple">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+	<form name="ListUnemploymentClaims" type="multi"
+		target="updateUnemploymentClaim?unemploymentClaimId=${unemploymentClaimId}&amp;roleTypeIdFrom=${roleTypeIdFrom}&amp;roleTypeIdTo=${roleTypeIdTo}&amp;partyIdFrom=${partyIdFrom}&amp;partyIdTo=${partyIdTo}&amp;fromDate=${fromDate}"
+		paginate-target="FindUnemploymentClaim" odd-row-style="alternate-row"
+		header-row-style="header-row-2"
+		default-table-style="table table-hover table-striped table-bordered dataTable" group-columns="false">
+		<actions>
+			<entity-condition entity-name="UnemploymentClaim"
+				filter-by-date="true">
+				<condition-list combine="and">
+					<condition-expr field-name="partyIdFrom" operator="equals"
+						from-field="parameters.partyIdFrom" />
+					<condition-expr field-name="partyIdTo" operator="equals"
+						from-field="parameters.partyIdTo" />
+					<condition-expr field-name="roleTypeIdFrom"
+						operator="equals" from-field="parameters.roleTypeIdFrom" />
+					<condition-expr field-name="roleTypeIdTo" operator="equals"
+						from-field="parameters.roleTypeIdTo" />
+					<condition-expr field-name="fromDate" operator="equals"
+						from-field="parameters.fromDate" />
+				</condition-list>
+				<order-by field-name="unemploymentClaimId" />
+			</entity-condition>
+		</actions>
+		<field name="unemploymentClaimId">
+			<display />
+		</field>
+		<field name="partyIdFrom">
+			<display />
+		</field>
+		<field name="partyIdTo">
+			<display />
+		</field>
+		<field name="roleTypeIdTo">
+			<hidden />
+		</field>
+		<field name="roleTypeIdFrom">
+			<hidden />
+		</field>
+		<field name="fromDate">
+			<display />
+		</field>
+		<field name="description">
+			<text size="12" />
+		</field>
+		<field name="statusId">
+			<drop-down allow-empty="false">
+				<entity-options description="${description}"
+					key-field-name="statusId" entity-name="StatusItem">
+					<entity-constraint name="statusTypeId" operator="equals"
+						value="EMPL_POSITION_STATUS" />
+					<entity-order-by field-name="description" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="_rowSubmit" title="${uiLabelMap.CommonSelect}">
+			<hidden value="Y" />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonSubmit}"
+			widget-style="btn btn-small btn-primary margin-top5 margin-left6">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+		<field name="deleteLink" title=" " widget-style="btn btn-mini btn-danger">
+			<hyperlink target="deleteUnemploymentClaim" description="${uiLabelMap.CommonDelete}">
+				<parameter param-name="unemploymentClaimId" />
+				<parameter param-name="roleTypeIdFrom" />
+				<parameter param-name="roleTypeIdTo" />
+				<parameter param-name="partyIdFrom" />
+				<parameter param-name="partyIdTo" />
+				<parameter param-name="fromDate" />
+			</hyperlink>
+		</field>
+	</form>
+	<form name="AddUnemploymentClaim" type="single" target="createUnemploymentClaim"
+		title="" default-map-name="unemploymentClaim" header-row-style="header-row"
+		default-table-style="basic-table">
+		<auto-fields-service service-name="createUnemploymentClaim" />
+		<field name="unemploymentClaimId" title-style="asterisk">
+			<lookup target-form-name="LookupUnemploymentClaim" />
+		</field>
+		<field name="statusId">
+			<drop-down allow-empty="false">
+				<entity-options description="${description}"
+					key-field-name="statusId" entity-name="StatusItem">
+					<entity-constraint name="statusTypeId" operator="equals"
+						value="EMPL_POSITION_STATUS" />
+					<entity-order-by field-name="description" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="roleTypeIdFrom">
+			<hidden />
+		</field>
+		<field name="roleTypeIdTo">
+			<hidden />
+		</field>
+		<field name="partyIdFrom">
+			<hidden />
+		</field>
+		<field name="partyIdTo">
+			<hidden />
+		</field>
+		<field name="fromDate">
+			<hidden />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonCreate}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+
+	<form name="FindEmplAgreement" type="single" target="FindEmplAgreement"
+		header-row-style="header-row" default-table-style="basic-table">
+		<field name="agreementId" title="${uiLabelMap.EmplAgreementId}">
+			<text-find />
+		</field>
+		<field name="partyIdFrom" title="${uiLabelMap.PartyIdFrom}"
+			tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
+			<lookup target-form-name="LookupPartyName" />
+		</field>
+		<field name="partyIdTo" title="${uiLabelMap.PartyIdTo}" tooltip="${uiLabelMap.CommonRequired}"
+			widget-style="required">
+			<lookup target-form-name="LookupPartyName" />
+		</field>
+		<field name="roleTypeIdFrom" title="${uiLabelMap.RoleTypeIdFrom}"
+			tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
+			<hidden value="INTERNAL_ORGANIZATIO" />
+		</field>
+		<field name="roleTypeIdTo" title="${uiLabelMap.RoleTypeIdTo}"
+			tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
+			<hidden value="EMPLOYEE" />
+		</field>
+		<field name="emplPositionId" title="${uiLabelMap.Position}"
+			tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
+			<lookup target-form-name="LookupEmplPosition"></lookup>
+		</field>
+		<field name="agreementTypeId">
+			<hidden value="EMPLOYMENT_AGREEMENT"/>
+		</field>
+		<field name="agreementDate" title="${uiLabelMap.AgreementDate}">
+			<date-find />
+		</field>
+		<field name="fromDate" tooltip="${uiLabelMap.CommonRequired}"
+			widget-style="required">
+			<date-find />
+		</field>
+		<field name="thruDate">
+			<date-find />
+		</field>
+		<field name="description" title="${uiLabelMap.CommonDescription}">
+			<text-find />
+		</field>
+		
+		<field name="noConditionFind">
+			<hidden value="Y" /><!-- if this isn't there then with all fields 
+				empty no query will be done -->
+		</field>
+		
+		<field name="submitButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-search" />
+		</field>
+	</form>
+
+	<form name="ListEmplAgreements" type="list" list-name="listIt"
+		odd-row-style="alternate-row" header-row-style="header-row-2"
+		default-table-style="table table-hover table-striped table-bordered dataTable">
+		<actions>
+			<!-- <service service-name="performFind" result-map="map" result-map-list="listIt">
+				<field-map field-name="inputFields" from-field="parameters" />
+				<field-map field-name="entityName" value="Agreement" />
+				<field-map field-name="viewIndex" from-field="viewIndex" />
+				<field-map field-name="viewSize" from-field="viewSize" />
+				<field-map field-name="noConditionFind" value="Y"/>
+			</service> -->
+		</actions>
+		<row-actions>
+			<entity-one entity-name="EmplPosition" auto-field-map="true">
+			</entity-one>
+			<set field="emplId" from-field="partyIdTo"/>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrPositionEmpl.groovy"/>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrDeptEmpl.groovy"/>
+		</row-actions>
+		<field name="agreementId" title="${uiLabelMap.EmplAgreementId}"
+			widget-style="">
+			<hyperlink target="ViewEmplAgreement" description="${agreementId}">
+				<parameter param-name="agreementId" />
+			</hyperlink>
+		</field>
+		<field name="partyIdFrom" title="${uiLabelMap.PartyIdFrom}">
+			<display-entity entity-name="PartyGroup" key-field-name="partyId" description="${groupName}"></display-entity>
+		</field>
+		<field name="partyIdTo" title="${uiLabelMap.PartyIdTo}">
+			<display-entity entity-name="Person" key-field-name="partyId" description="${lastName} ${middleName} ${firstName}"></display-entity>
+		</field>
+		<!-- <field name="roleTypeIdFrom" title="${uiLabelMap.RoleTypeIdFrom}">
+			<display-entity entity-name="RoleType" key-field-name="roleTypeId" description="${description}"></display-entity>
+		</field> -->
+		<!-- <field name="roleTypeIdTo" title="${uiLabelMap.RoleTypeIdTo}">
+			<display-entity entity-name="RoleType" key-field-name="roleTypeId" description="${description}"></display-entity>
+		</field> -->
+		<field name="currPositionsStr" title="${uiLabelMap.Position}">
+			<display></display>
+		</field>
+		
+		<field name="currDept" title="${uiLabelMap.PartyIdWork}">
+			<display></display>
+		</field>
+		<field name="fromDate" red-when="never">
+			<display type="date"/>
+		</field>
+		<field name="thruDate" red-when="never">
+			<display type="date"></display>
+		</field>
+		<field name="agreementDate" title="${uiLabelMap.AgreementDate}">
+			<display type="date"></display>
+		</field>
+		<!-- <field name="description" title="${uiLabelMap.CommonDescription}">
+			<display />
+		</field> -->
+		<!-- <field name="textData" title="${uiLabelMap.CommonText}">
+			<display />
+		</field> -->
+		<field name="deleteLink" title="${uiLabelMap.CommonDelete}"
+			widget-style="btn btn-mini btn-danger icon-trash open-sans" >
+			<hyperlink target="deleteEmplAgreement" description=" " request-confirmation="true" confirmation-message="${uiLabelMap.NotifyDelete}">
+				<parameter param-name="agreementId" />
+			</hyperlink>
+		</field>
+	</form>
+
+	<form name="AddEmplAgreement" type="single" target="createEmplAgreement"
+		header-row-style="header-row" default-table-style="basic-table">
+		<actions>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employment/getDataForAgreement.groovy"/>
+			<entity-one value-field="employee" entity-name="Party" auto-field-map="false">
+				<field-map field-name="partyId" from-field="parameters.partyIdTo"/>
+			</entity-one>
+			<set field="emplPositionList" value="${groovy: if(employee != null)return com.olbius.util.PartyUtil.getCurrPositionTypeOfEmpl(delegator, employee.partyId)}" type="List"/>
+			<set field="emplPosition" from-field="emplPositionList[0]"/>
+			<set field="emplPositionId" from-field="emplPosition.emplPositionId"/>
+			<set field="emplPositionTypeId" from-field="emplPosition.emplPositionTypeId"/>	
+			<set field="agreementDate" value="${groovy: org.ofbiz.base.util.UtilDateTime.nowTimestamp();}"/>		
+		</actions>
+		<!-- <field name="agreementId" title="${uiLabelMap.EmplAgreementId}">
+			<text></text>
+		</field> -->
+		<field name="partyIdFrom" title="${uiLabelMap.PartyIdFrom}" use-when="${groovy: partyIdFrom==null}" 
+			map-name="context" title-style="asterisk" required-field="true">
+			<lookup target-form-name="LookupPartyFromForAgreement" />
+		</field>
+		<field name="partyIdFromRepresent" title="${uiLabelMap.partyIdFromRepresent}" title-style="asterisk" required-field="true">
+			<lookup target-form-name="LookupPersonRoleManager"></lookup>
+		</field>
+		<field name="partyIdFrom" title="${uiLabelMap.PartyIdTo}"  use-when="${groovy: partyIdFrom!=null}" 
+			map-name="context" title-style="asterisk" required-field="true">
+			<display></display>
+		</field>
+		<!-- <field name="partyIdTo" title="${uiLabelMap.PartyIdTo}"  use-when="${groovy: partyIdTo!=null}" 
+			map-name="context" title-style="asterisk" required-field="true">
+			<display></display>
+		</field>
+		<field name="partyIdTo" title="${uiLabelMap.PartyIdTo}" title-style="asterisk" use-when="${groovy: partyIdTo==null}" map-name="context"
+			required-field="true">
+			<lookup target-form-name="LookupPersonForAgreement" />
+		</field> -->
+		<!-- <field name="partyIdTo" title="${uiLabelMap.PartyIdTo}"  use-when="${groovy: employee!=null}" 
+			map-name="context" title-style="asterisk" required-field="true">
+			<display></display>
+		</field> -->
+		<field name="partyIdTo" title="${uiLabelMap.PartyIdTo}" title-style="asterisk" map-name="context"
+			required-field="true">
+			<lookup target-form-name="LookupPersonForAgreement" />
+		</field> 
+		
+		<field name="roleTypeIdFrom" title="${uiLabelMap.RoleTypeIdFrom}">	
+			<hidden value="INTERNAL_ORGANIZATIO" />
+		</field>
+		
+		<field name="roleTypeIdTo" title="${uiLabelMap.RoleTypeIdTo}">
+			<hidden value="EMPLOYEE" />
+		</field>
+		<field name="emplPositionTypeId" title="${uiLabelMap.Position}" required-field="true">
+			<display-entity entity-name="EmplPositionType" description="${description}"></display-entity>
+		</field>
+		<field name="emplPositionId">
+			<hidden/>
+		</field>
+		<field name="agreementTypeId">
+			<hidden value="EMPLOYMENT_AGREEMENT"/>
+		</field>
+		<field name="agreementDate" title="${uiLabelMap.AgreementDate}">
+			<date-time type="date"/>
+		</field>
+		<field name="fromDate" title-style="asterisk" required-field="true">
+			<date-time type="date"/>
+		</field>
+		<field name="thruDate">
+			<date-time type="date"/>
+		</field>
+		<!-- <field name="description" title="${uiLabelMap.CommonDescription}">
+			<text />
+		</field>
+		<field name="textData" title="${uiLabelMap.CommonText}">
+			<textarea />
+		</field> -->
+		<field name="submitButton" title="${uiLabelMap.CommonCreate}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+		<field name="trialSalaryRate"><hidden/></field>
+		<field name="salary"><hidden/></field>
+		<sort-order>
+			<field-group style="span6 no-widget-header no-left-margin">
+				<!-- <sort-field name="agreementId"/> -->
+				<sort-field name="partyIdFrom"/>
+				<sort-field name="partyIdFromRepresent"/>
+				<sort-field name="partyIdTo"/>
+				<sort-field name="emplPositionTypeId"/>
+				<!-- <sort-field name="emplPositionId"/> -->
+				
+			</field-group>
+			<field-group style="span6 no-widget-header">
+				<sort-field name="agreementDate"/>
+				<sort-field name="fromDate"/>
+				<sort-field name="thruDate"/>
+				<sort-field name="description"/>
+				<sort-field name="textData"/>
+			</field-group>
+			
+			<field-group style="align-center span12 no-widget-header no-left-margin">
+				<sort-field name="submitButton"/>
+			</field-group>
+		</sort-order>
+	</form>
+	
+	<form name="AddTrialAgreement" type="single" target="createEmplAgreement"
+		header-row-style="header-row" default-table-style="basic-table">
+		<actions>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employment/getDataForAgreement.groovy"/>
+			<set field="emplPositionId" from-field="parameters.emplPositionId" />
+			<set field="partyIdTo" from-field="parameters.partyId" />
+			<set field="agreementDate" value="${groovy: org.ofbiz.base.util.UtilDateTime.nowTimestamp()}"/>
+		</actions>		
+		<field name="partyIdFrom" title="${uiLabelMap.PartyIdFrom}" use-when="${groovy: partyIdFrom==null}" 
+			map-name="context" title-style="asterisk" required-field="true">
+			<lookup target-form-name="LookupPartyFromForAgreement" />
+		</field>
+		<field name="partyIdFromRepresent" title="${uiLabelMap.partyIdFromRepresent}" title-style="asterisk" required-field="true">
+			<lookup target-form-name="LookupPersonRoleManager"></lookup>
+		</field>
+		<!-- <field name="partyIdFrom" title="${uiLabelMap.PartyIdTo}"  use-when="${groovy: partyIdFrom!=null}" 
+			map-name="context" title-style="asterisk" required-field="true">
+			<display></display>
+		</field> -->
+		<!-- <field name="partyIdTo" title="${uiLabelMap.PartyIdTo}"  use-when="${groovy: partyIdTo!=null}" 
+			map-name="context">
+			<display-entity entity-name="PartyNameView" description="${firstName} ${middleName} ${lastName}" key-field-name="partyId">
+			</display-entity>
+		</field> -->
+		<field name="partyIdTo" title="${uiLabelMap.PartyIdTo}" title-style="asterisk" required-field="true" use-when="${groovy: partyIdTo==null}" map-name="context">
+			<lookup target-form-name="LookupPersonForAgreement" />
+		</field>
+		<field name="roleTypeIdFrom" title="${uiLabelMap.RoleTypeIdFrom}">	
+			<hidden value="INTERNAL_ORGANIZATIO" />
+		</field>
+		
+		<field name="roleTypeIdTo" title="${uiLabelMap.RoleTypeIdTo}">
+			<hidden value="EMPLOYEE" />
+		</field>
+		
+		<field name="emplPositionTypeId" title="${uiLabelMap.Position}" required-field="true">
+			<display-entity entity-name="EmplPositionType" description="${description}"></display-entity>
+		</field>
+		<field name="emplPositionId">
+			<hidden/>
+		</field>
+		
+		<!-- <field name="partyIdWork" title="${uiLabelMap.FormFieldTitle_partyIdWork}"
+			 use-when="${groovy: emplPositionId!=null}">
+			<display-entity entity-name="PartyNameView" description="${groupName}" key-field-name="partyId">
+			</display-entity>
+		</field> -->
+		
+		<!-- <field name="emplPositionTypeId" title="${uiLabelMap.Position}"
+			 use-when="${groovy: emplPositionId!=null}">
+			<display-entity entity-name="EmplPositionType" description="${description}" key-field-name="emplPositionTypeId">
+			</display-entity>
+		</field> -->
+		
+		<field name="agreementTypeId">
+			<hidden value="TRIAL_AGREEMENT"/>
+		</field>
+		<field name="agreementDate" title="${uiLabelMap.AgreementDate}">
+			<date-time type="date"/>
+		</field>
+		<field name="fromDate" title-style="asterisk" required-field="true">
+			<date-time type="date"/>
+		</field>
+		<field name="thruDate">
+			<date-time type="date"/>
+		</field>
+		<!-- <field name="description" title="${uiLabelMap.CommonDescription}">
+			<text />
+		</field>
+		<field name="textData" title="${uiLabelMap.CommonText}">
+			<textarea />
+		</field> -->
+		<field name="submitButton" title="${uiLabelMap.CommonCreate}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+		<field name="trialSalaryRate" title="${uiLabelMap.FormFieldTitle_TrialSalaryRate}"><text/></field>
+		<field name="salary" title="${uiLabelMap.FormFieldTitle_Salary}"><text/></field>
+		<sort-order>
+			<field-group style="span6 no-widget-header no-left-margin">
+				<sort-field name="agreementId"/>
+				<sort-field name="partyIdFrom"/>
+				<sort-field name="partyIdFromRepresent"/>
+				<sort-field name="partyIdTo"/>
+				<!-- <sort-field name="emplPositionId"/> -->
+				<!-- <sort-field name="partyIdWork"/> -->
+				<sort-field name="emplPositionTypeId"/>
+				<!-- <sort-field name="description"/>
+				<sort-field name="textData"/> -->
+			</field-group>
+			<field-group style="span6 no-widget-header">
+				<sort-field name="agreementDate"/>
+				<sort-field name="fromDate"/>
+				<sort-field name="thruDate"/>
+				<sort-field name="trialSalaryRate"/>
+				<sort-field name="salary"/>
+			</field-group>
+			
+			<field-group style="align-center span12 no-widget-header">
+				<sort-field name="submitButton"/>
+			</field-group>
+		</sort-order>
+	</form>
+	
+	<form name="ListEmplAgreementItems" type="list" title=""
+		odd-row-style="alternate-row" header-row-style="header-row-2"
+		default-table-style="table table-hover table-striped table-bordered dataTable">
+		<actions>
+			<entity-condition entity-name="AgreementItem">
+				<condition-list>
+					<condition-expr field-name="agreementId" value="${agreementId}" />
+				</condition-list>
+			</entity-condition>
+		</actions>
+		<field name="agreementId" title="${uiLabelMap.EmplAgreementId}"
+			widget-style="btn btn-info btn-mini">
+			<hyperlink target="AddEmplAgreementItemTerm" description="${agreementId}">
+				<parameter param-name="agreementId" />
+				<parameter param-name="agreementItemSeqId" />
+			</hyperlink>
+		</field>
+		<field name="agreementItemSeqId" title="${uiLabelMap.AgreementItemSeqId}">
+			<display />
+		</field>
+		<field name="agreementItemTypeId" title="${uiLabelMap.AgreementItemTypeId}">
+			<display />
+		</field>
+		<field name="currencyUomId" title="${uiLabelMap.CurrencyUomId}">
+			<display />
+		</field>
+		<field name="agreementText" title="${uiLabelMap.AgreementText}">
+			<display />
+		</field>
+		<field name="deleteLink" title="${uiLabelMap.CommonDelete}"
+			widget-style="btn btn-mini btn-danger">
+			<hyperlink target="deleteEmplAgreementItem" description="${uiLabelMap.CommonDelete}">
+				<parameter param-name="agreementId" />
+				<parameter param-name="agreementItemSeqId" />
+			</hyperlink>
+		</field>
+	</form>
+
+	<form name="AddEmplAgreementItem" type="single" target="addEmplAgreementItem"
+		header-row-style="header-row" default-table-style="basic-table">
+		<field name="agreementId">
+			<hidden />
+		</field>
+		<field name="agreementItemTypeId" title="${uiLabelMap.AgreementItemTypeId}">
+			<drop-down allow-empty="true">
+				<entity-options description="${description}"
+					entity-name="AgreementItemType" key-field-name="agreementItemTypeId" />
+			</drop-down>
+		</field>
+		<field name="currencyUomId" title="${uiLabelMap.CurrencyUomId}">
+			<drop-down allow-empty="true"
+				no-current-selected-key="${defaultOrganizationPartyCurrencyUomId}">
+				<entity-options key-field-name="uomId"
+					description="${description} - ${abbreviation}" entity-name="Uom">
+					<entity-constraint name="uomTypeId" operator="equals"
+						value="CURRENCY_MEASURE" />
+					<entity-order-by field-name="description" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="agreementText" title="${uiLabelMap.AgreementText}">
+			<textarea />
+		</field>
+		<field name="agreementImage" title="${uiLabelMap.AgreementImage}">
+			<text />
+		</field>
+		<field name="submitButton" title="${uiLabelMap.CommonCreate}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+
+	<form name="ListEmplAgreementTerms" type="list" title=""
+		odd-row-style="alternate-row" header-row-style="header-row-2"
+		default-table-style="table table-hover table-striped table-bordered dataTable">
+		<actions>
+			<entity-condition entity-name="AgreementTerm">
+				<condition-list>
+					<condition-expr field-name="agreementId" value="${agreementId}" />
+				</condition-list>
+			</entity-condition>
+		</actions>
+		<field name="agreementId" title="${uiLabelMap.EmplAgreementId}"
+			widget-style="btn btn-info btn-mini">
+			<hyperlink target="AddEmplAgreementTerm" description="${agreementId}">
+				<parameter param-name="agreementId" />
+			</hyperlink>
+		</field>
+		<field name="agreementItemSeqId" title="${uiLabelMap.AgreementItemSeqId}">
+			<display />
+		</field>
+		<field name="agreementTermId" title="${uiLabelMap.EmplAgreementTermId}">
+			<hidden />
+		</field>
+		<field name="termTypeId" title="${uiLabelMap.EmplTermTypeId}">
+			<display-entity entity-name="TermType" key-field-name="termTypeId" description="${description}"></display-entity>
+		</field>
+		<field name="agreementId" title="${uiLabelMap.EmplAgreementId}">
+			<hidden />
+		</field>
+		<field name="agreementItemSeqId" title="${uiLabelMap.EmplAgreementItemSeqId}">
+			<hidden />
+		</field>
+		<field name="invoiceItemTypeId">
+			<display-entity entity-name="InvoiceItemType" key-field-name="invoiceItemTypeId" description="${description}"></display-entity>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.FromDate}">
+			<display />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.ThruDate}">
+			<display></display>
+		</field>
+		<field name="textValue" title="${uiLabelMap.TextValue}">
+			<display></display>
+		</field>
+		<field name="termValue" title="${uiLabelMap.TermValue}">
+			<display></display>
+		</field>
+		<field name="description" title="${uiLabelMap.Description}">
+			<display></display>
+		</field>
+		<field name="deleteLink" title="${uiLabelMap.CommonDelete}"
+			widget-style="btn btn-mini btn-danger icon-trash open-sans">
+			<hyperlink target="deleteEmplAgreementTerm" description="${uiLabelMap.CommonDelete}">
+				<parameter param-name="agreementId" />
+				<parameter param-name="agreementTermId" />
+			</hyperlink>
+		</field>
+	</form>
+
+	<form name="ListEmplAgreementItemTerms" type="list" title=""
+		odd-row-style="alternate-row" header-row-style="header-row-2"
+		default-table-style="table table-hover table-striped table-bordered dataTable">
+		<actions>
+			<entity-condition entity-name="AgreementTerm">
+				<condition-list>
+					<condition-expr field-name="agreementId" value="${agreementId}" />
+					<condition-expr field-name="agreementItemSeqId"
+						value="${agreementItemSeqId}" />
+				</condition-list>
+			</entity-condition>
+		</actions>
+		<field name="agreementId" title="${uiLabelMap.EmplAgreementId}"
+			widget-style="btn btn-info btn-mini">
+			<hyperlink target="AddEmplAgreementTerm" description="${agreementId}">
+				<parameter param-name="agreementId" />
+			</hyperlink>
+		</field>
+		<field name="agreementItemSeqId" title="${uiLabelMap.AgreementItemSeqId}">
+			<display />
+		</field>
+		<field name="agreementTermId" title="${uiLabelMap.EmplAgreementTermId}">
+			<hidden />
+		</field>
+		<field name="termTypeId" title="${uiLabelMap.EmplTermTypeId}">
+			<display />
+		</field>
+		<field name="agreementId" title="${uiLabelMap.EmplAgreementId}">
+			<hidden />
+		</field>
+		<field name="agreementItemSeqId" title="${uiLabelMap.EmplAgreementItemSeqId}">
+			<hidden />
+		</field>
+		<field name="invoiceItemTypeId">
+			<display />
+		</field>
+		<field name="fromDate" title="${uiLabelMap.FromDate}">
+			<display />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.ThruDate}">
+			<display></display>
+		</field>
+		<field name="termValue" title="${uiLabelMap.TermValue}">
+			<display></display>
+		</field>
+		<field name="textValue" title="${uiLabelMap.TextValue}">
+			<display></display>
+		</field>
+		<field name="description" title="${uiLabelMap.Description}">
+			<display></display>
+		</field>
+		<field name="deleteLink" title="${uiLabelMap.CommonDelete}"
+			widget-style="btn btn-mini btn-danger">
+			<hyperlink target="deleteEmplAgreementItem" description="${uiLabelMap.CommonDelete}">
+				<parameter param-name="agreementId" />
+				<parameter param-name="agreementItemSeqId" />
+			</hyperlink>
+		</field>
+	</form>
+
+	<form name="AddEmplAgreementTerm" type="single" target="createEmplAgreementTerm"
+		title="" header-row-style="header-row" default-table-style="basic-table">
+		<field name="agreementTermId" title="${uiLabelMap.EmplAgreementTermId}">
+			<hidden />
+		</field>
+		<field name="termTypeId" title="${uiLabelMap.EmplTermTypeId}">
+			<drop-down allow-empty="false">
+				<entity-options entity-name="TermType" description="${description}">
+					<entity-order-by field-name="description" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="agreementId" title="${uiLabelMap.EmplAgreementId}">
+			<hidden />
+		</field>
+		<field name="agreementItemSeqId" title="${uiLabelMap.EmplAgreementItemSeqId}">
+			<hidden />
+		</field>
+		<field name="invoiceItemTypeId">
+			<drop-down allow-empty="true">
+				<entity-options entity-name="InvoiceItemType"
+					description="${description}">
+					<entity-order-by field-name="description" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.FromDate}">
+			<date-time />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.ThruDate}" >
+			<date-time />
+		</field>
+		<field name="textValue" title="${uiLabelMap.TextValue}" widget-style="required" required-field="true" title-style="asterisk">
+			<text />
+		</field>
+		<field name="termValue" title="${uiLabelMap.TermValue}" widget-style="required" required-field="true" title-style="asterisk">
+			<text />
+		</field>
+		<field name="description" title="${uiLabelMap.Description}">
+			<text />
+		</field>
+		<field name="createParameterPayroll" title="${uiLabelMap.HrolbiusCreateParameterPayroll}" ><check></check></field>
+		<field name="submitButton" title="${uiLabelMap.CommonSubmit}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+
+	<form name="AddEmplAgreementItemTerm" type="single"
+		target="createEmplAgreementItemTerm" title="" header-row-style="header-row"
+		default-table-style="basic-table">
+		<field name="agreementTermId" title="${uiLabelMap.EmplAgreementTermId}">
+			<hidden />
+		</field>
+		<field name="termTypeId" title="${uiLabelMap.EmplTermTypeId}">
+			<drop-down allow-empty="false">
+				<entity-options entity-name="TermType" description="${description}">
+					<entity-order-by field-name="description" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="agreementId" title="${uiLabelMap.EmplAgreementId}">
+			<hidden />
+		</field>
+		<field name="agreementItemSeqId" title="${uiLabelMap.EmplAgreementItemSeqId}">
+			<hidden />
+		</field>
+		<field name="invoiceItemTypeId">
+			<drop-down allow-empty="true">
+				<entity-options entity-name="InvoiceItemType"
+					description="${description}">
+					<entity-order-by field-name="description" />
+				</entity-options>
+			</drop-down>
+		</field>
+		<field name="fromDate" title="${uiLabelMap.FromDate}">
+			<date-time />
+		</field>
+		<field name="thruDate" title="${uiLabelMap.ThruDate}">
+			<date-time />
+		</field>
+		<field name="termValue" title="${uiLabelMap.TermValue}">
+			<text />
+		</field>
+		<field name="textValue" title="${uiLabelMap.TextValue}">
+			<text />
+		</field>
+		<field name="description" title="${uiLabelMap.Description}">
+			<text />
+		</field>
+
+		<field name="submitButton" title="${uiLabelMap.CommonSubmit}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-ok" />
+		</field>
+	</form>
+	
+	<form name="FindTrialAgreement" type="single" target="FindTrialAgreement"
+		header-row-style="header-row" default-table-style="basic-table">
+		<field name="agreementId" title="${uiLabelMap.EmplAgreementId}">
+			<text-find />
+		</field>
+		<field name="partyIdFrom" title="${uiLabelMap.PartyIdFrom}"
+			tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
+			<lookup target-form-name="LookupPartyName" />
+		</field>
+		<field name="partyIdTo" title="${uiLabelMap.PartyIdTo}" tooltip="${uiLabelMap.CommonRequired}"
+			widget-style="required">
+			<lookup target-form-name="LookupPartyName" />
+		</field>
+		<field name="roleTypeIdFrom" title="${uiLabelMap.RoleTypeIdFrom}"
+			tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
+			<hidden value="INTERNAL_ORGANIZATIO" />
+		</field>
+		<field name="roleTypeIdTo" title="${uiLabelMap.RoleTypeIdTo}"
+			tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
+			<hidden value="EMPLOYEE" />
+		</field>
+		<field name="emplPositionId" title="${uiLabelMap.Position}"
+			tooltip="${uiLabelMap.CommonRequired}" widget-style="required">
+			<lookup target-form-name="LookupEmplPosition"></lookup>
+		</field>
+		<field name="agreementTypeId">
+			<hidden value="TRIAL_AGREEMENT"/>
+		</field>
+		<field name="agreementDate" title="${uiLabelMap.AgreementDate}">
+			<date-find />
+		</field>
+		<field name="fromDate" tooltip="${uiLabelMap.CommonRequired}"
+			widget-style="required">
+			<date-find />
+		</field>
+		<field name="thruDate">
+			<date-find />
+		</field>
+		<field name="description" title="${uiLabelMap.CommonDescription}">
+			<text-find />
+		</field>
+		
+		<field name="noConditionFind">
+			<hidden value="Y" /><!-- if this isn't there then with all fields 
+				empty no query will be done -->
+		</field>
+		
+		<field name="submitButton" title="${uiLabelMap.CommonFind}"
+			widget-style="btn btn-small btn-primary">
+			<submit button-type="button" image-location="icon-search" />
+		</field>
+	</form>
+
+	<form name="ListTrialAgreements" type="list" list-name="listIt"
+		odd-row-style="alternate-row" header-row-style="header-row-2"
+		default-table-style="table table-hover table-striped table-bordered dataTable">
+		<actions></actions>
+		<row-actions>
+			<entity-one entity-name="EmplPosition" auto-field-map="true">
+			</entity-one>
+			<set field="emplId" from-field="partyIdTo"/>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrPositionEmpl.groovy"/>
+			<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrDeptEmpl.groovy"/>
+		</row-actions>
+		<field name="agreementId" title="${uiLabelMap.EmplAgreementId}"
+			widget-style="">
+			<hyperlink target="ViewEmplAgreement" description="${agreementId}">
+				<parameter param-name="agreementId" />
+			</hyperlink>
+		</field>
+		<field name="partyIdFrom" title="${uiLabelMap.PartyIdFrom}">
+			<display-entity entity-name="PartyGroup" key-field-name="partyId" description="${groupName}"></display-entity>
+		</field>
+		<field name="partyIdTo" title="${uiLabelMap.PartyIdTo}">
+			<display-entity entity-name="Person" key-field-name="partyId" description="${lastName} ${middleName} ${firstName}"></display-entity>
+		</field>
+		<!-- <field name="roleTypeIdFrom" title="${uiLabelMap.RoleTypeIdFrom}">
+			<display-entity entity-name="RoleType" key-field-name="roleTypeId" description="${description}"></display-entity>
+		</field>
+		<field name="roleTypeIdTo" title="${uiLabelMap.RoleTypeIdTo}">
+			<display-entity entity-name="RoleType" key-field-name="roleTypeId" description="${description}"></display-entity>
+		</field> -->
+		<!-- <field name="emplPositionId" title="${uiLabelMap.Position}">
+			<display-entity entity-name="EmplPositionEmplPositionTypeParty" key-field-name="emplPositionId" description="${description}"></display-entity>
+		</field>
+		<field name="partyId" title="${uiLabelMap.PartyIdWork}">
+			<display-entity entity-name="PartyGroup" description="${groupName}"></display-entity>
+		</field> -->
+		<field name="currPositionsStr" title="${uiLabelMap.Position}">
+			<display></display>
+		</field>
+		
+		<field name="currDept" title="${uiLabelMap.PartyIdWork}">
+			<display></display>
+		</field>
+		<field name="fromDate" red-when="never">
+			<display type="date"/>
+		</field>
+		<field name="thruDate" red-when="never">
+			<display type="date"></display>
+		</field>
+		<field name="agreementTypeId">
+			<hidden/>
+		</field>
+		<field name="agreementDate" title="${uiLabelMap.AgreementDate}">
+			<display type="date"></display>
+		</field>
+		<!-- <field name="description" title="${uiLabelMap.CommonDescription}">
+			<display />
+		</field>
+		<field name="textData" title="${uiLabelMap.CommonText}">
+			<display />
+		</field> -->
+		<field name="deleteLink" title="${uiLabelMap.CommonDelete}"
+			widget-style="btn btn-mini btn-danger icon-trash open-sans" >
+			<hyperlink target="deleteEmplAgreement" description=" "  request-confirmation="true" confirmation-message="${uiLabelMap.NotifyDelete}">
+				<parameter param-name="agreementId" />
+			</hyperlink>
+		</field>
+	</form>
+	
+	
+</forms>

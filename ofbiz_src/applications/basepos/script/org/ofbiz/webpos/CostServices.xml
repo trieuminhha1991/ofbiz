@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+	<simple-method method-name="getProductAverageCostSimple"
+		short-description="Service to get the average cost of product with input productId">
+		<set field="getPartyAcctgPrefMap.organizationPartyId" from-field="parameters.ownerPartyId" />
+		<call-service service-name="getPartyAccountingPreferences" in-map-name="getPartyAcctgPrefMap">
+			<result-to-field result-name="partyAccountingPreference" />
+		</call-service>
+		<if-compare field="partyAccountingPreference.cogsMethodId"
+			operator="equals" value="COGS_AVG_COST">
+			<entity-and entity-name="ProductAverageCost" list="productAverageCostList"
+				filter-by-date="true">
+				<field-map field-name="productAverageCostTypeId" value="SIMPLE_AVG_COST" /> <!-- TODO: handle for WEIGHTED_AVG_COST and MOVING_AVG_COST -->
+				<field-map field-name="organizationPartyId" from-field="parameters.ownerPartyId" />
+				<field-map field-name="productId" from-field="parameters.productId" />
+				<field-map field-name="facilityId" from-field="parameters.facilityId" />
+			</entity-and>
+			<field-to-result field="partyAccountingPreference.baseCurrencyUomId"
+				result-name="currencyUomId" />
+			<first-from-list list="productAverageCostList" entry="productAverageCost" />
+		</if-compare>
+		<if-not-empty field="productAverageCost">
+			<set field="unitCost" from-field="productAverageCost.averageCost"
+				type="BigDecimal" />
+			<else>
+				<set field="unitCost" value="0" type="BigDecimal" />
+			</else>
+		</if-not-empty>
+		<field-to-result field="unitCost" />
+	</simple-method>
+</simple-methods>

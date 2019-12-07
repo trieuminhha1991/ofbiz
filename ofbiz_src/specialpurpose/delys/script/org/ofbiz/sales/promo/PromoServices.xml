@@ -1,0 +1,875 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<simple-methods xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/simple-methods-v2.xsd">
+	<simple-method method-name="promosPermissionCheck">
+		<set field="primaryPermission" value="DELYS_PROMOS"/>
+        <call-simple-method method-name="genericBasePermissionCheck" xml-resource="component://common/script/org/ofbiz/common/permission/CommonPermissionServices.xml"/>		
+	</simple-method>
+	
+	<simple-method method-name="createProductPromoDelys">
+        <if-empty field="parameters.promoName">
+        	<add-error>
+        		<fail-property resource="DelysPromoUiLabels" property="DelysPromoProductPromoNameMustNotBeEmpty"/>
+        	</add-error>
+        </if-empty>
+        <if-empty field="parameters.productPromoTypeId">
+        	<add-error>
+        		<fail-property resource="DelysPromoUiLabels" property="DelysPromoProductPromoTypeMustNotBeEmpty"/>
+        	</add-error>
+        </if-empty>
+        <if-empty field="parameters.fromDate">
+        	<add-error>
+        		<fail-property resource="DelysPromoUiLabels" property="DelysPromoFromDateNotBeEmpty"/>
+        	</add-error>
+        </if-empty>
+        <if-empty field="parameters.roleTypeIds">
+        	<add-error>
+        		<fail-property resource="DelysAdminErrorUiLabels" property="DARoleTypeApplyNotBeEmpty"/>
+        	</add-error>
+        </if-empty>
+        <if-empty field="parameters.productStoreIds">
+        	<add-error>
+        		<fail-property resource="DelysAdminErrorUiLabels" property="DAPromotionStoreNotBeEmpty"/>
+        	</add-error>
+        </if-empty>
+        <check-errors/>
+			
+		<make-value value-field="newEntity" entity-name="ProductPromo"/>
+		<if-empty field="parameters.productPromoStatusId">
+		    <set field="parameters.productPromoStatusId" value="PROMO_CREATED"/>
+		</if-empty>
+        <set-nonpk-fields map="parameters" value-field="newEntity"/>
+        <set field="newEntity.productPromoId" from-field="parameters.productPromoId"/>
+        <if-empty field="newEntity.productPromoId">
+    		<sequenced-id sequence-name="ProductPromo" field="newEntity.productPromoId"/>
+    	<else>
+    		<check-id field="newEntity.productPromoId" />
+    		<check-errors/>
+    		<entity-one value-field="dummyProductPromo" entity-name="ProductPromo">
+    			<field-map field-name="productPromoId" from-field="parameters.productPromoId"/>
+    		</entity-one>
+    		<if-not-empty field="dummyProductPromo">
+    			<add-error>
+    				<fail-property resource="CommonErrorUiLabels" property="CommonErrorDublicateKey" />
+    			</add-error>
+    		</if-not-empty>
+    		<check-errors/>
+    	</else>
+    	</if-empty>
+        
+		<set field="productPromoId" from-field="newEntity.productPromoId"/>
+        <if-empty field="newEntity.userEntered">
+            <set value="Y" set-if-empty="true" field="newEntity.userEntered"/>
+        </if-empty>
+		
+        <now-timestamp field="nowTimestamp"/>
+        <set from-field="nowTimestamp" field="newEntity.createdDate"/>
+        <set from-field="nowTimestamp" field="newEntity.lastModifiedDate"/>
+        <set from-field="userLogin.userLoginId" field="newEntity.lastModifiedByUserLogin"/>
+        <set from-field="userLogin.userLoginId" field="newEntity.createdByUserLogin"/>
+        <create-value value-field="newEntity"/>
+        
+        <make-value value-field="newPromoStatus" entity-name="ProductPromoStatus"/>
+        <sequenced-id sequence-name="ProductPromoStatus" field="newPromoStatus.productPromoStatusId"/>
+        <set field="newPromoStatus.statusId" from-field="newEntity.productPromoStatusId"/>
+        <set field="newPromoStatus.productPromoId" from-field="newEntity.productPromoId"/>
+        <set field="newPromoStatus.statusDatetime" from-field="nowTimestamp"/>
+        <set field="newPromoStatus.statusUserLogin" from-field="userLogin.userLoginId"/>
+        <set field="newPromoStatus.changeReason" from-field="parameters.changeReason"/>
+        <create-value value-field="newPromoStatus"/>
+        
+        <if-not-empty field="parameters.budgetId">
+        	<make-value value-field="newPromoBudget" entity-name="ProductPromoBudget"/>		
+			<set field="newPromoBudget.productPromoId" from-field="productPromoId"/>
+			<set field="newPromoBudget.budgetId" from-field="parameters.budgetId"/>
+			<set field="newPromoBudget.budgetTypeId" value="PROMO_BUDGET_DIS"/>
+			<create-value value-field="newPromoBudget"/>
+        </if-not-empty>
+		
+		<if-not-empty field="parameters.miniRevenueId">
+			<make-value value-field="newPromoMiniRevenue" entity-name="ProductPromoBudget"/>
+			<set field="newPromoMiniRevenue.productPromoId" from-field="productPromoId"/>
+			<set field="newPromoMiniRevenue.budgetId" from-field="parameters.miniRevenueId"/>
+			<set field="newPromoMiniRevenue.budgetTypeId" value="PROMO_MINI_REVENUE"/>
+			<create-value value-field="newPromoMiniRevenue"/>
+		</if-not-empty>
+		
+		<if-not-empty field="parameters.roleTypeIds">
+			<!-- <call-class-method method-name="toSet" class-name="org.ofbiz.base.util.UtilMisc" ret-field="partiesSet">
+				<field field="parameters.parties"/>
+			</call-class-method> -->		
+			<iterate entry="roleTypeId" list="parameters.roleTypeIds">
+				<set field="promoRoleCtx.roleTypeId" from-field="roleTypeId"/>
+				<set field="promoRoleCtx.productPromoId" from-field="productPromoId"/>
+				<if-not-empty field="parameters.fromDate">
+					<set field="promoRoleCtx.fromDate" from-field="parameters.fromDate"/>
+					<else>
+						<now-timestamp field="promoRoleCtx.fromDate"/>		
+					</else>
+				</if-not-empty>
+				<call-service service-name="createProductPromoRoleDelys" in-map-name="promoRoleCtx"></call-service>
+			</iterate>
+		</if-not-empty>
+		<if-not-empty field="parameters.productStoreIds"> 			
+			<iterate entry="productStoreId" list="parameters.productStoreIds">
+				<set field="productStorePromo.productStoreId" from-field="productStoreId"/>
+				<set field="productStorePromo.productPromoId" from-field="productPromoId"/>				
+				<if-not-empty field="parameters.fromDate">
+					<set field="productStorePromo.fromDate" from-field="parameters.fromDate"/>
+					<else>
+						<now-timestamp field="productStorePromo.fromDate"/>		
+					</else>
+				</if-not-empty>
+				<if-not-empty field="parameters.thruDate">
+					<set field="productStorePromo.thruDate" from-field="parameters.thruDate"/>
+				</if-not-empty>
+				<!-- set from date, thru date for promotion -->
+				<call-service service-name="createProductStorePromoAppl" in-map-name="productStorePromo">
+				</call-service>
+			</iterate>
+		</if-not-empty>
+		<field-to-result field="productPromoId" result-name="productPromoId"/>
+	</simple-method> 
+	
+	<simple-method method-name="updateProductPromo">		
+		<set from-field="parameters.productPromoId" field="lookupPKMap.productPromoId"/>
+        <find-by-primary-key entity-name="ProductPromo" map="lookupPKMap" value-field="lookedUpValue"/>
+        <set field="productPromoStatusId" from-field="lookedUpValue.productPromoStatusId"/>
+        <if-compare operator="equals" value="PROMO_CREATED" field="productPromoStatusId">
+        	<call-service service-name="updateProductPromo" in-map-name="parameters"></call-service>
+        	<if-not-empty field="parameters.budgetId">
+        		<entity-condition list="listPromoBudget" entity-name="ProductPromoBudget">
+        			<condition-list>
+        				<condition-expr field-name="productPromoId" from-field="lookupPKMap.productPromoId"/>
+        				<condition-expr field-name="budgetTypeId" value="PROMO_BUDGET_DIS"/>
+        			</condition-list>
+        		</entity-condition>
+        		<if-not-empty field="listPromoBudget">
+        			<iterate entry="promoBudgetItem" list="listPromoBudget">
+	        			<set field="promoBudgetItem.budgetId" from-field="lookupPKMap.budgetId"/>
+	        		</iterate>
+	        		<store-list list="listPromoBudget"/>
+        		</if-not-empty>
+        	</if-not-empty>
+			<if-not-empty field="parameters.miniRevenueId">
+				<entity-condition list="listPromoMiniRevenue" entity-name="ProductPromoBudget">
+        			<condition-list>
+        				<condition-expr field-name="productPromoId" from-field="lookupPKMap.productPromoId"/>
+        				<condition-expr field-name="budgetTypeId" value="PROMO_MINI_REVENUE"/>
+        			</condition-list>
+        		</entity-condition>
+        		<if-not-empty field="listPromoMiniRevenue">
+        			<iterate entry="promoMiniRevenueItem" list="listPromoMiniRevenue">
+	        			<set field="promoMiniRevenueItem.budgetId" from-field="lookupPKMap.miniRevenueId"/>
+	        		</iterate>
+	        		<store-list list="listPromoMiniRevenue"/>
+        		</if-not-empty>
+			</if-not-empty>
+	        <else>
+	        	<add-error>
+	        		<fail-property resource="DelysUiLabels" property="productPromoSttNotCreated"/>
+	        	</add-error>
+	        	<check-errors/>
+	        </else>
+        </if-compare>        
+	</simple-method>
+	<simple-method method-name="deleteProductPromo" short-description="Delete a ProductPromo">        
+        <!-- TODO: if a force remove flag is passed, remove related info first, maybe just rules, store assocs, etc -->
+        <set from-field="parameters.productPromoId" field="lookupPKMap.productPromoId"/>
+        <find-by-primary-key entity-name="ProductPromo" map="lookupPKMap" value-field="lookedUpValue"/>
+        <if-compare operator="equals" value="PROMO_CREATED" field="lookedUpValue.productPromoStatusId">
+        	<entity-condition list="listPromoStatus" entity-name="ProductPromoStatus">
+       			<condition-list>
+       				<condition-expr field-name="productPromoId" from-field="lookupPKMap.productPromoId"/>
+       			</condition-list>
+       		</entity-condition>
+       		<if-not-empty field="listPromoStatus">
+        		<remove-list list="listPromoStatus"/>
+       		</if-not-empty>
+       		<entity-condition list="listStorePromoAppl" entity-name="ProductStorePromoAppl">
+       			<condition-list>
+       				<condition-expr field-name="productPromoId" from-field="lookupPKMap.productPromoId"/>
+       			</condition-list>
+       		</entity-condition>
+       		<if-not-empty field="listStorePromoAppl">
+        		<remove-list list="listStorePromoAppl"/>
+       		</if-not-empty>
+       		<entity-condition list="listPromoBudget" entity-name="ProductPromoBudget">
+       			<condition-list>
+       				<condition-expr field-name="productPromoId" from-field="lookupPKMap.productPromoId"/>
+       				<condition-expr field-name="budgetTypeId" value="PROMO_BUDGET_DIS"/>
+       			</condition-list>
+       		</entity-condition>
+       		<if-not-empty field="listPromoBudget">
+        		<remove-list list="listPromoBudget"/>
+       		</if-not-empty>
+			<entity-condition list="listPromoMiniRevenue" entity-name="ProductPromoBudget">
+       			<condition-list>
+       				<condition-expr field-name="productPromoId" from-field="lookupPKMap.productPromoId"/>
+       				<condition-expr field-name="budgetTypeId" value="PROMO_MINI_REVENUE"/>
+       			</condition-list>
+       		</entity-condition>
+       		<if-not-empty field="listPromoMiniRevenue">
+       			<remove-list list="listPromoMiniRevenue"/>
+       		</if-not-empty>
+       		<entity-condition list="listPromoCond" entity-name="ProductPromoCond">
+       			<condition-expr field-name="productPromoId" from-field="lookupPKMap.productPromoId"/>
+       		</entity-condition>
+       		<if-not-empty field="listPromoCond">
+       			<remove-list list="listPromoCond"/>
+       		</if-not-empty>
+       		<entity-condition list="listPromoAction" entity-name="ProductPromoAction">
+       			<condition-expr field-name="productPromoId" from-field="lookupPKMap.productPromoId"/>
+       		</entity-condition>
+       		<if-not-empty field="listPromoAction">
+       			<remove-list list="listPromoAction"/>
+       		</if-not-empty>
+       		<entity-condition list="listPromoContent" entity-name="ProductPromoContent">
+       			<condition-expr field-name="productPromoId" from-field="lookupPKMap.productPromoId"/>
+       		</entity-condition>
+       		<if-not-empty field="listPromoContent">
+       			<remove-list list="listPromoContent"/>
+       		</if-not-empty>
+       		<entity-condition list="listPromoProduct" entity-name="ProductPromoProduct">
+       			<condition-expr field-name="productPromoId" from-field="lookupPKMap.productPromoId"/>
+       		</entity-condition>
+       		<if-not-empty field="listPromoProduct">
+       			<remove-list list="listPromoProduct"/>
+       		</if-not-empty>
+       		<entity-condition list="listPromoCategory" entity-name="ProductPromoCategory">
+       			<condition-expr field-name="productPromoId" from-field="lookupPKMap.productPromoId"/>
+       		</entity-condition>
+       		<if-not-empty field="listPromoCategory">
+       			<remove-list list="listPromoCategory"/>
+       		</if-not-empty>
+       		<entity-condition list="listPromoRoleTypeAppl" entity-name="ProductPromoRoleTypeAppl">
+       			<condition-expr field-name="productPromoId" from-field="lookupPKMap.productPromoId"/>
+       		</entity-condition>
+       		<if-not-empty field="listPromoRoleTypeAppl">
+       			<remove-list list="listPromoRoleTypeAppl"/>
+       		</if-not-empty>
+       		<entity-condition list="listPromoRule" entity-name="ProductPromoRule">
+       			<condition-expr field-name="productPromoId" from-field="lookupPKMap.productPromoId"/>
+       		</entity-condition>
+       		<if-not-empty field="listPromoRule">
+       			<remove-list list="listPromoRule"/>
+       		</if-not-empty>
+       		<call-service service-name="deleteProductPromo" in-map-name="parameters"></call-service>
+       	<else>
+       		<add-error>
+       			<fail-property resource="DelysAdminErrorUiLabels" property="DACannotRemoveThisRecord"/>
+       		</add-error>
+       		<check-errors/>
+       	</else>
+        </if-compare>
+    </simple-method>
+    <!-- product role apply -->
+    <simple-method method-name="createProductPromoRole">
+    	<check-permission permission="DELYS_PROMOS" action="_CREATE">
+    		<fail-property resource="DelysUiLabels" property="DelysCreatePermissionError"/>
+    	</check-permission>
+    	<set field="lookupPKMap.productPromoId" from-field="parameters.productPromoId"/>
+    	<find-by-primary-key value-field="lookedUpValue" map="lookupPKMap" entity-name="ProductPromo"/>
+    	<if-compare operator="equals" value="PROMO_CREATED" field="lookedUpValue.productPromoStatusId">
+			<make-value value-field="newPromoRole" entity-name="ProductPromoRoleTypeAppl"/>
+			<set-pk-fields value-field="newPromoRole" map="parameters"/>
+			<find-by-primary-key value-field="lookedUpValue" map="newPromoRole"/>
+			<if-not-empty field="lookedUpValue">
+				<call-bsh>
+					import org.ofbiz.base.util.UtilProperties;
+					import org.ofbiz.service.ServiceUtil;
+					resourceError = "DelysUiLabels";
+					ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "ProductPromoRoleExists", locale));
+				</call-bsh>
+				<return/>
+			</if-not-empty>		
+			<set-nonpk-fields value-field="newPromoRole" map="parameters"/>				
+			<create-value value-field="newPromoRole"/>
+		<else>
+			<call-bsh>
+				import org.ofbiz.base.util.UtilProperties;
+				import org.ofbiz.service.ServiceUtil;
+				resourceError = "DelysUiLabels";
+				ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "ProductPromoSttNotCreated", locale));			
+			</call-bsh>
+		</else>	    	
+    	</if-compare>	
+    </simple-method>
+    <simple-method method-name="deleteProductPromoRole">
+    	<check-permission permission="DELYS_PROMOS" action="_DELETE">
+    		<fail-property resource="DelysUiLabels" property="DelysCreatePermissionError"/>
+    	</check-permission>	
+    	<make-value value-field="lookupPKMap" entity-name="ProductPromoRoleTypeAppl"/>
+    	<set-pk-fields value-field="lookupPKMap" map="parameters"/>
+    	<find-by-primary-key value-field="lookedUpValue" map="lookupPKMap" entity-name="ProductPromoRoleTypeAppl"/>
+    	<remove-value value-field="lookedUpValue"/>
+    </simple-method>
+    
+	<!-- productstore promotion apply -->
+	<simple-method method-name="createProductStorePromoAppl">
+		<check-permission permission="DELYS_PROMOS" action="_CREATE">
+            <fail-property resource="DelysUiLabels" property="DelysCreatePermissionError"/>
+        </check-permission>        
+        <check-errors/>
+		<set from-field="parameters.productPromoId" field="lookupPKMap.productPromoId"/>
+        <find-by-primary-key entity-name="ProductPromo" map="lookupPKMap" value-field="lookedUpValue"/>
+        <if-compare operator="equals" value="PROMO_CREATED" field="lookedUpValue.productPromoStatusId">
+        	<call-service service-name="createProductStorePromoAppl" in-map-name="parameters"></call-service>
+        <else>
+       		<call-bsh>
+				import org.ofbiz.base.util.UtilProperties;
+				import org.ofbiz.service.ServiceUtil;
+				resourceError = "DelysUiLabels";
+				ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "ProductPromoSttNotCreated", locale));			
+			</call-bsh>
+       	</else>	
+        </if-compare>
+	</simple-method>
+	
+	<simple-method method-name="updateProductStorePromoAppl">
+		<check-permission permission="DELYS_PROMOS" action="_UPDATE">
+            <fail-property resource="DelysUiLabels" property="DelysCreatePermissionError"/>
+        </check-permission>        
+        <check-errors/>
+		<set from-field="parameters.productPromoId" field="lookupPKMap.productPromoId"/>
+        <find-by-primary-key entity-name="ProductPromo" map="lookupPKMap" value-field="lookedUpValue"/>
+        <if-compare operator="equals" value="PROMO_CREATED" field="lookedUpValue.productPromoStatusId">
+        	<call-service service-name="updateProductStorePromoAppl" in-map-name="parameters"></call-service>
+        <else>
+       		<call-bsh>
+				import org.ofbiz.base.util.UtilProperties;
+				import org.ofbiz.service.ServiceUtil;
+				resourceError = "DelysUiLabels";
+				ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "ProductPromoSttNotCreated", locale));			
+			</call-bsh>
+       	</else>	
+        </if-compare>
+	</simple-method>
+	
+	<simple-method method-name="deleteProductStorePromoAppl">
+		<check-permission permission="DELYS_PROMOS" action="_DELETE">
+            <fail-property resource="DelysUiLabels" property="DelysCreatePermissionError"/>
+        </check-permission>        
+        <check-errors/>
+		<set from-field="parameters.productPromoId" field="lookupPKMap.productPromoId"/>
+        <find-by-primary-key entity-name="ProductPromo" map="lookupPKMap" value-field="lookedUpValue"/>
+        <if-compare operator="equals" value="PROMO_CREATED" field="lookedUpValue.productPromoStatusId">
+        	<call-service service-name="deleteProductStorePromoAppl" in-map-name="parameters"></call-service>
+        <else>
+       		<call-bsh>
+				import org.ofbiz.base.util.UtilProperties;
+				import org.ofbiz.service.ServiceUtil;
+				resourceError = "DelysUiLabels";
+				ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "ProductPromoSttNotCreated", locale));			
+			</call-bsh>
+       	</else>	
+        </if-compare>
+	</simple-method>
+	
+	<!-- ProductPromoRule methods -->
+    <simple-method method-name="createProductPromoRule" short-description="Create a ProductPromoRule">
+        <check-permission permission="DELYS_PROMOS" action="_CREATE">
+            <fail-property resource="DelysUiLabels" property="DelysCreatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+        
+       	<if-empty field="parameters.ruleName">
+        	<add-error>
+        		<fail-property resource="DelysAdminErrorUiLabels" property="DARuleNameMustNotBeEmpty"/>
+        	</add-error>
+        </if-empty>
+        <check-errors/>
+        
+		<set from-field="parameters.productPromoId" field="lookupPKMap.productPromoId"/>
+        <find-by-primary-key entity-name="ProductPromo" map="lookupPKMap" value-field="lookedUpValue"/>
+        <if-compare operator="equals" value="PROMO_CREATED" field="lookedUpValue.productPromoStatusId">
+        	<call-service service-name="createProductPromoRule" in-map-name="parameters">
+        	    <result-to-field result-name="productPromoRuleId" field="productPromoRuleId"/>
+        	</call-service>
+	    <else>
+	    	<add-error>
+        		<fail-property resource="DelysUiLabels" property="ProductPromoSttNotCreated"/>
+        	</add-error>
+        	<check-errors/>
+	    </else>    
+        </if-compare>
+        <field-to-result field="productPromoRuleId" result-name="productPromoRuleId"/>
+    </simple-method>
+    <simple-method method-name="updateProductPromoRule" short-description="Update a ProductPromoRule">
+        <check-permission permission="DELYS_PROMOS" action="_UPDATE">
+            <fail-property resource="DelysUiLabels" property="DelysUpdatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+		<set from-field="parameters.productPromoId" field="lookupPKMap.productPromoId"/>
+        <find-by-primary-key entity-name="ProductPromo" map="lookupPKMap" value-field="lookedUpValue"/>
+        <if-compare operator="equals" value="PROMO_CREATED" field="lookedUpValue.productPromoStatusId">
+        	<call-service service-name="updateProductPromoRule" in-map-name="parameters"></call-service>
+		<else>
+			<call-bsh>
+				import org.ofbiz.base.util.UtilProperties;
+				import org.ofbiz.service.ServiceUtil;
+				resourceError = "DelysUiLabels";
+				ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "ProductPromoSttNotCreated", locale));			
+			</call-bsh>
+		</else>
+        </if-compare>
+       
+    </simple-method>
+    <simple-method method-name="deleteProductPromoRule" short-description="Delete a ProductPromoRule">
+        <check-permission permission="DELYS_PROMOS" action="_DELETE">
+            <fail-property resource="DelysUiLabels" property="DelysDeletePermissionError"/>
+        </check-permission>
+        <check-errors/>
+		<set from-field="parameters.productPromoId" field="lookupPKMap.productPromoId"/>
+        <find-by-primary-key entity-name="ProductPromo" map="lookupPKMap" value-field="lookedUpValue"/>
+        
+        <if-compare operator="equals" value="PROMO_CREATED" field="lookedUpValue.productPromoStatusId">
+        	<set field="productPromoRuleCtx.productPromoId" from-field="parameters.productPromoId"/>
+        	<set field="productPromoRuleCtx.productPromoRuleId" from-field="parameters.productPromoRuleId"/>        	
+        	<find-by-and list="condList" map="productPromoRuleCtx" entity-name="ProductPromoCond"/>
+        	<find-by-and list="actionList" map="productPromoRuleCtx" entity-name="ProductPromoAction"/>
+        	<iterate entry="cond" list="condList">
+        		<set field="condCtx.productPromoId" from-field="cond.productPromoId"/>
+        		<set field="condCtx.productPromoRuleId" from-field="cond.productPromoRuleId"/>
+        		<set field="condCtx.productPromoCondSeqId" from-field="cond.productPromoCondSeqId"/> 
+        		<call-service service-name="deleteProductPromoCond" in-map-name="condCtx"></call-service>       		
+        	</iterate>
+        	<iterate entry="action" list="actionList">
+        		<set field="actionCtx.productPromoId" from-field="action.productPromoId"/>
+        		<set field="actionCtx.productPromoRuleId" from-field="action.productPromoRuleId"/>
+        		<set field="actionCtx.productPromoActionSeqId" from-field="action.productPromoActionSeqId"/> 
+        		<call-service service-name="deleteProductPromoAction" in-map-name="actionCtx"></call-service>
+        	</iterate>
+        	<call-service service-name="deleteProductPromoRule" in-map-name="parameters"></call-service>
+        </if-compare>
+    </simple-method>
+    
+    <!-- ProductPromoCond methods -->
+    <simple-method method-name="createProductPromoCond" short-description="Create an ProductPromoCond">        
+		<set field="lookupPKMap.productPromoId" from-field="parameters.productPromoId"/>
+		<find-by-primary-key value-field="productPromo" map="lookupPKMap" entity-name="ProductPromo"/>
+		<if-compare operator="equals" value="PROMO_CREATED" field="productPromo.productPromoStatusId">
+			<set-service-fields service-name="createProductPromoCond" to-map="context" map="parameters"/>
+			<call-service service-name="createProductPromoCond" in-map-name="context">
+				<result-to-field result-name="productPromoCondSeqId" field="productPromoCondSeqId"/>
+			</call-service>
+			<if-not-empty field="parameters.productCatIdListCond">
+				<iterate entry="productCatId" list="parameters.productCatIdListCond">
+					<set field="parameters.productCategoryId" from-field="productCatId"/>
+					<set field="parameters.productPromoActionSeqId" value="_NA_"/>
+					<set field="parameters.productPromoCondSeqId" from-field="productPromoCondSeqId"/>
+					<set field="parameters.andGroupId" value="_NA_"/>
+					<set-service-fields service-name="createProductPromoCategory" to-map="productCatContext" map="parameters"/>
+					<call-service service-name="createProductPromoCategory" in-map-name="productCatContext"></call-service>
+				</iterate>
+			</if-not-empty>
+			<if-not-empty field="parameters.productIdListCond">
+				<iterate entry="productId" list="parameters.productIdListCond">
+					<set field="parameters.productId" from-field="productId"/>
+					<set field="parameters.productPromoActionSeqId" value="_NA_"/>
+					<set field="parameters.productPromoCondSeqId" from-field="productPromoCondSeqId"/>
+					<set-service-fields service-name="createProductPromoProduct" to-map="productContext" map="parameters"/>
+					<call-service service-name="createProductPromoProduct" in-map-name="productContext"></call-service>
+				</iterate>
+			</if-not-empty>
+	        <else>
+	        	<call-bsh>
+					import org.ofbiz.base.util.UtilProperties;
+					import org.ofbiz.service.ServiceUtil;
+					resourceError = "DelysUiLabels";
+					ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "ProductPromoSttNotCreated", locale));			
+				</call-bsh>
+	        </else>
+		</if-compare>
+    </simple-method>
+    <simple-method method-name="updateProductPromoCond" short-description="Update an ProductPromoCond">
+		<set field="lookupPKMap.productPromoId" from-field="parameters.productPromoId"/>
+		<find-by-primary-key value-field="productPromo" map="lookupPKMap" entity-name="ProductPromo"/>
+		<if-compare operator="equals" value="PROMO_CREATED" field="productPromo.productPromoStatusId">
+			<call-service service-name="updateProductPromoCond" in-map-name="parameters"></call-service>
+        <else>
+        	<call-bsh>
+				import org.ofbiz.base.util.UtilProperties;
+				import org.ofbiz.service.ServiceUtil;
+				resourceError = "DelysUiLabels";
+				ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "ProductPromoSttNotCreated", locale));			
+			</call-bsh>
+        </else>
+		</if-compare>
+    </simple-method>
+    <simple-method method-name="deleteProductPromoCond" short-description="Delete an ProductPromoCond">
+        <set field="lookupPKMap.productPromoId" from-field="parameters.productPromoId"/>
+		<find-by-primary-key value-field="productPromo" map="lookupPKMap" entity-name="ProductPromo"/>
+		<if-compare operator="equals" value="PROMO_CREATED" field="productPromo.productPromoStatusId">
+			<call-service service-name="deleteProductPromoCond" in-map-name="parameters"></call-service>
+	    <else>
+	    	<call-bsh>
+				import org.ofbiz.base.util.UtilProperties;
+				import org.ofbiz.service.ServiceUtil;
+				resourceError = "DelysUiLabels";
+				ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "ProductPromoSttNotCreated", locale));			
+			</call-bsh>
+	    </else>    
+		</if-compare>
+    </simple-method>
+    
+    <!-- ProductPromoAction methods -->
+    <simple-method method-name="createProductPromoAction" short-description="Create an ProductPromoAction">        
+		<set field="lookupPKMap.productPromoId" from-field="parameters.productPromoId"/>
+		<find-by-primary-key value-field="productPromo" map="lookupPKMap" entity-name="ProductPromo"/>
+		<if-compare operator="equals" value="PROMO_CREATED" field="productPromo.productPromoStatusId">
+			<set-service-fields service-name="createProductPromoAction" to-map="context" map="parameters"/>	       
+	        <call-service service-name="createProductPromoAction" in-map-name="context">
+	        	<result-to-field result-name="productPromoActionSeqId" field="productPromoActionSeqId"/>
+	        </call-service>
+	        <if-not-empty field="parameters.productCatIdListAction">
+				<iterate entry="productCatId" list="parameters.productCatIdListAction">
+					<set field="parameters.productCategoryId" from-field="productCatId"/>
+					<set field="parameters.productPromoActionSeqId" from-field="productPromoActionSeqId"/>
+					<set field="parameters.productPromoCondSeqId" value="_NA_"/>
+					<set field="parameters.andGroupId" value="_NA_"/>
+					<set-service-fields service-name="createProductPromoCategory" to-map="productCatContext" map="parameters"/>
+					<call-service service-name="createProductPromoCategory" in-map-name="productCatContext"></call-service>
+				</iterate>
+			</if-not-empty>
+			<if-not-empty field="parameters.productIdListAction">
+				<iterate entry="productId" list="parameters.productIdListAction">
+					<set field="parameters.productId" from-field="productId"/>
+					<set field="parameters.productPromoActionSeqId" from-field="productPromoActionSeqId"/>
+					<set field="parameters.productPromoCondSeqId" value="_NA_"/>
+					<set-service-fields service-name="createProductPromoProduct" to-map="productContext" map="parameters"/>
+					<call-service service-name="createProductPromoProduct" in-map-name="productContext"></call-service>
+				</iterate>
+			</if-not-empty>
+	    <else>
+	    	<call-bsh>
+				import org.ofbiz.base.util.UtilProperties;
+				import org.ofbiz.service.ServiceUtil;
+				resourceError = "DelysUiLabels";
+				ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "ProductPromoSttNotCreated", locale));			
+			</call-bsh>
+	    </else>
+        </if-compare>
+    </simple-method>
+    <simple-method method-name="updateProductPromoAction" short-description="Update an ProductPromoAction">
+        <set field="lookupPKMap.productPromoId" from-field="parameters.productPromoId"/>
+		<find-by-primary-key value-field="productPromo" map="lookupPKMap" entity-name="ProductPromo"/>
+		<if-compare operator="equals" value="PROMO_CREATED" field="productPromo.productPromoStatusId">
+			<call-service service-name="updateProductPromoAction" in-map-name="parameters"></call-service>
+		<else>
+			<call-bsh>
+				import org.ofbiz.base.util.UtilProperties;
+				import org.ofbiz.service.ServiceUtil;
+				resourceError = "DelysUiLabels";
+				ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "ProductPromoSttNotCreated", locale));			
+			</call-bsh>
+		</else>	        
+		</if-compare>
+    </simple-method>
+    <simple-method method-name="deleteProductPromoAction" short-description="Delete an ProductPromoAction">
+        <set field="lookupPKMap.productPromoId" from-field="parameters.productPromoId"/>
+		<find-by-primary-key value-field="productPromo" map="lookupPKMap" entity-name="ProductPromo"/>
+		<if-compare operator="equals" value="PROMO_CREATED" field="productPromo.productPromoStatusId">
+			<call-service service-name="deleteProductPromoAction" in-map-name="parameters"></call-service>
+	    <else>
+	    	<call-bsh>
+				import org.ofbiz.base.util.UtilProperties;
+				import org.ofbiz.service.ServiceUtil;
+				resourceError = "DelysUiLabels";
+				ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "ProductPromoSttNotCreated", locale));			
+			</call-bsh>
+	    </else>    
+		</if-compare>
+    </simple-method>
+	<!-- productPromoCategory method -->
+    <simple-method method-name="createProductPromoCategory">
+    	<check-permission permission="DELYS_PROMOS" action="_CREATE">
+            <fail-property resource="DelysUiLabels" property="DelysCreatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+    	<set field="lookupPKMap.productPromoId" from-field="parameters.productPromoId"/>
+		<find-by-primary-key value-field="productPromo" map="lookupPKMap" entity-name="ProductPromo"/>
+		<if-compare operator="equals" value="PROMO_CREATED" field="productPromo.productPromoStatusId">
+			<call-service service-name="createProductPromoCategory" in-map-name="parameters"></call-service>
+	    <else>
+	    	<call-bsh>
+				import org.ofbiz.base.util.UtilProperties;
+				import org.ofbiz.service.ServiceUtil;
+				resourceError = "DelysUiLabels";
+				ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "ProductPromoSttNotCreated", locale));			
+			</call-bsh>
+	    </else>    
+		</if-compare>
+    </simple-method>	   
+    <simple-method method-name="updateProductPromoCategory">
+    	<check-permission permission="DELYS_PROMOS" action="_UPDATE">
+            <fail-property resource="DelysUiLabels" property="DelysUpdatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+    	<set field="lookupPKMap.productPromoId" from-field="parameters.productPromoId"/>
+		<find-by-primary-key value-field="productPromo" map="lookupPKMap" entity-name="ProductPromo"/>
+		<if-compare operator="equals" value="PROMO_CREATED" field="productPromo.productPromoStatusId">
+			<call-service service-name="updateProductPromoCategory" in-map-name="parameters"></call-service>
+	    <else>
+	    	<call-bsh>
+				import org.ofbiz.base.util.UtilProperties;
+				import org.ofbiz.service.ServiceUtil;
+				resourceError = "DelysUiLabels";
+				ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "ProductPromoSttNotCreated", locale));			
+			</call-bsh>
+	    </else>    
+		</if-compare>
+    </simple-method>
+    
+    <simple-method method-name="deleteProductPromoCategory">
+    	<check-permission permission="DELYS_PROMOS" action="_DELETE">
+            <fail-property resource="DelysUiLabels" property="DelysDeletePermissionError"/>
+        </check-permission>
+        <check-errors/>
+    	<set field="lookupPKMap.productPromoId" from-field="parameters.productPromoId"/>
+		<find-by-primary-key value-field="productPromo" map="lookupPKMap" entity-name="ProductPromo"/>
+		<if-compare operator="equals" value="PROMO_CREATED" field="productPromo.productPromoStatusId">
+			<call-service service-name="deleteProductPromoCategory" in-map-name="parameters"></call-service>
+	    <else>
+	    	<call-bsh>
+				import org.ofbiz.base.util.UtilProperties;
+				import org.ofbiz.service.ServiceUtil;
+				resourceError = "DelysUiLabels";
+				ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "ProductPromoSttNotCreated", locale));			
+			</call-bsh>
+	    </else>    
+		</if-compare>
+    </simple-method>
+    
+    <!-- productPromoProduct method -->
+    <simple-method method-name="createProductPromoProduct">
+    	<check-permission permission="DELYS_PROMOS" action="_CREATE">
+            <fail-property resource="DelysUiLabels" property="DelysDeletePermissionError"/>
+        </check-permission>
+        <check-errors/>
+        <set field="lookupPKMap.productPromoId" from-field="parameters.productPromoId"/>
+		<find-by-primary-key value-field="productPromo" map="lookupPKMap" entity-name="ProductPromo"/>
+		<if-compare operator="equals" value="PROMO_CREATED" field="productPromo.productPromoStatusId">
+			<call-service service-name="createProductPromoProduct" in-map-name="parameters"></call-service>
+	    <else>
+	    	<call-bsh>
+				import org.ofbiz.base.util.UtilProperties;
+				import org.ofbiz.service.ServiceUtil;
+				resourceError = "DelysUiLabels";
+				ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "ProductPromoSttNotCreated", locale));			
+			</call-bsh>
+	    </else>    
+		</if-compare>
+    </simple-method>
+    <simple-method method-name="updateProductPromoProduct">
+    	<check-permission permission="DELYS_PROMOS" action="_UPDATE">
+            <fail-property resource="DelysUiLabels" property="DelysDeletePermissionError"/>
+        </check-permission>
+        <check-errors/>
+        <set field="lookupPKMap.productPromoId" from-field="parameters.productPromoId"/>
+		<find-by-primary-key value-field="productPromo" map="lookupPKMap" entity-name="ProductPromo"/>
+		<if-compare operator="equals" value="PROMO_CREATED" field="productPromo.productPromoStatusId">
+			<call-service service-name="updateProductPromoProduct" in-map-name="parameters"></call-service>
+	    <else>
+	    	<call-bsh>
+				import org.ofbiz.base.util.UtilProperties;
+				import org.ofbiz.service.ServiceUtil;
+				resourceError = "DelysUiLabels";
+				ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "ProductPromoSttNotCreated", locale));			
+			</call-bsh>
+	    </else>    
+		</if-compare>
+    </simple-method>
+    <simple-method method-name="deleteProductPromoProduct">
+    	<check-permission permission="DELYS_PROMOS" action="_DELETE">
+            <fail-property resource="DelysUiLabels" property="DelysDeletePermissionError"/>
+        </check-permission>
+        <check-errors/>
+        <set field="lookupPKMap.productPromoId" from-field="parameters.productPromoId"/>
+		<find-by-primary-key value-field="productPromo" map="lookupPKMap" entity-name="ProductPromo"/>
+		<if-compare operator="equals" value="PROMO_CREATED" field="productPromo.productPromoStatusId">
+			<call-service service-name="deleteProductPromoProduct" in-map-name="parameters"></call-service>
+	    <else>
+	    	<call-bsh>
+				import org.ofbiz.base.util.UtilProperties;
+				import org.ofbiz.service.ServiceUtil;
+				resourceError = "DelysUiLabels";
+				ServiceUtil.returnError(UtilProperties.getMessage(resourceError, "ProductPromoSttNotCreated", locale));			
+			</call-bsh>
+	    </else>    
+		</if-compare>
+    </simple-method>   
+	<!-- end update product promo -->
+	
+	<simple-method method-name="updateRegPomotionStt">
+		<set from-field="parameters.productPromoId" field="lookupPKMap.productPromoId"/>
+		<set from-field="parameters.partyId" field="lookupPKMap.partyId"/>
+		<find-by-primary-key value-field="lookedUpValue" map="lookupPKMap" entity-name="ProductPromoRegister"/>
+		<set field="lookedUpValue.registerStatus" from-field="parameters.registerStatus"/>
+		<store-value value-field="lookedUpValue"/>
+	</simple-method>
+	<simple-method method-name="updateMarkingExh">		
+    	<set from-field="parameters.productPromoId" field="lookupPKMap.productPromoId"/>
+		<set from-field="parameters.partyId" field="lookupPKMap.partyId"/>
+		<find-by-primary-key value-field="lookedUpValue" map="lookupPKMap" entity-name="ProductPromoRegister"/>
+		<set field="lookedUpValue.promoMarkingStatus" from-field="parameters.promoMarkingStatus"/>
+		<store-value value-field="lookedUpValue"/>
+    </simple-method>
+	<simple-method method-name="createPromotionContent">
+        <make-value value-field="exhibitedContent" entity-name="PromoExhibitedContent"/>
+        <set-pk-fields value-field="exhibitedContent" map="parameters"/>
+        <set-nonpk-fields value-field="exhibitedContent" map="parameters"/>
+
+        <if-empty field="exhibitedContent.fromDate">
+            <now-timestamp field="nowTimestamp"/>
+            <set field="exhibitedContent.fromDate" from-field="nowTimestamp"/>
+        </if-empty>
+        <create-value value-field="exhibitedContent"/>
+    </simple-method>
+    
+    <simple-method method-name="updateProductPromoStatus">
+    	<!-- set status for Promotion, ProductPromoStatus
+    	if PROMO_CANCELLED: Change status of ProductStorePromoAppl => if thruDate is NULL or thruDate greater than nowStamp => set thruDate for Store
+    	 -->
+   	 	<check-permission permission="DELYS_PROMOS" action="_UPDATE">
+           	<fail-property resource="DelysUiLabels" property="DelysCreatePermissionError"/>
+       	</check-permission>        
+       	<check-errors/>
+    	<if>
+    		<condition>
+    			<or>
+    				<if-compare operator="equals" value="PROMO_CANCELLED" field="parameters.productPromoStatusId"></if-compare>
+    				<if-compare operator="equals" value="PROMO_ACCEPTED" field="parameters.productPromoStatusId"></if-compare>
+    			</or>
+    		</condition>
+    		<then>
+    			<now-timestamp field="nowStamp"/>
+    			<set from-field="parameters.productPromoId" field="lookupPKMap.productPromoId"/>
+				<find-by-primary-key value-field="lookedUpValue" map="lookupPKMap" entity-name="ProductPromo"/>
+				<set field="oldProductPromoStatusId" from-field="lookedUpValue.productPromoStatusId"/>
+				<if-compare operator="not-equals" value="PROMO_CREATED" field="oldProductPromoStatusId">
+					<add-error>
+						<fail-property resource="DelysPromoUiLabels" property="DelysPromoPromotionErrorCouldNotChange"/>
+					</add-error>
+				</if-compare>
+				<check-errors/>
+				
+    			<if-compare operator="equals" value="PROMO_CANCELLED" field="parameters.productPromoStatusId">
+	    			<entity-condition list="productStoreApplList" entity-name="ProductStorePromoAppl" filter-by-date="true">
+	    				<condition-expr field-name="productPromoId" from-field="lookupPKMap.productPromoId"/>
+	    			</entity-condition>
+	    			<iterate entry="productStoreApplItem" list="productStoreApplList">
+	    				<!-- thru date all product store in promotion -->
+	    				<set field="productStoreApplItem.thruDate" from-field="nowStamp"/>
+	    				<store-value value-field="productStoreApplItem"/>
+	    			</iterate>
+    			</if-compare>
+				
+				<set field="lookedUpValue.productPromoStatusId" from-field="parameters.productPromoStatusId"/>
+				<store-value value-field="lookedUpValue"/>
+
+				<now-timestamp field="nowTimestamp"/>
+				<make-value value-field="newPromoStatus" entity-name="ProductPromoStatus"/>
+		        <sequenced-id sequence-name="ProductPromoStatus" field="newPromoStatus.productPromoStatusId"/>
+		        <set field="newPromoStatus.statusId" from-field="lookedUpValue.productPromoStatusId"/>
+		        <set field="newPromoStatus.productPromoId" from-field="lookedUpValue.productPromoId"/>
+		        <set field="newPromoStatus.statusDatetime" from-field="nowTimestamp"/>
+		        <set field="newPromoStatus.statusUserLogin" from-field="userLogin.userLoginId"/>
+		        <set field="newPromoStatus.changeReason" from-field="parameters.changeReason"/>
+		        <create-value value-field="newPromoStatus"/>
+    		</then>
+    	</if>
+    </simple-method>
+    <simple-method method-name="updateProductPromoThruDate">
+    	<check-permission permission="DELYS_PROMOS" action="_APPROVE">
+            <fail-property resource="DelysAdminUiLabels" property="DAUpdatePermissionError"/>
+        </check-permission>
+        <check-errors/>
+        
+         <if-empty field="parameters.productPromoId">
+        	<add-error>
+        		<fail-property resource="DelysPromoUiLabels" property="DelysPromoProductPromoIdMustNotBeEmpty"/>
+        	</add-error>
+        </if-empty>
+        <if-empty field="parameters.thruDate">
+        	<add-error>
+        		<fail-property resource="DelysAdminUiLabels" property="DAThruDateMustNotBeEmpty"/>
+        	</add-error>
+        </if-empty>
+        <check-errors/>
+        
+        <field-to-result field="parameters.productPromoId" result-name="productPromoId"/>
+        <entity-one value-field="dummyPromo" entity-name="ProductPromo">
+        	<field-map field-name="productPromoId" from-field="parameters.productPromoId"/>
+        </entity-one>
+        <if-empty field="dummyPromo">
+   			<add-error>
+   				<fail-property resource="DelysPromoUiLabels" property="DAPromotionNotFound" />
+   			</add-error>
+   		</if-empty>
+   		<!-- <now-timestamp field="nowTimestamp"/>
+       	<set-calendar field="compareDate" from-field="nowTimestamp" seconds="-30" />
+       	<if-compare-field field="parameters.thruDate" operator="less" to-field="compareDate" type="Timestamp">
+       		<add-error>
+       			<fail-property resource="DelysAdminUiLabels" property="DAThruDateCantLessThanToday"/>
+       		</add-error>
+       	</if-compare-field> -->
+       	<set-calendar field="compareDate" from-field="dummyPromo.fromDate"/>
+       	<if-compare-field field="parameters.thruDate" operator="less" to-field="compareDate" type="Timestamp">
+       		<add-error>
+       			<fail-property resource="DelysAdminErrorUiLabels" property="DAThruDateCanNotLessThanFromDate"/>
+       		</add-error>
+       	</if-compare-field>
+        <check-errors/>
+        
+        <set field="dummyPromo.thruDate" from-field="parameters.thruDate"/>
+        <store-value value-field="dummyPromo"/>
+        
+        <entity-condition list="productStoreApplList" entity-name="ProductStorePromoAppl" filter-by-date="true">
+			<condition-expr field-name="productPromoId" from-field="parameters.productPromoId"/>
+		</entity-condition>
+		<iterate entry="productStoreApplItem" list="productStoreApplList">
+			<!-- thru date all product store in promotion -->
+			<set field="productStoreApplItem.thruDate" from-field="parameters.thruDate"/>
+		</iterate>
+		<store-list list="productStoreApplList"/>
+    </simple-method>
+    
+    
+    <!-- budget promo method -->
+    <simple-method method-name="createBudgetPromo">
+    	<make-value value-field="newEntity" entity-name="Budget"/>
+    	<set-nonpk-fields value-field="newEntity" map="parameters"/>
+    	<sequenced-id sequence-name="Budget" field="newEntity.budgetId"/>
+    	<field-to-result field="newEntity.budgetId" result-name="budgetId"/>
+    	<create-value value-field="newEntity"/>
+    </simple-method>
+    <simple-method method-name="updateBudgetPromo">
+    	<set field="lookupPkMap.budgetId" from-field="parameters.budgetId"/>
+    	<find-by-primary-key value-field="lookedUpValue" map="lookupPkMap" entity-name="Budget"/>
+    	<set-nonpk-fields value-field="lookedUpValue" map="parameters"/>
+    	<store-value value-field="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="createBudgetItemPromo">
+    	<make-value value-field="newEntity" entity-name="BudgetItem"/>
+    	<set-nonpk-fields value-field="newEntity" map="parameters"/>
+    	<set-pk-fields value-field="newEntity" map="parameters"/>
+    	<make-next-seq-id seq-field-name="budgetItemSeqId" value-field="newEntity" numeric-padding="2"/>
+    	<field-to-result field="newEntity.budgetItemSeqId" result-name="budgetItemSeqId"/>
+    	<create-value value-field="newEntity"/>	
+    </simple-method>
+    <simple-method method-name="updateBugetItemPromo">
+    	<make-value value-field="lookUpPkMap" entity-name="BudgetItem"/>
+    	<set-pk-fields value-field="lookUpPkMap" map="parameters"/>
+    	<find-by-primary-key value-field="lookedUpValue" map="lookUpPkMap" entity-name="BudgetItem"/>
+    	<set-nonpk-fields value-field="lookedUpValue" map="parameters"/>
+    	<store-value value-field="lookedUpValue"/>
+    </simple-method>
+    <simple-method method-name="deleteBudgetItemPromo">
+    	<make-value value-field="lookUpPkMap" entity-name="BudgetItem"/>
+    	<set-pk-fields value-field="lookUpPkMap" map="parameters"/>
+    	<find-by-primary-key value-field="lookedUpValue" map="lookUpPkMap" entity-name="BudgetItem"/>
+    	<remove-value value-field="lookedUpValue"/>
+    </simple-method>
+    <!-- end budget promo method -->
+</simple-methods>

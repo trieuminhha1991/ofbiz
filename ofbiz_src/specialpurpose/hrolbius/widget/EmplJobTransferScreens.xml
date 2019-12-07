@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	<screen name="EditIntOrgTransferProposal">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="EmplMgrWorking"/>
+				<set field="titleProperty" value="HROlbiusJobTransferProposal"/>
+                <set field="tabButtonItemBottom" value="EmplTransferJobProposal" />
+                <set field="formName" value="CreateJobTransferProposal"/>
+                <!-- <set field="jobTransferProposalTypeId" from-field="parameters.jobTransferProposalTypeId"/> -->
+                <set field="tabButtonItem" value="EmplTransferJobProposal" />
+                <!-- <set field="subtabSelected" value="${groovy: jobTransferProposalTypeId.equals(&quot;TRANSFER_DEPT&quot;)? &quot;TransDeptProposal&quot; : &quot;TransPositionProposal&quot;}"/> -->
+                <set field="tabSubButtonItem" value="TransDeptProposal"/>
+                <set field="parentDropdownField" value="internalOrgUnitToId"/>
+                <set field="dependentDropDownField" value="emplPositionTypeToId"/>
+                <set field="proposalTypeId" value="jobTransferProposalTypeId"/>
+                <set field="partyId" from-field="userLogin.partyId"/>
+                <!-- <script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getTitleJobTransferProposal.groovy"/> -->
+			</actions>
+			<widgets>
+				<decorator-screen name="EmplMgrWorkingDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="HR_JOB_TRANS" action="_VIEW"/>
+							</condition>
+							<widgets>
+								<platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/setPositionTypeInDepartmenJs.ftl"/>
+									</html>
+								</platform-specific>
+								<section>
+									<!-- <condition>
+										<if-compare operator="equals" value="TRANSFER_DEPT" field="jobTransferProposalTypeId"/>
+									</condition> -->
+									<actions>
+										<set field="emplId" from-field="partyId"/>
+										<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/Training/getPartyGroupTree.groovy"/>
+										<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrPositionEmpl.groovy"/>
+									</actions>
+									<widgets>
+										<screenlet title="${uiLabelMap.HrolbiusCreateJobTransProposal}" collapsible="false">
+											<include-form name="CreateJobTransferProposal" 
+												location="component://hrolbius/widget/forms/EmplTransferJobForms.xml" />
+												
+											<!-- <platform-specific>
+												<html>
+													<html-template location="component://hrolbius/webapp/hrolbius/ftl/employee/EmplJobTransferProposal.ftl"/>
+												</html>
+											</platform-specific> -->	
+										</screenlet>
+										
+										<platform-specific>
+											<html>
+												<html-template location="component://hrolbius/webapp/hrolbius/ftl/validate/EditIntOrgTransferProposalValidate.ftl"/>
+											</html>
+										</platform-specific>
+									</widgets>
+									<!-- <fail-widgets>
+										<screenlet title="${uiLabelMap.HrolbiusCreateTransPositionProposal}" collapsible="false">
+											<include-form name="CreateJobTransferProposal" 
+												location="component://hrolbius/widget/forms/EmplTransferJobForms.xml" />
+										</screenlet>
+										
+										<platform-specific>
+											<html>
+												<html-template location="component://hrolbius/webapp/hrolbius/ftl/validate/EditIntOrgTransferProposalValidate.ftl"/>
+											</html>
+										</platform-specific>
+									</fail-widgets> -->
+								</section>
+							</widgets>
+							<fail-widgets>
+								<label style="h3">${uiLabelMap.ViewPermissionError}</label>	
+							</fail-widgets>
+						</section>				
+					</decorator-section>
+				</decorator-screen>
+			</widgets>
+		</section>		    
+	</screen>  
+	<screen name="EditIntOrgTransProposalByMgr">
+		<section>
+			<actions>	
+				<set field="selectedMenuItem" value="EmplMgrWorking"/>
+				<!-- <set field="jobTransferProposalTypeId" from-field="parameters.jobTransferProposalTypeId"/> -->
+				<set field="titleProperty" value="HROlbiusJobTransferProposal"/>
+                <set field="tabButtonItemBottom" value="EmplTransferJobProposal" />
+                <set field="tabButtonItem" value="EmplTransferJobProposal" />
+                
+                <set field="tabSubButtonItem" value="TransDeptProposalByMgr"/>
+                <set field="formName" value="CreateJobTransferByMgrProposal"/>
+                <set field="parentDropdownField" value="internalOrgUnitToId"/>
+                <set field="dependentDropDownField" value="emplPositionTypeToId"/>  
+                <set field="employeeId" value="partyIdTransfer"/>
+                <set field="partyId" from-field="parameters.partyId"/>
+                <set field="dependenEmplPositionField" value="emplPositionTypeFromId"/> 
+                <set field="layoutSettings.styleSheets[]" value="/aceadmin/assets/css/chosen.css" global="true"/>  
+               <!--  <script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getTitleJobTransferProposalByMgr.groovy"/> -->                          
+			</actions>
+			<widgets>
+				<section>					
+					<widgets>
+						<decorator-screen name="EmplMgrWorkingDecorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<section>
+									<condition>
+										<if-has-permission permission="HR_JOB_TRANS_MGR" action="_VIEW"/>
+									</condition>
+									<widgets>	
+										<platform-specific>
+											<html>
+												<html-template location="component://hrolbius/webapp/hrolbius/ftl/setPositionTypeInDepartmenJs.ftl"/>
+												<html-template location="component://hrolbius/webapp/hrolbius/ftl/setPositionTypeByEmplJs.ftl"/>												
+											</html>
+										</platform-specific>
+										<section>
+											<!-- <condition>
+												<if-compare operator="equals" value="TRANSFER_DEPT" field="jobTransferProposalTypeId"/>
+											</condition> -->
+											<widgets>
+												<screenlet title="${uiLabelMap.HrolbiusCreateJobTransProposalByMgr}" collapsible="false">
+													<include-form name="CreateJobTransferByMgrProposal" 
+														location="component://hrolbius/widget/forms/EmplTransferJobForms.xml" />
+												</screenlet>
+												<platform-specific>
+													<html>
+														<html-template location="component://hrolbius/webapp/hrolbius/ftl/validate/CreateJobTransferByMgrProposalValidate.ftl"/>
+													</html>
+												</platform-specific>
+											</widgets>
+											<!-- <fail-widgets>
+												<screenlet title="${uiLabelMap.HrolbiusCreateTransPositionProposalByMgr}" collapsible="false">
+													<include-form name="CreateJobTransferByMgrProposal" 
+														location="component://hrolbius/widget/forms/EmplTransferJobForms.xml" />
+												</screenlet>
+												<platform-specific>
+													<html>
+														<html-template location="component://hrolbius/webapp/hrolbius/ftl/validate/CreateJobTransferByMgrProposalValidate.ftl"/>
+													</html>
+												</platform-specific>
+											</fail-widgets> -->
+										</section>
+									</widgets>
+									<fail-widgets>
+										<label style="h3">${uiLabelMap.ViewPermissionError}</label>	
+									</fail-widgets>
+								</section>				
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+				</section>
+			</widgets>
+			
+		</section>	
+	</screen>
+	
+	<screen name="EditJobTransApproval">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="EmplMgrWorking"/>
+				<set field="tabButtonItemBottom" value="EmplTransferJobProposal" />
+                <set field="tabButtonItem" value="EmplTransferJobProposal" />
+			</actions>
+			<widgets>
+				<decorator-screen name="EmplMgrWorkingDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<if-has-permission permission="HR_JOB_TRANS" action="_VIEW"/>
+							</condition>
+							<actions>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getJobTransferProposal.groovy"/>
+							</actions>
+							<widgets>
+								<screenlet title="${uiLabelMap.HrApprovalJobTransferProposal}">
+									<include-form name="ApprovalJobTransferProposal" 
+										location="component://hrolbius/widget/forms/EmplTransferJobForms.xml" />
+								</screenlet>
+								<platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/validate/EditJobTransApprovalValidate.ftl"/>
+									</html>
+								</platform-specific>
+							</widgets>
+							<fail-widgets>
+								<label style="h3">${uiLabelMap.ViewPermissionError}</label>
+							</fail-widgets>					
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>
+		</section>
+	</screen> 
+	
+	<screen name="EditJobTransProposalApproval">
+		<section>
+			<actions>
+				<set field="selectedMenuItem" value="EmplMgrWorking"/>
+				<set field="tabButtonItemBottom" value="EmplTransferJobProposal" />
+                <set field="tabButtonItem" value="EmplTransferJobProposal" />
+                <entity-one value-field="emplProposal" entity-name="EmplProposal"></entity-one>
+			</actions>
+			<widgets>
+				<decorator-screen name="EmplMgrWorkingDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body">
+						<section>
+							<condition>
+								<and>
+									<if-has-permission permission="HR_JOB_TRANS" action="_VIEW"/>
+									<not>
+										<if-empty field="emplProposal"/>
+									</not>
+								</and>
+								
+							</condition>
+							<!-- <actions>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getJobTransferProposal.groovy"/>
+							</actions> -->
+							<actions>
+								<entity-one value-field="jobTransferProposal" entity-name="JobTransferProposal" auto-field-map="false">
+									<field-map field-name="jobTransferProposalId" from-field="emplProposal.emplProposalId"/>
+								</entity-one>
+								<!-- <entity-one value-field="transferDeptProposal" entity-name="TransferDeptProposal" auto-field-map="true"></entity-one> -->
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/emplProposal/getEmplProposalRole.groovy"/>
+								<entity-condition list="proposedRoleTypeList" entity-name="EmplProposalRoleType" filter-by-date="true">
+									<condition-list>
+										<condition-expr field-name="emplProposalId" from-field="parameters.emplProposalId"/>
+										<condition-expr field-name="roleTypeId" value="PPSL_PROPOSED"/>
+									</condition-list>
+								</entity-condition>
+								<entity-one value-field="proposer" entity-name="Person">
+									<field-map field-name="partyId" from-field="emplProposal.partyId"/>
+								</entity-one>
+								
+								<entity-one value-field="emplProposer" entity-name="Person">
+									<field-map field-name="partyId" from-field="emplProposal.partyId"/>
+								</entity-one>
+								<!-- <entity-condition list="jobTransferApprovalRoleTypeList" entity-name="JobTransferApprovalRoleType" filter-by-date="true">
+									<condition-list>
+										<condition-expr field-name="jobTransferProposalId" from-field="jobTransferProposal.jobTransferProposalId"/>
+										<condition-expr field-name="partyId" operator="not-equals" from-field="userLogin.partyId"/>										
+									</condition-list>
+									<order-by field-name="roleTypeId"/>
+								</entity-condition>
+								<entity-condition list="partyJobTransferApproval" entity-name="JobTransferApprovalRoleType" filter-by-date="true">
+									<condition-list>
+										<condition-expr field-name="jobTransferProposalId" from-field="jobTransferProposal.jobTransferProposalId"/>
+										<condition-expr field-name="partyId" from-field="userLogin.partyId"/>
+									</condition-list>
+								</entity-condition> -->
+								
+								<set field="emplId" from-field="jobTransferProposal.partyIdTransfer"/>
+								<script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/employees/getCurrDeptEmpl.groovy"/>
+								<entity-condition list="statusApprovalList" entity-name="StatusItem">
+									<condition-expr field-name="statusTypeId" value="APPL_PPSL_STT"/>
+								</entity-condition>
+							</actions>
+							<widgets>
+								<screenlet title="${uiLabelMap.HrApprovalJobTransferProposal}">
+									<!-- <include-form name="ApprovalJobTransferProposal" 
+										location="component://hrolbius/widget/forms/EmplTransferJobForms.xml" /> -->
+									<platform-specific>
+										<html>
+											<html-template location="component://hrolbius/webapp/hrolbius/ftl/employee/EditTransferDeptProposalAppr.ftl"/>
+										</html>
+									</platform-specific>	
+								</screenlet>
+								<!-- <platform-specific>
+									<html>
+										<html-template location="component://hrolbius/webapp/hrolbius/ftl/validate/EditJobTransApprovalValidate.ftl"/>
+									</html>
+								</platform-specific> -->
+							</widgets>
+							<fail-widgets>
+								<label style="h3">${uiLabelMap.ViewPermissionError} ${uiLabelMap.CommonOr} ${uiLabelMap.CannotFindEmplProposal}</label>
+							</fail-widgets>					
+						</section>
+					</decorator-section>
+				</decorator-screen>	
+			</widgets>	
+		</section>
+	</screen>
+	
+	<screen name="ViewApprovalProposal">
+		<section>
+			<actions>
+				<set field="titleProperty" value="HROlbiusJobTransferProposal"/>
+                <set field="tabButtonItemBottom" value="ViewApprovalProposal" />
+                <set field="tabButtonItem" value="ViewApprovalProposal" />
+                <set field="jobTransferProposalId" from-field="parameters.jobTransferProposalId"/>
+			</actions>
+			<widgets>
+				<section>
+					<condition>
+						<if-has-permission permission="HROLBIUS" action="_VIEW"/>
+					</condition>
+					<actions>
+						<!-- <service service-name="updateNotification" auto-field-map="true"></service> -->
+					</actions>					
+					<widgets>
+						<decorator-screen name="EmplMgrWorkingDecorator" location="${parameters.mainDecoratorLocation}">
+							<decorator-section name="body">
+								<screenlet title="${uiLabelMap.HRViewApprovalProposal}">
+									<include-form location="component://hrolbius/widget/forms/EmplTransferJobForms.xml" 
+										name="ViewApprovalProposal"/>
+								</screenlet>
+							</decorator-section>
+						</decorator-screen>
+					</widgets>
+					<fail-widgets>
+						<label style="h3">${uiLabelMap.ViewPermissionError}</label>
+					</fail-widgets>
+				</section>	
+			</widgets>
+		</section>
+	</screen> 
+	<screen name="EmplTransJobProposalHistory">
+		<section>
+			<actions>
+				<set field="navMenuName" value="EmplProposalSubTabBar" />
+				<set field="navMenuLocation" value="component://hrolbius/widget/menus/EmployeeMenus.xml" />
+				<set field="titleProperty" value="HREmplTransJobProposalHistory"/>
+	            <set field="tabButtonItemBottom" value="EmplTransJobProposalHistory" />
+	            <set field="tabButtonItem" value="EmplTransJobProposalHistory" />	            
+	            <set field="fromDate" from-field="parameters.fromDate"/>
+	            <set field="parameters.partyIdTransfer" from-field="userLogin.partyId"/>	            
+            </actions>
+            <widgets>
+       			<decorator-screen name="profileDecorator" location="${parameters.mainDecoratorLocation}">
+       				<decorator-section name="body">
+       					<section>
+       						<condition>
+           						<if-has-permission permission="HR_JOB_TRANS" action="_VIEW"/>
+           					</condition>
+       						<widgets>
+         					<decorator-screen name="FindScreenDecorator" location="component://common/widget/CommonScreens.xml">                                    
+                                 <decorator-section name="search-options">
+                                     <include-form name="FindProposalHistory" location="component://hrolbius/widget/forms/EmplTransferJobForms.xml"/>
+                                 </decorator-section>
+                                 <decorator-section name="search-results">
+                                     <include-form name="ListProposalHistory" location="component://hrolbius/widget/forms/EmplTransferJobForms.xml"/>
+                                 </decorator-section>
+                             </decorator-screen>
+                           	</widgets>
+                           	<fail-widgets>
+								<label style="h3">${uiLabelMap.ViewPermissionError}</label>
+							</fail-widgets>
+                    	</section>
+       				</decorator-section>
+       			</decorator-screen>
+            </widgets>   
+		</section>
+	</screen>
+</screens>        

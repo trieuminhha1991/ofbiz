@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<screens xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="http://ofbiz.apache.org/dtds/widget-screen.xsd">
+	<screen name="EmployeeProfilePDF">
+		<section>
+			<actions>
+				<entity-one entity-name="PartyAndPerson" value-field="lookupPerson">
+					<field-map field-name="partyId" from-field="parameters.partyId" /><!--is required -->
+				</entity-one>
+				<entity-and list="partyContentList" entity-name="PartyContent">
+					<field-map field-name="partyId" from-field="parameters.partyId" />
+					<field-map field-name="partyContentTypeId" value="LGOIMGURL" />
+					<order-by field-name="-fromDate" />
+				</entity-and>
+				<set field="partyContentId" from-field="partyContentList[0].contentId" />
+				
+				<set field="partyContent"				
+					value="${groovy: partyContentId!=null?&quot;/content/control/stream?contentId=&quot; + partyContentId : &quot;&quot;}" />
+				<!-- <set field="partyGroupLogoLinkUrl" from-field="partyContent"
+					default-value="${lookupGroup.logoImageUrl}" global="true" /> -->
+				<service service-name="getPartyEmail" result-map="primaryEmailAddress">
+					<field-map field-name="partyId" from-field="parameters.partyId"/>
+					<field-map field-name="contactMechPurposeTypeId" value="PRIMARY_EMAIL"/>
+				</service>
+				<service service-name="getPartyEmail" result-map="personalEmailAddress">
+					<field-map field-name="partyId" from-field="parameters.partyId"/>
+					<field-map field-name="contactMechPurposeTypeId" value="PERSONAL_EMAIL"/>
+				</service>
+				<service service-name="getPartyEmail" result-map="otherEmailAddress">
+					<field-map field-name="partyId" from-field="parameters.partyId"/>
+					<field-map field-name="contactMechPurposeTypeId" value="OTHER_EMAIL"/>
+				</service>
+				<service service-name="getPartyTelephone" result-map="phoneWork">
+					<field-map field-name="partyId" from-field="parameters.partyId"/>
+					<field-map field-name="contactMechPurposeTypeId" value="PHONE_WORK"/>
+				</service>
+				<service service-name="getPartyTelephone" result-map="phoneHome">
+					<field-map field-name="partyId" from-field="parameters.partyId"/>
+					<field-map field-name="contactMechPurposeTypeId" value="PHONE_HOME"/>
+				</service>
+				<service service-name="getPartyTelephone" result-map="phoneMobile">
+					<field-map field-name="partyId" from-field="parameters.partyId"/>
+					<field-map field-name="contactMechPurposeTypeId" value="PHONE_MOBILE"/>
+				</service>
+				<service service-name="getPartyPostalAddress" result-map="currResidentAddr">
+					<field-map field-name="partyId" from-field="parameters.partyId"/>
+					<field-map field-name="contactMechPurposeTypeId" value="CURRENT_RESIDENCE"/>
+				</service>
+				<service service-name="getPartyPostalAddress" result-map="perResidentAddr">
+					<field-map field-name="partyId" from-field="parameters.partyId"/>
+					<field-map field-name="contactMechPurposeTypeId" value="PERMANENT_RESIDENCE"/>
+				</service>
+				<set field="personalImage" from-field="partyContent" />
+				<!-- <script location="component://hrolbius/webapp/hrolbius/WEB-INF/actions/com/olbius/fo/convertImageToString.groovy"/> -->
+				<property-to-field resource="general" property="ORGANIZATION_PARTY" field="organization"/>
+				<property-map map-name="uiLabelMap" resource="HrCommonUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="EmployeeUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="hrolbiusUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="CommonUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="PartyUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="DirectoryUiLabels" global="true"/>
+				<property-map map-name="uiLabelMap" resource="EmplPositionUiLabels" global="true"/>
+			</actions>
+			<widgets>
+				<!-- <decorator-screen name="FoReportDecorator" location="${parameters.mainDecoratorLocation}">
+					<decorator-section name="body"> -->
+						<platform-specific>
+							<xsl-fo>
+								<html-template location="component://hrolbius/webapp/hrolbius/ftl/pdf/EmployeeProfile.fo.ftl"/>
+							</xsl-fo>
+						</platform-specific>
+					<!-- </decorator-section>
+				</decorator-screen> -->
+			</widgets>
+		</section>
+	</screen>	
+</screens>	
+
